@@ -12,7 +12,7 @@
  * - Respects prefers-reduced-motion
  */
 
-import { logger } from '../../entries/core.ts';
+import { logger, normalizeError } from '../../entries/core.ts';
 import { getAnimationConfig } from '../../config/client-defaults.ts';
 import { X } from '../../icons.tsx';
 import { POSITION_PATTERNS, UI_CLASSES } from '../constants.ts';
@@ -101,7 +101,8 @@ const SheetContent = ({
         });
       })
       .catch((error) => {
-        logger.error('SheetContent: failed to load animation config', error);
+        const normalized = normalizeError(error, 'SheetContent: failed to load animation config');
+        logger.error('SheetContent: failed to load animation config', normalized);
       });
   }, []);
 

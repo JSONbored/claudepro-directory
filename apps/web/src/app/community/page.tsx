@@ -1,11 +1,4 @@
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  getContactChannels,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   Github,
@@ -15,6 +8,7 @@ import {
   Twitter,
   Users,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getCommunityDirectory,
@@ -60,82 +54,54 @@ function formatStatValue(value: number | null | undefined): string {
 }
 
 export default async function CommunityPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/community', 'CommunityPage');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'CommunityPage',
+    route: '/community',
+    module: 'apps/web/src/app/community',
+  });
 
   // Section: Configuration Check
-  const configSectionStart = Date.now();
   const channels = getContactChannels();
   if (!channels.discord) {
-    logger.warn('CommunityPage: Discord channel is not configured', undefined, {
-      ...withDuration(baseLogContext, startTime),
-      requestId,
-      operation: 'CommunityPage',
+    reqLogger.warn('CommunityPage: Discord channel is not configured', {
       section: 'configuration-check',
-      sectionDuration_ms: Date.now() - configSectionStart,
       channel: 'discord',
       configKey: 'DISCORD_INVITE_URL',
     });
   }
   if (!channels.twitter) {
-    logger.warn('CommunityPage: Twitter channel is not configured', undefined, {
-      ...withDuration(baseLogContext, startTime),
-      requestId,
-      operation: 'CommunityPage',
+    reqLogger.warn('CommunityPage: Twitter channel is not configured', {
       section: 'configuration-check',
-      sectionDuration_ms: Date.now() - configSectionStart,
       channel: 'twitter',
       configKey: 'TWITTER_URL',
     });
   }
 
   // Section: Data Fetch
-  const dataFetchSectionStart = Date.now();
   const categoryIds = getHomepageCategoryIds;
 
   const [communityDirectory, configurationCount, homepageData] = await Promise.all([
     getCommunityDirectory({ limit: 500 }).catch((error) => {
-      logger.error(
-        'CommunityPage: failed to load community directory',
-        normalizeError(error),
-        {
-          ...withDuration(baseLogContext, startTime),
-          requestId,
-          operation: 'CommunityPage',
-          section: 'data-fetch',
-          sectionDuration_ms: Date.now() - dataFetchSectionStart,
-        }
-      );
+      reqLogger.error('CommunityPage: failed to load community directory', normalizeError(error), {
+        section: 'data-fetch',
+      });
       return null;
     }),
     getConfigurationCount().catch((error) => {
-      logger.error(
-        'CommunityPage: failed to load configuration count',
-        normalizeError(error),
-        {
-          ...withDuration(baseLogContext, startTime),
-          requestId,
-          operation: 'CommunityPage',
-          section: 'data-fetch',
-          sectionDuration_ms: Date.now() - dataFetchSectionStart,
-        }
-      );
+      reqLogger.error('CommunityPage: failed to load configuration count', normalizeError(error), {
+        section: 'data-fetch',
+      });
       return 0;
     }),
     getHomepageData(categoryIds).catch((error) => {
-      logger.error(
-        'CommunityPage: failed to load homepage metrics',
-        normalizeError(error),
-        {
-          ...withDuration(baseLogContext, startTime),
-          requestId,
-          operation: 'CommunityPage',
-          section: 'data-fetch',
-          sectionDuration_ms: Date.now() - dataFetchSectionStart,
-        }
-      );
+      reqLogger.error('CommunityPage: failed to load homepage metrics', normalizeError(error), {
+        section: 'data-fetch',
+      });
       return null;
     }),
   ]);

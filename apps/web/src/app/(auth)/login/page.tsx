@@ -1,10 +1,9 @@
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import {
-  createWebAppContextWithId,
   generateRequestId,
   logger,
   normalizeError,
-} from '@heyclaude/web-runtime/core';
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/logging/server';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -32,7 +31,17 @@ export default async function LoginPage({
 }) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, '/login', 'LoginPage');
+  const operation = 'LoginPage';
+  const route = '/login';
+  const module = 'apps/web/src/app/(auth)/login/page';
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation,
+    route,
+    module,
+  });
 
   let redirectTo: string | undefined;
   try {
@@ -40,7 +49,7 @@ export default async function LoginPage({
     redirectTo = resolvedSearchParameters.redirect;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to resolve login search params');
-    logger.error('LoginPage: resolving searchParams failed', normalized, logContext);
+    reqLogger.error('LoginPage: resolving searchParams failed', normalized);
     redirectTo = undefined;
   }
 

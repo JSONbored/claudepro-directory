@@ -174,15 +174,6 @@ export function withContext(
   };
 }
 
-/**
- * Helper to add duration to logContext
- */
-export function withDuration(base: BaseLogContext, startTime: number): BaseLogContext {
-  return {
-    ...base,
-    duration_ms: Date.now() - startTime,
-  };
-}
 
 /**
  * Create logContext for shared utility functions
@@ -272,11 +263,15 @@ export function logTrace(message: string, logContext: Partial<BaseLogContext> & 
  * Mixin function automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
  * Flushes logs for critical errors to ensure they're written
  * 
+ * NOTE: This function is async to ensure flush() completes before returning.
+ * In edge functions, await this call to ensure logs are written before response.
+ * 
  * @param message - Log message
  * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
  * @param error - Optional error object to include in log
+ * @returns Promise that resolves when logs are flushed
  */
-export function logError(message: string, logContext: Partial<BaseLogContext> & Record<string, unknown>, error?: unknown): void {
+export async function logError(message: string, logContext: Partial<BaseLogContext> & Record<string, unknown>, error?: unknown): Promise<void> {
   // Build log data - mixin will automatically inject bindings (requestId, operation, userId, etc.)
   // Only include logContext fields that aren't already in bindings (mixin handles bindings automatically)
   const logData: Record<string, unknown> = {
@@ -294,9 +289,20 @@ export function logError(message: string, logContext: Partial<BaseLogContext> & 
   // - category, slug, correlationId (from logger.bindings())
   pinoLogger.error(logData, message);
   
-  // Flush logs synchronously for errors to ensure they're written before response
+  // Flush logs for errors to ensure they're written before response
   // This is especially important in edge functions where execution may terminate quickly
-  pinoLogger.flush();
+  // Use Promise wrapper to await the flush callback
+  await new Promise<void>((resolve, reject) => {
+    pinoLogger.flush((err) => {
+      if (err) {
+        // Log flush errors to stderr as a last resort (can't use logger here)
+        console.error('Failed to flush logs:', err);
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
 }
 
 /**

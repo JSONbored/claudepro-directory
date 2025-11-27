@@ -143,7 +143,7 @@ export async function handleOAuthAuthorize(c: Context): Promise<Response> {
     // Redirect to Supabase Auth with all parameters including resource
     return c.redirect(supabaseAuthUrl.toString(), 302);
   } catch (error) {
-    logError('OAuth authorization proxy failed', logContext, error);
+    await logError('OAuth authorization proxy failed', logContext, error);
     return jsonError(c, 'server_error', 'Internal server error', 500);
   }
 }

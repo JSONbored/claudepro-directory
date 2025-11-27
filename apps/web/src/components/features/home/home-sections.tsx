@@ -118,7 +118,14 @@ function HomePageClientComponent({
 
   // Get static config bundle
   useEffect(() => {
-    const bundle = getHomepageConfigBundle();
+    let bundle;
+    try {
+      bundle = getHomepageConfigBundle();
+    } catch (error) {
+      // Log error but don't crash - fall back to server-provided data
+      console.warn('Failed to load homepage config bundle:', error);
+      bundle = null;
+    }
     
     // Extract featured categories from homepage config with defensive checks
     const categories = Array.isArray(bundle?.homepageConfig?.['homepage.featured_categories'])

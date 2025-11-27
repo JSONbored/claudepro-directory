@@ -166,7 +166,7 @@ async function processImageGeneration(
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logError(`Image generation error (${type})`, logContext, error);
+    await logError(`Image generation error (${type})`, logContext, error);
     return {
       success: false,
       error: errorMessage,
@@ -225,7 +225,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
       // Validate message structure
       if (!queueMessage.type || !['card', 'thumbnail', 'logo'].includes(queueMessage.type)) {
         const errorLogContext = createUtilityContext('image-generation', 'invalid-message');
-        logError(
+        await logError(
           'Invalid queue message format',
           {
             ...errorLogContext,
@@ -242,7 +242,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
             msg_id: msg.msg_id.toString(),
           });
         } catch (deleteError) {
-          logError(
+          await logError(
             'Failed to delete invalid message',
             {
               ...errorLogContext,
@@ -263,7 +263,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
       // Validate type-specific required fields
       if (queueMessage.type === 'card' && (!queueMessage.params?.title || !queueMessage.params.title.trim())) {
         const errorLogContext = createUtilityContext('image-generation', 'invalid-message');
-        logError(
+        await logError(
           'Card generation message missing required title',
           {
             ...errorLogContext,
@@ -281,7 +281,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
             msg_id: msg.msg_id.toString(),
           });
         } catch (deleteError) {
-          logError(
+          await logError(
             'Failed to delete invalid message',
             {
               ...errorLogContext,
@@ -302,7 +302,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
       // Validate thumbnail has image_data
       if (queueMessage.type === 'thumbnail' && !queueMessage.image_data) {
         const errorLogContext = createUtilityContext('image-generation', 'invalid-message');
-        logError(
+        await logError(
           'Thumbnail generation message missing required image_data',
           {
             ...errorLogContext,
@@ -320,7 +320,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
             msg_id: msg.msg_id.toString(),
           });
         } catch (deleteError) {
-          logError(
+          await logError(
             'Failed to delete invalid message',
             {
               ...errorLogContext,
@@ -341,7 +341,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
       // Validate logo has image_data and company_id
       if (queueMessage.type === 'logo' && (!queueMessage.image_data || !queueMessage.company_id)) {
         const errorLogContext = createUtilityContext('image-generation', 'invalid-message');
-        logError(
+        await logError(
           'Logo generation message missing required fields',
           {
             ...errorLogContext,
@@ -360,7 +360,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
             msg_id: msg.msg_id.toString(),
           });
         } catch (deleteError) {
-          logError(
+          await logError(
             'Failed to delete invalid message',
             {
               ...errorLogContext,
@@ -411,7 +411,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
         } else {
           // Check if message has exceeded maximum retry attempts
           if (attempts >= MAX_RETRY_ATTEMPTS) {
-            logError('Message exceeded max retry attempts, removing from queue', {
+            await logError('Message exceeded max retry attempts, removing from queue', {
               ...logContext,
               msg_id: msg.msg_id.toString(),
               attempts,
@@ -428,7 +428,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
                 attempts,
               });
             } catch (deleteError) {
-              logError(
+              await logError(
                 'Failed to delete message after max retries',
                 {
                   ...logContext,
@@ -452,7 +452,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
           }
         }
       } catch (error) {
-        logError('Unexpected error processing image generation', logContext, error);
+        await logError('Unexpected error processing image generation', logContext, error);
         // Leave in queue for retry
         results.push({
           msg_id: msg.msg_id.toString(),
@@ -488,7 +488,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
     );
   } catch (error) {
     // Log full error details server-side for troubleshooting
-    logError('Image generation queue worker error', logContext, error);
+    await logError('Image generation queue worker error', logContext, error);
     // Never expose internal error details to users - always use generic message
     return new Response(
       JSON.stringify({

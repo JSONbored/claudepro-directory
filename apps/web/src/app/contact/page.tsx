@@ -1,12 +1,8 @@
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  getContactChannels,
-  logger,
-} from '@heyclaude/web-runtime/core';
+import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 
@@ -29,26 +25,30 @@ export const revalidate = 86_400;
 export default function ContactPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, '/contact', 'ContactPage');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'ContactPage',
+    route: '/contact',
+    module: 'apps/web/src/app/contact',
+  });
 
   const channels = getContactChannels();
   if (!channels.email) {
-    logger.warn('ContactPage: email channel is not configured', undefined, {
-      ...logContext,
+    reqLogger.warn('ContactPage: email channel is not configured', {
       channel: 'email',
       configKey: 'CONTACT_EMAIL',
     });
   }
   if (!channels.github) {
-    logger.warn('ContactPage: github channel is not configured', undefined, {
-      ...logContext,
+    reqLogger.warn('ContactPage: github channel is not configured', {
       channel: 'github',
       configKey: 'GITHUB_URL',
     });
   }
   if (!channels.discord) {
-    logger.warn('ContactPage: discord channel is not configured', undefined, {
-      ...logContext,
+    reqLogger.warn('ContactPage: discord channel is not configured', {
       channel: 'discord',
       configKey: 'DISCORD_INVITE_URL',
     });

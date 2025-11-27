@@ -5,12 +5,6 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -21,6 +15,7 @@ import {
   TrendingUp,
   Users,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, UnifiedBadge,
   Card,
   CardContent,
@@ -99,29 +94,25 @@ interface CompanyPageProperties {
 }
 
 export const revalidate = 1800; // 30min ISR (fallback if edge function cache misses)
-// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
  * Generate static params for company pages
  * Pre-renders top 50 companies at build time for optimal SEO and performance
  */
-// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
 export async function generateStaticParams() {
-  const { getCompaniesList } = await import('@heyclaude/web-runtime/data');
-  const { logger, createWebAppContextWithId, generateRequestId, normalizeError } = await import(
-    '@heyclaude/web-runtime/core'
-  );
-
   // Generate requestId for static params generation (build-time)
-  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
   const staticParamsRequestId = generateRequestId();
-  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
-  const staticParamsLogContext = createWebAppContextWithId(
-    staticParamsRequestId,
-    '/companies/[slug]',
-    'CompanyPageStaticParams'
-  );
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId: staticParamsRequestId,
+    operation: 'CompanyPageStaticParams',
+    route: '/companies/[slug]',
+    module: 'apps/web/src/app/companies/[slug]',
+  });
+
+  const { getCompaniesList } = await import('@heyclaude/web-runtime/data');
 
   try {
     const result = await getCompaniesList(50, 0);
@@ -134,7 +125,7 @@ export async function generateStaticParams() {
       }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load companies for generateStaticParams');
-    logger.error('generateStaticParams: failed to load companies', normalized, staticParamsLogContext);
+    reqLogger.error('generateStaticParams: failed to load companies', normalized);
     return [];
   }
 }
@@ -149,24 +140,23 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
 export default async function CompanyPage({ params }: CompanyPageProperties) {
   const { slug } = await params;
 
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, `/companies/${slug}`, 'CompanyPage', {
-    slug,
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'CompanyPage',
+    route: `/companies/${slug}`,
+    module: 'apps/web/src/app/companies/[slug]',
   });
 
   // Section: Company Profile Fetch
-  const profileSectionStart = Date.now();
   const profile = await getCompanyProfile(slug);
 
   if (!profile?.company) {
-    logger.warn('CompanyPage: company not found', undefined, {
-      ...withDuration(baseLogContext, startTime),
-      requestId,
-      operation: 'CompanyPage',
+    reqLogger.warn('CompanyPage: company not found', {
       section: 'company-profile-fetch',
-      sectionDuration_ms: Date.now() - profileSectionStart,
     });
     notFound();
   }

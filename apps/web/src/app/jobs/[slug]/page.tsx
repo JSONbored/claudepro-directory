@@ -3,13 +3,6 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   ArrowLeft,
@@ -21,6 +14,7 @@ import {
   MapPin,
   Users,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/server';
 import type { PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
@@ -125,23 +119,21 @@ export async function generateMetadata({
   const { slug } = await params;
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
-  const metadataLogContext = createWebAppContextWithId(
-    metadataRequestId,
-    `/jobs/${slug}`,
-    'JobPageMetadata',
-    {
-      slug,
-    }
-  );
+  
+  // Create request-scoped child logger to avoid race conditions
+  const metadataLogger = logger.child({
+    requestId: metadataRequestId,
+    operation: 'JobPageMetadata',
+    route: `/jobs/${slug}`,
+    module: 'apps/web/src/app/jobs/[slug]',
+  });
 
   let job: Awaited<ReturnType<typeof getJobBySlug>> = null;
   try {
     job = await getJobBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job for metadata');
-    logger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, {
-      ...metadataLogContext,
-      requestId: metadataRequestId,
+    metadataLogger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, {
       operation: 'generateMetadata',
     });
   }
@@ -153,17 +145,17 @@ export async function generateMetadata({
   });
 }
 
-// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
 export async function generateStaticParams() {
   // Generate requestId for static params generation (build-time)
-  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
-  const staticParamsRequestId = generateRequestId();
-  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
-  const staticParamsLogContext = createWebAppContextWithId(
-    staticParamsRequestId,
-    '/jobs',
-    'JobPageStaticParams'
-  );
+  const staticParametersRequestId = generateRequestId();
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId: staticParametersRequestId,
+    operation: 'JobPageStaticParams',
+    route: '/jobs',
+    module: 'apps/web/src/app/jobs/[slug]',
+  });
 
   const { getFilteredJobs } = await import('@heyclaude/web-runtime/server');
   try {
@@ -171,28 +163,19 @@ export async function generateStaticParams() {
     const jobs = jobsResult?.jobs ?? [];
 
     if (jobs.length === 0) {
-      logger.warn(
-        'generateStaticParams: no jobs available, returning placeholder',
-        undefined,
-        staticParamsLogContext
-      );
+      reqLogger.warn('generateStaticParams: no jobs available, returning placeholder');
       return [{ slug: 'placeholder' }];
     }
 
     return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
-    logger.error(
-      'JobPage: getJobs threw in generateStaticParams',
-      normalized,
-      staticParamsLogContext
-    );
+    reqLogger.error('JobPage: getJobs threw in generateStaticParams', normalized);
     return [{ slug: 'placeholder' }];
   }
 }
 
 export default async function JobPage({ params }: PageProps) {
-  const startTime = Date.now();
   if (!params) {
     notFound();
   }
@@ -203,28 +186,24 @@ export default async function JobPage({ params }: PageProps) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const slug = validationResult.success ? validationResult.data.slug : String(rawParameters['slug']);
-  const baseLogContext = createWebAppContextWithId(requestId, `/jobs/${slug}`, 'JobPage', {
-    slug,
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'JobPage',
+    route: `/jobs/${slug}`,
+    module: 'apps/web/src/app/jobs/[slug]',
   });
 
   // Section: Parameter Validation
-  const validationSectionStart = Date.now();
-
   if (!validationResult.success) {
-    logger.error(
+    reqLogger.error(
       'Invalid slug parameter for job page',
       new Error(validationResult.error.issues[0]?.message ?? 'Invalid slug'),
-      withDuration(
-        {
-          ...baseLogContext,
-          requestId,
-          operation: 'JobPage',
-          section: 'parameter-validation',
-          errorCount: validationResult.error.issues.length,
-          sectionDuration_ms: Date.now() - validationSectionStart,
-        },
-        startTime
-      )
+      {
+        section: 'parameter-validation',
+        errorCount: validationResult.error.issues.length,
+      }
     );
     notFound();
   }
@@ -232,29 +211,20 @@ export default async function JobPage({ params }: PageProps) {
   const validatedSlug = validationResult.data.slug;
 
   // Section: Job Data Fetch
-  const jobDataSectionStart = Date.now();
   let job: Awaited<ReturnType<typeof getJobBySlug>>;
   try {
     job = await getJobBySlug(validatedSlug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job detail');
-    logger.error('JobPage: getJobBySlug threw', normalized, {
-      ...withDuration(baseLogContext, startTime),
-      requestId,
-      operation: 'JobPage',
+    reqLogger.error('JobPage: getJobBySlug threw', normalized, {
       section: 'job-data-fetch',
-      sectionDuration_ms: Date.now() - jobDataSectionStart,
     });
     throw normalized;
   }
 
   if (!job) {
-    logger.warn('JobPage: job not found', undefined, {
-      ...withDuration(baseLogContext, startTime),
-      requestId,
-      operation: 'JobPage',
+    reqLogger.warn('JobPage: job not found', {
       section: 'job-data-fetch',
-      sectionDuration_ms: Date.now() - jobDataSectionStart,
     });
     notFound();
   }

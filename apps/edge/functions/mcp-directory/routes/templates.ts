@@ -28,7 +28,7 @@ export async function handleGetTemplates(
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('RPC call failed in getTemplates', {
+    await logError('RPC call failed in getTemplates', {
       dbQuery: {
         rpcName: 'get_content_templates',
         args: rpcArgs, // Will be redacted by Pino's redact config

@@ -290,7 +290,7 @@ function getMcpServerResourceUrl(): string {
  * Validate JWT token audience claim
  * Per MCP spec (RFC 8707), tokens MUST be issued for this specific resource
  */
-function validateTokenAudience(token: string, expectedAudience: string): boolean {
+async function validateTokenAudience(token: string, expectedAudience: string): Promise<boolean> {
   try {
     // Decode JWT without verification (we already verified via Supabase)
     // We just need to check the audience claim
@@ -352,7 +352,7 @@ function validateTokenAudience(token: string, expectedAudience: string): boolean
     const logContext = createDataApiContext('validate-token-audience', {
       app: 'mcp-directory',
     });
-    logError('Failed to decode JWT token for audience validation', logContext, error);
+    await logError('Failed to decode JWT token for audience validation', logContext, error);
     return false;
   }
 }
@@ -432,8 +432,8 @@ mcpApp.all('/mcp', async (c) => {
 
     // Validate token audience (RFC 8707 - Resource Indicators)
     // This ensures tokens were issued specifically for this MCP server
-    if (!validateTokenAudience(authResult.token, mcpServerUrl)) {
-      logError(
+    if (!(await validateTokenAudience(authResult.token, mcpServerUrl))) {
+      await logError(
         'Token audience validation failed',
         logContext,
         new Error('Token audience mismatch')
@@ -485,7 +485,7 @@ mcpApp.all('/mcp', async (c) => {
 
     return response;
   } catch (error) {
-    logError('MCP protocol error handling request', logContext, error);
+    await logError('MCP protocol error handling request', logContext, error);
 
     // Return MCP-formatted error
     const isAuthError =

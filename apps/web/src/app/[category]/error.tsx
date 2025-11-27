@@ -1,15 +1,14 @@
 'use client';
 
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
+import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { useEffect } from 'react';
 
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
+/**
+ * Client-side error boundary for category routes.
+ * Logs errors using the standardized client-side error boundary logging utility.
+ */
 export default function CategoryError({
   error,
   reset,
@@ -18,16 +17,24 @@ export default function CategoryError({
   reset: () => void;
 }) {
   useEffect(() => {
-    const requestId = generateRequestId();
     const route = globalThis.location.pathname;
-    const normalized = normalizeError(error, 'Category listing route failed');
-    const logContext = createWebAppContextWithId(requestId, route, 'CategoryErrorBoundary', {
-      segment: 'category',
-      ...(error.digest && { digest: error.digest }),
-      userAgent: globalThis.navigator.userAgent,
-      url: globalThis.location.href,
-    });
-    logger.error('Category error boundary triggered', normalized, logContext);
+    // Note: error.stack is the JavaScript error stack trace, not React's component stack.
+    // React component stack is unavailable in functional app-router error.tsx components.
+    const errorStack = error.stack ?? '';
+    
+    logClientErrorBoundary(
+      'Category error boundary triggered',
+      error,
+      route,
+      errorStack,
+      {
+        errorDigest: error.digest ?? 'no-digest',
+        digestAvailable: Boolean(error.digest),
+        userAgent: globalThis.navigator.userAgent,
+        url: globalThis.location.href,
+        segment: 'category',
+      }
+    );
   }, [error]);
 
   return (

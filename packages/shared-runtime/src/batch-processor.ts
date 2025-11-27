@@ -90,7 +90,7 @@ export async function batchProcess<T, R>(
       item_index: items.indexOf(item),
       total_retries: retries,
     });
-    logError('Item processing failed after all retries', itemLogContext, lastError);
+    await logError('Item processing failed after all retries', itemLogContext, lastError);
     failed.push({ item, error: lastError });
     processed++;
     if (onProgress) {

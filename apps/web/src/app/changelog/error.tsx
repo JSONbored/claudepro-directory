@@ -1,16 +1,18 @@
 'use client';
 
-import { Constants } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
+import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { useEffect } from 'react';
 
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
+/**
+ * Client-side error boundary for changelog routes.
+ * 
+ * Logs errors using client-side logging utilities and displays
+ * a user-friendly error fallback UI.
+ * 
+ * @see {@link logClientErrorBoundary} - Client-side error logging utility
+ */
 export default function ChangelogError({
   error,
   reset,
@@ -19,16 +21,18 @@ export default function ChangelogError({
   reset: () => void;
 }) {
   useEffect(() => {
-    const requestId = generateRequestId();
-    const route = globalThis.location.pathname;
-    const normalized = normalizeError(error, 'Changelog route rendering failed');
-    const logContext = createWebAppContextWithId(requestId, route, 'ChangelogErrorBoundary', {
-      segment: Constants.public.Enums.content_category[10], // 'changelog'
-      ...(error.digest && { digest: error.digest }),
-      userAgent: globalThis.navigator.userAgent,
-      url: globalThis.location.href,
-    });
-    logger.error('Changelog error boundary triggered', normalized, logContext);
+    logClientErrorBoundary(
+      'Changelog error boundary triggered',
+      error,
+      globalThis.location.pathname,
+      error.stack ?? '',
+      {
+        errorDigest: error.digest,
+        userAgent: globalThis.navigator.userAgent,
+        url: globalThis.location.href,
+        segment: 'changelog-page',
+      }
+    );
   }, [error]);
 
   return (

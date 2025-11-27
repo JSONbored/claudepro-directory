@@ -59,7 +59,7 @@ export async function parseJsonBody<T = unknown>(
     bodyText = await req.text();
   } catch (error) {
     const logContext = createUtilityContext('parse-json-body', 'read-body-failed');
-    logError('Failed to read request body', logContext, error);
+    await logError('Failed to read request body', logContext, error);
     return {
       success: false,
       response: badRequestResponse('Failed to read request body', cors),
@@ -95,7 +95,7 @@ export async function parseJsonBody<T = unknown>(
     const logContext = createUtilityContext('parse-json-body', 'json-parse-failed', {
       body_preview: bodyText.slice(0, 100),
     });
-    logError('JSON parse failed', logContext, error);
+    await logError('JSON parse failed', logContext, error);
     return {
       success: false,
       response: badRequestResponse('Invalid JSON body', cors),

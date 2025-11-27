@@ -118,13 +118,13 @@ export async function handleDiscordSubmissions(_req: Request): Promise<Response>
               msg_id: msg.msg_id.toString(),
             }
           );
-          logError('Invalid submission webhook payload structure', invalidLogContext);
+          await logError('Invalid submission webhook payload structure', invalidLogContext);
 
           // Delete invalid message to prevent infinite retries
           try {
             await pgmqDelete(SUBMISSION_DISCORD_QUEUE, msg.msg_id);
           } catch (error) {
-            logError('Failed to delete invalid message', invalidLogContext, error);
+            await logError('Failed to delete invalid message', invalidLogContext, error);
           }
 
           results.push({
@@ -148,13 +148,13 @@ export async function handleDiscordSubmissions(_req: Request): Promise<Response>
               type: payload.type,
             }
           );
-          logError('Invalid webhook type', invalidTypeLogContext);
+          await logError('Invalid webhook type', invalidTypeLogContext);
 
           // Delete invalid message to prevent infinite retries
           try {
             await pgmqDelete(SUBMISSION_DISCORD_QUEUE, msg.msg_id);
           } catch (error) {
-            logError('Failed to delete invalid message', invalidTypeLogContext, error);
+            await logError('Failed to delete invalid message', invalidTypeLogContext, error);
           }
 
           results.push({
@@ -199,7 +199,7 @@ export async function handleDiscordSubmissions(_req: Request): Promise<Response>
         const errorLogContext = createUtilityContext('flux-station', 'discord-submissions-notify', {
           msg_id: msg.msg_id.toString(),
         });
-        logError('Submission Discord notification failed', errorLogContext, error);
+        await logError('Submission Discord notification failed', errorLogContext, error);
         // Leave in queue for retry
         results.push({
           msg_id: msg.msg_id.toString(),
@@ -220,8 +220,8 @@ export async function handleDiscordSubmissions(_req: Request): Promise<Response>
       200
     );
   } catch (error) {
-    logError('Submission Discord queue error', logContext, error);
-    return errorResponse(
+    await logError('Submission Discord queue error', logContext, error);
+    return await errorResponse(
       error,
       'flux-station:discord-submissions-error',
       publicCorsHeaders,

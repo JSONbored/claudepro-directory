@@ -24,15 +24,10 @@
 
 import { Constants } from '@heyclaude/database-types';
 import type { Database } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, NavLink  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
@@ -61,6 +56,17 @@ export const revalidate = 3600;
  * Includes RSS/Atom feed discovery links (2025 best practice)
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Generate requestId for metadata generation (separate from page render)
+  const metadataRequestId = generateRequestId();
+  
+  // Create request-scoped child logger to avoid race conditions
+  const metadataLogger = logger.child({
+    requestId: metadataRequestId,
+    operation: 'ChangelogPageMetadata',
+    route: '/changelog',
+    module: 'apps/web/src/app/changelog',
+  });
+
   try {
     const baseMetadata = await generatePageMetadata('/changelog');
 
@@ -75,16 +81,8 @@ export async function generateMetadata(): Promise<Metadata> {
       },
     };
   } catch (error) {
-    // Generate requestId for metadata generation (separate from page render)
-    const metadataRequestId = generateRequestId();
-    const metadataLogContext = createWebAppContextWithId(
-      metadataRequestId,
-      '/changelog',
-      'ChangelogPageMetadata'
-    );
-
     const normalized = normalizeError(error, 'Failed to generate changelog metadata');
-    logger.error('Failed to generate changelog metadata', normalized, metadataLogContext);
+    metadataLogger.error('Failed to generate changelog metadata', normalized);
     return {
       title: 'Changelog - Claude Pro Directory',
       description: 'Track all updates, features, and improvements to Claude Pro Directory.',
@@ -104,7 +102,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ChangelogPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, '/changelog', 'ChangelogPage');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'ChangelogPage',
+    route: '/changelog',
+    module: 'apps/web/src/app/changelog',
+  });
 
   try {
     // Load changelog overview with entries, metadata, and featured (database-cached)
@@ -223,7 +228,7 @@ export default async function ChangelogPage() {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog page');
-    logger.error('Failed to load changelog page', normalized, logContext);
+    reqLogger.error('Failed to load changelog page', normalized);
 
     // Fallback UI on error
     return (

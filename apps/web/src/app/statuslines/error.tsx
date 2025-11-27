@@ -1,16 +1,18 @@
 'use client';
 
-import { Constants } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
+import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { useEffect } from 'react';
 
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
+/**
+ * Statuslines Segment Error Boundary
+ * 
+ * Client-side error boundary for statuslines routes.
+ * Logs errors using standardized client-side error boundary logging.
+ * 
+ * @see {@link @heyclaude/web-runtime/logging/client.logClientErrorBoundary | logClientErrorBoundary} - Error boundary logging utility
+ */
 export default function StatuslinesError({
   error,
   reset,
@@ -19,16 +21,23 @@ export default function StatuslinesError({
   reset: () => void;
 }) {
   useEffect(() => {
-    const requestId = generateRequestId();
+    // In client components, globalThis is always available
     const route = globalThis.location.pathname;
-    const normalized = normalizeError(error, 'Statuslines route rendering failed');
-    const logContext = createWebAppContextWithId(requestId, route, 'StatuslinesErrorBoundary', {
-      segment: Constants.public.Enums.content_category[5], // 'statuslines'
-      ...(error.digest && { digest: error.digest }),
-      userAgent: globalThis.navigator.userAgent,
-      url: globalThis.location.href,
-    });
-    logger.error('Statuslines error boundary triggered', normalized, logContext);
+    const jsStackTrace = error.stack ?? ''; // Note: This is JS stack trace, not React component stack
+    
+    logClientErrorBoundary(
+      'Statuslines error boundary triggered',
+      error,
+      route,
+      jsStackTrace, // Note: This is JS stack trace, not React component stack
+      {
+        errorDigest: error.digest, // Allow undefined to match account/error.tsx pattern
+        digestAvailable: Boolean(error.digest),
+        userAgent: globalThis.navigator.userAgent,
+        url: globalThis.location.href,
+        segment: 'statuslines-page',
+      }
+    );
   }, [error]);
 
   return (

@@ -4,19 +4,16 @@
 
 import type { Database } from '@heyclaude/database-types';
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserCompanyById,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/server';
 import { Button,
   Card,
   CardContent,
@@ -45,82 +42,61 @@ interface EditCompanyPageProperties {
 }
 
 export default async function EditCompanyPage({ params }: EditCompanyPageProperties) {
-  const startTime = Date.now();
   const { id } = await params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  const operation = 'EditCompanyPage';
+  const route = `/account/companies/${id}/edit`;
+  const module = 'apps/web/src/app/account/companies/[id]/edit/page';
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    `/account/companies/${id}/edit`,
-    'EditCompanyPage',
-    {
-      companyId: id,
-    }
-  );
+    operation,
+    route,
+    module,
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'EditCompanyPage' });
 
   if (!user) {
-    logger.warn(
-      'EditCompanyPage: unauthenticated access attempt',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'authentication',
-        },
-        authSectionStart
-      )
-    );
+    reqLogger.warn('EditCompanyPage: unauthenticated access attempt', {
+      section: 'authentication',
+      companyId: id,
+    });
     redirect('/login');
   }
 
-  const hashedUserId = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash: hashedUserId };
-  logger.info(
-    'EditCompanyPage: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+
+  userLogger.info('EditCompanyPage: authentication successful', {
+    section: 'authentication',
+    companyId: id,
+  });
 
   // Section: Company Data Fetch
-  const companySectionStart = Date.now();
   let company: Database['public']['CompositeTypes']['user_companies_company'] | null = null;
   let hasError = false;
   try {
     company = await getUserCompanyById(user.id, id);
-    logger.info(
-      'EditCompanyPage: company data loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'company-data-fetch',
-          hasCompany: !!company,
-        },
-        companySectionStart
-      )
-    );
+    userLogger.info('EditCompanyPage: company data loaded', {
+      section: 'company-data-fetch',
+      hasCompany: !!company,
+      companyId: id,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load company for edit page');
-    logger.error(
-      'EditCompanyPage: getUserCompanyById threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'company-data-fetch',
-        },
-        companySectionStart
-      )
-    );
+    // Wrapper API: error(message, error, context) - wrapper internally calls Pino with (logData, message)
+    userLogger.error('EditCompanyPage: getUserCompanyById threw', normalized, {
+      section: 'company-data-fetch',
+      companyId: id,
+    });
     hasError = true;
   }
 
@@ -145,31 +121,18 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
   }
 
   if (!company) {
-    logger.warn(
-      'Company not found or access denied',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          section: 'company-data-fetch',
-        },
-        companySectionStart
-      )
-    );
+    userLogger.warn('Company not found or access denied', {
+      section: 'company-data-fetch',
+      companyId: id,
+    });
     notFound();
   }
 
   // Final summary log
-  logger.info(
-    'EditCompanyPage: page execution completed',
-    withDuration(
-      {
-        ...logContext,
-        section: 'page-execution',
-      },
-      startTime
-    )
-  );
+  userLogger.info('EditCompanyPage: page execution completed', {
+    section: 'page-execution',
+    companyId: id,
+  });
 
   return (
     <div className="space-y-6">

@@ -106,7 +106,7 @@ export async function handleUploadPackage(
   // Authenticate: Internal-only endpoint (requires service role key)
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!serviceRoleKey) {
-    logError('SUPABASE_SERVICE_ROLE_KEY not configured', finalLogContext);
+    await logError('SUPABASE_SERVICE_ROLE_KEY not configured', finalLogContext);
     return jsonResponse(
       {
         error: 'Internal Server Error',
@@ -206,7 +206,7 @@ export async function handleUploadPackage(
 
     if (fetchError || !contentData) {
       // Use dbQuery serializer for consistent database query formatting
-      logError('Content not found for upload', {
+      await logError('Content not found for upload', {
         ...finalLogContext,
         dbQuery: {
           table: 'content',
@@ -262,7 +262,7 @@ export async function handleUploadPackage(
       }
       mcpbBuffer = bytes.buffer;
     } catch (error) {
-      logError('Failed to decode base64 mcpb_file', finalLogContext, error);
+      await logError('Failed to decode base64 mcpb_file', finalLogContext, error);
       return badRequestResponse('Invalid base64 encoding in mcpb_file', CORS);
     }
 
@@ -279,7 +279,7 @@ export async function handleUploadPackage(
     });
 
     if (!(uploadResult.success && uploadResult.publicUrl)) {
-      logError('Storage upload failed', finalLogContext, {
+      await logError('Storage upload failed', finalLogContext, {
         error: uploadResult['error'] || 'Unknown upload error',
         content_id,
         slug: content.slug,
@@ -316,7 +316,7 @@ export async function handleUploadPackage(
 
     if (updateError) {
       // Use dbQuery serializer for consistent database query formatting
-      logError('Database update failed', {
+      await logError('Database update failed', {
         ...finalLogContext,
         dbQuery: {
           table: 'content',
@@ -371,7 +371,7 @@ export async function handleUploadPackage(
     });
   } catch (error) {
     // Log the real error server-side for debugging
-    logError('Package upload failed', finalLogContext, error);
-    return errorResponse(error, 'data-api:content-generate-upload', CORS, finalLogContext);
+    await logError('Package upload failed', finalLogContext, error);
+    return await errorResponse(error, 'data-api:content-generate-upload', CORS, finalLogContext);
   }
 }

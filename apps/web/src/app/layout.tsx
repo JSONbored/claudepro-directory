@@ -5,14 +5,9 @@ import './sugar-high.css';
 
 import type { Database } from '@heyclaude/database-types';
 import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
@@ -179,7 +174,14 @@ export default async function RootLayout({
 }>) {
   // Generate single requestId for this layout request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, '/', 'RootLayout');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'RootLayout',
+    route: '/',
+    module: 'apps/web/src/app/layout',
+  });
 
   // Fetch layout data (announcements and navigation)
   const [layoutDataResult] = await Promise.allSettled([getLayoutData()]);
@@ -192,8 +194,7 @@ export default async function RootLayout({
   // eslint-disable-next-line architectural-rules/no-hardcoded-enum-values -- PromiseSettledResult status is a standard JavaScript value, not a database enum
   if (layoutDataResult.status === 'rejected') {
     const normalized = normalizeError(layoutDataResult.reason, 'Failed to load layout data');
-    logger.error('RootLayout: layout data fetch failed', normalized, {
-      ...logContext,
+    reqLogger.error('RootLayout: layout data fetch failed', normalized, {
       source: 'root-layout',
     });
   }

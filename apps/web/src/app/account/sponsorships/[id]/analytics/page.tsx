@@ -1,18 +1,11 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getAuthenticatedUser,
   getSponsorshipAnalytics,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { POSITION_PATTERNS, UI_CLASSES, UnifiedBadge, Button ,
   Card,
   CardContent,
@@ -46,34 +39,24 @@ export async function generateMetadata({ params }: AnalyticsPageProperties): Pro
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProperties) {
   const { id } = await params;
 
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    `/account/sponsorships/${id}/analytics`,
-    'SponsorshipAnalyticsPage',
-    {
-      sponsorshipId: id,
-    }
-  );
+    operation: 'SponsorshipAnalyticsPage',
+    route: `/account/sponsorships/${id}/analytics`,
+    module: 'apps/web/src/app/account/sponsorships/[id]/analytics',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipAnalyticsPage' });
 
   if (!user) {
-    logger.warn(
-      'SponsorshipAnalyticsPage: unauthenticated access attempt',
-      undefined,
-      {
-        ...withDuration(baseLogContext, startTime),
-        requestId,
-        operation: 'SponsorshipAnalyticsPage',
-        section: 'authentication',
-        sectionDuration_ms: Date.now() - authSectionStart,
-      }
-    );
+    reqLogger.warn('SponsorshipAnalyticsPage: unauthenticated access attempt', {
+      section: 'authentication',
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -91,32 +74,26 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     );
   }
 
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
 
   // Section: Analytics Data Fetch
-  const analyticsSectionStart = Date.now();
   let analyticsData: SponsorshipAnalytics | null = null;
   try {
     analyticsData = await getSponsorshipAnalytics(user.id, id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load sponsorship analytics');
-    logger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, {
-      ...withDuration(logContext, startTime),
-      requestId,
-      operation: 'SponsorshipAnalyticsPage',
+    userLogger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, {
       section: 'analytics-data-fetch',
-      sectionDuration_ms: Date.now() - analyticsSectionStart,
     });
     throw normalized;
   }
 
   if (!analyticsData) {
-    logger.warn(
-      'SponsorshipAnalyticsPage: analytics not found or inaccessible',
-      undefined,
-      logContext
-    );
+    userLogger.warn('SponsorshipAnalyticsPage: analytics not found or inaccessible');
     notFound();
   }
 
@@ -128,10 +105,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
   // Handle nullability per generated types (composite types are nullable in generated types)
   if (!(sponsorship && daily_stats && computed_metrics)) {
-    logger.error(
+    userLogger.error(
       'SponsorshipAnalyticsPage: unexpected null fields in analytics data',
-      new Error('Null fields in analytics data'),
-      logContext
+      new Error('Null fields in analytics data')
     );
     notFound();
   }
@@ -155,8 +131,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     : 'sponsored'; // Safe default for invalid values
 
   if (!isTierValid) {
-    logger.warn('SponsorshipAnalyticsPage: invalid tier value, using safe default', undefined, {
-      ...logContext,
+    userLogger.warn('SponsorshipAnalyticsPage: invalid tier value, using safe default', {
       invalidTier: rawTier,
       expectedTiers: validTiers, // Now supports arrays directly - better for log querying
       fallbackTier: 'sponsored',

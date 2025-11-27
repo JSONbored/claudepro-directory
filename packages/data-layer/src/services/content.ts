@@ -7,7 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { logRpcError, logger } from '../utils/rpc-error-logging.ts';
+import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export interface ContentFilterOptions {
   categories?: Database['public']['Enums']['content_category'][] | undefined;
@@ -446,61 +446,55 @@ export class ContentService {
    * 
    * CRITICAL: Supabase RPCs returning composite types (RETURNS, not RETURNS SETOF)
    * return the data in a specific format. We need to handle this correctly.
+   * 
+   * NOTE: This method uses a different error-handling pattern (direct call with explicit
+   * validation) compared to other RPC methods in this class. This is intentional because:
+   * 1. Composite types require explicit type validation (null/array/object checks)
+   * 2. The validation logic provides better error messages for schema mismatches
+   * 3. Removes redundant try-catch wrapper while maintaining proper error logging
+   * 
+   * This pattern should be applied to other methods in a future refactor for consistency.
    */
   async getHomepageOptimized(args: Database['public']['Functions']['get_homepage_optimized']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_homepage_optimized', args);
-      
-      if (error) {
-        // Log RPC error with business context
-        logRpcError(error, {
-          rpcName: 'get_homepage_optimized',
-          operation: 'ContentService.getHomepageOptimized',
-          args: args,
-        });
-        throw error;
-      }
-      
-      // Supabase returns composite types as a single object (not array) for RETURNS (not SETOF)
-      // But if function returns no rows, data will be null
-      if (data === null || data === undefined) {
-        // Null data is expected when no rows returned - not an error, just return null
-        return null;
-      }
-      
-      // If data is an array (shouldn't happen for non-SETOF, but be defensive), take first element
-      if (Array.isArray(data)) {
-        // Unexpected format but recoverable - log structured warning and continue
-        // Note: This is a data format issue, not an error, so we continue processing
-        // Use dbQuery serializer for consistent database query formatting
-        logger.warn({
-          dbQuery: {
-            rpcName: 'get_homepage_optimized',
-            operation: 'ContentService.getHomepageOptimized',
-          },
-        }, 'Unexpected array format from get_homepage_optimized (expected single object)');
-        return (data[0] ?? null) as Database['public']['Functions']['get_homepage_optimized']['Returns'];
-      }
-      
-      // Data should be a single object
-      if (typeof data !== 'object') {
-        // Invalid data type - log error
-        logRpcError(
-          new Error(`Invalid data type from get_homepage_optimized: expected object, got ${typeof data}`),
-          {
-            rpcName: 'get_homepage_optimized',
-            operation: 'ContentService.getHomepageOptimized',
-            args: args,
-          }
-        );
-        return null;
-      }
-      
-      return data as Database['public']['Functions']['get_homepage_optimized']['Returns'];
-    } catch (error) {
-      // Error already logged above if it was an RPC error
-      // Re-throw to maintain error propagation
+    const { data, error } = await this.supabase.rpc('get_homepage_optimized', args);
+    
+    if (error) {
+      // Log RPC error with business context
+      logRpcError(error, {
+        rpcName: 'get_homepage_optimized',
+        operation: 'ContentService.getHomepageOptimized',
+        args: args,
+      });
       throw error;
     }
+    
+    // Null/undefined is expected when no rows returned
+    if (data === null || data === undefined) {
+      return null;
+    }
+    
+    // Array format indicates schema mismatch - fail fast with descriptive error
+    if (Array.isArray(data)) {
+      const schemaError = new Error('Unexpected array format from get_homepage_optimized (expected single object) - possible schema/RPC misconfiguration');
+      logRpcError(schemaError, {
+        rpcName: 'get_homepage_optimized',
+        operation: 'ContentService.getHomepageOptimized',
+        args: args,
+      });
+      throw schemaError;
+    }
+    
+    // Invalid data type - fail fast with descriptive error
+    if (typeof data !== 'object') {
+      const typeError = new Error(`Invalid data type from get_homepage_optimized: expected object, got ${typeof data}`);
+      logRpcError(typeError, {
+        rpcName: 'get_homepage_optimized',
+        operation: 'ContentService.getHomepageOptimized',
+        args: args,
+      });
+      throw typeError;
+    }
+    
+    return data as Database['public']['Functions']['get_homepage_optimized']['Returns'];
   }
 }

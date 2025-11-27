@@ -100,3 +100,5 @@ apps/edge/functions/deno.lock
 packages/edge-runtime/src/utils/email/templates/template-map.json
 
 apps/web/src/lib/data/README.md
+config/tools/ESLINT_RULES.md
+packages/shared-runtime/src/privacy.ts

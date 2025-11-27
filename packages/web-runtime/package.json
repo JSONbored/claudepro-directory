@@ -94,6 +94,14 @@
       "types": "./src/utils/request-context.ts",
       "default": "./src/utils/request-context.ts"
     },
+    "./logging/client": {
+      "types": "./src/logging/client.ts",
+      "default": "./src/logging/client.ts"
+    },
+    "./logging/server": {
+      "types": "./src/logging/server.ts",
+      "default": "./src/logging/server.ts"
+    },
     "./data/config/constants": {
       "types": "./src/data/config/constants.ts",
       "default": "./src/data/config/constants.ts"

@@ -1,13 +1,5 @@
 import type { Database } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  ensureStringArray,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { ensureStringArray } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAccountDashboardBundle,
@@ -16,6 +8,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
   Card,
@@ -42,24 +35,23 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export default async function AccountDashboard() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/account', 'AccountDashboard');
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'AccountDashboard',
+    route: '/account',
+    module: 'apps/web/src/app/account',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'AccountDashboard' });
 
   if (!user) {
-    const authLogContext = withDuration(baseLogContext, startTime);
-    logger.warn('AccountDashboard: unauthenticated access attempt detected', undefined, {
-      ...authLogContext,
-      requestId,
-      operation: 'AccountDashboard',
+    reqLogger.warn('AccountDashboard: unauthenticated access attempt detected', {
       section: 'authentication',
-      sectionDuration_ms: Date.now() - authSectionStart,
-      timestamp: new Date().toISOString(),
     });
     return (
       <div className="space-y-6">
@@ -78,52 +70,31 @@ export default async function AccountDashboard() {
     );
   }
 
-  // Hash user ID for privacy-compliant logging (GDPR/CCPA)
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
-  logger.info(
-    'AccountDashboard: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+
+  userLogger.info('AccountDashboard: authentication successful', {
+    section: 'authentication',
+  });
 
   // Section: Dashboard Bundle
-  const bundleSectionStart = Date.now();
   let bundleData: Awaited<ReturnType<typeof getAccountDashboardBundle>> | null = null;
   try {
     bundleData = await getAccountDashboardBundle(user.id);
-    logger.info(
-      'AccountDashboard: dashboard bundle loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'dashboard-bundle',
-          hasDashboard: !!bundleData.dashboard,
-          hasLibrary: !!bundleData.library,
-          hasHomepage: !!bundleData.homepage,
-        },
-        bundleSectionStart
-      )
-    );
+    userLogger.info('AccountDashboard: dashboard bundle loaded', {
+      section: 'dashboard-bundle',
+      hasDashboard: !!bundleData.dashboard,
+      hasLibrary: !!bundleData.library,
+      hasHomepage: !!bundleData.homepage,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load account dashboard bundle');
-    logger.error(
-      'AccountDashboard: getAccountDashboardBundle threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'dashboard-bundle',
-          sectionDuration_ms: Date.now() - bundleSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.error('AccountDashboard: getAccountDashboardBundle threw', normalized, {
+      section: 'dashboard-bundle',
+    });
     throw normalized;
   }
 
@@ -135,21 +106,12 @@ export default async function AccountDashboard() {
 
   if (!dashboardData) {
     const normalized = normalizeError(
-      'Dashboard data is null',
+      new Error('Dashboard data is null'),
       'AccountDashboard: dashboard data is null'
     );
-    logger.error(
-      'AccountDashboard: dashboard data is null',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'dashboard-bundle',
-          sectionDuration_ms: Date.now() - bundleSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.error('AccountDashboard: dashboard data is null', normalized, {
+      section: 'dashboard-bundle',
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -182,7 +144,6 @@ export default async function AccountDashboard() {
   const recentBookmarks = bookmarks.slice(0, 3);
 
   // Section: Recent Bookmarks
-  const bookmarksSectionStart = Date.now();
   const recentlySavedContentResults = await Promise.all(
     recentBookmarks.map(async (bookmark) => {
       try {
@@ -192,29 +153,21 @@ export default async function AccountDashboard() {
         return detail?.content ?? null;
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to load bookmark content');
-        logger.warn('AccountDashboard: getContentDetailCore failed for bookmark', undefined, {
-          ...logContext,
+        userLogger.warn('AccountDashboard: getContentDetailCore failed for bookmark', {
+          err: normalized,
           section: 'recent-bookmarks',
           slug: bookmark.content_slug,
           category: bookmark.content_type,
-          error: normalized.message,
         });
         return null;
       }
     })
   );
-  logger.info(
-    'AccountDashboard: recent bookmarks loaded',
-    withDuration(
-      {
-        ...logContext,
-        section: 'recent-bookmarks',
-        bookmarkCount: recentBookmarks.length,
-        loadedCount: recentlySavedContentResults.filter(Boolean).length,
-      },
-      bookmarksSectionStart
-    )
-  );
+  userLogger.info('AccountDashboard: recent bookmarks loaded', {
+    section: 'recent-bookmarks',
+    bookmarkCount: recentBookmarks.length,
+    loadedCount: recentlySavedContentResults.filter(Boolean).length,
+  });
   const recentlySavedContent = recentlySavedContentResults.filter(
     (item): item is Database['public']['Tables']['content']['Row'] =>
       item !== null && typeof item === 'object'
@@ -261,25 +214,17 @@ export default async function AccountDashboard() {
       : homepageItems;
 
   // Section: Recommendations
-  const recommendationsSectionStart = Date.now();
   const recommendations = candidateRecommendations
     .filter(
       (item) => item.slug && !bookmarkedSlugs.has(`${item.category}/${item.slug}`) && item.title
     )
     .slice(0, 3);
-  logger.info(
-    'AccountDashboard: recommendations generated',
-    withDuration(
-      {
-        ...logContext,
-        section: 'recommendations',
-        candidateCount: candidateRecommendations.length,
-        finalCount: recommendations.length,
-        savedTagsCount: savedTags.size,
-      },
-      recommendationsSectionStart
-    )
-  );
+  userLogger.info('AccountDashboard: recommendations generated', {
+    section: 'recommendations',
+    candidateCount: candidateRecommendations.length,
+    finalCount: recommendations.length,
+    savedTagsCount: savedTags.size,
+  });
 
   const latestBookmark = recentBookmarks[0];
   const resumeBookmarkHref =
@@ -288,19 +233,12 @@ export default async function AccountDashboard() {
       : null;
 
   // Final summary log
-  logger.info(
-    'AccountDashboard: page render completed',
-    withDuration(
-      {
-        ...logContext,
-        section: 'page-render',
-        bookmarkCount,
-        recommendationsCount: recommendations.length,
-        recentlySavedCount: recentlySavedContent.length,
-      },
-      startTime
-    )
-  );
+  userLogger.info('AccountDashboard: page render completed', {
+    section: 'page-render',
+    bookmarkCount,
+    recommendationsCount: recommendations.length,
+    recentlySavedCount: recentlySavedContent.length,
+  });
 
   return (
     <div className="space-y-6">

@@ -158,7 +158,7 @@ async function processSearchEventsBatch(messages: PulseQueueMessage[]): Promise<
     });
     // Use dbQuery serializer for consistent database query formatting
     // Note: This is a direct table insert, not an RPC call, so no rpcName
-    logError('Search events batch insert error', logContext, error);
+    await logError('Search events batch insert error', logContext, error);
     failed = messages.length;
     return { inserted: 0, failed, errors };
   }
@@ -388,7 +388,7 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
           args: rpcArgs, // Will be redacted by Pino's redact config
         },
       });
-      logError('Pulse batch insert RPC error', errorLogContext, batchError);
+      await logError('Pulse batch insert RPC error', errorLogContext, batchError);
       throw batchError;
     }
 
@@ -423,7 +423,10 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
       updateResendEngagement(messages).catch((error) => {
         // Silent fail - Resend updates are best-effort, don't block batch processing
         const logContext = createUtilityContext('flux-station', 'pulse-resend-engagement');
-        logError('Resend engagement update failed', logContext, error);
+        // Handle logError promise explicitly to avoid unhandled rejection
+        logError('Resend engagement update failed', logContext, error).catch(() => {
+          // Swallow errors from logging itself - best effort
+        });
       });
     }
 
@@ -437,7 +440,7 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
         rpcName: 'batch_insert_user_interactions',
       },
     });
-    logError('Pulse batch insert error', logContext, error);
+    await logError('Pulse batch insert error', logContext, error);
     return { inserted: 0, failed: messages.length, errors };
   }
 }
@@ -505,7 +508,7 @@ async function deletePulseMessages(msgIds: bigint[]): Promise<void> {
           const logContext = createUtilityContext('flux-station', 'pulse-delete-message', {
             msg_id: msgId.toString(),
           });
-          logError('Failed to delete pulse message', logContext, error);
+          await logError('Failed to delete pulse message', logContext, error);
         }
       })
     );
@@ -562,8 +565,8 @@ export async function handlePulse(_req: Request): Promise<Response> {
       messages = rawMessages as unknown as PulseQueueMessage[];
     } catch (error) {
       if (error instanceof Error && error.name === 'TimeoutError') {
-        logError('Pulse queue read timeout', logContext, error);
-        return errorResponse(error, 'flux-station:pulse-timeout', publicCorsHeaders, logContext);
+        await logError('Pulse queue read timeout', logContext, error);
+        return await errorResponse(error, 'flux-station:pulse-timeout', publicCorsHeaders, logContext);
       }
       throw error;
     }
@@ -641,7 +644,7 @@ export async function handlePulse(_req: Request): Promise<Response> {
           msg_ids: invalidMsgIds.map((id) => id.toString()),
         });
       } catch (error) {
-        logError(
+        await logError(
           'Failed to delete invalid pulse events',
           {
             ...logContext,
@@ -692,7 +695,7 @@ export async function handlePulse(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    logError('Fatal pulse queue processing error', logContext, error);
-    return errorResponse(error, 'flux-station:pulse-fatal', publicCorsHeaders, logContext);
+    await logError('Fatal pulse queue processing error', logContext, error);
+    return await errorResponse(error, 'flux-station:pulse-fatal', publicCorsHeaders, logContext);
   }
 }

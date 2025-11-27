@@ -4,15 +4,10 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  isValidCategory,
-  logger,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getTrendingPageData } from '@heyclaude/web-runtime/data';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import type {
   DisplayableContent,
@@ -50,10 +45,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/trending', 'TrendingPage');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'TrendingPage',
+    route: '/trending',
+    module: 'apps/web/src/app/trending',
+  });
 
   const rawParameters = await searchParams;
   const categoryParameter = (() => {
@@ -67,20 +68,11 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   const normalizedCategory = categoryParameter && isValidCategory(categoryParameter) ? categoryParameter : null;
 
   // Section: Category Validation
-  const validationSectionStart = Date.now();
   if (categoryParameter && !normalizedCategory) {
-    logger.warn(
-      'TrendingPage: invalid category parameter provided',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'category-validation',
-          category: categoryParameter,
-        },
-        validationSectionStart
-      )
-    );
+    reqLogger.warn('TrendingPage: invalid category parameter provided', {
+      section: 'category-validation',
+      category: categoryParameter,
+    });
   }
 
   // Section: Trending Data Fetch
@@ -88,21 +80,14 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
     category: normalizedCategory,
     limit,
   });
-  logger.info(
-    'Trending page accessed',
-    withDuration(
-      {
-        ...baseLogContext,
-        section: 'trending-data-fetch',
-        category: normalizedCategory ?? 'all',
-        limit,
-        trendingCount: pageData.trending.length,
-        popularCount: pageData.popular.length,
-        recentCount: pageData.recent.length,
-      },
-      startTime
-    )
-  );
+  reqLogger.info('Trending page accessed', {
+    section: 'trending-data-fetch',
+    category: normalizedCategory ?? 'all',
+    limit,
+    trendingCount: pageData.trending.length,
+    popularCount: pageData.popular.length,
+    recentCount: pageData.recent.length,
+  });
 
   const trendingDisplay = mapTrendingMetrics(pageData.trending, normalizedCategory);
   const popularDisplay = mapPopularContent(pageData.popular, normalizedCategory);

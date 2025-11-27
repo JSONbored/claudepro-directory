@@ -1,13 +1,101 @@
+/**
+ * Web Runtime Logger
+ * 
+ * Main logger instance for web-runtime package.
+ * Uses centralized Pino configuration with browser-specific optimizations.
+ * 
+ * **⚠️ IMPORTANT: Universal Module (Client & Server Compatible)**
+ * - ✅ **SAFE** to import in client components (`'use client'`)
+ * - ✅ **SAFE** to import in server components (server-only)
+ * - This logger instance works in both contexts, but usage patterns differ:
+ *   - **Client-side**: Use {@link ../logging/client | Client Logging Barrel} utilities
+ *   - **Server-side**: Use {@link ../logging/server | Server Logging Barrel} utilities
+ * 
+ * **Browser Configuration:**
+ * - Console logging: Disabled in production (users don't see logs)
+ * - Transmit: Enabled in production to forward error/warn logs to server
+ * - Performance: Fire-and-forget, batched, only error/warn levels
+ * 
+ * **Usage:**
+ * - **Client components**: Import from {@link ../logging/client | Client Logging Barrel} (don't import logger directly)
+ * - **Server components**: Import from {@link ../logging/server | Server Logging Barrel} (logger exported there)
+ * 
+ * **Related Modules:**
+ * - {@link ../logging/client | Client Logging Barrel} - Use for client-side logging
+ * - {@link ../logging/server | Server Logging Barrel} - Use for server-side logging
+ * - {@link @heyclaude/shared-runtime/logger/config | Pino Configuration} - Centralized config
+ * - {@link ../app/api/logs/client/route | Client Logs API} - Server endpoint for log forwarding
+ * 
+ * @module web-runtime/logger
+ * @see {@link ../logging/client | Client Logging Barrel} - Recommended for client-side files
+ * @see {@link ../logging/server | Server Logging Barrel} - Recommended for server-side files
+ * @see {@link @heyclaude/shared-runtime/logger/config | Pino Configuration} - Centralized config
+ */
 import pino from 'pino';
 import { createPinoConfig } from '@heyclaude/shared-runtime/logger/config';
+import { normalizeError } from './errors';
+const pinoInstance = pino(
+  createPinoConfig({
+    service: 'web-runtime',
+    // Browser configuration: Disable console in production, enable transmit
+    browser: (() => {
+        const transmitConfig = (() => {
+        // Only enable in browser environment
+        if (typeof window === 'undefined') {
+          return undefined;
+        }
 
-// Create Pino instance with centralized configuration
-// This uses the shared config which includes:
-// - Native redaction (replaces manual sanitization)
-// - Standard error serializers (replaces manual error serialization)
-// - ISO timestamps
-// - Base context (env, service)
-const pinoInstance = pino(createPinoConfig({ service: 'web-runtime' }));
+        const isProduction = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production';
+        const consoleEnabled = typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
+
+        // Enable transmit in production (always) or development (if console enabled)
+        // This ensures we capture client-side errors even when console is disabled
+        if (!isProduction && !consoleEnabled) {
+          return undefined;
+        }
+
+        return {
+          level: 'warn' as pino.LevelOrString, // Only send warn and error logs (reduces network traffic)
+          send: (level: pino.Level, logEvent: pino.LogEvent) => {
+            // Fire-and-forget: Don't await, don't block UI
+            // Performance: Pino batches logs automatically, so this is efficient
+            // Security: Redaction happens before transmit, so no sensitive data sent
+            // Level parameter is the numeric log level (10=trace, 20=debug, 30=info, 40=warn, 50=error, 60=fatal)
+            // We use it to ensure only warn (40) and error (50+) logs are sent (double-check, though transmit.level already filters)
+            // Convert level to number if it's a string (Pino.Level can be string or number)
+            const numericLevel = typeof level === 'number' ? level : (logEvent.level?.value ?? 40);
+            if (numericLevel >= 40) {
+              fetch('/api/logs/client', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  ...logEvent,
+                  level, // Include numeric level for server-side processing
+                }),
+                // Keepalive ensures request completes even if page unloads
+                keepalive: true,
+              }).catch(() => {
+                // Silently fail - don't log errors about logging
+                // Prevents infinite loops if logging endpoint fails
+              });
+            }
+          },
+        };
+      })();
+
+      return {
+        // Console logging: Only enabled if NEXT_PUBLIC_LOGGER_CONSOLE=true
+        // In production, this is false (users don't see logs in browser console)
+        disabled: typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] !== 'true',
+        // Serialize all objects for proper formatting
+        serialize: true,
+        // Enable transmit for error/warn logs (sends to /api/logs/client)
+        // This is the ONLY way logs appear in production (users don't see them)
+        ...(transmitConfig && { transmit: transmitConfig }),
+      };
+    })(),
+  })
+);
 
 export type LogContextValue =
   | string
@@ -75,14 +163,10 @@ class Logger {
     // Pass error as 'err' key - Pino will serialize it properly
     const logData: Record<string, unknown> = { ...context, ...metadata };
     if (error !== undefined) {
-      if (error instanceof Error) {
-        // Pino's stdSerializers.err handles this automatically
-        logData['err'] = error;
-      } else if (typeof error === 'string') {
-        logData['err'] = new Error(error);
-      } else {
-        logData['err'] = new Error(String(error));
-      }
+      // Use normalizeError() for consistent error normalization across codebase
+      // This handles Error instances, strings, objects, and unknown types
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     pinoInstance.error(logData, message);
   }
@@ -92,14 +176,10 @@ class Logger {
     // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
     const logData: Record<string, unknown> = { ...context, ...metadata };
     if (error !== undefined) {
-      if (error instanceof Error) {
-        // Pino's stdSerializers.err handles this automatically
-        logData['err'] = error;
-      } else if (typeof error === 'string') {
-        logData['err'] = new Error(error);
-      } else {
-        logData['err'] = new Error(String(error));
-      }
+      // Use normalizeError() for consistent error normalization across codebase
+      // This handles Error instances, strings, objects, and unknown types
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     pinoInstance.fatal(logData, message);
   }
@@ -121,9 +201,21 @@ class Logger {
    * Update logger bindings dynamically (adds to existing bindings)
    * Use this to add context that will be included in all subsequent logs
    * @param bindings - Key-value pairs to add to logger context
+   * @deprecated Use child() instead to avoid race conditions in concurrent environments
    */
   setBindings(bindings: Record<string, unknown>): void {
     pinoInstance.setBindings(bindings);
+  }
+
+  /**
+   * Create a child logger with request-scoped context
+   * Use this instead of setBindings() to avoid race conditions in concurrent environments
+   * @param bindings - Key-value pairs to add to child logger context
+   * @returns New Logger instance with merged context
+   */
+  child(bindings: Record<string, unknown>): Logger {
+    const childPino = pinoInstance.child(bindings);
+    return new RequestLogger(childPino);
   }
 
   /**
@@ -187,13 +279,10 @@ class RequestLogger extends Logger {
   override error(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
     const logData: Record<string, unknown> = { ...context, ...metadata };
     if (error !== undefined) {
-      if (error instanceof Error) {
-        logData['err'] = error;
-      } else if (typeof error === 'string') {
-        logData['err'] = new Error(error);
-      } else {
-        logData['err'] = new Error(String(error));
-      }
+      // Use normalizeError() for consistent error normalization across codebase
+      // This handles Error instances, strings, objects, and unknown types
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     this.childPino.error(logData, message);
   }
@@ -201,13 +290,10 @@ class RequestLogger extends Logger {
   override fatal(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
     const logData: Record<string, unknown> = { ...context, ...metadata };
     if (error !== undefined) {
-      if (error instanceof Error) {
-        logData['err'] = error;
-      } else if (typeof error === 'string') {
-        logData['err'] = new Error(error);
-      } else {
-        logData['err'] = new Error(String(error));
-      }
+      // Use normalizeError() for consistent error normalization across codebase
+      // This handles Error instances, strings, objects, and unknown types
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     this.childPino.fatal(logData, message);
   }

@@ -4,20 +4,14 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import {
-  type CollectionDetailData,
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import type { CollectionDetailData } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getPublicCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
   Card,
   CardContent,
@@ -62,15 +56,14 @@ export async function generateMetadata({ params }: PublicCollectionPagePropertie
 
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
-  const metadataLogContext = createWebAppContextWithId(
-    metadataRequestId,
-    `/u/${slug}/collections/${collectionSlug}`,
-    'PublicCollectionPageMetadata',
-    {
-      slug,
-      collectionSlug,
-    }
-  );
+  
+  // Create request-scoped child logger to avoid race conditions
+  const metadataLogger = logger.child({
+    requestId: metadataRequestId,
+    operation: 'PublicCollectionPageMetadata',
+    route: `/u/${slug}/collections/${collectionSlug}`,
+    module: 'apps/web/src/app/u/[slug]/collections/[collectionSlug]',
+  });
 
   try {
     // Warm cache for subsequent page render - this fetch in generateMetadata
@@ -81,7 +74,9 @@ export async function generateMetadata({ params }: PublicCollectionPagePropertie
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for metadata');
-    logger.error('PublicCollectionPage: metadata fetch failed', normalized, metadataLogContext);
+    metadataLogger.error('PublicCollectionPage: metadata fetch failed', normalized, {
+      section: 'metadata-generation',
+    });
   }
 
   return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
@@ -92,20 +87,18 @@ export async function generateMetadata({ params }: PublicCollectionPagePropertie
 }
 
 export default async function PublicCollectionPage({ params }: PublicCollectionPageProperties) {
-  const startTime = Date.now();
   const { slug, collectionSlug } = await params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    `/u/${slug}/collections/${collectionSlug}`,
-    'PublicCollectionPage',
-    {
-      slug,
-      collectionSlug,
-    }
-  );
+    operation: 'PublicCollectionPage',
+    route: `/u/${slug}/collections/${collectionSlug}`,
+    module: 'apps/web/src/app/u/[slug]/collections/[collectionSlug]',
+  });
 
   // Get current user (if logged in) for ownership check
   const { user: currentUser } = await getAuthenticatedUser({
@@ -113,12 +106,12 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
     context: 'PublicCollectionPage',
   });
 
-  const logContext = currentUser?.id
-    ? { ...baseLogContext, viewerId: currentUser.id }
-    : baseLogContext;
+  // Create child logger with viewer context if available
+  const viewerLogger = currentUser?.id 
+    ? reqLogger.child({ viewerId: currentUser.id })
+    : reqLogger;
 
   // Section: Collection Detail Fetch
-  const collectionSectionStart = Date.now();
   let collectionData: CollectionDetailData | null = null;
   try {
     collectionData = await getPublicCollectionDetail({
@@ -126,47 +119,22 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
       collectionSlug,
       ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
-    logger.info(
-      'PublicCollectionPage: collection detail loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'collection-detail-fetch',
-          hasData: !!collectionData,
-        },
-        collectionSectionStart
-      )
-    );
+    viewerLogger.info('PublicCollectionPage: collection detail loaded', {
+      section: 'collection-detail-fetch',
+      hasData: !!collectionData,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for page render');
-    logger.error(
-      'PublicCollectionPage: getPublicCollectionDetail threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'collection-detail-fetch',
-          sectionDuration_ms: Date.now() - collectionSectionStart,
-        },
-        startTime
-      )
-    );
+    viewerLogger.error('PublicCollectionPage: getPublicCollectionDetail threw', normalized, {
+      section: 'collection-detail-fetch',
+    });
     throw normalized;
   }
 
   if (!collectionData) {
-    logger.warn(
-      'PublicCollectionPage: collection detail not found',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'collection-detail-fetch',
-          sectionDuration_ms: Date.now() - collectionSectionStart,
-        },
-        startTime
-      )
-    );
+    viewerLogger.warn('PublicCollectionPage: collection detail not found', {
+      section: 'collection-detail-fetch',
+    });
     notFound();
   }
 

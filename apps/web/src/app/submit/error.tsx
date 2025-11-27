@@ -1,15 +1,18 @@
 'use client';
 
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
+import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { useEffect } from 'react';
 
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
+/**
+ * Submit Segment Error Boundary
+ * 
+ * Client-side error boundary for submission routes.
+ * Logs errors using standardized client-side error boundary logging.
+ * 
+ * @see {@link @heyclaude/web-runtime/logging/client.logClientErrorBoundary | logClientErrorBoundary} - Error boundary logging utility
+ */
 export default function SubmitError({
   error,
   reset,
@@ -18,16 +21,23 @@ export default function SubmitError({
   reset: () => void;
 }) {
   useEffect(() => {
-    const requestId = generateRequestId();
+    // In client components, globalThis is always available
     const route = globalThis.location.pathname;
-    const normalized = normalizeError(error, 'Submit route rendering failed');
-    const logContext = createWebAppContextWithId(requestId, route, 'SubmitErrorBoundary', {
-      segment: 'submit',
-      ...(error.digest && { digest: error.digest }),
-      userAgent: globalThis.navigator.userAgent,
-      url: globalThis.location.href,
-    });
-    logger.error('Submit error boundary triggered', normalized, logContext);
+    const componentStack = error.stack ?? '';
+    
+    logClientErrorBoundary(
+      'Submit error boundary triggered',
+      error,
+      route,
+      componentStack,
+      {
+        errorDigest: error.digest ?? 'no-digest',
+        digestAvailable: Boolean(error.digest),
+        userAgent: globalThis.navigator.userAgent,
+        url: globalThis.location.href,
+        segment: 'submit',
+      }
+    );
   }, [error]);
 
   return (

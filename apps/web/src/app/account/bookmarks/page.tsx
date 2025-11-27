@@ -1,5 +1,8 @@
-import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import {
+  generateRequestId,
+  logger,
+} from '@heyclaude/web-runtime/logging/server';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
@@ -25,16 +28,22 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function BookmarksPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, SOURCE_ROUTE, 'BookmarksPage', {
+  const operation = 'BookmarksPage';
+  const route = SOURCE_ROUTE;
+  const module = 'apps/web/src/app/account/bookmarks/page';
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation,
+    route,
+    module,
+  });
+
+  reqLogger.info(`BookmarksPage: redirecting legacy ${SOURCE_ROUTE} to ${TARGET_ROUTE}`, {
     sourceRoute: SOURCE_ROUTE,
     targetRoute: TARGET_ROUTE,
     redirectReason: 'legacy-route-compatibility',
   });
-
-  logger.info(
-    `BookmarksPage: redirecting legacy ${SOURCE_ROUTE} to ${TARGET_ROUTE}`,
-    undefined, // error parameter (not applicable for info logs)
-    logContext
-  );
   redirect(TARGET_ROUTE);
 }

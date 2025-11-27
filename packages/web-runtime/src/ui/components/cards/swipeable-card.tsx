@@ -84,9 +84,9 @@ export function SwipeableCardWrapper({
       };
     } catch (error) {
       const normalized = normalizeError(error, 'SwipeableCardWrapper: Failed to load animation config');
-      logger.warn('SwipeableCardWrapper: Failed to load animation config', undefined, {
+      logger.warn('SwipeableCardWrapper: Failed to load animation config', {
+        err: normalized,
         component: 'SwipeableCardWrapper',
-        error: normalized.message,
       });
       // Fallback to default values
       return {
@@ -107,9 +107,9 @@ export function SwipeableCardWrapper({
         setIsMobile(hasTouchScreen && isNarrowScreen);
       } catch (error) {
         const normalized = normalizeError(error, 'SwipeableCardWrapper: Mobile detection failed');
-        logger.warn('SwipeableCardWrapper: Mobile detection failed', undefined, {
+        logger.warn('SwipeableCardWrapper: Mobile detection failed', {
+          err: normalized,
           component: 'SwipeableCardWrapper',
-          error: normalized.message,
         });
         setIsMobile(false);
       }
@@ -133,9 +133,9 @@ export function SwipeableCardWrapper({
       };
     } catch (error) {
       const normalized = normalizeError(error, 'SwipeableCardWrapper: Media query setup failed');
-      logger.warn('SwipeableCardWrapper: Media query setup failed', undefined, {
+      logger.warn('SwipeableCardWrapper: Media query setup failed', {
+        err: normalized,
         component: 'SwipeableCardWrapper',
-        error: normalized.message,
       });
       return () => {};
     }

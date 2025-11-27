@@ -22,7 +22,6 @@ import {
   logger,
   validateLimit,
   validateQueryString,
-  withDuration,
 } from '@heyclaude/shared-runtime';
 
 // Types for autocomplete/facets (still local for now)
@@ -72,17 +71,13 @@ interface SearchResponse {
     offset: number;
     hasMore: boolean;
   };
-  performance: {
-    dbTime: number;
-    totalTime: number;
-  };
   searchType: 'content' | 'unified' | 'jobs';
 }
 
 /**
  * Main search endpoint with analytics tracking and caching
  */
-export async function handleSearch(req: Request, startTime: number): Promise<Response> {
+export async function handleSearch(req: Request): Promise<Response> {
   const url = new URL(req.url);
   
   // Create log context for this search request
@@ -271,7 +266,6 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
     );
   }
 
-  const dbStartTime = performance.now();
   const searchService = new dataLayer.SearchService(supabaseAnon);
 
   let data: ContentSearchResult[] | UnifiedSearchResult[] | JobSearchResult[];
@@ -341,11 +335,10 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
     data = [];
   }
 
-  const dbEndTime = performance.now();
 
   if (error) {
-    logError('Search RPC error', { ...searchLogContext, searchType }, error);
-    return errorResponse(error, 'search-service', getWithAuthCorsHeaders);
+    await logError('Search RPC error', { ...searchLogContext, searchType }, error);
+    return await errorResponse(error, 'search-service', getWithAuthCorsHeaders);
   }
 
   const results = data;
@@ -428,10 +421,8 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
     // Fire-and-forget: errors are handled internally by trackSearchAnalytics
   });
 
-  const totalTime = performance.now() - startTime;
-
   logInfo('Search completed', {
-    ...withDuration(searchLogContext, startTime),
+    ...searchLogContext,
     resultCount: results.length,
     searchType,
     highlighted: query.trim().length > 0,
@@ -458,14 +449,10 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
       hasMore:
         totalCount !== undefined ? offset + results.length < totalCount : results.length === limit,
     },
-    performance: {
-      dbTime: Math.round(dbEndTime - dbStartTime),
-      totalTime: Math.round(totalTime),
-    },
     searchType,
   };
 
-  traceRequestComplete(logContext);
+  traceRequestComplete(searchLogContext);
   return new Response(JSON.stringify(response), {
     status: 200,
     headers: {
@@ -480,7 +467,7 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
 /**
  * Autocomplete endpoint
  */
-export async function handleAutocomplete(req: Request, startTime: number): Promise<Response> {
+export async function handleAutocomplete(req: Request): Promise<Response> {
   const url = new URL(req.url);
   
   // Create log context for this autocomplete request
@@ -528,14 +515,14 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('Autocomplete RPC error', {
+    await logError('Autocomplete RPC error', {
       ...logContext,
       dbQuery: {
         rpcName: 'get_search_suggestions_from_history',
         args: rpcArgs, // Will be redacted by Pino's redact config
       },
     }, error);
-    return errorResponse(error, 'get_search_suggestions_from_history', getWithAuthCorsHeaders);
+    return await errorResponse(error, 'get_search_suggestions_from_history', getWithAuthCorsHeaders);
   }
 
   const suggestions = (data ?? []).map((item: AutocompleteResult) => ({
@@ -543,8 +530,6 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
     searchCount: Number(item.search_count),
     isPopular: Number(item.search_count) >= 2,
   }));
-
-  const totalTime = performance.now() - startTime;
 
   const response = {
     suggestions,
@@ -558,7 +543,6 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
       'Content-Type': 'application/json',
       ...buildSecurityHeaders(),
       ...buildCacheHeaders('search_autocomplete'),
-      'X-Response-Time': `${Math.round(totalTime)}ms`,
       ...getWithAuthCorsHeaders,
     },
   });
@@ -567,7 +551,7 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
 /**
  * Facets endpoint
  */
-export async function handleFacets(startTime: number): Promise<Response> {
+export async function handleFacets(): Promise<Response> {
   const logContext = createSearchContext({ searchType: 'facets', app: 'public-api' });
   
   // Initialize request logging with trace and bindings
@@ -585,13 +569,13 @@ export async function handleFacets(startTime: number): Promise<Response> {
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('Facets RPC error', {
+    await logError('Facets RPC error', {
       ...logContext,
       dbQuery: {
         rpcName: 'get_search_facets',
       },
     }, error);
-    return errorResponse(error, 'get_search_facets', getWithAuthCorsHeaders);
+    return await errorResponse(error, 'get_search_facets', getWithAuthCorsHeaders);
   }
 
   const facets = (data ?? []).map((item: FacetResult) => ({
@@ -600,8 +584,6 @@ export async function handleFacets(startTime: number): Promise<Response> {
     tags: item.all_tags || [],
     authors: item.authors || [],
   }));
-
-  const totalTime = performance.now() - startTime;
 
   const response = {
     facets,
@@ -614,7 +596,6 @@ export async function handleFacets(startTime: number): Promise<Response> {
       'Content-Type': 'application/json',
       ...buildSecurityHeaders(),
       ...buildCacheHeaders('search_facets'),
-      'X-Response-Time': `${Math.round(totalTime)}ms`,
       ...getWithAuthCorsHeaders,
     },
   });

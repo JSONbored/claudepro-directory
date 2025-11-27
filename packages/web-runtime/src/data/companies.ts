@@ -9,7 +9,7 @@ import { getCacheTtl } from '../cache-config.ts';
 import { searchCompaniesUnified } from '../edge/search-client.ts';
 import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
-import { generateRequestId } from '../utils/request-context.ts';
+import { generateRequestId } from '../utils/request-id.ts';
 
 import { normalizeRpcResult } from './content-helpers.ts';
 
@@ -24,64 +24,108 @@ type GetCompanyAdminProfileReturn =
 export async function getCompanyAdminProfile(
   companyId: string
 ): Promise<GetCompanyAdminProfileReturn[number] | null> {
+  const requestId = generateRequestId();
+  const requestLogger = logger.child({
+    requestId,
+    operation: 'getCompanyAdminProfile',
+    module: 'data/companies',
+  });
+
   if (!companyId) {
     return null;
   }
 
-  const data = await fetchCached(
-    (client) => new CompaniesService(client).getCompanyAdminProfile({ p_company_id: companyId }),
-    {
-      keyParts: ['company-admin', companyId],
-      tags: ['companies', `company-id-${companyId}`],
-      ttlKey: COMPANY_DETAIL_TTL_KEY,
-      useAuth: true,
-      fallback: null,
-      logMeta: { companyId },
-    }
-  );
+  try {
+    const data = await fetchCached(
+      (client) => new CompaniesService(client).getCompanyAdminProfile({ p_company_id: companyId }),
+      {
+        keyParts: ['company-admin', companyId],
+        tags: ['companies', `company-id-${companyId}`],
+        ttlKey: COMPANY_DETAIL_TTL_KEY,
+        useAuth: true,
+        fallback: null,
+        logMeta: { companyId },
+      }
+    );
 
-  const normalized = normalizeRpcResult(data);
-  if (!normalized) {
-    logger.warn('getCompanyAdminProfile: company not found', undefined, {
-      requestId: generateRequestId(),
-      operation: 'getCompanyAdminProfile',
+    const normalized = normalizeRpcResult(data);
+    if (!normalized) {
+      requestLogger.warn('getCompanyAdminProfile: company not found', {
+        companyId,
+      });
+      return null;
+    }
+
+    return normalized as GetCompanyAdminProfileReturn[number] | null;
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to get company admin profile');
+    requestLogger.error('getCompanyAdminProfile failed', normalized, {
       companyId,
     });
-    return null;
+    throw normalized;
   }
-
-  return normalized as GetCompanyAdminProfileReturn[number] | null;
 }
 
 export async function getCompanyProfile(
   slug: string
 ): Promise<Database['public']['Functions']['get_company_profile']['Returns'] | null> {
-  return fetchCached(
-    (client) => new CompaniesService(client).getCompanyProfile({ p_slug: slug }),
-    {
-      keyParts: ['company', slug],
-      tags: ['companies', JOBS_CATEGORY, `company-${slug}`],
-      ttlKey: COMPANY_DETAIL_TTL_KEY,
-      fallback: null,
-      logMeta: { slug },
-    }
-  );
+  const requestId = generateRequestId();
+  const requestLogger = logger.child({
+    requestId,
+    operation: 'getCompanyProfile',
+    module: 'data/companies',
+  });
+
+  try {
+    return await fetchCached(
+      (client) => new CompaniesService(client).getCompanyProfile({ p_slug: slug }),
+      {
+        keyParts: ['company', slug],
+        tags: ['companies', JOBS_CATEGORY, `company-${slug}`],
+        ttlKey: COMPANY_DETAIL_TTL_KEY,
+        fallback: null,
+        logMeta: { slug },
+      }
+    );
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to get company profile');
+    requestLogger.error('getCompanyProfile failed', normalized, {
+      slug,
+    });
+    throw normalized;
+  }
 }
 
 export async function getCompaniesList(
   limit = 50,
   offset = 0
 ): Promise<Database['public']['Functions']['get_companies_list']['Returns']> {
-  return fetchCached(
-    (client) => new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
-    {
-      keyParts: ['companies-list', limit, offset],
-      tags: ['companies', JOBS_CATEGORY],
-      ttlKey: 'cache.company_list.ttl_seconds',
-      fallback: { companies: [], total: 0 },
-      logMeta: { limit, offset },
-    }
-  );
+  const requestId = generateRequestId();
+  const requestLogger = logger.child({
+    requestId,
+    operation: 'getCompaniesList',
+    module: 'data/companies',
+  });
+
+  try {
+    return await fetchCached(
+      (client) => new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
+      {
+        keyParts: ['companies-list', limit, offset],
+        tags: ['companies', JOBS_CATEGORY],
+        ttlKey: 'cache.company_list.ttl_seconds',
+        fallback: { companies: [], total: 0 },
+        logMeta: { limit, offset },
+      }
+    );
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to get companies list');
+    requestLogger.error('getCompaniesList failed', normalized, {
+      limit,
+      offset,
+    });
+    throw normalized;
+  }
 }
 
 export interface CompanySearchResult {
@@ -95,6 +139,13 @@ async function fetchCompanySearchResults(
   query: string,
   limit: number
 ): Promise<CompanySearchResult[]> {
+  const requestId = generateRequestId();
+  const requestLogger = logger.child({
+    requestId,
+    operation: 'fetchCompanySearchResults',
+    module: 'data/companies',
+  });
+
   const { trackPerformance } = await import('../utils/performance-metrics');
   
   try {
@@ -119,14 +170,10 @@ async function fetchCompanySearchResults(
   } catch (error) {
     // trackPerformance already logs the error, but we log again with context about fallback behavior
     const normalized = normalizeError(error, 'Company search failed, returning empty results');
-    const fallbackRequestId = generateRequestId();
-    logger.warn('Company search failed, returning empty results', undefined, {
-      requestId: fallbackRequestId,
-      operation: 'fetchCompanySearchResults-fallback',
-      route: '/data/companies',
+    requestLogger.warn('Company search failed, returning empty results', {
+      err: normalized,
       query,
       limit,
-      errorMessage: normalized.message,
       fallbackStrategy: 'empty-array',
     });
     return [];

@@ -1,14 +1,18 @@
 'use client';
 
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
+import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect } from 'react';
 
+/**
+ * Global error boundary for the entire application.
+ * 
+ * This is the top-level error boundary that catches errors not handled
+ * by other error boundaries. Logs errors using client-side logging utilities
+ * and displays a critical error fallback UI.
+ * 
+ * @see {@link logClientErrorBoundary} - Client-side error logging utility
+ */
 export default function GlobalError({
   error,
   reset,
@@ -18,17 +22,18 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     // Log critical global errors with digest for Vercel observability
-    const requestId = generateRequestId();
-    const route = globalThis.location.pathname;
-    const normalized = normalizeError(error, 'Global error boundary triggered');
-    const logContext = createWebAppContextWithId(requestId, route, 'GlobalErrorBoundary', {
-      errorDigest: error.digest ?? 'no-digest',
-      digestAvailable: Boolean(error.digest),
-      userAgent: globalThis.navigator.userAgent,
-      url: globalThis.location.href,
-      global: true,
-    });
-    logger.error('Global error boundary triggered', normalized, logContext);
+    logClientErrorBoundary(
+      'Global error boundary triggered',
+      error,
+      globalThis.location.pathname,
+      error.stack ?? '',
+      {
+        errorDigest: error.digest,
+        userAgent: globalThis.navigator.userAgent,
+        url: globalThis.location.href,
+        segment: 'global-error',
+      }
+    );
   }, [error]);
   return (
     <html lang="en">

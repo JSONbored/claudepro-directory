@@ -5,7 +5,7 @@ import { cache } from 'react';
 
 import { logger, normalizeError } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
-import { generateRequestId } from '../utils/request-context.ts';
+import { generateRequestId } from '../utils/request-id.ts';
 
 type PaymentPlanRow = Database['public']['Tables']['payment_plan_catalog']['Row'];
 type JobBillingSummaryRow = Database['public']['Views']['job_billing_summary']['Row'];
@@ -44,6 +44,14 @@ function sanitizeBenefits(benefits: PaymentPlanRow['benefits']): string[] | null
 }
 
 export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogEntry[]> => {
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getPaymentPlanCatalog',
+    module: 'data/payments',
+  });
+
   const { trackPerformance } = await import('../utils/performance-metrics');
   const supabase = await createSupabaseServerClient();
 
@@ -82,9 +90,7 @@ export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogE
 
     // Type guard: Validate that data is an array and has expected structure
     if (!Array.isArray(data)) {
-      logger.warn('getPaymentPlanCatalog: Expected array but got non-array data', {
-        requestId: generateRequestId(),
-        operation: 'getPaymentPlanCatalog',
+      reqLogger.warn('getPaymentPlanCatalog: Expected array but got non-array data', {
         dataType: typeof data,
       });
       return [];
@@ -115,8 +121,9 @@ export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogE
       product_type: entry.product_type,
     }));
   } catch (error) {
-    // trackPerformance already logs the error with performance metrics
+    // trackPerformance logs performance metrics, but we need explicit error logging
     const normalized = normalizeError(error, 'Failed to load payment_plan_catalog');
+    reqLogger.error('getPaymentPlanCatalog failed', normalized);
     throw normalized;
   }
 });
@@ -127,6 +134,14 @@ export async function getJobBillingSummaries(
   if (jobIds.length === 0) {
     return [];
   }
+
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getJobBillingSummaries',
+    module: 'data/payments',
+  });
 
   const { trackPerformance } = await import('../utils/performance-metrics');
   const { createSupabaseServerClient } = await import('../supabase/server.ts');
@@ -170,9 +185,7 @@ export async function getJobBillingSummaries(
 
     // Type guard: Validate that data is an array
     if (!Array.isArray(data)) {
-      logger.warn('getJobBillingSummaries: Expected array but got non-array data', {
-        requestId: generateRequestId(),
-        operation: 'getJobBillingSummaries',
+      reqLogger.warn('getJobBillingSummaries: Expected array but got non-array data', {
         dataType: typeof data,
         jobCount: jobIds.length,
       });
@@ -194,8 +207,11 @@ export async function getJobBillingSummaries(
 
     return entries;
   } catch (error) {
-    // trackPerformance already logs the error with performance metrics
+    // trackPerformance logs performance metrics, but we need explicit error logging
     const normalized = normalizeError(error, 'Failed to fetch job billing summaries');
+    reqLogger.error('getJobBillingSummaries failed', normalized, {
+      jobCount: jobIds.length,
+    });
     throw normalized;
   }
 }

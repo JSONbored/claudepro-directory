@@ -43,7 +43,7 @@ export async function handleGetContentDetail(
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('Database query failed in getContentDetail', {
+    await logError('Database query failed in getContentDetail', {
       dbQuery: {
         table: 'content',
         operation: 'select',

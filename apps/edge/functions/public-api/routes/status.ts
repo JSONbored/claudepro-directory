@@ -171,7 +171,7 @@ export async function handleStatusRoute(
   const { data, error } = await supabaseAnon.rpc('get_api_health', undefined);
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    return errorResponse(error, 'data-api:get_api_health', CORS, {
+    return await errorResponse(error, 'data-api:get_api_health', CORS, {
       ...logContext,
       dbQuery: {
         rpcName: 'get_api_health',
@@ -180,7 +180,7 @@ export async function handleStatusRoute(
   }
 
   if (!data) {
-    return errorResponse(new Error('Health check returned null'), 'data-api:get_api_health', CORS, logContext);
+    return await errorResponse(new Error('Health check returned null'), 'data-api:get_api_health', CORS, logContext);
   }
 
   // Validate data structure without type assertion

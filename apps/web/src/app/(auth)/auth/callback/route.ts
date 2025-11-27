@@ -4,13 +4,12 @@
 
 import { refreshProfileFromOAuthServer, validateNextParameter  } from '@heyclaude/web-runtime';
 import { subscribeViaOAuthAction } from '@heyclaude/web-runtime/actions';
+import { SECURITY_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import {
-  createWebAppContextWithId,
   generateRequestId,
   logger,
   normalizeError,
-} from '@heyclaude/web-runtime/core';
-import { SECURITY_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+} from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient } from '@heyclaude/web-runtime/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -26,7 +25,17 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   // Generate single requestId for this route request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/auth/callback', 'AuthCallback');
+  const operation = 'AuthCallback';
+  const route = '/auth/callback';
+  const module = 'apps/web/src/app/(auth)/auth/callback/route';
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation,
+    route,
+    module,
+  });
 
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
@@ -41,22 +50,24 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (data.session) {
-      const { user } = data;
+      const { user } = data.session;
       let shouldSetNewsletterCookie = false;
+
+      // Create new child logger with user context
+      // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+      const userLogger = reqLogger.child({
+        userId: user.id, // Redaction will automatically hash this
+      });
 
       try {
         await refreshProfileFromOAuthServer(user.id);
-        logger.info('Auth callback refreshed profile from OAuth', {
-          ...baseLogContext,
-          userId: user.id,
+        userLogger.info('Auth callback refreshed profile from OAuth', {
           isLinkingFlow,
         });
       } catch (refreshError) {
         const normalized = normalizeError(refreshError, 'Failed to refresh profile from OAuth');
-        logger.warn('Auth callback failed to refresh profile', undefined, {
-          ...baseLogContext,
-          userId: user.id,
-          errorMessage: normalized.message,
+        userLogger.warn('Auth callback failed to refresh profile', {
+          err: normalized,
           isLinkingFlow,
         });
       }
@@ -73,18 +84,22 @@ export async function GET(request: NextRequest) {
             });
 
             if (newsletterResult.serverError) {
-              logger.warn('Newsletter opt-in via auth callback failed', undefined, {
-                ...baseLogContext,
-                userId: user.id,
-                error: newsletterResult.serverError,
+              const normalized = normalizeError(
+                newsletterResult.serverError,
+                'Newsletter opt-in via auth callback failed'
+              );
+              userLogger.warn('Newsletter opt-in via auth callback failed', {
+                err: normalized,
               });
             } else if (newsletterResult.data?.success) {
               shouldSetNewsletterCookie = true;
             } else {
-              logger.warn('Newsletter opt-in via auth callback failed', undefined, {
-                ...baseLogContext,
-                userId: user.id,
-                error: 'Unknown error',
+              const normalized = normalizeError(
+                new Error('Unknown error'),
+                'Newsletter opt-in via auth callback failed'
+              );
+              userLogger.warn('Newsletter opt-in via auth callback failed', {
+                err: normalized,
               });
             }
           } catch (subscribeError) {
@@ -92,16 +107,10 @@ export async function GET(request: NextRequest) {
               subscribeError,
               'Newsletter opt-in via auth callback threw'
             );
-            logger.error('Newsletter opt-in via auth callback threw', normalizedSubscribeError, {
-              ...baseLogContext,
-              userId: user.id,
-            });
+            userLogger.error('Newsletter opt-in via auth callback threw', normalizedSubscribeError);
           }
         } else {
-          logger.warn('Newsletter opt-in skipped - user email missing', undefined, {
-            ...baseLogContext,
-            userId: user.id,
-          });
+          userLogger.warn('Newsletter opt-in skipped - user email missing');
         }
       }
 
@@ -115,10 +124,9 @@ export async function GET(request: NextRequest) {
             return new URL(url).hostname;
           } catch (urlError) {
             const normalized = normalizeError(urlError, 'Invalid origin URL in SECURITY_CONFIG');
-            logger.warn('Skipping invalid origin URL in SECURITY_CONFIG', undefined, {
-              ...baseLogContext,
+            userLogger.warn('Skipping invalid origin URL in SECURITY_CONFIG', {
+              err: normalized,
               url,
-              errorMessage: normalized.message,
             });
             return null;
           }
@@ -150,20 +158,20 @@ export async function GET(request: NextRequest) {
       return response;
     }
 
-    const normalized = normalizeError(error, error?.message ?? 'Auth callback exchange failed');
-    logger.error('Auth callback exchange failed', normalized, {
-      ...baseLogContext,
+    const normalized = normalizeError(
+      error,
+      error instanceof Error ? error.message : 'Auth callback exchange failed'
+    );
+    reqLogger.error('Auth callback exchange failed', normalized, {
       hasCode: true,
-      ...(error?.code && { errorCode: String(error.code) }),
-      ...(error?.message && { errorMessage: error.message }),
+      ...(error && typeof error === 'object' && 'code' in error && { errorCode: String(error.code) }),
     });
   } else {
     const normalized = normalizeError(
       new Error('No authorization code provided'),
       'Auth callback missing code'
     );
-    logger.error('Auth callback no code provided', normalized, {
-      ...baseLogContext,
+    reqLogger.error('Auth callback no code provided', normalized, {
       hasCode: false,
       origin,
     });

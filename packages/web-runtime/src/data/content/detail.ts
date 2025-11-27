@@ -7,7 +7,7 @@ import { Constants } from '@heyclaude/database-types';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
-import { generateRequestId } from '../../utils/request-context.ts';
+import { generateRequestId } from '../../utils/request-id.ts';
 import { generateContentTags } from '../content-helpers.ts';
 
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -28,12 +28,16 @@ export async function getContentDetailComplete(input: {
   slug: string;
 }): Promise<Database['public']['Functions']['get_content_detail_complete']['Returns'] | null> {
   const { category, slug } = input;
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getContentDetailComplete',
+    module: 'data/content/detail',
+  });
 
   if (!isValidContentCategory(category)) {
     const normalized = normalizeError('Invalid category', 'Invalid category in getContentDetailComplete');
-    logger.error('Invalid category in getContentDetailComplete', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getContentDetailComplete',
+    reqLogger.error('Invalid category in getContentDetailComplete', normalized, {
       category,
       slug,
     });
@@ -53,9 +57,7 @@ export async function getContentDetailComplete(input: {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load content detail');
-    logger.error('getContentDetailComplete failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getContentDetailComplete',
+    reqLogger.error('getContentDetailComplete failed', normalized, {
       category,
       slug,
     });
@@ -68,12 +70,16 @@ export async function getContentDetailCore(input: {
   slug: string;
 }): Promise<Database['public']['Functions']['get_content_detail_core']['Returns'] | null> {
   const { category, slug } = input;
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getContentDetailCore',
+    module: 'data/content/detail',
+  });
 
   if (!isValidContentCategory(category)) {
     const normalized = normalizeError('Invalid category', 'Invalid category in getContentDetailCore');
-    logger.error('Invalid category in getContentDetailCore', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getContentDetailCore',
+    reqLogger.error('Invalid category in getContentDetailCore', normalized, {
       category,
       slug,
     });
@@ -93,9 +99,7 @@ export async function getContentDetailCore(input: {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'getContentDetailCore failed');
-    logger.error('getContentDetailCore failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getContentDetailCore',
+    reqLogger.error('getContentDetailCore failed', normalized, {
       category,
       slug,
     });
@@ -108,12 +112,16 @@ export async function getContentAnalytics(input: {
   slug: string;
 }): Promise<Database['public']['Functions']['get_content_analytics']['Returns'] | null> {
   const { category, slug } = input;
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getContentAnalytics',
+    module: 'data/content/detail',
+  });
 
   if (!isValidContentCategory(category)) {
     const normalized = normalizeError('Invalid category', 'Invalid category in getContentAnalytics');
-    logger.error('Invalid category in getContentAnalytics', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getContentAnalytics',
+    reqLogger.error('Invalid category in getContentAnalytics', normalized, {
       category,
       slug,
     });
@@ -133,9 +141,7 @@ export async function getContentAnalytics(input: {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load content analytics');
-    logger.error('getContentAnalytics failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getContentAnalytics',
+    reqLogger.error('getContentAnalytics failed', normalized, {
       category,
       slug,
     });

@@ -10,7 +10,7 @@ import {
   pulseUserSearch,
   searchUsersUnified,
 } from '../index.ts';
-import { generateRequestId } from '../utils/request-context.ts';
+import { generateRequestId } from '../utils/request-id.ts';
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
@@ -22,6 +22,12 @@ export async function getCommunityDirectory(options: {
   limit?: number;
 }): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
   const { searchQuery, limit = DEFAULT_DIRECTORY_LIMIT } = options;
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getCommunityDirectory',
+    module: 'data/community',
+  });
 
   if (searchQuery?.trim()) {
     const { trackPerformance } = await import('../utils/performance-metrics');
@@ -50,12 +56,20 @@ export async function getCommunityDirectory(options: {
             created_at: result.created_at,
           }));
 
+      // Fire-and-forget: Generate explicit requestId for traceability in async callback
+      const callbackRequestId = generateRequestId();
       pulseUserSearch(searchQuery.trim(), allUsers.length).catch((error) => {
         const normalized = normalizeError(error, 'Failed to pulse user search');
-        logger.warn('Failed to pulse user search', undefined, {
-          requestId: generateRequestId(),
+        // Use child logger for callback to maintain isolation
+        const callbackLogger = logger.child({
+          requestId: callbackRequestId,
           operation: 'pulseUserSearch',
-          error: normalized.message,
+          module: 'data/community',
+        });
+        callbackLogger.warn('Failed to pulse user search', {
+          err: normalized,
+          searchQuery: searchQuery.trim(),
+          resultCount: allUsers.length,
         });
       });
 
@@ -67,34 +81,39 @@ export async function getCommunityDirectory(options: {
     } catch (error) {
       // trackPerformance already logs the error, but we log again with context about fallback behavior
       const normalized = normalizeError(error, 'Community directory search failed, falling back to RPC');
-      const fallbackRequestId = generateRequestId();
-      logger.warn('Community directory search failed, using RPC fallback', undefined, {
-        requestId: fallbackRequestId,
-        operation: 'getCommunityDirectory-fallback',
-        route: '/data/community',
+      reqLogger.warn('Community directory search failed, using RPC fallback', {
+        err: normalized,
         searchQuery: searchQuery.trim(),
         limit,
-        errorMessage: normalized.message,
         fallbackStrategy: 'rpc',
       });
       // Fall through to RPC fallback
     }
   }
 
-  return fetchCached(
-    (client) => new CommunityService(client).getCommunityDirectory({ p_limit: limit }),
-    {
-      keyParts: ['community-directory', 'all', limit],
-      tags: ['community', 'users'],
-      ttlKey: 'cache.community.ttl_seconds',
-      useAuth: false,
-      fallback: null,
-      logMeta: {
-        hasQuery: Boolean(searchQuery?.trim()),
-        limit,
-      },
-    }
-  );
+  try {
+    return await fetchCached(
+      (client) => new CommunityService(client).getCommunityDirectory({ p_limit: limit }),
+      {
+        keyParts: ['community-directory', 'all', limit],
+        tags: ['community', 'users'],
+        ttlKey: 'cache.community.ttl_seconds',
+        useAuth: false,
+        fallback: null,
+        logMeta: {
+          hasQuery: Boolean(searchQuery?.trim()),
+          limit,
+        },
+      }
+    );
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to get community directory');
+    reqLogger.error('getCommunityDirectory failed', normalized, {
+      hasQuery: Boolean(searchQuery?.trim()),
+      limit,
+    });
+    throw normalized;
+  }
 }
 
 export async function getPublicUserProfile(input: {
@@ -102,6 +121,12 @@ export async function getPublicUserProfile(input: {
   viewerId?: string;
 }): Promise<Database['public']['Functions']['get_user_profile']['Returns'] | null> {
   const { slug, viewerId } = input;
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getPublicUserProfile',
+    module: 'data/community',
+  });
 
   try {
     return await fetchCached(
@@ -120,9 +145,7 @@ export async function getPublicUserProfile(input: {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user profile detail');
-    logger.error('getPublicUserProfile failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getPublicUserProfile',
+    reqLogger.error('getPublicUserProfile failed', normalized, {
       slug,
       ...(viewerId ? { viewerId } : {}),
     });
@@ -136,6 +159,12 @@ export async function getPublicCollectionDetail(input: {
   viewerId?: string;
 }): Promise<CollectionDetailData | null> {
   const { userSlug, collectionSlug, viewerId } = input;
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getPublicCollectionDetail',
+    module: 'data/community',
+  });
 
   try {
     const data = await fetchCached(
@@ -161,9 +190,7 @@ export async function getPublicCollectionDetail(input: {
     );
 
     if (!data) {
-      logger.warn('getPublicCollectionDetail: RPC returned null', undefined, {
-        requestId: generateRequestId(),
-        operation: 'getPublicCollectionDetail',
+      reqLogger.warn('getPublicCollectionDetail: RPC returned null', {
         slug: userSlug,
         collectionSlug,
         ...(viewerId ? { viewerId } : {}),
@@ -174,9 +201,7 @@ export async function getPublicCollectionDetail(input: {
     return data;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user collection detail');
-    logger.error('getPublicCollectionDetail failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getPublicCollectionDetail',
+    reqLogger.error('getPublicCollectionDetail failed', normalized, {
       slug: userSlug,
       collectionSlug,
       ...(viewerId ? { viewerId } : {}),

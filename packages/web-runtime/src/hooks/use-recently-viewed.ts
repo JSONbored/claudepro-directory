@@ -38,6 +38,7 @@ import {
   getRecentlyViewedConfig,
   getTimeoutConfig,
 } from '../config/static-configs.ts';
+import { normalizeError } from '../errors.ts';
 import { logger } from '../entries/core.ts';
 import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
@@ -156,7 +157,7 @@ function loadFromStorage(): RecentlyViewedItem[] {
 
     return validItems.slice(0, MAX_ITEMS);
   } catch (error) {
-    const normalized = error instanceof Error ? error : new Error(String(error));
+    const normalized = normalizeError(error, 'Failed to load recently viewed');
     logger.error('Failed to load recently viewed', normalized, {
       hook: 'useRecentlyViewed',
     });
@@ -189,7 +190,7 @@ function saveToStorage(items: RecentlyViewedItem[]): void {
         });
       }
     } else {
-      const normalized = error instanceof Error ? error : new Error(String(error));
+      const normalized = normalizeError(error, 'Failed to save recently viewed');
       logger.error('Failed to save recently viewed', normalized, {
         hook: 'useRecentlyViewed',
       });
@@ -217,7 +218,9 @@ export function useRecentlyViewed(): UseRecentlyViewedReturn {
 
   // Load from localStorage on mount (client-side only)
   useEffect(() => {
-    // Load configs from static defaults
+    if (isLoaded) return;
+
+    // Load configs from static defaults (only when not loaded)
     const recentlyViewed = getRecentlyViewedConfig();
     const timeout = getTimeoutConfig();
     
@@ -234,8 +237,6 @@ export function useRecentlyViewed(): UseRecentlyViewedReturn {
     
     const timeoutConfig = timeout as { 'timeout.ui.form_debounce_ms': number };
     DEBOUNCE_MS = timeoutConfig['timeout.ui.form_debounce_ms'];
-
-    if (isLoaded) return;
 
     const loadedItems = loadFromStorage();
     setItems(loadedItems);

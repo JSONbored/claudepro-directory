@@ -408,7 +408,7 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
     const actualMimeType = isPng ? 'image/png' : (isJpeg ? 'image/jpeg' : 'image/png');
 
     if (!isPng && !isJpeg) {
-      logError('Optimized card format is unrecognized', logContext, new Error('Invalid image format'));
+      await logError('Optimized card format is unrecognized', logContext, new Error('Invalid image format'));
       return jsonResponse(
         {
           success: false,
@@ -431,7 +431,7 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
 
     // Validate optimized image size
     if (optimizedImage.length > BUCKET_SIZE_LIMIT) {
-      logError('Optimized card exceeds bucket size limit', logContext, new Error(`Size: ${optimizedImage.length} bytes, limit: ${BUCKET_SIZE_LIMIT} bytes`));
+      await logError('Optimized card exceeds bucket size limit', logContext, new Error(`Size: ${optimizedImage.length} bytes, limit: ${BUCKET_SIZE_LIMIT} bytes`));
       return jsonResponse(
         {
           success: false,
@@ -480,7 +480,7 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
         });
 
         if (!uploadResult.success || !uploadResult.publicUrl) {
-          logError('Failed to upload content card', logContext, new Error(uploadResult.error || 'Unknown upload error'));
+          await logError('Failed to upload content card', logContext, new Error(uploadResult.error || 'Unknown upload error'));
           return jsonResponse(
             {
               success: false,
@@ -502,12 +502,12 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
               .from('content-cards')
               .remove([body.oldCardPath]);
             if (deleteError) {
-              logError('Error deleting old card', logContext, deleteError);
+              await logError('Error deleting old card', logContext, deleteError);
             } else {
               logInfo('Old content card deleted', { ...logContext, oldPath: body.oldCardPath });
             }
           } catch (error) {
-            logError('Error deleting old card', logContext, error);
+            await logError('Error deleting old card', logContext, error);
           }
         }
 
@@ -524,7 +524,7 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
                 .eq('slug', body.contentId);
               if (updateError) {
                 // Use dbQuery serializer for consistent database query formatting
-                logError('Error updating content card in database (slug)', {
+                await logError('Error updating content card in database (slug)', {
                   ...logContext,
                   dbQuery: {
                     table: 'content',
@@ -546,7 +546,7 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
                 .eq('id', body.contentId);
               if (updateError) {
                 // Use dbQuery serializer for consistent database query formatting
-                logError('Error updating content card in database (id)', {
+                await logError('Error updating content card in database (id)', {
                   ...logContext,
                   dbQuery: {
                     table: 'content',
@@ -563,7 +563,7 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
               }
             }
           } catch (error) {
-            logError('Error updating content card in database', logContext, error);
+            await logError('Error updating content card in database', logContext, error);
           }
         }
       }
@@ -582,7 +582,7 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
     traceRequestComplete(logContext);
     return jsonResponse(response, 200, CORS);
   } catch (error) {
-    logError('Content card generation failed', logContext, error);
+    await logError('Content card generation failed', logContext, error);
     return jsonResponse(
       {
         success: false,

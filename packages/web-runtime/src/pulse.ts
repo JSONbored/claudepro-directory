@@ -52,8 +52,9 @@ export async function enqueuePulseEvent(
     });
 
     if (error) {
+      const normalizedError = normalizeError(error, 'Failed to enqueue pulse event');
       logger.warn('Failed to enqueue pulse event', {
-        error: error.message,
+        err: normalizedError,
         interaction_type: event.interaction_type,
         content_type: event.content_type ?? 'unknown',
         ...(event.user_id && { user_id: event.user_id }),
@@ -61,12 +62,12 @@ export async function enqueuePulseEvent(
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Pulse event enqueue exception');
-    logger.warn('Pulse event enqueue exception', {
-      error: normalized.message,
-      interaction_type: event.interaction_type,
-      content_type: event.content_type ?? 'unknown',
-      ...(event.user_id && { user_id: event.user_id }),
-    });
+      logger.warn('Pulse event enqueue exception', {
+        err: normalized,
+        interaction_type: event.interaction_type,
+        content_type: event.content_type ?? 'unknown',
+        ...(event.user_id && { user_id: event.user_id }),
+      });
   }
 }
 

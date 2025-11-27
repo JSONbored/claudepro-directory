@@ -9,22 +9,22 @@
 export const runtime = 'nodejs';
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  VALID_CATEGORIES,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
-import { createErrorResponse } from '@heyclaude/web-runtime/utils/error-handler';
+import { generateRequestId, logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const startTime = Date.now();
   // Generate single requestId for this API request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/api/templates', 'TemplatesAPI');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'TemplatesAPI',
+    route: '/api/templates',
+    module: 'apps/web/src/app/api/templates',
+  });
 
   const searchParameters = request.nextUrl.searchParams;
   const category = searchParameters.get('category');
@@ -37,17 +37,9 @@ export async function GET(request: NextRequest) {
         VALID_CATEGORIES.includes(category as Database['public']['Enums']['content_category'])
       )
     ) {
-      logger.warn(
-        'Templates API: invalid category',
-        undefined,
-        withDuration(
-          {
-            ...baseLogContext,
-            category,
-          },
-          startTime
-        )
-      );
+      reqLogger.warn('Templates API: invalid category', {
+        category,
+      });
       return NextResponse.json(
         {
           error: 'Invalid category',
@@ -63,20 +55,13 @@ export async function GET(request: NextRequest) {
     // Fetch templates from data layer
     const templates = await getContentTemplates(validCategory);
 
-    // Structured logging with cache tags and duration
-    logger.info(
-      'Templates API: success',
-      withDuration(
-        {
-          ...baseLogContext,
-          category: validCategory,
-          count: templates.length,
-          cacheTags: ['templates', `templates-${validCategory}`],
-          cacheTTL: 300,
-        },
-        startTime
-      )
-    );
+    // Structured logging with cache tags
+    reqLogger.info('Templates API: success', {
+      category: validCategory,
+      count: templates.length,
+      cacheTags: ['templates', `templates-${validCategory}`],
+      cacheTTL: 300,
+    });
 
     // Return success response
     return NextResponse.json(
@@ -94,12 +79,16 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    const duration = Date.now() - startTime;
+    const normalized = normalizeError(error, 'Templates API error');
+    reqLogger.error('Templates API error', normalized, {
+      section: 'error-handling',
+      ...(category && { category }),
+    });
     return createErrorResponse(error, {
       route: '/api/templates',
       operation: 'TemplatesAPI',
       method: 'GET',
-      logContext: category ? { category, duration } : { duration },
+      logContext: category ? { category } : {},
     });
   }
 }

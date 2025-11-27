@@ -120,10 +120,14 @@ export class DraftManager {
       localStorage.setItem(this.key, JSON.stringify(draft));
       return true;
     } catch (error) {
+      // Client-side utility - no requestId needed, but include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to save draft');
       logger.warn('DraftManager: Failed to save draft', {
-        error: normalized.message,
+        err: normalized,
+        operation: 'DraftManager.save',
+        module: 'data/drafts',
         key: this.key,
+        submission_type: data.submission_type,
       });
       return false;
     }
@@ -159,7 +163,11 @@ export class DraftManager {
 
       // Version check
       if (draft.version !== DraftManager.VERSION) {
+        // Client-side utility - no requestId needed, but include full context
         logger.info('DraftManager: Draft version mismatch, clearing', {
+          operation: 'DraftManager.loadRaw',
+          module: 'data/drafts',
+          key: this.key,
           stored: draft.version,
           current: DraftManager.VERSION,
         });
@@ -169,9 +177,12 @@ export class DraftManager {
 
       return draft;
     } catch (error) {
+      // Client-side utility - no requestId needed, but include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to load draft');
       logger.warn('DraftManager: Failed to load draft', {
-        error: normalized.message,
+        err: normalized,
+        operation: 'DraftManager.loadRaw',
+        module: 'data/drafts',
         key: this.key,
       });
       return null;
@@ -186,9 +197,12 @@ export class DraftManager {
       localStorage.removeItem(this.key);
       return true;
     } catch (error) {
+      // Client-side utility - no requestId needed, but include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to clear draft');
       logger.warn('DraftManager: Failed to clear draft', {
-        error: normalized.message,
+        err: normalized,
+        operation: 'DraftManager.clear',
+        module: 'data/drafts',
         key: this.key,
       });
       return false;
@@ -319,9 +333,13 @@ export class DraftManager {
         });
       }
     } catch (error) {
+      // Client-side utility - no requestId needed, but include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to list drafts');
-      // Pino's stdSerializers.err automatically handles error serialization
-      logger.warn('DraftManager: Failed to list drafts', { err: normalized });
+      logger.warn('DraftManager: Failed to list drafts', {
+        err: normalized,
+        operation: 'DraftManager.listAll',
+        module: 'data/drafts',
+      });
     }
 
     // Sort by updated_at (most recent first)
@@ -368,9 +386,14 @@ export class DraftManager {
         }
       }
     } catch (error) {
+      // Client-side utility - no requestId needed, but include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to clear expired drafts');
-      // Pino's stdSerializers.err automatically handles error serialization
-      logger.warn('DraftManager: Failed to clear expired drafts', { err: normalized });
+      logger.warn('DraftManager: Failed to clear expired drafts', {
+        err: normalized,
+        operation: 'DraftManager.clearExpired',
+        module: 'data/drafts',
+        cleared,
+      });
     }
 
     return cleared;
@@ -399,9 +422,14 @@ export class DraftManager {
         cleared++;
       }
     } catch (error) {
+      // Client-side utility - no requestId needed, but include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to clear all drafts');
-      // Pino's stdSerializers.err automatically handles error serialization
-      logger.warn('DraftManager: Failed to clear all drafts', { err: normalized });
+      logger.warn('DraftManager: Failed to clear all drafts', {
+        err: normalized,
+        operation: 'DraftManager.clearAll',
+        module: 'data/drafts',
+        cleared,
+      });
     }
 
     return cleared;
@@ -425,9 +453,13 @@ export class DraftManager {
         }
       }
     } catch (error) {
+      // Client-side utility - no requestId needed, but include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to calculate storage size');
-      // Pino's stdSerializers.err automatically handles error serialization
-      logger.warn('DraftManager: Failed to calculate storage size', { err: normalized });
+      logger.warn('DraftManager: Failed to calculate storage size', {
+        err: normalized,
+        operation: 'DraftManager.getStorageSize',
+        module: 'data/drafts',
+      });
     }
 
     return size;
@@ -456,7 +488,10 @@ export function createDebouncedSave(
     timeoutId = setTimeout(() => {
       draftManager.save(data);
       const loadedDraft = draftManager.load();
+      // Client-side utility - no requestId needed, but include full context
       logger.debug('DraftManager: Auto-saved draft', {
+        operation: 'createDebouncedSave',
+        module: 'data/drafts',
         ...(data.submission_type ? { submission_type: data.submission_type } : {}),
         ...(loadedDraft?.quality_score === undefined
           ? {}

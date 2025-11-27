@@ -60,7 +60,6 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
             logger.error('Failed to set auth cookies in Route Handler', normalized, {
               context: 'supabase_server_client',
               cookieCount: cookiesToSet.length,
-              errorMessage: normalized.message,
             });
           } else {
             const normalized = normalizeError(

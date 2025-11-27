@@ -16,21 +16,21 @@
  */
 export const runtime = 'nodejs';
 
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import { handleApiError } from '@heyclaude/web-runtime/utils/error-handler';
+import { generateRequestId, logger, normalizeError, handleApiError } from '@heyclaude/web-runtime/logging/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  const startTime = Date.now();
   // Generate single requestId for this API request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/api/revalidate', 'RevalidateAPI');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'RevalidateAPI',
+    route: '/api/revalidate',
+    module: 'apps/web/src/app/api/revalidate',
+  });
 
   try {
     const body = (await request.json()) as {
@@ -43,18 +43,10 @@ export async function POST(request: NextRequest) {
 
     // Verify secret from body (PostgreSQL trigger sends in payload)
     if (!secret || secret !== process.env['REVALIDATE_SECRET']) {
-      logger.warn(
-        'Revalidate webhook unauthorized',
-        undefined,
-        withDuration(
-          {
-            ...baseLogContext,
-            hasSecret: !!secret,
-            ip: request.headers.get('x-forwarded-for') ?? 'unknown',
-          },
-          startTime
-        )
-      );
+      reqLogger.warn('Revalidate webhook unauthorized', {
+        hasSecret: !!secret,
+        ip: request.headers.get('x-forwarded-for') ?? 'unknown',
+      });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -82,17 +74,9 @@ export async function POST(request: NextRequest) {
       // Validate all tags are strings
       const invalidTags = tags.filter((tag) => typeof tag !== 'string');
       if (invalidTags.length > 0) {
-        logger.warn(
-          'Revalidate webhook: invalid tags',
-          undefined,
-          withDuration(
-            {
-              ...baseLogContext,
-              invalidTags,
-            },
-            startTime
-          )
-        );
+        reqLogger.warn('Revalidate webhook: invalid tags', {
+          invalidTags,
+        });
         return NextResponse.json(
           { error: 'All tags must be strings', invalidTags },
           { status: 400 }
@@ -111,45 +95,30 @@ export async function POST(request: NextRequest) {
     // If neither category nor tags provided, return error
     const tagsArray = Array.isArray(tags) ? tags : [];
     if (!category && tagsArray.length === 0) {
-      logger.warn(
-        'Revalidate webhook invalid payload',
-        undefined,
-        withDuration(
-          {
-            ...baseLogContext,
-            hasCategory: !!category,
-            hasTags: Array.isArray(tags),
-            bodyKeys: Object.keys(body),
-          },
-          startTime
-        )
-      );
+      reqLogger.warn('Revalidate webhook invalid payload', {
+        hasCategory: !!category,
+        hasTags: Array.isArray(tags),
+        bodyKeys: Object.keys(body),
+      });
       return NextResponse.json(
         { error: 'Missing category or tags in webhook payload' },
         { status: 400 }
       );
     }
 
-    // Structured logging with revalidation targets, cache tags, and duration
-    logger.info(
-      'Revalidated successfully',
-      withDuration(
-        {
-          ...baseLogContext,
-          ...(typeof category === 'string' ? { category } : {}),
-          ...(typeof slug === 'string' ? { slug } : {}),
-          paths, // Array of revalidated paths - better for querying
-          pathCount: paths.length,
-          tags: invalidatedTags.length > 0 ? invalidatedTags : undefined, // Array support enables better log querying
-          tagCount: invalidatedTags.length,
-          revalidationTargets: {
-            paths,
-            tags: invalidatedTags,
-          },
-        },
-        startTime
-      )
-    );
+    // Structured logging with revalidation targets and cache tags
+    reqLogger.info('Revalidated successfully', {
+      ...(typeof category === 'string' ? { category } : {}),
+      ...(typeof slug === 'string' ? { slug } : {}),
+      paths, // Array of revalidated paths - better for querying
+      pathCount: paths.length,
+      tags: invalidatedTags.length > 0 ? invalidatedTags : undefined, // Array support enables better log querying
+      tagCount: invalidatedTags.length,
+      revalidationTargets: {
+        paths,
+        tags: invalidatedTags,
+      },
+    });
 
     return NextResponse.json({
       revalidated: true,
@@ -158,12 +127,14 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error: unknown) {
-    const duration = Date.now() - startTime;
+    const normalized = normalizeError(error, 'Revalidate API error');
+    reqLogger.error('Revalidate API error', normalized, {
+      section: 'error-handling',
+    });
     return handleApiError(error, {
       route: '/api/revalidate',
       operation: 'RevalidateAPI',
       method: 'POST',
-      logContext: { duration },
     });
   }
 }

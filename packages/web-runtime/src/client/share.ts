@@ -120,9 +120,9 @@ export async function shareNative(options: ShareOptions): Promise<boolean> {
     }
     const normalized = normalizeError(error, 'navigator.share failed');
     logger.warn('shareNative: navigator.share failed', {
+      err: normalized,
       platform: options.platform,
       url: options.url,
-      error: normalized.message,
     });
     // Fallback to copy link
     return await copyShareLink(options);
@@ -144,9 +144,9 @@ export async function copyShareLink(options: ShareOptions): Promise<boolean> {
   } catch (error) {
     const normalized = normalizeError(error, 'copyShareLink failed');
     logger.warn('copyShareLink failed', {
+      err: normalized,
       platform: options.platform,
       url: options.url,
-      error: normalized.message,
     });
     return false;
   }

@@ -73,7 +73,7 @@ const requireInternalSecret: Middleware<FluxStationContext> = async (
 
   if (!secret) {
     const logContext = createUtilityContext('flux-station', 'auth-config-check');
-    logError('Missing CRON_WORKER_SECRET or INTERNAL_API_KEY environment variable', logContext);
+    await logError('Missing CRON_WORKER_SECRET or INTERNAL_API_KEY environment variable', logContext);
     return jsonResponse(
       { error: 'Server configuration error', code: 'auth:config_error' },
       500,
@@ -111,7 +111,7 @@ const verifyDiscordWebhookSignatureMiddleware: Middleware<FluxStationContext> = 
   // Get Discord public key from environment
   const publicKey = Deno.env.get('DISCORD_PUBLIC_KEY');
   if (!publicKey) {
-    logError('Missing DISCORD_PUBLIC_KEY environment variable', logContext);
+    await logError('Missing DISCORD_PUBLIC_KEY environment variable', logContext);
     return jsonResponse(
       { error: 'Server configuration error', code: 'discord:config_error' },
       500,
@@ -156,7 +156,7 @@ const verifyDiscordWebhookSignatureMiddleware: Middleware<FluxStationContext> = 
     const clonedRequest = ctx.request.clone();
     rawBody = await clonedRequest.text();
   } catch (error) {
-    logError('Failed to read Discord webhook request body', logContext, error);
+    await logError('Failed to read Discord webhook request body', logContext, error);
     return badRequestResponse('Failed to read request body', discordCorsHeaders);
   }
 
@@ -231,7 +231,7 @@ serveEdgeApp<FluxStationContext>({
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, HEAD, OPTIONS',
   },
-  onNoMatch: (ctx) => {
+  onNoMatch: async (ctx) => {
     // Default route for unmatched POST requests (external webhooks)
     if (ctx.method === 'POST' || ctx.method === 'OPTIONS') {
       return chain<FluxStationContext>(rateLimit('public'))((c) =>
@@ -241,13 +241,11 @@ serveEdgeApp<FluxStationContext>({
     const logContext = createUtilityContext('flux-station', 'not-found', {
       pathname: ctx.pathname,
     });
-    return Promise.resolve(
-      errorResponse(
-        new Error(`Not Found: ${ctx.pathname}`),
-        'flux-station:not-found',
-        publicCorsHeaders,
-        logContext
-      )
+    return await errorResponse(
+      new Error(`Not Found: ${ctx.pathname}`),
+      'flux-station:not-found',
+      publicCorsHeaders,
+      logContext
     );
   },
   routes: [

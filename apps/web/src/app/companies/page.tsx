@@ -1,10 +1,3 @@
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -15,6 +8,7 @@ import {
   Star,
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, UnifiedBadge, Button ,
   Card,
   CardContent,
@@ -90,76 +84,46 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CompaniesPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, '/companies', 'CompaniesPage', {
-    limit: 50,
-    offset: 0,
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'CompaniesPage',
+    route: '/companies',
+    module: 'apps/web/src/app/companies',
   });
 
   // Section: Companies List
-  const companiesSectionStart = Date.now();
   let companiesResponse: Awaited<ReturnType<typeof getCompaniesList>> | null = null;
   try {
     companiesResponse = await getCompaniesList(50, 0);
-    logger.info(
-      'CompaniesPage: companies list loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'companies-list',
-          companiesCount: companiesResponse.companies?.length ?? 0,
-        },
-        companiesSectionStart
-      )
-    );
+    reqLogger.info('CompaniesPage: companies list loaded', {
+      section: 'companies-list',
+      companiesCount: companiesResponse.companies?.length ?? 0,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load companies list');
-    logger.error(
-      'CompaniesPage: getCompaniesList failed',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'companies-list',
-          sectionDuration_ms: Date.now() - companiesSectionStart,
-        },
-        startTime
-      )
-    );
+    reqLogger.error('CompaniesPage: getCompaniesList failed', normalized, {
+      section: 'companies-list',
+    });
     throw normalized;
   }
 
   if (!companiesResponse.companies) {
-    logger.warn(
-      'CompaniesPage: companies response is empty',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          section: 'companies-list',
-          sectionDuration_ms: Date.now() - companiesSectionStart,
-        },
-        startTime
-      )
-    );
+    reqLogger.warn('CompaniesPage: companies response is empty', {
+      section: 'companies-list',
+    });
   }
 
   const companies = companiesResponse.companies ?? [];
 
   // Final summary log
-  logger.info(
-    'CompaniesPage: page render completed',
-    withDuration(
-      {
-        ...logContext,
-        section: 'page-render',
-        companiesCount: companies.length,
-      },
-      startTime
-    )
-  );
+  reqLogger.info('CompaniesPage: page render completed', {
+    section: 'page-render',
+    companiesCount: companies.length,
+  });
 
   return (
     <div className={'min-h-screen bg-background'}>

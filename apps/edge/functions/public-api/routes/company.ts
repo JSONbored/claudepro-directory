@@ -63,7 +63,7 @@ export async function handleCompanyRoute(
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    return errorResponse(error, 'data-api:get_company_profile', CORS, {
+    return await errorResponse(error, 'data-api:get_company_profile', CORS, {
       ...logContext,
       dbQuery: {
         rpcName: 'get_company_profile',

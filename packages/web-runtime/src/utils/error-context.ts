@@ -5,7 +5,7 @@
  * across all data fetching functions and API routes.
  */
 
-import { generateRequestId } from './request-context.ts';
+import { generateRequestId } from './request-id.ts';
 import type { LogContext } from '../logger.ts';
 
 export interface ErrorContextOptions {

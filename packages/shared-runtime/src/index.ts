@@ -42,6 +42,7 @@ export * from './schemas/primitives.ts';
 export * from './schemas/env.ts';
 export * from './schemas/database.generated.ts';
 export * from './object-utils.ts';
+export * from './privacy.ts';
 // NOTE: Image manipulation is edge-function-only and should not be imported in web app
 // This export is commented out to prevent the Deno-only @imagemagick/magick-wasm package
 // from being included in the web app bundle. Edge functions can import directly from

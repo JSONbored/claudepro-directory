@@ -445,7 +445,7 @@ export async function handleContentHighlight(
       ...buildCacheHeaders('transform'),
     });
   } catch (error) {
-    logError('Content highlight failed', logContext, error);
+    await logError('Content highlight failed', logContext, error);
     // DO NOT expose internal error details to user - use generic message
     return jsonResponse({ error: 'Internal Server Error' }, 500, {
       ...buildSecurityHeaders(),
@@ -623,7 +623,7 @@ export async function handleContentProcess(
       ...buildCacheHeaders('transform'),
     });
   } catch (error) {
-    logError('Content processing failed', logContext, error);
-    return errorResponse(error, 'data-api:content-process', CORS, logContext);
+    await logError('Content processing failed', logContext, error);
+    return await errorResponse(error, 'data-api:content-process', CORS, logContext);
   }
 }

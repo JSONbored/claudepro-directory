@@ -158,7 +158,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        logError('Invalid base64 image data', logContext, error);
+        await logError('Invalid base64 image data', logContext, error);
         return badRequestResponse(`Invalid base64 image data: ${errorMessage}`, CORS);
       }
     } else {
@@ -203,7 +203,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
     const isJpeg = optimizedImage[0] === 0xff && optimizedImage[1] === 0xd8;
     
     if (!isPng && !isJpeg) {
-      logError('Optimized image format is unrecognized', logContext, new Error('Invalid image format'));
+      await logError('Optimized image format is unrecognized', logContext, new Error('Invalid image format'));
       return jsonResponse(
         {
           success: false,
@@ -232,7 +232,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
     // Validate optimized image size (bucket limit is 200KB)
     const BUCKET_SIZE_LIMIT = 200 * 1024; // 200KB
     if (optimizedImage.length > BUCKET_SIZE_LIMIT) {
-      logError('Optimized image exceeds bucket size limit', logContext, new Error(`Size: ${optimizedImage.length} bytes, limit: ${BUCKET_SIZE_LIMIT} bytes`));
+      await logError('Optimized image exceeds bucket size limit', logContext, new Error(`Size: ${optimizedImage.length} bytes, limit: ${BUCKET_SIZE_LIMIT} bytes`));
       return jsonResponse(
         {
           success: false,
@@ -278,7 +278,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
     });
 
     if (!uploadResult.success || !uploadResult.publicUrl) {
-      logError('Failed to upload optimized logo', logContext, new Error(uploadResult.error));
+      await logError('Failed to upload optimized logo', logContext, new Error(uploadResult.error));
       return jsonResponse(
         {
           success: false,
@@ -298,7 +298,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
           .remove([body.oldLogoPath]);
 
         if (deleteError) {
-          logError('Failed to delete old logo', logContext, deleteError);
+          await logError('Failed to delete old logo', logContext, deleteError);
           // Don't fail the request - old logo deletion is non-critical
         } else {
           logInfo('Old logo deleted', {
@@ -308,7 +308,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
         }
       } catch (error) {
         // Non-critical - log but don't fail
-        logError('Error deleting old logo', logContext, error);
+        await logError('Error deleting old logo', logContext, error);
       }
     }
 
@@ -323,7 +323,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
 
         if (updateError) {
           // Use dbQuery serializer for consistent database query formatting
-          logError('Failed to update company logo in database', {
+          await logError('Failed to update company logo in database', {
             ...logContext,
             dbQuery: {
               table: 'companies',
@@ -343,7 +343,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
           });
         }
       } catch (error) {
-        logError('Error updating company logo in database', logContext, error);
+        await logError('Error updating company logo in database', logContext, error);
         // Non-critical - return success with URL
       }
     }
@@ -360,7 +360,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
     traceRequestComplete(logContext);
     return jsonResponse(response, 200, CORS);
   } catch (error) {
-    logError('Logo optimization failed', logContext, error);
+    await logError('Logo optimization failed', logContext, error);
     return jsonResponse(
       {
         success: false,

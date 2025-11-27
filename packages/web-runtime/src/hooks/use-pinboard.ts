@@ -119,9 +119,9 @@ export function usePinboard(): UsePinboardReturn {
       if (!payload.slug) return;
       pulse.bookmark({ category: payload.category, slug: payload.slug, action }).catch((error) => {
         const normalized = normalizeError(error, 'usePinboard: bookmark pulse failed');
-        logger.warn('usePinboard: bookmark pulse failed', undefined, {
+        logger.warn('usePinboard: bookmark pulse failed', {
+          err: normalized,
           hook: 'usePinboard',
-          error: normalized.message,
         });
       });
     },

@@ -11,7 +11,7 @@ import {
   updateCompany,
   uploadCompanyLogoAction,
 } from '@heyclaude/web-runtime/actions';
-import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
+import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
@@ -85,7 +85,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         setMaxDimension(config['form.max_image_dimension_px']);
       })
       .catch((error) => {
-        logClientWarning('CompanyForm: failed to load form config', error);
+        logClientWarn('CompanyForm: failed to load form config', error, 'CompanyForm.loadConfig');
       });
   }, []);
 
@@ -370,9 +370,14 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 const file = e.target.files?.[0];
                 if (file) {
                   handleLogoUpload(file).catch((error) => {
-                    logger.error(
+                    logClientError(
                       'Logo upload failed',
-                      error instanceof Error ? error : new Error(String(error))
+                      error instanceof Error ? error : new Error(String(error)),
+                      'CompanyForm.handleLogoUpload',
+                      {
+                        component: 'CompanyForm',
+                        action: 'handleLogoUpload',
+                      }
                     );
                     toasts.error.fromError(error, 'Failed to upload logo');
                   });

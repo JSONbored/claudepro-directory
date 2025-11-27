@@ -339,11 +339,10 @@ export const ConfigCard = memo(
             'Invalid content type',
             'Invalid content type for bookmark'
           );
-          logger.error('Invalid content type for bookmark', undefined, {
+          logger.error('Invalid content type for bookmark', normalized, {
             component: 'ConfigCard',
             contentType: categoryValue,
             contentSlug: item.slug,
-            error: normalized.message,
           });
           toasts.error.fromError(new Error(`Invalid content type: ${categoryValue}`));
           return;
@@ -378,11 +377,10 @@ export const ConfigCard = memo(
           }
         } catch (error) {
           const normalized = normalizeError(error, 'ConfigCard: Failed to add bookmark via swipe');
-          logger.error('ConfigCard: Failed to add bookmark via swipe', undefined, {
+          logger.error('ConfigCard: Failed to add bookmark via swipe', normalized, {
             component: 'ConfigCard',
             contentType: validatedCategory,
             contentSlug: item.slug,
-            error: normalized.message,
           });
           if (error instanceof Error && error.message.includes('signed in')) {
             toasts.error.authRequired();
@@ -410,20 +408,18 @@ export const ConfigCard = memo(
                 })
                 .catch((error) => {
                   const normalized = normalizeError(error, 'Failed to track copy action');
-                  logger.error('Failed to track copy action', undefined, {
+                  logger.error('Failed to track copy action', normalized, {
                     component: 'ConfigCard',
                     context: 'config_card_quick_copy',
                     category: cardCategory,
                     slug: cardSlug,
-                    error: normalized.message,
                   });
                 });
             }
           } catch (error) {
             const normalized = normalizeError(error, 'ConfigCard: quick action copy failed');
-            logger.error('ConfigCard: quick action copy failed', undefined, {
+            logger.error('ConfigCard: quick action copy failed', normalized, {
               component: 'ConfigCard',
-              error: normalized.message,
             });
             toasts.raw.error('Copy failed', { description: 'Unable to copy to clipboard.' });
           }
@@ -459,9 +455,8 @@ export const ConfigCard = memo(
             });
           } catch (error) {
             const normalized = normalizeError(error, 'ConfigCard: failed to toggle pinboard state');
-            logger.error('ConfigCard: failed to toggle pinboard state', undefined, {
+            logger.error('ConfigCard: failed to toggle pinboard state', normalized, {
               component: 'ConfigCard',
-              error: normalized.message,
             });
             toasts.raw.error('Unable to update pinboard', {
               description: 'Please try again.',
@@ -837,9 +832,8 @@ export const ConfigCard = memo(
                     manager: 'pnpm',
                   }).catch((error) => {
                     const normalized = normalizeError(error, 'Failed to copy pnpm command');
-                    logger.error('Failed to copy pnpm command', undefined, {
+                    logger.error('Failed to copy pnpm command', normalized, {
                       component: 'ConfigCard',
-                      error: normalized.message,
                     });
                   });
                 }}
@@ -864,9 +858,8 @@ export const ConfigCard = memo(
                     }
                   ).catch((error) => {
                     const normalized = normalizeError(error, 'Failed to copy configuration');
-                    logger.error('Failed to copy configuration', undefined, {
+                    logger.error('Failed to copy configuration', normalized, {
                       component: 'ConfigCard',
-                      error: normalized.message,
                     });
                   });
                 }}
@@ -979,9 +972,8 @@ export const ConfigCard = memo(
       );
     } catch (error) {
       const normalized = normalizeError(error, 'ConfigCard: Rendering failed');
-      logger.error('ConfigCard: Rendering failed', undefined, {
+      logger.error('ConfigCard: Rendering failed', normalized, {
         component: 'ConfigCard',
-        error: normalized.message,
         hasSlug: Boolean(item.slug),
         hasCategory: Boolean(item.category),
       });

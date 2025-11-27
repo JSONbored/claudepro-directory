@@ -148,11 +148,14 @@ const getBuildTimeInvalidations = (): Record<CacheInvalidateKey, readonly string
 const BUILD_TIME_TTL_DEFAULTS = getBuildTimeTtls();
 const CACHE_INVALIDATE_DEFAULTS = getBuildTimeInvalidations();
 
-// OPTIMIZATION: Store resolved config to avoid re-computing (request-scoped memoization)
+// OPTIMIZATION: Store resolved config to avoid re-computing (module-scoped memoization)
+// NOTE: This is module/instance-scoped, not request-scoped. The config is static and doesn't change
+// per request, so module-level caching is appropriate. In serverless/edge environments, this will
+// persist across requests within the same runtime instance.
 let cachedConfig: CacheConfig | null = null;
 
 function loadCacheConfig(): CacheConfig {
-  // OPTIMIZATION: Return cached config if already loaded (request-scoped memoization)
+  // OPTIMIZATION: Return cached config if already loaded (module-scoped memoization)
   if (cachedConfig !== null) {
     return cachedConfig;
   }

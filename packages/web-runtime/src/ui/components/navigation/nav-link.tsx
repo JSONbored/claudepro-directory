@@ -91,9 +91,9 @@ function getSafeExternalUrl(url: string): string | null {
     // Log URL parsing errors for debugging
     const normalized = normalizeError(error, 'NavLink: Failed to parse external URL');
     logger.warn('NavLink: Invalid external URL', {
+      err: normalized,
       component: 'NavLink',
       url: String(url),
-      error: normalized.message,
     });
     return null;
   }

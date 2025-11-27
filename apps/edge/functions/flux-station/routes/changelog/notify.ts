@@ -178,7 +178,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
     } catch (error) {
       const errorMsg = errorToString(error);
       errors.push(`Discord: ${errorMsg}`);
-      logError('Discord webhook failed', logContext, error);
+      await logError('Discord webhook failed', logContext, error);
     }
   }
 
@@ -208,7 +208,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
   } catch (error) {
     const errorMsg = errorToString(error);
     errors.push(`Notification: ${errorMsg}`);
-    logError('Notification insert failed', logContext, error);
+    await logError('Notification insert failed', logContext, error);
   }
 
   // 3. Invalidate cache tags (non-critical, after notification insert)
@@ -348,7 +348,7 @@ async function deleteQueueMessage(msgId: bigint): Promise<void> {
     const deleteLogContext = createUtilityContext('flux-station', 'changelog-notify-delete', {
       msg_id: msgId.toString(),
     });
-    logError('Failed to delete queue message', deleteLogContext, error);
+    await logError('Failed to delete queue message', deleteLogContext, error);
     // Don't throw - message will remain in queue for retry
   }
 }
@@ -378,8 +378,8 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
     const readError = messages === null ? new Error('Failed to read queue messages') : null;
 
     if (readError) {
-      logError('Queue read error', logContext, readError);
-      return errorResponse(
+      await logError('Queue read error', logContext, readError);
+      return await errorResponse(
         new Error(`Failed to read queue: ${readError.message}`),
         'flux-station:changelog-notify-read',
         publicCorsHeaders,
@@ -416,13 +416,13 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
             msg_id: msg.msg_id.toString(),
           }
         );
-        logError('Invalid changelog release job structure', invalidLogContext);
+        await logError('Invalid changelog release job structure', invalidLogContext);
 
         // Delete invalid message to prevent infinite retries
         try {
           await pgmqDelete(CHANGELOG_NOTIFICATIONS_QUEUE, msg.msg_id);
         } catch (error) {
-          logError('Failed to delete invalid message', invalidLogContext, error);
+          await logError('Failed to delete invalid message', invalidLogContext, error);
         }
 
         results.push({
@@ -465,7 +465,7 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
         const errorLogContext = createUtilityContext('flux-station', 'changelog-notify-message', {
           msg_id: message.msg_id.toString(),
         });
-        logError('Unexpected error processing message', errorLogContext, error);
+        await logError('Unexpected error processing message', errorLogContext, error);
         results.push({
           msg_id: message.msg_id.toString(),
           status: 'failed',
@@ -485,8 +485,8 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    logError('Fatal queue processing error', logContext, error);
-    return errorResponse(
+    await logError('Fatal queue processing error', logContext, error);
+    return await errorResponse(
       error,
       'flux-station:changelog-notify-fatal',
       publicCorsHeaders,

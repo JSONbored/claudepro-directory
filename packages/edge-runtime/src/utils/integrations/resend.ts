@@ -8,7 +8,7 @@ import { RESEND_ENV } from '../../config/email-config.ts';
 import { Constants, type Database, type Database as DatabaseGenerated } from '@heyclaude/database-types';
 
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
-import { createUtilityContext, logError, logInfo, logWarn } from '@heyclaude/shared-runtime';
+import { createUtilityContext, logError, logInfo, logWarn, normalizeError } from '@heyclaude/shared-runtime';
 import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
 import { runWithRetry } from './http-client.ts';
 import { logger } from '../logger.ts';
@@ -259,12 +259,12 @@ async function assignTopicsToContact(
         attempts: 3,
         baseDelayMs: 500,
         onRetry(attempt, error, delay) {
+          const normalized = normalizeError(error, '[resend] topic assignment throttled');
           logWarn('[resend] topic assignment throttled', {
             ...logContext,
             attempt,
             delay,
-            error: error.message,
-          });
+          }, normalized);
         },
       }
     );
@@ -275,7 +275,7 @@ async function assignTopicsToContact(
     });
   } catch (error) {
     if (error instanceof ResendApiError) {
-      logError(
+      await logError(
         'Failed to assign topics',
         {
           ...logContext,
@@ -285,7 +285,7 @@ async function assignTopicsToContact(
         error
       );
     } else {
-      logError('Failed to assign topics', logContext, error);
+      await logError('Failed to assign topics', logContext, error);
     }
   }
 }
@@ -453,12 +453,12 @@ export async function syncContactSegment(
           attempts: 3,
           baseDelayMs: 500,
           onRetry(attempt, error, delay) {
-            logWarn('[resend] segment list throttled', {
-              ...logContext,
-              attempt,
-              delay,
-              error: error.message,
-            });
+                const normalized = normalizeError(error, '[resend] segment list throttled');
+                logWarn('[resend] segment list throttled', {
+                  ...logContext,
+                  attempt,
+                  delay,
+                }, normalized);
           },
         }
       );
@@ -481,12 +481,12 @@ export async function syncContactSegment(
               attempts: 3,
               baseDelayMs: 500,
               onRetry(attempt, error, delay) {
+                const normalized = normalizeError(error, '[resend] segment removal throttled');
                 logWarn('[resend] segment removal throttled', {
                   ...logContext,
                   attempt,
                   delay,
-                  error: error.message,
-                });
+                }, normalized);
               },
             }
           );
@@ -513,19 +513,19 @@ export async function syncContactSegment(
           attempts: 3,
           baseDelayMs: 500,
           onRetry(attempt, error, delay) {
+            const normalized = normalizeError(error, '[resend] segment add throttled');
             logWarn('[resend] segment add throttled', {
               ...logContext,
               attempt,
               delay,
-              error: error.message,
-            });
+            }, normalized);
           },
         }
       );
     }
   } catch (error) {
     if (error instanceof ResendApiError) {
-      logError(
+      await logError(
         'Segment sync failed',
         {
           ...logContext,
@@ -535,7 +535,7 @@ export async function syncContactSegment(
         error
       );
     } else {
-      logError('Segment sync failed', logContext, error);
+      await logError('Segment sync failed', logContext, error);
     }
   }
 }

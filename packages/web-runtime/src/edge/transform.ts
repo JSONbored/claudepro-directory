@@ -87,9 +87,9 @@ export async function highlightCodeEdge(
 
     return data.html;
   } catch (error) {
-    const normalized = error instanceof Error ? error : new Error(String(error));
-    logger.warn('Edge highlighting failed, using fallback', undefined, {
-      error: normalized.message,
+    const normalized = normalizeError(error, 'Edge highlighting failed, using fallback');
+    logger.warn('Edge highlighting failed, using fallback', {
+      err: normalized,
       language,
       codePreview: code.slice(0, 80),
     });
@@ -152,7 +152,7 @@ export async function processContentEdge(
   if (data.error) {
     const normalized = normalizeError(new Error(data.error), 'Process content edge error');
     // Pino's stdSerializers.err automatically handles error serialization
-    logger.warn('processContentEdge fallback', undefined, { err: normalized });
+    logger.warn('processContentEdge fallback', { err: normalized });
   }
   return data;
 }

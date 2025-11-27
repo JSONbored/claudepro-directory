@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 import { getEnvVar } from '@heyclaude/shared-runtime';
+import { normalizeError } from '../../errors.ts';
 
 export async function onContactSubmission(
   result: { submission_id: string },
@@ -43,9 +44,10 @@ export async function onContactSubmission(
 
   if (!(response.ok && emailResult?.success)) {
     const errorMessage = emailResult?.error || response.statusText || 'Email sending failed';
+    const normalized = normalizeError(new Error(errorMessage), 'submitContactForm email failed');
     logger.warn('submitContactForm email failed (submission saved)', {
+      err: normalized,
       status: response.status,
-      error: errorMessage,
       submissionId: result.submission_id,
     });
   }

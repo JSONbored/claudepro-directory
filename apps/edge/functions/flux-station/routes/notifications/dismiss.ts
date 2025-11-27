@@ -125,6 +125,7 @@ export async function handleDismissNotifications(req: Request): Promise<Response
       notificationCorsHeaders
     );
   } catch (error) {
-    return errorResponse(error, 'flux-station:dismiss-notifications', notificationCorsHeaders, logContext);
+    traceRequestComplete(logContext);
+    return await errorResponse(error, 'flux-station:dismiss-notifications', notificationCorsHeaders, logContext);
   }
 }

@@ -66,7 +66,7 @@ export async function handleProtectedResourceMetadata(_c: Context): Promise<Resp
       'Access-Control-Allow-Headers': 'Content-Type',
     });
   } catch (error) {
-    logError('Failed to generate protected resource metadata', logContext, error);
+    await logError('Failed to generate protected resource metadata', logContext, error);
     return jsonResponse({ error: 'Internal server error' }, 500, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -141,7 +141,7 @@ export async function handleAuthorizationServerMetadata(_c: Context): Promise<Re
       'Access-Control-Allow-Headers': 'Content-Type',
     });
   } catch (error) {
-    logError('Failed to generate authorization server metadata', logContext, error);
+    await logError('Failed to generate authorization server metadata', logContext, error);
     return jsonResponse({ error: 'Internal server error' }, 500, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',

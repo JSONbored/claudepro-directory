@@ -1,19 +1,12 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
   Card,
   CardContent,
@@ -185,26 +178,23 @@ function getSafeContentUrl(
 }
 
 export default async function SubmissionsPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    '/account/submissions',
-    'SubmissionsPage'
-  );
+    operation: 'SubmissionsPage',
+    route: '/account/submissions',
+    module: 'apps/web/src/app/account/submissions',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'SubmissionsPage' });
 
   if (!user) {
-    logger.warn('SubmissionsPage: unauthenticated access attempt', undefined, {
-      ...withDuration(baseLogContext, startTime),
-      requestId,
-      operation: 'SubmissionsPage',
+    reqLogger.warn('SubmissionsPage: unauthenticated access attempt', {
       section: 'authentication',
-      sectionDuration_ms: Date.now() - authSectionStart,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -224,11 +214,13 @@ export default async function SubmissionsPage() {
     );
   }
 
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
 
   // Section: Submissions Data Fetch
-  const submissionsSectionStart = Date.now();
   let submissions: NonNullable<
     Database['public']['Functions']['get_user_dashboard']['Returns']['submissions']
   > = [];
@@ -238,27 +230,19 @@ export default async function SubmissionsPage() {
     if (data?.submissions) {
       submissions = data.submissions;
     } else {
-      logger.error(
+      userLogger.error(
         'SubmissionsPage: getUserDashboard returned null',
         new Error('getUserDashboard returned null'),
         {
-          ...withDuration(logContext, startTime),
-          requestId,
-          operation: 'SubmissionsPage',
           section: 'submissions-data-fetch',
-          sectionDuration_ms: Date.now() - submissionsSectionStart,
         }
       );
       hasError = true;
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submissions from dashboard');
-    logger.error('SubmissionsPage: getUserDashboard threw', normalized, {
-      ...withDuration(logContext, startTime),
-      requestId,
-      operation: 'SubmissionsPage',
+    userLogger.error('SubmissionsPage: getUserDashboard threw', normalized, {
       section: 'submissions-data-fetch',
-      sectionDuration_ms: Date.now() - submissionsSectionStart,
     });
     hasError = true;
   }
@@ -366,8 +350,7 @@ export default async function SubmissionsPage() {
   // Log any submissions with missing IDs for data integrity monitoring
   for (const [index, sub] of submissions.entries()) {
     if (!sub.id) {
-      logger.warn('SubmissionsPage: submission missing ID', undefined, {
-        ...logContext,
+      userLogger.warn('SubmissionsPage: submission missing ID', {
         index: index,
       });
     }

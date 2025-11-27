@@ -7,7 +7,7 @@ import { revalidateTag } from 'next/cache';
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { getCacheInvalidateTags } from '../cache-config.ts';
 import { logger, normalizeError } from '../index.ts';
-import { generateRequestId } from '../utils/request-context.ts';
+import { generateRequestId } from '../utils/request-id.ts';
 
 export type ActiveNotificationRecord = Database['public']['Functions']['get_active_notifications']['Returns'][number];
 
@@ -25,15 +25,23 @@ export function getNotificationCacheTags(userId: string): string[] {
 }
 
 export function revalidateNotificationCache(userId: string): void {
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'revalidateNotificationCache',
+    module: 'data/notifications',
+  });
+
   const tags = getNotificationCacheTags(userId);
   for (const tag of tags) {
     try {
       revalidateTag(tag, 'default');
     } catch (error) {
-      logger.error('Failed to revalidate notification cache tag', normalizeError(error), {
-        requestId: generateRequestId(),
-        operation: 'revalidateNotificationCache',
+      // Log error with normalized error object
+      reqLogger.error('Failed to revalidate notification cache tag', normalizeError(error), {
         tag,
+        userId,
       });
     }
   }
@@ -48,15 +56,35 @@ export async function getActiveNotifications({
   userId,
   dismissedIds = [],
 }: NotificationFetchParameters): Promise<ActiveNotificationRecord[]> {
-  return fetchCached(
-    (client) => new MiscService(client).getActiveNotifications({ p_dismissed_ids: dismissedIds }),
-    {
-      keyParts: ['notifications', userId, dismissedIds.join('|') || 'none'],
-      tags: [DEFAULT_NOTIFICATION_TAG, `user-${userId}`],
-      ttlKey: TTL_KEY,
-      useAuth: true,
-      fallback: [],
-      logMeta: { userId, dismissedCount: dismissedIds.length },
-    }
-  );
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getActiveNotifications',
+    module: 'data/notifications',
+  });
+
+  try {
+    return await fetchCached(
+      (client) => new MiscService(client).getActiveNotifications({ p_dismissed_ids: dismissedIds }),
+      {
+        keyParts: ['notifications', userId, dismissedIds.join('|') || 'none'],
+        tags: [DEFAULT_NOTIFICATION_TAG, `user-${userId}`],
+        ttlKey: TTL_KEY,
+        useAuth: true,
+        fallback: [],
+        logMeta: { userId, dismissedCount: dismissedIds.length },
+      }
+    );
+  } catch (error) {
+    // Log error if fetchCached fails unexpectedly (e.g., cache system error)
+    // Note: fetchCached handles service call errors internally and returns fallback
+    const normalized = normalizeError(error, 'getActiveNotifications failed');
+    reqLogger.error('getActiveNotifications: unexpected error', normalized, {
+      userId,
+      dismissedCount: dismissedIds.length,
+    });
+    // Return fallback on unexpected errors
+    return [];
+  }
 }

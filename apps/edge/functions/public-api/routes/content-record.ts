@@ -112,7 +112,7 @@ async function handleJsonFormat(
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    return errorResponse(error, 'data-api:get_api_content_full', CORS_JSON, {
+    return await errorResponse(error, 'data-api:get_api_content_full', CORS_JSON, {
       ...logContext,
       dbQuery: {
         rpcName: 'get_api_content_full',
@@ -161,7 +161,7 @@ async function handleMarkdownFormat(
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    return errorResponse(error, 'data-api:generate_markdown_export', CORS_MARKDOWN, {
+    return await errorResponse(error, 'data-api:generate_markdown_export', CORS_MARKDOWN, {
       ...logContext,
       dbQuery: {
         rpcName: 'generate_markdown_export',
@@ -275,7 +275,7 @@ async function handleItemLlmsTxt(
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    return errorResponse(error, 'data-api:generate_item_llms_txt', CORS_JSON, {
+    return await errorResponse(error, 'data-api:generate_item_llms_txt', CORS_JSON, {
       ...logContext,
       dbQuery: {
         rpcName: 'generate_item_llms_txt',
@@ -320,7 +320,7 @@ async function handleStorageFormat(
 
     if (error) {
       // Use dbQuery serializer for consistent database query formatting
-      return errorResponse(error, 'data-api:get_skill_storage_path', CORS_JSON, {
+      return await errorResponse(error, 'data-api:get_skill_storage_path', CORS_JSON, {
         ...logContext,
         dbQuery: {
           rpcName: 'get_skill_storage_path',
@@ -371,7 +371,7 @@ async function handleStorageFormat(
 
     if (error) {
       // Use dbQuery serializer for consistent database query formatting
-      return errorResponse(error, 'data-api:get_mcpb_storage_path', CORS_JSON, {
+      return await errorResponse(error, 'data-api:get_mcpb_storage_path', CORS_JSON, {
         ...logContext,
         dbQuery: {
           rpcName: 'get_mcpb_storage_path',

@@ -7,7 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
 import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
@@ -141,8 +141,10 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
     try {
       hasSeenToast = sessionStorage.getItem(NEWSLETTER_OPT_IN_SEEN_FLAG) === 'true';
     } catch (error) {
-      logger.warn(
+      logClientWarn(
         'LayoutContent: unable to read newsletter toast flag from sessionStorage',
+        error,
+        'LayoutContent.readToastFlag',
         buildStorageErrorContext(error)
       );
     }
@@ -158,8 +160,10 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
     try {
       sessionStorage.setItem(NEWSLETTER_OPT_IN_SEEN_FLAG, 'true');
     } catch (error) {
-      logger.warn(
+      logClientWarn(
         'LayoutContent: unable to set newsletter toast flag',
+        error,
+        'LayoutContent.setToastFlag',
         buildStorageErrorContext(error)
       );
     }
@@ -175,8 +179,7 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
     }
 
     clearNewsletterOptInCookie().catch((error) => {
-      const normalized = normalizeError(error, 'Failed to clear newsletter opt-in cookie');
-      logger.error('LayoutContent: failed to clear newsletter opt-in cookie', normalized, {
+      logClientError('LayoutContent: failed to clear newsletter opt-in cookie', error, 'LayoutContent.clearCookie', {
         component: 'LayoutContent',
         pathname,
         cookieName: NEWSLETTER_OPT_IN_COOKIE,

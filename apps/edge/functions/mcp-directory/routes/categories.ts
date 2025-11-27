@@ -19,7 +19,7 @@ export async function handleListCategories(
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('RPC call failed in listCategories', {
+    await logError('RPC call failed in listCategories', {
       dbQuery: {
         rpcName: 'get_category_configs_with_features',
       },
@@ -36,7 +36,7 @@ export async function handleListCategories(
   
   if (facetsError) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('RPC call failed in listCategories (get_search_facets)', {
+    await logError('RPC call failed in listCategories (get_search_facets)', {
       dbQuery: {
         rpcName: 'get_search_facets',
       },

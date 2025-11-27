@@ -123,7 +123,7 @@ async function checkQueueMetrics(queueName: string): Promise<number> {
     const logContext = createUtilityContext('flux-station', 'queue-processor-metrics', {
       queue_name: queueName,
     });
-    logError(`Failed to check metrics for queue '${queueName}'`, logContext, error);
+    await logError(`Failed to check metrics for queue '${queueName}'`, logContext, error);
     return 0;
   }
 }
@@ -248,7 +248,7 @@ async function processExternalQueue(
         status: response.status,
       });
       const error = new Error(errorMessage || `HTTP ${response.status} ${response.statusText}`);
-      logError('External queue processing failed', logContext, error);
+      await logError('External queue processing failed', logContext, error);
       
       return {
         queue: config.name,
@@ -366,7 +366,7 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
           processed: result.processed,
         });
       } else {
-        logError(
+        await logError(
           `Queue '${config.name}' processing failed`,
           queueLogContext,
           new Error(result.error)
@@ -379,7 +379,7 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
         queue_name: config.name,
         queue_length: queueLength,
       });
-      logError(`Unexpected error processing queue '${config.name}'`, errorLogContext, error);
+      await logError(`Unexpected error processing queue '${config.name}'`, errorLogContext, error);
       result = {
         queue: config.name,
         success: false,

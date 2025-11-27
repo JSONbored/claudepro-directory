@@ -11,6 +11,11 @@
  * - Error serialization (via stdSerializers.err)
  * - Sensitive data redaction (via redact option in config)
  * 
+ * The logger wrapper provides a message-first API (consistent with web-runtime and edge-runtime):
+ * - logger.info(message, context?)
+ * - logger.error(message, error?, context?)
+ * - logger.warn(message, context?)
+ * 
  * @module data-layer/utils/rpc-error-logging
  */
 
@@ -19,7 +24,120 @@ import { createPinoConfig } from '@heyclaude/shared-runtime/logger/config.ts';
 
 // Create Pino logger instance with centralized configuration
 // Pino automatically handles error serialization and redaction
-export const logger = pino(createPinoConfig({ service: 'data-layer' }));
+const pinoLogger = pino(createPinoConfig({ service: 'data-layer' }));
+
+/**
+ * Logger wrapper with message-first API (consistent with web-runtime and edge-runtime)
+ * This ensures all data-layer utilities use the same logger API pattern
+ */
+export const logger = {
+  info: (message: string, context?: Record<string, unknown>) => {
+    pinoLogger.info(context || {}, message);
+  },
+  warn: (message: string, context?: Record<string, unknown>) => {
+    pinoLogger.warn(context || {}, message);
+  },
+  error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
+    const logData: Record<string, unknown> = { ...(context || {}) };
+    if (error) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      logData['err'] = errorObj;
+    }
+    pinoLogger.error(logData, message);
+  },
+  debug: (message: string, context?: Record<string, unknown>) => {
+    pinoLogger.debug(context || {}, message);
+  },
+  trace: (message: string, context?: Record<string, unknown>) => {
+    pinoLogger.trace(context || {}, message);
+  },
+  fatal: (message: string, error?: unknown, context?: Record<string, unknown>) => {
+    const logData: Record<string, unknown> = { ...(context || {}) };
+    if (error) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      logData['err'] = errorObj;
+    }
+    pinoLogger.fatal(logData, message);
+  },
+  /**
+   * Get current logger bindings (context that will be included in all logs)
+   */
+  bindings: (): Record<string, unknown> => {
+    return pinoLogger.bindings();
+  },
+  /**
+   * Update logger bindings dynamically (adds to existing bindings)
+   */
+  setBindings: (bindings: Record<string, unknown>): void => {
+    pinoLogger.setBindings(bindings);
+  },
+  /**
+   * Create a child logger with request-scoped context
+   * Use this instead of setBindings() to avoid race conditions in concurrent environments
+   */
+  child: (bindings: Record<string, unknown>) => {
+    const childPino = pinoLogger.child(bindings);
+    // Return a wrapped child logger with message-first API
+    const createChildLogger = (pinoInstance: pino.Logger) => ({
+      info: (message: string, context?: Record<string, unknown>) => {
+        pinoInstance.info(context || {}, message);
+      },
+      warn: (message: string, context?: Record<string, unknown>) => {
+        pinoInstance.warn(context || {}, message);
+      },
+      error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
+        const logData: Record<string, unknown> = { ...(context || {}) };
+        if (error) {
+          const errorObj = error instanceof Error ? error : new Error(String(error));
+          logData['err'] = errorObj;
+        }
+        pinoInstance.error(logData, message);
+      },
+      debug: (message: string, context?: Record<string, unknown>) => {
+        pinoInstance.debug(context || {}, message);
+      },
+      trace: (message: string, context?: Record<string, unknown>) => {
+        pinoInstance.trace(context || {}, message);
+      },
+      fatal: (message: string, error?: unknown, context?: Record<string, unknown>) => {
+        const logData: Record<string, unknown> = { ...(context || {}) };
+        if (error) {
+          const errorObj = error instanceof Error ? error : new Error(String(error));
+          logData['err'] = errorObj;
+        }
+        pinoInstance.fatal(logData, message);
+      },
+      bindings: (): Record<string, unknown> => {
+        return pinoInstance.bindings();
+      },
+      setBindings: (newBindings: Record<string, unknown>): void => {
+        pinoInstance.setBindings(newBindings);
+      },
+      child: (childBindings: Record<string, unknown>) => {
+        return createChildLogger(pinoInstance.child(childBindings));
+      },
+      flush: (callback?: (err?: Error) => void): void => {
+        pinoInstance.flush(callback);
+      },
+      isLevelEnabled: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'): boolean => {
+        return pinoInstance.isLevelEnabled(level);
+      },
+    });
+    return createChildLogger(childPino);
+  },
+  /**
+   * Flush buffered logs synchronously
+   */
+  flush: (callback?: (err?: Error) => void): void => {
+    pinoLogger.flush(callback);
+  },
+  /**
+   * Check if a log level is enabled
+   */
+  isLevelEnabled: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'): boolean => {
+    return pinoLogger.isLevelEnabled(level);
+  },
+};
 
 /**
  * Context for RPC error logging
@@ -78,7 +196,7 @@ export async function withRpcErrorLogging<T>(
         // Note: requestId, operation, userId are automatically injected via mixin from logger.bindings()
       };
       
-      logger.info(logContext, 'Critical RPC operation completed');
+      logger.info('Critical RPC operation completed', logContext);
     }
     
     return result;
@@ -94,10 +212,9 @@ export async function withRpcErrorLogging<T>(
     };
     
     // Pino's stdSerializers.err automatically handles error serialization
-    // Pass error as 'err' key - Pino will serialize it properly
+    // Pass error as second parameter - wrapper will serialize it properly
     // Mixin automatically injects requestId, operation, userId from logger.bindings()
-    const errorObj = error instanceof Error ? error : new Error(String(error));
-    logger.error({ ...logContext, err: errorObj }, 'RPC call failed');
+    logger.error('RPC call failed', error, logContext);
     
     throw error;
   }
@@ -136,8 +253,7 @@ export function logRpcError(error: unknown, context: RpcErrorLogContext): void {
   };
   
   // Pino's stdSerializers.err automatically handles error serialization
-  // Pass error as 'err' key - Pino will serialize it properly
+  // Pass error as second parameter - wrapper will serialize it properly
   // Mixin automatically injects requestId, operation, userId from logger.bindings()
-  const errorObj = error instanceof Error ? error : new Error(String(error));
-  logger.error({ ...logContext, err: errorObj }, 'RPC call failed');
+  logger.error('RPC call failed', error, logContext);
 }

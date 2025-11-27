@@ -1,17 +1,11 @@
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserBookmarksForCollections,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -31,74 +25,49 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NewCollectionPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    '/account/library/new',
-    'NewCollectionPage'
-  );
+    operation: 'NewCollectionPage',
+    route: '/account/library/new',
+    module: 'apps/web/src/app/account/library/new',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'NewCollectionPage' });
 
   if (!user) {
-    logger.warn(
-      'NewCollectionPage: unauthenticated access attempt',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'authentication',
-          timestamp: new Date().toISOString(),
-        },
-        authSectionStart
-      )
-    );
+    reqLogger.warn('NewCollectionPage: unauthenticated access attempt', {
+      section: 'authentication',
+      timestamp: new Date().toISOString(),
+    });
     redirect('/login');
   }
 
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
-  logger.info(
-    'NewCollectionPage: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+
+  userLogger.info('NewCollectionPage: authentication successful', {
+    section: 'authentication',
+  });
 
   // Section: Bookmarks Data Fetch
-  const bookmarksSectionStart = Date.now();
   const bookmarks = await getUserBookmarksForCollections(user.id);
-  logger.info(
-    'NewCollectionPage: bookmarks data loaded',
-    withDuration(
-      {
-        ...logContext,
-        section: 'bookmarks-data-fetch',
-        bookmarksCount: bookmarks.length,
-      },
-      bookmarksSectionStart
-    )
-  );
+  userLogger.info('NewCollectionPage: bookmarks data loaded', {
+    section: 'bookmarks-data-fetch',
+    bookmarksCount: bookmarks.length,
+  });
 
   // Final summary log
-  logger.info(
-    'NewCollectionPage: page render completed',
-    withDuration(
-      {
-        ...logContext,
-        section: 'page-render',
-      },
-      startTime
-    )
-  );
+  userLogger.info('NewCollectionPage: page render completed', {
+    section: 'page-render',
+  });
 
   return (
     <div className="space-y-6">

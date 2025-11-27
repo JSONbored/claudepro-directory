@@ -4,7 +4,7 @@
  */
 
 import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
-import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude/web-runtime/core';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -28,16 +28,17 @@ export async function GET(
   const { searchParams, origin } = new URL(request.url);
   const next = validateNextParameter(searchParams.get('next'), '/account/connected-accounts');
 
-  const baseLogContext = createWebAppContextWithId(
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    `/auth/link/${rawProvider}`,
-    'OAuthLink'
-  );
+    operation: 'OAuthLink',
+    route: `/auth/link/${rawProvider}`,
+    module: 'app/(auth)/auth/link/[provider]',
+  });
 
   // Validate provider
   if (!isValidProvider(rawProvider)) {
-    logger.warn('OAuth link: invalid provider', undefined, {
-      ...baseLogContext,
+    reqLogger.warn('OAuth link: invalid provider', {
       provider: rawProvider,
     });
     return NextResponse.redirect(`${origin}/account/connected-accounts?error=invalid_provider`);
@@ -50,8 +51,7 @@ export async function GET(
   });
 
   if (!(authResult.isAuthenticated && authResult.user)) {
-    logger.warn('OAuth link: user not authenticated', undefined, {
-      ...baseLogContext,
+    reqLogger.warn('OAuth link: user not authenticated', {
       provider: rawProvider,
     });
     // Redirect to login with return URL, preserving the 'next' parameter

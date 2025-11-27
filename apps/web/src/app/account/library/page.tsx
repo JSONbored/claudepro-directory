@@ -5,14 +5,6 @@
 
 import { Constants, type Database } from '@heyclaude/database-types';
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserLibrary,
@@ -25,6 +17,7 @@ import {
   Layers,
   Plus,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
   Card,
   CardContent,
@@ -47,28 +40,24 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LibraryPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/account/library', 'LibraryPage');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'LibraryPage',
+    route: '/account/library',
+    module: 'apps/web/src/app/account/library',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });
 
   if (!user) {
-    logger.warn(
-      'LibraryPage: unauthenticated access attempt detected',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'authentication',
-          timestamp: new Date().toISOString(),
-        },
-        authSectionStart
-      )
-    );
+    reqLogger.warn('LibraryPage: unauthenticated access attempt detected', {
+      section: 'authentication',
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -86,65 +75,35 @@ export default async function LibraryPage() {
     );
   }
 
-  // Hash user ID for privacy-compliant logging (GDPR/CCPA)
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
-  logger.info(
-    'LibraryPage: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+
+  userLogger.info('LibraryPage: authentication successful', {
+    section: 'authentication',
+  });
 
   // Section: Library Data Fetch
-  const librarySectionStart = Date.now();
   let data: Database['public']['Functions']['get_user_library']['Returns'] | null = null;
   try {
     data = await getUserLibrary(user.id);
     if (data === null) {
-      logger.warn(
-        'LibraryPage: getUserLibrary returned null',
-        undefined,
-        withDuration(
-          {
-            ...logContext,
-            section: 'library-data-fetch',
-            sectionDuration_ms: Date.now() - librarySectionStart,
-          },
-          startTime
-        )
-      );
+      userLogger.warn('LibraryPage: getUserLibrary returned null', {
+        section: 'library-data-fetch',
+      });
     } else {
-      logger.info(
-        'LibraryPage: library data loaded',
-        withDuration(
-          {
-            ...logContext,
-            section: 'library-data-fetch',
-            hasData: !!data,
-          },
-          librarySectionStart
-        )
-      );
+      userLogger.info('LibraryPage: library data loaded', {
+        section: 'library-data-fetch',
+        hasData: !!data,
+      });
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user library');
-    logger.error(
-      'LibraryPage: getUserLibrary threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'library-data-fetch',
-          sectionDuration_ms: Date.now() - librarySectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.error('LibraryPage: getUserLibrary threw', normalized, {
+      section: 'library-data-fetch',
+    });
   }
 
   if (!data) {
@@ -179,31 +138,17 @@ export default async function LibraryPage() {
   const bookmarkCount = stats.bookmark_count ?? 0;
   const collectionCount = stats.collection_count ?? 0;
   if (!(bookmarks.length > 0 || collections.length > 0)) {
-    logger.info(
-      'LibraryPage: library returned no bookmarks or collections',
-      withDuration(
-        {
-          ...logContext,
-          section: 'library-data-fetch',
-        },
-        librarySectionStart
-      )
-    );
+    userLogger.info('LibraryPage: library returned no bookmarks or collections', {
+      section: 'library-data-fetch',
+    });
   }
 
   // Final summary log
-  logger.info(
-    'LibraryPage: page render completed',
-    withDuration(
-      {
-        ...logContext,
-        section: 'page-render',
-        bookmarksCount: bookmarks.length,
-        collectionsCount: collections.length,
-      },
-      startTime
-    )
-  );
+  userLogger.info('LibraryPage: page render completed', {
+    section: 'page-render',
+    bookmarksCount: bookmarks.length,
+    collectionsCount: collections.length,
+  });
 
   return (
     <div className="space-y-6">

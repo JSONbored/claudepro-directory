@@ -149,7 +149,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          logError('Invalid base64 image data', logContext, error);
+          await logError('Invalid base64 image data', logContext, error);
           return jsonResponse(
             {
               success: false,
@@ -204,7 +204,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          logError('Invalid base64 image data', logContext, error);
+          await logError('Invalid base64 image data', logContext, error);
           return jsonResponse(
             {
               success: false,
@@ -248,7 +248,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
       } else {
         // Invalid object type
         const actualType = typeof body.imageData;
-        logError('Invalid imageData type', logContext, new Error(`Expected Uint8Array, ArrayBuffer, or TypedArray, got ${actualType}`));
+        await logError('Invalid imageData type', logContext, new Error(`Expected Uint8Array, ArrayBuffer, or TypedArray, got ${actualType}`));
         return jsonResponse(
           {
             success: false,
@@ -261,7 +261,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
     } else {
       // Invalid type (string, null, undefined, or other primitive)
       const actualType = body.imageData === null ? 'null' : body.imageData === undefined ? 'undefined' : typeof body.imageData;
-      logError('Invalid imageData type', logContext, new Error(`Expected Uint8Array, ArrayBuffer, or TypedArray, got ${actualType}`));
+      await logError('Invalid imageData type', logContext, new Error(`Expected Uint8Array, ArrayBuffer, or TypedArray, got ${actualType}`));
       return jsonResponse(
         {
           success: false,
@@ -323,7 +323,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
     const isJpeg = optimizedImage[0] === 0xff && optimizedImage[1] === 0xd8;
     
     if (!isPng && !isJpeg) {
-      logError('Optimized image format is unrecognized', logContext, new Error('Invalid image format'));
+      await logError('Optimized image format is unrecognized', logContext, new Error('Invalid image format'));
       return jsonResponse(
         {
           success: false,
@@ -351,7 +351,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
 
     // Validate optimized image size (bucket limit is 200KB)
     if (optimizedImage.length > BUCKET_SIZE_LIMIT) {
-      logError('Optimized image exceeds bucket size limit', logContext, new Error(`Size: ${optimizedImage.length} bytes, limit: ${BUCKET_SIZE_LIMIT} bytes`));
+      await logError('Optimized image exceeds bucket size limit', logContext, new Error(`Size: ${optimizedImage.length} bytes, limit: ${BUCKET_SIZE_LIMIT} bytes`));
       return jsonResponse(
         {
           success: false,
@@ -390,7 +390,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
     });
 
     if (!uploadResult.success || !uploadResult.publicUrl) {
-      logError('Failed to upload optimized thumbnail', logContext, new Error(uploadResult.error));
+      await logError('Failed to upload optimized thumbnail', logContext, new Error(uploadResult.error));
       return jsonResponse(
         {
           success: false,
@@ -410,7 +410,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
           .remove([body.oldThumbnailPath]);
 
         if (deleteError) {
-          logError('Failed to delete old thumbnail', logContext, deleteError);
+          await logError('Failed to delete old thumbnail', logContext, deleteError);
           // Don't fail the request - old thumbnail deletion is non-critical
         } else {
           logInfo('Old thumbnail deleted', {
@@ -420,7 +420,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
         }
       } catch (error) {
         // Non-critical - log but don't fail
-        logError('Error deleting old thumbnail', logContext, error);
+        await logError('Error deleting old thumbnail', logContext, error);
       }
     }
 
@@ -439,7 +439,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
 
           if (updateError) {
             // Use dbQuery serializer for consistent database query formatting
-            logError('Failed to update content thumbnail in database', {
+            await logError('Failed to update content thumbnail in database', {
               ...logContext,
               dbQuery: {
                 table: 'content',
@@ -466,7 +466,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
 
           if (updateError) {
             // Use dbQuery serializer for consistent database query formatting
-            logError('Failed to update content thumbnail in database', {
+            await logError('Failed to update content thumbnail in database', {
               ...logContext,
               dbQuery: {
                 table: 'content',
@@ -487,7 +487,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
           }
         }
       } catch (error) {
-        logError('Error updating content thumbnail in database', logContext, error);
+        await logError('Error updating content thumbnail in database', logContext, error);
         dbUpdateWarning = 'Thumbnail uploaded but database update failed';
       }
     }
@@ -505,7 +505,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
     traceRequestComplete(logContext);
     return jsonResponse(response, 200, CORS);
   } catch (error) {
-    logError('Thumbnail generation failed', logContext, error);
+    await logError('Thumbnail generation failed', logContext, error);
     return jsonResponse(
       {
         success: false,

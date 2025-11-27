@@ -475,7 +475,10 @@ export async function handleContentNotificationDirect(
       });
     } catch (error) {
       // Non-critical - log but don't fail the webhook
-      logError('Failed to enqueue card generation', updatedContext, error);
+      // Fire-and-forget: Don't await to avoid blocking webhook response
+      logError('Failed to enqueue card generation', updatedContext, error).catch(() => {
+        // Swallow errors from logging itself - best effort
+      });
     }
   } else {
     logInfo('Skipping card generation - content has no title', {
@@ -537,14 +540,14 @@ export async function handleDiscordNotification(
         );
     }
   } catch (error) {
-    return errorResponse(error, `discord-notification:${notificationType}`, discordCorsHeaders);
+    return await errorResponse(error, `discord-notification:${notificationType}`, discordCorsHeaders);
   }
 }
 
 async function handleJobNotification(req: Request): Promise<Response> {
   const webhookUrl = validateWebhookUrl(edgeEnv.discord.jobs, 'DISCORD_WEBHOOK_JOBS');
   if (webhookUrl instanceof Response) {
-    return errorResponse(
+    return await errorResponse(
       new Error('Discord webhook not configured'),
       'handleJobNotification',
       discordCorsHeaders
@@ -696,7 +699,7 @@ async function updateJobDiscordMessage(
 async function handleSubmissionNotification(req: Request): Promise<Response> {
   const webhookUrl = validateWebhookUrl(edgeEnv.discord.defaultWebhook, 'DISCORD_WEBHOOK_URL');
   if (webhookUrl instanceof Response) {
-    return errorResponse(
+    return await errorResponse(
       new Error('Discord webhook not configured'),
       'handleSubmissionNotification',
       discordCorsHeaders
@@ -751,7 +754,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
     'DISCORD_ANNOUNCEMENTS_WEBHOOK_URL'
   );
   if (webhookUrl instanceof Response) {
-    return errorResponse(
+    return await errorResponse(
       new Error('Discord webhook not configured'),
       'handleContentNotification',
       discordCorsHeaders
@@ -879,7 +882,7 @@ async function handleErrorNotification(req: Request): Promise<Response> {
     'DISCORD_EDGE_FUNCTION_ERRORS_WEBHOOK'
   );
   if (webhookUrl instanceof Response) {
-    return errorResponse(
+    return await errorResponse(
       new Error('Discord webhook not configured'),
       'handleErrorNotification',
       discordCorsHeaders
@@ -930,7 +933,7 @@ async function handleErrorNotification(req: Request): Promise<Response> {
 async function handleChangelogNotification(req: Request): Promise<Response> {
   const webhookUrl = validateWebhookUrl(edgeEnv.discord.changelog, 'DISCORD_CHANGELOG_WEBHOOK_URL');
   if (webhookUrl instanceof Response) {
-    return errorResponse(
+    return await errorResponse(
       new Error('Discord webhook not configured'),
       'handleChangelogNotification',
       discordCorsHeaders

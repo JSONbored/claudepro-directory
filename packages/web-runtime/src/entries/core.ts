@@ -14,9 +14,16 @@ export * from '../types/category.ts';
 export * from '../utils/category-validation.ts';
 export * from '../utils/content-highlights.ts';
 export * from '../utils/url-validation.ts';
-export * from '../utils/log-context.ts';
-export * from '../utils/request-context.ts';
+// Logging utilities - use barrel exports instead
+// export * from '../utils/log-context.ts'; // Use @heyclaude/web-runtime/logging/server instead
+// export * from '../utils/request-context.ts'; // Use @heyclaude/web-runtime/logging/server instead
+export * from '../utils/request-id.ts'; // Client-safe request ID generation
+// Export log context builders for backward compatibility (prefer logging/server barrel)
+export { createWebAppContext, createWebAppContextWithId, type WebAppLogContext } from '../utils/log-context.ts';
 export * from '../utils/homepage-error-tracking.ts';
+export * from '../utils/client-session.ts';
+export * from '../utils/client-logger.ts';
+export * from '../hooks/use-client-logger.ts';
 export * from '../data/marketing/contact.ts';
 export type { JobsFilterResult } from '../data/jobs.ts';
 export type { SearchFilters } from '../edge/search-client.ts';

@@ -1,7 +1,7 @@
 'use client';
 
 import { getTimeoutConfig } from '../config/static-configs.ts';
-import { logger } from '../entries/core.ts';
+import { logger, normalizeError } from '../entries/core.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Clipboard reset delay (loaded from static config)
@@ -128,17 +128,17 @@ export function useCopyToClipboard(
         return true;
       } catch (err) {
         // ROLLBACK on error
-        const errorObj = err instanceof Error ? err : new Error(String(err));
-        setError(errorObj);
+        const normalized = normalizeError(err, 'Failed to copy to clipboard');
+        setError(normalized);
         setCopied(false);
 
-        logger.error('Failed to copy to clipboard', errorObj, {
+        logger.error('Failed to copy to clipboard', normalized, {
           component: context?.component || 'useCopyToClipboard',
           action: context?.action || 'copy',
           textLength: text.length,
         });
 
-        onError?.(errorObj);
+        onError?.(normalized);
         return false;
       }
     },

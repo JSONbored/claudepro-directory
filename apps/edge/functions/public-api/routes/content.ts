@@ -198,7 +198,7 @@ async function handleSitewideLlmsTxt(logContext?: BaseLogContext): Promise<Respo
       },
     });
   } catch (error) {
-    return errorResponse(error, 'data-api:generate_sitewide_llms_txt', CORS, logContext);
+    return await errorResponse(error, 'data-api:generate_sitewide_llms_txt', CORS, logContext);
   }
 }
 
@@ -263,7 +263,7 @@ async function handleCategoryLlmsTxt(category: ContentCategory): Promise<Respons
       },
     });
   } catch (error) {
-    return errorResponse(error, 'data-api:generate_category_llms_txt', CORS);
+    return await errorResponse(error, 'data-api:generate_category_llms_txt', CORS);
   }
 }
 
@@ -289,7 +289,7 @@ async function handleChangelogLlmsTxt(): Promise<Response> {
       },
     });
   } catch (error) {
-    return errorResponse(error, 'data-api:generate_changelog_llms_txt', CORS);
+    return await errorResponse(error, 'data-api:generate_changelog_llms_txt', CORS);
   }
 }
 
@@ -315,7 +315,7 @@ async function handleChangelogEntryLlmsTxt(slug: string): Promise<Response> {
       },
     });
   } catch (error) {
-    return errorResponse(error, 'data-api:generate_changelog_entry_llms_txt', CORS);
+    return await errorResponse(error, 'data-api:generate_changelog_entry_llms_txt', CORS);
   }
 }
 
@@ -341,7 +341,7 @@ async function handleToolLlms(tool: string): Promise<Response> {
       },
     });
   } catch (error) {
-    return errorResponse(error, 'data-api:generate_tool_llms_txt', CORS);
+    return await errorResponse(error, 'data-api:generate_tool_llms_txt', CORS);
   }
 }
 
@@ -369,7 +369,7 @@ async function handleCategoryConfigs(): Promise<Response> {
       'X-Generated-By': 'supabase.rpc.get_category_configs_with_features',
     });
   } catch (error) {
-    return errorResponse(error, 'data-api:get_category_configs_with_features', CORS);
+    return await errorResponse(error, 'data-api:get_category_configs_with_features', CORS);
   }
 }
 
@@ -513,6 +513,6 @@ async function handleMcpbGeneration(
       }
     );
   } catch (error) {
-    return errorResponse(error, 'data-api:get_api_content_full', CORS, logContext);
+    return await errorResponse(error, 'data-api:get_api_content_full', CORS, logContext);
   }
 }

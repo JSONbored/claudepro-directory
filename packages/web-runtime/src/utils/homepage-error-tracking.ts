@@ -18,7 +18,7 @@
 
 import { logger, toLogContextValue } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
-import { generateRequestId } from './request-context.ts';
+import { generateRequestId } from './request-id.ts';
 
 export type HomepageSection = 
   | 'hero' 

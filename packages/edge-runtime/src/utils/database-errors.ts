@@ -12,11 +12,11 @@ import { logError } from '@heyclaude/shared-runtime';
  * Handle database errors with appropriate responses
  * Returns Response if error should be returned, null if should be re-thrown
  */
-export function handleDatabaseError(
+export async function handleDatabaseError(
   error: unknown,
   logContext: BaseLogContext,
   context: string
-): Response | null {
+): Promise<Response | null> {
   // Type guard for Supabase PostgrestError which has 'code' and 'message' properties
   const isPostgrestError = typeof error === 'object' && error !== null && 'code' in error;
 
@@ -44,6 +44,7 @@ export function handleDatabaseError(
 
   // Use errorToString for consistent error message extraction
   const normalizedError = error instanceof Error ? error : new Error(errorToString(error));
-  logError('Database operation failed', logContext, normalizedError);
-  return errorResponse(normalizedError, context);
+  // Await to ensure logs are flushed before returning response
+  await logError('Database operation failed', logContext, normalizedError);
+  return await errorResponse(normalizedError, context);
 }

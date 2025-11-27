@@ -84,7 +84,7 @@ async function handleSitemapGet(url: URL, logContext: BaseLogContext): Promise<R
     const { data: urls, error } = await supabaseAnon.rpc('get_site_urls', undefined);
     if (error) {
       // Use dbQuery serializer for consistent database query formatting
-      return errorResponse(error, 'data-api:get_site_urls', CORS, {
+      return await errorResponse(error, 'data-api:get_site_urls', CORS, {
         ...logContext,
         dbQuery: {
           rpcName: 'get_site_urls',
@@ -184,7 +184,7 @@ async function handleSitemapGet(url: URL, logContext: BaseLogContext): Promise<R
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    return errorResponse(error, 'data-api:generate_sitemap_xml', CORS, {
+    return await errorResponse(error, 'data-api:generate_sitemap_xml', CORS, {
       ...logContext,
       dbQuery: {
         rpcName: 'generate_sitemap_xml',
@@ -246,7 +246,7 @@ async function handleSitemapIndexNow(req: Request, logContext: BaseLogContext): 
   const { data: urls, error } = await supabaseAnon.rpc('get_site_urls', undefined);
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    return errorResponse(error, 'data-api:get_site_urls', CORS, {
+    return await errorResponse(error, 'data-api:get_site_urls', CORS, {
       ...logContext,
       dbQuery: {
         rpcName: 'get_site_urls',
@@ -337,7 +337,7 @@ async function handleSitemapIndexNow(req: Request, logContext: BaseLogContext): 
     );
   } catch (error) {
     // Log error but return success to avoid blocking
-    logError(
+    await logError(
       'IndexNow submission failed',
       {
         ...logContext,

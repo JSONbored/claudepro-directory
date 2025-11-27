@@ -118,8 +118,8 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
         await processPolarWebhook(result);
         traceStep('Polar webhook processed successfully', enrichedLogContext);
       } catch (error) {
-        logError('Polar webhook processing failed', enrichedLogContext, error);
-        return errorResponse(error, 'flux-station:polar-webhook', corsHeaders, enrichedLogContext);
+        await logError('Polar webhook processing failed', enrichedLogContext, error);
+        return await errorResponse(error, 'flux-station:polar-webhook', corsHeaders, enrichedLogContext);
       }
     } else if (!result.duplicate && result.source === 'resend') {
       try {
@@ -127,8 +127,8 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
         await processResendWebhook(result);
         traceStep('Resend webhook processed successfully', enrichedLogContext);
       } catch (error) {
-        logError('Resend webhook processing failed', enrichedLogContext, error);
-        return errorResponse(error, 'flux-station:resend-webhook', corsHeaders, enrichedLogContext);
+        await logError('Resend webhook processing failed', enrichedLogContext, error);
+        return await errorResponse(error, 'flux-station:resend-webhook', corsHeaders, enrichedLogContext);
       }
     }
 
@@ -148,7 +148,7 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
       return badRequestResponse(error.message, webhookCorsHeaders);
     }
 
-    logError('Unexpected webhook error', logContext, error);
-    return errorResponse(error, 'flux-station:webhook', webhookCorsHeaders, logContext);
+    await logError('Unexpected webhook error', logContext, error);
+    return await errorResponse(error, 'flux-station:webhook', webhookCorsHeaders, logContext);
   }
 }

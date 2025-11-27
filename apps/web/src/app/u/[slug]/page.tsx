@@ -5,20 +5,14 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-  sanitizeSlug,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, NavLink, UnifiedBadge,
   Card,
   CardContent,
@@ -134,29 +128,24 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
 }
 
 export default async function UserProfilePage({ params }: UserProfilePageProperties) {
-  const startTime = Date.now();
   const { slug } = await params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, `/u/${slug}`, 'UserProfilePage', {
-    slug,
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'UserProfilePage',
+    route: `/u/${slug}`,
+    module: 'apps/web/src/app/u/[slug]',
   });
 
   // Section: Slug Validation
-  const validationSectionStart = Date.now();
   if (!isValidSlug(slug)) {
-    logger.warn(
-      'UserProfilePage: invalid user slug',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'slug-validation',
-        },
-        validationSectionStart
-      )
-    );
+    reqLogger.warn('UserProfilePage: invalid user slug', {
+      section: 'slug-validation',
+    });
     notFound();
   }
 
@@ -165,59 +154,34 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
     context: 'UserProfilePage',
   });
 
-  const logContext = currentUser?.id
-    ? { ...baseLogContext, viewerId: currentUser.id }
-    : baseLogContext;
+  // Create child logger with viewer context if available
+  const viewerLogger = currentUser?.id 
+    ? reqLogger.child({ viewerId: currentUser.id })
+    : reqLogger;
 
   // Section: User Profile Fetch
-  const profileSectionStart = Date.now();
   let profileData: Database['public']['Functions']['get_user_profile']['Returns'] | null = null;
   try {
     profileData = await getPublicUserProfile({
       slug,
       ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
-    logger.info(
-      'UserProfilePage: user profile loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'user-profile-fetch',
-          hasProfile: !!profileData,
-        },
-        profileSectionStart
-      )
-    );
+    viewerLogger.info('UserProfilePage: user profile loaded', {
+      section: 'user-profile-fetch',
+      hasProfile: !!profileData,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user profile detail');
-    logger.error(
-      'UserProfilePage: get_user_profile threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'user-profile-fetch',
-          sectionDuration_ms: Date.now() - profileSectionStart,
-        },
-        startTime
-      )
-    );
+    viewerLogger.error('UserProfilePage: get_user_profile threw', normalized, {
+      section: 'user-profile-fetch',
+    });
     throw normalized;
   }
 
   if (!profileData) {
-    logger.warn(
-      'UserProfilePage: user profile not found',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'user-profile-fetch',
-          sectionDuration_ms: Date.now() - profileSectionStart,
-        },
-        startTime
-      )
-    );
+    viewerLogger.warn('UserProfilePage: user profile not found', {
+      section: 'user-profile-fetch',
+    });
     notFound();
   }
 
@@ -364,16 +328,11 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                     .map((collection) => {
                       const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
                       if (!safeCollectionUrl) {
-                        logger.warn(
-                          'UserProfilePage: skipping collection with invalid slug',
-                          undefined,
-                          {
-                            ...baseLogContext,
-                            collectionId: collection.id,
-                            collectionName: collection.name ?? 'Unknown',
-                            collectionSlug: collection.slug,
-                          }
-                        );
+                        viewerLogger.warn('UserProfilePage: skipping collection with invalid slug', {
+                          collectionId: collection.id,
+                          collectionName: collection.name ?? 'Unknown',
+                          collectionSlug: collection.slug,
+                        });
                         return null;
                       }
                       return (
@@ -431,16 +390,11 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                     .map((item) => {
                       const safeContentUrl = getSafeContentUrl(item.content_type, item.slug);
                       if (!safeContentUrl) {
-                        logger.warn(
-                          'UserProfilePage: skipping contribution with invalid type or slug',
-                          undefined,
-                          {
-                            ...baseLogContext,
-                            contentId: item.id,
-                            contentType: item.content_type,
-                            contentSlug: item.slug,
-                          }
-                        );
+                        viewerLogger.warn('UserProfilePage: skipping contribution with invalid type or slug', {
+                          contentId: item.id,
+                          contentType: item.content_type,
+                          contentSlug: item.slug,
+                        });
                         return null;
                       }
                       return (

@@ -55,7 +55,6 @@ import {
   logWarn,
   MAX_BODY_SIZE,
   validateEmail,
-  withDuration,
 } from '@heyclaude/shared-runtime';
 
 validateEnvironment(['resend', 'auth-hook']);
@@ -69,7 +68,6 @@ let newsletterCountCache: { value: number; expiresAt: number } | null = null;
  * Handle Newsletter Subscription
  */
 export async function handleSubscribe(req: Request): Promise<Response> {
-  const startTime = Date.now();
 
   const parseResult = await parseJsonBody<{
     email: string;
@@ -262,23 +260,23 @@ export async function handleSubscribe(req: Request): Promise<Response> {
     const service = new NewsletterService(supabaseServiceRole);
 
     // Call service instead of direct RPC
-    const rpcResult = await service.subscribeNewsletter(rpcArgs).catch((error) => {
+    const rpcResult = await service.subscribeNewsletter(rpcArgs).catch(async (error) => {
       // Handle database errors similar to original helper
-      const handled = handleDatabaseError(error, logContext, 'handleSubscribe');
+      const handled = await handleDatabaseError(error, logContext, 'handleSubscribe');
       if (handled) throw handled; // re-throw response as error to be caught by outer catch
       throw error;
     });
 
     if (!(rpcResult && rpcResult.success)) {
       const errorMessage = rpcResult?.error ?? 'Subscription failed';
-      logError('RPC subscription failed', logContext, new Error(errorMessage));
-      return errorResponse(new Error(errorMessage), 'handleSubscribe');
+      await logError('RPC subscription failed', logContext, new Error(errorMessage));
+      return await errorResponse(new Error(errorMessage), 'handleSubscribe');
     }
 
     const subscriptionId = rpcResult.subscription_id;
     if (!subscriptionId) {
-      logError('RPC returned success but no subscription_id', logContext);
-      return errorResponse(
+      await logError('RPC returned success but no subscription_id', logContext);
+      return await errorResponse(
         new Error('Subscription succeeded but no subscription ID returned'),
         'handleSubscribe'
       );
@@ -288,8 +286,8 @@ export async function handleSubscribe(req: Request): Promise<Response> {
     const subscription = await service.getSubscriptionById(subscriptionId);
 
     if (!subscription) {
-      logError('Failed to fetch subscription after RPC call', logContext);
-      return errorResponse(
+      await logError('Failed to fetch subscription after RPC call', logContext);
+      return await errorResponse(
         new Error('Subscription succeeded but failed to fetch subscription data'),
         'handleSubscribe'
       );
@@ -330,13 +328,13 @@ export async function handleSubscribe(req: Request): Promise<Response> {
     );
 
     if (emailError) {
-      logError('Welcome email failed', logContext, emailError);
+      await logError('Welcome email failed', logContext, emailError);
     } else {
       await enrollInOnboardingSequence(normalizedEmail, logContext);
     }
 
     logInfo('Subscription completed', {
-      ...withDuration(logContext, startTime),
+      ...logContext,
       success: true,
       subscription_id: subscription.id,
       resend_contact_id: resendContactId,
@@ -357,13 +355,12 @@ export async function handleSubscribe(req: Request): Promise<Response> {
     });
   } catch (error) {
     if (error instanceof Response) return error; // Return handled responses directly
-    logError('Newsletter subscription failed', withDuration(logContext, startTime), error);
-    return errorResponse(error, 'handleSubscribe', publicCorsHeaders, logContext);
+    await logError('Newsletter subscription failed', logContext, error);
+    return await errorResponse(error, 'handleSubscribe', publicCorsHeaders, logContext);
   }
 }
 
 export async function handleWelcome(req: Request): Promise<Response> {
-  const startTime = Date.now();
   const triggerSource = req.headers.get('X-Trigger-Source');
   
   const logContext = createEmailHandlerContext('welcome', {
@@ -420,14 +417,14 @@ export async function handleWelcome(req: Request): Promise<Response> {
     );
 
   if (error) {
-    logError('Welcome email failed', logContext, error);
-    return errorResponse(new Error(error.message || 'Welcome email failed'), 'handleWelcome', publicCorsHeaders, logContext);
+    await logError('Welcome email failed', logContext, error);
+    return await errorResponse(new Error(error.message || 'Welcome email failed'), 'handleWelcome', publicCorsHeaders, logContext);
   }
 
     await enrollInOnboardingSequence(email, logContext);
 
     logInfo('Welcome email sent', {
-      ...withDuration(logContext, startTime),
+      ...logContext,
       subscription_id,
       email_id: data?.id,
     });
@@ -479,8 +476,8 @@ export async function handleWelcome(req: Request): Promise<Response> {
   );
 
   if (error) {
-    logError('Signup email failed', { ...logContext, user: { id: user.id, email: user.email } }, error); // Use user serializer
-    return errorResponse(new Error(error.message || 'Signup email failed'), 'handleWelcome', publicCorsHeaders, logContext);
+    await logError('Signup email failed', { ...logContext, user: { id: user.id, email: user.email } }, error); // Use user serializer
+    return await errorResponse(new Error(error.message || 'Signup email failed'), 'handleWelcome', publicCorsHeaders, logContext);
   }
 
   await enrollInOnboardingSequence(user.email, logContext);
@@ -497,7 +494,6 @@ export async function handleWelcome(req: Request): Promise<Response> {
 }
 
 export async function handleTransactional(req: Request): Promise<Response> {
-  const startTime = Date.now();
 
   const parseResult = await parseJsonBody<{
     type: string;
@@ -563,8 +559,8 @@ export async function handleTransactional(req: Request): Promise<Response> {
   );
 
   if (error) {
-    logError('Failed to send transactional email', { ...logContext, type }, error);
-    return errorResponse(
+    await logError('Failed to send transactional email', { ...logContext, type }, error);
+    return await errorResponse(
       new Error(error.message || 'Transactional email failed'),
       'handleTransactional',
       publicCorsHeaders,
@@ -573,7 +569,7 @@ export async function handleTransactional(req: Request): Promise<Response> {
   }
 
   logInfo('Transactional email sent', {
-    ...withDuration(logContext, startTime),
+    ...logContext,
     type,
     email_id: data?.id,
   });
@@ -583,7 +579,6 @@ export async function handleTransactional(req: Request): Promise<Response> {
 }
 
 export async function handleDigest(): Promise<Response> {
-  const startTime = Date.now();
   const logContext = createEmailHandlerContext('digest');
   
   // Initialize request logging with trace and bindings
@@ -626,14 +621,14 @@ export async function handleDigest(): Promise<Response> {
 
   if (digestError) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('Failed to fetch weekly digest', {
+    await logError('Failed to fetch weekly digest', {
       ...logContext,
       dbQuery: {
         rpcName: 'get_weekly_digest',
         args: digestArgs, // Will be redacted by Pino's redact config
       },
     }, digestError);
-    return errorResponse(digestError, 'handleDigest', publicCorsHeaders, logContext);
+    return await errorResponse(digestError, 'handleDigest', publicCorsHeaders, logContext);
   }
 
   if (!digest) {
@@ -701,7 +696,7 @@ export async function handleDigest(): Promise<Response> {
       };
 
       // Log error with full context for observability
-      logError(
+      await logError(
         'Failed to upsert last_digest_email_timestamp',
         {
           ...logContext,
@@ -734,7 +729,7 @@ export async function handleDigest(): Promise<Response> {
           error instanceof Error
             ? error.message
             : 'Failed to update last_digest_email_timestamp after retries';
-        logError(
+        await logError(
           'Exhausted retries for upsert_digest_timestamp - marking run as failed',
           {
             ...logContext,
@@ -766,7 +761,7 @@ export async function handleDigest(): Promise<Response> {
   }
 
   logInfo('Digest completed', {
-    ...withDuration(logContext, startTime),
+    ...logContext,
     success: results.success,
     failed: results.failed,
     success_rate: results.successRate,
@@ -785,7 +780,6 @@ export async function handleDigest(): Promise<Response> {
 }
 
 export async function handleSequence(): Promise<Response> {
-  const startTime = Date.now();
   const logContext = createEmailHandlerContext('sequence');
   
   // Initialize request logging with trace and bindings
@@ -803,13 +797,13 @@ export async function handleSequence(): Promise<Response> {
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('Failed to fetch due sequence emails', {
+    await logError('Failed to fetch due sequence emails', {
       ...logContext,
       dbQuery: {
         rpcName: 'get_due_sequence_emails',
       },
     }, error);
-    return errorResponse(error, 'handleSequence', publicCorsHeaders, logContext);
+    return await errorResponse(error, 'handleSequence', publicCorsHeaders, logContext);
   }
 
   if (!Array.isArray(data) || data.length === 0) {
@@ -834,8 +828,8 @@ export async function handleSequence(): Promise<Response> {
     {
       concurrency: 5,
       retries: 0,
-      onError: (item, error, attempt) => {
-        logError(
+      onError: async (item, error, attempt) => {
+        await logError(
           'Failed to send sequence email',
           {
             ...logContext,
@@ -853,7 +847,7 @@ export async function handleSequence(): Promise<Response> {
   const failedCount = results.failedCount;
 
   logInfo('Sequence emails completed', {
-    ...withDuration(logContext, startTime),
+    ...logContext,
     sent: sentCount,
     failed: failedCount,
     total: dueEmails.length,
@@ -866,7 +860,6 @@ export async function handleSequence(): Promise<Response> {
 }
 
 export async function handleJobLifecycleEmail(req: Request, action: string): Promise<Response> {
-  const startTime = Date.now();
 
   const parseResult = await parseJsonBody<
     { userEmail: string; jobId: string } & Record<string, unknown>
@@ -932,7 +925,7 @@ export async function handleJobLifecycleEmail(req: Request, action: string): Pro
   );
 
   if (error) {
-    logError(
+    await logError(
       `${action} email failed`,
       {
         ...logContext,
@@ -940,7 +933,7 @@ export async function handleJobLifecycleEmail(req: Request, action: string): Pro
       },
       error
     );
-    return errorResponse(
+    return await errorResponse(
       new Error(error.message || `${action} email failed`),
       'handleJobLifecycleEmail',
       publicCorsHeaders,
@@ -949,7 +942,7 @@ export async function handleJobLifecycleEmail(req: Request, action: string): Pro
   }
 
   logInfo(`${action} email sent`, {
-    ...withDuration(logContext, startTime),
+    ...logContext,
     job_id: jobId,
     email_id: data?.id,
   });
@@ -1005,8 +998,8 @@ export async function handleGetNewsletterCount(): Promise<Response> {
     traceRequestComplete(logContext);
     return jsonResponse({ count }, 200, headers);
   } catch (error) {
-    logError('Newsletter count failed', logContext, error);
-    return errorResponse(error, 'handleGetNewsletterCount', publicCorsHeaders, logContext);
+    await logError('Newsletter count failed', logContext, error);
+    return await errorResponse(error, 'handleGetNewsletterCount', publicCorsHeaders, logContext);
   }
 }
 
@@ -1014,7 +1007,6 @@ export async function handleGetNewsletterCount(): Promise<Response> {
  * Contact Form Submission Handler
  */
 export async function handleContactSubmission(req: Request): Promise<Response> {
-  const startTime = Date.now();
 
   const parseResult = await parseJsonBody<{
     submissionId: string;
@@ -1104,7 +1096,7 @@ export async function handleContactSubmission(req: Request): Promise<Response> {
     );
 
     if (adminError) {
-      logError(
+      await logError(
         'Admin notification email failed',
         {
           ...logContext,
@@ -1133,7 +1125,7 @@ export async function handleContactSubmission(req: Request): Promise<Response> {
     );
 
     if (userError) {
-      logError(
+      await logError(
         'User confirmation email failed',
         {
           ...logContext,
@@ -1144,7 +1136,7 @@ export async function handleContactSubmission(req: Request): Promise<Response> {
     }
 
     logInfo('Contact submission emails completed', {
-      ...withDuration(logContext, startTime),
+      ...logContext,
       submission_id: submissionId,
       admin_email_sent: !adminError,
       user_email_sent: !userError,
@@ -1160,7 +1152,7 @@ export async function handleContactSubmission(req: Request): Promise<Response> {
       user_email_id: userData?.id || null,
     });
   } catch (error) {
-    logError('Contact submission email failed', withDuration(logContext, startTime), error);
-    return errorResponse(error, 'handleContactSubmission', publicCorsHeaders, logContext);
+    await logError('Contact submission email failed', logContext, error);
+    return await errorResponse(error, 'handleContactSubmission', publicCorsHeaders, logContext);
   }
 }

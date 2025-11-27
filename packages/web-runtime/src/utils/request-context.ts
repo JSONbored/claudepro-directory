@@ -1,31 +1,65 @@
 /**
- * Request Context Utilities
+ * Request Context Utilities (Server-Only)
  * 
- * Provides request ID generation and context for logging and error tracking.
- * Request IDs enable distributed tracing across async operations.
+ * Provides server-only request context utilities for logging and error tracking.
+ * These utilities use Next.js `next/headers` which is only available in Server Components.
  * 
- * NOTE: This module works in both App Router and Pages Router contexts.
- * In Pages Router or when next/headers is unavailable, request IDs are generated
- * without using next/headers.
+ * **⚠️ IMPORTANT: Server-Only Module**
+ * - ❌ **DO NOT** import this in client components (`'use client'`)
+ * - ✅ **ONLY** import in server components, API routes, or server actions
+ * - ✅ Safe to import in Edge Runtime (uses try-catch for compatibility)
+ * 
+ * **Client/Server Boundaries:**
+ * - This module uses `require('next/headers')` which is server-only
+ * - If you need request IDs in client components, use {@link ./request-id.generateRequestId | generateRequestId} from {@link ./request-id | request-id} instead
+ * - For client-side logging, use {@link ../logging/client | Client Logging Barrel}
+ * 
+ * **Usage:**
+ * - Server components: Use `getRequestContext()` or `createLogContext()`
+ * - API routes: Use `getRequestContext()` or `createLogContext()`
+ * - Client components: **DO NOT USE** - use {@link ../logging/client | Client Logging Barrel} instead
+ * 
+ * @module web-runtime/utils/request-context
+ * @see {@link ./request-id | request-id} - Client-safe request ID generation
+ * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
+ * @see {@link ../logging/client | Client Logging Barrel} - Client-side logging utilities
  */
 
-import { generateTraceId } from '../trace.ts';
+import 'server-only';
 
-/**
- * Generate a unique request ID for tracing
- * Uses timestamp + random for uniqueness
- * Works in all contexts (App Router, Pages Router, Edge Runtime, Client)
- */
-export function generateRequestId(): string {
-  return generateTraceId();
-}
+import { generateRequestId } from './request-id';
 
 /**
  * Get request context from Next.js headers (App Router only)
- * Extracts useful information for logging and error tracking
  * 
- * NOTE: This function only works in App Router Server Components.
- * In Pages Router or other contexts, it returns minimal context.
+ * Extracts useful information for logging and error tracking from Next.js headers.
+ * This function only works in App Router Server Components.
+ * 
+ * **⚠️ Server-Only Function**
+ * - ❌ **DO NOT** call from client components
+ * - ✅ **ONLY** call from server components, API routes, or server actions
+ * - Uses `next/headers` which is server-only
+ * 
+ * **Fallback Behavior:**
+ * - If `next/headers` is unavailable (Pages Router, Edge Runtime, build time), returns minimal context with just request ID
+ * - This ensures the function doesn't crash in non-App Router contexts
+ * 
+ * @returns Request context with requestId, userAgent, ip, referer, and path
+ * 
+ * @example
+ * ```typescript
+ * // Server component or API route
+ * import { getRequestContext } from '@heyclaude/web-runtime/logging/server';
+ * 
+ * export default async function MyPage() {
+ *   const context = await getRequestContext();
+ *   logger.info('Page loaded', { ...context, userId: user.id });
+ * }
+ * ```
+ * 
+ * @see {@link ./request-id.generateRequestId | generateRequestId} - Client-safe alternative for client components
+ * @see {@link createLogContext} - Higher-level function that uses this
+ * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
  */
 export async function getRequestContext(): Promise<{
   requestId: string;
@@ -71,7 +105,34 @@ export async function getRequestContext(): Promise<{
 
 /**
  * Create enhanced log context with request information
- * Use this in data fetching functions and API routes
+ * 
+ * Combines request context from Next.js headers with additional context fields.
+ * Use this in data fetching functions and API routes.
+ * 
+ * **⚠️ Server-Only Function**
+ * - ❌ **DO NOT** call from client components
+ * - ✅ **ONLY** call from server components, API routes, or server actions
+ * - Uses `getRequestContext()` which is server-only
+ * 
+ * @param additionalContext - Additional context fields to merge with request context
+ * @returns Enhanced log context with request information and additional fields
+ * 
+ * @example
+ * ```typescript
+ * // Server component or API route
+ * import { createLogContext } from '@heyclaude/web-runtime/logging/server';
+ * 
+ * export default async function MyPage() {
+ *   const logContext = await createLogContext({
+ *     userId: user.id,
+ *     page: 1,
+ *   });
+ *   logger.info('Data loaded', logContext);
+ * }
+ * ```
+ * 
+ * @see {@link getRequestContext} - Lower-level function that extracts request info
+ * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
  */
 export async function createLogContext(additionalContext?: Record<string, unknown>): Promise<Record<string, unknown>> {
   const requestContext = await getRequestContext();

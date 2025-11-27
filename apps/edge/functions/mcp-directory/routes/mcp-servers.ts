@@ -57,7 +57,7 @@ export async function handleGetMcpServers(
 
   if (metadataError) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('Database query failed in getMcpServers', {
+    await logError('Database query failed in getMcpServers', {
       dbQuery: {
         table: 'content',
         operation: 'select',

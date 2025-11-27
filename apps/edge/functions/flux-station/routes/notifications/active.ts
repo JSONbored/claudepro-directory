@@ -79,6 +79,6 @@ export async function handleActiveNotifications(req: Request): Promise<Response>
       notificationCorsHeaders
     );
   } catch (error) {
-    return errorResponse(error, 'flux-station:active-notifications', notificationCorsHeaders, logContext);
+    return await errorResponse(error, 'flux-station:active-notifications', notificationCorsHeaders, logContext);
   }
 }

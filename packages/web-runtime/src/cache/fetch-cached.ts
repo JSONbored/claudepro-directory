@@ -8,7 +8,7 @@ import { getCacheTtl, type CacheTtlKey } from '../cache-config.ts';
 import { logger, toLogContextValue, type LogContext } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 import { withTimeout, TimeoutError } from '@heyclaude/shared-runtime';
-import { generateRequestId } from '../utils/request-context.ts';
+import { generateRequestId } from '../utils/request-id.ts';
 
 export interface FetchCachedOptions<TResult> {
   /**

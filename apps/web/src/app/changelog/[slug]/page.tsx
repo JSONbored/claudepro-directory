@@ -28,18 +28,13 @@ export const revalidate = 7200;
 
 import { Constants } from '@heyclaude/database-types';
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getAllChangelogEntries,
   getChangelogEntryBySlug,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, NavLink, Separator   } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import type { Metadata } from 'next';
@@ -53,17 +48,17 @@ import { ChangelogContent } from '@/src/components/features/changelog/changelog-
 /**
  * Generate static params for all changelog entries
  */
-// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
 export async function generateStaticParams() {
   // Generate requestId for static params generation (build-time)
-  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
-  const staticParamsRequestId = generateRequestId();
-  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
-  const staticParamsLogContext = createWebAppContextWithId(
-    staticParamsRequestId,
-    '/changelog',
-    'ChangelogEntryPageStaticParams'
-  );
+  const requestId = generateRequestId();
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'ChangelogEntryPageStaticParams',
+    route: '/changelog',
+    module: 'apps/web/src/app/changelog/[slug]',
+  });
 
   try {
     const entries = await getAllChangelogEntries();
@@ -73,11 +68,7 @@ export async function generateStaticParams() {
     }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog static params');
-    logger.error(
-      'ChangelogEntryPage: generateStaticParams threw',
-      normalized,
-      staticParamsLogContext
-    );
+    reqLogger.error('ChangelogEntryPage: generateStaticParams threw', normalized);
     // Re-throw so callers/CI see a hard failure rather than masking it
     throw normalized;
   }
@@ -95,22 +86,21 @@ export async function generateMetadata({
 
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
-  const metadataLogContext = createWebAppContextWithId(
-    metadataRequestId,
-    `/changelog/${slug}`,
-    'ChangelogEntryPageMetadata',
-    {
-      slug,
-    }
-  );
+  
+  // Create request-scoped child logger to avoid race conditions
+  const metadataLogger = logger.child({
+    requestId: metadataRequestId,
+    operation: 'ChangelogEntryPageMetadata',
+    route: `/changelog/${slug}`,
+    module: 'apps/web/src/app/changelog/[slug]',
+  });
 
   let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>>;
   try {
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry for metadata');
-    logger.error('ChangelogEntryPage: metadata loader threw', normalized, {
-      ...metadataLogContext,
+    metadataLogger.error('ChangelogEntryPage: metadata loader threw', normalized, {
       operation: 'generateMetadata',
     });
     entry = null;
@@ -135,29 +125,26 @@ export default async function ChangelogEntryPage({
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    `/changelog/${slug}`,
-    'ChangelogEntryPage',
-    {
-      slug,
-    }
-  );
+    operation: 'ChangelogEntryPage',
+    route: `/changelog/${slug}`,
+    module: 'apps/web/src/app/changelog/[slug]',
+  });
 
   let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>>;
   try {
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry');
-    logger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized, {
-      ...logContext,
-      operation: 'ChangelogEntryPage',
-    });
+    reqLogger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized);
     throw normalized;
   }
 
   if (!entry) {
-    logger.warn('ChangelogEntryPage: entry not found', undefined, logContext);
+    reqLogger.warn('ChangelogEntryPage: entry not found');
     notFound();
   }
 

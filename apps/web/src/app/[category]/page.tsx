@@ -33,16 +33,14 @@
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  isValidCategory,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -57,7 +55,6 @@ import { ContentListServer } from '@/src/components/content/content-grid-list';
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
 export const dynamic = 'force-dynamic';
-// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
 export const dynamicParams = true; // Allow unknown categories to be rendered on demand (will 404 if invalid)
 
 /**
@@ -130,25 +127,26 @@ export async function generateMetadata({
  * // /statuslines → Lists all statuslines with search/filter
  */
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
-  const startTime = Date.now();
   const { category } = await params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, `/${category}`, 'CategoryPage');
+  const operation = 'CategoryPage';
+  const route = `/${category}`;
+  const module = 'apps/web/src/app/[category]/page';
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation,
+    route,
+    module,
+  });
 
   if (!isValidCategory(category)) {
-    logger.warn(
-      'Invalid category in list page',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          category,
-        },
-        startTime
-      )
-    );
+    reqLogger.warn('Invalid category in list page', {
+      category,
+    });
     notFound();
   }
 
@@ -158,20 +156,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const config = getCategoryConfig(typedCategory);
   if (!config) {
     const normalized = normalizeError(
-      'Category config is null',
+      new Error('Category config is null'),
       'CategoryPage: missing category config'
     );
-    logger.error(
-      'CategoryPage: missing category config',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          category,
-        },
-        startTime
-      )
-    );
+    reqLogger.error('CategoryPage: missing category config', normalized, {
+      category,
+    });
     notFound();
   }
 
@@ -182,17 +172,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     items = await getContentByCategory(typedCategory);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category list content');
-    logger.error(
-      'CategoryPage: getContentByCategory threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          category,
-        },
-        startTime
-      )
-    );
+    reqLogger.error('CategoryPage: getContentByCategory threw', normalized, {
+      category,
+    });
     // Use empty array instead of re-throwing to prevent page crash
     // The page will render with empty content, which is better than crashing
     items = [];
@@ -200,17 +182,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   }
   // Only log warning if no error occurred (to avoid duplicate logging)
   if (items.length === 0 && !hadError) {
-    logger.warn(
-      'CategoryPage: getContentByCategory returned no items',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          category,
-        },
-        startTime
-      )
-    );
+    reqLogger.warn('CategoryPage: getContentByCategory returned no items', {
+      category,
+    });
   }
 
   // Process badges (handle dynamic count badges)

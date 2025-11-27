@@ -31,7 +31,8 @@
 
 'use client';
 
-import { logClientWarning, logger, normalizeError } from '../entries/core.ts';
+import { logger, normalizeError } from '../entries/core.ts';
+import { logClientWarn } from '../utils/client-logger.ts';
 import { useCallback, useMemo } from 'react';
 
 interface UseViewTransitionReturn {
@@ -74,7 +75,9 @@ export function useViewTransition(): UseViewTransitionReturn {
       // Fallback: Execute immediately without animation
       if (!isSupported) {
         Promise.resolve(updateCallback()).catch((error) => {
-          logClientWarning('useViewTransition: fallback update failed (unsupported)', error);
+          logClientWarn('useViewTransition: fallback update failed (unsupported)', error, 'useViewTransition.fallback', {
+            component: 'useViewTransition',
+          });
         });
         return undefined;
       }
@@ -86,13 +89,17 @@ export function useViewTransition(): UseViewTransitionReturn {
         if (process.env.NODE_ENV === 'development') {
           const normalized = normalizeError(error, 'View Transition failed');
           logger.warn('View Transition failed, falling back to instant update', {
-            error: normalized.message,
+            err: normalized,
           });
         }
         Promise.resolve(updateCallback()).catch((fallbackError) => {
-          logClientWarning(
+          logClientWarn(
             'useViewTransition: fallback update failed after ViewTransition error',
-            fallbackError
+            fallbackError,
+            'useViewTransition.fallback',
+            {
+              component: 'useViewTransition',
+            }
           );
         });
         return undefined;

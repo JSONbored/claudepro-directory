@@ -39,7 +39,7 @@ export async function trackInteraction(params: {
   });
 
   if (result?.serverError) {
-    logger.warn('trackInteraction failed', undefined, { error: result.serverError });
+    logger.warn('trackInteraction failed', { error: result.serverError });
   }
 }
 
@@ -143,6 +143,6 @@ export async function trackUsage(params: {
 }): Promise<void> {
   const result = await trackUsageAction(params);
   if (result?.serverError) {
-    logger.warn('trackUsage failed', undefined, { error: result.serverError });
+    logger.warn('trackUsage failed', { error: result.serverError });
   }
 }

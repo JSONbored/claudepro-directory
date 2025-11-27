@@ -14,26 +14,21 @@ export const runtime = 'nodejs';
 export const revalidate = 300;
 
 import { Constants } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { generateRequestId, logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseAnonClient } from '@heyclaude/web-runtime/server';
-import { createErrorResponse } from '@heyclaude/web-runtime/utils/error-handler';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const startTime = Date.now();
   // Generate single requestId for this API request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    '/api/stats/social-proof',
-    'SocialProofStatsAPI'
-  );
+    operation: 'SocialProofStatsAPI',
+    route: '/api/stats/social-proof',
+    module: 'apps/web/src/app/api/stats/social-proof',
+  });
 
   try {
     const supabase = createSupabaseAnonClient();
@@ -81,9 +76,8 @@ export async function GET() {
 
     if (submissionsError) {
       const normalized = normalizeError(submissionsError, 'Failed to fetch recent submissions');
-      logger.warn('Failed to fetch recent submissions', undefined, {
-        ...baseLogContext,
-        error: normalized.message,
+      reqLogger.warn('Failed to fetch recent submissions', {
+        err: normalized,
       });
     }
 
@@ -99,9 +93,8 @@ export async function GET() {
 
     if (monthError) {
       const normalized = normalizeError(monthError, 'Failed to fetch month submissions');
-      logger.warn('Failed to fetch month submissions', undefined, {
-        ...baseLogContext,
-        error: normalized.message,
+      reqLogger.warn('Failed to fetch month submissions', {
+        err: normalized,
       });
     }
 
@@ -117,9 +110,8 @@ export async function GET() {
 
     if (contentError) {
       const normalized = normalizeError(contentError, 'Failed to fetch content count');
-      logger.warn('Failed to fetch content count', undefined, {
-        ...baseLogContext,
-        error: normalized.message,
+      reqLogger.warn('Failed to fetch content count', {
+        err: normalized,
       });
     }
 
@@ -158,25 +150,18 @@ export async function GET() {
     const totalUsers = contentCount ?? null;
     const timestamp = new Date().toISOString();
 
-    // Structured logging with cache tags, duration, and stats
-    logger.info(
-      'Social proof stats API: success',
-      withDuration(
-        {
-          ...baseLogContext,
-          stats: {
-            contributorCount: topContributors.length,
-            submissionCount,
-            successRate,
-            totalUsers,
-          },
-          cacheTags: ['stats', 'social-proof'],
-          cacheTTL: 300,
-          revalidate: 300,
-        },
-        startTime
-      )
-    );
+    // Structured logging with cache tags and stats
+    reqLogger.info('Social proof stats API: success', {
+      stats: {
+        contributorCount: topContributors.length,
+        submissionCount,
+        successRate,
+        totalUsers,
+      },
+      cacheTags: ['stats', 'social-proof'],
+      cacheTTL: 300,
+      revalidate: 300,
+    });
 
     // Generate ETag from timestamp and stats hash for conditional requests
     const statsHash = `${submissionCount}-${successRate}-${totalUsers}`;
@@ -207,12 +192,14 @@ export async function GET() {
       }
     );
   } catch (error) {
-    const duration = Date.now() - startTime;
+    const normalized = normalizeError(error, 'Social proof stats API error');
+    reqLogger.error('Social proof stats API error', normalized, {
+      section: 'error-handling',
+    });
     return createErrorResponse(error, {
       route: '/api/stats/social-proof',
       operation: 'SocialProofStatsAPI',
       method: 'GET',
-      logContext: { duration },
     });
   }
 }

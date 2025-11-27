@@ -9,7 +9,7 @@
 import { getNewsletterCountAction } from '@heyclaude/web-runtime/actions';
 import { getPollingConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { CACHE_CONFIG_DEFAULTS } from '@heyclaude/web-runtime/feature-flags/defaults';
-import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
+import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useRef, useState } from 'react';
 
 export interface UseNewsletterCountReturn {
@@ -94,9 +94,7 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
           throw new Error('Failed to fetch newsletter count');
         }
       } catch (err) {
-        logger.error('Failed to fetch newsletter count', err as Error, {
-          context: 'use-newsletter-count',
-        });
+        logClientError('Failed to fetch newsletter count', err, 'useNewsletterCount.fetch');
         setError(err as Error);
         setIsLoading(false);
       }
@@ -104,13 +102,15 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
 
     // Initial fetch
     fetchCount().catch((err) => {
-      logClientWarning('useNewsletterCount: initial fetch failed', err);
+      logClientWarn('useNewsletterCount: initial fetch failed', err, 'useNewsletterCount.fetch');
     });
 
     // Start polling with current interval
     intervalRef.current = setInterval(() => {
       fetchCount().catch((err) => {
-        logClientWarning('useNewsletterCount: polling fetch failed', err);
+        logClientWarn('useNewsletterCount: polling fetch failed', err, 'useNewsletterCount.poll', {
+          component: 'useNewsletterCount',
+        });
       });
     }, pollIntervalMs);
 
@@ -124,12 +124,12 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
       } else {
         // Resume polling when tab becomes visible
         fetchCount().catch((err) => {
-          logClientWarning('useNewsletterCount: resume fetch failed', err);
+          logClientWarn('useNewsletterCount: resume fetch failed', err, 'useNewsletterCount.resume');
         });
         if (!intervalRef.current) {
           intervalRef.current = setInterval(() => {
             fetchCount().catch((err) => {
-              logClientWarning('useNewsletterCount: polling fetch failed', err);
+              logClientWarn('useNewsletterCount: polling fetch failed', err, 'useNewsletterCount.poll');
             });
           }, pollIntervalMs);
         }

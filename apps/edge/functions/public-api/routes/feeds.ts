@@ -122,7 +122,7 @@ export async function handleFeedsRoute(
   } catch (error) {
     // Use dbQuery serializer for consistent database query formatting
     // Note: RPC name will be in the error message or logged by generateFeedPayload
-    return errorResponse(error, 'data-api:feeds', CORS, {
+    return await errorResponse(error, 'data-api:feeds', CORS, {
       ...logContext,
       dbQuery: {
         // RPC name will be determined from error context or logged separately
@@ -147,7 +147,7 @@ async function generateFeedPayload(
         // Use dbQuery serializer for consistent database query formatting
         const { logError } = await import('@heyclaude/shared-runtime');
         if (error) {
-          logError('RPC call failed in generateFeedPayload', {
+          await logError('RPC call failed in generateFeedPayload', {
             dbQuery: {
               rpcName: 'generate_changelog_rss_feed',
               args: rpcArgs, // Will be redacted by Pino's redact config
@@ -170,7 +170,7 @@ async function generateFeedPayload(
       // Use dbQuery serializer for consistent database query formatting
       const { logError } = await import('@heyclaude/shared-runtime');
       if (error) {
-        logError('RPC call failed in generateFeedPayload', {
+        await logError('RPC call failed in generateFeedPayload', {
           dbQuery: {
             rpcName: 'generate_changelog_atom_feed',
             args: rpcArgs2, // Will be redacted by Pino's redact config
@@ -198,7 +198,7 @@ async function generateFeedPayload(
       // Use dbQuery serializer for consistent database query formatting
       const { logError } = await import('@heyclaude/shared-runtime');
       if (error) {
-        logError('RPC call failed in generateFeedPayload', {
+        await logError('RPC call failed in generateFeedPayload', {
           dbQuery: {
             rpcName: 'generate_content_rss_feed',
             args: rpcArgs3, // Will be redacted by Pino's redact config
@@ -223,7 +223,7 @@ async function generateFeedPayload(
     // Use dbQuery serializer for consistent database query formatting
     const { logError } = await import('@heyclaude/shared-runtime');
     if (error) {
-      logError('RPC call failed in generateFeedPayload', {
+      await logError('RPC call failed in generateFeedPayload', {
         dbQuery: {
           rpcName: 'generate_content_atom_feed',
           args: rpcArgs4, // Will be redacted by Pino's redact config

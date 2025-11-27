@@ -78,7 +78,8 @@ export const HighlightedText = memo(({ html, fallback, className = '' }: Highlig
           }
         })
         .catch((error) => {
-          logger.error('HighlightedText: Failed to load DOMPurify', error);
+          const normalized = normalizeError(error, 'HighlightedText: Failed to load DOMPurify');
+          logger.error('HighlightedText: Failed to load DOMPurify', normalized);
           setSafeHtml(null); // Trigger fallback rendering
         });
     }

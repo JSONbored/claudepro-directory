@@ -1,15 +1,14 @@
 'use client';
 
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
+import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { useEffect } from 'react';
 
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
+/**
+ * Client-side error boundary for account routes.
+ * Logs errors using the standardized client-side error boundary logging utility.
+ */
 export default function AccountError({
   error,
   reset,
@@ -18,16 +17,18 @@ export default function AccountError({
   reset: () => void;
 }) {
   useEffect(() => {
-    const requestId = generateRequestId();
-    const route = globalThis.location.pathname;
-    const normalized = normalizeError(error, 'Account segment rendering failed');
-    const logContext = createWebAppContextWithId(requestId, route, 'AccountErrorBoundary', {
-      segment: 'account',
-      ...(error.digest && { digest: error.digest }),
-      userAgent: globalThis.navigator.userAgent,
-      url: globalThis.location.href,
-    });
-    logger.error('Account error boundary triggered', normalized, logContext);
+    logClientErrorBoundary(
+      'Account error boundary triggered',
+      error,
+      globalThis.location.pathname,
+      error.stack ?? '',
+      {
+        errorDigest: error.digest,
+        userAgent: globalThis.navigator.userAgent,
+        url: globalThis.location.href,
+        segment: 'account',
+      }
+    );
   }, [error]);
 
   return (

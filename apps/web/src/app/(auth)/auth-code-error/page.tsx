@@ -1,13 +1,11 @@
 import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
+import {
+  generateRequestId,
+  logger,
+} from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, Button ,
   Card,
   CardContent,
@@ -28,11 +26,17 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AuthCodeError(properties: PagePropsWithSearchParams) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(
+  const operation = 'AuthCodeErrorPage';
+  const route = AUTH_CODE_ERROR_PATH;
+  const module = 'apps/web/src/app/(auth)/auth-code-error/page';
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    AUTH_CODE_ERROR_PATH,
-    'AuthCodeErrorPage'
-  );
+    operation,
+    route,
+    module,
+  });
 
   const searchParameters = await properties.searchParams;
 
@@ -45,13 +49,8 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
   const provider = (Array.isArray(rawProvider) ? rawProvider[0] : rawProvider) ?? 'unknown';
   const message = Array.isArray(rawMessage) ? rawMessage[0] : rawMessage;
 
-  const normalized = normalizeError(
-    'Authentication code error page accessed',
-    'AuthCodeErrorPage rendered'
-  );
-
-  logger.error('AuthCodeErrorPage rendered', normalized, {
-    ...logContext,
+  // Log page render (informational)
+  reqLogger.info('AuthCodeErrorPage rendered', {
     // Redact sensitive code/provider values
     hasCode: Boolean(code && code !== 'unknown'),
     provider: provider === 'unknown' ? 'unknown' : 'redacted',

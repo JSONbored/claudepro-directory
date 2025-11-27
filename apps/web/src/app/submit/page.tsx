@@ -5,19 +5,17 @@
 
 import { Constants, type Database } from '@heyclaude/database-types';
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getContentTemplates,
   getSubmissionDashboard,
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/server';
 import { cn, UI_CLASSES, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
@@ -109,16 +107,11 @@ function mapSubmissionTypeToContentCategory(
   }
 
   // Fallback if somehow an invalid value gets through (should never happen)
-  // Note: This is a module-level function, so it can't access component-level logContext
-  // Generate a new requestId for this warning (acceptable for utility functions)
-  const utilityRequestId = generateRequestId();
-  const utilityLogContext = createWebAppContextWithId(
-    utilityRequestId,
-    '/submit',
-    'SubmitPageUtility'
-  );
-  logger.warn('mapSubmissionTypeToContentCategory: invalid submission_type', undefined, {
-    ...utilityLogContext,
+  // Note: This is a module-level utility function, so it can't access component-level bindings
+  // Log with minimal context (utility functions don't need full request context)
+  logger.warn('mapSubmissionTypeToContentCategory: invalid submission_type', {
+    module: 'apps/web/src/app/submit',
+    operation: 'mapSubmissionTypeToContentCategory',
     submissionType,
   });
   return DEFAULT_CONTENT_CATEGORY;
@@ -157,95 +150,58 @@ export async function generateMetadata(): Promise<Metadata> {
 // revalidate is set at the top of the file
 
 export default async function SubmitPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/submit', 'SubmitPage');
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'SubmitPage',
+    route: '/submit',
+    module: 'apps/web/src/app/submit',
+  });
 
   // Section: Submission Dashboard
-  const dashboardSectionStart = Date.now();
   let dashboardData: Awaited<ReturnType<typeof getSubmissionDashboard>> = null;
   try {
     dashboardData = await getSubmissionDashboard(5, 5);
-    logger.info(
-      'SubmitPage: submission dashboard loaded',
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'submission-dashboard',
-          recentCount: 5,
-          statsCount: 5,
-          hasData: !!dashboardData,
-        },
-        dashboardSectionStart
-      )
-    );
+    reqLogger.info('SubmitPage: submission dashboard loaded', {
+      section: 'submission-dashboard',
+      recentCount: 5,
+      statsCount: 5,
+      hasData: !!dashboardData,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission dashboard');
-    logger.error(
-      'SubmitPage: getSubmissionDashboard failed',
-      normalized,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'submission-dashboard',
-          recentCount: 5,
-          statsCount: 5,
-          sectionDuration_ms: Date.now() - dashboardSectionStart,
-        },
-        startTime
-      )
-    );
+    reqLogger.error('SubmitPage: getSubmissionDashboard failed', normalized, {
+      section: 'submission-dashboard',
+      recentCount: 5,
+      statsCount: 5,
+    });
     // Continue with null dashboardData - page will render with fallback empty data
   }
 
   if (!dashboardData) {
-    logger.warn(
-      'SubmitPage: getSubmissionDashboard returned no data',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'submission-dashboard',
-          recentCount: 5,
-          statsCount: 5,
-          sectionDuration_ms: Date.now() - dashboardSectionStart,
-        },
-        startTime
-      )
-    );
+    reqLogger.warn('SubmitPage: getSubmissionDashboard returned no data', {
+      section: 'submission-dashboard',
+      recentCount: 5,
+      statsCount: 5,
+    });
   }
 
   // Section: Form Configuration
-  const formConfigSectionStart = Date.now();
   let formConfig: Awaited<ReturnType<typeof getSubmissionFormFields>> | null = null;
   try {
     formConfig = await getSubmissionFormFields();
-    logger.info(
-      'SubmitPage: form configuration loaded',
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'form-config',
-          hasConfig: !!formConfig,
-        },
-        formConfigSectionStart
-      )
-    );
+    reqLogger.info('SubmitPage: form configuration loaded', {
+      section: 'form-config',
+      hasConfig: !!formConfig,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission form config');
-    logger.error(
-      'SubmitPage: getSubmissionFormFields failed',
-      normalized,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'form-config',
-          sectionDuration_ms: Date.now() - formConfigSectionStart,
-        },
-        startTime
-      )
-    );
+    reqLogger.error('SubmitPage: getSubmissionFormFields failed', normalized, {
+      section: 'form-config',
+    });
     throw normalized;
   }
 
@@ -260,8 +216,7 @@ export default async function SubmitPage() {
           return type;
         }
         // This should never happen, but TypeScript requires handling the case
-        logger.warn('SubmitPage: invalid submission_type found', undefined, {
-          ...baseLogContext,
+        reqLogger.warn('SubmitPage: invalid submission_type found', {
           type,
         });
         return DEFAULT_CONTENT_CATEGORY;
@@ -270,14 +225,12 @@ export default async function SubmitPage() {
         isValidContentCategory(category)
       );
   // Section: Content Templates
-  const templatesSectionStart = Date.now();
   let templates: Awaited<ReturnType<typeof getContentTemplates>> = [];
   try {
     const templatePromises = supportedCategories.map((category) =>
       getContentTemplates(category).catch((error) => {
         const normalized = normalizeError(error, `Failed to load templates for ${category}`);
-        logger.error('SubmitPage: getContentTemplates failed for category', normalized, {
-          ...baseLogContext,
+        reqLogger.error('SubmitPage: getContentTemplates failed for category', normalized, {
           section: 'content-templates',
           category,
         });
@@ -286,27 +239,21 @@ export default async function SubmitPage() {
     );
     const templateResults = await Promise.all(templatePromises);
     templates = templateResults.flat();
-    logger.info(
-      'SubmitPage: content templates loaded',
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'content-templates',
-          templatesCount: templates.length,
-          categoriesCount: supportedCategories.length,
-        },
-        templatesSectionStart
-      )
-    );
+    reqLogger.info('SubmitPage: content templates loaded', {
+      section: 'content-templates',
+      templatesCount: templates.length,
+      categoriesCount: supportedCategories.length,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission templates');
-    logger.error('SubmitPage: getContentTemplates failed', normalized, baseLogContext);
+    reqLogger.error('SubmitPage: getContentTemplates failed', normalized, {
+      section: 'content-templates',
+    });
     // Continue with empty templates array - page will render without templates
   }
 
   if (templates.length === 0) {
-    logger.warn('SubmitPage: no templates returned from getContentTemplates', undefined, {
-      ...baseLogContext,
+    reqLogger.warn('SubmitPage: no templates returned from getContentTemplates', {
       supportedCategoriesCount: supportedCategories.length,
       categories: supportedCategories,
     });
@@ -335,7 +282,7 @@ export default async function SubmitPage() {
         merged_at: mergedAt,
         merged_at_formatted: formatTimeAgo(mergedAt),
         user:
-          submission.user && submission.user.name && submission.user.slug
+          submission.user?.name && submission.user.slug
             ? { name: submission.user.name, slug: submission.user.slug }
             : null,
       };

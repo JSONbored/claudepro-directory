@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
-import { generateRequestId } from '../utils/request-context.ts';
+import { generateRequestId } from '../utils/request-id.ts';
 
 const changeItemSchema = z.object({
   content: z.string(),
@@ -32,15 +32,23 @@ const changesSchema = z
 
 export type ChangelogChanges = z.infer<typeof changesSchema>;
 
-export function parseChangelogChanges(changes: unknown): ChangelogChanges {
+export function parseChangelogChanges(
+  changes: unknown,
+  requestId?: string
+): ChangelogChanges {
   try {
     return changesSchema.parse(changes);
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to parse changelog changes');
-    logger.error('Failed to parse changelog changes', normalized, {
-      requestId: generateRequestId(),
+    // Only create logger on error to avoid wasting work on successful path
+    const errorRequestId = requestId ?? generateRequestId();
+    const reqLogger = logger.child({
+      requestId: errorRequestId,
       operation: 'parseChangelogChanges',
+      route: 'utility-function', // Utility function - no specific route
+      module: 'packages/web-runtime/src/data/changelog',
     });
+    const normalized = normalizeError(error, 'Failed to parse changelog changes');
+    reqLogger.error('Failed to parse changelog changes', normalized);
     return {};
   }
 }

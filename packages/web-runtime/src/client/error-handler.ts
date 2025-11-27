@@ -73,7 +73,7 @@ export function createErrorBoundaryFallback(
           fallbackError: true,
         }
       );
-      logger.error('Error boundary fallback handler failed', normalized, logContext);
+      logger.error('Error boundary fallback handler failed', normalized, logContext, undefined);
     } catch {
       // Last resort - if even logging fails, just return error response
     }

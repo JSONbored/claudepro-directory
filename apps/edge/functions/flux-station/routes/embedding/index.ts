@@ -33,7 +33,6 @@ import {
   TIMEOUT_PRESETS,
   verifySupabaseDatabaseWebhook,
   withCircuitBreaker,
-  withDuration,
   withTimeout,
 } from '@heyclaude/shared-runtime';
 
@@ -151,7 +150,7 @@ async function storeEmbedding(
     if (error) {
       // Use dbQuery serializer for consistent database query formatting
       const logContext = createUtilityContext('generate-embedding', 'store-embedding');
-      logError('Failed to store embedding', {
+      await logError('Failed to store embedding', {
         ...logContext,
         dbQuery: {
           table: 'content_embeddings',
@@ -183,7 +182,6 @@ async function storeEmbedding(
  * Main webhook handler with analytics wrapper pattern
  */
 function respondWithAnalytics(handler: () => Promise<Response>): Promise<Response> {
-  const startedAt = performance.now();
   const logContext = createUtilityContext('generate-embedding', 'webhook-handler');
 
   // Initialize request logging with trace and bindings (Phase 1 & 2)
@@ -197,19 +195,17 @@ function respondWithAnalytics(handler: () => Promise<Response>): Promise<Respons
     function: logContext.function,
   });
 
-  const logEvent = (status: number, outcome: 'success' | 'error', error?: unknown) => {
-    const duration = Math.round(performance.now() - startedAt);
+  const logEvent = async (status: number, outcome: 'success' | 'error', error?: unknown) => {
     const errorData = error ? { error: errorToString(error) } : {};
     const logData = {
-      ...withDuration(logContext, startedAt),
+      ...logContext,
       status,
       outcome,
-      duration_ms: duration,
       ...errorData,
     };
 
     if (outcome === 'error') {
-      logError('Embedding generation failed', logContext, error);
+      await logError('Embedding generation failed', logContext, error);
     } else {
       logInfo('Embedding generation completed', logData);
     }
@@ -220,9 +216,9 @@ function respondWithAnalytics(handler: () => Promise<Response>): Promise<Respons
       logEvent(response.status, response.ok ? 'success' : 'error');
       return response;
     })
-    .catch((error) => {
-      logEvent(500, 'error', error);
-      return errorResponse(error, 'generate-embedding', publicCorsHeaders, logContext);
+    .catch(async (error) => {
+      await logEvent(500, 'error', error);
+      return await errorResponse(error, 'generate-embedding', publicCorsHeaders, logContext);
     });
 }
 
@@ -288,7 +284,7 @@ async function processEmbeddingGeneration(
       // Use dbQuery serializer for consistent database query formatting
       const errorLogContext = createUtilityContext('generate-embedding', 'fetch-content');
       if (fetchError) {
-        logError('Failed to fetch content for embedding generation', {
+        await logError('Failed to fetch content for embedding generation', {
           ...errorLogContext,
           dbQuery: {
             table: 'content',
@@ -339,7 +335,7 @@ async function processEmbeddingGeneration(
     const errorMsg = errorToString(error);
     errors.push(`Embedding generation failed: ${errorMsg}`);
     const errorLogContext = createUtilityContext('generate-embedding', 'generation-error');
-    logError(
+    await logError(
       'Embedding generation error',
       {
         ...errorLogContext,
@@ -398,7 +394,7 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
 
       if (!isValidQueueMessage(queueMessage)) {
         const errorLogContext = createUtilityContext('generate-embedding', 'invalid-message');
-        logError(
+        await logError(
           'Invalid queue message format',
           {
             ...errorLogContext,
@@ -415,7 +411,7 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
             msg_id: msg.msg_id.toString(),
           });
         } catch (deleteError) {
-          logError(
+          await logError(
             'Failed to delete invalid message',
             {
               ...errorLogContext,
@@ -501,7 +497,7 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
         }
       } catch (error) {
         const errorMsg = errorToString(error);
-        logError(
+        await logError(
           'Unexpected error processing embedding generation',
           {
             ...logContext,
@@ -528,8 +524,8 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
       200
     );
   } catch (error) {
-    logError('Fatal embedding generation queue error', logContext, error);
-    return errorResponse(error, 'generate-embedding:queue-fatal', publicCorsHeaders, logContext);
+    await logError('Fatal embedding generation queue error', logContext, error);
+    return await errorResponse(error, 'generate-embedding:queue-fatal', publicCorsHeaders, logContext);
   }
 }
 
@@ -537,7 +533,6 @@ export async function handleEmbeddingWebhook(req: Request): Promise<Response> {
   // Otherwise, handle as direct webhook (legacy)
   return respondWithAnalytics(async () => {
     const logContext = createUtilityContext('generate-embedding', 'webhook-handler');
-    const startTime = performance.now();
 
     // Only accept POST requests
     if (req.method !== 'POST') {
@@ -553,12 +548,12 @@ export async function handleEmbeddingWebhook(req: Request): Promise<Response> {
     // Verify webhook signature - INTERNAL_API_SECRET is required for security
     const webhookSecret = Deno.env.get('INTERNAL_API_SECRET');
     if (!webhookSecret) {
-      logError(
+      await logError(
         'INTERNAL_API_SECRET environment variable is not configured - rejecting request for security',
         logContext,
         new Error('Missing INTERNAL_API_SECRET')
       );
-      return errorResponse(
+      return await errorResponse(
         new Error('Server configuration error: INTERNAL_API_SECRET is not set'),
         'embedding-webhook:config_error',
         webhookCorsHeaders
@@ -720,7 +715,6 @@ export async function handleEmbeddingWebhook(req: Request): Promise<Response> {
       ...logContext,
       content_id: contentId,
       embedding_dim: embedding.length,
-      duration_ms: Math.round(performance.now() - startTime),
     });
 
     const securityHeaders = buildSecurityHeaders();

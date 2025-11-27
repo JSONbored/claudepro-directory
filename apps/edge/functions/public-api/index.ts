@@ -97,10 +97,10 @@ async function withRateLimit(
 // Define handlers map
 const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response>> = {
   root: (ctx) => handleDirectoryIndex(ctx),
-  'og-image': (ctx) => handleOGImageRequest(ctx.request, performance.now()),
-  'search-autocomplete': (ctx) => handleAutocomplete(ctx.request, performance.now()),
-  'search-facets': () => handleFacets(performance.now()),
-  'search-main': (ctx) => handleSearch(ctx.request, performance.now()),
+  'og-image': (ctx) => handleOGImageRequest(ctx.request),
+  'search-autocomplete': (ctx) => handleAutocomplete(ctx.request),
+  'search-facets': () => handleFacets(),
+  'search-main': (ctx) => handleSearch(ctx.request),
   'transform-highlight': (ctx) => handleContentHighlightRoute(ctx.request),
   'transform-process': (ctx) => handleContentProcessRoute(ctx.request),
   'transform-image': async (ctx) => {

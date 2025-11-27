@@ -2,8 +2,8 @@
  * Create Company Page - Standalone company creation flow
  */
 
-import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
@@ -23,19 +23,19 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function NewCompanyPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    '/account/companies/new',
-    'NewCompanyPage'
-  );
+    operation: 'NewCompanyPage',
+    route: '/account/companies/new',
+    module: 'apps/web/src/app/account/companies/new/page',
+  });
 
   const { user } = await getAuthenticatedUser({ context: 'NewCompanyPage' });
 
   if (!user) {
-    logger.warn('NewCompanyPage: unauthenticated access attempt', undefined, {
-      ...logContext,
-      timestamp: new Date().toISOString(),
-    });
+    reqLogger.warn('NewCompanyPage: unauthenticated access attempt');
     redirect('/login');
   }
 

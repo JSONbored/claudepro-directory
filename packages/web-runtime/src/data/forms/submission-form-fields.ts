@@ -20,7 +20,7 @@ import type {
   SelectFieldDefinition,
   SelectOption
 } from '../../types/component.types.ts';
-import { generateRequestId } from '../../utils/request-context.ts';
+import { generateRequestId } from '../../utils/request-id.ts';
 
 const SUBMISSION_CONTENT_TYPES = Constants.public.Enums.submission_type as readonly SubmissionContentType[];
 const FORM_FIELDS_CACHE_TAG = 'submission-form-fields';
@@ -124,6 +124,15 @@ function emptySection(): SubmissionFormSection {
 async function fetchFieldsForContentType(
   contentType: SubmissionContentType
 ): Promise<SubmissionFormSection> {
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const requestLogger = logger.child({
+    requestId,
+    operation: 'fetchFieldsForContentType',
+    route: 'utility-function', // Utility function - no specific route
+    module: 'data/forms/submission-form-fields',
+  });
+
   const result = await fetchCached(
     (client) => new MiscService(client).getFormFieldConfig({ p_form_type: contentType }),
     {
@@ -136,10 +145,11 @@ async function fetchFieldsForContentType(
   );
 
   if (!result?.fields) {
-    const normalized = normalizeError('RPC returned null or no fields', 'Failed to load form fields');
-    logger.error('Failed to load form fields', normalized, {
-      requestId: generateRequestId(),
-      operation: 'fetchFieldsForContentType',
+    const normalized = normalizeError(
+      new Error('RPC returned null or no fields'),
+      'Failed to load form fields'
+    );
+    requestLogger.error('Failed to load form fields', normalized, {
       contentType,
       source: 'SubmissionFormConfig',
     });

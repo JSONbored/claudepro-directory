@@ -28,20 +28,17 @@ function respondWithAnalytics(
   routeName: string,
   handler: () => Promise<Response>
 ): Promise<Response> {
-  const startedAt = performance.now();
   const logContext = createTransformApiContext(routeName, {
     path: 'transform-api',
     method: 'POST',
   });
 
-  const logEvent = (status: number, outcome: 'success' | 'error', error?: unknown) => {
-    const durationMs = Math.round(performance.now() - startedAt);
+  const logEvent = async (status: number, outcome: 'success' | 'error', error?: unknown) => {
     const logData: Record<string, unknown> = {
       route: routeName,
       path: 'transform-api',
       method: 'POST',
       status,
-      duration_ms: durationMs,
     };
 
     if (error) {
@@ -51,16 +48,16 @@ function respondWithAnalytics(
     if (outcome === 'success') {
       logInfo('Route hit', { ...logContext, ...logData });
     } else {
-      logError('Route error', { ...logContext, ...logData }, error);
+      await logError('Route error', { ...logContext, ...logData }, error);
     }
   };
 
   return handler()
-    .then((response) => {
-      logEvent(response.status, 'success');
+    .then(async (response) => {
+      await logEvent(response.status, 'success');
       return response;
     })
-    .catch((error) => {
+    .catch(async (error) => {
       let status = 500;
       if (error instanceof Response) {
         status = error.status;
@@ -78,7 +75,7 @@ function respondWithAnalytics(
           status = statusValue;
         }
       }
-      logEvent(status, 'error', error);
+      await logEvent(status, 'error', error);
       throw error;
     });
 }

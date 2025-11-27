@@ -60,22 +60,15 @@ export function useInfiniteScroll({
   threshold,
   root = null,
 }: UseInfiniteScrollOptions): UseInfiniteScrollReturn {
-  // Default values (loaded from static config at mount)
-  const [configDefaults, setConfigDefaults] = useState({
-    batchSize: 30,
-    threshold: 0.1,
-  });
-
-  // Load static config defaults on mount
-  useEffect(() => {
+  // Load static config defaults synchronously using lazy initialization
+  // This ensures config is loaded before displayCount is initialized
+  const [configDefaults] = useState(() => {
     const bundle = getHomepageConfigBundle();
-    if (bundle.appSettings) {
-      setConfigDefaults({
-        batchSize: bundle.appSettings['hooks.infinite_scroll.batch_size'] ?? 30,
-        threshold: bundle.appSettings['hooks.infinite_scroll.threshold'] ?? 0.1,
-      });
-    }
-  }, []);
+    return {
+      batchSize: bundle.appSettings?.['hooks.infinite_scroll.batch_size'] ?? 30,
+      threshold: bundle.appSettings?.['hooks.infinite_scroll.threshold'] ?? 0.1,
+    };
+  });
 
   // Merge user options with config defaults (user options take precedence)
   const finalBatchSize = batchSize ?? configDefaults.batchSize;

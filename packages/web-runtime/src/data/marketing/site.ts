@@ -6,7 +6,7 @@ import { cache } from 'react';
 import { getContentCount } from '../../data/content/index.ts';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
-import { generateRequestId } from '../../utils/request-context.ts';
+import { generateRequestId } from '../../utils/request-id.ts';
 
 const DESCRIPTION_FALLBACK =
   'Open-source directory of Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.';
@@ -36,6 +36,14 @@ interface VercelAnalyticsResponse {
 
 const getVisitorStats = unstable_cache(
   async (): Promise<VisitorStats> => {
+    // Create request-scoped child logger - do not mutate shared logger in cached function
+    const requestId = generateRequestId();
+    const requestLogger = logger.child({
+      requestId,
+      operation: 'getVisitorStats',
+      module: 'data/marketing/site',
+    });
+
     const { trackPerformance } = await import('../../utils/performance-metrics.ts');
     
     if (!(VERCEL_ANALYTICS_TOKEN && VERCEL_PROJECT_ID)) {
@@ -79,15 +87,11 @@ const getVisitorStats = unstable_cache(
       
       return result;
     } catch (error) {
-      // trackPerformance already logs the error, but we log again with context about fallback behavior
+      // trackPerformance logs performance metrics, but we need explicit error logging
       const normalized = normalizeError(error, 'Visitor stats fetch failed, using defaults');
-      const fallbackRequestId = generateRequestId();
-      logger.warn('Visitor stats fetch failed, using defaults', undefined, {
-        requestId: fallbackRequestId,
-        operation: 'getVisitorStats-fallback',
-        route: '/data/marketing/site',
+      requestLogger.warn('Visitor stats fetch failed, using defaults', {
+        err: normalized,
         source: 'vercel-analytics-api',
-        errorMessage: normalized.message,
         fallbackStrategy: 'defaults',
       });
       return HERO_DEFAULTS;
@@ -100,14 +104,21 @@ const getVisitorStats = unstable_cache(
 const getConfigurationCountCached = cache(async () => getContentCount());
 
 export async function getContentDescriptionCopy(): Promise<string> {
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const requestLogger = logger.child({
+    requestId,
+    operation: 'getContentDescriptionCopy',
+    module: 'data/marketing/site',
+  });
+
   try {
     const count = await getConfigurationCountCached();
     return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
   } catch (error) {
-    logger.error('MarketingSite: failed to build content description', normalizeError(error), {
-      requestId: generateRequestId(),
-      operation: 'getContentDescriptionCopy',
-    });
+    // Log error with normalized error object
+    const normalized = normalizeError(error, 'MarketingSite: failed to build content description');
+    requestLogger.error('MarketingSite: failed to build content description', normalized);
     return DESCRIPTION_FALLBACK;
   }
 }
@@ -119,6 +130,14 @@ export interface PartnerHeroStats {
 }
 
 export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const requestLogger = logger.child({
+    requestId,
+    operation: 'getPartnerHeroStats',
+    module: 'data/marketing/site',
+  });
+
   try {
     const configurationCount = await getConfigurationCountCached();
     const visitorStats = await getVisitorStats();
@@ -127,10 +146,9 @@ export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
       ...visitorStats,
     };
   } catch (error) {
-    logger.error('MarketingSite: failed to load hero stats', normalizeError(error), {
-      requestId: generateRequestId(),
-      operation: 'getPartnerHeroStats',
-    });
+    // Log error with normalized error object
+    const normalized = normalizeError(error, 'MarketingSite: failed to load hero stats');
+    requestLogger.error('MarketingSite: failed to load hero stats', normalized);
     return {
       configurationCount: 0,
       ...HERO_DEFAULTS,

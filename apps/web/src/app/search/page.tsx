@@ -5,18 +5,12 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import type { SearchFilters } from '@heyclaude/web-runtime/core';
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getHomepageData,
   getSearchFacets,
   searchContent, getHomepageCategoryIds 
 } from '@heyclaude/web-runtime/data';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -86,7 +80,7 @@ async function SearchResultsSection({
   quickTags,
   quickAuthors,
   quickCategories,
-  logContext,
+  requestId,
 }: {
   query: string;
   filters: SearchFilters;
@@ -100,46 +94,37 @@ async function SearchResultsSection({
   quickTags: string[];
   quickAuthors: string[];
   quickCategories: ContentCategory[];
-  logContext: ReturnType<typeof createWebAppContextWithId>;
+  requestId: string;
 }) {
+  // Create request-scoped child logger using parent requestId for correlation
+  const sectionLogger = logger.child({
+    requestId,
+    operation: 'SearchResultsSection',
+    route: '/search',
+    module: 'apps/web/src/app/search',
+  });
+
   // Section: Search Results
-  const resultsSectionStart = Date.now();
   // Use noCache for search queries (cache: 'no-store' equivalent)
   const noCache = query.length > 0 || hasUserFilters;
 
   let results: Awaited<ReturnType<typeof searchContent>> = [];
   try {
     results = await searchContent(query, filters, noCache);
-    logger.info(
-      'SearchPage: search results loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'search-results',
-          queryLength: query.length,
-          hasFilters: hasUserFilters,
-          resultsCount: results.length,
-          noCache,
-        },
-        resultsSectionStart
-      )
-    );
+    sectionLogger.info('SearchPage: search results loaded', {
+      section: 'search-results',
+      queryLength: query.length,
+      hasFilters: hasUserFilters,
+      resultsCount: results.length,
+      noCache,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Search content fetch failed');
-    logger.error(
-      'SearchPage: searchContent invocation failed',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'search-results',
-          query,
-          hasFilters: hasUserFilters,
-          sectionDuration_ms: Date.now() - resultsSectionStart,
-        },
-        resultsSectionStart
-      )
-    );
+    sectionLogger.error('SearchPage: searchContent invocation failed', normalized, {
+      section: 'search-results',
+      query,
+      hasFilters: hasUserFilters,
+    });
     throw normalized;
   }
 
@@ -163,12 +148,19 @@ async function SearchResultsSection({
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProperties) {
-  const startTime = Date.now();
+  const resolvedParameters = await searchParams;
+  
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/search', 'SearchPage');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'SearchPage',
+    route: '/search',
+    module: 'apps/web/src/app/search',
+  });
 
-  const resolvedParameters = await searchParams;
   const query = (resolvedParameters.q ?? '').trim().slice(0, 200);
 
   const categories = resolvedParameters.category?.split(',').filter(Boolean);
@@ -197,7 +189,6 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
   const hasQueryOrFilters = query.length > 0 || hasUserFilters;
 
   // Section: Search Facets
-  const facetsSectionStart = Date.now();
   let facetAggregate: SearchFacetAggregate | null = null;
   let facetOptions = {
     tags: [] as string[],
@@ -211,37 +202,20 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
       authors: facetAggregate.authors,
       categories: facetAggregate.categories,
     };
-    logger.info(
-      'SearchPage: facets loaded',
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'facets',
-          tagsCount: facetOptions.tags.length,
-          authorsCount: facetOptions.authors.length,
-          categoriesCount: facetOptions.categories.length,
-        },
-        facetsSectionStart
-      )
-    );
+    reqLogger.info('SearchPage: facets loaded', {
+      section: 'facets',
+      tagsCount: facetOptions.tags.length,
+      authorsCount: facetOptions.authors.length,
+      categoriesCount: facetOptions.categories.length,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Search facets fetch failed');
-    logger.error(
-      'SearchPage: getSearchFacets invocation failed',
-      normalized,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'facets',
-          sectionDuration_ms: Date.now() - facetsSectionStart,
-        },
-        startTime
-      )
-    );
+    reqLogger.error('SearchPage: getSearchFacets invocation failed', normalized, {
+      section: 'facets',
+    });
   }
 
   // Section: Zero-State Suggestions
-  const suggestionsSectionStart = Date.now();
   let zeroStateSuggestions: Awaited<ReturnType<typeof searchContent>> = [];
   if (!hasQueryOrFilters) {
     try {
@@ -251,34 +225,18 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
       zeroStateSuggestions = categoryData
         ? (Object.values(categoryData).flat() as Awaited<ReturnType<typeof searchContent>>)
         : [];
-      logger.info(
-        'SearchPage: zero-state suggestions loaded',
-        withDuration(
-          {
-            ...baseLogContext,
-            section: 'zero-state-suggestions',
-            suggestionsCount: zeroStateSuggestions.length,
-          },
-          suggestionsSectionStart
-        )
-      );
+      reqLogger.info('SearchPage: zero-state suggestions loaded', {
+        section: 'zero-state-suggestions',
+        suggestionsCount: zeroStateSuggestions.length,
+      });
     } catch (error) {
       const normalized = normalizeError(
         error,
         'SearchPage: getHomepageData for suggestions failed'
       );
-      logger.error(
-        'SearchPage: suggestions fetch failed',
-        normalized,
-        withDuration(
-          {
-            ...baseLogContext,
-            section: 'zero-state-suggestions',
-            sectionDuration_ms: Date.now() - suggestionsSectionStart,
-          },
-          startTime
-        )
-      );
+      reqLogger.error('SearchPage: suggestions fetch failed', normalized, {
+        section: 'zero-state-suggestions',
+      });
     }
   }
 
@@ -305,20 +263,13 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
   );
 
   // Final summary log
-  logger.info(
-    'SearchPage: page render completed',
-    withDuration(
-      {
-        ...baseLogContext,
-        section: 'page-render',
-        hasQuery: query.length > 0,
-        hasFilters: hasUserFilters,
-        facetsLoaded: !!facetAggregate,
-        suggestionsCount: zeroStateSuggestions.length,
-      },
-      startTime
-    )
-  );
+  reqLogger.info('SearchPage: page render completed', {
+    section: 'page-render',
+    hasQuery: query.length > 0,
+    hasFilters: hasUserFilters,
+    facetsLoaded: !!facetAggregate,
+    suggestionsCount: zeroStateSuggestions.length,
+  });
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -354,7 +305,7 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
             quickTags={quickTags}
             quickAuthors={quickAuthors}
             quickCategories={quickCategories}
-            logContext={baseLogContext}
+            requestId={requestId}
           />
         </Suspense>
         <Suspense fallback={null}>

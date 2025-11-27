@@ -36,7 +36,6 @@ import {
   TIMEOUT_PRESETS,
   validateQueryString,
   withCircuitBreaker,
-  withDuration,
   withTimeout,
 } from '@heyclaude/shared-runtime';
 import { getSeoMetadata } from '../../lib/seo.ts';
@@ -549,7 +548,7 @@ function generateOGImage(params: OGImageParams): Response {
 /**
  * Handle OG image generation request
  */
-export async function handleOGImageRequest(req: Request, startTime: number): Promise<Response> {
+export async function handleOGImageRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const routeParam = url.searchParams.get('route');
   const titleParam = url.searchParams.get('title');
@@ -619,7 +618,7 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
   try {
     const imageResponse = generateOGImage(params);
     logInfo('OG image generated', {
-      ...withDuration(logContext, startTime),
+      ...logContext,
       title: params.title,
       type: params.type,
       tagsCount: params.tags.length,
@@ -653,7 +652,7 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
       headers,
     });
   } catch (error) {
-    logError('Failed to generate OG image', withDuration(logContext, startTime), error);
-    return errorResponse(error, 'og-image:generate', CORS, withDuration(logContext, startTime));
+    await logError('Failed to generate OG image', logContext, error);
+    return await errorResponse(error, 'og-image:generate', CORS, logContext);
   }
 }

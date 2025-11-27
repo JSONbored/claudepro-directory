@@ -6,7 +6,6 @@
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
 export const revalidate = 7200;
-// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API requires this exact name
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
@@ -16,13 +15,12 @@ export const dynamicParams = true; // Allow unknown slugs to be rendered on dema
  * Strategy: Pre-render popular content (most likely to be accessed) while allowing
  * other content to be rendered on-demand via ISR. This balances build time with performance.
  */
-// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API requires this exact name
 export async function generateStaticParams() {
   // Dynamic imports only for data modules (category/content)
   const { getHomepageCategoryIds } = await import('@heyclaude/web-runtime/data/config/category');
   const { getContentByCategory } = await import('@heyclaude/web-runtime/data/content');
-  const { logger, createWebAppContextWithId, generateRequestId, normalizeError } = await import(
-    '@heyclaude/web-runtime/core'
+  const { logger, generateRequestId, normalizeError } = await import(
+    '@heyclaude/web-runtime/logging/server'
   );
 
   const categories = getHomepageCategoryIds;
@@ -50,25 +48,22 @@ export async function generateStaticParams() {
         return { category, params: categoryParameters };
       } catch (error) {
         // Log error but continue with other categories
-        // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
-        const staticParamsRequestId = generateRequestId();
-        // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
-        const staticParamsLogContext = createWebAppContextWithId(
-          staticParamsRequestId,
-          `/${category}`,
-          'generateStaticParams',
-          {
-            category,
-          }
-        );
+        const requestId = generateRequestId();
+        const operation = 'generateStaticParams';
+        const route = `/${category}`;
+        const module = 'apps/web/src/app/[category]/[slug]/page';
+        const reqLogger = logger.child({
+          requestId,
+          operation,
+          route,
+          module,
+        });
         const normalized = normalizeError(
           error,
           'Failed to load content for category in generateStaticParams'
         );
-        logger.error('generateStaticParams: failed to load content for category', normalized, {
-          ...staticParamsLogContext,
-          requestId: staticParamsRequestId,
-          operation: 'generateStaticParams',
+        reqLogger.error('generateStaticParams: failed to load content for category', normalized, {
+          category,
           section: 'static-params-generation',
         });
         return { category, params: [] };
@@ -87,16 +82,13 @@ export async function generateStaticParams() {
 }
 
 import { Constants, type Database } from '@heyclaude/database-types';
+import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
+import type { RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
 import {
-  createWebAppContextWithId,
-  ensureStringArray,
   generateRequestId,
-  isValidCategory,
   logger,
   normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import type { RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
+} from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getCategoryConfig,
@@ -161,30 +153,27 @@ export default async function DetailPage({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }) {
-  const startTime = Date.now();
   const { category, slug } = await params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, `/${category}/${slug}`, 'DetailPage', {
-    category,
-    slug,
+  const operation = 'DetailPage';
+  const route = `/${category}/${slug}`;
+  const module = 'apps/web/src/app/[category]/[slug]/page';
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation,
+    route,
+    module,
   });
 
   // Section: Category Validation
-  const validationSectionStart = Date.now();
   if (!isValidCategory(category)) {
-    logger.warn(
-      'Invalid category in detail page',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'category-validation',
-        },
-        validationSectionStart
-      )
-    );
+    reqLogger.warn('Invalid category in detail page', {
+      section: 'category-validation',
+    });
     notFound();
   }
 
@@ -194,23 +183,13 @@ export default async function DetailPage({
       new Error('Category config is null'),
       'DetailPage: missing category config'
     );
-    logger.error(
-      'DetailPage: missing category config',
-      normalized,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'category-validation',
-          sectionDuration_ms: Date.now() - validationSectionStart,
-        },
-        startTime
-      )
-    );
+    reqLogger.error('DetailPage: missing category config', normalized, {
+      section: 'category-validation',
+    });
     notFound();
   }
 
   // Section: Core Content Fetch
-  const coreContentSectionStart = Date.now();
   // Optimized for PPR: Split core content (critical) from analytics/related (deferred)
   // 1. Fetch Core Content (Blocking - for LCP)
   const coreData = await getContentDetailCore({ category, slug });
@@ -219,18 +198,9 @@ export default async function DetailPage({
     // Content may not exist (deleted, never existed, or invalid slug)
     // This is expected behavior during build-time static generation when generateStaticParams
     // generates paths for content that may have been removed from the database
-    logger.warn(
-      'DetailPage: get_content_detail_core returned null - content may not exist',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'core-content-fetch',
-          sectionDuration_ms: Date.now() - coreContentSectionStart,
-        },
-        startTime
-      )
-    );
+    reqLogger.warn('DetailPage: get_content_detail_core returned null - content may not exist', {
+      section: 'core-content-fetch',
+    });
     notFound();
   }
 
@@ -238,32 +208,16 @@ export default async function DetailPage({
 
   // Null safety: If content doesn't exist in database, return 404
   if (!fullItem) {
-    logger.warn(
-      'Content not found in RPC response',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'core-content-fetch',
-          sectionDuration_ms: Date.now() - coreContentSectionStart,
-          rpcFunction: 'get_content_detail_core',
-        },
-        startTime
-      )
-    );
+    reqLogger.warn('Content not found in RPC response', {
+      section: 'core-content-fetch',
+      rpcFunction: 'get_content_detail_core',
+    });
     notFound();
   }
 
-  logger.info(
-    'DetailPage: core content loaded',
-    withDuration(
-      {
-        ...baseLogContext,
-        section: 'core-content-fetch',
-      },
-      coreContentSectionStart
-    )
-  );
+  reqLogger.info('DetailPage: core content loaded', {
+    section: 'core-content-fetch',
+  });
 
   // Section: Analytics & Related Fetch (Non-blocking - for Suspense)
   // 2. Fetch Analytics & Related (Non-blocking promise - for Suspense)
@@ -286,18 +240,11 @@ export default async function DetailPage({
   // This eliminates runtime overhead and follows DRY principles
 
   // Final summary log
-  logger.info(
-    'DetailPage: page render completed',
-    withDuration(
-      {
-        ...baseLogContext,
-        section: 'page-render',
-        category,
-        slug,
-      },
-      startTime
-    )
-  );
+  reqLogger.info('DetailPage: page render completed', {
+    section: 'page-render',
+    category,
+    slug,
+  });
 
   // Unified rendering: All categories use UnifiedDetailPage
   // Collections pass their specialized sections via collectionSections prop

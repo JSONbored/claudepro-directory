@@ -4,14 +4,7 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  type JobsFilterResult,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import type { JobsFilterResult } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getFilteredJobs } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -23,6 +16,7 @@ import {
   Search,
   SlidersHorizontal,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import { POSITION_PATTERNS, UI_CLASSES, UnifiedBadge, Button , Card, CardContent, Input ,
   Select,
@@ -89,7 +83,6 @@ async function JobsListSection({
   sort,
   limit,
   offset,
-  logContext,
 }: {
   searchQuery?: string | undefined;
   category?: string | undefined;
@@ -99,8 +92,15 @@ async function JobsListSection({
   sort: SortOption;
   limit: number;
   offset: number;
-  logContext: ReturnType<typeof createWebAppContextWithId>;
 }) {
+  // Create request-scoped child logger for this component
+  const sectionRequestId = generateRequestId();
+  const sectionLogger = logger.child({
+    requestId: sectionRequestId,
+    operation: 'JobsListSection',
+    route: '/jobs',
+    module: 'apps/web/src/app/jobs',
+  });
    
   const hasFilters = Boolean(
     (searchQuery ?? false) ||
@@ -130,8 +130,7 @@ async function JobsListSection({
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs list');
-    logger.error('JobsPage: getFilteredJobs failed', normalized, {
-      ...logContext,
+    sectionLogger.error('JobsPage: getFilteredJobs failed', normalized, {
       hasSearch: Boolean(searchQuery),
       category: category ?? 'all',
       employment: employment ?? 'any',
@@ -212,13 +211,18 @@ async function JobsListSection({
 }
 
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/jobs', 'JobsPage');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'JobsPage',
+    route: '/jobs',
+    module: 'apps/web/src/app/jobs',
+  });
 
   // Section: Parameter Parsing
-  const parameterParsingSectionStart = Date.now();
   const rawParameters = (await searchParams) ?? {};
 
   const searchQuery =
@@ -239,12 +243,8 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   const limit = Math.min(Number(limitParameter) || 20, 100);
   const offset = (page - 1) * limit;
 
-  logger.info('Jobs page accessed', {
-    ...withDuration(baseLogContext, startTime),
-    requestId,
-    operation: 'JobsPage',
+  reqLogger.info('Jobs page accessed', {
     section: 'parameter-parsing',
-    sectionDuration_ms: Date.now() - parameterParsingSectionStart,
     searchQuery: searchQuery ?? 'none',
     category: category ?? 'all',
     employment: employment ?? 'any',
@@ -256,19 +256,14 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   });
 
   // Section: Total Jobs Count Fetch
-  const totalCountSectionStart = Date.now();
   let totalJobs = 0;
   try {
     const totalResponse = await getFilteredJobs({ limit: 1, offset: 0 }, false);
     totalJobs = totalResponse?.total_count ?? 0;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs total count');
-    logger.error('JobsPage: getFilteredJobs for total count failed', normalized, {
-      ...withDuration(baseLogContext, startTime),
-      requestId,
-      operation: 'JobsPage',
+    reqLogger.error('JobsPage: getFilteredJobs for total count failed', normalized, {
       section: 'total-count-fetch',
-      sectionDuration_ms: Date.now() - totalCountSectionStart,
     });
   }
 
@@ -588,7 +583,6 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 sort={sort}
                 limit={limit}
                 offset={offset}
-                logContext={baseLogContext}
               />
             </Suspense>
           </div>

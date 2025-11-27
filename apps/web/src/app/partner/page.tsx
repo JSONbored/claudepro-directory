@@ -1,11 +1,4 @@
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  getPartnerContactChannels,
-  getPartnerCtas,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
+import { getPartnerContactChannels, getPartnerCtas } from '@heyclaude/web-runtime/core';
 import { getPartnerHeroStats, getPartnerPricing } from '@heyclaude/web-runtime/data';
 import {
   BarChart,
@@ -18,6 +11,11 @@ import {
   MousePointer,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/server';
 import { RESPONSIVE_PATTERNS, UI_CLASSES, UnifiedBadge, HoverCard , Button ,
   Card,
   CardContent,
@@ -38,14 +36,23 @@ export const revalidate = 86_400;
 export default async function PartnerPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, '/partner', 'PartnerPage');
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'PartnerPage',
+    route: '/partner',
+    module: 'app/partner',
+  });
 
   let pricing: ReturnType<typeof getPartnerPricing>;
   try {
     pricing = getPartnerPricing();
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load pricing config');
-    logger.error('PartnerPage: getPartnerPricing failed', normalized, logContext);
+    reqLogger.error('PartnerPage: getPartnerPricing failed', normalized, {
+      section: 'pricing-config',
+    });
     // Use defaults instead of throwing to prevent page crash
     pricing = {
       jobs: {

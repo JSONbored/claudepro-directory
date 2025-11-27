@@ -29,7 +29,7 @@ export async function handleGetRelatedContent(
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('RPC call failed in getRelatedContent', {
+    await logError('RPC call failed in getRelatedContent', {
       dbQuery: {
         rpcName: 'get_related_content',
         args: rpcArgs, // Will be redacted by Pino's redact config

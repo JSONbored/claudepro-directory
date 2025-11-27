@@ -205,7 +205,7 @@ export async function handleSeoRoute(
       },
     });
   } catch (error) {
-    logError('SEO generation failed', finalLogContext, error);
-    return errorResponse(error, 'data-api:generate_metadata_complete', CORS, finalLogContext);
+    await logError('SEO generation failed', finalLogContext, error);
+    return await errorResponse(error, 'data-api:generate_metadata_complete', CORS, finalLogContext);
   }
 }

@@ -1,13 +1,8 @@
 'use client';
 
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
+import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { UI_CLASSES, Button , Card  } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -21,17 +16,18 @@ export default function ErrorBoundary({
   reset: () => void;
 }) {
   useEffect(() => {
-    const requestId = generateRequestId();
-    const route = globalThis.location.pathname;
-    const normalized = normalizeError(error, 'Application error boundary triggered');
-    const logContext = createWebAppContextWithId(requestId, route, 'ApplicationErrorBoundary', {
-      errorDigest: error.digest ?? 'no-digest',
-      digestAvailable: Boolean(error.digest),
-      userAgent: globalThis.navigator.userAgent,
-      url: globalThis.location.href,
-      segment: 'global',
-    });
-    logger.error('Application error boundary triggered', normalized, logContext);
+    logClientErrorBoundary(
+      'Global error boundary triggered',
+      error,
+      globalThis.location.pathname,
+      error.stack ?? '',
+      {
+        errorDigest: error.digest,
+        userAgent: globalThis.navigator.userAgent,
+        url: globalThis.location.href,
+        segment: 'global-error',
+      }
+    );
   }, [error]);
 
   return (

@@ -8,7 +8,7 @@ import { fetchCached } from '../cache/fetch-cached.ts';
 import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
 import { pulseJobSearch } from '../pulse.ts';
-import { generateRequestId } from '../utils/request-context.ts';
+import { generateRequestId } from '../utils/request-id.ts';
 import {
   isValidJobCategory,
   isValidJobType,
@@ -34,6 +34,14 @@ export interface JobsFilterOptions {
 async function getFilteredJobsDirect(
   options: JobsFilterOptions
 ): Promise<JobsFilterResult | null> {
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getFilteredJobsDirect',
+    module: 'data/jobs',
+  });
+
   const { trackPerformance } = await import('../utils/performance-metrics');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
   const { searchQuery, category, employment, experience, remote, limit, offset, sort } = options;
@@ -100,13 +108,9 @@ async function getFilteredJobsDirect(
   } catch (error) {
     // trackPerformance already logs the error, but we log again with context about fallback behavior
     const normalized = normalizeError(error, 'Job filtering failed, returning null');
-    const fallbackRequestId = generateRequestId();
-    logger.warn('Job filtering failed, returning null', undefined, {
-      requestId: fallbackRequestId,
-      operation: 'getFilteredJobsDirect-fallback',
-      route: '/data/jobs',
+    reqLogger.warn('Job filtering failed, returning null', {
+      err: normalized,
       ...filtersLog,
-      errorMessage: normalized.message,
       fallbackStrategy: 'null',
     });
     return null;
@@ -123,6 +127,14 @@ export async function getFilteredJobs(
   options: JobsFilterOptions,
   noCache = false
 ): Promise<JobsFilterResult | null> {
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getFilteredJobs',
+    module: 'data/jobs',
+  });
+
   const { searchQuery, category, employment, experience, remote, limit, offset, sort } = options;
   const hasFilters = Boolean(
     (searchQuery ?? '') !== '' ||
@@ -145,7 +157,8 @@ export async function getFilteredJobs(
 
   // If no filters, use standard list (cached)
   if (!hasFilters) {
-    return fetchCached(
+    try {
+      return await fetchCached(
       (client: SupabaseClient<Database>) => new SearchService(client).filterJobs({
         ...(limit === undefined ? {} : { p_limit: limit }),
         ...(offset === undefined ? {} : { p_offset: offset })
@@ -157,7 +170,15 @@ export async function getFilteredJobs(
         fallback: null,
         logMeta: filtersLog
       }
-    );
+      );
+    } catch (error) {
+      // Log error if fetchCached fails unexpectedly (e.g., cache system error)
+      const normalized = normalizeError(error, 'getFilteredJobs: failed to fetch jobs list');
+      reqLogger.error('getFilteredJobs: failed to fetch jobs list', normalized, {
+        ...filtersLog,
+      });
+      return null;
+    }
   }
 
   // If filters present and noCache=true, bypass cache (uncached SSR)
@@ -165,10 +186,16 @@ export async function getFilteredJobs(
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
       pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
-        const normalized = normalizeError(error);
+        // Note: Using explicit context here for nested async callbacks
+        // While parent bindings are available at runtime, explicit context ensures
+        // proper correlation and traceability for fire-and-forget operations
+        const normalized = normalizeError(error, 'Failed to pulse job search');
+        const callbackRequestId = generateRequestId();
         logger.error('Failed to pulse job search', normalized, {
-          requestId: generateRequestId(),
+          requestId: callbackRequestId,
           operation: 'pulseJobSearch',
+          module: 'data/jobs',
+          searchQuery,
         });
       });
     }
@@ -180,10 +207,16 @@ export async function getFilteredJobs(
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
       pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
-        const normalized = normalizeError(error);
+        // Note: Using explicit context here for nested async callbacks
+        // While parent bindings are available at runtime, explicit context ensures
+        // proper correlation and traceability for fire-and-forget operations
+        const normalized = normalizeError(error, 'Failed to pulse job search');
+        const callbackRequestId = generateRequestId();
         logger.error('Failed to pulse job search', normalized, {
-          requestId: generateRequestId(),
+          requestId: callbackRequestId,
           operation: 'pulseJobSearch',
+          module: 'data/jobs',
+          searchQuery,
         });
       });
     }
@@ -239,10 +272,9 @@ export async function getFilteredJobs(
       }
     );
   } catch (error) {
-    const normalized = normalizeError(error);
-    logger.error('Failed to fetch filtered jobs', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getFilteredJobs',
+    // Log error if fetchCached fails unexpectedly (e.g., cache system error)
+    const normalized = normalizeError(error, 'Failed to fetch filtered jobs');
+    reqLogger.error('Failed to fetch filtered jobs', normalized, {
       ...filtersLog,
     });
     return null;
@@ -253,28 +285,64 @@ export async function getFilteredJobs(
  * Gets a single job by slug
  */
 export async function getJobBySlug(slug: string) {
-  return fetchCached(
-    (client: SupabaseClient<Database>) => new JobsService(client).getJobBySlug({ p_slug: slug }),
-    {
-      keyParts: ['job', slug],
-      tags: [`job-${slug}`],
-      ttlKey: 'cache.jobs_detail.ttl_seconds',
-      fallback: null
-    }
-  );
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getJobBySlug',
+    module: 'data/jobs',
+  });
+
+  try {
+    return await fetchCached(
+      (client: SupabaseClient<Database>) => new JobsService(client).getJobBySlug({ p_slug: slug }),
+      {
+        keyParts: ['job', slug],
+        tags: [`job-${slug}`],
+        ttlKey: 'cache.jobs_detail.ttl_seconds',
+        fallback: null,
+        logMeta: { slug },
+      }
+    );
+  } catch (error) {
+    // Log error if fetchCached fails unexpectedly (e.g., cache system error)
+    const normalized = normalizeError(error, 'getJobBySlug failed');
+    reqLogger.error('getJobBySlug: unexpected error', normalized, {
+      slug,
+    });
+    return null;
+  }
 }
 
 /**
  * Gets featured jobs
  */
 export async function getFeaturedJobs(limit = 5) {
-  return fetchCached(
-    (client: SupabaseClient<Database>) => new JobsService(client).getFeaturedJobs(),
-    {
-      keyParts: ['jobs-featured', limit],
-      tags: ['jobs-featured'],
-      ttlKey: 'cache.jobs.ttl_seconds',
-      fallback: []
-    }
-  );
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getFeaturedJobs',
+    module: 'data/jobs',
+  });
+
+  try {
+    return await fetchCached(
+      (client: SupabaseClient<Database>) => new JobsService(client).getFeaturedJobs(),
+      {
+        keyParts: ['jobs-featured', limit],
+        tags: ['jobs-featured'],
+        ttlKey: 'cache.jobs.ttl_seconds',
+        fallback: [],
+        logMeta: { limit },
+      }
+    );
+  } catch (error) {
+    // Log error if fetchCached fails unexpectedly (e.g., cache system error)
+    const normalized = normalizeError(error, 'getFeaturedJobs failed');
+    reqLogger.error('getFeaturedJobs: unexpected error', normalized, {
+      limit,
+    });
+    return [];
+  }
 }

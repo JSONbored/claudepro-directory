@@ -3,15 +3,7 @@
  */
 
 import type { JobStatus } from '@heyclaude/web-runtime';
-import {
-  createWebAppContextWithId,
-  formatRelativeDate,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { formatRelativeDate } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -19,6 +11,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
   Card,
   CardContent,
@@ -56,96 +49,57 @@ export async function generateMetadata({ params }: JobAnalyticsPageProperties): 
 }
 
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProperties) {
-  const startTime = Date.now();
   const { id } = await params;
-
+  
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    `/account/jobs/${id}/analytics`,
-    'JobAnalyticsPage',
-    {
-      jobId: id,
-    }
-  );
+    operation: 'JobAnalyticsPage',
+    route: `/account/jobs/${id}/analytics`,
+    module: 'apps/web/src/app/account/jobs/[id]/analytics',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'JobAnalyticsPage' });
 
   if (!user) {
-    logger.warn(
-      'JobAnalyticsPage: unauthenticated access attempt',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'authentication',
-        },
-        authSectionStart
-      )
-    );
+    reqLogger.warn('JobAnalyticsPage: unauthenticated access attempt', {
+      section: 'authentication',
+    });
     redirect(ROUTES.LOGIN);
   }
 
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
-  logger.info(
-    'JobAnalyticsPage: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+  
+  userLogger.info('JobAnalyticsPage: authentication successful', {
+    section: 'authentication',
+  });
 
   // Section: Job Data Fetch
-  const jobSectionStart = Date.now();
   let job: Awaited<ReturnType<typeof getUserJobById>> = null;
   try {
     job = await getUserJobById(user.id, id);
-    logger.info(
-      'JobAnalyticsPage: job data loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'job-data-fetch',
-          hasJob: !!job,
-        },
-        jobSectionStart
-      )
-    );
+    userLogger.info('JobAnalyticsPage: job data loaded', {
+      section: 'job-data-fetch',
+      hasJob: !!job,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job analytics detail');
-    logger.error(
-      'JobAnalyticsPage: getUserJobById threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'job-data-fetch',
-          sectionDuration_ms: Date.now() - jobSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.error('JobAnalyticsPage: getUserJobById threw', normalized, {
+      section: 'job-data-fetch',
+    });
   }
   if (!job) {
-    logger.warn(
-      'JobAnalyticsPage: job not found or not owned by user',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          section: 'job-data-fetch',
-          sectionDuration_ms: Date.now() - jobSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.warn('JobAnalyticsPage: job not found or not owned by user', {
+      section: 'job-data-fetch',
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -173,18 +127,11 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
   const status: JobStatus = job.status;
 
   // Final summary log
-  logger.info(
-    'JobAnalyticsPage: page render completed',
-    withDuration(
-      {
-        ...logContext,
-        section: 'page-render',
-        jobId: id,
-        status,
-      },
-      startTime
-    )
-  );
+  userLogger.info('JobAnalyticsPage: page render completed', {
+    section: 'page-render',
+    jobId: id,
+    status,
+  });
 
   return (
     <div className="space-y-6">

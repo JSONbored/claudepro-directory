@@ -23,16 +23,32 @@ import { createPinoConfig } from './config.ts';
  * 
  * Supports ALL Pino features via the comprehensive PinoConfigOptions interface.
  * 
+ * **Important:** The `destination` parameter is NOT a config option - it's passed as the second argument.
+ * Use this function's second parameter for destinations (files, streams, etc.).
+ * 
  * @param options - Optional configuration overrides (includes EVERY Pino feature)
+ * @param destination - Optional destination stream/file (use `pino.destination()` or `pino.multistream()`)
  * @returns Pino logger instance with all features available
+ * 
+ * @remarks
+ * **Performance:** By default, logs to stdout/stderr (async, optimal performance).
+ * For file logging, use `pino.destination()` for optimal performance (uses SonicBoom).
+ * 
+ * **Vercel Compatibility:** Default destination (stdout) works perfectly with Vercel logs.
+ * No additional configuration needed - all JSON logs are automatically captured.
+ * 
+ * **Future-Proof for External Services:**
+ * - Use `transport` option in config for external services (Datadog, BetterStack, etc.)
+ * - Or use `destination` parameter for file logging
+ * - Both can be used together (transport for external, destination for local)
  * 
  * @example
  * ```typescript
  * import { createLogger } from '@heyclaude/shared-runtime/logger';
  * 
- * // Basic usage
+ * // Basic usage (logs to stdout - works with Vercel)
  * const logger = createLogger({ service: 'my-service' });
- * logger.info('Hello world', { userId: '123' });
+ * logger.info({ userId: '123' }, 'Hello world');
  * logger.error({ err: new Error('Something went wrong') }, 'Error occurred');
  * 
  * // Create child logger with additional context
@@ -59,31 +75,43 @@ import { createPinoConfig } from './config.ts';
  *   }
  * });
  * 
- * // Advanced: File destination
+ * // Advanced: File destination (CORRECT way)
  * import { destination } from 'pino';
- * const fileLogger = createLogger({
- *   service: 'file-logger',
- *   destination: destination('./app.log')
- * });
+ * const fileLogger = createLogger(
+ *   { service: 'file-logger' },
+ *   destination('./app.log') // Second parameter, not in options!
+ * );
  * 
- * // Advanced: Multiple destinations
+ * // Advanced: Multiple destinations (CORRECT way)
  * import { multistream } from 'pino';
- * const multiLogger = createLogger({
- *   service: 'multi',
- *   destination: multistream([
+ * const multiLogger = createLogger(
+ *   { service: 'multi' },
+ *   multistream([
  *     { stream: process.stdout, level: 'info' },
  *     { stream: process.stderr, level: 'error' }
- *   ])
- * });
+ *   ]) // Second parameter, not in options!
+ * );
  * 
- * // Advanced: Transport
+ * // Advanced: Transport (for external services)
  * const transportLogger = createLogger({
  *   service: 'transport',
  *   transport: {
- *     target: 'pino-pretty',
+ *     target: 'pino-pretty', // Development only
  *     options: { colorize: true }
  *   }
  * });
+ * 
+ * // Advanced: Transport + Destination (both together)
+ * const hybridLogger = createLogger(
+ *   {
+ *     service: 'hybrid',
+ *     transport: {
+ *       target: 'pino-datadog-transport',
+ *       options: { ddClientConf: { ... } }
+ *     }
+ *   },
+ *   destination('./local.log') // Also log to file
+ * );
  * 
  * // Advanced: Browser transmit
  * const browserLogger = createLogger({
@@ -101,9 +129,17 @@ import { createPinoConfig } from './config.ts';
  *   }
  * });
  * ```
+ * 
+ * @see {@link https://getpino.io/#/docs/api#pino-options-destination | Pino Destination Documentation}
+ * @see {@link https://getpino.io/#/docs/api#pino-destination | pino.destination()}
+ * @see {@link https://getpino.io/#/docs/api#pino-multistream | pino.multistream()}
  */
-export function createLogger(options?: Parameters<typeof createPinoConfig>[0]): pino.Logger {
-  return pino(createPinoConfig(options));
+export function createLogger(
+  options?: Parameters<typeof createPinoConfig>[0],
+  destination?: pino.DestinationStream
+): pino.Logger {
+  const config = createPinoConfig(options);
+  return destination ? pino(config, destination) : pino(config);
 }
 
 /**
@@ -143,5 +179,40 @@ export {
   stdTimeFunctions
 } from 'pino';
 
-// Note: pino.final is a separate package 'pino-final' - import separately if needed
-// import pinoFinal from 'pino-final';
+/**
+ * About pino-pretty:
+ * 
+ * pino-pretty is a development tool that formats Pino's JSON logs into human-readable, colorized output.
+ * 
+ * **Usage:**
+ * - Development only (not for production)
+ * - As transport: `transport: { target: 'pino-pretty', options: { colorize: true } }`
+ * - As CLI: `node app.js | pino-pretty`
+ * 
+ * **Installation:** `npm install -D pino-pretty`
+ * 
+ * @see {@link https://github.com/pinojs/pino-pretty | pino-pretty GitHub}
+ * 
+ * About pino-final:
+ * 
+ * pino-final is a separate package for handling logger finalization on process exit.
+ * It ensures logs are flushed before the process exits.
+ * 
+ * **Note:** Pino v7+ transports already handle this automatically via `process.on('beforeExit')` and `process.on('exit')` listeners.
+ * You only need pino-final if:
+ * - You're using Pino v6 or earlier
+ * - You need custom exit handling beyond what transports provide
+ * 
+ * **Installation:** `npm install pino-final`
+ * 
+ * **Usage:**
+ * ```typescript
+ * import pinoFinal from 'pino-final';
+ * const finalLogger = pinoFinal(logger, (err, finalLogger) => {
+ *   finalLogger.info('Process exiting');
+ *   process.exit(err ? 1 : 0);
+ * });
+ * ```
+ * 
+ * @see {@link https://github.com/pinojs/pino-final | pino-final GitHub}
+ */

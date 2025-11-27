@@ -6,14 +6,13 @@
 'use client';
 
 import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
+import {
+  generateRequestId,
+  logClientError,
+  logClientWarn,
+} from '@heyclaude/web-runtime/logging/client';
 import { UI_CLASSES, Button ,
   Card,
   CardContent,
@@ -67,11 +66,9 @@ export default function OAuthLinkCallbackPage({
 
       // Generate single requestId for this client-side operation
       const requestId = generateRequestId();
-      const baseLogContext = createWebAppContextWithId(
-        requestId,
-        `/auth/link/${resolvedParameters.provider}/callback`,
-        'OAuthLinkCallback'
-      );
+      const operation = 'OAuthLinkCallback';
+      const route = `/auth/link/${resolvedParameters.provider}/callback`;
+      const module = 'apps/web/src/app/(auth)/auth/link/[provider]/callback/page';
 
       try {
         // Get provider from params
@@ -86,14 +83,18 @@ export default function OAuthLinkCallbackPage({
         }
 
         setProvider(rawProvider);
-        const logContext = { ...baseLogContext, provider: rawProvider };
 
         // Check if user is authenticated
         if (!(isAuthenticated && user)) {
           if (!mounted) return;
           setStatus('error');
           setErrorMessage('You must be signed in to link an account. Redirecting to login...');
-          logger.warn('OAuth link callback: user not authenticated', undefined, logContext);
+          logClientWarn('OAuth link callback: user not authenticated', undefined, operation, {
+            requestId,
+            route,
+            module,
+            provider: rawProvider,
+          });
           // Guard redirect with mounted check and store timeout ID for cleanup
           redirectTimeoutId = setTimeout(() => {
             if (!mounted) return; // Don't redirect if component unmounted
@@ -122,13 +123,16 @@ export default function OAuthLinkCallbackPage({
 
         if (error) {
           if (!mounted) return;
-          const normalized = normalizeError(error, 'Failed to link OAuth provider');
-          logger.error('OAuth link callback: linkIdentity failed', normalized, {
-            ...logContext,
-            errorMessage: error.message,
+          logClientError('OAuth link callback: linkIdentity failed', error, operation, {
+            requestId,
+            route,
+            module,
+            provider: rawProvider,
           });
           setStatus('error');
-          setErrorMessage(error.message || 'Failed to link account. Please try again.');
+          setErrorMessage(
+            error instanceof Error ? error.message : 'Failed to link account. Please try again.'
+          );
           return;
         }
 
@@ -142,10 +146,14 @@ export default function OAuthLinkCallbackPage({
         if (!mounted) return;
         setStatus('error');
         setErrorMessage('Unexpected response from OAuth provider. Please try again.');
-      } catch (error) {
+      } catch (caughtError) {
         if (!mounted) return;
-        const normalized = normalizeError(error, 'OAuth link callback threw');
-        logger.error('OAuth link callback: unexpected error', normalized, baseLogContext);
+        logClientError('OAuth link callback: unexpected error', caughtError, operation, {
+          requestId,
+          route,
+          module,
+          provider: resolvedParameters.provider,
+        });
         setStatus('error');
         setErrorMessage('An unexpected error occurred. Please try again.');
       }

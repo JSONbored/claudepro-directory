@@ -38,7 +38,7 @@ export async function getAllSubscribers(): Promise<string[]> {
   if (error) {
     const logContext = createEmailHandlerContext('get-all-subscribers');
     // Use dbQuery serializer for consistent database query formatting
-    logError('Failed to fetch subscribers', {
+    await logError('Failed to fetch subscribers', {
       ...logContext,
       dbQuery: {
         rpcName: 'get_active_subscribers',
@@ -164,7 +164,7 @@ export async function sendBatchDigest(
         success += batch.length;
       }
     } catch (error) {
-      logError(
+      await logError(
         'Batch send failed',
         {
           ...logContext,

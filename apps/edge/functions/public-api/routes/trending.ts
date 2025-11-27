@@ -147,7 +147,7 @@ async function handlePageTabs(url: URL, logContext: ReturnType<typeof createData
 
     return badRequestResponse('Invalid tab. Valid tabs: trending, popular, recent', CORS);
   } catch (error) {
-    return errorResponse(error, 'data-api:trending', CORS, logContext);
+    return await errorResponse(error, 'data-api:trending', CORS, logContext);
   }
 }
 
@@ -187,7 +187,7 @@ async function handleSidebar(url: URL, logContext: ReturnType<typeof createDataA
       ...buildCacheHeaders('trending_sidebar'),
     });
   } catch (error) {
-    return errorResponse(error, 'data-api:trending-sidebar', CORS, logContext);
+    return await errorResponse(error, 'data-api:trending-sidebar', CORS, logContext);
   }
 }
 

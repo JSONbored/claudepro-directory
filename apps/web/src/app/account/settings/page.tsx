@@ -6,19 +6,12 @@
 import type { Database } from '@heyclaude/database-types';
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserSettings,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, Button ,
   Card,
   CardContent,
@@ -46,22 +39,23 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SettingsPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/account/settings', 'SettingsPage');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'SettingsPage',
+    route: '/account/settings',
+    module: 'apps/web/src/app/account/settings',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
 
   if (!user) {
-    logger.warn('SettingsPage: unauthenticated access attempt', undefined, {
-      ...withDuration(baseLogContext, startTime),
-      requestId,
-      operation: 'SettingsPage',
+    reqLogger.warn('SettingsPage: unauthenticated access attempt', {
       section: 'authentication',
-      sectionDuration_ms: Date.now() - authSectionStart,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -81,31 +75,25 @@ export default async function SettingsPage() {
     );
   }
 
-  const hashedUserId = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash: hashedUserId };
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
 
   // Section: Settings Data Fetch
-  const settingsSectionStart = Date.now();
   let settingsData: Database['public']['Functions']['get_user_settings']['Returns'] | null = null;
   try {
     settingsData = await getUserSettings(user.id);
     if (!settingsData) {
-      logger.warn('SettingsPage: getUserSettings returned null', undefined, {
-        ...withDuration(logContext, startTime),
-        requestId,
-        operation: 'SettingsPage',
+      userLogger.warn('SettingsPage: getUserSettings returned null', {
         section: 'settings-data-fetch',
-        sectionDuration_ms: Date.now() - settingsSectionStart,
       });
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings');
-    logger.error('SettingsPage: getUserSettings threw', normalized, {
-      ...withDuration(logContext, startTime),
-      requestId,
-      operation: 'SettingsPage',
+    userLogger.error('SettingsPage: getUserSettings threw', normalized, {
       section: 'settings-data-fetch',
-      sectionDuration_ms: Date.now() - settingsSectionStart,
     });
   }
 
@@ -135,9 +123,7 @@ export default async function SettingsPage() {
 
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
-    logger.warn('SettingsPage: user_data missing, invoking ensureUserRecord', undefined, {
-      ...logContext,
-    });
+    userLogger.warn('SettingsPage: user_data missing, invoking ensureUserRecord');
     try {
       // Type-safe access to user_metadata (Record<string, unknown> from Supabase)
       const userMetadata = user.user_metadata;
@@ -156,25 +142,20 @@ export default async function SettingsPage() {
         userData = refreshed.user_data;
         profile = refreshed.profile;
       } else {
-        logger.warn(
-          'SettingsPage: getUserSettings returned null after ensureUserRecord',
-          undefined,
-          logContext
-        );
+        userLogger.warn('SettingsPage: getUserSettings returned null after ensureUserRecord');
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to initialize user record');
-      logger.error('SettingsPage: ensureUserRecord failed', normalized, logContext);
+      userLogger.error('SettingsPage: ensureUserRecord failed', normalized);
       // Leave userData/profile undefined so page can render fallback UI
     }
   }
 
   if (!profile) {
     // No error object available, only context
-    logger.error(
+    userLogger.error(
       'SettingsPage: profile missing from getUserSettings response',
-      new Error('Profile missing from response'),
-      logContext
+      new Error('Profile missing from response')
     );
     return (
       <div className="space-y-6">

@@ -125,13 +125,19 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
           const invalidLogContext = createUtilityContext('flux-station', 'discord-jobs-validate', {
             msg_id: msg.msg_id.toString(),
           });
-          logError('Invalid job webhook payload structure', invalidLogContext);
+          await logError('Invalid job webhook payload structure', invalidLogContext);
 
           // Delete invalid message to prevent infinite retries
           try {
             await pgmqDelete(JOB_DISCORD_QUEUE, msg.msg_id);
           } catch (error) {
-            logError('Failed to delete invalid message', invalidLogContext, error);
+            // Wrap logError in try-catch to prevent logging errors from blocking execution
+            try {
+              await logError('Failed to delete invalid message', invalidLogContext, error);
+            } catch (logErr) {
+              // Fallback to console.error if logging itself fails
+              console.error('Failed to log error:', logErr);
+            }
           }
 
           results.push({
@@ -155,13 +161,13 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
               type: payload.type,
             }
           );
-          logError('Invalid webhook type', invalidTypeLogContext);
+          await logError('Invalid webhook type', invalidTypeLogContext);
 
           // Delete invalid message to prevent infinite retries
           try {
             await pgmqDelete(JOB_DISCORD_QUEUE, msg.msg_id);
           } catch (error) {
-            logError('Failed to delete invalid message', invalidTypeLogContext, error);
+            await logError('Failed to delete invalid message', invalidTypeLogContext, error);
           }
 
           results.push({
@@ -248,7 +254,7 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
         const errorLogContext = createUtilityContext('flux-station', 'discord-jobs-notify', {
           msg_id: msg.msg_id.toString(),
         });
-        logError('Job Discord notification failed', errorLogContext, error);
+        await logError('Job Discord notification failed', errorLogContext, error);
         // Leave in queue for retry
         results.push({
           msg_id: msg.msg_id.toString(),
@@ -269,7 +275,7 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    logError('Job Discord queue error', logContext, error);
-    return errorResponse(error, 'flux-station:discord-jobs-error', publicCorsHeaders, logContext);
+    await logError('Job Discord queue error', logContext, error);
+    return await errorResponse(error, 'flux-station:discord-jobs-error', publicCorsHeaders, logContext);
   }
 }

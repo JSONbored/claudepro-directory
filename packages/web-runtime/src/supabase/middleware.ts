@@ -12,6 +12,7 @@ import { NextResponse } from 'next/server';
 import type { Database } from '@heyclaude/database-types';
 import { getEnvVar } from '@heyclaude/shared-runtime';
 import { logger } from '../logger.ts';
+import { normalizeError } from '../errors.ts';
 
 /**
  * Update Supabase Auth session in middleware
@@ -81,8 +82,9 @@ export async function updateSupabaseSession(
     // Fail silently in middleware - don't block requests
     // Log error for debugging but don't throw
     if (error instanceof Error) {
+      const normalized = normalizeError(error, 'Supabase session update failed in middleware');
       logger.warn('Supabase session update failed in middleware', {
-        error: error.message,
+        err: normalized,
         pathname: request.nextUrl.pathname,
       });
     }

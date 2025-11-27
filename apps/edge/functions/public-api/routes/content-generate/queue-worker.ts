@@ -71,7 +71,7 @@ async function processPackageGeneration(
     if (fetchError || !content) {
       // Use dbQuery serializer for consistent database query formatting
       if (logContext) {
-        logError('Failed to fetch content for package generation', {
+        await logError('Failed to fetch content for package generation', {
           ...logContext,
           dbQuery: {
             table: 'content',
@@ -123,7 +123,7 @@ async function processPackageGeneration(
     const errorMsg = errorToString(error);
     errors.push(`Generation failed: ${errorMsg}`);
     if (logContext) {
-      logError(
+      await logError(
         'Package generation error',
         {
           ...logContext,
@@ -223,7 +223,7 @@ export async function handlePackageGenerationQueue(
     for (const msg of messages) {
       // Validate message structure
       if (!isValidQueueMessage(msg.message)) {
-        logError('Invalid queue message structure', {
+        await logError('Invalid queue message structure', {
           ...finalLogContext,
           msg_id: msg.msg_id.toString(),
         });
@@ -232,7 +232,7 @@ export async function handlePackageGenerationQueue(
         try {
           await pgmqDelete(PACKAGE_GENERATION_QUEUE, msg.msg_id);
         } catch (error) {
-          logError(
+          await logError(
             'Failed to delete invalid message',
             {
               ...finalLogContext,
@@ -280,7 +280,7 @@ export async function handlePackageGenerationQueue(
         }
       } catch (error) {
         const errorMsg = errorToString(error);
-        logError(
+        await logError(
           'Unexpected error processing package generation',
           {
             ...finalLogContext,
@@ -314,7 +314,7 @@ export async function handlePackageGenerationQueue(
       200
     );
   } catch (error) {
-    logError('Fatal package generation queue error', finalLogContext, error);
-    return errorResponse(error, 'data-api:package-generation-queue-fatal', undefined, finalLogContext);
+    await logError('Fatal package generation queue error', finalLogContext, error);
+    return await errorResponse(error, 'data-api:package-generation-queue-fatal', undefined, finalLogContext);
   }
 }

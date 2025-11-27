@@ -112,13 +112,13 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
             msg_id: msg.msg_id.toString(),
             operation: 'validate-payload',
           });
-          logError('Invalid revalidation payload structure', invalidLogContext);
+          await logError('Invalid revalidation payload structure', invalidLogContext);
 
           // Delete invalid message to prevent infinite retries
           try {
             await pgmqDelete(CONTENT_REVALIDATION_QUEUE, msg.msg_id);
           } catch (error) {
-            logError('Failed to delete invalid message', invalidLogContext, error);
+            await logError('Failed to delete invalid message', invalidLogContext, error);
           }
 
           results.push({
@@ -207,7 +207,7 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
           operation: 'process-message',
         });
         const errorMsg = errorToString(error);
-        logError('Content revalidation failed', errorLogContext, error);
+        await logError('Content revalidation failed', errorLogContext, error);
         // Leave in queue for retry
         results.push({
           msg_id: msg.msg_id.toString(),
@@ -228,7 +228,7 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    logError('Content revalidation queue error', logContext, error);
-    return errorResponse(error, 'flux-station:revalidation-error', publicCorsHeaders, logContext);
+    await logError('Content revalidation queue error', logContext, error);
+    return await errorResponse(error, 'flux-station:revalidation-error', publicCorsHeaders, logContext);
   }
 }

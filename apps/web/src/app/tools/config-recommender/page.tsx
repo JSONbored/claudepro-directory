@@ -17,14 +17,13 @@
  * - Serverless-friendly architecture
  */
 
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
 import {
-  createWebAppContextWithId,
   generateRequestId,
   logger,
   normalizeError,
-} from '@heyclaude/web-runtime/core';
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
+} from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, UnifiedBadge,
   Card,
   CardContent,
@@ -63,11 +62,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function ConfigRecommenderPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    '/tools/config-recommender',
-    'ConfigRecommenderPage'
-  );
+    operation: 'ConfigRecommenderPage',
+    route: '/tools/config-recommender',
+    module: 'app/tools/config-recommender',
+  });
 
   try {
     return (
@@ -256,7 +258,7 @@ export default function ConfigRecommenderPage() {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Config Recommender page render failed');
-    logger.error('ConfigRecommenderPage: render failed', normalized, logContext);
+    reqLogger.error('ConfigRecommenderPage: render failed', normalized);
     throw normalized;
   }
 }

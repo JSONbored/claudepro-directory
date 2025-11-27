@@ -1,18 +1,11 @@
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getAuthenticatedUser,
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, UnifiedBadge, SimpleCopyButton,
   Button,
   Card,
@@ -43,84 +36,53 @@ export async function generateMetadata({ params }: CollectionPageProperties): Pr
 }
 
 export default async function CollectionDetailPage({ params }: CollectionPageProperties) {
-  const startTime = Date.now();
   const { slug } = await params;
-
+  
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    `/account/library/${slug}`,
-    'CollectionDetailPage',
-    {
-      slug,
-    }
-  );
+    operation: 'CollectionDetailPage',
+    route: `/account/library/${slug}`,
+    module: 'apps/web/src/app/account/library/[slug]',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'CollectionDetailPage' });
 
   if (!user) {
-    logger.warn(
-      'CollectionDetailPage: unauthenticated access attempt',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'authentication',
-        },
-        authSectionStart
-      )
-    );
+    reqLogger.warn('CollectionDetailPage: unauthenticated access attempt', {
+      section: 'authentication',
+    });
     redirect('/login');
   }
 
-  // Hash user ID for privacy-compliant logging (GDPR/CCPA)
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
-  logger.info(
-    'CollectionDetailPage: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+
+  userLogger.info('CollectionDetailPage: authentication successful', {
+    section: 'authentication',
+  });
 
   // Section: Collection Data Fetch
-  const collectionSectionStart = Date.now();
   let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   let hasError = false;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
-    logger.info(
-      'CollectionDetailPage: collection data loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'collection-data-fetch',
-          hasData: !!collectionData,
-        },
-        collectionSectionStart
-      )
-    );
+    userLogger.info('CollectionDetailPage: collection data loaded', {
+      section: 'collection-data-fetch',
+      hasData: !!collectionData,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for account view');
-    logger.error(
-      'CollectionDetailPage: getCollectionDetail threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'collection-data-fetch',
-          sectionDuration_ms: Date.now() - collectionSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.error('CollectionDetailPage: getCollectionDetail threw', normalized, {
+      section: 'collection-data-fetch',
+    });
     hasError = true;
   }
 
@@ -145,43 +107,23 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   }
 
   if (!collectionData) {
-    logger.warn(
-      'CollectionDetailPage: collection not found or inaccessible',
-      undefined,
-      logContext
-    );
+    userLogger.warn('CollectionDetailPage: collection not found or inaccessible');
     notFound();
   }
 
   const { collection, items, bookmarks } = collectionData;
 
   if (!collection) {
-    logger.warn(
-      'CollectionDetailPage: collection is null in response',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          section: 'collection-data-fetch',
-          sectionDuration_ms: Date.now() - collectionSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.warn('CollectionDetailPage: collection is null in response', {
+      section: 'collection-data-fetch',
+    });
     notFound();
   }
 
   // Final summary log
-  logger.info(
-    'CollectionDetailPage: page render completed',
-    withDuration(
-      {
-        ...logContext,
-        section: 'page-render',
-      },
-      startTime
-    )
-  );
+  userLogger.info('CollectionDetailPage: page render completed', {
+    section: 'page-render',
+  });
 
   const shareUrl = collection.is_public
     ? `${APP_CONFIG.url}/u/${user.id}/collections/${collection.slug}`

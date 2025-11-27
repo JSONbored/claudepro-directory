@@ -41,7 +41,7 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
       ingestResult = await ingestWebhookEvent(body, req.headers);
     } catch (error) {
       if (error instanceof WebhookIngestError) {
-        return errorResponse(error, 'changelog-sync:ingest', changelogCorsHeaders);
+        return await errorResponse(error, 'changelog-sync:ingest', changelogCorsHeaders);
       }
       throw error;
     }
@@ -70,7 +70,7 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
       const idempotencyKey = payload.id || req.headers.get('x-vercel-id');
       if (!idempotencyKey) {
         logger.error('Missing idempotency key', updatedContext);
-        return errorResponse(
+        return await errorResponse(
           new Error('Missing idempotency key in webhook'),
           'changelog-sync:missing-idempotency-key',
           changelogCorsHeaders
@@ -93,7 +93,7 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
           idempotencyKey,
           err: errorObj,
         });
-        return errorResponse(
+        return await errorResponse(
           new Error('Failed to retrieve webhook event ID'),
           'changelog-sync:webhook-query',
           changelogCorsHeaders
@@ -126,7 +126,7 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
         webhook_event_id: webhookEventId,
         err: errorObj,
       });
-      return errorResponse(
+      return await errorResponse(
         new Error(`Failed to enqueue processing job: ${errorMsg}`),
         'changelog-sync:enqueue',
         changelogCorsHeaders
@@ -145,6 +145,6 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
       changelogCorsHeaders
     );
   } catch (error) {
-    return errorResponse(error, 'changelog-sync:error', changelogCorsHeaders);
+    return await errorResponse(error, 'changelog-sync:error', changelogCorsHeaders);
   }
 }

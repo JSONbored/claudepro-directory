@@ -3,13 +3,6 @@
  */
 
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
 import { getUserSettings, getUserSponsorships } from '@heyclaude/web-runtime/data';
 import {
   Activity,
@@ -23,6 +16,7 @@ import {
   TrendingUp,
   User,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES, Button , Card  } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
@@ -46,9 +40,14 @@ export default async function AccountLayout({ children }: { children: React.Reac
 
   // Generate single requestId for this layout request
   const requestId = generateRequestId();
-  const userIdHash = hashUserId(user.id);
-  const logContext = createWebAppContextWithId(requestId, '/account', 'AccountLayout', {
-    userIdHash,
+  // Create request-scoped child logger to avoid race conditions
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'AccountLayout',
+    route: '/account',
+    module: 'apps/web/src/app/account/layout',
+    userId: user.id, // Redaction will automatically hash this
   });
 
   if (session?.expires_at) {
@@ -57,13 +56,12 @@ export default async function AccountLayout({ children }: { children: React.Reac
       const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError) {
         const normalized = normalizeError(refreshError, 'Session refresh failed');
-        logger.warn('AccountLayout: session refresh failed', undefined, {
-          ...logContext,
-          error: normalized.message,
+        reqLogger.warn('AccountLayout: session refresh failed', {
+          err: normalized,
         });
         // Continue with existing session - user may need to re-authenticate on next request
       } else if (refreshData.session) {
-        logger.debug('AccountLayout: session refreshed successfully', logContext);
+        reqLogger.debug('AccountLayout: session refreshed successfully');
       }
     }
   }
@@ -87,11 +85,11 @@ export default async function AccountLayout({ children }: { children: React.Reac
     if (settings) {
       profile = settings.user_data;
     } else {
-      logger.warn('AccountLayout: getUserSettings returned null', undefined, logContext);
+      reqLogger.warn('AccountLayout: getUserSettings returned null');
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings in account layout');
-    logger.error('AccountLayout: getUserSettings threw', normalized, logContext);
+    reqLogger.error('AccountLayout: getUserSettings threw', normalized);
   }
 
   if (!profile) {
@@ -106,22 +104,14 @@ export default async function AccountLayout({ children }: { children: React.Reac
       if (settings) {
         profile = settings.user_data ?? null;
       } else {
-        logger.warn(
-          'AccountLayout: getUserSettings returned null after ensureUserRecord',
-          undefined,
-          logContext
-        );
+        reqLogger.warn('AccountLayout: getUserSettings returned null after ensureUserRecord');
       }
     } catch (error) {
       const normalized = normalizeError(
         error,
         'Failed to ensure user record or reload settings in account layout'
       );
-      logger.error(
-        'AccountLayout: ensureUserRecord or getUserSettings threw',
-        normalized,
-        logContext
-      );
+      reqLogger.error('AccountLayout: ensureUserRecord or getUserSettings threw', normalized);
     }
   }
 
@@ -131,7 +121,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
     sponsorships = await sponsorshipsPromise;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships in account layout');
-    logger.error('AccountLayout: getUserSponsorships threw', normalized, logContext);
+    reqLogger.error('AccountLayout: getUserSponsorships threw', normalized);
     sponsorships = [];
   }
 

@@ -77,7 +77,7 @@ export async function handlePaginatedContent(url: URL): Promise<Response> {
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    return errorResponse(error, 'data-api:get_content_paginated_slim', CORS, {
+    return await errorResponse(error, 'data-api:get_content_paginated_slim', CORS, {
       ...logContext,
       dbQuery: {
         rpcName: 'get_content_paginated_slim',

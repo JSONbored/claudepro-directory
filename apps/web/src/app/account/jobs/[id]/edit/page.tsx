@@ -6,14 +6,7 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import type { CreateJobInput } from '@heyclaude/web-runtime';
 import { updateJob } from '@heyclaude/web-runtime/actions';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -49,130 +42,74 @@ interface EditJobPageProperties {
 }
 
 export default async function EditJobPage({ params }: EditJobPageProperties) {
-  const startTime = Date.now();
   const { id } = await params;
-
+  
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    `/account/jobs/${id}/edit`,
-    'EditJobPage',
-    {
-      jobId: id,
-    }
-  );
+    operation: 'EditJobPage',
+    route: `/account/jobs/${id}/edit`,
+    module: 'apps/web/src/app/account/jobs/[id]/edit',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
   if (!user) {
-    logger.warn(
-      'EditJobPage: unauthenticated access attempt',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'authentication',
-        },
-        authSectionStart
-      )
-    );
+    reqLogger.warn('EditJobPage: unauthenticated access attempt', {
+      section: 'authentication',
+    });
     redirect('/login');
   }
 
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
-  logger.info(
-    'EditJobPage: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+  
+  userLogger.info('EditJobPage: authentication successful', {
+    section: 'authentication',
+  });
 
   // Section: Job Data Fetch
-  const jobSectionStart = Date.now();
   let job: Database['public']['Tables']['jobs']['Row'] | null = null;
   try {
     job = await getUserJobById(user.id, id);
-    logger.info(
-      'EditJobPage: job data loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'job-data-fetch',
-          hasJob: !!job,
-        },
-        jobSectionStart
-      )
-    );
+    userLogger.info('EditJobPage: job data loaded', {
+      section: 'job-data-fetch',
+      hasJob: !!job,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user job for edit page');
-    logger.error(
-      'EditJobPage: getUserJobById threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'job-data-fetch',
-          sectionDuration_ms: Date.now() - jobSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.error('EditJobPage: getUserJobById threw', normalized, {
+      section: 'job-data-fetch',
+    });
     throw normalized;
   }
   if (!job) {
-    logger.warn(
-      'EditJobPage: job not found or not owned by user',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          section: 'job-data-fetch',
-          sectionDuration_ms: Date.now() - jobSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.warn('EditJobPage: job not found or not owned by user', {
+      section: 'job-data-fetch',
+    });
     notFound();
   }
 
   // Section: Plan Catalog Fetch
-  const planCatalogSectionStart = Date.now();
   let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
   try {
     planCatalog = await getPaymentPlanCatalog();
-    logger.info(
-      'EditJobPage: plan catalog loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'plan-catalog-fetch',
-          plansCount: planCatalog.length,
-        },
-        planCatalogSectionStart
-      )
-    );
+    userLogger.info('EditJobPage: plan catalog loaded', {
+      section: 'plan-catalog-fetch',
+      plansCount: planCatalog.length,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load payment plan catalog');
-    logger.error(
-      'EditJobPage: getPaymentPlanCatalog threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'plan-catalog-fetch',
-          sectionDuration_ms: Date.now() - planCatalogSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.error('EditJobPage: getPaymentPlanCatalog threw', normalized, {
+      section: 'plan-catalog-fetch',
+    });
   }
 
   const handleSubmit = async (data: EditJobInput) => {
@@ -180,14 +117,14 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
 
     // Generate requestId for server action (separate from page render)
     const actionRequestId = generateRequestId();
-    const actionLogContext = createWebAppContextWithId(
-      actionRequestId,
-      `/account/jobs/${id}/edit`,
-      'EditJobPageAction',
-      {
-        jobId: id,
-      }
-    );
+    
+    // Create request-scoped child logger for server action
+    const actionLogger = logger.child({
+      requestId: actionRequestId,
+      operation: 'EditJobPageAction',
+      route: `/account/jobs/${id}/edit`,
+      module: 'apps/web/src/app/account/jobs/[id]/edit',
+    });
 
     let result: Awaited<ReturnType<typeof updateJob>>;
     try {
@@ -197,19 +134,19 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
       });
     } catch (error) {
       const normalized = normalizeError(error, 'updateJob server action failed');
-      logger.error('EditJobPage: updateJob threw', normalized, actionLogContext);
+      actionLogger.error('EditJobPage: updateJob threw', normalized);
       throw normalized;
     }
 
     if (result.serverError) {
       const normalized = normalizeError(result.serverError, 'updateJob server error response');
-      logger.error('EditJobPage: updateJob returned serverError', normalized, actionLogContext);
+      actionLogger.error('EditJobPage: updateJob returned serverError', normalized);
       throw normalized;
     }
 
     if (!result.data) {
-      const normalized = normalizeError('updateJob returned no data', 'updateJob returned no data');
-      logger.error('EditJobPage: updateJob returned no data', normalized, actionLogContext);
+      const normalized = normalizeError(new Error('updateJob returned no data'), 'updateJob returned no data');
+      actionLogger.error('EditJobPage: updateJob returned no data', normalized);
       throw normalized;
     }
 
@@ -245,35 +182,19 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
 
   // Log warnings for invalid enum values to help track data integrity issues
   if (!isValidJobType(job.type)) {
-    logger.warn(
-      'EditJobPage: encountered invalid job type',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          section: 'job-data-validation',
-          type: job.type,
-        },
-        startTime
-      )
-    );
+    userLogger.warn('EditJobPage: encountered invalid job type', {
+      section: 'job-data-validation',
+      type: job.type,
+    });
   }
   if (!isValidJobCategory(job.category)) {
-    logger.warn(
-      'EditJobPage: encountered invalid job category',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          section: 'job-data-validation',
-          category: job.category,
-        },
-        startTime
-      )
-    );
+    userLogger.warn('EditJobPage: encountered invalid job category', {
+      section: 'job-data-validation',
+      category: job.category,
+    });
   }
 
-  const hasInvalidData = !isValidJobType(job.type) || !isValidJobCategory(job.category);
+  const hasInvalidData = !(isValidJobType(job.type) && isValidJobCategory(job.category));
 
   return (
     <div className="space-y-6">

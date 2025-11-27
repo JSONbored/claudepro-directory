@@ -4,15 +4,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  formatRelativeDate,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { formatRelativeDate } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -28,6 +20,11 @@ import {
   Eye,
   Plus,
 } from '@heyclaude/web-runtime/icons';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, UnifiedBadge, Button ,
   Card,
   CardContent,
@@ -68,32 +65,27 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CompaniesPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  const operation = 'CompaniesPage';
+  const route = '/account/companies';
+  const module = 'apps/web/src/app/account/companies/page';
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    '/account/companies',
-    'CompaniesPage'
-  );
+    operation,
+    route,
+    module,
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'CompaniesPage' });
 
   if (!user) {
-    logger.warn(
-      'CompaniesPage: unauthenticated access attempt detected',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'authentication',
-          timestamp: new Date().toISOString(),
-        },
-        authSectionStart
-      )
-    );
+    reqLogger.warn('CompaniesPage: unauthenticated access attempt detected', {
+      section: 'authentication',
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -111,22 +103,17 @@ export default async function CompaniesPage() {
     );
   }
 
-  // Hash user ID for privacy-compliant logging (GDPR/CCPA)
-  const hashedUserId = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash: hashedUserId };
-  logger.info(
-    'CompaniesPage: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+
+  userLogger.info('CompaniesPage: authentication successful', {
+    section: 'authentication',
+  });
 
   // Section: Companies Data Fetch
-  const companiesSectionStart = Date.now();
   let companies: Database['public']['Functions']['get_user_companies']['Returns']['companies'] = [];
   let hasError = false;
 
@@ -136,46 +123,21 @@ export default async function CompaniesPage() {
 
     if (data) {
       companies = data.companies ?? [];
-      logger.info(
-        'CompaniesPage: companies data loaded',
-        withDuration(
-          {
-            ...logContext,
-            section: 'companies-data-fetch',
-            companiesCount: companies.length,
-          },
-          companiesSectionStart
-        )
-      );
+      userLogger.info('CompaniesPage: companies data loaded', {
+        section: 'companies-data-fetch',
+        companiesCount: companies.length,
+      });
     } else {
-      logger.warn(
-        'CompaniesPage: getUserCompanies returned null',
-        undefined,
-        withDuration(
-          {
-            ...logContext,
-            section: 'companies-data-fetch',
-            sectionDuration_ms: Date.now() - companiesSectionStart,
-          },
-          startTime
-        )
-      );
+      userLogger.warn('CompaniesPage: getUserCompanies returned null', {
+        section: 'companies-data-fetch',
+      });
       hasError = true;
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch user companies');
-    logger.error(
-      'CompaniesPage: getUserCompanies threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'companies-data-fetch',
-          sectionDuration_ms: Date.now() - companiesSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.error('CompaniesPage: getUserCompanies threw', normalized, {
+      section: 'companies-data-fetch',
+    });
     hasError = true;
   }
 
@@ -200,30 +162,16 @@ export default async function CompaniesPage() {
   }
 
   if (companies.length === 0) {
-    logger.info(
-      'CompaniesPage: user has no companies',
-      withDuration(
-        {
-          ...logContext,
-          section: 'companies-data-fetch',
-        },
-        companiesSectionStart
-      )
-    );
+    userLogger.info('CompaniesPage: user has no companies', {
+      section: 'companies-data-fetch',
+    });
   }
 
   // Final summary log
-  logger.info(
-    'CompaniesPage: page render completed',
-    withDuration(
-      {
-        ...logContext,
-        section: 'page-render',
-        companiesCount: companies.length,
-      },
-      startTime
-    )
-  );
+  userLogger.info('CompaniesPage: page render completed', {
+    section: 'page-render',
+    companiesCount: companies.length,
+  });
 
   return (
     <div className="space-y-6">

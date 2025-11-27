@@ -6,7 +6,8 @@
  */
 
 import { logger } from '../logger.ts';
-import { generateRequestId } from './request-context.ts';
+import { generateRequestId } from './request-id.ts';
+import { normalizeError } from '../errors.ts';
 import type { LogContext } from '../logger.ts';
 
 export interface PerformanceMetricsOptions {
@@ -103,7 +104,8 @@ export async function trackPerformance<T>(
     const roundedDuration = Math.round(duration);
 
     // Always log errors with duration
-    logger.error(`Operation failed: ${operationName}`, error instanceof Error ? error : new Error(String(error)), {
+    const normalized = normalizeError(error, `Operation failed: ${operationName}`);
+    logger.error(`Operation failed: ${operationName}`, normalized, {
       requestId,
       operation: operationName,
       duration: roundedDuration,
@@ -167,7 +169,8 @@ export function trackPerformanceSync<T>(
     const duration = performance.now() - startTime;
     const roundedDuration = Math.round(duration);
 
-    logger.error(`Operation failed: ${operationName}`, error instanceof Error ? error : new Error(String(error)), {
+    const normalized = normalizeError(error, `Operation failed: ${operationName}`);
+    logger.error(`Operation failed: ${operationName}`, normalized, {
       requestId,
       operation: operationName,
       duration: roundedDuration,

@@ -1,13 +1,7 @@
 import type { Database } from '@heyclaude/database-types';
 import type { CreateJobInput } from '@heyclaude/web-runtime';
 import { createJob } from '@heyclaude/web-runtime/actions';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
@@ -27,60 +21,48 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NewJobPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/account/jobs/new', 'NewJobPage');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'NewJobPage',
+    route: '/account/jobs/new',
+    module: 'apps/web/src/app/account/jobs/new',
+  });
 
   // Section: Plan Catalog Fetch
-  const planCatalogSectionStart = Date.now();
   let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
   try {
     planCatalog = await getPaymentPlanCatalog();
-    logger.info(
-      'NewJobPage: plan catalog loaded',
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'plan-catalog-fetch',
-          plansCount: planCatalog.length,
-        },
-        planCatalogSectionStart
-      )
-    );
+    reqLogger.info('NewJobPage: plan catalog loaded', {
+      section: 'plan-catalog-fetch',
+      plansCount: planCatalog.length,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'NewJobPage: failed to fetch plan catalog');
-    logger.warn(
-      'NewJobPage: failed to fetch plan catalog, using fallback',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'plan-catalog-fetch',
-          sectionDuration_ms: Date.now() - planCatalogSectionStart,
-          error: normalized.message,
-          name: normalized.name,
-        },
-        startTime
-      )
-    );
+    reqLogger.warn('NewJobPage: failed to fetch plan catalog, using fallback', {
+      err: normalized,
+      section: 'plan-catalog-fetch',
+      name: normalized.name,
+    });
     // planCatalog remains [] - JobForm will use legacy fallback
   }
 
-  const handleSubmit = async (data: CreateJobInput) => {
+  async function handleSubmit(data: CreateJobInput) {
     'use server';
 
     // Generate requestId for server action (separate from page render)
     const actionRequestId = generateRequestId();
-    const actionLogContext = createWebAppContextWithId(
-      actionRequestId,
-      '/account/jobs/new',
-      'NewJobPageAction',
-      {
-        title: data.title,
-        company: data.company,
-      }
-    );
+    
+    // Create request-scoped child logger for server action
+    const actionLogger = logger.child({
+      requestId: actionRequestId,
+      operation: 'NewJobPageAction',
+      route: '/account/jobs/new',
+      module: 'apps/web/src/app/account/jobs/new',
+    });
 
     let result: Awaited<ReturnType<typeof createJob>>;
     try {
@@ -88,23 +70,23 @@ export default async function NewJobPage() {
       result = await createJob(data);
     } catch (error) {
       const normalized = normalizeError(error, 'createJob server action failed');
-      logger.error('NewJobPage: createJob threw', normalized, actionLogContext);
+      actionLogger.error('NewJobPage: createJob threw', normalized);
       throw normalized;
     }
 
     if (result.serverError) {
-      const error = normalizeError(result.serverError, 'NewJobPage: createJob failed');
-      logger.error('NewJobPage: createJob failed', error, actionLogContext);
-      throw error;
+      const normalized = normalizeError(result.serverError, 'NewJobPage: createJob failed');
+      actionLogger.error('NewJobPage: createJob failed', normalized);
+      throw normalized;
     }
 
     if (!result.data) {
-      const error = normalizeError(
+      const normalized = normalizeError(
         'createJob returned no data',
         'NewJobPage: createJob returned no data'
       );
-      logger.error('NewJobPage: createJob returned no data', error, actionLogContext);
-      throw error;
+      actionLogger.error('NewJobPage: createJob returned no data', normalized);
+      throw normalized;
     }
 
     // Type the result data using generated database types
@@ -116,12 +98,11 @@ export default async function NewJobPage() {
     if (jobResult.success) {
       if (jobResult.requires_payment) {
         if (!jobResult.checkoutUrl) {
-          const error = normalizeError(
+          const normalized = normalizeError(
             new Error('Missing checkout URL for paid job creation'),
             'NewJobPage: missing checkout URL'
           );
-          logger.error('NewJobPage: missing checkout URL', error, {
-            ...actionLogContext,
+          actionLogger.error('NewJobPage: missing checkout URL', normalized, {
             jobId: jobResult.job_id ?? 'unknown',
             companyId: jobResult.company_id ?? 'unknown',
           });
@@ -146,12 +127,11 @@ export default async function NewJobPage() {
     }
 
     // Handle unexpected failure case
-    const error = normalizeError(
+    const normalized = normalizeError(
       new Error('Job creation failed'),
       'NewJobPage: createJob returned success=false'
     );
-    logger.error('NewJobPage: createJob returned success=false', error, {
-      ...actionLogContext,
+      actionLogger.error('NewJobPage: createJob returned success=false', normalized, {
       jobId: jobResult.job_id ?? 'unknown',
       companyId: jobResult.company_id ?? 'unknown',
       requiresPayment: jobResult.requires_payment ?? false,

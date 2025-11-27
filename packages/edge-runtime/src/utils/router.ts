@@ -41,7 +41,7 @@ export function createRouter<C extends RouterContext>(options: RouterOptions<C>)
         return options.onNoMatch(context);
       }
       const defaultCors: Record<string, string> = options.defaultCors ?? publicCorsHeaders;
-      return errorResponse(new Error('Not Found'), 'router:not_found', defaultCors);
+      return await errorResponse(new Error('Not Found'), 'router:not_found', defaultCors);
     }
 
     const allowedMethods = route.methods?.length ? route.methods : DEFAULT_METHODS;

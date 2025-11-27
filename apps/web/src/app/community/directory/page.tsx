@@ -1,11 +1,6 @@
 import type { Database } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
@@ -24,14 +19,14 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   // Generate single requestId for this component
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    '/community/directory',
-    'CommunityDirectoryContent',
-    {
-      hasQuery: Boolean(searchQuery),
-    }
-  );
+    operation: 'CommunityDirectoryContent',
+    route: '/community/directory',
+    module: 'apps/web/src/app/community/directory',
+  });
 
   let directoryData: Database['public']['Functions']['get_community_directory']['Returns'] | null =
     null;
@@ -39,16 +34,12 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
     directoryData = await getCommunityDirectory({ searchQuery, limit: DEFAULT_DIRECTORY_LIMIT });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load community directory');
-    logger.error('CommunityDirectoryContent: getCommunityDirectory failed', normalized, logContext);
+    reqLogger.error('CommunityDirectoryContent: getCommunityDirectory failed', normalized);
     throw normalized;
   }
 
   if (!directoryData) {
-    logger.warn(
-      'CommunityDirectoryContent: directory data response is empty',
-      undefined,
-      logContext
-    );
+    reqLogger.warn('CommunityDirectoryContent: directory data response is empty');
   }
 
   const {

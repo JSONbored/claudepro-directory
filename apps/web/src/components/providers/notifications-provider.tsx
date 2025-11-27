@@ -9,7 +9,7 @@ import {
   dismissNotificationsAction,
   getActiveNotificationsAction,
 } from '@heyclaude/web-runtime/actions';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
 import { useAction } from 'next-safe-action/hooks';
 import {
@@ -77,11 +77,15 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         JSON.stringify({ dismissedIds: dismissedIdsRef.current })
       );
     } catch (error) {
-      const err = normalizeError(error);
-      logger.error('[NotificationsProvider] Failed to persist dismissed IDs', err, {
-        dismissedIds: dismissedIdsRef.current, // Array support enables better log querying
-        count: dismissedIdsRef.current.length,
-      });
+      logClientError(
+        '[NotificationsProvider] Failed to persist dismissed IDs',
+        error,
+        'NotificationsProvider.persistDismissedIds',
+        {
+          dismissedIds: dismissedIdsRef.current, // Array support enables better log querying
+          count: dismissedIdsRef.current.length,
+        }
+      );
     }
   }, [dismissedIds]);
 
@@ -91,17 +95,19 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       const latest = await fetchNotifications({ dismissedIds: dismissedIdsRef.current });
 
       if (latest?.serverError) {
-        logger.error(
+        logClientError(
           '[NotificationsProvider] Failed to refresh notifications (server error)',
-          new Error(latest.serverError)
+          new Error(latest.serverError),
+          'NotificationsProvider.refresh'
         );
         return;
       }
 
       if (latest?.validationErrors) {
-        logger.error(
+        logClientError(
           '[NotificationsProvider] Validation error refreshing notifications',
-          new Error(JSON.stringify(latest.validationErrors))
+          new Error(JSON.stringify(latest.validationErrors)),
+          'NotificationsProvider.refresh'
         );
         return;
       }
@@ -111,9 +117,10 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         | undefined;
       setNotifications(payload?.notifications ?? []);
     } catch (error) {
-      logger.error(
+      logClientError(
         '[NotificationsProvider] Failed to refresh notifications',
-        normalizeError(error),
+        error,
+        'NotificationsProvider.refresh',
         {
           dismissedIds: dismissedIdsRef.current, // Array support enables better log querying
           count: dismissedIdsRef.current.length,
@@ -132,7 +139,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         }
       }
     } catch (error) {
-      logger.error('[NotificationsProvider] Failed to read dismissed IDs', normalizeError(error));
+      logClientError('[NotificationsProvider] Failed to read dismissed IDs', error, 'NotificationsProvider.readDismissedIds');
     } finally {
       setIsInitialized(true);
     }
@@ -141,9 +148,10 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (!(isInitialized && flags.enableNotifications)) return;
     refresh().catch((error) => {
-      logger.error(
+      logClientError(
         '[NotificationsProvider] Failed to refresh notifications on mount',
-        normalizeError(error)
+        error,
+        'NotificationsProvider.mount'
       );
     });
   }, [flags.enableNotifications, isInitialized, refresh]);
@@ -154,7 +162,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     }
     const id = window.setInterval(() => {
       refresh().catch((error) =>
-        logger.error('[NotificationsProvider] Failed periodic refresh', normalizeError(error))
+        logClientError('[NotificationsProvider] Failed periodic refresh', error, 'NotificationsProvider.periodicRefresh')
       );
     }, 60000);
     return () => window.clearInterval(id);
@@ -170,11 +178,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       performDismiss({ notificationIds: [id] })
         .then(() => refresh())
         .catch((error) => {
-          const normalized = normalizeError(
-            error,
-            '[NotificationsProvider] Failed to persist dismissal'
-          );
-          logger.error('[NotificationsProvider] Failed to persist dismissal', normalized, {
+          logClientError('[NotificationsProvider] Failed to persist dismissal', error, 'NotificationsProvider.dismiss', {
             id,
           });
         });
@@ -190,11 +194,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     performDismiss({ notificationIds: ids })
       .then(() => refresh())
       .catch((error) => {
-        const normalized = normalizeError(
-          error,
-          '[NotificationsProvider] Failed to persist dismiss-all'
-        );
-        logger.error('[NotificationsProvider] Failed to persist dismiss-all', normalized, {
+        logClientError('[NotificationsProvider] Failed to persist dismiss-all', error, 'NotificationsProvider.dismissAll', {
           dismissedIds: ids, // Array support enables better log querying
           count: ids.length,
         });

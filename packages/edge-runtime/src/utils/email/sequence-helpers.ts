@@ -50,7 +50,7 @@ export async function processSequenceEmail(
 
   const Template = STEP_TEMPLATES[step];
   if (!Template) {
-    logError('Unknown sequence step', logContext, new Error(`Unknown step: ${step}`));
+    await logError('Unknown sequence step', logContext, new Error(`Unknown step: ${step}`));
     throw new Error(`Unknown step: ${step}`);
   }
 
@@ -62,7 +62,7 @@ export async function processSequenceEmail(
 
   const subject = STEP_SUBJECTS[step];
   if (!subject) {
-    logError(
+    await logError(
       'Unknown sequence step subject',
       logContext,
       new Error(`No subject for step: ${step}`)
@@ -87,7 +87,7 @@ export async function processSequenceEmail(
   );
 
   if (result.error) {
-    logError('Sequence email send failed', logContext, result.error);
+    await logError('Sequence email send failed', logContext, result.error);
     throw new Error(result.error.message);
   }
 
@@ -101,7 +101,7 @@ export async function processSequenceEmail(
   
   if (markError) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('Failed to mark sequence email processed', {
+    await logError('Failed to mark sequence email processed', {
       ...logContext,
       dbQuery: {
         rpcName: 'mark_sequence_email_processed',
@@ -119,7 +119,7 @@ export async function processSequenceEmail(
   
   if (scheduleError) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('Failed to schedule next sequence step', {
+    await logError('Failed to schedule next sequence step', {
       ...logContext,
       dbQuery: {
         rpcName: 'schedule_next_sequence_step',

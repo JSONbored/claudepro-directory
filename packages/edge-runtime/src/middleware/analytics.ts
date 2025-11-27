@@ -25,7 +25,7 @@ export function analytics(
       app: appLabel,
     });
 
-    const logEvent = (status: number, outcome: 'success' | 'error', error?: unknown) => {
+    const logEvent = async (status: number, outcome: 'success' | 'error', error?: unknown) => {
       const durationMs = Math.round(performance.now() - startedAt);
       const logData: Record<string, unknown> = {
         route: routeName,
@@ -48,13 +48,13 @@ export function analytics(
       if (outcome === 'success') {
         logInfo('Route hit', { ...logContext, ...logData });
       } else {
-        logError('Route error', { ...logContext, ...logData }, error);
+        await logError('Route error', { ...logContext, ...logData }, error);
       }
     };
 
     try {
       const response = await next();
-      logEvent(response.status, 'success');
+      await logEvent(response.status, 'success');
       return response;
     } catch (error) {
       // Attempt to get status from error object
@@ -67,7 +67,7 @@ export function analytics(
         if (typeof s === 'number') status = s;
       }
       
-      logEvent(status, 'error', error);
+      await logEvent(status, 'error', error);
       throw error;
     }
   };

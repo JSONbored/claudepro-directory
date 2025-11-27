@@ -1,14 +1,11 @@
 import { getUserIdentities } from '@heyclaude/web-runtime';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/server';
 import { Button,
   Card,
   CardContent,
@@ -34,38 +31,31 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ConnectedAccountsPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, ROUTE, 'ConnectedAccountsPage');
+  const operation = 'ConnectedAccountsPage';
+  const route = ROUTE;
+  const module = 'apps/web/src/app/account/connected-accounts/page';
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation,
+    route,
+    module,
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'ConnectedAccountsPage' });
 
   if (!user) {
-    logger.warn(
-      'ConnectedAccountsPage: unauthenticated access attempt detected',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'authentication',
-        },
-        authSectionStart
-      )
-    );
-    logger.info(
-      'ConnectedAccountsPage: page render completed (unauthenticated)',
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'page-render',
-          outcome: 'unauthenticated',
-        },
-        startTime
-      )
-    );
+    reqLogger.warn('ConnectedAccountsPage: unauthenticated access attempt detected', {
+      section: 'authentication',
+    });
+    reqLogger.info('ConnectedAccountsPage: page render completed (unauthenticated)', {
+      section: 'page-render',
+      outcome: 'unauthenticated',
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -83,48 +73,29 @@ export default async function ConnectedAccountsPage() {
     );
   }
 
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
-  logger.info(
-    'ConnectedAccountsPage: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+
+  userLogger.info('ConnectedAccountsPage: authentication successful', {
+    section: 'authentication',
+  });
 
   // Section: Identities Data Fetch
-  const identitiesSectionStart = Date.now();
   let result: Awaited<ReturnType<typeof getUserIdentities>> | { data: null; serverError: string };
   try {
     result = await getUserIdentities();
-    logger.info(
-      'ConnectedAccountsPage: identities data loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'identities-data-fetch',
-          hasData: !!result.data,
-        },
-        identitiesSectionStart
-      )
-    );
+    userLogger.info('ConnectedAccountsPage: identities data loaded', {
+      section: 'identities-data-fetch',
+      hasData: !!result.data,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'getUserIdentities invocation failed');
-    logger.error(
-      'ConnectedAccountsPage: getUserIdentities threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'identities-data-fetch',
-        },
-        identitiesSectionStart
-      )
-    );
+    userLogger.error('ConnectedAccountsPage: getUserIdentities threw', normalized, {
+      section: 'identities-data-fetch',
+    });
     result = { data: null, serverError: normalized.message };
   }
 
@@ -138,34 +109,19 @@ export default async function ConnectedAccountsPage() {
   if (!result.data || result.serverError) {
     if (result.serverError) {
       const normalized = normalizeError(result.serverError, 'Connected accounts server error');
-      logger.error(
-        'ConnectedAccountsPage: getUserIdentities returned serverError',
-        normalized,
-        logContext
-      );
+      userLogger.error('ConnectedAccountsPage: getUserIdentities returned serverError', normalized);
     } else {
-      logger.warn(
-        'ConnectedAccountsPage: getUserIdentities returned no data',
-        undefined,
-        logContext
-      );
+      userLogger.warn('ConnectedAccountsPage: getUserIdentities returned no data');
     }
 
     // Use generic error message for user-facing display to prevent leaking
     // internal implementation details. Detailed errors are logged server-side.
     const errorMessage = 'Failed to load connected accounts. Please try again later.';
 
-    logger.info(
-      'ConnectedAccountsPage: page render completed (error)',
-      withDuration(
-        {
-          ...logContext,
-          section: 'page-render',
-          outcome: result.serverError ? 'server-error' : 'no-data',
-        },
-        startTime
-      )
-    );
+    userLogger.info('ConnectedAccountsPage: page render completed (error)', {
+      section: 'page-render',
+      outcome: result.serverError ? 'server-error' : 'no-data',
+    });
 
     return (
       <div className="space-y-6">
@@ -187,30 +143,16 @@ export default async function ConnectedAccountsPage() {
 
   const identities = result.data.identities ?? [];
   if (identities.length === 0) {
-    logger.info(
-      'ConnectedAccountsPage: no OAuth identities found',
-      withDuration(
-        {
-          ...logContext,
-          section: 'identities-data-fetch',
-        },
-        identitiesSectionStart
-      )
-    );
+    userLogger.info('ConnectedAccountsPage: no OAuth identities found', {
+      section: 'identities-data-fetch',
+    });
   }
 
   // Final summary log
-  logger.info(
-    'ConnectedAccountsPage: page render completed',
-    withDuration(
-      {
-        ...logContext,
-        section: 'page-render',
-        identitiesCount: identities.length,
-      },
-      startTime
-    )
-  );
+  userLogger.info('ConnectedAccountsPage: page render completed', {
+    section: 'page-render',
+    identitiesCount: identities.length,
+  });
 
   return (
     <div className="space-y-6">

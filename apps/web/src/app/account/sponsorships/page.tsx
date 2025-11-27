@@ -1,18 +1,11 @@
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserSponsorships,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, UnifiedBadge, Button ,
   Card,
   CardContent,
@@ -52,26 +45,23 @@ function isSponsorshipActive(
 }
 
 export default async function SponsorshipsPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    '/account/sponsorships',
-    'SponsorshipsPage'
-  );
+    operation: 'SponsorshipsPage',
+    route: '/account/sponsorships',
+    module: 'apps/web/src/app/account/sponsorships',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipsPage' });
 
   if (!user) {
-    logger.warn('SponsorshipsPage: unauthenticated access attempt', undefined, {
-      ...withDuration(baseLogContext, startTime),
-      requestId,
-      operation: 'SponsorshipsPage',
+    reqLogger.warn('SponsorshipsPage: unauthenticated access attempt', {
       section: 'authentication',
-      sectionDuration_ms: Date.now() - authSectionStart,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -91,22 +81,20 @@ export default async function SponsorshipsPage() {
     );
   }
 
-  const hashedUserId = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash: hashedUserId };
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
 
   // Section: Sponsorships Data Fetch
-  const sponsorshipsSectionStart = Date.now();
   let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>>;
   try {
     sponsorships = await getUserSponsorships(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships');
-    logger.error('SponsorshipsPage: getUserSponsorships threw', normalized, {
-      ...withDuration(logContext, startTime),
-      requestId,
-      operation: 'SponsorshipsPage',
+    userLogger.error('SponsorshipsPage: getUserSponsorships threw', normalized, {
       section: 'sponsorships-data-fetch',
-      sectionDuration_ms: Date.now() - sponsorshipsSectionStart,
     });
     return (
       <div className="space-y-6">
@@ -116,7 +104,7 @@ export default async function SponsorshipsPage() {
   }
 
   if (sponsorships.length === 0) {
-    logger.info('SponsorshipsPage: user has no sponsorships', logContext);
+    userLogger.info('SponsorshipsPage: user has no sponsorships');
     return (
       <div className="space-y-6">
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>

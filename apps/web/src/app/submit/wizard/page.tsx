@@ -25,13 +25,31 @@ import { Constants, type Database } from '@heyclaude/database-types';
 import { getEnvVar } from '@heyclaude/shared-runtime';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
-import { Code, FileText, Plus, Sparkles, Tag, X, Camera as ImageIcon } from '@heyclaude/web-runtime/icons';
+import {
+  Code,
+  FileText,
+  Camera as ImageIcon,
+  Plus,
+  Sparkles,
+  Tag,
+  X,
+} from '@heyclaude/web-runtime/icons';
+import { useClientLogger } from '@heyclaude/web-runtime/logging/client';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
-import { toasts, Button , Card, CardContent, CardHeader, CardTitle, Input , Textarea, Badge    } from '@heyclaude/web-runtime/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Textarea,
+  toasts,
+} from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
@@ -124,14 +142,25 @@ export default function WizardSubmissionPage() {
     subscribe: false,
   });
   const formTracking = useFormTracking();
-   
+  
+  // Client-side logging with automatic component context
+  const log = useClientLogger({
+    component: 'WizardSubmissionPage',
+    module: 'app/submit/wizard',
+  });
+
   const runLoggedAsync = useLoggedAsync({
     scope: 'WizardSubmissionPage',
     defaultMessage: 'Wizard submission operation failed',
     defaultRethrow: false,
   }) as <T>(
     operation: () => Promise<T>,
-    options?: { message?: string; level?: 'error' | 'warn'; rethrow?: boolean; context?: Record<string, unknown> }
+    options?: {
+      message?: string;
+      level?: 'error' | 'warn';
+      rethrow?: boolean;
+      context?: Record<string, unknown>;
+    }
   ) => Promise<T | undefined>;
 
   // Form state
@@ -147,7 +176,7 @@ export default function WizardSubmissionPage() {
     successRate?: number;
     totalUsers?: number;
   }>({});
-  
+
   // Thumbnail upload state
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -201,8 +230,9 @@ export default function WizardSubmissionPage() {
     onTrackEvent: (event, data) => {
       if (event === 'template_applied') {
         formTracking.trackFieldFocused('template_applied', { ...data }).catch((error) => {
-          const normalized = normalizeError(error, 'Failed to track template applied event');
-          logger.warn('Failed to track template applied event', { error: normalized.message });
+          log.warn('Failed to track template applied event', error, 'templateApplied', {
+            ...data,
+          });
         });
         toasts.success.templateApplied();
       }
@@ -282,7 +312,9 @@ export default function WizardSubmissionPage() {
       const MAX_DIMENSION = 2048; // 2048px
 
       if (file.size > MAX_FILE_SIZE) {
-        toasts.error.actionFailed(`File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`);
+        toasts.error.actionFailed(
+          `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`
+        );
         return;
       }
 
@@ -399,7 +431,7 @@ export default function WizardSubmissionPage() {
               error?: string;
             };
 
-            if (!result.success || !result.publicUrl) {
+            if (!(result.success && result.publicUrl)) {
               throw new Error(result.error ?? 'Thumbnail generation failed');
             }
 
@@ -714,15 +746,15 @@ export default function WizardSubmissionPage() {
         toasts.error.submissionFailed(result.serverError);
       }
     } catch (error) {
-      const normalized = normalizeError(error, 'Submission failed');
-      logger.error('Submission failed', normalized, {
+      log.error('Submission failed', error, 'handleSubmit', {
         submissionType: formData.submission_type,
+        qualityScore,
       });
       toasts.error.submissionFailed();
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, formData, formTracking, qualityScore, draftManager, router]);
+  }, [user, formData, formTracking, qualityScore, draftManager, router, log]);
 
   // Render step content
   const renderStepContent = () => {
@@ -1059,7 +1091,7 @@ function StepBasicInfo({
                     }}
                   >
                     <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-sm font-medium">
+                    <span className="font-medium text-sm">
                       {isUploadingThumbnail ? 'Generating thumbnail...' : 'Choose image'}
                     </span>
                     <input
@@ -1090,12 +1122,14 @@ function StepBasicInfo({
                       transition={TOKENS.animations.spring.smooth}
                       className="relative inline-block"
                     >
-                      <div className="relative h-32 w-32 overflow-hidden rounded-lg border"
-                        style={{ borderColor: TOKENS.colors.border.light }}>
+                      <div
+                        className="relative h-32 w-32 overflow-hidden rounded-lg border"
+                        style={{ borderColor: TOKENS.colors.border.light }}
+                      >
                         <Image
                           src={thumbnailPreview}
                           alt="Thumbnail preview"
-                          fill
+                          fill={true}
                           className="object-cover"
                           unoptimized={thumbnailPreview.startsWith('blob:')}
                         />
@@ -1105,7 +1139,7 @@ function StepBasicInfo({
                         onClick={onRemoveThumbnail}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm"
+                        className="-right-2 -top-2 absolute flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm"
                         disabled={isUploadingThumbnail}
                       >
                         <X className="h-4 w-4" />

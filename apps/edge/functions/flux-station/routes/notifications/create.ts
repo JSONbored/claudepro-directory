@@ -190,6 +190,6 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
       notificationCorsHeaders
     );
   } catch (error) {
-    return errorResponse(error, 'flux-station:create-notification', notificationCorsHeaders, logContext);
+    return await errorResponse(error, 'flux-station:create-notification', notificationCorsHeaders, logContext);
   }
 }

@@ -1,17 +1,10 @@
 import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
-import {
   generatePageMetadata,
   getAuthenticatedUser,
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -36,130 +29,76 @@ export async function generateMetadata({ params }: EditCollectionPageProperties)
 }
 
 export default async function EditCollectionPage({ params }: EditCollectionPageProperties) {
-  const startTime = Date.now();
   const { slug } = await params;
-
+  
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    `/account/library/${slug}/edit`,
-    'EditCollectionPage',
-    {
-      slug,
-    }
-  );
+    operation: 'EditCollectionPage',
+    route: `/account/library/${slug}/edit`,
+    module: 'apps/web/src/app/account/library/[slug]/edit',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'EditCollectionPage' });
 
   if (!user) {
-    logger.warn(
-      'EditCollectionPage: unauthenticated access attempt',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'authentication',
-        },
-        authSectionStart
-      )
-    );
+    reqLogger.warn('EditCollectionPage: unauthenticated access attempt', {
+      section: 'authentication',
+    });
     redirect('/login');
   }
 
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
-  logger.info(
-    'EditCollectionPage: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+
+  userLogger.info('EditCollectionPage: authentication successful', {
+    section: 'authentication',
+  });
 
   // Section: Collection Data Fetch
-  const collectionSectionStart = Date.now();
   let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
-    logger.info(
-      'EditCollectionPage: collection data loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'collection-data-fetch',
-          hasData: !!collectionData,
-        },
-        collectionSectionStart
-      )
-    );
+    userLogger.info('EditCollectionPage: collection data loaded', {
+      section: 'collection-data-fetch',
+      hasData: !!collectionData,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for edit page');
-    logger.error(
-      'EditCollectionPage: getCollectionDetail threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'collection-data-fetch',
-          sectionDuration_ms: Date.now() - collectionSectionStart,
-        },
-        startTime
-      )
-    );
+    // Wrapper API: error(message, error, context) - wrapper internally calls Pino with (logData, message)
+    userLogger.error('EditCollectionPage: getCollectionDetail threw', normalized, {
+      section: 'collection-data-fetch',
+    });
     throw normalized;
   }
 
   if (!collectionData) {
-    logger.warn(
-      'EditCollectionPage: collection not found or inaccessible',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          section: 'collection-data-fetch',
-          sectionDuration_ms: Date.now() - collectionSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.warn('EditCollectionPage: collection not found or inaccessible', {
+      section: 'collection-data-fetch',
+    });
     notFound();
   }
 
   const { collection, bookmarks } = collectionData;
 
   if (!collection) {
-    logger.warn(
-      'EditCollectionPage: collection is null in response',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          section: 'collection-data-fetch',
-          sectionDuration_ms: Date.now() - collectionSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.warn('EditCollectionPage: collection is null in response', {
+      section: 'collection-data-fetch',
+    });
     notFound();
   }
 
   // Final summary log
-  logger.info(
-    'EditCollectionPage: page render completed',
-    withDuration(
-      {
-        ...logContext,
-        section: 'page-render',
-      },
-      startTime
-    )
-  );
+  userLogger.info('EditCollectionPage: page render completed', {
+    section: 'page-render',
+  });
 
   return (
     <div className="space-y-6">

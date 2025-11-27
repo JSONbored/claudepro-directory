@@ -7,7 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
-import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { useCallback, useMemo, useState, useTransition } from 'react';
@@ -58,8 +58,7 @@ async function fetchWithRetry(
       await new Promise((resolve) => setTimeout(resolve, delay));
       return fetchWithRetry(url, options, retryConfig, retries - 1);
     }
-    const normalized = normalizeError(error, 'fetchWithRetry: request failed');
-    logger.error('fetchWithRetry: request failed', normalized, {
+    logClientError('fetchWithRetry: request failed', error, 'useNewsletter.fetchWithRetry', {
       url,
       attempt: retryConfig.maxRetries - retries + 1,
     });
@@ -121,7 +120,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         backoffMultiplier: config['newsletter.retry_backoff_multiplier'] ?? DEFAULT_RETRY_BACKOFF_MULTIPLIER,
       };
     } catch (error) {
-      logClientWarning('useNewsletter: failed to load retry config', error);
+      logClientWarn('useNewsletter: failed to load retry config', error, 'useNewsletter.loadConfig');
       return {
         maxRetries: DEFAULT_MAX_RETRIES,
         initialDelayMs: DEFAULT_INITIAL_RETRY_DELAY_MS,
@@ -203,7 +202,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
               },
             }),
           ]).catch((error) => {
-            logClientWarning('useNewsletter: signup success tracking failed', error, {
+            logClientWarn('useNewsletter: signup success tracking failed', error, 'useNewsletter.trackSuccess', {
               source,
               email: normalizedEmail,
               subscriptionId: result.subscription_id,
@@ -236,11 +235,10 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
               },
             })
             .catch((error) => {
-              logClientWarning('useNewsletter: signup error tracking failed', error, { source });
+              logClientWarn('useNewsletter: signup error tracking failed', error, 'useNewsletter.trackError', { source });
             });
 
-          const normalized = normalizeError(errorMessage, 'Newsletter subscription failed');
-          logger.error('Newsletter subscription failed', normalized, {
+          logClientError('Newsletter subscription failed', errorMessage, 'useNewsletter.subscribe', {
             component: 'useNewsletter',
             source,
             email: `${email.substring(0, 3)}***`,
@@ -273,10 +271,10 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             },
           })
           .catch((error) => {
-            logClientWarning('useNewsletter: exception tracking failed', error, { source });
+            logClientWarn('useNewsletter: exception tracking failed', error, 'useNewsletter.trackException', { source });
           });
 
-        logger.error('Newsletter subscription error', err instanceof Error ? err : undefined, {
+        logClientError('Newsletter subscription error', err, 'useNewsletter.subscribe', {
           component: 'useNewsletter',
           source,
           ...logContext,

@@ -227,7 +227,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     if (webhookError || !webhookEvent) {
       const errorMsg = errorToString(webhookError);
       errors.push(`Webhook fetch: ${errorMsg}`);
-      logError('Failed to fetch webhook event', logContext, webhookError);
+      await logError('Failed to fetch webhook event', logContext, webhookError);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
     }
 
@@ -237,7 +237,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     if (!isValidVercelWebhookPayload(webhookData)) {
       const validationError = 'Invalid webhook payload structure';
       errors.push(validationError);
-      logError('Invalid webhook payload structure', {
+      await logError('Invalid webhook payload structure', {
         ...logContext,
         data_preview: JSON.stringify(webhookData).slice(0, 200),
       });
@@ -252,7 +252,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
           })
           .eq('id', job.webhook_event_id);
       } catch (updateError) {
-        logError('Failed to mark invalid webhook as processed', logContext, updateError);
+        await logError('Failed to mark invalid webhook as processed', logContext, updateError);
       }
 
       return exitWithResult(
@@ -286,7 +286,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     if (!(baseCommit && headCommit)) {
       const errorMsg = 'Missing commit metadata in deployment payload';
       errors.push(errorMsg);
-      logError('Missing commit metadata', logContext);
+      await logError('Missing commit metadata', logContext);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
     }
 
@@ -354,7 +354,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     } catch (error) {
       const errorMsg = errorToString(error);
       errors.push(`GitHub fetch: ${errorMsg}`);
-      logError('Failed to fetch commits from GitHub', logContext, error);
+      await logError('Failed to fetch commits from GitHub', logContext, error);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
     }
 
@@ -434,7 +434,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     if (insertError || !changelogData) {
       const errorMsg = errorToString(insertError);
       errors.push(`Changelog insert: ${errorMsg}`);
-      logError('Failed to insert changelog entry', logContext, insertError);
+      await logError('Failed to insert changelog entry', logContext, insertError);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
     }
 
@@ -460,7 +460,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     } catch (enqueueError) {
       const errorMsg = enqueueError instanceof Error ? enqueueError.message : String(enqueueError);
       errors.push(`Notification enqueue: ${errorMsg}`);
-      logError('Failed to enqueue changelog notifications', logContext, enqueueError);
+      await logError('Failed to enqueue changelog notifications', logContext, enqueueError);
       // Don't fail the job - changelog is inserted, notifications can be retried
     }
 
@@ -494,7 +494,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     );
   } catch (error) {
     const errorMsg = errorToString(error);
-    logError('Unexpected error processing changelog webhook', logContext, error);
+    await logError('Unexpected error processing changelog webhook', logContext, error);
     return exitWithResult({ success: false, errors: [errorMsg] }, { errorMessage: errorMsg });
   }
 }
@@ -557,13 +557,13 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
             msg_id: msg.msg_id.toString(),
           }
         );
-        logError('Invalid changelog webhook processing job structure', invalidLogContext);
+        await logError('Invalid changelog webhook processing job structure', invalidLogContext);
 
         // Delete invalid message to prevent infinite retries
         try {
           await pgmqDelete(CHANGELOG_PROCESSING_QUEUE, msg.msg_id);
         } catch (error) {
-          logError('Failed to delete invalid message', invalidLogContext, error);
+          await logError('Failed to delete invalid message', invalidLogContext, error);
         }
 
         results.push({
@@ -607,7 +607,7 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
         const errorLogContext = createUtilityContext('flux-station', 'changelog-process-message', {
           msg_id: message.msg_id.toString(),
         });
-        logError('Unexpected error processing message', errorLogContext, error);
+        await logError('Unexpected error processing message', errorLogContext, error);
         results.push({
           msg_id: message.msg_id.toString(),
           status: 'failed',
@@ -627,8 +627,8 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    logError('Fatal queue processing error', logContext, error);
-    return errorResponse(
+    await logError('Fatal queue processing error', logContext, error);
+    return await errorResponse(
       error,
       'flux-station:changelog-process-fatal',
       publicCorsHeaders,

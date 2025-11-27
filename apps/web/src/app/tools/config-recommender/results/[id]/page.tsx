@@ -4,15 +4,9 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
@@ -41,16 +35,23 @@ interface DecodedQuizAnswers {
   timestamp?: string;
 }
 
-function decodeQuizAnswers(encoded: string, resultId: string): DecodedQuizAnswers {
-  // Note: This is a module-level utility function, so it can't access component-level logContext
-  // Generate a new requestId for this utility function (acceptable for utility functions)
-  const utilityRequestId = generateRequestId();
-  const utilityLogContext = createWebAppContextWithId(
-    utilityRequestId,
-    `/tools/config-recommender/results/${resultId}`,
-    'ConfigRecommenderResultsUtility'
-  );
-
+function decodeQuizAnswers(
+  encoded: string,
+  resultId: string,
+  parentLogger?: ReturnType<typeof logger.child>
+): DecodedQuizAnswers {
+  // Use parent logger if provided, otherwise create a child logger with generated requestId
+  const utilityLogger = parentLogger
+    ? parentLogger.child({
+        operation: 'decodeQuizAnswers',
+      })
+    : logger.child({
+        requestId: generateRequestId(),
+        route: 'utility-function',
+        module: 'apps/web/src/app/tools/config-recommender/results/[id]',
+        operation: 'decodeQuizAnswers',
+      });
+  
   try {
     const json = Buffer.from(encoded, 'base64url').toString('utf8');
     const parsed = JSON.parse(json) as unknown;
@@ -140,8 +141,8 @@ function decodeQuizAnswers(encoded: string, resultId: string): DecodedQuizAnswer
     } as DecodedQuizAnswers;
   } catch (error) {
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
-    logger.error('ConfigRecommenderResults: decodeQuizAnswers failed', normalized, {
-      ...utilityLogContext,
+    utilityLogger.error('ConfigRecommenderResults: decodeQuizAnswers failed', normalized, {
+      resultId,
       encodedLength: encoded.length,
     });
     throw normalized;
@@ -150,7 +151,8 @@ function decodeQuizAnswers(encoded: string, resultId: string): DecodedQuizAnswer
 
 function normalizeRecommendationResults(
   results: Database['public']['Functions']['get_recommendations']['Returns']['results'],
-  resultId: string
+  resultId: string,
+  parentLogger?: ReturnType<typeof logger.child>
 ): Array<
   Database['public']['CompositeTypes']['recommendation_item'] & {
     slug: string;
@@ -158,15 +160,18 @@ function normalizeRecommendationResults(
     category: Database['public']['Enums']['content_category'];
   }
 > {
-  // Note: This is a module-level utility function, so it can't access component-level logContext
-  // Generate a new requestId for this utility function (acceptable for utility functions)
-  const utilityRequestId = generateRequestId();
-  const utilityLogContext = createWebAppContextWithId(
-    utilityRequestId,
-    `/tools/config-recommender/results/${resultId}`,
-    'ConfigRecommenderResultsUtility'
-  );
-
+  // Use parent logger if provided, otherwise create a child logger with generated requestId
+  const utilityLogger = parentLogger
+    ? parentLogger.child({
+        operation: 'normalizeRecommendationResults',
+      })
+    : logger.child({
+        requestId: generateRequestId(),
+        route: 'utility-function',
+        module: 'apps/web/src/app/tools/config-recommender/results/[id]',
+        operation: 'normalizeRecommendationResults',
+      });
+  
   if (!results) return [];
   const normalized = results.filter(
     (
@@ -179,8 +184,8 @@ function normalizeRecommendationResults(
   );
 
   if (normalized.length < results.length) {
-    logger.warn('ConfigRecommenderResults: filtered incomplete recommendation items', undefined, {
-      ...utilityLogContext,
+    utilityLogger.warn('ConfigRecommenderResults: filtered incomplete recommendation items', {
+      resultId,
       originalCount: results.length,
       filteredCount: normalized.length,
     });
@@ -210,74 +215,46 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
 }
 
 export default async function ResultsPage({ params, searchParams }: PageProperties) {
-  const startTime = Date.now();
   const resolvedParameters = await params;
   const resolvedSearchParameters = await searchParams;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
     requestId,
-    `/tools/config-recommender/results/${resolvedParameters.id}`,
-    'ConfigRecommenderResults',
-    {
-      resultId: resolvedParameters.id,
-    }
-  );
+    operation: 'ConfigRecommenderResults',
+    route: `/tools/config-recommender/results/${resolvedParameters.id}`,
+    module: 'apps/web/src/app/tools/config-recommender/results/[id]',
+  });
 
   // Section: Answers Validation
-  const validationSectionStart = Date.now();
   if (!resolvedSearchParameters.answers) {
-    logger.warn(
-      'ConfigRecommenderResults: accessed without answers parameter',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'answers-validation',
-        },
-        validationSectionStart
-      )
-    );
+    reqLogger.warn('ConfigRecommenderResults: accessed without answers parameter', {
+      section: 'answers-validation',
+    });
     notFound();
   }
 
   // Section: Answers Decoding
-  const decodingSectionStart = Date.now();
   let answers: DecodedQuizAnswers;
   try {
-    answers = decodeQuizAnswers(resolvedSearchParameters.answers, resolvedParameters.id);
-    logger.info(
-      'ConfigRecommenderResults: answers decoded successfully',
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'answers-decoding',
-          useCase: answers.useCase,
-          experienceLevel: answers.experienceLevel,
-        },
-        decodingSectionStart
-      )
-    );
+    answers = decodeQuizAnswers(resolvedSearchParameters.answers, resolvedParameters.id, reqLogger);
+    reqLogger.info('ConfigRecommenderResults: answers decoded successfully', {
+      section: 'answers-decoding',
+      useCase: answers.useCase,
+      experienceLevel: answers.experienceLevel,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to decode quiz answers');
-    logger.error(
-      'ConfigRecommenderResults: failed to decode quiz answers',
-      normalized,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'answers-decoding',
-          sectionDuration_ms: Date.now() - decodingSectionStart,
-        },
-        startTime
-      )
-    );
+    reqLogger.error('ConfigRecommenderResults: failed to decode quiz answers', normalized, {
+      section: 'answers-decoding',
+    });
     notFound();
   }
 
   // Section: Recommendations Fetch
-  const recommendationsSectionStart = Date.now();
   const enrichedResult = await getConfigRecommendations({
     useCase: answers.useCase,
     experienceLevel: answers.experienceLevel,
@@ -285,40 +262,32 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
     ...(answers.p_integrations && { integrations: answers.p_integrations }),
     ...(answers.p_focus_areas && { focusAreas: answers.p_focus_areas }),
   });
-  logger.info(
-    'ConfigRecommenderResults: recommendations fetched',
-    withDuration(
-      {
-        ...baseLogContext,
-        section: 'recommendations-fetch',
-        useCase: answers.useCase,
-        experienceLevel: answers.experienceLevel,
-        resultCount: enrichedResult?.results?.length ?? 0,
-      },
-      recommendationsSectionStart
-    )
-  );
+  reqLogger.info('ConfigRecommenderResults: recommendations fetched', {
+    section: 'recommendations-fetch',
+    useCase: answers.useCase,
+    experienceLevel: answers.experienceLevel,
+    resultCount: enrichedResult?.results?.length ?? 0,
+  });
 
   if (!enrichedResult?.results) {
-    logger.error(
-      'ConfigRecommenderResults: get_recommendations returned no data',
+    const recommendationsError = normalizeError(
       new Error('Recommendations result is null'),
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'recommendations-fetch',
-          useCase: answers.useCase,
-          sectionDuration_ms: Date.now() - recommendationsSectionStart,
-        },
-        startTime
-      )
+      'get_recommendations returned no data'
+    );
+    reqLogger.error(
+      'ConfigRecommenderResults: get_recommendations returned no data',
+      recommendationsError,
+      {
+        section: 'recommendations-fetch',
+        useCase: answers.useCase,
+      }
     );
     notFound();
   }
 
   const recommendations: RecommendationResponse = {
     ...enrichedResult,
-    results: normalizeRecommendationResults(enrichedResult.results, resolvedParameters.id),
+    results: normalizeRecommendationResults(enrichedResult.results, resolvedParameters.id, reqLogger),
     answers,
     id: resolvedParameters.id,
     generatedAt: new Date().toISOString(),
@@ -326,19 +295,12 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
 
   const shareUrl = `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParameters.id}?answers=${resolvedSearchParameters.answers}`;
 
-  logger.info(
-    'ConfigRecommenderResults: page viewed',
-    withDuration(
-      {
-        ...baseLogContext,
-        section: 'page-render',
-        useCase: answers.useCase,
-        experienceLevel: answers.experienceLevel,
-        resultCount: recommendations.results?.length ?? 0,
-      },
-      startTime
-    )
-  );
+  reqLogger.info('ConfigRecommenderResults: page viewed', {
+    section: 'page-render',
+    useCase: answers.useCase,
+    experienceLevel: answers.experienceLevel,
+    resultCount: recommendations.results?.length ?? 0,
+  });
 
   return (
     <div className="min-h-screen bg-background">

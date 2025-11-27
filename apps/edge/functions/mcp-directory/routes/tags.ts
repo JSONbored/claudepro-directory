@@ -30,7 +30,7 @@ export async function handleGetContentByTag(
 
   if (error) {
     // Use dbQuery serializer for consistent database query formatting
-    logError('RPC call failed in getContentByTag', {
+    await logError('RPC call failed in getContentByTag', {
       dbQuery: {
         rpcName: 'get_content_paginated',
         args: rpcArgs, // Will be redacted by Pino's redact config

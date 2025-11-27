@@ -1,6 +1,6 @@
 'use client';
 
-import { logger } from '../logger.ts';
+import { logger, normalizeError } from '../entries/core.ts';
 import { createSupabaseBrowserClient } from '../supabase/browser.ts';
 import { getEnvVar } from '@heyclaude/shared-runtime';
 
@@ -33,9 +33,9 @@ export async function callEdgeFunction<T = unknown>(
     session?.access_token || (requireAuth ? null : getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY'));
 
   if (!token && requireAuth) {
-    const error = new Error('Authentication required');
-    logger.error('No auth token available for Edge function', error, { functionName });
-    throw error;
+    const normalized = normalizeError(new Error('Authentication required'), 'No auth token available for Edge function');
+    logger.error('No auth token available for Edge function', normalized, { functionName });
+    throw normalized;
   }
 
   const response = await fetch(`${getEdgeBaseUrl()}/${functionName}`, {
@@ -49,8 +49,11 @@ export async function callEdgeFunction<T = unknown>(
 
   if (!response.ok) {
     const errorText = await response.text();
-    const fetchError = new Error(`Edge function ${functionName} failed: ${response.status} ${response.statusText}`);
-    logger.error('Edge function error', fetchError, {
+    const normalized = normalizeError(
+      new Error(`Edge function ${functionName} failed: ${response.status} ${response.statusText}`),
+      'Edge function error'
+    );
+    logger.error('Edge function error', normalized, {
       functionName,
       status: response.status,
       method,

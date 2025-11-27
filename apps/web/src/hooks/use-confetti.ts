@@ -1,7 +1,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import confetti from 'canvas-confetti';
 import { useCallback } from 'react';
@@ -66,26 +66,22 @@ export function useConfetti() {
   const celebrateBookmark = useCallback(() => {
     fireConfetti('success').catch((error) => {
       // Error handling is done inside fireConfetti, but we need to catch to prevent floating promise
-      const normalized = normalizeError(error, 'useConfetti: celebrateBookmark failed');
-      logger.error('useConfetti: celebrateBookmark failed', normalized);
+      logClientError('useConfetti: celebrateBookmark failed', error, 'useConfetti.celebrateBookmark');
     });
   }, [fireConfetti]);
   const celebrateSubmission = useCallback(() => {
     fireConfetti('celebration').catch((error) => {
-      const normalized = normalizeError(error, 'useConfetti: celebrateSubmission failed');
-      logger.error('useConfetti: celebrateSubmission failed', normalized);
+      logClientError('useConfetti: celebrateSubmission failed', error, 'useConfetti.celebrateSubmission');
     });
   }, [fireConfetti]);
   const celebrateMilestone = useCallback(() => {
     fireConfetti('milestone').catch((error) => {
-      const normalized = normalizeError(error, 'useConfetti: celebrateMilestone failed');
-      logger.error('useConfetti: celebrateMilestone failed', normalized);
+      logClientError('useConfetti: celebrateMilestone failed', error, 'useConfetti.celebrateMilestone');
     });
   }, [fireConfetti]);
   const celebrateSignup = useCallback(() => {
     fireConfetti('subtle').catch((error) => {
-      const normalized = normalizeError(error, 'useConfetti: celebrateSignup failed');
-      logger.error('useConfetti: celebrateSignup failed', normalized);
+      logClientError('useConfetti: celebrateSignup failed', error, 'useConfetti.celebrateSignup');
     });
   }, [fireConfetti]);
 

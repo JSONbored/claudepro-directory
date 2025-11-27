@@ -163,12 +163,12 @@ export function successResponse(data: unknown, status = 200, cors = publicCorsHe
   return jsonResponse(data, status, cors);
 }
 
-export function errorResponse(
+export async function errorResponse(
   error: unknown,
   context: string,
   cors: Record<string, string> = publicCorsHeaders,
   logContext?: BaseLogContext
-): Response {
+): Promise<Response> {
   // Use provided logContext if available (preserves request_id), otherwise create new one
   const finalLogContext: BaseLogContext = logContext
     ? { ...logContext, action: logContext.action || 'error-response', context }
@@ -180,7 +180,8 @@ export function errorResponse(
   // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
   // Only pass context-specific fields (context, action) that aren't in bindings
   // logError already includes flush() internally for critical errors
-  logError(`${context} failed`, finalLogContext, error);
+  // Await to ensure logs are flushed before returning response
+  await logError(`${context} failed`, finalLogContext, error);
 
   // Never expose internal error details in HTTP responses
   const isTimeout = error instanceof Error && error.name === 'TimeoutError';

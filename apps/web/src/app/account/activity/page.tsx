@@ -1,15 +1,12 @@
 import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, Button ,
   Card,
   CardContent,
@@ -33,27 +30,27 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ActivityPage() {
-  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/account/activity', 'ActivityPage');
+  const operation = 'ActivityPage';
+  const route = '/account/activity';
+  const module = 'apps/web/src/app/account/activity/page';
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation,
+    route,
+    module,
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'ActivityPage' });
 
   if (!user) {
-    logger.warn(
-      'ActivityPage: unauthenticated access attempt detected',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'authentication',
-        },
-        authSectionStart
-      )
-    );
+    reqLogger.warn('ActivityPage: unauthenticated access attempt detected', {
+      section: 'authentication',
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -73,21 +70,17 @@ export default async function ActivityPage() {
     );
   }
 
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
-  logger.info(
-    'ActivityPage: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+
+  userLogger.info('ActivityPage: authentication successful', {
+    section: 'authentication',
+  });
 
   // Section: Activity Data Fetch
-  const activitySectionStart = Date.now();
   // Fetch activity data - use Promise.allSettled for partial success handling
   const [summaryResult, timelineResult] = await Promise.allSettled([
     getActivitySummary(),
@@ -109,18 +102,9 @@ export default async function ActivityPage() {
     const reason = result.reason as unknown;
     const normalized = normalizeError(reason, `Failed to load ${name}`);
     if (user) {
-      logger.error(
-        `ActivityPage: ${name} failed`,
-        normalized,
-        withDuration(
-          {
-            ...logContext,
-            section: 'activity-data-fetch',
-            sectionDuration_ms: Date.now() - activitySectionStart,
-          },
-          startTime
-        )
-      );
+      userLogger.error(`ActivityPage: ${name} failed`, normalized, {
+        section: 'activity-data-fetch',
+      });
     }
     return null;
   }
@@ -154,33 +138,18 @@ export default async function ActivityPage() {
 
   const activities = timeline?.activities ?? [];
   if (hasTimeline && activities.length === 0) {
-    logger.warn(
-      'ActivityPage: activity timeline returned no activities',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          section: 'activity-data-fetch',
-        },
-        activitySectionStart
-      )
-    );
+    userLogger.warn('ActivityPage: activity timeline returned no activities', {
+      section: 'activity-data-fetch',
+    });
   }
 
   // Final summary log
-  logger.info(
-    'ActivityPage: page render completed',
-    withDuration(
-      {
-        ...logContext,
-        section: 'page-render',
-        activitiesCount: activities.length,
-        hasSummary,
-        hasTimeline,
-      },
-      startTime
-    )
-  );
+  userLogger.info('ActivityPage: page render completed', {
+    section: 'page-render',
+    activitiesCount: activities.length,
+    hasSummary,
+    hasTimeline,
+  });
 
   return (
     <div className="space-y-6">

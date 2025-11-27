@@ -247,9 +247,9 @@ export function formatDate(date: string | Date, style: DateFormatStyle = 'long')
   } catch (error) {
     const normalized = normalizeError(error, 'formatDate failed');
     logger.warn('formatDate failed', {
+      err: normalized,
       input: typeof date === 'string' ? date : date.toString(),
       style,
-      error: normalized.message,
     });
     return typeof date === 'string' ? date : date.toString();
   }
@@ -305,9 +305,9 @@ export function formatRelativeDate(date: string | Date, options: RelativeDateOpt
   } catch (error) {
     const normalized = normalizeError(error, 'formatRelativeDate failed');
     logger.warn('formatRelativeDate failed', {
+      err: normalized,
       input: typeof date === 'string' ? date : date.toString(),
       style,
-      error: normalized.message,
     });
     return typeof date === 'string' ? date : date.toString();
   }

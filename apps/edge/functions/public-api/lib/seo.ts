@@ -110,7 +110,7 @@ export async function getSeoMetadata(
     // Log error for debugging while maintaining API contract
     // Use logError helper for proper error instrumentation
     const { logError } = await import('@heyclaude/shared-runtime');
-    logError('Failed to generate SEO metadata', {
+    await logError('Failed to generate SEO metadata', {
       route: sanitizedRoute,
       include: validatedInclude,
     }, error);

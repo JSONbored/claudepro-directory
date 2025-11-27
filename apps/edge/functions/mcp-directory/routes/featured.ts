@@ -47,17 +47,17 @@ export async function handleGetFeatured(
   const results = await Promise.allSettled(categoryQueries);
 
   // Process results - handle both fulfilled and rejected promises
-  results.forEach((result: PromiseSettledResult<Awaited<ReturnType<typeof supabase.rpc>>>, index: number) => {
+  for (const [index, result] of results.entries()) {
     const category = validCategories[index];
 
-    if (!category) return; // Skip if category is undefined
+    if (!category) continue; // Skip if category is undefined
 
     if (result.status === 'fulfilled') {
       const { data, error } = result.value;
 
       if (error) {
         // Use dbQuery serializer for consistent database query formatting
-        logError('RPC call failed in getFeatured', {
+        await logError('RPC call failed in getFeatured', {
           dbQuery: {
             rpcName: 'get_content_paginated_slim',
             args: {
@@ -71,7 +71,7 @@ export async function handleGetFeatured(
           category,
         }, error);
         // Continue gracefully - category will be missing from featured object
-        return;
+        continue;
       }
 
       if (data) {
@@ -81,7 +81,7 @@ export async function handleGetFeatured(
         
         // Validate response structure
         if (!typedData || typeof typedData !== 'object') {
-          return; // Skip malformed responses
+          continue; // Skip malformed responses
         }
         
         if (typedData.items) {
@@ -119,7 +119,7 @@ export async function handleGetFeatured(
       }
     } else if (result.status === 'rejected') {
       // Promise was rejected - log with dbQuery serializer
-      logError('RPC promise rejected in getFeatured', {
+      await logError('RPC promise rejected in getFeatured', {
         dbQuery: {
           rpcName: 'get_content_paginated_slim',
           args: {
@@ -134,7 +134,7 @@ export async function handleGetFeatured(
       }, result.reason);
       // Continue gracefully - category will be missing from featured object
     }
-  });
+  }
 
   if (Object.keys(featured).length === 0) {
     return {

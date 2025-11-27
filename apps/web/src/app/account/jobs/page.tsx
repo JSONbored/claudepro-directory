@@ -1,14 +1,6 @@
 import type { Database } from '@heyclaude/database-types';
 import type { JobStatus } from '@heyclaude/web-runtime';
-import {
-  createWebAppContextWithId,
-  formatRelativeDate,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-  withDuration,
-} from '@heyclaude/web-runtime/core';
+import { formatRelativeDate } from '@heyclaude/web-runtime/core';
 import type { JobBillingSummaryEntry } from '@heyclaude/web-runtime/data';
 import {
   generatePageMetadata,
@@ -26,6 +18,7 @@ import {
   Eye,
   Plus,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
   Card,
   CardContent,
@@ -108,32 +101,29 @@ interface MyJobsPageProperties {
 }
 
 export default async function MyJobsPage({ searchParams }: MyJobsPageProperties) {
-  const startTime = Date.now();
   const resolvedSearchParameters = searchParams ? await searchParams : {};
   const paymentStatus = resolvedSearchParameters.payment;
   const paymentJobId = resolvedSearchParameters.job_id;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(requestId, '/account/jobs', 'MyJobsPage');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'MyJobsPage',
+    route: '/account/jobs',
+    module: 'apps/web/src/app/account/jobs',
+  });
 
   // Section: Authentication
-  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'MyJobsPage' });
 
   if (!user) {
-    logger.warn(
-      'MyJobsPage: unauthenticated access attempt detected',
-      undefined,
-      withDuration(
-        {
-          ...baseLogContext,
-          section: 'authentication',
-          timestamp: new Date().toISOString(),
-        },
-        authSectionStart
-      )
-    );
+    reqLogger.warn('MyJobsPage: unauthenticated access attempt detected', {
+      section: 'authentication',
+      timestamp: new Date().toISOString(),
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -151,66 +141,37 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
     );
   }
 
-  const userIdHash = hashUserId(user.id);
-  const logContext = { ...baseLogContext, userIdHash };
-  logger.info(
-    'MyJobsPage: authentication successful',
-    withDuration(
-      {
-        ...logContext,
-        section: 'authentication',
-      },
-      authSectionStart
-    )
-  );
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+
+  userLogger.info('MyJobsPage: authentication successful', {
+    section: 'authentication',
+  });
 
   // Section: Dashboard Data Fetch
-  const dashboardSectionStart = Date.now();
   let data: Database['public']['Functions']['get_user_dashboard']['Returns'] | null = null;
   let fetchError = false;
   try {
     data = await getUserDashboard(user.id);
-    logger.info(
-      'MyJobsPage: dashboard data loaded',
-      withDuration(
-        {
-          ...logContext,
-          section: 'dashboard-data-fetch',
-          hasData: !!data,
-        },
-        dashboardSectionStart
-      )
-    );
+    userLogger.info('MyJobsPage: dashboard data loaded', {
+      section: 'dashboard-data-fetch',
+      hasData: !!data,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user dashboard for jobs');
-    logger.error(
-      'MyJobsPage: getUserDashboard threw',
-      normalized,
-      withDuration(
-        {
-          ...logContext,
-          section: 'dashboard-data-fetch',
-          sectionDuration_ms: Date.now() - dashboardSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.error('MyJobsPage: getUserDashboard threw', normalized, {
+      section: 'dashboard-data-fetch',
+    });
     fetchError = true;
   }
 
   if (!data) {
-    logger.warn(
-      'MyJobsPage: getUserDashboard returned no data',
-      undefined,
-      withDuration(
-        {
-          ...logContext,
-          section: 'dashboard-data-fetch',
-          sectionDuration_ms: Date.now() - dashboardSectionStart,
-        },
-        startTime
-      )
-    );
+    userLogger.warn('MyJobsPage: getUserDashboard returned no data', {
+      section: 'dashboard-data-fetch',
+    });
     fetchError = true;
   }
 
@@ -275,7 +236,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   })();
 
   if (jobs.length === 0) {
-    logger.info('MyJobsPage: user has no job listings', logContext);
+    userLogger.info('MyJobsPage: user has no job listings');
   }
 
   const jobIds = jobs.map((job) => job.id).filter(Boolean);
@@ -285,7 +246,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
       billingSummaries = await getJobBillingSummaries(jobIds);
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to load job billing summaries');
-      logger.error('MyJobsPage: getJobBillingSummaries failed', normalized, logContext);
+      userLogger.error('MyJobsPage: getJobBillingSummaries failed', normalized);
     }
   }
   const billingSummaryMap = new Map<string, JobBillingSummaryEntry>();

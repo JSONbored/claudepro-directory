@@ -87,7 +87,7 @@ export async function handleGeneratePackage(
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!serviceRoleKey) {
     if (logContext) {
-      logError('SUPABASE_SERVICE_ROLE_KEY not configured', logContext);
+      await logError('SUPABASE_SERVICE_ROLE_KEY not configured', logContext);
     }
     return jsonResponse(
       {
@@ -178,7 +178,7 @@ export async function handleGeneratePackage(
   // Get generator for category
   const generator = getGenerator(category);
   if (!generator) {
-    return errorResponse(
+    return await errorResponse(
       new Error(`Generator not found for category '${category}'`),
       'content-generate:getGenerator',
       CORS,
@@ -195,7 +195,7 @@ export async function handleGeneratePackage(
 
   if (fetchError || !content) {
     if (logContext) {
-      logError('Content not found', logContext, fetchError);
+      await logError('Content not found', logContext, fetchError);
     }
     return jsonResponse(
       {
@@ -276,11 +276,11 @@ export async function handleGeneratePackage(
     } catch (error) {
       // Log error details server-side (not exposed to users)
       if (logContext) {
-        logError('Failed to enqueue package generation', logContext, error);
+        await logError('Failed to enqueue package generation', logContext, error);
       }
 
       // errorResponse accepts optional logContext, so no need for conditional
-      return errorResponse(error, 'data-api:content-generate-enqueue', CORS, logContext);
+      return await errorResponse(error, 'data-api:content-generate-enqueue', CORS, logContext);
     }
   }
 
@@ -324,7 +324,7 @@ export async function handleGeneratePackage(
     });
   } catch (error) {
     // Log error details server-side (not exposed to users)
-    logError('Package generation failed', finalLogContext, error);
-    return errorResponse(error, 'data-api:content-generate-sync', CORS, finalLogContext);
+    await logError('Package generation failed', finalLogContext, error);
+    return await errorResponse(error, 'data-api:content-generate-sync', CORS, finalLogContext);
   }
 }
