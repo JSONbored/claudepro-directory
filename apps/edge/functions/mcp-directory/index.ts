@@ -108,8 +108,10 @@ mcpApp.use('/*', async (c, next) => {
  */
 
 /**
- * Get authenticated Supabase client for tool handlers
- * Creates client with user's auth context for RLS enforcement
+ * Create a Supabase client scoped to the provided authentication token.
+ *
+ * @param token - The user's access token used to set the `Authorization: Bearer <token>` header for row-level security
+ * @returns A Supabase client instance configured to send the provided token with every request
  */
 function getAuthenticatedSupabase(_user: User, token: string) {
   const {
@@ -128,8 +130,14 @@ function getAuthenticatedSupabase(_user: User, token: string) {
  */
 
 /**
- * Register all tools with a given Supabase client
- * This function is called for each request with an authenticated client
+ * Register all MCP tools on the provided server using the given per-request Supabase client.
+ *
+ * Registers the directory tools (listCategories, searchContent, getContentDetail, getTrending, getFeatured,
+ * getTemplates, getMcpServers, getRelatedContent, getContentByTag, getPopular, getRecent) to operate
+ * against the authenticated Supabase instance for the current request.
+ *
+ * @param mcpServer - MCP server instance to register tools on
+ * @param supabase - Authenticated per-request Supabase client bound to the request's user/token
  */
 function registerAllTools(
   mcpServer: McpServer,
@@ -279,7 +287,9 @@ mcpApp.get('/.well-known/oauth-authorization-server', handleAuthorizationServerM
 mcpApp.get('/oauth/authorize', handleOAuthAuthorize);
 
 /**
- * Get MCP server resource URL for audience validation
+ * Provide the MCP server resource URL used to validate token audience.
+ *
+ * @returns The MCP server resource URL — the value of the `MCP_SERVER_URL` environment variable if set, otherwise `https://mcp.heyclau.de/mcp`.
  */
 function getMcpServerResourceUrl(): string {
   // Use environment variable if set, otherwise default to production URL
@@ -287,8 +297,13 @@ function getMcpServerResourceUrl(): string {
 }
 
 /**
- * Validate JWT token audience claim
- * Per MCP spec (RFC 8707), tokens MUST be issued for this specific resource
+ * Check whether a JWT's audience includes the MCP resource or a compatible Supabase audience.
+ *
+ * Decodes the token payload without performing signature verification (assumes the token was verified earlier).
+ *
+ * @param token - The JWT string to inspect
+ * @param expectedAudience - The MCP resource URL expected to be present in the token's `aud` claim
+ * @returns `true` if the token's `aud` includes `expectedAudience` or a compatible Supabase audience, `false` otherwise
  */
 function validateTokenAudience(token: string, expectedAudience: string): boolean {
   try {
@@ -361,7 +376,11 @@ function validateTokenAudience(token: string, expectedAudience: string): boolean
 }
 
 /**
- * Create WWW-Authenticate header per MCP spec (RFC 9728)
+ * Build a WWW-Authenticate header value for MCP-compliant bearer authentication.
+ *
+ * @param resourceMetadataUrl - The URL to the protected-resource metadata (resource_metadata) to include in the header
+ * @param scope - Optional space-delimited scope string to include in the header
+ * @returns A WWW-Authenticate header string containing `Bearer`, `realm="mcp"`, `resource_metadata="<url>"`, and optionally `scope="<scopes>"`
  */
 function createWwwAuthenticateHeader(resourceMetadataUrl: string, scope?: string): string {
   const params = ['Bearer', `realm="mcp"`, `resource_metadata="${resourceMetadataUrl}"`];

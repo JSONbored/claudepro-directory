@@ -26,6 +26,14 @@ type PopularContentRow =
 type RecentContentRow =
   DatabaseGenerated['public']['Functions']['get_recent_content']['Returns'][number];
 
+/**
+ * Route handler for the public trending API that validates the request and dispatches to page or sidebar handlers.
+ *
+ * @param segments - Path segments following the trending route (e.g., ["sidebar"] for the sidebar route)
+ * @param url - The full request URL, used to read query parameters such as `mode`, `tab`, `limit`, and `category`
+ * @param method - The HTTP method of the request; only `GET` requests are accepted
+ * @returns A Response containing the requested trending data or an error response (e.g., 400, 405)
+ */
 export async function handleTrendingRoute(
   segments: string[],
   url: URL,
@@ -67,6 +75,15 @@ export async function handleTrendingRoute(
   return handlePageTabs(url, logContext);
 }
 
+/**
+ * Handle requests for the trending page tabs (trending, popular, recent) and return the corresponding JSON payload.
+ *
+ * Reads `tab`, `limit`, and `category` from the provided URL's query parameters, clamps/validates them, fetches the requested data, and returns a JSON response containing the matching items and a `totalCount`.
+ *
+ * @param url - The request URL containing query parameters `tab`, `limit`, and `category`
+ * @param logContext - Structured logging/tracing context for the current data-api request
+ * @returns A Response with a JSON body containing either `{ trending | popular | recent, totalCount }`, a 400 for invalid tab, or an error response on failure
+ */
 async function handlePageTabs(url: URL, logContext: ReturnType<typeof createDataApiContext>): Promise<Response> {
   const tab = (url.searchParams.get('tab') || 'trending').toLowerCase();
   const limit = clampLimit(Number(url.searchParams.get('limit') || '12'));
@@ -151,6 +168,13 @@ async function handlePageTabs(url: URL, logContext: ReturnType<typeof createData
   }
 }
 
+/**
+ * Fetches trending metrics and recent content for a sidebar by category and returns them as a JSON response.
+ *
+ * @param url - The request URL; supports query parameters `limit` (number) and `category` (string or "all")
+ * @param logContext - Request logging/tracing context created by `createDataApiContext`
+ * @returns A Response with a JSON body `{ trending: Array, recent: Array }`, CORS and cache headers, and status 200 on success
+ */
 async function handleSidebar(url: URL, logContext: ReturnType<typeof createDataApiContext>): Promise<Response> {
   const limit = clampLimit(Number(url.searchParams.get('limit') || '8'));
   const category = parseCategory(url.searchParams.get('category')) ?? 'guides';
@@ -191,6 +215,12 @@ async function handleSidebar(url: URL, logContext: ReturnType<typeof createDataA
   }
 }
 
+/**
+ * Determines whether a value is a valid content category.
+ *
+ * @param value - The value to test for membership in the ContentCategory set
+ * @returns `true` if `value` is a valid `ContentCategory` string, `false` otherwise.
+ */
 function isValidContentCategory(value: unknown): value is ContentCategory {
   if (typeof value !== 'string') {
     return false;
@@ -205,6 +235,12 @@ function isValidContentCategory(value: unknown): value is ContentCategory {
   return false;
 }
 
+/**
+ * Convert a category string into a ContentCategory, or return null when unspecified or invalid.
+ *
+ * @param value - The category value to parse; may be a category name, `'all'`, or `null`
+ * @returns The corresponding `ContentCategory` when `value` matches a valid category; `null` if `value` is `null`, `'all'`, or not a recognized category
+ */
 function parseCategory(value: string | null): ContentCategory | null {
   if (!value || value === 'all') {
     return null;
@@ -212,6 +248,12 @@ function parseCategory(value: string | null): ContentCategory | null {
   return isValidContentCategory(value) ? value : null;
 }
 
+/**
+ * Clamp a requested limit to the valid range used by the API.
+ *
+ * @param rawLimit - The numeric limit provided by the caller; may be `NaN`
+ * @returns `rawLimit` constrained to the range 1–100, or 12 if `rawLimit` is `NaN`
+ */
 function clampLimit(rawLimit: number): number {
   if (Number.isNaN(rawLimit)) {
     return 12;
@@ -219,6 +261,13 @@ function clampLimit(rawLimit: number): number {
   return Math.min(Math.max(rawLimit, 1), 100);
 }
 
+/**
+ * Normalize database trending metric rows into API-friendly trending items.
+ *
+ * @param rows - Raw trending metric rows from the database
+ * @param fallbackCategory - Category to use when a row's category is missing; if `null`, uses the module default
+ * @returns An array of trending items containing: `category` (resolved category), `slug`, `title`, optional `description`, optional `author`, optional `tags`, optional `source`, optional numeric counters `viewCount`, `copyCount`, `bookmarkCount`, and optional numeric scores `popularity`, `engagementScore`, and `freshnessScore`
+ */
 function mapTrendingRows(rows: TrendingMetricsRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     category: row.category ?? fallbackCategory ?? DEFAULT_CATEGORY,
@@ -237,6 +286,13 @@ function mapTrendingRows(rows: TrendingMetricsRow[], fallbackCategory: ContentCa
   }));
 }
 
+/**
+ * Convert database popular-content rows into API-friendly records with safe fallbacks.
+ *
+ * @param rows - Rows returned from the database for popular content
+ * @param fallbackCategory - Category to use when a row's `category` is null; if `null`, `DEFAULT_CATEGORY` is used
+ * @returns An array of objects containing `category`, `slug`, `title`, optional `description`, optional `author`, optional `tags`, optional `viewCount`, optional `copyCount`, and optional `popularity` fields
+ */
 function mapPopularRows(rows: PopularContentRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     category: row.category ?? fallbackCategory ?? DEFAULT_CATEGORY,
@@ -251,6 +307,13 @@ function mapPopularRows(rows: PopularContentRow[], fallbackCategory: ContentCate
   }));
 }
 
+/**
+ * Normalize recent content rows into API-ready objects, ensuring a category is set.
+ *
+ * @param rows - Recent content rows from the database
+ * @param fallbackCategory - Category to use when a row's category is missing; if `null`, `DEFAULT_CATEGORY` is used
+ * @returns An array of recent content objects with properties: `category`, `slug`, `title`, `description`, `author`, `tags`, and `created_at`
+ */
 function mapRecentRows(rows: RecentContentRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     category: row.category ?? fallbackCategory ?? DEFAULT_CATEGORY,
@@ -263,6 +326,13 @@ function mapRecentRows(rows: RecentContentRow[], fallbackCategory: ContentCatego
   }));
 }
 
+/**
+ * Convert trending metric rows into lightweight sidebar items.
+ *
+ * @param rows - Database rows containing trending metrics for content items
+ * @param fallbackCategory - Category to use when a row's category is missing; if `null`, uses the default category
+ * @returns An array of sidebar items with `title`, `slug` (path formatted as `/category/slug`), and `views` (human-readable string like `"1,234 views"`)
+ */
 function mapSidebarTrending(rows: TrendingMetricsRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     title: row.title ?? row.slug,
@@ -271,6 +341,13 @@ function mapSidebarTrending(rows: TrendingMetricsRow[], fallbackCategory: Conten
   }));
 }
 
+/**
+ * Maps recent content rows into sidebar-friendly entries with title, category-prefixed slug, and a formatted date.
+ *
+ * @param rows - Recent content rows to map
+ * @param fallbackCategory - Category to use when a row's category is missing; if null, uses the default category
+ * @returns An array of objects each containing `title` (row title or slug), `slug` ("/category/slug"), and `date` (formatted as an "Mon D, YYYY" en-US string or empty string if no date)
+ */
 function mapSidebarRecent(rows: RecentContentRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => {
     const displayCategory = row.category ?? fallbackCategory ?? DEFAULT_CATEGORY;

@@ -47,6 +47,12 @@ const OG_HEIGHT = 630;
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
+/**
+ * Determines whether a string matches one of the recognized content category values.
+ *
+ * @param value - The candidate content category string to validate
+ * @returns `true` if `value` matches a known content category (narrows its type), `false` otherwise
+ */
 function isValidContentCategory(
   value: string
 ): value is DatabaseGenerated['public']['Enums']['content_category'] {
@@ -67,7 +73,11 @@ export interface OGImageParams {
 }
 
 /**
- * Create OG image specific log context (more specific than shared-utils)
+ * Builds a per-request logging context for OG image generation.
+ *
+ * @param action - A short label describing the action or step being performed
+ * @param options - Additional context properties to merge into the returned context
+ * @returns A BaseLogContext containing `function: 'og-image'`, the provided `action`, a generated `request_id` (UUID), an ISO `started_at` timestamp, and any supplied `options`
  */
 function createOGImageContext(action: string, options?: Record<string, unknown>): BaseLogContext {
   return {
@@ -80,8 +90,12 @@ function createOGImageContext(action: string, options?: Record<string, unknown>)
 }
 
 /**
- * Extract metadata from HTTP response data
- * Handles both { metadata: {...} } and {...} response shapes
+ * Normalize SEO/metadata payloads from an HTTP response into an object containing title, description, and keywords.
+ *
+ * Supports responses shaped as `{ metadata: { ... } }` or as a top-level metadata object; only string `title` and `description`
+ * and string-array `keywords` are extracted.
+ *
+ * @returns An object with optional `title`, `description`, and `keywords` (array of strings). Properties are included only when valid values are present in the input.
  */
 function extractMetadataFromResponse(data: unknown): {
   title?: string;
@@ -122,9 +136,14 @@ function extractMetadataFromResponse(data: unknown): {
 }
 
 /**
- * Fetch metadata from SEO service with direct function call (no HTTP loopback)
- * Falls back to HTTP call if direct call fails, then to route-based title extraction
- * Always returns OGImageParams (never null)
+ * Resolve Open Graph metadata for a URL route using multiple fallbacks.
+ *
+ * Attempts a direct SEO function call, falls back to an internal HTTP SEO endpoint,
+ * then a database RPC for content routes, and finally derives a title from the route.
+ *
+ * @param route - The URL path to resolve metadata for (for example, `/agents/foo`)
+ * @param logContext - Per-request logging context used for observability and logging
+ * @returns OGImageParams containing `title`, `description`, `type`, and `tags`; values use sensible defaults when specific metadata is unavailable
  */
 async function fetchMetadataFromRoute(
   route: string,
@@ -333,7 +352,10 @@ async function fetchMetadataFromRoute(
 }
 
 /**
- * Extract category/type from route path
+ * Determine the content category implied by a URL path.
+ *
+ * @param route - The URL path (e.g., "/", "/agents/code-reviewer", "/mcp/github")
+ * @returns The first path segment if it matches a known content category, otherwise "website"
  */
 function extractTypeFromRoute(route: string): string {
   // Routes like /agents/code-reviewer -> "agents"
@@ -349,7 +371,10 @@ function extractTypeFromRoute(route: string): string {
 }
 
 /**
- * Generate heyclaude logo component (hey + claude chip style)
+ * Create a React element that renders the "HeyClaude" logo with a two-part "hey" text and a rounded "claude" pill.
+ *
+ * @param size - Visual size of the logo; `'sm'` | `'md'` | `'lg'` adjust the rendered font size
+ * @returns A React element containing the styled HeyClaude logo
  */
 function createHeyClaudeLogo(size: 'sm' | 'md' | 'lg' = 'md') {
   const fontSize = size === 'sm' ? '28px' : size === 'md' ? '36px' : '44px';
@@ -388,8 +413,13 @@ function createHeyClaudeLogo(size: 'sm' | 'md' | 'lg' = 'md') {
 }
 
 /**
- * Generate OG image using React and og_edge
- * Redesigned to match static og-image.webp style
+ * Render an Open Graph PNG image from the provided OG image parameters using React components and og_edge.
+ *
+ * Layout includes a category pill, prominent title, optional description, up to five tag pills, and bottom-branding;
+ * styling is designed to match the static og-image.webp appearance.
+ *
+ * @param params - OGImageParams containing `title`, optional `description`, `type` (category), and `tags` array
+ * @returns The HTTP Response containing the generated PNG image for use in Open Graph previews
  */
 function generateOGImage(params: OGImageParams): Response {
   const { title, description, type, tags } = params;
@@ -546,7 +576,12 @@ function generateOGImage(params: OGImageParams): Response {
 }
 
 /**
- * Handle OG image generation request
+ * Generate an Open Graph PNG image for a given site route or explicit metadata.
+ *
+ * Accepts either a `route` query parameter (preferred) to derive metadata via multiple fallbacks, or direct parameters (`title`, `description`, `type`, `tags`) to build the image. Ensures a non-empty title, applies security and CORS headers, and sets long-term SEO cache headers.
+ *
+ * @param req - The incoming Request whose URL query supplies either `route` or one or more of `title`, `description`, `type`, `tags`
+ * @returns An HTTP Response containing the generated PNG image and headers (Content-Type: image/png, CORS, security headers, and SEO-focused cache headers). Returns a 400 response for missing or invalid query parameters and an error response when image generation fails.
  */
 export async function handleOGImageRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);

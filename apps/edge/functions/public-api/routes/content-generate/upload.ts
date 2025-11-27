@@ -60,12 +60,13 @@ interface UploadPackageResponse {
 }
 
 /**
- * Handle package upload request
- * POST /content/generate-package/upload
+ * Handle internal MCP package uploads for an existing content entry.
  *
- * Body: { content_id, category: 'mcp', mcpb_file: base64, content_hash }
+ * Validates the service-role Authorization header, parses and validates the JSON body (expects `content_id`, `category` equal to `'mcp'`, `mcpb_file` as base64, and `content_hash`), decodes and stores the .mcpb file in object storage, updates the content record with the storage URL and build metadata, and returns an HTTP response describing success or failure.
  *
- * Authentication: Requires SUPABASE_SERVICE_ROLE_KEY (via Authorization: Bearer header)
+ * @param request - Incoming HTTP request
+ * @param logContext - Optional logging context to attach to request logs and traces
+ * @returns An HTTP Response containing an UploadPackageResponse payload with `success`, `content_id`, `category`, `slug`, `storage_url`, and optional `message` or `error` details
  */
 export async function handleUploadPackage(
   request: Request,
@@ -161,7 +162,14 @@ export async function handleUploadPackage(
     return badRequestResponse('Missing or invalid content_id', CORS);
   }
 
-  // Validate category enum type
+  /**
+   * Checks whether a value is one of the known `content_category` enum values.
+   *
+   * Narrows the type to `DatabaseGenerated['public']['Enums']['content_category']` when true.
+   *
+   * @param value - The value to validate as a `content_category`
+   * @returns `true` if `value` matches a `content_category` enum member, `false` otherwise.
+   */
   function isValidContentCategory(
     value: unknown
   ): value is DatabaseGenerated['public']['Enums']['content_category'] {

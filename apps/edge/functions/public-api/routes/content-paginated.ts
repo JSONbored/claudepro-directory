@@ -16,6 +16,12 @@ import { buildSecurityHeaders, createDataApiContext, logger } from '@heyclaude/s
 const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
+/**
+ * Convert a raw input string to a recognized `content_category` enum value.
+ *
+ * @param value - Input string to map; whitespace and case are ignored.
+ * @returns A `DatabaseGenerated['public']['Enums']['content_category']` matching the normalized input if recognized, `undefined` otherwise.
+ */
 function toContentCategory(
   value: string | undefined
 ): DatabaseGenerated['public']['Enums']['content_category'] | undefined {
@@ -28,6 +34,15 @@ function toContentCategory(
     : undefined;
 }
 
+/**
+ * Handle a paginated content request from the provided URL and return a JSON response.
+ *
+ * Processes query parameters `offset`, `limit`, and `category`, calls the database RPC
+ * `get_content_paginated_slim`, and returns the RPC items as a JSON array with appropriate
+ * security, CORS, and cache headers.
+ *
+ * @param url - The request URL containing query parameters (`offset`, `limit`, `category`)
+ * @returns A Response whose body is a JSON array of content items (may be empty) on success, or a structured error response for invalid parameters or RPC failures. Responses include security, CORS, and caching headers.
 export async function handlePaginatedContent(url: URL): Promise<Response> {
   const logContext = createDataApiContext('content-paginated', {
     path: url.pathname,

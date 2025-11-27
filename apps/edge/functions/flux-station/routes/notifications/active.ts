@@ -16,6 +16,12 @@ import {
 } from '@heyclaude/edge-runtime';
 import { createNotificationRouterContext, logger } from '@heyclaude/shared-runtime';
 
+/**
+ * Handle GET /active-notifications: authenticate the caller, fetch active notifications for the user (excluding any dismissed IDs specified in the `dismissed` query parameter), and return them with a trace identifier.
+ *
+ * @param req - Incoming HTTP request for the route; may include a comma-separated `dismissed` query parameter.
+ * @returns An HTTP Response: on success a 200 response whose JSON body contains `{ notifications, traceId }` and CORS headers; on failure a standardized error response (namespace `flux-station:active-notifications`) with CORS headers.
+ */
 export async function handleActiveNotifications(req: Request): Promise<Response> {
   const authResult = await requireAuthUser(req, {
     cors: notificationCorsHeaders,

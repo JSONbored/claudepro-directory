@@ -25,6 +25,19 @@ import {
 
 const CORS = getOnlyCorsHeaders;
 
+/**
+ * Handle the SEO route: validate the request, invoke the SEO RPC, and return serialized metadata and JSON-LD schemas.
+ *
+ * Processes only GET requests with no nested path segments, requires a `route` query parameter and optional `include`.
+ * Detects internal loopback calls via the `X-Internal-Loopback` header, sanitizes the route, calls the SeoService RPC,
+ * validates and serializes the returned metadata and schemas, and returns a JSON response with security, CORS, and cache headers.
+ *
+ * @param segments - Path segments for the route; must be empty (nested segments are rejected)
+ * @param url - The incoming request URL (query parameters `route` and `include` are read from this)
+ * @param method - The HTTP method of the request
+ * @param request - Optional original Request object; used to detect internal loopback via headers
+ * @param logContext - Optional logging context to attach to request logs and traces
+ * @returns A Response containing a JSON body with `metadata` and `schemas` on success; otherwise an HTTP error response describing the failure.
 export async function handleSeoRoute(
   segments: string[],
   url: URL,

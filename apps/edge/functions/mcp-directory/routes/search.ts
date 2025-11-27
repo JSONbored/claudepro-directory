@@ -10,6 +10,12 @@ import type { SearchContentInput } from '../lib/types.ts';
 
 type ContentPaginatedItem = Database['public']['CompositeTypes']['content_paginated_item'];
 
+/**
+ * Fetches paginated content matching the given search filters and returns a text summary plus metadata.
+ *
+ * @param input - Search filters and pagination options: `query` (search text), `category`, `tags`, `page`, and `limit`.
+ * @returns An object with `content` (a single text block summarizing matched items) and `_meta` containing `items` (formatted items with slug, title, category, truncated description, tags, author, and dateAdded), `total`, `page`, `limit`, and `hasMore`.
+ */
 export async function handleSearchContent(
   supabase: SupabaseClient<Database>,
   input: SearchContentInput

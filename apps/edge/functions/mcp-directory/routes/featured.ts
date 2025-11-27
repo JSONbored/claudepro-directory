@@ -11,6 +11,17 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { logError } from '@heyclaude/shared-runtime';
 import type { GetFeaturedInput } from '../lib/types.ts';
 
+/**
+ * Retrieve and assemble featured homepage content grouped by category.
+ *
+ * Fetches featured items for a fixed set of categories, aggregates successful RPC responses
+ * into a per-category `featured` structure, and builds a single text summary listing up to
+ * three items per category. If no featured content is available, returns a default text message.
+ *
+ * @returns An object containing:
+ *  - `content`: an array with a single text item (`{ type: 'text', text: string }`) holding the generated summary or a fallback message.
+ *  - `_meta`: metadata with `featured` (per-category arrays of items), `categories` (array of category keys present in `featured`), and `totalItems` (total number of items across all categories).
+ */
 export async function handleGetFeatured(
   supabase: SupabaseClient<Database>,
   _input: GetFeaturedInput

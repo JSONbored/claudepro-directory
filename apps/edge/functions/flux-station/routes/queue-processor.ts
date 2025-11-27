@@ -109,8 +109,10 @@ export interface QueueProcessingSummary {
 }
 
 /**
- * Check queue metrics to determine if queue has messages
- * Returns queue_length (0 if empty or error)
+ * Retrieve the current message count for a named queue.
+ *
+ * @param queueName - The identifier of the queue to inspect.
+ * @returns The queue's `queue_length` (number of pending messages); returns `0` if the queue is empty or if metrics could not be retrieved.
  */
 async function checkQueueMetrics(queueName: string): Promise<number> {
   try {
@@ -129,7 +131,11 @@ async function checkQueueMetrics(queueName: string): Promise<number> {
 }
 
 /**
- * Process a single queue (internal handler)
+ * Invoke an internal queue handler and produce a structured processing result.
+ *
+ * @param config - Queue configuration (must include `handlerFn` for internal queues); `config.name` is used in the result.
+ * @param queueLength - Observed number of messages in the queue at the time of the check.
+ * @returns A QueueProcessingResult containing the queue name, whether processing succeeded, the observed `queueLength`, and optional `processed` count and `error` message.
  */
 async function processInternalQueue(
   config: QueueConfig,
@@ -197,7 +203,17 @@ async function processInternalQueue(
 }
 
 /**
- * Process a single queue (external edge function)
+ * Invoke an external edge-function queue endpoint and return its processing outcome.
+ *
+ * Sends a signed POST to the configured endpoint, attempts to extract optional
+ * `processed` and `error` values from a JSON response, and converts HTTP or
+ * runtime failures into a `QueueProcessingResult`.
+ *
+ * @param config - Queue configuration for an external queue; must provide `endpoint`
+ * @param queueLength - Number of messages present in the queue at the time of check
+ * @returns A `QueueProcessingResult` containing the queue name, `success` flag,
+ *          the observed `queueLength`, and optionally `processed` (number of messages
+ *          processed) or `error` (error message)
  */
 async function processExternalQueue(
   config: QueueConfig,
@@ -279,9 +295,13 @@ async function processExternalQueue(
 }
 
 /**
- * Process all queues with smart polling
- * Only processes queues that have messages (queue_length > 0)
- * Processes queues sequentially to avoid database overload
+ * Orchestrates smart polling and sequential processing of registered queues that currently have messages.
+ *
+ * Checks metrics for all registered queues, filters to those with queue_length > 0, sorts them by priority,
+ * and processes each queue one at a time (internal handlers invoked or external endpoints called). Individual
+ * queue failures are isolated so a failure in one queue does not prevent processing of the remaining queues.
+ *
+ * @returns The aggregate processing summary as a `QueueProcessingSummary`, including totals and per-queue results.
  */
 export async function processAllQueues(): Promise<QueueProcessingSummary> {
   const startTime = Date.now();

@@ -15,7 +15,11 @@ const SUPABASE_URL = edgeEnv.supabase.url;
 const SUPABASE_AUTH_URL = `${SUPABASE_URL}/auth/v1`;
 
 /**
- * Common logging setup for metadata endpoints
+ * Create and initialize a logging context for metadata endpoints and bind it to the global logger.
+ *
+ * @param action - The name of the logging action or operation for this request
+ * @param method - The HTTP method associated with the request; defaults to `'GET'`
+ * @returns The created logging context for the request
  */
 function setupMetadataLogging(action: string, method: string = 'GET') {
   const logContext = createDataApiContext(action, {
@@ -39,14 +43,13 @@ function setupMetadataLogging(action: string, method: string = 'GET') {
 }
 
 /**
- * Get OAuth Protected Resource Metadata (RFC 9728)
+ * Serve the OAuth Protected Resource Metadata document for this MCP server.
  *
- * Endpoint: GET /.well-known/oauth-protected-resource
+ * Provides the protected-resource metadata (RFC 9728) describing the resource identifier,
+ * authorization server(s), supported scopes and bearer methods, and whether the `resource`
+ * parameter is supported.
  *
- * This metadata document tells MCP clients:
- * - Where to find the authorization server (Supabase Auth)
- * - What scopes are supported
- * - The resource identifier for this MCP server
+ * @returns A Response containing the metadata JSON (HTTP 200) or an error JSON (HTTP 500) on failure
  */
 export async function handleProtectedResourceMetadata(_c: Context): Promise<Response> {
   const logContext = setupMetadataLogging('oauth-protected-resource-metadata');

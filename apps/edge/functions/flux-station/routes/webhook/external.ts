@@ -26,6 +26,17 @@ import {
   validateBodySize,
 } from '@heyclaude/shared-runtime';
 
+/**
+ * Handle an incoming external webhook request: validate size, ingest and route the event,
+ * optionally process source-specific payloads, and return an HTTP response with CORS headers.
+ *
+ * @param req - The incoming HTTP request for the external webhook route
+ * @returns An HTTP Response representing the outcome:
+ *  - `200` with payload `{ message: 'OK', source, duplicate }` on success,
+ *  - `400` for invalid payloads or oversized bodies,
+ *  - `401` for unauthorized webhook requests,
+ *  - or an error response for processing failures. Responses include appropriate CORS headers.
+ */
 export async function handleExternalWebhook(req: Request): Promise<Response> {
   const logContext = createNotificationRouterContext('external-webhook', {
     source: 'unknown',

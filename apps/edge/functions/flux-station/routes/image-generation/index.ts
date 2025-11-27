@@ -52,8 +52,15 @@ interface ImageGenerationMessage {
 }
 
 /**
- * Process a single image generation job
- */
+ * Process a single image generation job by calling the appropriate internal image transform API.
+ *
+ * Supports message types `card`, `thumbnail`, and `logo`; constructs the request payload from the message
+ * and posts to the corresponding edge function endpoint. Ensures required Supabase env vars are present,
+ * handles non-JSON responses and HTTP errors, and logs results and errors to the provided logging context.
+ *
+ * @param message - The ImageGenerationMessage containing fields used for the request (`type`, `content_id`, `company_id`, `image_data`, and `params`).
+ * @param logContext - Context object used for structured logging.
+ * @returns `{ success: true }` when the image generation request completed successfully, `{ success: false, error: string }` when it failed.
 async function processImageGeneration(
   message: ImageGenerationMessage,
   logContext: BaseLogContext
@@ -175,7 +182,16 @@ async function processImageGeneration(
 }
 
 /**
- * Main queue worker handler
+ * Processes a batch of image-generation queue messages, validates each message, routes jobs to the appropriate image transform API (card, thumbnail, or logo), and removes or retains messages based on validation and retry policy.
+ *
+ * The handler:
+ * - Reads up to QUEUE_BATCH_SIZE messages from the image_generation queue.
+ * - Validates message structure and type-specific required fields; deletes invalid messages to prevent retries.
+ * - Delegates valid messages to processImageGeneration and deletes successful messages.
+ * - Leaves failed messages for retry unless they have exceeded MAX_RETRY_ATTEMPTS, in which case they are deleted.
+ * - Returns a JSON summary with totals and per-message results.
+ *
+ * @returns A Response containing a JSON summary of processing results. On normal completion returns status 200 with `{ processed, total, success, failed, results }`. On an unexpected error returns status 500 with `{ error: 'An unexpected error occurred', processed: 0 }`.
  */
 export async function handleImageGenerationQueue(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('image-generation', 'queue-processor', {});

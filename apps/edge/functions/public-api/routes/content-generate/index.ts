@@ -37,12 +37,10 @@ type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
 const CORS = getOnlyCorsHeaders;
 
 /**
- * Handle package generation request
- * POST /content/generate-package
+ * Handle incoming requests to generate a content package for a given content ID and category.
  *
- * Body: { content_id: string, category: ContentCategory }
- *
- * Authentication: Requires SUPABASE_SERVICE_ROLE_KEY (via Authorization: Bearer header)
+ * @param logContext - Optional request-level logging context (will be created automatically if omitted)
+ * @returns An HTTP Response representing the result of the request — e.g. 200 for successful synchronous generation, 202 when queued for asynchronous processing, or an appropriate error status (400, 401, 404, 405, 500) with an explanatory payload.
  */
 export async function handleGeneratePackage(
   request: Request,
@@ -151,7 +149,12 @@ export async function handleGeneratePackage(
     return badRequestResponse('category is required and must be a string', CORS);
   }
 
-  // Validate category enum type
+  /**
+   * Determines whether a value is a valid `content_category` enum member.
+   *
+   * @param value - The value to validate as a `content_category`
+   * @returns `true` if `value` matches one of the `content_category` enum values, `false` otherwise.
+   */
   function isValidContentCategory(
     value: unknown
   ): value is DatabaseGenerated['public']['Enums']['content_category'] {

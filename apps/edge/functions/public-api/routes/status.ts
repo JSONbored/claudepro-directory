@@ -20,7 +20,19 @@ import {
 
 const CORS = getOnlyCorsHeaders;
 
-// Transform snake_case to camelCase for JSON API response
+/**
+ * Normalize a raw `get_api_health` RPC result (snake_case) into a camelCase health-report object.
+ *
+ * Missing or undefined fields are replaced with sensible defaults: top-level `status` defaults to `"unhealthy"`,
+ * `timestamp` defaults to the current time, `apiVersion` defaults to `"1.0.0"`, each sub-check `status` defaults to `"error"`,
+ * and numeric metrics default to `0`. If a sub-check includes an `error` string it will be preserved.
+ *
+ * @param result - The raw RPC return value from `get_api_health`, expected in snake_case form
+ * @returns An object with `status`, `timestamp`, `apiVersion`, and a `checks` object containing:
+ * - `database`: `{ status, latency, error? }`
+ * - `contentTable`: `{ status, count, error? }`
+ * - `categoryConfigs`: `{ status, count, error? }`
+ */
 function transformHealthResult(
   result: DatabaseGenerated['public']['Functions']['get_api_health']['Returns']
 ): {
@@ -109,6 +121,21 @@ function transformHealthResult(
   return response;
 }
 
+/**
+ * Handle requests to the /status health-check endpoint.
+ *
+ * Processes a request to the /status route, validates the path and method, runs the API health check, and returns a structured JSON health report.
+ *
+ * @param segments - Path segments following `/status`; requests with any segments return 404
+ * @param _url - Original request URL (unused)
+ * @param method - HTTP method of the request; only `GET` is allowed
+ * @returns A Response containing the JSON-formatted health report. Responses:
+ * - 404 when extra path segments are present
+ * - 405 when the method is not `GET`
+ * - 200 when health status is `healthy` or `degraded`
+ * - 503 for other health statuses
+ * The response includes CORS and security headers, an `X-Generated-By: supabase.rpc.get_api_health` header, and cache headers for the `status` resource.
+ */
 export async function handleStatusRoute(
   segments: string[],
   _url: URL,

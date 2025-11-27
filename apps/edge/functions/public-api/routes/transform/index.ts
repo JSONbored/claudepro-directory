@@ -24,6 +24,16 @@ const BASE_CORS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+/**
+ * Executes a handler while emitting analytics for the given transform route.
+ *
+ * Logs a success or error event containing route, path, method, status, and optional error details; errors are logged and rethrown.
+ *
+ * @param routeName - Identifier used in analytics for the route
+ * @param handler - Callback that performs the route work and yields a Response
+ * @returns The Response produced by the handler
+ * @throws Rethrows any error produced by the handler after logging it
+ */
 function respondWithAnalytics(
   routeName: string,
   handler: () => Promise<Response>
@@ -80,6 +90,12 @@ function respondWithAnalytics(
     });
 }
 
+/**
+ * Handle a content highlight transform request: enforce rate limits, initialize logging/tracing, and forward the request to the content-highlight processor.
+ *
+ * @param req - Incoming HTTP request for content highlighting (expected POST to the transform endpoint)
+ * @returns A Response containing the highlighted content on success, or an error response (including a rate-limit error with CORS headers when limits are exceeded)
+ */
 export async function handleContentHighlightRoute(req: Request): Promise<Response> {
   const rateLimit = checkRateLimit(req, RATE_LIMIT_PRESETS.transform);
   if (!rateLimit.allowed) {
@@ -113,6 +129,14 @@ export async function handleContentHighlightRoute(req: Request): Promise<Respons
   });
 }
 
+/**
+ * Handle the content processing transform route, enforcing rate limits, initializing logging/tracing, and returning the processed response.
+ *
+ * If the request exceeds the transform rate limit, returns a rate-limit error response with the module's CORS headers. For allowed requests, initializes request logging and tracing, binds request metadata to the logger, invokes content processing, and attaches rate-limit headers to the response.
+ *
+ * @param req - Incoming HTTP request for the content processing route
+ * @returns The HTTP response to return to the client; a rate-limit error response with CORS headers when over the limit, otherwise the processed response with rate-limit headers applied
+ */
 export async function handleContentProcessRoute(req: Request): Promise<Response> {
   const rateLimit = checkRateLimit(req, RATE_LIMIT_PRESETS.transform);
   if (!rateLimit.allowed) {

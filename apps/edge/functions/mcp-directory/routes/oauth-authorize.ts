@@ -22,7 +22,13 @@ const MCP_SERVER_URL = getEnvVar('MCP_SERVER_URL') ?? 'https://mcp.heyclau.de';
 const MCP_RESOURCE_URL = `${MCP_SERVER_URL}/mcp`;
 
 /**
- * Helper function to return JSON error responses with CORS headers
+ * Create an OAuth-style JSON error response and include CORS and JSON content-type headers.
+ *
+ * @param c - The request/response context used to build the response
+ * @param error - OAuth error code to return (e.g., `invalid_request`, `server_error`)
+ * @param description - Human-readable error description to include as `error_description`
+ * @param status - HTTP status code to send (400 or 500); defaults to 400
+ * @returns A Response whose JSON body contains `error` and `error_description` and whose headers include `Content-Type: application/json` and `Access-Control-Allow-Origin: *`
  */
 function jsonError(
   c: Context,
@@ -37,14 +43,11 @@ function jsonError(
 }
 
 /**
- * OAuth Authorization Endpoint Proxy
+ * Proxies incoming OAuth authorization requests to Supabase Auth, injecting the RFC 8707 `resource` parameter for MCP audience and preserving required OAuth and PKCE parameters.
  *
- * GET /oauth/authorize
+ * Performs required validation for `client_id`, `response_type` (must be `code`), `redirect_uri`, and PKCE (`code_challenge` / `code_challenge_method` must be `S256`) and returns appropriate JSON OAuth error responses on validation failure.
  *
- * Proxies to Supabase Auth's /authorize endpoint, ensuring:
- * 1. Resource parameter (RFC 8707) is included
- * 2. PKCE parameters are preserved
- * 3. All OAuth 2.1 requirements are met
+ * @returns A redirect Response to the Supabase Auth `/authorize` endpoint when the request is valid, or a JSON error Response describing the validation or server error.
  */
 export async function handleOAuthAuthorize(c: Context): Promise<Response> {
   const logContext = createDataApiContext('oauth-authorize', {

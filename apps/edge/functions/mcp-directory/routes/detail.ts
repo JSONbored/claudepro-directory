@@ -10,6 +10,16 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { logError } from '@heyclaude/shared-runtime';
 import type { GetContentDetailInput } from '../lib/types.ts';
 
+/**
+ * Fetches and formats full metadata and a textual summary for a content item identified by slug and category.
+ *
+ * Queries the `content` table for a single record matching `input.slug` and `input.category`, normalizes missing fields with sensible defaults, and returns a human-readable markdown-like text block plus a `_meta` object containing detailed fields and stats.
+ *
+ * @param supabase - Supabase client instance used to query the database
+ * @param input - Object containing `slug` and `category` of the content item to retrieve
+ * @returns An object with `content` — an array containing a single text block (`type: 'text'`, `text: string`) — and `_meta` — a details object with fields: `slug`, `title`, `displayTitle`, `category`, `description`, `content`, `tags`, `author`, `authorProfileUrl`, `dateAdded`, `dateUpdated`, `createdAt`, `metadata`, and `stats` (`views`, `bookmarks`, `copies`)
+ * @throws If the database query fails (logs the error and rethrows) or if no content is found for the provided category/slug
+ */
 export async function handleGetContentDetail(
   supabase: SupabaseClient<Database>,
   input: GetContentDetailInput

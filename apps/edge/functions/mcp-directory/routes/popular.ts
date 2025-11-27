@@ -10,6 +10,14 @@ import type { GetPopularInput } from '../lib/types.ts';
 
 type PopularContentItem = Database['public']['Functions']['get_popular_content']['Returns'][number];
 
+/**
+ * Retrieve and format popular content, optionally filtered by category, into a textual summary and metadata.
+ *
+ * @param input - Query options: `category` to filter results and `limit` to cap the number of items returned.
+ * @returns An object with:
+ *   - `content`: a single text item containing a human-readable summary (or a "no popular content found" message when empty).
+ *   - `_meta`: metadata including `items` (the formatted list with slug, title, category, truncated description, tags, author, dateAdded, and stats), `category` (the requested category or `'all'`), and `count` (number of items, present when results exist).
+ */
 export async function handleGetPopular(supabase: SupabaseClient<Database>, input: GetPopularInput) {
   const { category, limit } = input;
 

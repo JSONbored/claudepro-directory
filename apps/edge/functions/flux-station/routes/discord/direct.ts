@@ -13,6 +13,13 @@ import {
 } from '@heyclaude/edge-runtime';
 import { createUtilityContext, logger, MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime';
 
+/**
+ * Handle a direct (non-queued) Discord notification POST and forward it to the notification processor.
+ *
+ * Validates the `X-Discord-Notification-Type` header and request body size, sets up request logging and tracing, delegates processing to the Discord notification handler, and emits a completion trace for successful responses.
+ *
+ * @returns A Response representing the result of processing: a 400 response if the required header is missing or the body exceeds the allowed size, otherwise the response returned by the notification handler.
+ */
 export async function handleDiscordDirect(req: Request): Promise<Response> {
   const notificationType = req.headers.get('X-Discord-Notification-Type');
 

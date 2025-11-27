@@ -20,6 +20,12 @@ const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 type FeedType = 'rss' | 'atom';
 const SUPPORTED_TYPES = new Set<FeedType>(['rss', 'atom']);
 
+/**
+ * Convert a string to a `ContentCategory` when it matches one of the allowed category values.
+ *
+ * @param value - The input string to normalize; may be `null`.
+ * @returns The matching `ContentCategory` if `value` is one of the allowed categories, `null` otherwise.
+ */
 function toContentCategory(value: string | null): ContentCategory | null {
   if (!value) return null;
   return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory)
@@ -30,7 +36,17 @@ function toContentCategory(value: string | null): ContentCategory | null {
 const CORS = getOnlyCorsHeaders;
 
 /**
- * Execute RPC call with consistent error handling and logging
+ * Call a database RPC, log failures with context, and return the RPC result.
+ *
+ * Invokes the provided `rpcCall` and returns its `data` when present. If the RPC yields an `error`
+ * or returns `null` data, logs the failure with `rpcName` and `args` and then throws the RPC error
+ * or a new `Error` indicating a null result.
+ *
+ * @param rpcName - Identifier for the RPC used in logs and error messages
+ * @param rpcCall - Function that performs the RPC and resolves to an object with `data` and `error`
+ * @param args - Arguments passed to the RPC (included in logged context; may be redacted)
+ * @returns The `data` returned by the RPC
+ * @throws The RPC `error` if present, or an `Error` when the RPC returned `null` data
  */
 async function executeRpcWithLogging<T>(
   rpcName: string,
@@ -53,6 +69,17 @@ async function executeRpcWithLogging<T>(
 }
 const FEED_LIMIT = 50;
 
+/**
+ * Handle the /feeds HTTP route: validate the request, generate an RSS or Atom feed, and return the HTTP response.
+ *
+ * Validates HTTP method and path segments, parses `type` and `category` query parameters (supports `rss`/`atom` and `changelog` or site categories),
+ * generates the feed payload via database RPCs, and returns a Response with feed XML and appropriate CORS, cache, and security headers.
+ *
+ * @param segments - Remaining path segments after `/feeds` (must be empty)
+ * @param url - The incoming request URL; `type` and `category` are read from its query parameters
+ * @param method - The HTTP method of the request
+ * @returns An HTTP Response containing feed XML with appropriate Content-Type and headers on success, or a JSON error response with the corresponding status code on failure
+ */
 export async function handleFeedsRoute(
   segments: string[],
   url: URL,
@@ -156,6 +183,16 @@ export async function handleFeedsRoute(
   }
 }
 
+/**
+ * Generate the feed XML, the appropriate Content-Type header value, and a human-readable source label for the requested feed type and category.
+ *
+ * @param type - The feed format to generate (`'rss'` or `'atom'`).
+ * @param category - The content category to filter by; use `'changelog'` to produce the changelog feed, `null` (or omitted) to include all categories.
+ * @returns An object with:
+ *  - `xml` — the generated feed XML as a string,
+ *  - `contentType` — the MIME `Content-Type` value for the feed,
+ *  - `source` — a descriptive source label (e.g., `"PostgreSQL changelog (rss)"` or `"PostgreSQL content (category)"`).
+ */
 async function generateFeedPayload(
   type: FeedType,
   category: string | null

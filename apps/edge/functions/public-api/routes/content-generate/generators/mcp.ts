@@ -29,16 +29,20 @@ type UserConfigEntry = {
 };
 
 /**
- * Helper to create template variable strings for manifest.json
- * These are literal strings that will be in the generated JSON, not template literals
+ * Builds a manifest template placeholder in the form `${variable}`.
+ *
+ * @param variable - The template variable name to embed
+ * @returns The placeholder string formatted as `${variable}`
  */
 function createTemplateVar(variable: string): string {
   return `\${${variable}}`;
 }
 
 /**
- * Escape a string for safe inclusion in a single-quoted JS string literal.
- * Example: const name = '${slug}';
+ * Escape characters so a string can be embedded inside a single-quoted JavaScript string literal.
+ *
+ * @param s - The input string to escape
+ * @returns The input with backslashes, single quotes, dollar signs (`$`), and backticks escaped for safe inclusion in a single-quoted JS string
  */
 function escapeForSingleQuotedLiteral(s: string): string {
   // Escape backslashes, then single quotes, then template literal chars ($ and `)
@@ -47,8 +51,11 @@ function escapeForSingleQuotedLiteral(s: string): string {
 }
 
 /**
- * Safely extract properties from unknown objects
- * Used for accessing nested properties in metadata JSON
+ * Retrieve a named own property value from an unknown value if it is a plain object.
+ *
+ * @param obj - The value to inspect for the property
+ * @param key - The property name to read
+ * @returns The property's value if `obj` is a non-null object and has an own property `key`, `undefined` otherwise
  */
 function getProperty(obj: unknown, key: string): unknown {
   if (typeof obj !== 'object' || obj === null) {
@@ -59,7 +66,11 @@ function getProperty(obj: unknown, key: string): unknown {
 }
 
 /**
- * Safely extract string properties from unknown objects
+ * Retrieve a string property from an unknown object if present.
+ *
+ * @param obj - The value to read the property from
+ * @param key - The property name to retrieve
+ * @returns The string value of `key` if present and of type `string`, `undefined` otherwise
  */
 function getStringProperty(obj: unknown, key: string): string | undefined {
   const value = getProperty(obj, key);
@@ -67,7 +78,12 @@ function getStringProperty(obj: unknown, key: string): string | undefined {
 }
 
 /**
- * Extract user_config from MCP metadata
+ * Builds user_config entries for the MCP manifest based on the MCP's metadata.
+ *
+ * If `metadata.requires_auth` is true, returns a single API key entry whose key name is derived from the MCP slug (falling back to `api_key`) and whose title/description include the MCP title or slug. Otherwise returns an empty object.
+ *
+ * @param mcp - The MCP content row whose metadata, slug, and title are used to derive user_config entries
+ * @returns A map of `UserConfigEntry` objects keyed by their environment variable name; empty when no user config is required
  */
 function extractUserConfig(mcp: McpRow): Record<string, UserConfigEntry> {
   const userConfig: Record<string, UserConfigEntry> = {};
@@ -100,7 +116,10 @@ function extractUserConfig(mcp: McpRow): Record<string, UserConfigEntry> {
 }
 
 /**
- * Generate manifest.json for .mcpb package (v0.2 spec)
+ * Build an MCP .mcpb manifest (v0.2) for the provided MCP content row.
+ *
+ * @param mcp - The MCP content row whose metadata, slug, title, description, and author populate manifest fields
+ * @returns The manifest.json content as a pretty-printed JSON string conforming to the .mcpb v0.2 specification
  */
 function generateManifest(mcp: McpRow): string {
   const metadata = mcp.metadata;
@@ -169,13 +188,13 @@ function generateManifest(mcp: McpRow): string {
 }
 
 /**
- * Generate Node.js MCP server wrapper
+ * Generates the Node.js server entry file (server/index.js) for an MCP package.
  *
- * For HTTP-based servers: Creates a proxy bridge that converts stdio MCP protocol
- * to HTTP requests to the remote MCP server endpoint.
+ * Produces an HTTP-to-stdio proxy bridge when the MCP metadata specifies a remote HTTP endpoint,
+ * otherwise produces a minimal stdio-based MCP server placeholder.
  *
- * For stdio-based servers: Generates a minimal stdio server that can be extended
- * with tools/resources from metadata if available.
+ * @param mcp - The MCP content row; used to read metadata (title, description, slug, and configuration) that determine server type and embedded values.
+ * @returns The generated source code for server/index.js as a string.
  */
 function generateServerIndex(mcp: McpRow): string {
   const metadata = mcp.metadata;
@@ -387,7 +406,10 @@ main().catch((error) => {
 }
 
 /**
- * Generate package.json for the MCP server
+ * Create the contents of a package.json for an MCP Node.js package.
+ *
+ * @param mcp - MCP row whose `slug`, `description`, and `title` are used to populate the package fields
+ * @returns A pretty-printed JSON string for package.json including `name`, `version`, `description`, `type`, `main`, and `dependencies`
  */
 function generatePackageJson(mcp: McpRow): string {
   const packageJson = {
@@ -405,7 +427,10 @@ function generatePackageJson(mcp: McpRow): string {
 }
 
 /**
- * Generate README.md for the .mcpb package
+ * Builds the README.md contents for a generated .mcpb package using MCP metadata.
+ *
+ * @param mcp - The MCP content row whose title, description, configuration flag, and documentation URL populate the README
+ * @returns The README.md content as a Markdown string
  */
 function generateReadme(mcp: McpRow): string {
   return `# ${mcp.title || mcp.slug}
@@ -437,11 +462,13 @@ Generated by HeyClaud
 }
 
 /**
- * Create .mcpb package (ZIP file) from bundle files
- * Note: .mcpb files are ZIP archives, so we can create them directly
+ * Assembles a .mcpb package containing manifest, server index, package.json, and README into a ZIP-formatted byte array.
  *
- * Uses manual ZIP creation (same approach as Skills generator)
- * TODO: Replace with proper Deno-compatible ZIP library when available
+ * @param manifest - The text content for `manifest.json`
+ * @param serverIndex - The text content for `server/index.js`
+ * @param packageJson - The text content for `package.json`
+ * @param readme - The text content for `README.md`
+ * @returns A `Uint8Array` containing the ZIP-formatted `.mcpb` package
  */
 async function createMcpbPackage(
   manifest: string,
@@ -522,7 +549,14 @@ async function createMcpbPackage(
 }
 
 /**
- * Create ZIP Local File Header
+ * Builds a ZIP local file header for a single file entry.
+ *
+ * @param fileName - The file name to include in the header (UTF-8)
+ * @param fileSize - The file's size in bytes (used for both compressed and uncompressed sizes)
+ * @param dosTime - The last modification time encoded in DOS time format
+ * @param dosDate - The last modification date encoded in DOS date format
+ * @param crc - The CRC-32 checksum of the file data
+ * @returns A `Uint8Array` containing the local file header followed by the file name bytes
  */
 function createZipLocalFileHeader(
   fileName: string,
@@ -551,7 +585,15 @@ function createZipLocalFileHeader(
 }
 
 /**
- * Create ZIP Central Directory Entry
+ * Builds a ZIP central directory entry for a single file.
+ *
+ * @param fileName - The file name to store in the central directory entry.
+ * @param fileSize - The file size in bytes (used for both compressed and uncompressed size fields).
+ * @param localHeaderOffset - The relative offset (from start of archive) to the file's local header.
+ * @param dosTime - The last-modified time encoded in DOS time format.
+ * @param dosDate - The last-modified date encoded in DOS date format.
+ * @param crc - The CRC-32 checksum of the file data.
+ * @returns A Uint8Array containing the binary central directory entry for the specified file.
  */
 function createZipCentralDirEntry(
   fileName: string,
@@ -586,6 +628,12 @@ function createZipCentralDirEntry(
   return entry;
 }
 
+/**
+ * Compute the CRC-32 checksum of a byte array.
+ *
+ * @param data - The input bytes to checksum
+ * @returns The CRC-32 checksum of `data` as an unsigned 32-bit integer
+ */
 function crc32(data: Uint8Array): number {
   let crc = 0xffffffff;
   for (const byte of data) {
@@ -598,7 +646,12 @@ function crc32(data: Uint8Array): number {
 }
 
 /**
- * Create ZIP End of Central Directory Record
+ * Builds the ZIP End of Central Directory (EOCD) record.
+ *
+ * @param centralDirOffset - Byte offset where the central directory starts within the archive
+ * @param centralDirSize - Size in bytes of the central directory
+ * @param entryCount - Number of entries contained in the central directory
+ * @returns A 22-byte `Uint8Array` containing the EOCD record ready to append to the ZIP archive
  */
 function createZipEocd(
   centralDirOffset: number,
@@ -621,7 +674,10 @@ function createZipEocd(
 }
 
 /**
- * Convert Date to DOS time format (16-bit)
+ * Encode a Date's time component into 16-bit MS-DOS time format.
+ *
+ * @param date - The date whose local time will be encoded
+ * @returns A 16-bit DOS time value: hours in bits 11–15, minutes in bits 5–10, and seconds/2 in bits 0–4
  */
 function dateToDosTime(date: Date): number {
   const hour = date.getHours();
@@ -631,7 +687,10 @@ function dateToDosTime(date: Date): number {
 }
 
 /**
- * Convert Date to DOS date format (16-bit)
+ * Convert a JavaScript Date into a 16-bit DOS date value.
+ *
+ * @param date - The date to convert
+ * @returns A 16-bit DOS date where bits encode the year since 1980, month, and day
  */
 function dateToDosDate(date: Date): number {
   const year = date.getFullYear() - 1980;
@@ -762,8 +821,10 @@ export class McpGenerator implements PackageGenerator {
 }
 
 /**
- * Compute content hash for build tracking
- * Uses Web Crypto API (available in Deno)
+ * Produce a SHA-256 hash of the given content as a lowercase hexadecimal string.
+ *
+ * @param content - The input string to hash
+ * @returns The SHA-256 digest of `content` encoded as a lowercase hex string
  */
 async function computeContentHash(content: string): Promise<string> {
   const encoder = new TextEncoder();

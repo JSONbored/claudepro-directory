@@ -35,13 +35,11 @@ function validateInclude(include: string): SeoIncludeOption {
 }
 
 /**
- * Get SEO metadata for a route by calling the database RPC directly
- * This avoids HTTP loopback calls and reduces latency
+ * Retrieve SEO metadata for a given route by invoking the database RPC directly.
  *
- * @param route - The route path (e.g., '/agents/some-slug')
- * @param supabase - Supabase client instance
- * @param include - What to include in the response (default: 'metadata')
- * @returns SEO metadata or null if generation fails
+ * @param route - The route path to generate metadata for (e.g., "/agents/some-slug")
+ * @param include - Which data to include: `'metadata'` or `'metadata,schemas'` (default: `'metadata'`)
+ * @returns `SeoMetadataResult` with `title`, `description`, and `keywords`, or `null` if metadata is missing, invalid, or generation fails
  */
 export async function getSeoMetadata(
   route: string,

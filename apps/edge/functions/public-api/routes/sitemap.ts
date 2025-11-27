@@ -32,6 +32,18 @@ const INDEXNOW_API_URL = 'https://api.indexnow.org/IndexNow';
 const INDEXNOW_API_KEY = edgeEnv.indexNow.apiKey;
 const INDEXNOW_TRIGGER_KEY = edgeEnv.indexNow.triggerKey;
 
+/**
+ * Route handler for sitemap requests; validates the path and dispatches to the GET or POST sitemap handlers.
+ *
+ * Creates or reuses a request logging context and binds request metadata for tracing. Rejects nested sitemap segments.
+ *
+ * @param segments - URL path segments after the sitemap base (must be empty)
+ * @param url - The request URL (used to read query parameters for GET)
+ * @param method - The HTTP method of the request; supports `GET` and `POST`
+ * @param req - The original Request object (passed to POST handler)
+ * @param logContext - Optional prebuilt logging context; one will be created if omitted
+ * @returns A Response containing sitemap XML or JSON for `GET`, an IndexNow submission result for `POST`, or an error response for invalid requests
+ */
 export async function handleSitemapRoute(
   segments: string[],
   url: URL,
@@ -72,6 +84,16 @@ export async function handleSitemapRoute(
   return methodNotAllowedResponse('GET, POST', CORS);
 }
 
+/**
+ * Serve the sitemap either as XML (default) or as structured JSON when `format=json` is provided.
+ *
+ * When `format=json` this fetches site URLs from the database and returns a JSON payload with `urls` and `meta`.
+ * Otherwise it generates sitemap XML via a database RPC and returns the XML with appropriate security and cache headers.
+ *
+ * @param url - The request URL; the `format` search param (accepted values: `xml`, `json`) controls the response format.
+ * @param logContext - Optional logging context used for tracing and for error responses.
+ * @returns A `Response` containing sitemap XML when `format` is not `json`, or a JSON object with `urls` and `meta` when `format=json`. Error responses use appropriate 4xx/5xx statuses on validation or database failures.
+ */
 async function handleSitemapGet(url: URL, logContext: BaseLogContext): Promise<Response> {
   const format = (url.searchParams.get('format') || 'xml').toLowerCase();
   
@@ -192,6 +214,21 @@ async function handleSitemapGet(url: URL, logContext: BaseLogContext): Promise<R
   });
 }
 
+/**
+ * Process an IndexNow submission: validate trigger and API keys, gather site URLs, and submit them to the IndexNow service.
+ *
+ * Performs server-side validation of the configured trigger key and API key, fetches site URLs from the database, constructs an IndexNow payload (up to 10,000 URLs), and makes a timed, retry-enabled POST to the IndexNow API. If the submission succeeds returns the submitted count; if the submission fails non-blocking, logs the error and still returns success with a warning. Returns appropriate error responses for missing configuration, invalid trigger key, database failures, or non-OK IndexNow responses.
+ *
+ * @param req - The incoming Request containing headers used to validate the trigger key.
+ * @param logContext - Optional logging/tracing context merged into logs and traces for this request.
+ * @returns A Response describing the outcome:
+ *   - `200` with `{ ok: true, submitted: number }` on success (or with a `warning` if submission failed non-blocking),
+ *   - `401` when the provided trigger key is invalid,
+ *   - `503` when required IndexNow configuration is missing,
+ *   - `500` when no URLs are available to submit,
+ *   - `502` when the IndexNow HTTP response is not OK,
+ *   - Database-related errors will return an error response describing the RPC failure.
+ */
 async function handleSitemapIndexNow(req: Request, logContext: BaseLogContext): Promise<Response> {
   traceStep('Processing IndexNow submission', logContext);
   

@@ -104,7 +104,12 @@ const FILENAME_RULES: Partial<Record<string, FilenameRule>> = {
   troubleshooting: { suffix: '' },
 };
 
-// Helper functions ported from content.utils.ts
+/**
+ * Converts a string into a lowercase, hyphen-separated slug suitable for filenames or identifiers.
+ *
+ * @param value - The input string to normalize
+ * @returns A slugified string: lowercase, spaces collapsed to hyphens, and containing only `a–z`, `0–9`, and hyphens
+ */
 function normalizeSlug(value: string): string {
   return value
     .toLowerCase()
@@ -113,6 +118,12 @@ function normalizeSlug(value: string): string {
     .replace(/[^a-z0-9-]/g, '');
 }
 
+/**
+ * Convert a raw filename candidate into a sanitized, slugified filename suitable for use as a file name.
+ *
+ * @param input - The raw filename or title to sanitize; may be undefined.
+ * @returns `'untitled'` if `input` is missing or invalid; otherwise a sanitized, slugified filename truncated to MAX_FILENAME_LENGTH characters.
+ */
 function sanitizeFilename(input: string | undefined): string {
   if (!input || typeof input !== 'string') {
     return 'untitled';
@@ -125,6 +136,12 @@ function sanitizeFilename(input: string | undefined): string {
     : sanitized;
 }
 
+/**
+ * Converts a hook type identifier from camelCase or PascalCase into kebab-case.
+ *
+ * @param hook_type - The hook type identifier to convert
+ * @returns The input converted to kebab-case (lowercase with hyphens separating former capital letters)
+ */
 function convertHookTypeToKebab(hook_type: string): string {
   return hook_type
     .replace(/([A-Z])/g, '-$1')
@@ -132,12 +149,23 @@ function convertHookTypeToKebab(hook_type: string): string {
     .replace(/^-/, '');
 }
 
+/**
+ * Map a language name to its preferred file extension.
+ *
+ * @param language - Language name or alias (case-insensitive)
+ * @returns The file extension for the language (without a leading dot), or `'txt'` if no mapping exists
+ */
 function getExtensionFromLanguage(language: string): string {
   const normalized = language.toLowerCase().trim();
   return LANGUAGE_EXTENSIONS[normalized] || 'txt';
 }
 
-// Language detection ported from language-detection.ts
+/**
+ * Checks whether a string contains valid JSON.
+ *
+ * @param str - The string to validate as JSON
+ * @returns `true` if `str` is valid JSON, `false` otherwise
+ */
 function isValidJSON(str: string): boolean {
   try {
     JSON.parse(str);
@@ -147,6 +175,15 @@ function isValidJSON(str: string): boolean {
   }
 }
 
+/**
+ * Determine the programming or markup language of a code snippet.
+ *
+ * Uses an optional hint to prefer a specific language; if the hint is `'text'` it is ignored.
+ *
+ * @param code - The source code to analyze
+ * @param hint - Optional preferred language name to respect when provided (ignored when `'text'`)
+ * @returns The detected language name such as `'json'`, `'bash'`, `'typescript'`, `'javascript'`, `'python'`, `'yaml'`, or `'text'`
+ */
 function detectLanguage(code: string, hint?: string): string {
   if (hint && hint !== 'text') {
     return hint;
@@ -198,6 +235,16 @@ interface FilenameGeneratorOptions {
   section?: string;
 }
 
+/**
+ * Generate a sanitized filename for an item according to category rules, requested format, and language.
+ *
+ * @param options - Generator options
+ * @param options.item - Item descriptor; must include `category` and may include `slug`, `name`, and `hook_type`
+ * @param options.language - Language hint used to derive the file extension
+ * @param options.format - Optional filename format: when `'multi'` the `section` is appended; when `'hook'` hook-type rules may apply
+ * @param options.section - Optional section key used only when `format` is `'multi'`
+ * @returns A filename string including an extension derived from `language` (e.g., `example.json`)
+ */
 function generateFilename(options: FilenameGeneratorOptions): string {
   const { item, language, format, section } = options;
 
@@ -233,6 +280,14 @@ function generateFilename(options: FilenameGeneratorOptions): string {
   return `example.${ext}`;
 }
 
+/**
+ * Create a filename for a specific section of a multi-format MCP item.
+ *
+ * @param item - The item descriptor used to derive the base filename (must include `category` and optional `slug`, `name`, or `hook_type`)
+ * @param sectionKey - The section identifier (mapped to a human-readable label or sanitized when unknown) to append for multi-format filenames
+ * @param language - Language hint used to determine the file extension
+ * @returns A sanitized filename for the given item section with an extension derived from `language`
+ */
 function generateMultiFormatFilename(
   item: FilenameGeneratorOptions['item'],
   sectionKey: string,
@@ -247,6 +302,14 @@ function generateMultiFormatFilename(
   });
 }
 
+/**
+ * Generate a filename for a hook item using its hook type or slug and the language extension.
+ *
+ * @param item - Object with optional `hook_type` (preferred) or `slug` used to derive the base name
+ * @param contentType - 'hookConfig' to append `-config`, 'scriptContent' to append `-script`
+ * @param language - Language hint used to determine the file extension
+ * @returns The sanitized filename composed of the base identifier, the content-type suffix, and the language extension (e.g., `my-hook-config.yaml`)
+ */
 function generateHookFilename(
   item: FilenameGeneratorOptions['item'],
   contentType: 'hookConfig' | 'scriptContent',
@@ -266,8 +329,10 @@ function generateHookFilename(
 }
 
 /**
- * Validate and extract item parameter from request
- * Returns validated item with category, slug, name, and hook_type, or undefined if invalid
+ * Validate and normalize an `item` payload from a request.
+ *
+ * @param item - The value to validate; expected to be an object containing a required `category` string and optional `slug`, `name`, and `hook_type` strings.
+ * @returns An object with `category` and normalized `slug`, `name`, and `hook_type` properties (strings or `null`) if `item` is valid; `undefined` otherwise.
  */
 function validateItemParameter(item: unknown):
   | {
@@ -304,8 +369,10 @@ function validateItemParameter(item: unknown):
 }
 
 /**
- * Extract markdown headings from source text
- * Extracts h2-h6 only; h1 is typically the document title and excluded from TOC
+ * Extracts Markdown headings (levels 2–6) from a source string and returns their metadata.
+ *
+ * @param source - The Markdown text to scan for headings
+ * @returns An array of HeadingMetadata objects for each heading found. Each item includes `id` (normalized and made unique), `anchor` (prefixed with `#`), `title`, and `level`. Returns up to 50 headings; returns an empty array if no matching headings are found.
  */
 function extractMarkdownHeadings(source: string): HeadingMetadata[] {
   if (!(source && /^(#{2,6})\s+.+/m.test(source))) {
@@ -388,7 +455,14 @@ interface ProcessResponse {
  * - 'highlight': highlightCode only (for backward compatibility)
  */
 
-// Shared highlight logic
+/**
+ * Produce HTML-highlighted code and the resolved language for rendering.
+ *
+ * @param code - Source code to highlight; if empty or whitespace, a placeholder HTML is returned
+ * @param language - Optional language hint used to choose the highlighter; when `code` is present defaults to `javascript` if unspecified, when `code` is empty the returned language defaults to `text`
+ * @param showLineNumbers - When `true`, include line numbers in the highlighted output
+ * @returns An object with `html` containing the highlighted HTML (or a placeholder) and `language` set to the resolved language used for highlighting
+ */
 function performHighlight(
   code: string,
   language: string | undefined,
@@ -405,6 +479,18 @@ function performHighlight(
   return { html, language: highlightLanguage };
 }
 
+/**
+ * Handle HTTP requests that return syntax-highlighted HTML for a code snippet.
+ *
+ * Accepts POST with JSON { code, language?, showLineNumbers? } and returns a JSON response
+ * containing highlighted HTML and the resolved language. Responds to OPTIONS with 204 and
+ * rejects non-POST methods.
+ *
+ * @param req - The incoming Request object containing the JSON payload
+ * @param logContext - Logging context used for error reporting
+ * @returns A Response whose JSON body contains `{ html: string, language: string }` on success,
+ * or `{ error: string }` on failure
+ */
 export async function handleContentHighlight(
   req: Request,
   logContext: BaseLogContext
@@ -454,6 +540,13 @@ export async function handleContentHighlight(
   }
 }
 
+/**
+ * Handle content processing requests to detect language, generate filenames, and highlight code according to the requested operation.
+ *
+ * @param req - Incoming HTTP Request whose JSON body follows the ProcessRequest schema (operation 'full' | 'filename' | 'highlight').
+ * @param logContext - Request-scoped logging and tracing context used for observability and error reporting.
+ * @returns An HTTP Response containing a ProcessResponse payload on success or a structured error response on failure.
+ */
 export async function handleContentProcess(
   req: Request,
   logContext: BaseLogContext

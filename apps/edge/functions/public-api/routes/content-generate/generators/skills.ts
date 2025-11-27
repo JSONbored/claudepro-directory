@@ -17,8 +17,10 @@ import type { ContentRow, GenerateResult, PackageGenerator } from '../types.ts';
 const FIXED_DATE = new Date('2024-01-01T00:00:00.000Z');
 
 /**
- * Calculate CRC-32 checksum of a byte array
- * Standard polynomial: 0xEDB88320
+ * Compute the CRC-32 checksum for the given byte array.
+ *
+ * @param data - The input bytes to checksum
+ * @returns The CRC-32 checksum as an unsigned 32‑bit number
  */
 function crc32(data: Uint8Array): number {
   let crc = 0xffffffff;
@@ -32,8 +34,13 @@ function crc32(data: Uint8Array): number {
 }
 
 /**
- * Transform skill data to SKILL.md markdown format
- * Simplified version of transformSkillToMarkdown for edge function
+ * Convert a ContentRow skill into a SKILL.md Markdown document with YAML frontmatter and conditional sections.
+ *
+ * Produces Markdown that includes frontmatter (name and escaped description) followed by any of the following
+ * sections when present: Content, Prerequisites, Key Features, Use Cases, Examples, Troubleshooting, and Learn More.
+ *
+ * @param skill - The ContentRow representing the skill and its metadata
+ * @returns The generated SKILL.md content as a Markdown string
  */
 function transformSkillToMarkdown(skill: ContentRow): string {
   const frontmatter = `---
@@ -195,6 +202,12 @@ description: ${escapeYamlString(skill.description || '')}
   return `${frontmatter}\n\n${sections.filter(Boolean).join('\n\n')}`.trim();
 }
 
+/**
+ * Escapes a string for safe inclusion in YAML frontmatter, adding double quotes only when required.
+ *
+ * @param str - The input string to escape for YAML
+ * @returns The original `str` if no quoting is required; otherwise `str` with backslashes and double quotes escaped and wrapped in double quotes
+ */
 function escapeYamlString(str: string): string {
   const needsQuoting =
     str.includes(':') ||
@@ -212,16 +225,13 @@ function escapeYamlString(str: string): string {
 }
 
 /**
- * Generate ZIP file buffer using Deno-compatible ZIP library
+ * Create a minimal ZIP archive containing a single file at `{slug}/SKILL.md` with the provided Markdown content.
  *
- * Note: For Deno edge functions, we need a Deno-compatible ZIP library.
- * Options:
- * 1. Use jsr:@zip/zip (if available)
- * 2. Use npm:jszip (if Deno supports npm packages)
- * 3. Implement minimal ZIP creation using Web Streams API
+ * The archive uses a fixed DOS timestamp for deterministic metadata, stores the file without compression, and includes a CRC-32 checksum.
  *
- * For now, using a simple approach that creates a basic ZIP structure.
- * This can be enhanced with a proper ZIP library once we verify Deno compatibility.
+ * @param slug - Directory name (slug) to use as the archive path prefix for the SKILL.md file
+ * @param skillMdContent - The SKILL.md file content to include in the archive
+ * @returns A Uint8Array containing the bytes of the ZIP archive with one entry: `{slug}/SKILL.md`
  */
 async function generateZipBuffer(slug: string, skillMdContent: string): Promise<Uint8Array> {
   // TODO: Replace with proper Deno-compatible ZIP library
@@ -352,8 +362,10 @@ async function generateZipBuffer(slug: string, skillMdContent: string): Promise<
 }
 
 /**
- * Convert Date to DOS time format (16-bit, used in ZIP files)
- * DOS time: hour << 11 | minute << 5 | second >> 1
+ * Converts a Date to a 16-bit DOS time value used in ZIP file headers.
+ *
+ * @param date - The date to convert
+ * @returns A 16-bit DOS time value encoding hour, minute, and seconds (seconds stored as seconds/2)
  */
 function dateToDosTime(date: Date): number {
   const hour = date.getHours();
@@ -363,8 +375,10 @@ function dateToDosTime(date: Date): number {
 }
 
 /**
- * Convert Date to DOS date format (16-bit, used in ZIP files)
- * DOS date: (year - 1980) << 9 | month << 5 | day
+ * Encode a Date as a 16-bit DOS date value used in ZIP file headers.
+ *
+ * @param date - The date to encode (year, month, day are used)
+ * @returns The 16-bit DOS date value encoding year, month, and day
  */
 function dateToDosDate(date: Date): number {
   const year = date.getFullYear() - 1980;

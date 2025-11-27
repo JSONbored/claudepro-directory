@@ -46,7 +46,15 @@ const JOB_MONITORED_FIELDS = [
   'category',
 ] as const;
 
-// Type guard to validate database webhook payload structure
+/**
+ * Determines whether a value conforms to the expected database webhook payload shape for a job.
+ *
+ * Accepts objects with string `type` equal to `INSERT`, `UPDATE`, or `DELETE`, string `table` and `schema`,
+ * a `record` object, and an optional `old_record` that may be an object or `null`/`undefined`.
+ *
+ * @param value - The value to validate as a `DatabaseWebhookPayload<JobRow>`
+ * @returns `true` if `value` matches the expected webhook payload shape for a job, `false` otherwise.
+ */
 function isValidJobWebhookPayload(value: unknown): value is DatabaseWebhookPayload<JobRow> {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -80,11 +88,23 @@ function isValidJobWebhookPayload(value: unknown): value is DatabaseWebhookPaylo
   return true;
 }
 
-// Type guard to validate webhook type enum
+/**
+ * Checks whether a string is a valid webhook operation type.
+ *
+ * @param value - The string to validate as a webhook type.
+ * @returns `true` if `value` is 'INSERT', 'UPDATE', or 'DELETE', `false` otherwise.
+ */
 function isValidWebhookType(value: string): value is 'INSERT' | 'UPDATE' | 'DELETE' {
   return value === 'INSERT' || value === 'UPDATE' || value === 'DELETE';
 }
 
+/**
+ * Processes the "discord_jobs" queue and sends Discord notifications for relevant job INSERT/UPDATE events.
+ *
+ * This handler reads up to a batch of queued webhook messages, validates each payload and webhook type, applies trigger-like filtering (skipping drafts, placeholders, DELETE events, and updates where monitored fields did not change), invokes the direct job-notification handler for eligible messages, and deletes or retains queue messages according to outcome (invalid messages and handled/skipped messages are deleted; processing errors leave the message for retry).
+ *
+ * @returns An HTTP Response summarizing work performed, including the number of processed messages and a per-message results array with statuses (`success`, `skipped`, or `failed`), reasons or errors when applicable, and whether failed items will be retried.
+ */
 export async function handleDiscordJobs(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('flux-station', 'discord-jobs', {});
   

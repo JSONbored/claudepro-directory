@@ -61,7 +61,13 @@ const createPublicApiContext = (
 // Use StandardContext directly as it matches our needs
 type PublicApiContext = StandardContext;
 
-// Helper to deduplicate manual rate limiting logic
+/**
+ * Enforces the given rate limit preset for the incoming request and either returns a 429 JSON error or the handler's response with rate-limit headers.
+ *
+ * @param preset - The rate limit preset to apply for this request
+ * @param handler - Function invoked when the request is allowed; its response will be returned with rate-limit headers
+ * @returns A Response. If the request exceeds the limit, a 429 JSON response with `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers is returned; otherwise the handler's Response is returned augmented with `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers.
+ */
 async function withRateLimit(
   ctx: PublicApiContext,
   preset: (typeof RATE_LIMIT_PRESETS)[keyof typeof RATE_LIMIT_PRESETS],
@@ -209,7 +215,12 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
   trending: (ctx) => handleTrendingRoute(ctx.segments.slice(1), ctx.url, ctx.method),
 };
 
-// Matcher generator
+/**
+ * Creates a predicate that matches request paths against a route pattern.
+ *
+ * @param pathPattern - A route pattern with segments separated by `/` (e.g. `"/search/auto"` or `"sitemap"`). Leading or trailing slashes are ignored.
+ * @returns A function that returns `true` when `ctx.segments` begins with the pattern's segments (exact segment-wise prefix match). If `pathPattern` is empty, the matcher returns `true` only when there are no segments.
+ */
 function createPathMatcher(pathPattern: string) {
   const parts = pathPattern.split('/').filter(Boolean);
   return (ctx: PublicApiContext) => {

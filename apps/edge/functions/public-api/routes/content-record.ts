@@ -5,6 +5,12 @@ import { SITE_URL, supabaseAnon } from '@heyclaude/edge-runtime';
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
+/**
+ * Determine whether a string is one of the allowed content category enum values.
+ *
+ * @param value - The candidate category string to validate
+ * @returns `true` if `value` equals one of the allowed content category enum values, `false` otherwise
+ */
 function isValidContentCategory(
   value: string
 ): value is DatabaseGenerated['public']['Enums']['content_category'] {
@@ -33,6 +39,14 @@ import { buildSecurityHeaders, createDataApiContext, logger } from '@heyclaude/s
 const CORS_JSON = getOnlyCorsHeaders;
 const CORS_MARKDOWN = getWithAcceptCorsHeaders;
 
+/**
+ * Handle a request to export a content record in one of several formats (JSON, Markdown, LLMs text, or proxied storage).
+ *
+ * @param category - Content category identifier (validated against known content categories)
+ * @param slug - Content slug identifying the specific record to export
+ * @param url - Full request URL; query parameters (e.g., `format`, `includeMetadata`, `includeFooter`) control export behavior
+ * @returns A Response containing the exported content with appropriate headers, or a 400/ error Response describing validation or RPC failures
+ */
 export async function handleRecordExport(
   category: string,
   slug: string,
@@ -95,6 +109,16 @@ export async function handleRecordExport(
   }
 }
 
+/**
+ * Fetches the full content for a given category and slug and returns it as a JSON HTTP response.
+ *
+ * If the underlying RPC reports an error the function returns an error response; if the RPC returns no data it returns a 400 bad request response.
+ *
+ * @param category - The validated content category value used by the RPC
+ * @param slug - The content slug identifying the item to fetch
+ * @param logContext - Request context used for tracing and error reporting
+ * @returns A Response containing the content as a JSON string and appropriate headers; status 200 on success, 400 for missing content or RPC errors
+ */
 async function handleJsonFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
@@ -140,6 +164,18 @@ async function handleJsonFormat(
   });
 }
 
+/**
+ * Generate a markdown export for the specified content record.
+ *
+ * Reads `includeMetadata` (defaults to `true`) and `includeFooter` (`'true'` to include) from `url.searchParams`,
+ * calls the `generate_markdown_export` RPC, validates the RPC response, and returns the markdown with appropriate
+ * content-disposition, content-id, security, CORS, and caching headers.
+ *
+ * @param url - URL whose search parameters control export options (`includeMetadata`, `includeFooter`)
+ * @returns A Response with the exported Markdown as the body and headers:
+ *          `Content-Type: text/markdown; charset=utf-8`, `Content-Disposition` with a sanitized filename,
+ *          `X-Content-ID`, `X-Generated-By`, plus security, CORS, and cache headers. Error conditions produce
+ *          bad-request or RPC error responses.
 async function handleMarkdownFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
@@ -260,6 +296,14 @@ async function handleMarkdownFormat(
   });
 }
 
+/**
+ * Generate LLMs.txt content for a content item and return it as a plain-text HTTP response.
+ *
+ * @param category - The content category enum value for the requested item
+ * @param slug - The content item's slug identifier
+ * @param logContext - Request tracing/logging context created by createDataApiContext
+ * @returns A `Response` whose body is the LLMs.txt content (plain text) with status 200 on success; response headers include `Content-Type: text/plain`, `X-Generated-By`, security headers, CORS headers, and cache headers. 
+ */
 async function handleItemLlmsTxt(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
@@ -304,6 +348,14 @@ async function handleItemLlmsTxt(
   });
 }
 
+/**
+ * Proxies a stored file for the given content category and slug, returning a streaming response for the file or an error response.
+ *
+ * @param category - Content category to resolve; supports `'skills'` and `'mcp'` for storage lookups
+ * @param slug - The content slug used to resolve the storage path
+ * @param logContext - Request logging context used for tracing and error reporting
+ * @returns A Response that streams the proxied storage file with long‑term caching headers on success, or a bad request / error Response when the storage path cannot be resolved or an RPC call fails
+ */
 async function handleStorageFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,

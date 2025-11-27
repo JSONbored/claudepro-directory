@@ -65,7 +65,9 @@ const NEWSLETTER_COUNT_TTL_SECONDS = edgeEnv.newsletter.countTtlSeconds;
 let newsletterCountCache: { value: number; expiresAt: number } | null = null;
 
 /**
- * Handle Newsletter Subscription
+ * Process a newsletter subscription request, create or update the subscriber record, sync contact data with the email provider, invalidate related caches, attempt to send a welcome email, and return the resulting subscription details.
+ *
+ * @returns A Response containing subscription result and metadata: `subscription_id`, `email`, `resend_contact_id`, `sync_status`, `email_sent`, and `email_id`, or an error response on failure.
  */
 export async function handleSubscribe(req: Request): Promise<Response> {
 
@@ -360,6 +362,16 @@ export async function handleSubscribe(req: Request): Promise<Response> {
   }
 }
 
+/**
+ * Handle welcome-related email triggers for newsletter subscriptions and OAuth signup hooks.
+ *
+ * Processes requests that originate from either a newsletter subscription trigger or an authentication hook:
+ * - For newsletter subscriptions, sends the newsletter welcome email, enrolls the address in onboarding, and returns send metadata.
+ * - For authenticated signups, verifies the auth hook, sends the signup welcome email, enrolls in onboarding, and returns send metadata; non-signup auth actions are skipped.
+ *
+ * @param req - The incoming Request for the welcome email handler
+ * @returns A Response containing the operation result. On success includes `sent: true` and `id` plus `subscription_id` (newsletter) or `user_id` (auth signup); skipped actions include `skipped` and `reason`; errors return an error Response. May also return a verification Response if auth webhook verification yields one.
+ */
 export async function handleWelcome(req: Request): Promise<Response> {
   const triggerSource = req.headers.get('X-Trigger-Source');
   
@@ -493,6 +505,11 @@ export async function handleWelcome(req: Request): Promise<Response> {
   return successResponse({ sent: true, id: data?.id, user_id: user.id });
 }
 
+/**
+ * Handle incoming transactional email requests and send the configured email.
+ *
+ * @returns A Response containing the send result; on success the JSON body is `{ sent: true, id: string | undefined, type: string }`, otherwise an error response describing the failure.
+ */
 export async function handleTransactional(req: Request): Promise<Response> {
 
   const parseResult = await parseJsonBody<{
@@ -578,6 +595,17 @@ export async function handleTransactional(req: Request): Promise<Response> {
   return successResponse({ sent: true, id: data?.id, type });
 }
 
+/**
+ * Generate and send the weekly digest to all subscribers and record the run timestamp.
+ *
+ * Fetches the weekly digest content, skips if rate-limited or there's no content/subscribers,
+ * sends digest emails in batch, and attempts to upsert the last successful run timestamp with retries.
+ * If the timestamp upsert fails after retries, the function still returns success reflecting the email send results.
+ *
+ * @returns An object describing the outcome:
+ *  - If skipped: `{ skipped: true, reason: string, ... }` where `reason` is one of `rate_limited`, `invalid_data`, `no_content`, or `no_subscribers`.
+ *  - If processed: `{ sent: number, failed: number, rate: number }` with counts of successful and failed sends and the success rate.
+ */
 export async function handleDigest(): Promise<Response> {
   const logContext = createEmailHandlerContext('digest');
   
@@ -782,6 +810,14 @@ export async function handleDigest(): Promise<Response> {
   });
 }
 
+/**
+ * Process and send due sequence emails in batched concurrent tasks.
+ *
+ * Fetches all sequence emails that are due, sends each via the sequence processor,
+ * records per-item failures, emits an observability heartbeat, and returns a summary.
+ *
+ * @returns A Response containing `sent` and `failed` counts for processed sequence emails
+ */
 export async function handleSequence(): Promise<Response> {
   const logContext = createEmailHandlerContext('sequence');
   
@@ -862,6 +898,14 @@ export async function handleSequence(): Promise<Response> {
   return successResponse({ sent: sentCount, failed: failedCount });
 }
 
+/**
+ * Send a configured job-lifecycle email (e.g., onboarding or status updates) for a specific job.
+ *
+ * Builds template props and subject from the payload, renders the HTML, sends the email using the configured job email settings for `action`, and returns the send result.
+ *
+ * @param action - The job lifecycle action key identifying which email configuration in `JOB_EMAIL_CONFIGS` to use.
+ * @returns A Response containing `{ sent: true, id: string | undefined, jobId: string }` on success, or an error response when validation fails or the send fails.
+ */
 export async function handleJobLifecycleEmail(req: Request, action: string): Promise<Response> {
 
   const parseResult = await parseJsonBody<
@@ -954,6 +998,11 @@ export async function handleJobLifecycleEmail(req: Request, action: string): Pro
   return successResponse({ sent: true, id: data?.id, jobId });
 }
 
+/**
+ * Retrieves the newsletter subscriber count, using an in-memory cache and refreshing from NewsletterService when the cached value has expired.
+ *
+ * @returns The current newsletter subscriber count.
+ */
 async function getCachedNewsletterCount(): Promise<number> {
   const now = Date.now();
   if (newsletterCountCache && newsletterCountCache.expiresAt > now) {
@@ -970,6 +1019,11 @@ async function getCachedNewsletterCount(): Promise<number> {
   return count;
 }
 
+/**
+ * Serve the current newsletter subscriber count and associated caching headers.
+ *
+ * @returns A Response containing the newsletter subscriber count in JSON (`{ count: number }`) and appropriate Cache-Control and CORS headers
+ */
 export async function handleGetNewsletterCount(): Promise<Response> {
   const logContext = createEmailHandlerContext('get-newsletter-count');
   
@@ -1007,7 +1061,18 @@ export async function handleGetNewsletterCount(): Promise<Response> {
 }
 
 /**
- * Contact Form Submission Handler
+ * Handle a contact form submission, validate input, send admin and confirmation emails, and return the outcome.
+ *
+ * Validates required fields and the contact category, renders and sends an admin notification and a user confirmation
+ * email via Resend, logs results and tracing information, and returns a JSON response describing which emails were sent.
+ * Returns a 400 response when required fields are missing or the category is invalid, and an error response on unexpected failures.
+ *
+ * @returns A Response with a JSON payload containing:
+ * - `sent`: `true` if the handler completed its send attempts,
+ * - `submission_id`: the provided submission identifier,
+ * - `admin_email_sent`: `true` if the admin notification was sent (or `false` on failure),
+ * - `user_email_sent`: `true` if the user confirmation was sent (or `false` on failure),
+ * - `user_email_id`: the Resend message id for the user email or `null` when unavailable.
  */
 export async function handleContactSubmission(req: Request): Promise<Response> {
 

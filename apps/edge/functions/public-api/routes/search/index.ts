@@ -75,7 +75,17 @@ interface SearchResponse {
 }
 
 /**
- * Main search endpoint with analytics tracking and caching
+ * Handle incoming search requests and return a structured search response.
+ *
+ * Validates and normalizes query parameters, selects the appropriate search type
+ * (content, unified, or jobs), executes the corresponding data-layer RPCs,
+ * applies optional HTML highlighting when a query is present, enqueues search
+ * analytics (fire-and-forget), and returns a JSON payload with results,
+ * filters, pagination metadata, and the resolved search type. Returns HTTP 400
+ * for client-side validation errors and an error response for server-side failures.
+ *
+ * @param req - Incoming HTTP request containing query parameters and an optional Authorization header
+ * @returns A Response whose JSON body contains `results`, `query`, `filters`, `pagination`, and `searchType`
  */
 export async function handleSearch(req: Request): Promise<Response> {
   const url = new URL(req.url);
@@ -443,7 +453,9 @@ export async function handleSearch(req: Request): Promise<Response> {
 }
 
 /**
- * Autocomplete endpoint
+ * Return search suggestions for a short query string.
+ *
+ * @returns A Response whose JSON body contains `suggestions` — an array of suggestion objects `{ text, searchCount, isPopular }` — and the original `query`.
  */
 export async function handleAutocomplete(req: Request): Promise<Response> {
   const url = new URL(req.url);
@@ -527,7 +539,11 @@ export async function handleAutocomplete(req: Request): Promise<Response> {
 }
 
 /**
- * Facets endpoint
+ * Retrieve search facets (categories, tag lists, and author lists) for the public API.
+ *
+ * Calls the backend RPC to fetch facet data and returns a JSON response containing normalized facets.
+ *
+ * @returns A Response whose JSON body has the shape `{ facets: Array<{ category: string; contentCount: number; tags: string[]; authors: string[] }> }`.
  */
 export async function handleFacets(): Promise<Response> {
   const logContext = createSearchContext({ searchType: 'facets', app: 'public-api' });
@@ -580,7 +596,19 @@ export async function handleFacets(): Promise<Response> {
 }
 
 /**
- * Track search analytics - Queue-Based
+ * Enqueues search analytics data for later processing.
+ *
+ * If `query` is empty, this function exits without enqueuing anything.
+ *
+ * @param query - The search query text to record
+ * @param filters - Optional contextual filters applied to the search; may include:
+ *   - `categories`, `tags`, `authors`: arrays of selected values
+ *   - `sort`: requested sort option
+ *   - `entities`: requested entity types (e.g., `content`, `job`)
+ *   - `job_category`, `job_employment`, `job_experience`, `job_remote`: job-specific filters
+ *   - `entity`: single entity override
+ * @param resultCount - Number of results returned to the caller for this query
+ * @param authorizationHeader - Optional `Authorization` header value to attribute the request
  */
 async function trackSearchAnalytics(
   query: string,

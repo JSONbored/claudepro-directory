@@ -48,9 +48,13 @@ type ContentWebhookPayload = {
 };
 
 /**
- * Build searchable text from content fields
- * Combines title, description, tags, and author for embedding generation
- * Uses generated ContentRow type directly
+ * Create a single searchable string from a content row for embedding generation.
+ *
+ * Builds a space-separated string composed of the record's title, description, tags (joined),
+ * author, and up to the first 1000 characters of the content, skipping any missing fields.
+ *
+ * @param record - The content row to extract searchable text from
+ * @returns A trimmed string suitable for embedding generation containing the concatenated content fields
  */
 function buildSearchableText(record: ContentRow): string {
   const parts: string[] = [];
@@ -84,8 +88,11 @@ function buildSearchableText(record: ContentRow): string {
 }
 
 /**
- * Generate embedding for content text
- * Wrapped with circuit breaker and timeout for reliability
+ * Generate a normalized numeric embedding for the provided text using the `gte-small` AI model.
+ *
+ * @param text - The input content used to produce the embedding
+ * @returns The embedding vector as an array of numbers
+ * @throws Error if the model returns a non-array, an empty array, or values that are not numbers; may also throw on timeout or circuit-breaker failure
  */
 async function generateEmbedding(text: string): Promise<number[]> {
   const generateEmbeddingInternal = async () => {
@@ -125,8 +132,16 @@ async function generateEmbedding(text: string): Promise<number[]> {
 }
 
 /**
- * Store embedding in database
- * Wrapped with circuit breaker and timeout for reliability
+ * Persist a content embedding record to the database.
+ *
+ * Stores the provided embedding (as a JSON string) along with the content text and
+ * a generated-at timestamp into the `content_embeddings` table. The operation is
+ * protected by a circuit breaker and a timeout.
+ *
+ * @param contentId - The content record's unique identifier
+ * @param contentText - The searchable text associated with the content (stored for retrieval/search)
+ * @param embedding - The numeric embedding vector for `contentText`
+ * @throws Error If the database upsert fails or if the operation is aborted by the circuit breaker or timeout
  */
 async function storeEmbedding(
   contentId: string,
@@ -179,7 +194,14 @@ async function storeEmbedding(
 }
 
 /**
- * Main webhook handler with analytics wrapper pattern
+ * Wraps a webhook handler with request-scoped analytics, structured logging, and standardized error responses.
+ *
+ * Initializes a logging context and logger bindings, records success or failure of the wrapped handler, and
+ * returns the handler's response. If the handler throws, logs the error and returns a standardized error
+ * Response containing CORS headers and the request log context.
+ *
+ * @param handler - The webhook handler function to execute; must return a Response
+ * @returns The Response produced by `handler` on success, or a standardized error Response on failure
  */
 function respondWithAnalytics(handler: () => Promise<Response>): Promise<Response> {
   const logContext = createUtilityContext('generate-embedding', 'webhook-handler');
@@ -240,8 +262,9 @@ interface EmbeddingGenerationQueueMessage {
 }
 
 /**
- * Type guard to validate queue message structure
- * Validates that message has required fields - uses satisfies pattern for type safety
+ * Checks whether a value is a queue message containing a string `content_id`.
+ *
+ * @returns `true` if `msg` is an object with a string `content_id`, `false` otherwise.
  */
 function isValidQueueMessage(
   msg: unknown
@@ -254,7 +277,10 @@ function isValidQueueMessage(
 }
 
 /**
- * Process a single embedding generation job (from queue)
+ * Processes a single embedding generation queue message and persists an embedding for the referenced content.
+ *
+ * @param message - Queue message containing a `content_id` and metadata for the embedding job
+ * @returns An object with `success` indicating whether processing completed or was skipped, and `errors` containing any error messages encountered during processing
  */
 async function processEmbeddingGeneration(
   message: EmbeddingGenerationQueueMessage
@@ -348,8 +374,15 @@ async function processEmbeddingGeneration(
 }
 
 /**
- * Queue worker handler
- * POST /process - Processes embedding_generation queue
+ * Handle a batch of embedding generation queue messages and process each item.
+ *
+ * Reads up to QUEUE_BATCH_SIZE messages from the embedding_generation queue, validates each message,
+ * generates and stores embeddings for valid content records, deletes successful messages,
+ * moves messages that exceeded MAX_EMBEDDING_ATTEMPTS to the dead-letter queue, and preserves messages that should be retried.
+ *
+ * Processing results for each message are included in the response payload.
+ *
+ * @returns A Response containing a summary object with the number of messages processed and an array of per-message results; returns a non-200 error response when a fatal error occurs. 
  */
 export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('generate-embedding', 'queue-processor', {});
@@ -529,6 +562,15 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
   }
 }
 
+/**
+ * Handle incoming Supabase content webhooks to generate and store embeddings for content records.
+ *
+ * Validates webhook signature and timestamp, accepts only INSERT and UPDATE events for the `public.content` table,
+ * builds searchable text from the record, generates an embedding, and upserts the embedding into storage.
+ *
+ * @param req - Incoming HTTP request containing the Supabase database webhook payload and signature headers
+ * @returns An HTTP Response describing the outcome. On success for generated embeddings, the response includes `content_id` and `embedding_dim`; for skipped events the response includes a `reason` (e.g., `delete_event`, `empty_text`); on failure the response contains standardized error information and appropriate status codes.
+ */
 export async function handleEmbeddingWebhook(req: Request): Promise<Response> {
   // Otherwise, handle as direct webhook (legacy)
   return respondWithAnalytics(async () => {
