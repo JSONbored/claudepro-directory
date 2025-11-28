@@ -107,18 +107,22 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 
 // Map route categories (plural) to RecentlyViewedCategory (singular)
-// Use string literals instead of array indices to avoid brittleness if enum order changes
+// Use Constants.public.Enums.content_category to avoid hardcoded enum values
+const CONTENT_CATEGORY_ENUMS = Constants.public.Enums.content_category;
 const CATEGORY_TO_RECENTLY_VIEWED: Record<string, RecentlyViewedCategory> = {
-  agents: 'agent',
-  commands: 'command',
-  hooks: 'hook',
-  mcp: 'mcp',
-  rules: 'rule',
-  statuslines: 'statusline',
-  skills: 'skill',
-  jobs: 'job',
+  [CONTENT_CATEGORY_ENUMS[0]]: 'agent', // agents
+  [CONTENT_CATEGORY_ENUMS[3]]: 'command', // commands
+  [CONTENT_CATEGORY_ENUMS[4]]: 'hook', // hooks
+  [CONTENT_CATEGORY_ENUMS[1]]: 'mcp', // mcp
+  [CONTENT_CATEGORY_ENUMS[2]]: 'rule', // rules
+  [CONTENT_CATEGORY_ENUMS[5]]: 'statusline', // statuslines
+  [CONTENT_CATEGORY_ENUMS[6]]: 'skill', // skills
+  [CONTENT_CATEGORY_ENUMS[9]]: 'job', // jobs
   job: 'job', // Alias for consistency
 } as const;
+
+// Stable constant for collections category (replaces brittle array index access)
+const COLLECTION_CATEGORY = 'collections' as const;
 
 function mapCategoryToRecentlyViewed(category: string): RecentlyViewedCategory | null {
   return CATEGORY_TO_RECENTLY_VIEWED[category] ?? null;
@@ -214,8 +218,9 @@ export default async function DetailPage({
     // generates paths for content that may have been removed from the database
     // During build, missing content is expected - only log at debug level
     // During runtime, log at warn level to catch real issues
-    const isBuildTime = process.env['NEXT_PHASE'] === 'phase-production-build' || 
-                        process.env['NEXT_PUBLIC_VERCEL_ENV'] === undefined;
+    const isBuildTime =
+      process.env['NEXT_PHASE'] === 'phase-production-build' ||
+      process.env['VERCEL_ENV'] === 'production';
     
     if (isBuildTime) {
       reqLogger.debug('DetailPage: content not found during build (expected)', {
@@ -261,8 +266,9 @@ export default async function DetailPage({
     currentTags: 'tags' in fullItem ? ensureStringArray(fullItem.tags) : [],
   }).then((result) => result.items);
 
-  // Content detail tabs - static default
-  // Set to false to disable tabbed layout, true to enable
+  // Content detail tabs - currently hardcoded to true
+  // TODO: Implement lazy-loading feature flag pattern to avoid Edge Config access during builds
+  // See: https://github.com/vercel/next.js/issues/XXX (ticket reference TBD)
   const tabsEnabled = true;
 
   // No transformation needed - displayTitle computed at build time
@@ -316,8 +322,7 @@ export default async function DetailPage({
         relatedItemsPromise={relatedItemsPromise}
         tabsEnabled={tabsEnabled}
         collectionSections={
-          category === Constants.public.Enums.content_category[8] &&
-          fullItem.category === Constants.public.Enums.content_category[8] ? (
+          category === COLLECTION_CATEGORY && fullItem.category === COLLECTION_CATEGORY ? (
             <CollectionDetailView
               collection={
                 fullItem as Database['public']['Tables']['content']['Row'] & {

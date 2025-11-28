@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { normalizeError, logActionFailure, logClientWarning, logUnhandledPromise } from './errors.ts';
 
-// Mock logger
+// @heyclaude/shared-runtime is mocked in vitest.setup.ts (hoisted globally)
+// Mock logger.ts BEFORE errors.ts imports it
 vi.mock('./logger.ts', () => ({
   logger: {
     error: vi.fn(),
@@ -10,6 +10,9 @@ vi.mock('./logger.ts', () => ({
   },
   toLogContextValue: vi.fn((v) => v),
 }));
+
+// Now import after mocks are set up
+import { normalizeError, logActionFailure, logClientWarning, logUnhandledPromise } from './errors.ts';
 
 describe('normalizeError', () => {
   it('should return Error objects unchanged', () => {

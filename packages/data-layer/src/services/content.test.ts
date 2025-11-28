@@ -54,7 +54,7 @@ describe('ContentService', () => {
 
       const result = await contentService.getSitewideReadme();
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_readme_data', {});
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_readme_data');
       expect(result).toEqual(mockData);
     });
 
@@ -70,7 +70,7 @@ describe('ContentService', () => {
       });
 
       await expect(contentService.getSitewideReadme()).rejects.toThrow();
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_readme_data', {});
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_readme_data');
     });
 
     it('should handle null data gracefully', async () => {
@@ -92,7 +92,7 @@ describe('ContentService', () => {
 
       const result = await contentService.getSitewideLlmsTxt();
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_sitewide_llms_txt', {});
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_sitewide_llms_txt');
       expect(result).toEqual(mockData);
     });
 
@@ -122,7 +122,7 @@ describe('ContentService', () => {
 
       const result = await contentService.getChangelogLlmsTxt();
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_changelog_llms_txt', {});
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_changelog_llms_txt');
       expect(result).toEqual(mockData);
     });
 

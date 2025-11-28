@@ -81,9 +81,12 @@ export default defineConfig({
       '@': resolve(__dirname, './'),
       '@heyclaude/web-runtime': resolve(__dirname, './packages/web-runtime/src'),
       '@heyclaude/data-layer': resolve(__dirname, './packages/data-layer/src'),
+      // Use src for tests to avoid needing dist build
       '@heyclaude/shared-runtime': resolve(__dirname, './packages/shared-runtime/src'),
       '@heyclaude/database-types': resolve(__dirname, './packages/database-types/src'),
       '@heyclaude/edge-runtime': resolve(__dirname, './packages/edge-runtime/src'),
     },
+    // Ensure mocks take precedence over actual module resolution
+    conditions: ['import', 'module', 'browser', 'default'],
   },
 });

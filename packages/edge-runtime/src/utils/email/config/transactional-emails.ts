@@ -3,7 +3,7 @@
  * Config-based approach for transactional emails
  */
 
-import type * as React from 'npm:react@18.3.1';
+import type React from 'npm:react@18.3.1';
 import type { FC } from 'npm:react@18.3.1';
 import { CollectionShared } from '@heyclaude/edge-runtime/utils/email/templates/collection-shared.tsx';
 import { JobPosted } from '@heyclaude/edge-runtime/utils/email/templates/job-posted.tsx';

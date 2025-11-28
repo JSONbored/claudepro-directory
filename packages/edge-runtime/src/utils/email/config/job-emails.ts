@@ -3,7 +3,7 @@
  * Config-based approach for job lifecycle emails
  */
 
-import type * as React from 'npm:react@18.3.1';
+import type React from 'npm:react@18.3.1';
 import type { FC } from 'npm:react@18.3.1';
 import { JobApproved } from '@heyclaude/edge-runtime/utils/email/templates/job-approved.tsx';
 import { JobExpired } from '@heyclaude/edge-runtime/utils/email/templates/job-expired.tsx';

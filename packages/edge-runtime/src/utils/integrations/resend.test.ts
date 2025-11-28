@@ -31,8 +31,16 @@ vi.mock(
     logError: vi.fn(),
     logInfo: vi.fn(),
     logWarn: vi.fn(),
-    TIMEOUT_PRESETS: { external: {} },
+    TIMEOUT_PRESETS: { external: 10000 },
     withTimeout: <T>(promise: Promise<T>) => promise,
+    createPinoConfig: vi.fn((options?: { service?: string }) => ({
+      level: 'info',
+      ...(options?.service && { service: options.service }),
+    })),
+    normalizeError: vi.fn((error: unknown) => {
+      if (error instanceof Error) return error;
+      return new Error(String(error));
+    }),
   }),
   { virtual: true }
 );

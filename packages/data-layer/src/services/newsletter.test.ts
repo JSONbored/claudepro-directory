@@ -100,7 +100,7 @@ describe('NewsletterService', () => {
 
       const result = await newsletterService.getNewsletterSubscriberCount();
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_active_subscribers', {});
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_active_subscribers');
       expect(result).toBe(3);
     });
 

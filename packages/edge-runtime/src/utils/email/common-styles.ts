@@ -29,7 +29,7 @@
  * @module emails/utils/common-styles
  */
 
-import type * as React from 'npm:react@18.3.1';
+import type React from 'npm:react@18.3.1';
 import { borderRadius, brandColors, emailTheme, spacing, typography } from '@heyclaude/edge-runtime/utils/email/theme.ts';
 
 // ============================================================================

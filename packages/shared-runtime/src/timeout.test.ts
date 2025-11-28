@@ -76,7 +76,10 @@ describe('withTimeout', () => {
     });
 
     it('should use default error message when not provided', async () => {
-      const promise = new Promise(resolve => setTimeout(resolve, 2000));
+      // Create a promise that never resolves (to test timeout)
+      const promise = new Promise(() => {
+        // Never resolves
+      });
       
       const result = withTimeout(promise, 5000);
       
@@ -86,7 +89,10 @@ describe('withTimeout', () => {
     });
 
     it('should include timeoutMs in TimeoutError', async () => {
-      const promise = new Promise(resolve => setTimeout(resolve, 2000));
+      // Create a promise that never resolves (to test timeout)
+      const promise = new Promise(() => {
+        // Never resolves
+      });
       
       const result = withTimeout(promise, 3000);
       
@@ -143,8 +149,15 @@ describe('withTimeout', () => {
       // Advance to rejection time (before timeout)
       await vi.advanceTimersByTimeAsync(500);
       
-      await expect(result).rejects.toThrow('Rejected');
-      await expect(result).rejects.not.toThrow(TimeoutError);
+      // The rejection should happen before timeout
+      // Catch the rejection to verify it's the right error
+      try {
+        await result;
+        expect.fail('Should have rejected');
+      } catch (error) {
+        expect(error).not.toBeInstanceOf(TimeoutError);
+        expect((error as Error).message).toBe('Rejected');
+      }
     });
   });
 
@@ -154,10 +167,9 @@ describe('withTimeout', () => {
       
       const result = withTimeout(promise, 0);
       
-      vi.advanceTimersByTime(1);
-      
-      // With 0 timeout, should timeout immediately
+      // With 0 timeout, should reject immediately (no timer needed)
       await expect(result).rejects.toThrow(TimeoutError);
+      await expect(result).rejects.toThrow('Operation timed out after 0ms');
     });
 
     it('should handle negative timeout gracefully', async () => {
@@ -165,10 +177,9 @@ describe('withTimeout', () => {
       
       const result = withTimeout(promise, -100);
       
-      vi.advanceTimersByTime(1);
-      
-      // Negative timeout should timeout immediately
+      // Negative timeout should reject immediately (no timer needed)
       await expect(result).rejects.toThrow(TimeoutError);
+      await expect(result).rejects.toThrow('Operation timed out after -100ms');
     });
 
     it('should handle already resolved promises', async () => {
@@ -231,6 +242,13 @@ describe('withTimeout', () => {
       
       await vi.advanceTimersByTimeAsync(501);
       await expect(result2).rejects.toThrow(TimeoutError);
+      
+      // Ensure all promises are handled
+      try {
+        await result2;
+      } catch {
+        // Expected timeout rejection
+      }
     });
   });
 });

@@ -9,6 +9,35 @@
 import { vi } from 'vitest';
 
 // ============================================================================
+// Global Module Mocks (must be hoisted before any test files)
+// ============================================================================
+
+// Mock @heyclaude/shared-runtime globally to prevent module resolution issues
+// This MUST be hoisted before any module that imports it (like logger.ts)
+vi.mock('@heyclaude/shared-runtime', () => ({
+  createPinoConfig: vi.fn((options?: { service?: string }) => ({
+    level: 'info',
+    ...(options?.service && { service: options.service }),
+  })),
+  normalizeError: vi.fn((error: unknown) => {
+    if (error instanceof Error) return error;
+    return new Error(String(error));
+  }),
+  logError: vi.fn(),
+  logInfo: vi.fn(),
+  logWarn: vi.fn(),
+  createUtilityContext: vi.fn((domain, action, meta) => ({ domain, action, ...meta })),
+  withTimeout: vi.fn((promise) => promise),
+  TimeoutError: class TimeoutError extends Error {
+    constructor(message: string, public readonly timeoutMs?: number) {
+      super(message);
+      this.name = 'TimeoutError';
+    }
+  },
+  TIMEOUT_PRESETS: { rpc: 30000, external: 10000, storage: 15000 },
+}));
+
+// ============================================================================
 // Next.js API Mocks
 // ============================================================================
 

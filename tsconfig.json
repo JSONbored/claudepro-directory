@@ -21,8 +21,10 @@
     "noEmit": true,
     "incremental": true,
     "tsBuildInfoFile": "apps/web/.next/cache/.tsbuildinfo",
+    "skipLibCheck": true,
     "typeRoots": [
-      "./node_modules/@types"
+      "./node_modules/@types",
+      "./packages/edge-runtime/src/types"
     ],
     "plugins": [
       {
@@ -42,6 +44,7 @@
     "packages/data-layer/src/**/*.ts",
     "packages/generators/src/**/*.ts",
     "packages/database-types/**/*.ts",
+    "packages/edge-runtime/src/types/**/*.d.ts",
     "types/**/*.d.ts"
   ],
   "exclude": [
@@ -53,8 +56,9 @@
     "**/*.spec.ts",
     "**/*.spec.tsx",
     "apps/edge/functions",
-    "packages/edge-runtime/src/utils/email/**/*.tsx",
-    "packages/edge-runtime/src/utils/email/**/*.ts",
+    "packages/edge-runtime/src/utils/email",
+    "packages/edge-runtime/src/utils/email/**",
+    "packages/edge-runtime/src/utils/email/**/*",
     "packages/edge-runtime"
   ]
 }

@@ -1,15 +1,24 @@
-import { describe, expect, it, vi } from 'vitest';
-import { logRpcError } from './rpc-error-logging.ts';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-// Mock the logger
+// Mock @heyclaude/shared-runtime
 vi.mock('@heyclaude/shared-runtime', () => ({
-  logError: vi.fn(),
-  createUtilityContext: vi.fn((domain, action, meta) => ({ domain, action, ...meta })),
+  createPinoConfig: vi.fn((options?: { service?: string }) => ({
+    level: 'info',
+    ...(options?.service && { service: options.service }),
+  })),
 }));
 
+// Import after mock is set up
+import { logRpcError, logger } from './rpc-error-logging.ts';
+
 describe('logRpcError', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Spy on the logger.error method
+    vi.spyOn(logger, 'error');
+  });
+
   it('should log RPC errors with context', () => {
-    const { logError } = require('@heyclaude/shared-runtime');
     const error = { message: 'RPC failed', code: 'PGRST116' };
     const context = {
       rpcName: 'get_content',
@@ -18,49 +27,48 @@ describe('logRpcError', () => {
 
     logRpcError(error, context);
 
-    expect(logError).toHaveBeenCalledWith(
-      expect.stringContaining('RPC failed'),
+    expect(logger.error).toHaveBeenCalledWith(
+      'RPC call failed',
       error,
       expect.objectContaining({
-        rpcName: 'get_content',
-        operation: 'ContentService.getContent',
+        dbQuery: expect.objectContaining({
+          rpcName: 'get_content',
+        }),
       })
     );
   });
 
   it('should handle errors without message', () => {
-    const { logError } = require('@heyclaude/shared-runtime');
     const error = { code: 'UNKNOWN' };
     const context = { rpcName: 'test_rpc' };
 
     logRpcError(error, context);
 
-    expect(logError).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalled();
   });
 
   it('should include error code in context', () => {
-    const { logError } = require('@heyclaude/shared-runtime');
     const error = { message: 'Error', code: 'PGRST301', details: 'Permission denied' };
     const context = { rpcName: 'protected_rpc' };
 
     logRpcError(error, context);
 
-    expect(logError).toHaveBeenCalledWith(
-      expect.any(String),
+    expect(logger.error).toHaveBeenCalledWith(
+      'RPC call failed',
       error,
       expect.objectContaining({
-        rpcName: 'protected_rpc',
+        dbQuery: expect.objectContaining({
+          rpcName: 'protected_rpc',
+        }),
       })
     );
   });
 
   it('should handle null/undefined errors gracefully', () => {
-    const { logError } = require('@heyclaude/shared-runtime');
-    
     logRpcError(null as any, { rpcName: 'test' });
-    expect(logError).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalled();
 
     logRpcError(undefined as any, { rpcName: 'test2' });
-    expect(logError).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalled();
   });
 });
