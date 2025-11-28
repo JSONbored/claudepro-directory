@@ -57,6 +57,13 @@ export const getCategoryStatsConfig = (): readonly CategoryStatsConfig[] => {
 };
 
 
+/**
+ * Compute the total sum of numeric resource counts in the provided stats map.
+ *
+ * @param {Record<string, number>} stats - Mapping of resource identifiers to their numeric counts.
+ * @returns {number} The sum of all counts in `stats`; returns 0 when `stats` is empty.
+ * ⚠️ Client-Compatible
+ */
 export function getTotalResourceCount(stats: Record<string, number>): number {
   return Object.values(stats).reduce((sum, count) => sum + count, 0);
 }

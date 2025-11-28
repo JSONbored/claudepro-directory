@@ -82,6 +82,33 @@ function validateReadmeContent(content: unknown, outputPath: string): string {
   return content;
 }
 
+/**
+ * Generate a repository README.md by fetching site-wide content from the Next.js API, validating the generated markdown, and writing it to disk.
+ *
+ * This function requests formatted site data from the Next.js API route `/api/content/sitewide?format=readme`, converts the response into Markdown, validates the content and target path for safety (size, format, malicious patterns, and path confinement to the repository), and atomically writes the validated README to the filesystem. It logs progress and summary information and will propagate errors encountered during fetching, validation, or file I/O.
+ *
+ * @param options - Configuration options for README generation.
+ * @param options.outputPath - Optional path to write the generated README. When omitted, writes to the repository root `README.md`.
+ * @returns A promise that resolves when the README has been written; rejects if fetching, validation, or writing fails.
+ *
+ * @example
+ * // Generate README to the default repository README.md
+ * await runGenerateReadme();
+ *
+ * @example
+ * // Generate README to a custom path
+ * await runGenerateReadme({ outputPath: './docs/README.md' });
+ *
+ * Side effects:
+ * - Performs an HTTP GET request to the Next.js API.
+ * - Writes a file to the filesystem at `options.outputPath` or the repository README.md.
+ * - Emits informational, warning, and error logs.
+ *
+ * Error behavior:
+ * - Throws if the API response is unsuccessful or returns invalid data.
+ * - Throws if content validation fails (type, size, format, malicious content, or path outside repository).
+ * - Throws if writing the file fails.
+ */
 export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Promise<void> {
   const README_PATH = options.outputPath ?? join(resolveRepoPath(), 'README.md');
 
