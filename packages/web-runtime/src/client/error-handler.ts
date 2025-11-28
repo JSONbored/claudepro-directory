@@ -17,6 +17,12 @@ type ErrorResponse = {
   stack?: string;
 };
 
+/**
+ * Classifies an arbitrary error value into a standardized error type string.
+ *
+ * @param error - The value to classify; may be any value (not necessarily an `Error`).
+ * @returns `'ValidationError'`, `'DatabaseError'`, `'AuthenticationError'`, `'NotFoundError'`, or `'InternalServerError'` indicating the determined error category.
+ */
 function determineErrorType(error: unknown): string {
   if (!(error instanceof Error)) return 'InternalServerError';
   const name = error.name.toLowerCase();
@@ -29,14 +35,11 @@ function determineErrorType(error: unknown): string {
 }
 
 /**
- * Create a standardized ErrorResponse and log the error context for a React error boundary.
+ * Build a standardized ErrorResponse for a React error boundary and record a client-safe structured log entry.
  *
- * Normalizes and classifies the provided Error, generates a request ID and error code,
- * records a client-safe structured log entry, and returns a consistent ErrorResponse object.
- *
- * @param error - The Error caught by the React error boundary
- * @param errorInfo - The React error boundary info object (expects `componentStack`)
- * @returns An ErrorResponse containing `success: false`, `error`, `message`, `code`, `timestamp`, `requestId`, and — in development when available — `stack`
+ * @param error - The Error instance caught by the React error boundary
+ * @param errorInfo - The React error boundary info object; expects a `componentStack` string
+ * @returns An ErrorResponse containing `success: false`, `error`, `message`, `code`, `timestamp`, `requestId`, and, when available in development, `stack`
  */
 export function createErrorBoundaryFallback(
   error: Error,
@@ -114,6 +117,16 @@ export function formatErrorForDisplay(error: Error | unknown): string {
   return 'An unexpected error occurred';
 }
 
+/**
+ * Determines whether an error should be reported to logging/monitoring.
+ *
+ * Evaluates the provided value and returns `true` when it should be reported:
+ * non-Error values are not reported; errors whose messages mention "umami" or "analytics" are not reported;
+ * errors mentioning "hydration" or "HMR" are reported only outside of development.
+ *
+ * @param error - The value to evaluate; only `Error` instances are considered reportable
+ * @returns `true` if the error should be reported, `false` otherwise
+ */
 export function shouldReportError(error: Error | unknown): boolean {
   if (!(error instanceof Error)) return false;
   if (error.message.includes('hydration') || error.message.includes('HMR')) {

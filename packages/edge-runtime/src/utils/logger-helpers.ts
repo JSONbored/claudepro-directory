@@ -46,10 +46,9 @@ export function initRequestLogging(
 }
 
 /**
- * Update request bindings dynamically
- * Use this when context changes (e.g., after authentication, user identified)
- * 
- * @param bindings - Additional context to add to logger bindings
+ * Update the current request's logger bindings with the provided fields.
+ *
+ * @param bindings - Fields to apply to the logger's current bindings for the request
  */
 export function updateRequestBindings(bindings: Record<string, unknown>): void {
   logger.setBindings(bindings);
@@ -85,10 +84,9 @@ export function isTraceEnabled(): boolean {
 }
 
 /**
- * Get current logger bindings for error context enrichment
- * Use this in error handlers to include current context
- * 
- * @returns Current logger bindings
+ * Retrieve the current logger bindings for the active logging context.
+ *
+ * @returns The current logger bindings object
  */
 export function getCurrentBindings(): Record<string, unknown> {
   return logger.bindings();

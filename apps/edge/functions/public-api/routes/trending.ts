@@ -169,14 +169,15 @@ async function handlePageTabs(url: URL, logContext: ReturnType<typeof createData
 }
 
 /**
- * Return sidebar payload containing trending and recent items for a specified category.
+ * Produce a sidebar payload containing trending and recent items for the specified category.
  *
- * Fetches trending metrics and recent content (30-day window) concurrently using query parameters from `url`,
- * normalizes the rows for sidebar consumption, and returns a JSON Response with CORS and cache headers.
+ * Fetches trending metrics and recent content (30-day window) concurrently, normalizes rows for sidebar use,
+ * and returns a JSON response with appropriate CORS and cache headers.
  *
  * @param url - Request URL; supports query parameters `limit` (number) and `category` (string or `"all"`)
- * @param logContext - Request logging/tracing context produced by `createDataApiContext`
- * @returns A Response whose JSON body contains `trending` and `recent` arrays suitable for sidebar display. */
+ * @param logContext - Request logging/tracing context created by `createDataApiContext`
+ * @returns A Response whose JSON body contains `trending` and `recent` arrays formatted for sidebar display.
+ */
 async function handleSidebar(url: URL, logContext: ReturnType<typeof createDataApiContext>): Promise<Response> {
   const limit = clampLimit(Number(url.searchParams.get('limit') || '8'));
   const category = parseCategory(url.searchParams.get('category')) ?? 'guides';

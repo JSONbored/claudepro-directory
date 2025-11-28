@@ -30,7 +30,10 @@ export interface JobsFilterOptions {
 }
 
 /**
- * Direct job filtering without cache (for filtered queries - uncached SSR)
+ * Fetches jobs matching the provided filter options directly from the data source without using cache.
+ *
+ * @param options - Filtering options (may include `searchQuery`, `category`, `employment`, `experience`, `remote`, `limit`, `offset`, `sort`)
+ * @returns The filtered jobs result, or `null` if an error occurs
  */
 async function getFilteredJobsDirect(
   options: JobsFilterOptions
@@ -317,7 +320,10 @@ export async function getJobBySlug(slug: string) {
 }
 
 /**
- * Gets featured jobs
+ * Retrieve a list of featured jobs for display.
+ *
+ * @param limit - Maximum number of featured jobs to return (default 5)
+ * @returns An array of featured job records; returns an empty array if none are available or if an error occurs
  */
 export async function getFeaturedJobs(limit = 5) {
   // Create request-scoped child logger to avoid race conditions

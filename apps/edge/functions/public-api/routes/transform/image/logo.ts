@@ -77,9 +77,9 @@ interface LogoOptimizeResponse {
 /**
  * Optimize an uploaded company logo to PNG, store it in the `company-logos` bucket, and optionally remove the old logo and update the company's database record.
  *
- * Accepts JSON or multipart/form-data containing image data and a userId, validates and constrains input sizes and max dimensions, converts/resizes the image to PNG, enforces a 200KB upload limit, uploads the resulting file, and treats old-logo deletion and database updates as non-fatal side effects.
+ * Accepts JSON or multipart/form-data, validates and constrains input sizes and max dimensions, converts base64 input to bytes when needed, resizes/encodes the image to PNG, enforces a 200KB upload limit, uploads the optimized file, and treats old-logo deletion and company record updates as non-fatal side effects.
  *
- * @returns A JSON LogoOptimizeResponse with `success`, `originalSize`, `optimizedSize`, optional `publicUrl` and `path`, optional `dimensions`, and an `error` message when applicable.
+ * @returns A LogoOptimizeResponse containing `success`, `originalSize`, `optimizedSize`, optional `publicUrl` and `path`, optional `dimensions`, and an `error` message when applicable.
  */
 export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
   const logContext = createDataApiContext('transform-image-logo', {

@@ -70,12 +70,12 @@ async function executeRpcWithLogging<T>(
 const FEED_LIMIT = 50;
 
 /**
- * Handle the /feeds HTTP route: validate the request, generate an RSS or Atom feed, and return the HTTP response.
+ * Serve the /feeds route by validating the request and returning RSS or Atom feed XML.
  *
- * Validates HTTP method and path segments, parses `type` and `category` query parameters (supports `rss`/`atom` and `changelog` or site categories),
- * generates the feed payload via database RPCs, and returns a Response with feed XML and appropriate CORS, cache, and security headers.
+ * Parses `type` and `category` from the URL query parameters and returns a feed response with appropriate headers,
+ * or a JSON error response for invalid or unsupported requests.
  *
- * @param segments - Remaining path segments after `/feeds` (must be empty)
+ * @param segments - Remaining path segments after `/feeds`; must be empty (nested segments produce 404)
  * @param url - The incoming request URL; `type` and `category` are read from its query parameters
  * @param method - The HTTP method of the request
  * @returns An HTTP Response containing feed XML with appropriate Content-Type and headers on success, or a JSON error response with the corresponding status code on failure

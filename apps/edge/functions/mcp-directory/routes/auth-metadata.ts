@@ -43,13 +43,9 @@ function setupMetadataLogging(action: string, method: string = 'GET') {
 }
 
 /**
- * Serve the OAuth Protected Resource Metadata document for this MCP server.
+ * Serve the protected-resource metadata (RFC 9728) for this MCP server.
  *
- * Provides the protected-resource metadata (RFC 9728) describing the resource identifier,
- * authorization server(s), supported scopes and bearer methods, and whether the `resource`
- * parameter is supported.
- *
- * @returns A Response containing the metadata JSON (HTTP 200) or an error JSON (HTTP 500) on failure
+ * @returns A Response containing the protected resource metadata JSON (HTTP 200) on success, or an error JSON (HTTP 500) on failure
  */
 export async function handleProtectedResourceMetadata(_c: Context): Promise<Response> {
   const logContext = setupMetadataLogging('oauth-protected-resource-metadata');

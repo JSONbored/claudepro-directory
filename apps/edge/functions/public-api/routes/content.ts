@@ -240,10 +240,10 @@ async function handleChangelogIndex(format: string): Promise<Response> {
 }
 
 /**
- * Parse a string into a ContentCategory when it matches a known category.
+ * Convert an input string to a known content category or return `null` if it does not match.
  *
- * @param value - The input string to convert to a ContentCategory; may be `null`.
- * @returns The matching `ContentCategory` when `value` is valid, `null` otherwise.
+ * @param value - The input string to convert; may be `null`
+ * @returns The matching `ContentCategory` when `value` is valid, `null` otherwise
  */
 function parseContentCategory(value: string | null): ContentCategory | null {
   if (!value) return null;
@@ -297,10 +297,10 @@ async function handleToolLlmsTxt(tool: string, format: string): Promise<Response
 }
 
 /**
- * Return the category's LLMs.txt as UTF-8 plain text.
+ * Serve the LLMs.txt export for a content category.
  *
  * @param category - The content category to export LLMs.txt for
- * @returns An HTTP Response containing the category LLMs.txt as UTF-8 plain text when available; otherwise an error response
+ * @returns An HTTP Response with the category LLMs.txt body when found, or an error response otherwise
  */
 async function handleCategoryLlmsTxt(category: ContentCategory): Promise<Response> {
   const service = new ContentService(supabaseAnon);

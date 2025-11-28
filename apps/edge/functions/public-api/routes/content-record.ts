@@ -110,14 +110,12 @@ export async function handleRecordExport(
 }
 
 /**
- * Fetches the full content for a given category and slug and returns it as a JSON HTTP response.
+ * Return the content for a category and slug as a JSON HTTP response.
  *
- * If the underlying RPC reports an error the function returns an error response; if the RPC returns no data it returns a 400 bad request response.
+ * If the underlying RPC call fails or returns no data the function returns an appropriate error response.
  *
- * @param category - The validated content category value used by the RPC
- * @param slug - The content slug identifying the item to fetch
  * @param logContext - Request context used for tracing and error reporting
- * @returns A Response containing the content as a JSON string and appropriate headers; status 200 on success, 400 for missing content or RPC errors
+ * @returns A Response whose body is the content serialized as a JSON string; status 200 on success, 400 or an error response when the RPC fails or content is not found
  */
 async function handleJsonFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],

@@ -539,9 +539,9 @@ export async function handleAutocomplete(req: Request): Promise<Response> {
 }
 
 /**
- * Provide normalized search facets (categories, tag lists, and author lists) for the public API.
+ * Return normalized search facets (categories, tag lists, and author lists) for the public API.
  *
- * @returns A Response whose JSON body is an object with a `facets` array; each facet contains:
+ * @returns A Response whose JSON body is an object with a `facets` array. Each facet object contains:
  * - `category`: the facet category string
  * - `contentCount`: the number of items in that category
  * - `tags`: an array of tag strings

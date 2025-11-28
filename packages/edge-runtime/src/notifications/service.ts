@@ -24,14 +24,14 @@ export interface NotificationInsertPayload {
 }
 
 /**
- * Fetches active notifications for a user, excluding dismissed notification IDs.
+ * Retrieve active notifications for a user, excluding specified dismissed notifications.
  *
- * The provided `dismissedIds` are trimmed, deduplicated, filtered for truthy values, and limited to 50 entries before being sent to the database.
+ * The provided `dismissedIds` are sanitized (trimmed, deduplicated, filtered, and limited to 50) before being applied.
  *
- * @param userId - The user identifier to fetch notifications for
- * @param dismissedIds - Notification IDs that should be treated as dismissed and excluded
- * @param logContext - Optional extra fields to include in structured logs
- * @returns An array of `NotificationRecord` objects representing active notifications; an empty array if none are returned
+ * @param userId - The identifier of the user whose active notifications to fetch
+ * @param dismissedIds - Notification IDs to exclude from the results
+ * @param logContext - Optional additional fields to include in structured logs
+ * @returns An array of `NotificationRecord` objects representing active notifications; an empty array if none are found
  */
 export async function getActiveNotificationsForUser(
   userId: string,
@@ -243,6 +243,12 @@ function isConflictError(error: unknown): error is {
   );
 }
 
+/**
+ * Fetches a notification by its id.
+ *
+ * @param id - The id of the notification to retrieve
+ * @returns The notification record matching `id`, or `null` if none is found or an error occurs
+ */
 async function getNotificationById(id: string): Promise<NotificationRecord | null> {
   const { data, error } = await supabaseServiceRole
     .from('notifications')
