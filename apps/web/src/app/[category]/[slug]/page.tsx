@@ -148,6 +148,14 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Render the detail page for a content item identified by category and slug.
+ *
+ * Validates the category, loads core content required for the page (blocking), and initiates non-blocking analytics and related-content fetches for Suspense-based rendering. If the category is invalid or the requested content is missing, the function triggers a 404 (calls `notFound()`).
+ *
+ * @param params - A promise that resolves to an object with `category` and `slug` route parameters
+ * @returns A React element that composes the content detail UI, analytics pulses, structured data, recently-viewed tracking (when supported), and any collection-specific section
+ */
 export default async function DetailPage({
   params,
 }: {

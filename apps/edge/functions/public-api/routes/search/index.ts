@@ -75,17 +75,17 @@ interface SearchResponse {
 }
 
 /**
- * Handle incoming search requests and return a structured search response.
+ * Process an incoming search HTTP request and return a structured search response.
  *
- * Validates and normalizes query parameters, selects the appropriate search type
- * (content, unified, or jobs), executes the corresponding data-layer RPCs,
- * applies optional HTML highlighting when a query is present, enqueues search
- * analytics (fire-and-forget), and returns a JSON payload with results,
- * filters, pagination metadata, and the resolved search type. Returns HTTP 400
- * for client-side validation errors and an error response for server-side failures.
+ * Validates and normalizes query parameters, chooses between content, unified, or jobs search,
+ * executes the corresponding data-layer RPC, optionally adds HTML highlights for matched terms,
+ * enqueues search analytics (fire-and-forget), and returns a JSON payload with results,
+ * filters, pagination metadata, and the resolved search type. Returns HTTP 400 for client-side
+ * validation errors and an error response for server-side failures.
  *
- * @param req - Incoming HTTP request containing query parameters and an optional Authorization header
- * @returns A Response whose JSON body contains `results`, `query`, `filters`, `pagination`, and `searchType`
+ * @param req - Incoming HTTP request; may include query parameters and an optional Authorization header
+ * @returns A JSON response containing `results` (possibly with highlighted fields), `query`, `filters`,
+ * `pagination` (total, limit, offset, hasMore), and `searchType` ("content" | "unified" | "jobs")
  */
 export async function handleSearch(req: Request): Promise<Response> {
   const url = new URL(req.url);
@@ -539,11 +539,13 @@ export async function handleAutocomplete(req: Request): Promise<Response> {
 }
 
 /**
- * Retrieve search facets (categories, tag lists, and author lists) for the public API.
+ * Provide normalized search facets (categories, tag lists, and author lists) for the public API.
  *
- * Calls the backend RPC to fetch facet data and returns a JSON response containing normalized facets.
- *
- * @returns A Response whose JSON body has the shape `{ facets: Array<{ category: string; contentCount: number; tags: string[]; authors: string[] }> }`.
+ * @returns A Response whose JSON body is an object with a `facets` array; each facet contains:
+ * - `category`: the facet category string
+ * - `contentCount`: the number of items in that category
+ * - `tags`: an array of tag strings
+ * - `authors`: an array of author strings
  */
 export async function handleFacets(): Promise<Response> {
   const logContext = createSearchContext({ searchType: 'facets', app: 'public-api' });

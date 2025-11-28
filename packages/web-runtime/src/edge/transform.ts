@@ -48,6 +48,19 @@ export interface ProcessContentResponse {
   headings?: ContentHeadingMetadata[];
 }
 
+/**
+ * Request syntax-highlighted HTML for a code snippet from the edge transform service.
+ *
+ * Sends the provided `code` and highlighting options to the edge endpoint and returns
+ * the resulting HTML. If `code` is empty, returns a small preformatted placeholder.
+ * If the edge service fails or returns an error, returns a safe, escaped fallback HTML block.
+ *
+ * @param code - The source code to highlight.
+ * @param options - Highlighting options.
+ * @param options.language - Language hint for the highlighter (defaults to `"javascript"`).
+ * @param options.showLineNumbers - Whether to include line numbers in the output (defaults to `true`).
+ * @returns An HTML string containing the highlighted code or a safe fallback/preformatted block when highlighting is unavailable.
+ */
 export async function highlightCodeEdge(
   code: string,
   options: HighlightCodeOptions = {}
@@ -118,6 +131,13 @@ export async function highlightCodeEdge(
   }
 }
 
+/**
+ * Request processing of content via the edge transform service using the provided options.
+ *
+ * @param options - Configuration for the processing request (operation, code, language, languageHint, showLineNumbers, item, format, section, sectionKey, contentType). `showLineNumbers` defaults to `true`.
+ * @returns The processed content response; may include `html`, `language`, `filename`, `headings`, or an `error` message.
+ * @throws If the edge endpoint responds with a non-OK HTTP status, throws an Error containing the status and response text.
+ */
 export async function processContentEdge(
   options: ProcessContentOptions
 ): Promise<ProcessContentResponse> {

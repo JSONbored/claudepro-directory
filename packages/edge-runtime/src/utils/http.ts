@@ -167,6 +167,15 @@ export function successResponse(data: unknown, status = 200, cors = publicCorsHe
   return jsonResponse(data, status, cors);
 }
 
+/**
+ * Logs an internal error and returns a standardized 500 JSON response.
+ *
+ * @param error - The error or value to log.
+ * @param context - Short string describing the operation or request context to include in the response and logs.
+ * @param cors - CORS headers to include on the response.
+ * @param logContext - Optional additional structured fields to merge into the logged context (may include request identifiers); `action` will be normalized to a string when present.
+ * @returns A Response with a JSON body containing an `error` message and the provided `context`. If the logged error is a `TimeoutError`, the `error` message is `Request timeout`; otherwise it is `Internal Server Error`.
+ */
 export async function errorResponse(
   error: unknown,
   context: string,

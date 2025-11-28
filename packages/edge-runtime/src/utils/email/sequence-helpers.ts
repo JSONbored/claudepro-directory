@@ -31,7 +31,14 @@ export const STEP_TEMPLATES: Record<number, FC<{ email: string }>> = {
 };
 
 /**
- * Process a single sequence email: send email, mark as processed, schedule next step
+ * Process one onboarding sequence email: render the step-specific template, send the email, mark the item processed, and schedule the next step.
+ *
+ * @param item - Database record for the due sequence email; must include `id`, `email`, and `step`
+ * @param logContext - Additional structured context merged into logs for this operation
+ *
+ * @throws Error when the step or subject is unknown.
+ * @throws Error with the send result message when the email send fails.
+ * @throws Error when a database RPC fails while marking the item processed or scheduling the next step.
  */
 export async function processSequenceEmail(
   resend: Resend,

@@ -207,10 +207,10 @@ export async function handlePackageGenerationQueue(
     };
 
     /**
-     * Type guard that validates a raw queue message contains the required string fields and a recognized content category.
+     * Checks whether a raw queue message contains required string fields and a valid content category.
      *
-     * @param msg - The raw queue message to validate
-     * @returns `true` if `msg` is an object with string `content_id`, `slug`, `created_at`, and a `category` matching one of `Constants.public.Enums.content_category`, `false` otherwise
+     * @param msg - Raw queue message to validate
+     * @returns `true` if `msg` is an object with string `content_id`, `slug`, and `created_at`, and a `category` equal to an allowed content category; `false` otherwise.
      */
     function isValidQueueMessage(msg: unknown): msg is {
       content_id: string;

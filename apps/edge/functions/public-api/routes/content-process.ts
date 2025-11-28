@@ -118,11 +118,10 @@ function normalizeSlug(value: string): string {
 }
 
 /**
- * Convert a raw filename candidate into a sanitized, slugified filename suitable for use as a file name.
+ * Produce a filesystem-safe filename from a raw candidate string.
  *
  * @param input - The raw filename or title to sanitize; may be undefined.
- * @returns `'untitled'` if `input` is missing or invalid; otherwise a sanitized, slugified filename truncated to MAX_FILENAME_LENGTH characters.
- */
+ * @returns The sanitized, slugified filename, or `'untitled'` if `input` is missing or invalid. */
 function sanitizeFilename(input: string | undefined): string {
   if (!input || typeof input !== 'string') {
     return 'untitled';
@@ -149,10 +148,12 @@ function convertHookTypeToKebab(hook_type: string): string {
 }
 
 /**
- * Map a language name to its preferred file extension.
+ * Maps a language name or alias to its preferred file extension.
+ *
+ * Comparison is case-insensitive and surrounding whitespace is ignored.
  *
  * @param language - Language name or alias (case-insensitive)
- * @returns The file extension for the language (without a leading dot), or `'txt'` if no mapping exists
+ * @returns The file extension (without a leading dot) associated with `language`, or `txt` if no mapping exists
  */
 function getExtensionFromLanguage(language: string): string {
   const normalized = language.toLowerCase().trim();
@@ -235,14 +236,13 @@ interface FilenameGeneratorOptions {
 }
 
 /**
- * Generate a sanitized filename for an item according to category rules, requested format, and language.
+ * Generate a sanitized filename for an item based on category rules, requested format, and language.
  *
- * @param options - Generator options
- * @param options.item - Item descriptor; must include `category` and may include `slug`, `name`, and `hook_type`
- * @param options.language - Language hint used to derive the file extension
- * @param options.format - Optional filename format: when `'multi'` the `section` is appended; when `'hook'` hook-type rules may apply
- * @param options.section - Optional section key used only when `format` is `'multi'`
- * @returns A filename string including an extension derived from `language` (e.g., `example.json`)
+ * @param options.item - Item descriptor with required `category` and optional `slug`, `name`, and `hook_type`; used to derive the filename base
+ * @param options.language - Language hint used to determine the file extension
+ * @param options.format - Optional filename format; when `'multi'` the `section` is appended, when `'hook'` hook-type naming may apply
+ * @param options.section - Section key used when `format` is `'multi'` to produce a section-specific filename
+ * @returns The generated filename including an extension derived from `language` (for example, `example.json`)
  */
 function generateFilename(options: FilenameGeneratorOptions): string {
   const { item, language, format, section } = options;
@@ -302,12 +302,12 @@ function generateMultiFormatFilename(
 }
 
 /**
- * Generate a filename for a hook item using its hook type or slug and the language extension.
+ * Create a sanitized filename for a hook item using its hook type or slug, appending a content-type suffix and the appropriate file extension.
  *
- * @param item - Object with optional `hook_type` (preferred) or `slug` used to derive the base name
- * @param contentType - 'hookConfig' to append `-config`, 'scriptContent' to append `-script`
+ * @param item - Object containing optional `hook_type` (preferred) or `slug` to derive the base name
+ * @param contentType - `'hookConfig'` to append `-config`, `'scriptContent'` to append `-script`
  * @param language - Language hint used to determine the file extension
- * @returns The sanitized filename composed of the base identifier, the content-type suffix, and the language extension (e.g., `my-hook-config.yaml`)
+ * @returns The filename composed of the sanitized base identifier, the content-type suffix, and the language extension (for example, `my-hook-config.yaml`)
  */
 function generateHookFilename(
   item: FilenameGeneratorOptions['item'],
@@ -368,11 +368,10 @@ function validateItemParameter(item: unknown):
 }
 
 /**
- * Extracts Markdown headings (levels 2–6) from a source string and returns their metadata.
+ * Extract Markdown headings (levels 2–6) and produce metadata for each heading.
  *
  * @param source - The Markdown text to scan for headings
- * @returns An array of HeadingMetadata objects for each heading found. Each item includes `id` (normalized and made unique), `anchor` (prefixed with `#`), `title`, and `level`. Returns up to 50 headings; returns an empty array if no matching headings are found.
- */
+ * @returns An array of heading metadata objects (id, anchor, title, level). `id` values are normalized and made unique within the document; at most 50 headings are returned.
 function extractMarkdownHeadings(source: string): HeadingMetadata[] {
   if (!(source && /^(#{2,6})\s+.+/m.test(source))) {
     return [];

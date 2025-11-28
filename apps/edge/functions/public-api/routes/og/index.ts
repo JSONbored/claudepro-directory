@@ -47,10 +47,10 @@ const OG_HEIGHT = 630;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 /**
- * Determines whether a string matches one of the recognized content category values.
+ * Determines whether a string is one of the recognized content category values.
  *
- * @param value - The candidate content category string to validate
- * @returns `true` if `value` matches a known content category (narrows its type), `false` otherwise
+ * @param value - The candidate content category to validate
+ * @returns `true` if `value` matches a known content category, `false` otherwise
  */
 function isValidContentCategory(
   value: string
@@ -72,11 +72,11 @@ export interface OGImageParams {
 }
 
 /**
- * Builds a per-request logging context for OG image generation.
+ * Create a per-request logging context for OG image generation.
  *
- * @param action - A short label describing the action or step being performed
- * @param options - Additional context properties to merge into the returned context
- * @returns A BaseLogContext containing `function: 'og-image'`, the provided `action`, a generated `request_id` (UUID), an ISO `started_at` timestamp, and any supplied `options`
+ * @param action - Short label describing the action or step being performed
+ * @param options - Additional context properties to merge into the returned object
+ * @returns An object containing `function: 'og-image'`, the provided `action`, a generated `request_id` (UUID), an ISO `started_at` timestamp, and any supplied `options`
  */
 function createOGImageContext(action: string, options?: Record<string, unknown>): Record<string, unknown> {
   return {
@@ -89,12 +89,12 @@ function createOGImageContext(action: string, options?: Record<string, unknown>)
 }
 
 /**
- * Normalize SEO/metadata payloads from an HTTP response into an object containing title, description, and keywords.
+ * Normalize SEO metadata from an HTTP response into an object with `title`, `description`, and `keywords` when present.
  *
- * Supports responses shaped as `{ metadata: { ... } }` or as a top-level metadata object; only string `title` and `description`
- * and string-array `keywords` are extracted.
+ * Accepts responses shaped either as `{ metadata: { ... } }` or as a top-level metadata object and extracts only
+ * string `title` and `description` and an array of string `keywords`. Only valid fields are included in the result.
  *
- * @returns An object with optional `title`, `description`, and `keywords` (array of strings). Properties are included only when valid values are present in the input.
+ * @returns An object containing any of `title`, `description`, and `keywords` (array of strings) when those fields exist and are of the expected types.
  */
 function extractMetadataFromResponse(data: unknown): {
   title?: string;
@@ -135,14 +135,13 @@ function extractMetadataFromResponse(data: unknown): {
 }
 
 /**
- * Resolve Open Graph metadata for a URL route using multiple fallbacks.
+ * Resolve Open Graph metadata for a given URL route using layered fallbacks.
  *
- * Attempts a direct SEO function call, falls back to an internal HTTP SEO endpoint,
- * then a database RPC for content routes, and finally derives a title from the route.
+ * Attempts to obtain title, description, type, and tags from primary SEO generation, then an internal SEO HTTP endpoint, then a database RPC for content routes, and finally derives a title from the route when other methods fail. Returned values use sensible defaults when specific metadata is unavailable.
  *
  * @param route - The URL path to resolve metadata for (for example, `/agents/foo`)
  * @param logContext - Per-request logging context used for observability and logging
- * @returns OGImageParams containing `title`, `description`, `type`, and `tags`; values use sensible defaults when specific metadata is unavailable
+ * @returns OGImageParams containing `title`, `description`, `type`, and `tags`; `title` and `description` will fall back to defaults when not available, and `tags` will be an empty array if none are found
  */
 async function fetchMetadataFromRoute(
   route: string,
@@ -412,13 +411,13 @@ function createHeyClaudeLogo(size: 'sm' | 'md' | 'lg' = 'md') {
 }
 
 /**
- * Render an Open Graph PNG image from the provided OG image parameters using React components and og_edge.
+ * Creates an Open Graph PNG image suitable for use as a social preview based on provided OG image parameters.
  *
- * Layout includes a category pill, prominent title, optional description, up to five tag pills, and bottom-branding;
- * styling is designed to match the static og-image.webp appearance.
+ * The generated image includes a category pill, prominent title, optional description, up to five tag pills,
+ * and bottom-branding (logo and domain). Layout and styling are optimized for a consistent og-image appearance.
  *
- * @param params - OGImageParams containing `title`, optional `description`, `type` (category), and `tags` array
- * @returns The HTTP Response containing the generated PNG image for use in Open Graph previews
+ * @param params - OGImageParams with `title`, optional `description`, `type` (category), and `tags` array
+ * @returns A Response containing the generated PNG image for use in Open Graph previews
  */
 function generateOGImage(params: OGImageParams): Response {
   const { title, description, type, tags } = params;
@@ -575,12 +574,10 @@ function generateOGImage(params: OGImageParams): Response {
 }
 
 /**
- * Generate an Open Graph PNG image for a given site route or explicit metadata.
+ * Generates an Open Graph PNG image from a route or explicit metadata.
  *
- * Accepts either a `route` query parameter (preferred) to derive metadata via multiple fallbacks, or direct parameters (`title`, `description`, `type`, `tags`) to build the image. Ensures a non-empty title, applies security and CORS headers, and sets long-term SEO cache headers.
- *
- * @param req - The incoming Request whose URL query supplies either `route` or one or more of `title`, `description`, `type`, `tags`
- * @returns An HTTP Response containing the generated PNG image and headers (Content-Type: image/png, CORS, security headers, and SEO-focused cache headers). Returns a 400 response for missing or invalid query parameters and an error response when image generation fails.
+ * @param req - Incoming Request whose URL query must supply either `route` or one or more of `title`, `description`, `type`, `tags`
+ * @returns An HTTP Response with the generated PNG image and appropriate headers; returns a 400 response for missing or invalid parameters or an error response when image generation fails.
  */
 export async function handleOGImageRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);

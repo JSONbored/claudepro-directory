@@ -25,10 +25,10 @@ import {
 } from '@heyclaude/shared-runtime';
 
 /**
- * Dismisses one or more notifications for the authenticated user based on the POST /dismiss request.
+ * Dismisses one or more notifications for the authenticated user from a POST /dismiss request.
  *
- * @param req - Incoming HTTP request containing a JSON body with `notificationIds` (an array of strings)
- * @returns A Response with status 200 and body `{ dismissed, traceId }` on success; 400 for invalid or oversized requests; error responses for internal failures
+ * @param req - Incoming HTTP request whose JSON body must include `notificationIds`, an array of strings
+ * @returns A Response whose success body contains `{ dismissed: number, traceId: string }`; on failure returns a 400 for invalid or oversized requests or an error response for internal failures
  */
 export async function handleDismissNotifications(req: Request): Promise<Response> {
   const authResult = await requireAuthUser(req, {

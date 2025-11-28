@@ -25,18 +25,19 @@ import {
 const CORS = getOnlyCorsHeaders;
 
 /**
- * Handle the SEO route: validate the request, invoke the SEO RPC, and return serialized metadata and JSON-LD schemas.
+ * Handle incoming GET requests to generate SEO metadata and JSON-LD schemas for a given route.
  *
- * Processes only GET requests with no nested path segments, requires a `route` query parameter and optional `include`.
- * Detects internal loopback calls via the `X-Internal-Loopback` header, sanitizes the route, calls the SeoService RPC,
- * validates and serializes the returned metadata and schemas, and returns a JSON response with security, CORS, and cache headers.
+ * Validates the request (must be GET with no nested segments), reads `route` (required) and `include`
+ * (optional) from the URL query, detects internal loopback via the `X-Internal-Loopback` header,
+ * invokes the SEO RPC to produce metadata and schemas, validates/serializes the result, and returns
+ * a JSON response with appropriate security, CORS, and cache headers.
  *
  * @param segments - Path segments for the route; must be empty (nested segments are rejected)
- * @param url - The incoming request URL (query parameters `route` and `include` are read from this)
+ * @param url - Incoming request URL; `route` and `include` are read from its query parameters
  * @param method - The HTTP method of the request
  * @param request - Optional original Request object; used to detect internal loopback via headers
- * @param logContext - Optional logging context to attach to request logs and traces
- * @returns A Response containing a JSON body with `metadata` and `schemas` on success; otherwise an HTTP error response describing the failure.
+ * @param logContext - Optional logging context attached to request logs and traces
+ * @returns A Response whose body is JSON containing `metadata` and `schemas` on success, or an HTTP error response on failure
  */
 export async function handleSeoRoute(
   segments: string[],

@@ -41,10 +41,25 @@ const clientSafePatterns = [
   /\/logging\/client/,
 ];
 
+/**
+ * Determines whether the given source text declares a client component by containing a "use client" directive.
+ *
+ * @param content - Source file text to inspect
+ * @returns `true` if `content` contains either `'use client'` or `"use client"`, `false` otherwise.
+ */
 function isClientComponent(content: string): boolean {
   return content.includes("'use client'") || content.includes('"use client"');
 }
 
+/**
+ * Validate a source file for client components that import server-only modules and record any violations.
+ *
+ * Reads the file at `filePath`; if the file is a client component, inspects static `import` statements and dynamic `import()` calls.
+ * Imports that match configured `clientSafePatterns` are ignored; imports that match `serverOnlyPatterns` produce violation records
+ * appended to the module-level `violations` array. Each violation includes the file (relative to CWD), 1-based line number, and a description.
+ *
+ * @param filePath - Absolute path to the file to validate
+ */
 function checkFile(filePath: string): void {
   const content = readFileSync(filePath, 'utf-8');
   const isClient = isClientComponent(content);
@@ -108,6 +123,13 @@ function checkFile(filePath: string): void {
   });
 }
 
+/**
+ * Recursively scans a directory tree and runs file validation for TypeScript files.
+ *
+ * Traverses `dir` and its subdirectories, skipping `node_modules`, `.next`, and `.git`. For each `.ts` or `.tsx` file encountered, calls `checkFile` to perform client/server boundary validation.
+ *
+ * @param dir - Absolute or relative path of the directory to scan
+ */
 function walkDirectory(dir: string): void {
   const entries = readdirSync(dir);
   

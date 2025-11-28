@@ -17,10 +17,10 @@ const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 /**
- * Convert a raw input string to a recognized `content_category` enum value.
+ * Map an input string to a recognized `content_category` enum value.
  *
- * @param value - Input string to map; whitespace and case are ignored.
- * @returns A `DatabaseGenerated['public']['Enums']['content_category']` matching the normalized input if recognized, `undefined` otherwise.
+ * @param value - Input string to map; leading/trailing whitespace and letter case are ignored.
+ * @returns The matching `content_category` enum value, or `undefined` if the input is not recognized.
  */
 function toContentCategory(
   value: string | undefined
@@ -35,15 +35,15 @@ function toContentCategory(
 }
 
 /**
- * Handle a paginated content request from the provided URL and return a JSON response.
+ * Serve a paginated content listing based on URL query parameters.
  *
- * Processes query parameters `offset`, `limit`, and `category`, calls the database RPC
- * `get_content_paginated_slim`, and returns the RPC items as a JSON array with appropriate
- * security, CORS, and cache headers.
+ * Parses `offset`, `limit`, and `category` from `url`, validates them, queries the database for the requested page of content, and returns the resulting items as a JSON array with security, CORS, and caching headers.
  *
- * @param url - The request URL containing query parameters (`offset`, `limit`, `category`)
- * @returns A Response whose body is a JSON array of content items (may be empty) on success, or a structured error response for invalid parameters or RPC failures. Responses include security, CORS, and caching headers.
- */
+ * @param url - The request URL containing query parameters:
+ *   - `offset`: non-negative integer, defaults to `0`
+ *   - `limit`: integer between `1` and `100`, defaults to `30`
+ *   - `category`: `'all'` or a content category string (case-insensitive)
+ * @returns A Response whose body is the JSON array of content items on success; for invalid parameters or RPC failures returns a structured error response. Responses include security, CORS, and cache headers.
 export async function handlePaginatedContent(url: URL): Promise<Response> {
   const logContext = createDataApiContext('content-paginated', {
     path: url.pathname,

@@ -7,10 +7,10 @@ const BASE_CORS = getOnlyCorsHeaders;
 type PublicApiContext = StandardContext;
 
 /**
- * Returns a JSON index of available public API endpoints.
+ * Provide a JSON index of available public API endpoints.
  *
- * @param ctx - PublicApiContext containing the incoming Request and the original HTTP method.
- * @returns A Response with status 200 and a JSON body `{ ok: true, resources: [...] }` plus CORS headers; when `ctx.originalMethod` is `'HEAD'` the response has no body but preserves status and headers.
+ * @param ctx - PublicApiContext containing the incoming Request and the original HTTP method
+ * @returns A Response with status 200 whose body is JSON `{ ok: true, resources: [...] }` and CORS headers; if `ctx.originalMethod` is `'HEAD'` the Response has no body but preserves status and headers
  */
 export async function handleDirectoryIndex(ctx: PublicApiContext): Promise<Response> {
   // Extract request ID from header if present (for distributed tracing), otherwise generate new one

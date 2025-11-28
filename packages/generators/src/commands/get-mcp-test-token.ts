@@ -31,6 +31,13 @@ if (!SUPABASE_ANON_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/**
+ * Obtain a Supabase access token for MCP testing by signing in with provided credentials or reusing an existing session, and print the token and usage instructions.
+ *
+ * Reads `--email` and `--password` from process arguments; if both are provided, attempts to sign in and prints the session token and user info. If no credentials are provided, checks for an existing Supabase session and prints the session token and user info when found.
+ *
+ * Exits the process with code 1 on sign-in failure, when no session is returned, or when no active session exists.
+ */
 async function getToken() {
   const args = process.argv.slice(2);
   const emailIndex = args.indexOf('--email');

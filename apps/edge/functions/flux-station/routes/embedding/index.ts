@@ -196,12 +196,12 @@ async function storeEmbedding(
 /**
  * Wraps a webhook handler with request-scoped analytics, structured logging, and standardized error responses.
  *
- * Initializes a logging context and logger bindings, records success or failure of the wrapped handler, and
- * returns the handler's response. If the handler throws, logs the error and returns a standardized error
- * Response containing CORS headers and the request log context.
+ * Executes the provided handler while ensuring request-scoped logging context is established, records the
+ * handler outcome (success or error), and converts thrown errors into a standardized error Response that
+ * includes CORS headers and the request log context.
  *
- * @param handler - The webhook handler function to execute; must return a Response
- * @returns The Response produced by `handler` on success, or a standardized error Response on failure
+ * @param handler - A function that handles the webhook and returns a Response
+ * @returns The Response produced by `handler` on success, or a standardized error Response containing CORS headers and request log context on failure
  */
 function respondWithAnalytics(handler: () => Promise<Response>): Promise<Response> {
   const logContext = createUtilityContext('generate-embedding', 'webhook-handler');
@@ -374,15 +374,9 @@ async function processEmbeddingGeneration(
 }
 
 /**
- * Handle a batch of embedding generation queue messages and process each item.
+ * Process a batch of embedding generation queue messages: validate each message, generate and store embeddings for valid content, delete successful messages, move messages that exceeded max attempts to the dead-letter queue, and leave retryable failures in the queue.
  *
- * Reads up to QUEUE_BATCH_SIZE messages from the embedding_generation queue, validates each message,
- * generates and stores embeddings for valid content records, deletes successful messages,
- * moves messages that exceeded MAX_EMBEDDING_ATTEMPTS to the dead-letter queue, and preserves messages that should be retried.
- *
- * Processing results for each message are included in the response payload.
- *
- * @returns A Response containing a summary object with the number of messages processed and an array of per-message results; returns a non-200 error response when a fatal error occurs. 
+ * @returns A Response containing a summary object with the number of messages processed and an array of per-message results (each result includes `msg_id`, `status`, `errors`, and optional `will_retry`); on a fatal error returns an error response with logging context.
  */
 export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('generate-embedding', 'queue-processor', {});

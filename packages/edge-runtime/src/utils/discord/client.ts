@@ -266,6 +266,22 @@ export async function createDiscordMessageWithLogging(
   };
 }
 
+/**
+ * Update an existing Discord message through the webhook while recording and updating an outbound webhook event log.
+ *
+ * Attempts to PATCH the message at the webhook URL with exponential backoff up to MAX_RETRIES. Creates an outbound
+ * webhook event record before the first attempt and updates that record on success, failure, or when the message is not found.
+ *
+ * @param webhookUrl - Base webhook URL (without trailing `/messages/:id`)
+ * @param messageId - Discord message identifier to update
+ * @param payload - Request body to send as the PATCH payload
+ * @param eventType - Webhook event type used when logging the outbound event
+ * @param relatedId - Optional related entity id to associate with the webhook event log
+ * @param metadata - Optional additional metadata to include in the webhook event log; merged with `discord_message_id`
+ * @param logContext - Optional contextual fields merged into structured logs
+ * @returns An object containing the HTTP status, whether the message was deleted (404), and the number of attempts performed
+ * @throws Error If a client (4xx) error occurs or if the update fails after exhausting retries
+ */
 export async function updateDiscordMessage(
     webhookUrl: string,
     messageId: string,

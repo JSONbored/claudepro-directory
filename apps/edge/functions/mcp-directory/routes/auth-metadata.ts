@@ -87,12 +87,11 @@ export async function handleProtectedResourceMetadata(_c: Context): Promise<Resp
 }
 
 /**
- * Get Authorization Server Metadata (RFC 8414 / OIDC Discovery)
+ * Serves OAuth 2.0 / OIDC authorization server metadata for this service.
  *
- * This endpoint proxies to Supabase Auth's OIDC discovery endpoint
- * or returns metadata pointing to it.
+ * Returns metadata that advertises the issuer and endpoints, points clients to Supabase's OIDC discovery for full configuration, and exposes the service's proxy authorization endpoint to support the resource parameter.
  *
- * Endpoint: GET /.well-known/oauth-authorization-server
+ * @returns The HTTP Response containing the authorization server metadata JSON
  */
 export async function handleAuthorizationServerMetadata(_c: Context): Promise<Response> {
   const logContext = setupMetadataLogging('oauth-authorization-server-metadata');

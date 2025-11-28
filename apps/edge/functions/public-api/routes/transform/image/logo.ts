@@ -75,15 +75,11 @@ interface LogoOptimizeResponse {
 }
 
 /**
- * Optimize and store a company logo image uploaded to the server.
+ * Optimize an uploaded company logo to PNG, store it in the `company-logos` bucket, and optionally remove the old logo and update the company's database record.
  *
- * Validates and authenticates the request, accepts JSON or multipart/form-data input,
- * decodes and checks image size, resizes/converts the image (PNG/JPEG) within configured limits,
- * uploads the optimized image to the `company-logos` storage bucket, optionally deletes an old logo,
- * optionally updates the company's `logo` field in the database, and returns upload and size metadata.
+ * Accepts JSON or multipart/form-data containing image data and a userId, validates and constrains input sizes and max dimensions, converts/resizes the image to PNG, enforces a 200KB upload limit, uploads the resulting file, and treats old-logo deletion and database updates as non-fatal side effects.
  *
- * @returns A Response whose JSON body is a LogoOptimizeResponse containing `success`, optional `publicUrl` and `path`,
- *          `originalSize`, `optimizedSize`, optional `dimensions`, and an `error` message when applicable.
+ * @returns A JSON LogoOptimizeResponse with `success`, `originalSize`, `optimizedSize`, optional `publicUrl` and `path`, optional `dimensions`, and an `error` message when applicable.
  */
 export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
   const logContext = createDataApiContext('transform-image-logo', {

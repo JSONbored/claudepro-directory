@@ -232,6 +232,15 @@ export function inferInitialTopics(
   return [...new Set(topics)];
 }
 
+/**
+ * Assigns the provided topic IDs to a Resend contact and opts the contact into each topic.
+ *
+ * If `topicIds` is empty the function is a no-op. The operation is retried on transient failures;
+ * successes and errors are logged with the provided `logContext`.
+ *
+ * @param contactId - The Resend contact identifier to update
+ * @param topicIds - Array of Resend topic IDs to opt the contact into
+ */
 async function assignTopicsToContact(
   resend: Resend,
   contactId: string,
@@ -664,9 +673,20 @@ async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise
 }
 
 /**
- * Send email via Resend with timeout and logging
- * Centralized email sending utility for consistent error handling and logging
- */
+ * Send an email through Resend and return the API response while logging failures.
+ *
+ * Sends a message with the provided fields, logs an error if the send fails, and returns the Resend response payload.
+ *
+ * @param options - Message fields.
+ * @param options.to - Recipient email address.
+ * @param options.subject - Email subject line.
+ * @param options.html - HTML body of the email.
+ * @param options.from - Sender email address.
+ * @param options.tags - Optional list of tag objects to attach to the message.
+ * @param options.replyTo - Optional reply-to email address.
+ * @param logContext - Context object added to logs for correlating this operation.
+ * @param timeoutMessage - Message used when the send operation times out.
+ * @returns An object with `data` containing `{ id }` when the send succeeded, or `error` containing `{ message }` when it failed.
 export async function sendEmail(
   resend: Resend,
   options: {
@@ -701,8 +721,16 @@ export async function sendEmail(
 }
 
 /**
- * Sync contact to Resend: create contact, assign topics, assign segment
- * Returns sync status and contact ID for database storage
+ * Create or find a contact in Resend, assign initial newsletter topics and an engagement segment, and report sync outcome.
+ *
+ * @param contactProperties - Properties to set on the Resend contact (used to compute engagement and metadata).
+ * @param validatedSource - The signup source value (newsletter_source enum or string) used to infer topics.
+ * @param copy_category - The content category value (content_category enum or string) used to infer topics; may be null/undefined.
+ * @returns An object with:
+ *  - `resendContactId`: the Resend contact ID when created or found, otherwise `null`;
+ *  - `syncStatus`: `'synced'`, `'skipped'`, or `'failed'` indicating the result for database persistence;
+ *  - `syncError`: an error message when `syncStatus` is `'failed'` or `'skipped'`, otherwise `null`;
+ *  - `topicIds`: the list of topic IDs that were assigned (may be empty)
  */
 export async function syncContactToResend(
   resend: Resend,
@@ -816,8 +844,12 @@ export async function syncContactToResend(
 }
 
 /**
- * Enroll email in onboarding sequence
- * Helper function to avoid duplication
+ * Enrolls an email address into the onboarding email sequence.
+ *
+ * Attempts to invoke the Supabase RPC `enroll_in_email_sequence` for the given email and logs any failure.
+ *
+ * @param email - The email address to enroll
+ * @param logContext - Additional context to include in logs if the enrollment fails
  */
 export async function enrollInOnboardingSequence(
   email: string,

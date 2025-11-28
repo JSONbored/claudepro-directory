@@ -15,14 +15,17 @@
 import { logTrace, logger } from '@heyclaude/shared-runtime';
 
 /**
- * Initialize request logging with trace and bindings
- * Call this at the start of edge function handlers
- * 
- * Sets bindings that will be automatically injected into all subsequent log calls via mixin.
- * This eliminates the need to manually pass requestId, operation, function in every log call.
- * 
- * @param logContext - Base log context for the request (Record<string, unknown>)
- * @param additionalBindings - Additional context to set as bindings (will be auto-injected via mixin)
+ * Initialize request-scoped logging: emit an entry trace and set logger bindings for the request.
+ *
+ * The function emits a trace "Request received" using the provided `logContext` and sets logger
+ * bindings that will be injected into subsequent log calls. Standard fields are extracted from
+ * `logContext` when present: `request_id` -> `requestId`, `action` -> `operation`, and
+ * `function` -> `function` (defaults for `operation` and `function` are `"unknown"`; `requestId`
+ * is left `undefined` if not a string).
+ *
+ * @param logContext - Arbitrary request log context; may contain `request_id`, `action`, and `function`
+ *                      keys used to populate bindings
+ * @param additionalBindings - Extra key/value pairs to merge into the logger bindings
  */
 export function initRequestLogging(
   logContext: Record<string, unknown>,
@@ -53,21 +56,19 @@ export function updateRequestBindings(bindings: Record<string, unknown>): void {
 }
 
 /**
- * Trace a processing step
- * Only logs if trace level is enabled (avoids unnecessary work)
- * 
- * @param message - Trace message
- * @param logContext - Log context (Record<string, unknown>)
+ * Log a processing step at trace level using the provided context.
+ *
+ * @param message - Human-readable trace message describing the step
+ * @param logContext - Contextual bindings to include with the trace (e.g., `request_id`, `action`, `function`)
  */
 export function traceStep(message: string, logContext: Record<string, unknown>): void {
   logTrace(message, logContext);
 }
 
 /**
- * Trace request completion
- * Call this before returning successful responses
- * 
- * @param logContext - Log context (Record<string, unknown>)
+ * Log a trace-level message indicating the request completed successfully.
+ *
+ * @param logContext - Context object whose string-keyed properties are attached to the trace
  */
 export function traceRequestComplete(logContext: Record<string, unknown>): void {
   logTrace('Request completed successfully', logContext);
