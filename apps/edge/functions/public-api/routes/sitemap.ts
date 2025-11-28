@@ -32,15 +32,13 @@ const INDEXNOW_API_KEY = edgeEnv.indexNow.apiKey;
 const INDEXNOW_TRIGGER_KEY = edgeEnv.indexNow.triggerKey;
 
 /**
- * Route handler for sitemap requests; validates the path and dispatches to the GET or POST sitemap handlers.
+ * Dispatches sitemap requests: serves a sitemap for `GET` or processes an IndexNow submission for `POST`.
  *
- * Creates or reuses a request logging context and binds request metadata for tracing. Rejects nested sitemap segments.
- *
- * @param segments - URL path segments after the sitemap base (must be empty)
- * @param url - The request URL (used to read query parameters for GET)
- * @param method - The HTTP method of the request; supports `GET` and `POST`
- * @param req - The original Request object (passed to POST handler)
- * @param logContext - Optional prebuilt logging context; one will be created if omitted
+ * @param segments - URL path segments after the sitemap base; must be empty or the request is rejected
+ * @param url - The request URL (used to read query parameters for `GET`)
+ * @param method - The HTTP method; only `GET` and `POST` are handled
+ * @param req - The original Request object; forwarded to the `POST` handler
+ * @param logContext - Optional logging/context object to associate with the request
  * @returns A Response containing sitemap XML or JSON for `GET`, an IndexNow submission result for `POST`, or an error response for invalid requests
  */
 export async function handleSitemapRoute(
@@ -214,19 +212,18 @@ async function handleSitemapGet(url: URL, logContext: Record<string, unknown>): 
 }
 
 /**
- * Process an IndexNow submission: validate trigger and API keys, gather site URLs, and submit them to the IndexNow service.
+ * Handle an IndexNow submission by validating the trigger and API keys, collecting site URLs, and submitting them to the IndexNow API.
  *
- * Performs server-side validation of the configured trigger key and API key, fetches site URLs from the database, constructs an IndexNow payload (up to 10,000 URLs), and makes a timed, retry-enabled POST to the IndexNow API. If the submission succeeds returns the submitted count; if the submission fails non-blocking, logs the error and still returns success with a warning. Returns appropriate error responses for missing configuration, invalid trigger key, database failures, or non-OK IndexNow responses.
- *
- * @param req - The incoming Request containing headers used to validate the trigger key.
- * @param logContext - Optional logging/tracing context merged into logs and traces for this request.
- * @returns A Response describing the outcome:
- *   - `200` with `{ ok: true, submitted: number }` on success (or with a `warning` if submission failed non-blocking),
- *   - `401` when the provided trigger key is invalid,
- *   - `503` when required IndexNow configuration is missing,
- *   - `500` when no URLs are available to submit,
- *   - `502` when the IndexNow HTTP response is not OK,
- *   - Database-related errors will return an error response describing the RPC failure.
+ * @param req - Incoming request; the `X-IndexNow-Trigger-Key` header is used to validate the trigger.
+ * @param logContext - Optional logging/tracing context merged into request logs and traces.
+ * @returns A Response reflecting the outcome:
+ *  - `200` with `{ ok: true, submitted: number }` on success,
+ *  - `200` with `{ ok: true, submitted: number, warning: string }` when submission failed non-blocking,
+ *  - `401` when the provided trigger key is invalid,
+ *  - `503` when required IndexNow configuration (trigger key or API key) is missing,
+ *  - `500` when there are no URLs available to submit,
+ *  - `502` when the IndexNow HTTP response is not OK,
+ *  - Database RPC failures are returned via the service's standardized error response.
  */
 async function handleSitemapIndexNow(req: Request, logContext: Record<string, unknown>): Promise<Response> {
   traceStep('Processing IndexNow submission', logContext);

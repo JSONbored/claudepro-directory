@@ -24,13 +24,18 @@ export const DEFAULT_COMPONENT_CARD_CONFIG: ComponentCardConfig = {
 };
 
 /**
- * Map component card configuration from record format to typed config
- * 
- * Server-safe utility function (no React hooks, no browser APIs)
- * Can be used in both server and client contexts.
- * 
- * @param record - Configuration record with keys like 'cards.show_copy_button'
- * @returns Mapped ComponentCardConfig
+ * Map a generic configuration record into a ComponentCardConfig.
+ *
+ * Server-safe utility that reads boolean flags from record keys and falls back
+ * to DEFAULT_COMPONENT_CARD_CONFIG when keys are missing or not booleans.
+ *
+ * @param record - Configuration record (or `null`). Reads these keys if present:
+ *                 `cards.show_copy_button`, `cards.show_bookmark`,
+ *                 `cards.show_view_count`, `cards.show_copy_count`,
+ *                 `cards.show_rating`.
+ * @returns A ComponentCardConfig where each flag is the boolean value from the
+ *          record when present and a boolean, or the corresponding default
+ *          from DEFAULT_COMPONENT_CARD_CONFIG otherwise.
  */
 export function mapComponentCardConfig(
   record: Record<string, unknown> | null

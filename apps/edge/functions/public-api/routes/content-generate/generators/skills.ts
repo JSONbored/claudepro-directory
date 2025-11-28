@@ -375,10 +375,10 @@ function dateToDosTime(date: Date): number {
 }
 
 /**
- * Encode a Date as a 16-bit DOS date value used in ZIP file headers.
+ * Encodes a Date into the 16-bit DOS date format used in ZIP file headers.
  *
- * @param date - The date to encode (year, month, day are used)
- * @returns The 16-bit DOS date value encoding year, month, and day
+ * @param date - The date to encode; only year, month, and day are used
+ * @returns A 16-bit DOS date where bits store the year offset from 1980, the month (1–12), and the day (1–31)
  */
 function dateToDosDate(date: Date): number {
   const year = date.getFullYear() - 1980;

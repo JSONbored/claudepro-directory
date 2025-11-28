@@ -52,8 +52,9 @@ import { ChangelogListClient } from '@/src/components/features/changelog/changel
 export const revalidate = 3600;
 
 /**
- * Generate metadata for changelog list page
- * Includes RSS/Atom feed discovery links (2025 best practice)
+ * Builds page metadata for the changelog route, including RSS and Atom feed alternates.
+ *
+ * @returns Page metadata for the changelog route, including RSS (`/changelog/rss.xml`) and Atom (`/changelog/atom.xml`) alternates.
  */
 export async function generateMetadata(): Promise<Metadata> {
   // Generate requestId for metadata generation (separate from page render)
@@ -99,7 +100,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Changelog List Page Component
+ * Renders the changelog list page with server-loaded entries, client-side filtering, and a newsletter CTA.
+ *
+ * Loads a published changelog overview, normalizes entries and category counts, and renders structured data, a header with stats, the client-side filtered changelog list, and a newsletter CTA. If data loading fails the error is logged and a minimal fallback UI is returned.
+ *
+ * @returns The React element for the changelog page or a minimal fallback UI when loading fails.
  */
 export default async function ChangelogPage() {
   // Generate single requestId for this page request

@@ -47,12 +47,12 @@ const JOB_MONITORED_FIELDS = [
 ] as const;
 
 /**
- * Determines whether a value conforms to the expected database webhook payload shape for a job.
+ * Type guard that validates whether a value matches the DatabaseWebhookPayload<JobRow> shape for job webhooks.
  *
- * Accepts objects with string `type` equal to `INSERT`, `UPDATE`, or `DELETE`, string `table` and `schema`,
- * a `record` object, and an optional `old_record` that may be an object or `null`/`undefined`.
+ * Checks that `type` is 'INSERT' | 'UPDATE' | 'DELETE', `table` and `schema` are strings, `record` is a non-null object,
+ * and `old_record` is either absent, `null`, or an object.
  *
- * @param value - The value to validate as a `DatabaseWebhookPayload<JobRow>`
+ * @param value - The value to validate as a `DatabaseWebhookPayload<JobRow]`
  * @returns `true` if `value` matches the expected webhook payload shape for a job, `false` otherwise.
  */
 function isValidJobWebhookPayload(value: unknown): value is DatabaseWebhookPayload<JobRow> {

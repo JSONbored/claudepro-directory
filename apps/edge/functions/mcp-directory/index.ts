@@ -108,10 +108,10 @@ mcpApp.use('/*', async (c, next) => {
  */
 
 /**
- * Create a Supabase client scoped to the provided authentication token.
+ * Create a Supabase client bound to the provided user access token.
  *
- * @param token - The user's access token used to set the `Authorization: Bearer <token>` header for row-level security
- * @returns A Supabase client instance configured to send the provided token with every request
+ * @param token - The user's access token to include as `Authorization: Bearer <token>` on every request
+ * @returns A Supabase client instance configured to send the provided token with each request
  */
 function getAuthenticatedSupabase(_user: User, token: string) {
   const {
@@ -130,11 +130,11 @@ function getAuthenticatedSupabase(_user: User, token: string) {
  */
 
 /**
- * Register all MCP tools on the provided server using the given per-request Supabase client.
+ * Register the directory MCP tools on the provided server so they operate against the given per-request Supabase client.
  *
- * Registers the directory tools (listCategories, searchContent, getContentDetail, getTrending, getFeatured,
- * getTemplates, getMcpServers, getRelatedContent, getContentByTag, getPopular, getRecent) to operate
- * against the authenticated Supabase instance for the current request.
+ * Registers the set of directory tools (listCategories, searchContent, getContentDetail, getTrending, getFeatured,
+ * getTemplates, getMcpServers, getRelatedContent, getContentByTag, getPopular, and getRecent) to route requests to
+ * handlers that use the authenticated Supabase instance for the current request.
  *
  * @param mcpServer - MCP server instance to register tools on
  * @param supabase - Authenticated per-request Supabase client bound to the request's user/token
@@ -297,12 +297,13 @@ function getMcpServerResourceUrl(): string {
 }
 
 /**
- * Check whether a JWT's audience includes the MCP resource or a compatible Supabase audience.
+ * Determine whether a JWT's `aud` claim includes the MCP resource or a compatible Supabase audience.
  *
- * Decodes the token payload without performing signature verification (assumes the token was verified earlier).
+ * Inspects the token's `aud` claim (string or array) and returns `true` if it contains `expectedAudience`
+ * or a recognized Supabase project audience; returns `false` if `aud` is missing or does not match.
  *
  * @param token - The JWT string to inspect
- * @param expectedAudience - The MCP resource URL expected to be present in the token's `aud` claim
+ * @param expectedAudience - The MCP resource URL that must be present in the token's `aud` claim
  * @returns `true` if the token's `aud` includes `expectedAudience` or a compatible Supabase audience, `false` otherwise
  */
 function validateTokenAudience(token: string, expectedAudience: string): boolean {
@@ -376,11 +377,11 @@ function validateTokenAudience(token: string, expectedAudience: string): boolean
 }
 
 /**
- * Build a WWW-Authenticate header value for MCP-compliant bearer authentication.
+ * Constructs a WWW-Authenticate header value for MCP Bearer authentication.
  *
- * @param resourceMetadataUrl - The URL to the protected-resource metadata (resource_metadata) to include in the header
- * @param scope - Optional space-delimited scope string to include in the header
- * @returns A WWW-Authenticate header string containing `Bearer`, `realm="mcp"`, `resource_metadata="<url>"`, and optionally `scope="<scopes>"`
+ * @param resourceMetadataUrl - URL of the protected-resource metadata to include as `resource_metadata`
+ * @param scope - Optional space-delimited scope string to include as `scope`
+ * @returns The header value starting with `Bearer ` and containing `realm="mcp"`, `resource_metadata="<url>"`, and optionally `scope="<scopes>"`
  */
 function createWwwAuthenticateHeader(resourceMetadataUrl: string, scope?: string): string {
   const params = [`realm="mcp"`, `resource_metadata="${resourceMetadataUrl}"`];

@@ -15,7 +15,14 @@ export interface BaseLogContext {
 }
 
 /**
- * Create logContext for email-handler functions
+ * Builds a logging context object for email-handler functions.
+ *
+ * @param action - The action name performed by the handler.
+ * @param options - Optional contextual fields.
+ * @param options.email - The email address involved in the action.
+ * @param options.requestId - The request identifier; a UUID is generated if not provided.
+ * @param options.subscriptionId - The subscription identifier related to the email.
+ * @returns A plain object containing standardized logging fields (`function`, `action`, `request_id`, `started_at`) and any provided additional properties.
  */
 export function createEmailHandlerContext(
   action: string,
@@ -34,7 +41,17 @@ export function createEmailHandlerContext(
 }
 
 /**
- * Create logContext for data-api routes
+ * Builds a logging context for data-api route handlers.
+ *
+ * @param route - The route name or identifier used as the `action` in the returned context.
+ * @param options - Optional context pieces:
+ *   - `path`: request path
+ *   - `method`: HTTP method
+ *   - `resource`: resource identifier
+ *   - `app`: overrides the `function` field (defaults to `"data-api"`)
+ *   - `requestId`: overrides the generated `request_id`
+ *   - any other key/value pairs are merged into the resulting context
+ * @returns A record containing `function`, `action`, `request_id`, and `started_at`, plus any provided `path`, `method`, `resource`, and additional properties.
  */
 export function createDataApiContext(
   route: string,
@@ -54,7 +71,14 @@ export function createDataApiContext(
 }
 
 /**
- * Create logContext for unified-search
+ * Build a standardized logging context for unified search requests.
+ *
+ * @param options - Optional fields to include in the context.
+ * @param options.query - The search query string to include when present.
+ * @param options.searchType - The action name for the search (defaults to `'search'`).
+ * @param options.filters - Arbitrary filters to include in the context.
+ * @param options.app - The originating application name (defaults to `'public-api'`).
+ * @returns A log context object containing `function`, `action`, `request_id`, `started_at`, and any provided `query` or `filters`.
  */
 export function createSearchContext(options?: {
   query?: string;
@@ -73,7 +97,17 @@ export function createSearchContext(options?: {
 }
 
 /**
- * Create logContext for edge functions (legacy name - used by flux-station and other functions)
+ * Builds a standardized log context for notification router (flux-station) operations.
+ *
+ * @param action - The action name or operation being performed
+ * @param options - Optional identifiers and metadata
+ * @param options.jobId - External job identifier to include as `job_id`
+ * @param options.entryId - Entry identifier to include as `entry_id`
+ * @param options.slug - Content or route slug
+ * @param options.attempt - Retry or attempt number
+ * @param options.userId - User identifier to include as `user_id`
+ * @param options.source - Source or origin of the notification
+ * @returns The log context object containing `function`, `action`, `request_id`, `started_at`, and any provided optional fields
  */
 export function createNotificationRouterContext(
   action: string,
@@ -101,7 +135,19 @@ export function createNotificationRouterContext(
 }
 
 /**
- * Create logContext for changelog handler
+ * Builds a logging context for the changelog handler.
+ *
+ * The returned object always includes `function: 'changelog-handler'`, `action: 'sync'`,
+ * a `request_id` (UUID string), and `started_at` (ISO 8601 timestamp). When provided in
+ * `options`, the object also includes `deployment_id`, `branch`, `changelog_id`, and `slug`.
+ *
+ * @param options - Optional contextual identifiers to include in the log context:
+ *   - `deploymentId` — deployment identifier to set as `deployment_id`
+ *   - `branch` — branch name
+ *   - `changelogId` — changelog identifier to set as `changelog_id`
+ *   - `slug` — slug associated with the changelog
+ * @returns A record containing standardized log fields for the changelog handler, including
+ *          generated `request_id` and `started_at`, plus any provided optional fields.
  */
 export function createChangelogHandlerContext(options?: {
   deploymentId?: string;
@@ -122,7 +168,16 @@ export function createChangelogHandlerContext(options?: {
 }
 
 /**
- * Create logContext for discord handler
+ * Builds a logging context object for Discord handler executions.
+ *
+ * @param notificationType - The notification type to set as the `action` in the context.
+ * @param options - Optional additional context properties.
+ * @param options.contentId - Maps to `content_id` when provided.
+ * @param options.jobId - Maps to `job_id` when provided.
+ * @param options.changelogId - Maps to `changelog_id` when provided.
+ * @param options.category - Maps to `category` when provided.
+ * @param options.slug - Maps to `slug` when provided.
+ * @returns A log context object containing `function`, `action`, `request_id`, `started_at`, and any of the provided optional fields (`content_id`, `job_id`, `changelog_id`, `category`, `slug`). 
  */
 export function createDiscordHandlerContext(
   notificationType: string,
@@ -148,7 +203,13 @@ export function createDiscordHandlerContext(
 }
 
 /**
- * Create logContext for notifications service
+ * Build a logging context for the notifications service.
+ *
+ * @param action - The action performed by the service (used as the `action` field)
+ * @param options - Optional identifiers to include in the context
+ * @param options.notificationId - Notification identifier to include as `notification_id`
+ * @param options.userId - User identifier to include as `user_id`
+ * @returns A context object containing `function`, `action`, a generated `request_id`, `started_at`, and any provided identifiers
  */
 export function createNotificationsServiceContext(
   action: string,
@@ -165,7 +226,11 @@ export function createNotificationsServiceContext(
 }
 
 /**
- * Helper to merge context with additional fields
+ * Create a new log context by combining `base` with `additional`, where `additional` overrides conflicting keys.
+ *
+ * @param base - The base context object
+ * @param additional - Additional fields to merge into the base context
+ * @returns A new object containing keys from `base` and `additional`; when the same key exists in both, the value from `additional` is used
  */
 export function withContext(
   base: Record<string, unknown>,
@@ -179,8 +244,12 @@ export function withContext(
 
 
 /**
- * Create logContext for shared utility functions
- * Use this for generic utilities that don't belong to a specific function
+ * Build a standardized log context for shared utility functions.
+ *
+ * @param utilityName - Name of the utility producing the log
+ * @param action - Action performed by the utility
+ * @param options - Additional context fields to merge into the returned object
+ * @returns A log context object containing `function: 'shared-utils'`, `action` set to `utilityName.action`, a generated `request_id`, a `started_at` timestamp, a `utility` field, and any provided `options`
  */
 export function createUtilityContext(
   utilityName: string,
@@ -198,7 +267,11 @@ export function createUtilityContext(
 }
 
 /**
- * Create logContext for transform-api routes
+ * Build a logging context for a transform-api route.
+ *
+ * @param route - The route name or identifier used as the action in the context
+ * @param options - Optional metadata: `path` is the request path, `method` is the HTTP method
+ * @returns A context object containing `function: 'transform-api'`, `action` set to `route`, a `request_id` (UUID), `started_at` (ISO timestamp), and optionally `path` and `method`
  */
 export function createTransformApiContext(
   route: string,
@@ -233,11 +306,12 @@ import { normalizeError } from './error-handling.ts';
 const pinoLogger = pino(createPinoConfig({ service: 'shared-runtime' }));
 
 /**
- * Log an info-level message
- * Mixin function automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
- * 
- * @param message - Log message
- * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
+ * Log an informational message with additional structured context.
+ *
+ * The provided `logContext` object is merged with the logger's current bindings (such as request id, operation, user id); bindings are applied automatically when emitting the log.
+ *
+ * @param message - The message to record
+ * @param logContext - Additional structured fields to include in the log; these are merged with the logger bindings
  */
 export function logInfo(message: string, logContext: Record<string, unknown>): void {
   // Pino handles redaction automatically via config
@@ -247,12 +321,12 @@ export function logInfo(message: string, logContext: Record<string, unknown>): v
 }
 
 /**
- * Log a trace-level message (finest-grained logging)
- * Use for detailed debugging, performance tracing, request/response logging
- * Mixin function automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
- * 
- * @param message - Log message
- * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
+ * Log a trace-level message with the current logger bindings merged into the provided context.
+ *
+ * The logger will automatically mix in bindings (for example request id, operation, user id) when emitting this entry.
+ *
+ * @param message - The message to record
+ * @param logContext - Context object whose fields will be merged with the logger's current bindings before logging
  */
 export function logTrace(message: string, logContext: Record<string, unknown>): void {
   // Only log if trace level is enabled (avoids unnecessary work)
@@ -263,17 +337,12 @@ export function logTrace(message: string, logContext: Record<string, unknown>): 
 }
 
 /**
- * Log an error-level message
- * Mixin function automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
- * Flushes logs for critical errors to ensure they're written
- * 
- * NOTE: This function is async to ensure flush() completes before returning.
- * In edge functions, await this call to ensure logs are written before response.
- * 
- * @param message - Log message
- * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
- * @param error - Optional error object to include in log
- * @returns Promise that resolves when logs are flushed
+ * Log an error message with optional error normalization and ensure logs are flushed.
+ *
+ * @param message - Human-readable log message
+ * @param logContext - Additional context fields to include; logger bindings (e.g., requestId, operation, userId) are mixed in automatically
+ * @param error - Optional error to normalize and attach as `err` in the log
+ * @returns Void when the log flush completes
  */
 export async function logError(message: string, logContext: Record<string, unknown>, error?: unknown): Promise<void> {
   // Build log data - mixin will automatically inject bindings (requestId, operation, userId, etc.)
@@ -315,12 +384,11 @@ export async function logError(message: string, logContext: Record<string, unkno
 }
 
 /**
- * Log a warning-level message
- * Mixin function automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
- * 
- * @param message - Log message
- * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
- * @param error - Optional error object to include in log
+ * Log a warning-level message including provided context and an optional error.
+ *
+ * @param message - The log message
+ * @param logContext - Additional context fields to include; these are merged with the logger's runtime bindings before emitting
+ * @param error - Optional error or value to attach as `err` in the log; the value will be normalized for consistent output
  */
 export function logWarn(message: string, logContext: Record<string, unknown>, error?: unknown): void {
   // Build log data - mixin will automatically inject bindings (requestId, operation, userId, etc.)

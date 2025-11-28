@@ -61,11 +61,11 @@ interface UploadPackageResponse {
 /**
  * Handle internal MCP package uploads for an existing content entry.
  *
- * Validates the service-role Authorization header, parses and validates the JSON body (expects `content_id`, `category` equal to `'mcp'`, `mcpb_file` as base64, and `content_hash`), decodes and stores the .mcpb file in object storage, updates the content record with the storage URL and build metadata, and returns an HTTP response describing success or failure.
+ * Validates service-role authorization, accepts a base64-encoded `.mcpb` package for content with category `mcp`, stores the file in object storage, updates the content record with the storage URL and build metadata, and returns the upload result.
  *
- * @param request - Incoming HTTP request
- * @param logContext - Optional logging context to attach to request logs and traces
- * @returns An HTTP Response containing an UploadPackageResponse payload with `success`, `content_id`, `category`, `slug`, `storage_url`, and optional `message` or `error` details
+ * @param request - The incoming HTTP request
+ * @param logContext - Optional logging context to attach to request logs and traces; if omitted a context is created
+ * @returns An UploadPackageResponse object containing `success`, `content_id`, `category`, `slug`, `storage_url`, and an optional `message` or `error`
  */
 export async function handleUploadPackage(
   request: Request,

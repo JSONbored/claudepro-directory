@@ -165,18 +165,18 @@ async function handleJsonFormat(
 }
 
 /**
- * Generate a markdown export for the specified content record.
+ * Generate a Markdown export for a specific content record and return it with appropriate headers.
  *
- * Reads `includeMetadata` (defaults to `true`) and `includeFooter` (`'true'` to include) from `url.searchParams`,
- * calls the `generate_markdown_export` RPC, validates the RPC response, and returns the markdown with appropriate
- * content-disposition, content-id, security, CORS, and caching headers.
- *
- * @param url - URL whose search parameters control export options (`includeMetadata`, `includeFooter`)
- * @returns A Response with the exported Markdown as the body and headers:
+ * @param category - Content category identifier (one of allowed content_category enum values)
+ * @param slug - Content record slug
+ * @param url - URL whose search parameters control export options:
+ *              `includeMetadata` (omit or any value other than `'false'` to include metadata) and
+ *              `includeFooter` (`'true'` to include a footer)
+ * @param logContext - Request logging/tracing context used to record processing steps
+ * @returns A Response containing the exported Markdown as the body. Headers include
  *          `Content-Type: text/markdown; charset=utf-8`, `Content-Disposition` with a sanitized filename,
  *          `X-Content-ID`, `X-Generated-By`, plus security, CORS, and cache headers. Error conditions produce
- *          bad-request or RPC error responses.
- */
+ *          a bad-request or RPC error response.
 async function handleMarkdownFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
@@ -300,10 +300,7 @@ async function handleMarkdownFormat(
 /**
  * Generate LLMs.txt content for a content item and return it as a plain-text HTTP response.
  *
- * @param category - The content category enum value for the requested item
- * @param slug - The content item's slug identifier
- * @param logContext - Request tracing/logging context created by createDataApiContext
- * @returns A `Response` whose body is the LLMs.txt content (plain text) with status 200 on success; response headers include `Content-Type: text/plain`, `X-Generated-By`, security headers, CORS headers, and cache headers. 
+ * @returns A `Response` whose body is the LLMs.txt content as plain text; status 200 on success, or an error/bad-request `Response` on failure.
  */
 async function handleItemLlmsTxt(
   category: DatabaseGenerated['public']['Enums']['content_category'],

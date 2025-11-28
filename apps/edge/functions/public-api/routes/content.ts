@@ -297,10 +297,10 @@ async function handleToolLlmsTxt(tool: string, format: string): Promise<Response
 }
 
 /**
- * Generate the LLMs.txt plain-text content for a specific content category.
+ * Return the category's LLMs.txt as UTF-8 plain text.
  *
- * @param category - The content category to retrieve the LLMs.txt for
- * @returns The HTTP Response containing the category LLMs.txt as UTF-8 plain text (status 200) or an appropriate error response (for example 400 if not found or other error responses produced by the data API)
+ * @param category - The content category to export LLMs.txt for
+ * @returns An HTTP Response containing the category LLMs.txt as UTF-8 plain text when available; otherwise an error response
  */
 async function handleCategoryLlmsTxt(category: ContentCategory): Promise<Response> {
   const service = new ContentService(supabaseAnon);
@@ -424,13 +424,14 @@ async function handleToolLlms(tool: string): Promise<Response> {
 }
 
 /**
- * Retrieve content category configurations and return them as a JSON HTTP response.
+ * Return category configuration records as a JSON HTTP response.
  *
- * Attempts to fetch category configuration records from the content service. If configs
- * are found, responds with the data and appropriate security, CORS, cache headers, and
- * an `X-Generated-By` marker; if no configs are available, responds with a 404 JSON error.
+ * If configuration records exist, responds with status 200 and the data plus CORS, security,
+ * cache headers, and an `X-Generated-By` marker. If no configurations are available, responds
+ * with a 404 JSON error. Unexpected failures produce an error response.
  *
- * @returns A Response containing the category configuration data (status 200) or a JSON error (status 404). In error cases, delegates to the centralized error responder.
+ * @returns `200` with the category configuration data and export headers; `404` with a JSON
+ * error when configs are not found; an appropriate error response for other failures.
  */
 async function handleCategoryConfigs(): Promise<Response> {
   const service = new ContentService(supabaseAnon);

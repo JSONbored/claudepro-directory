@@ -121,10 +121,11 @@ async function getFilteredJobsDirect(
 }
 
 /**
- * Gets jobs with filtering
- * 
- * @param options - Filter options
- * @param noCache - If true, bypass cache for filtered queries (uncached SSR)
+ * Retrieve jobs using the provided filter options, optionally bypassing the cache.
+ *
+ * @param options - Filtering parameters (searchQuery, category, employment, experience, remote, limit, offset, sort)
+ * @param noCache - When true, bypass cached results for filtered queries (uncached server-side rendering)
+ * @returns Filtered jobs result including hits and pagination metadata, or `null` if retrieval fails
  */
 export async function getFilteredJobs(
   options: JobsFilterOptions,

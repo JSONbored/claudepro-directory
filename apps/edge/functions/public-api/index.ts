@@ -62,11 +62,12 @@ const createPublicApiContext = (
 type PublicApiContext = StandardContext;
 
 /**
- * Enforces the given rate limit preset for the incoming request and either returns a 429 JSON error or the handler's response with rate-limit headers.
+ * Enforces a rate limit for the incoming request and returns either a 429 error or the handler's response augmented with rate-limit headers.
  *
+ * @param ctx - The request context used to evaluate the rate limit
  * @param preset - The rate limit preset to apply for this request
  * @param handler - Function invoked when the request is allowed; its response will be returned with rate-limit headers
- * @returns A Response. If the request exceeds the limit, a 429 JSON response with `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers is returned; otherwise the handler's Response is returned augmented with `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers.
+ * @returns A Response. If the request exceeds the limit, a 429 JSON response with `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers is returned; otherwise the handler's response is returned augmented with `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers.
  */
 async function withRateLimit(
   ctx: PublicApiContext,
@@ -216,10 +217,12 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
 };
 
 /**
- * Creates a predicate that matches request paths against a route pattern.
+ * Build a matcher that checks whether an incoming request path starts with a given segment pattern.
  *
- * @param pathPattern - A route pattern with segments separated by `/` (e.g. `"/search/auto"` or `"sitemap"`). Leading or trailing slashes are ignored.
- * @returns A function that returns `true` when `ctx.segments` begins with the pattern's segments (exact segment-wise prefix match). If `pathPattern` is empty, the matcher returns `true` only when there are no segments.
+ * The pattern is split on `/` and compared segment-by-segment against `ctx.segments`. Leading and trailing slashes in `pathPattern` are ignored; an empty pattern matches only when there are no segments.
+ *
+ * @param pathPattern - Route pattern using `/`-separated segments (e.g. "/search/auto" or "sitemap"); leading/trailing slashes are ignored
+ * @returns `true` when `ctx.segments` begins with the pattern's segments (exact segment-wise prefix), `false` otherwise
  */
 function createPathMatcher(pathPattern: string) {
   const parts = pathPattern.split('/').filter(Boolean);

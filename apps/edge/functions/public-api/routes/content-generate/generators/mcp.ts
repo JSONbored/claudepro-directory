@@ -427,10 +427,10 @@ function generatePackageJson(mcp: McpRow): string {
 }
 
 /**
- * Builds the README.md contents for a generated .mcpb package using MCP metadata.
+ * Generates README.md content for an MCP package using the MCP's title, description, configuration flag, and documentation URL.
  *
- * @param mcp - The MCP content row whose title, description, configuration flag, and documentation URL populate the README
- * @returns The README.md content as a Markdown string
+ * @param mcp - MCP content row; uses `title`, `description`, `metadata.configuration`, and `documentation_url` to populate sections
+ * @returns The generated README.md content
  */
 function generateReadme(mcp: McpRow): string {
   return `# ${mcp.title || mcp.slug}

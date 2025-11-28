@@ -363,14 +363,10 @@ export async function handleSubscribe(req: Request): Promise<Response> {
 }
 
 /**
- * Handle welcome-related email triggers for newsletter subscriptions and OAuth signup hooks.
+ * Handle incoming triggers to send welcome emails for newsletter subscriptions or OAuth signups.
  *
- * Processes requests that originate from either a newsletter subscription trigger or an authentication hook:
- * - For newsletter subscriptions, sends the newsletter welcome email, enrolls the address in onboarding, and returns send metadata.
- * - For authenticated signups, verifies the auth hook, sends the signup welcome email, enrolls in onboarding, and returns send metadata; non-signup auth actions are skipped.
- *
- * @param req - The incoming Request for the welcome email handler
- * @returns A Response containing the operation result. On success includes `sent: true` and `id` plus `subscription_id` (newsletter) or `user_id` (auth signup); skipped actions include `skipped` and `reason`; errors return an error Response. May also return a verification Response if auth webhook verification yields one.
+ * @param req - Incoming Request for the welcome email handler
+ * @returns A Response with the operation result: `sent: true` and `id` plus `subscription_id` (newsletter) or `user_id` (auth signup) on success; `{ skipped: true, reason }` when an auth hook action is not a signup; an error Response on failure; may return a verification Response if webhook verification dictates.
  */
 export async function handleWelcome(req: Request): Promise<Response> {
   const triggerSource = req.headers.get('X-Trigger-Source');
@@ -899,12 +895,10 @@ export async function handleSequence(): Promise<Response> {
 }
 
 /**
- * Send a configured job-lifecycle email (e.g., onboarding or status updates) for a specific job.
+ * Send the configured job-lifecycle email (for example onboarding or status updates) to the specified user for a job.
  *
- * Builds template props and subject from the payload, renders the HTML, sends the email using the configured job email settings for `action`, and returns the send result.
- *
- * @param action - The job lifecycle action key identifying which email configuration in `JOB_EMAIL_CONFIGS` to use.
- * @returns A Response containing `{ sent: true, id: string | undefined, jobId: string }` on success, or an error response when validation fails or the send fails.
+ * @param action - Key identifying which entry in `JOB_EMAIL_CONFIGS` to use for template, props, and subject
+ * @returns `{ sent: true, id: string | undefined, jobId: string }` on success, or an error response when validation or delivery fails
  */
 export async function handleJobLifecycleEmail(req: Request, action: string): Promise<Response> {
 
@@ -1061,18 +1055,14 @@ export async function handleGetNewsletterCount(): Promise<Response> {
 }
 
 /**
- * Handle a contact form submission, validate input, send admin and confirmation emails, and return the outcome.
+ * Process a contact form submission: validate required fields and category, send an admin notification and a user confirmation email, and return the outcome.
  *
- * Validates required fields and the contact category, renders and sends an admin notification and a user confirmation
- * email via Resend, logs results and tracing information, and returns a JSON response describing which emails were sent.
- * Returns a 400 response when required fields are missing or the category is invalid, and an error response on unexpected failures.
- *
- * @returns A Response with a JSON payload containing:
+ * @returns An object with the send outcome:
  * - `sent`: `true` if the handler completed its send attempts,
  * - `submission_id`: the provided submission identifier,
- * - `admin_email_sent`: `true` if the admin notification was sent (or `false` on failure),
- * - `user_email_sent`: `true` if the user confirmation was sent (or `false` on failure),
- * - `user_email_id`: the Resend message id for the user email or `null` when unavailable.
+ * - `admin_email_sent`: `true` if the admin notification was sent, `false` on failure,
+ * - `user_email_sent`: `true` if the user confirmation was sent, `false` on failure,
+ * - `user_email_id`: the Resend message id for the user email, or `null` when unavailable
  */
 export async function handleContactSubmission(req: Request): Promise<Response> {
 

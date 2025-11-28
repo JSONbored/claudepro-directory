@@ -28,6 +28,16 @@ function determineErrorType(error: unknown): string {
   return 'InternalServerError';
 }
 
+/**
+ * Create a standardized ErrorResponse and log the error context for a React error boundary.
+ *
+ * Normalizes and classifies the provided Error, generates a request ID and error code,
+ * records a client-safe structured log entry, and returns a consistent ErrorResponse object.
+ *
+ * @param error - The Error caught by the React error boundary
+ * @param errorInfo - The React error boundary info object (expects `componentStack`)
+ * @returns An ErrorResponse containing `success: false`, `error`, `message`, `code`, `timestamp`, `requestId`, and — in development when available — `stack`
+ */
 export function createErrorBoundaryFallback(
   error: Error,
   errorInfo: { componentStack: string }

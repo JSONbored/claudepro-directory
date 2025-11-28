@@ -110,11 +110,11 @@ function isValidChangelogReleaseJob(value: unknown): value is ChangelogReleaseJo
 }
 
 /**
- * Process a single changelog release queue message: send a Discord notification, insert a site notification,
- * attempt cache invalidation, and trigger page revalidation while collecting any step errors.
+ * Process a single changelog release queue message by sending a Discord webhook, inserting a site notification,
+ * attempting cache invalidation, and triggering page revalidation while collecting any step errors.
  *
- * @param message - The queue message containing `msg_id`, `read_ct` and the changelog release payload.
- * @returns An object with `success` set to `true` only if the notification was inserted, and `errors` containing any error messages from individual steps.
+ * @param message - The queue message envelope containing `msg_id`, `read_ct`, and the changelog payload (`message`)
+ * @returns An object where `success` is `true` only if the site notification was inserted, and `errors` lists any error messages produced by individual steps
  */
 async function processChangelogRelease(message: QueueMessage): Promise<{
   success: boolean;

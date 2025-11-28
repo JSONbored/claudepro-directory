@@ -145,10 +145,10 @@ function isValidChangelogWebhookProcessingJob(
 }
 
 /**
- * Validates that a value is an array of GitHub commit objects matching the expected `GitHubCommit` shape.
+ * Determines whether a value is an array of GitHub commit objects with the expected fields.
  *
  * @param value - The value to validate
- * @returns `true` if `value` is an array where each item contains `sha`, `html_url`, a `commit` object with `message`, and a `commit.author.name`; `false` otherwise.
+ * @returns `true` if `value` is an array where each item has `sha`, `html_url`, a `commit.message`, and a `commit.author.name`; `false` otherwise.
  */
 function isValidGitHubCommitArray(value: unknown): value is GitHubCommit[] {
   if (!Array.isArray(value)) {
@@ -527,12 +527,12 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
 }
 
 /**
- * Orchestrates batch processing of changelog webhook messages from the changelog_process queue.
+ * Process a batch of changelog webhook queue messages from the changelog_process queue.
  *
- * Reads up to the configured batch size of queue messages, validates each message, processes valid messages
- * via the changelog pipeline, deletes successfully processed messages from the queue, and aggregates per-message results.
+ * Reads up to the configured batch size, validates each message, runs the changelog processing pipeline for valid messages,
+ * deletes messages that succeeded, and collects per-message outcomes.
  *
- * @returns An HTTP Response containing a summary of the batch operation and a `results` array with per-message status (`success` or `failed`), errors, and retry intent; on a fatal processing error returns an error Response with diagnostic details.
+ * @returns An HTTP Response containing a summary of the batch operation and a `results` array with per-message status, errors, and retry intent; on fatal processing error, an error Response with diagnostic details.
  */
 export async function handleChangelogProcess(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('flux-station', 'changelog-process', {});

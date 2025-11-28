@@ -22,9 +22,10 @@ export type SeoIncludeOption = 'metadata' | 'metadata,schemas';
 const VALID_INCLUDE_VALUES: readonly SeoIncludeOption[] = ['metadata', 'metadata,schemas'] as const;
 
 /**
- * Validates and normalizes the include parameter
- * @param include - The include value to validate
- * @returns A valid include value, defaulting to 'metadata' if invalid
+ * Validate and normalize an SEO include option.
+ *
+ * @param include - The input include value (e.g., `'metadata'` or `'metadata,schemas'`)
+ * @returns `'metadata'` or `'metadata,schemas'`, defaulting to `'metadata'` when the input is invalid
  */
 function validateInclude(include: string): SeoIncludeOption {
   if (VALID_INCLUDE_VALUES.includes(include as SeoIncludeOption)) {

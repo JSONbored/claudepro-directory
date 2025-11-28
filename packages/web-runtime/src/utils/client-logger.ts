@@ -498,6 +498,19 @@ export function createWebAppContextWithIdClient(
   return logContext;
 }
 
+/**
+ * Log an error captured by a React error boundary with a standardized client-side context.
+ *
+ * The log entry will include the provided message, a normalized representation of `error`,
+ * and a context that contains the operation `ReactErrorBoundary`, `component` set to
+ * `ErrorBoundary`, `route`, `componentStack`, and any additional fields from `options`.
+ *
+ * @param message - Human-readable message describing the error
+ * @param error - The error value captured by the boundary; it will be normalized for logging
+ * @param route - The application route where the error occurred
+ * @param componentStack - The React component stack trace provided by the error boundary
+ * @param options - Optional additional context fields (e.g., `errorType`) to include in the log
+ */
 export function logClientErrorBoundary(
   message: string,
   error: unknown,
