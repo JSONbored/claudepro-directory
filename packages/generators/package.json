@@ -44,7 +44,7 @@
     "@heyclaude/database-types": "workspace:*",
     "@heyclaude/shared-runtime": "workspace:*",
     "@heyclaude/web-runtime": "workspace:*",
-    "@supabase/supabase-js": "^2.84.0",
+    "@supabase/supabase-js": "^2.86.0",
     "archiver": "^7.0.1",
     "escape-html": "^1.0.3",
     "jiti": "^2.6.1",
