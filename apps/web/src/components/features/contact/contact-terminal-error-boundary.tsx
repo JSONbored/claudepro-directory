@@ -6,11 +6,11 @@
 'use client';
 
 import {
-  createWebAppContextWithId,
   generateRequestId,
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/core';
+import { createWebAppContextWithIdClient } from '@heyclaude/web-runtime/logging/client';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { Component, type ReactNode } from 'react';
 import { Terminal } from '@heyclaude/web-runtime/ui';
@@ -39,7 +39,7 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
     const requestId = generateRequestId();
     const route = typeof window !== 'undefined' ? window.location.pathname : '/contact';
     const normalized = normalizeError(error, 'Contact terminal error boundary triggered');
-    const logContext = createWebAppContextWithId(requestId, route, 'ContactTerminalErrorBoundary', {
+    const logContext = createWebAppContextWithIdClient(requestId, route, 'ContactTerminalErrorBoundary', {
       componentStack: errorInfo.componentStack || 'unknown',
       segment: 'contact-terminal',
       userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',

@@ -43,6 +43,7 @@ function toContentCategory(
  *
  * @param url - The request URL containing query parameters (`offset`, `limit`, `category`)
  * @returns A Response whose body is a JSON array of content items (may be empty) on success, or a structured error response for invalid parameters or RPC failures. Responses include security, CORS, and caching headers.
+ */
 export async function handlePaginatedContent(url: URL): Promise<Response> {
   const logContext = createDataApiContext('content-paginated', {
     path: url.pathname,
@@ -56,8 +57,8 @@ export async function handlePaginatedContent(url: URL): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'content-paginated',
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'content-paginated',
     method: 'GET',
   });
   

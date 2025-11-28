@@ -330,8 +330,8 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'card-generate',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'card-generate',
     method: req.method,
   });
 

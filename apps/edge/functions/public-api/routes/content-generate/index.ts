@@ -26,7 +26,6 @@ import {
   traceRequestComplete,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { buildSecurityHeaders, logError, logInfo, logger, timingSafeEqual } from '@heyclaude/shared-runtime';
 import { getGenerator, getSupportedCategories, isCategorySupported } from './registry.ts';
 import type { GeneratePackageRequest, GeneratePackageResponse } from './types.ts';
@@ -44,7 +43,7 @@ const CORS = getOnlyCorsHeaders;
  */
 export async function handleGeneratePackage(
   request: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Create log context if not provided
   const finalLogContext = logContext || {
@@ -75,8 +74,8 @@ export async function handleGeneratePackage(
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: finalLogContext.request_id,
-    operation: finalLogContext.action || 'generate-package',
+    requestId: typeof finalLogContext['request_id'] === 'string' ? finalLogContext['request_id'] : undefined,
+    operation: typeof finalLogContext['action'] === 'string' ? finalLogContext['action'] : 'generate-package',
     method: request.method,
   });
 

@@ -7,7 +7,6 @@ import type { Resend } from 'npm:resend@6.5.2';
 import { RESEND_ENV } from '../../config/email-config.ts';
 import { Constants, type Database, type Database as DatabaseGenerated } from '@heyclaude/database-types';
 
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { createUtilityContext, logError, logInfo, logWarn, normalizeError } from '@heyclaude/shared-runtime';
 import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
 import { runWithRetry } from './http-client.ts';
@@ -237,7 +236,7 @@ async function assignTopicsToContact(
   resend: Resend,
   contactId: string,
   topicIds: string[],
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<void> {
   if (topicIds.length === 0) {
     return;
@@ -678,7 +677,7 @@ export async function sendEmail(
     tags?: Array<{ name: string; value: string }>;
     replyTo?: string;
   },
-  logContext: BaseLogContext,
+  logContext: Record<string, unknown>,
   timeoutMessage = 'Resend email send timed out'
 ): Promise<{ data: { id: string } | null; error: { message: string } | null }> {
   const { data, error } = (await withTimeout(
@@ -715,7 +714,7 @@ export async function syncContactToResend(
     | string
     | null
     | undefined,
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<{
   resendContactId: string | null;
   syncStatus: DatabaseGenerated['public']['Enums']['newsletter_sync_status'];
@@ -822,7 +821,7 @@ export async function syncContactToResend(
  */
 export async function enrollInOnboardingSequence(
   email: string,
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<void> {
   try {
     const { supabaseServiceRole: supabaseClient } = await import('../../clients/supabase.ts');

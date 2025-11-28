@@ -628,13 +628,13 @@ export default {
             // Check if it uses normalizeError
             const hasNormalizeError = catchBodyText.includes('normalizeError');
 
-            // Check if it uses logContext (or baseLogContext, actionLogContext, etc.)
+            // Check if it uses logContext (or context variables)
             const hasLogContext =
               catchBodyText.includes('logContext') ||
-              catchBodyText.includes('baseLogContext') ||
               catchBodyText.includes('actionLogContext') ||
               catchBodyText.includes('metadataLogContext') ||
               catchBodyText.includes('staticParamsLogContext') ||
+              catchBodyText.includes('Context') ||
               catchBodyText.includes('utilityLogContext');
 
             // Allow if it's a re-throw pattern (error is logged elsewhere or will be caught by error boundary)
@@ -1545,12 +1545,12 @@ export default {
 
         // Check if section-based logging is used
         const hasSectionLogging = /section:\s*['"][\w-]+['"]/.test(fileText);
-        const hasBaseLogContext = /baseLogContext/.test(fileText);
+        const hasLogContext = /logContext/.test(fileText) || /Context/.test(fileText);
 
         return {
           'Program:exit'() {
             // If page has async operations but no section logging, warn
-            if (hasAsyncOperations && hasBaseLogContext && !hasSectionLogging) {
+            if (hasAsyncOperations && hasLogContext && !hasSectionLogging) {
               context.report({
                 node: context.sourceCode.ast,
                 messageId: 'missingSectionLogging',
@@ -2035,7 +2035,6 @@ export default {
 
         // Allowed descriptive names (only in nested scopes)
         const allowedDescriptiveNames = new Set([
-          'baseLogContext',
           'actionLogContext',
           'metadataLogContext',
           'staticParamsLogContext',
@@ -2287,10 +2286,9 @@ export default {
         const filename = context.getFilename();
         const sourceCode = context.getSourceCode();
 
-        // Skip edge functions - they use logError which handles errors differently
-        if (filename.includes('apps/edge/functions')) {
-          return {};
-        }
+        // Edge functions should use logError/logWarn from @heyclaude/shared-runtime (normalizes internally)
+        // or explicitly normalizeError(). We still check edge functions to ensure they use proper helpers.
+        // The rule will verify they're using helpers that normalize internally.
 
         return {
           CallExpression(node) {
@@ -4112,6 +4110,551 @@ export default {
                   return fixer.replaceText(node, replacement);
                 },
               });
+            }
+          },
+        };
+      },
+    },
+    'require-normalize-error-before-logging': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Ensure normalizeError() is used before logging errors, except when using helpers that normalize internally (logError/logWarn from shared-runtime, logger.error from edge-runtime)',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          useNormalizeError:
+            'Errors must be normalized using normalizeError() before logging, unless using logError/logWarn from @heyclaude/shared-runtime or logger.error from @heyclaude/edge-runtime (they normalize internally).',
+          useHelperFunction:
+            'Use logError/logWarn from @heyclaude/shared-runtime or logger.error from @heyclaude/edge-runtime instead of direct pino logger calls. These helpers normalize errors automatically.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Check if file uses proper helpers (they normalize internally)
+        const hasSharedRuntimeHelpers =
+          (fileText.includes("from '@heyclaude/shared-runtime'") ||
+           fileText.includes('from "@heyclaude/shared-runtime"')) &&
+          (fileText.includes('logError') || fileText.includes('logWarn'));
+        
+        const hasEdgeRuntimeLogger =
+          (fileText.includes("from '@heyclaude/edge-runtime'") ||
+           fileText.includes('from "@heyclaude/edge-runtime"')) &&
+          fileText.includes('logger');
+
+        // Edge functions using proper helpers are exempt (they normalize internally)
+        // Also exempt logger implementation files (they export the helpers)
+        const isEdgeFunction = filename.includes('apps/edge/functions');
+        const isLoggerImplementation = 
+          filename.includes('logging.ts') || 
+          filename.includes('logger.ts') ||
+          (fileText.includes('export function logError') || fileText.includes('export function logWarn'));
+        
+        // Skip logger implementation files entirely - they ARE the helpers
+        if (isLoggerImplementation) {
+          return {};
+        }
+        
+        const usesProperHelpers = isEdgeFunction && (hasSharedRuntimeHelpers || hasEdgeRuntimeLogger);
+
+        return {
+          CallExpression(node) {
+            // Check for direct pino logger calls with error
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.object.type === 'Identifier' &&
+              (node.callee.object.name === 'pinoLogger' || 
+               (node.callee.object.name === 'logger' && !usesProperHelpers)) &&
+              node.callee.property.type === 'Identifier' &&
+              (node.callee.property.name === 'error' || 
+               node.callee.property.name === 'fatal')
+            ) {
+              const args = node.arguments;
+              
+              // Check if error is passed in first arg (object with err key) or second arg
+              let hasError = false;
+              if (args.length > 0 && args[0].type === 'ObjectExpression') {
+                const errProperty = args[0].properties.find(
+                  (prop) =>
+                    prop.type === 'Property' &&
+                    prop.key.type === 'Identifier' &&
+                    prop.key.name === 'err'
+                );
+                if (errProperty) {
+                  hasError = true;
+                }
+              }
+              
+              // Check if error is passed as second argument (logger.error(message, error, context))
+              if (args.length >= 2 && args[1].type !== 'ObjectExpression' && args[1].type !== 'StringLiteral') {
+                hasError = true;
+              }
+
+              if (hasError) {
+                // Check if normalizeError is used in surrounding context
+                const surroundingText = sourceCode.getText(node.parent || node);
+                const hasNormalizeError = surroundingText.includes('normalizeError');
+
+                if (!hasNormalizeError) {
+                  // Check if this is a direct pino logger (not our wrapper)
+                  const isDirectPino = node.callee.object.name === 'pinoLogger';
+                  
+                  context.report({
+                    node,
+                    messageId: isDirectPino ? 'useHelperFunction' : 'useNormalizeError',
+                  });
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+    'require-record-string-unknown-for-log-context': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Ensure all log context parameters use Record<string, unknown> type for consistency',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: 'code',
+        schema: [],
+        messages: {
+          useRecordStringUnknown:
+            'Log context parameters must use Record<string, unknown> type. Found: {actualType}. This ensures type safety and consistency.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+
+        return {
+          FunctionDeclaration(node) {
+            // Check function parameters named logContext, context, logCtx, etc.
+            node.params.forEach((param) => {
+              if (
+                param.type === 'Identifier' &&
+                (param.name === 'logContext' ||
+                 param.name === 'context' ||
+                 param.name === 'logCtx' ||
+                 param.name === 'ctx' ||
+                 param.name.includes('LogContext') ||
+                 param.name.includes('Context'))
+              ) {
+                // Check if parameter has type annotation
+                if (param.typeAnnotation && param.typeAnnotation.typeAnnotation) {
+                  const typeAnnotation = param.typeAnnotation.typeAnnotation;
+                  
+                  // Check if type is not Record<string, unknown>
+                  if (
+                    typeAnnotation.type === 'TSTypeReference' &&
+                    typeAnnotation.typeName.type === 'Identifier'
+                  ) {
+                    const typeName = typeAnnotation.typeName.name;
+                    
+                    // Check for deprecated or incorrect types
+                    if (
+                      typeName === 'BaseLogContext' ||
+                      typeName === 'any' ||
+                      typeName === 'object' ||
+                      (typeName === 'Record' && 
+                       typeAnnotation.typeParameters &&
+                       typeAnnotation.typeParameters.params &&
+                       typeAnnotation.typeParameters.params[1] &&
+                       typeAnnotation.typeParameters.params[1].type === 'TSAnyKeyword')
+                    ) {
+                      context.report({
+                        node: param,
+                        messageId: 'useRecordStringUnknown',
+                        data: { actualType: typeName },
+                        fix(fixer) {
+                          return fixer.replaceText(
+                            param.typeAnnotation,
+                            ': Record<string, unknown>'
+                          );
+                        },
+                      });
+                    }
+                  } else if (typeAnnotation.type === 'TSAnyKeyword' || 
+                            typeAnnotation.type === 'TSObjectKeyword') {
+                    context.report({
+                      node: param,
+                      messageId: 'useRecordStringUnknown',
+                      data: { actualType: typeAnnotation.type === 'TSAnyKeyword' ? 'any' : 'object' },
+                      fix(fixer) {
+                        return fixer.replaceText(
+                          param.typeAnnotation,
+                          ': Record<string, unknown>'
+                        );
+                      },
+                    });
+                  }
+                } else {
+                  // No type annotation - suggest adding one
+                  context.report({
+                    node: param,
+                    messageId: 'useRecordStringUnknown',
+                    data: { actualType: 'no type annotation' },
+                    fix(fixer) {
+                      return fixer.insertTextAfter(param, ': Record<string, unknown>');
+                    },
+                  });
+                }
+              }
+            });
+          },
+          ArrowFunctionExpression(node) {
+            // Check arrow function parameters
+            if (node.params) {
+              node.params.forEach((param) => {
+                if (
+                  param.type === 'Identifier' &&
+                  (param.name === 'logContext' ||
+                   param.name === 'context' ||
+                   param.name === 'logCtx' ||
+                   param.name === 'ctx' ||
+                   param.name.includes('LogContext') ||
+                   param.name.includes('Context'))
+                ) {
+                  // Similar logic as FunctionDeclaration
+                  if (param.typeAnnotation && param.typeAnnotation.typeAnnotation) {
+                    const typeAnnotation = param.typeAnnotation.typeAnnotation;
+                    
+                    if (
+                      typeAnnotation.type === 'TSTypeReference' &&
+                      typeAnnotation.typeName.type === 'Identifier'
+                    ) {
+                      const typeName = typeAnnotation.typeName.name;
+                      
+                      if (
+                        typeName === 'BaseLogContext' ||
+                        typeName === 'any' ||
+                        typeName === 'object'
+                      ) {
+                        context.report({
+                          node: param,
+                          messageId: 'useRecordStringUnknown',
+                          data: { actualType: typeName },
+                          fix(fixer) {
+                            return fixer.replaceText(
+                              param.typeAnnotation,
+                              ': Record<string, unknown>'
+                            );
+                          },
+                        });
+                      }
+                    }
+                  }
+                }
+              });
+            }
+          },
+        };
+      },
+    },
+    'enforce-bracket-notation-for-log-context-access': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Enforce bracket notation with type guards when accessing properties from Record<string, unknown> log contexts',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          useBracketNotation:
+            'Property access on Record<string, unknown> must use bracket notation with type guard. Use: typeof logContext[\'property\'] === \'string\' ? logContext[\'property\'] : undefined',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+
+        return {
+          MemberExpression(node) {
+            // Check for dot notation access on variables that might be Record<string, unknown>
+            if (
+              node.property.type === 'Identifier' &&
+              (node.property.name === 'request_id' ||
+               node.property.name === 'action' ||
+               node.property.name === 'function' ||
+               node.property.name === 'started_at')
+            ) {
+              // Check if object is a variable with logContext/context in name
+              if (
+                node.object.type === 'Identifier' &&
+                (node.object.name.includes('logContext') ||
+                 node.object.name.includes('Context') ||
+                 node.object.name === 'context' ||
+                 node.object.name === 'logCtx' ||
+                 node.object.name === 'ctx')
+              ) {
+                // Check if parent is not already using bracket notation or type guard
+                let parent = node.parent;
+                let isInTypeGuard = false;
+                let isInBracketNotation = false;
+
+                // Check if we're already in a typeof check
+                while (parent) {
+                  if (
+                    parent.type === 'BinaryExpression' &&
+                    parent.operator === '===' &&
+                    parent.left.type === 'UnaryExpression' &&
+                    parent.left.operator === 'typeof'
+                  ) {
+                    isInTypeGuard = true;
+                    break;
+                  }
+                  if (parent.type === 'MemberExpression' && parent.computed === true) {
+                    isInBracketNotation = true;
+                    break;
+                  }
+                  parent = parent.parent;
+                }
+
+                if (!isInTypeGuard && !isInBracketNotation) {
+                  context.report({
+                    node,
+                    messageId: 'useBracketNotation',
+                  });
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+    'prevent-base-log-context-usage': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent usage of deprecated BaseLogContext type in favor of Record<string, unknown>',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: 'code',
+        schema: [],
+        messages: {
+          useRecordStringUnknown:
+            'BaseLogContext is deprecated. Use Record<string, unknown> instead for consistency and maintainability.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+
+        return {
+          TSTypeReference(node) {
+            // Check for BaseLogContext type usage
+            if (
+              node.typeName.type === 'Identifier' &&
+              node.typeName.name === 'BaseLogContext'
+            ) {
+              context.report({
+                node,
+                messageId: 'useRecordStringUnknown',
+                fix(fixer) {
+                  return fixer.replaceText(node, 'Record<string, unknown>');
+                },
+              });
+            }
+          },
+          ImportSpecifier(node) {
+            // Check for BaseLogContext import
+            if (
+              node.imported.type === 'Identifier' &&
+              node.imported.name === 'BaseLogContext'
+            ) {
+              context.report({
+                node,
+                messageId: 'useRecordStringUnknown',
+                fix(fixer) {
+                  // Remove the import
+                  const importDeclaration = node.parent;
+                  if (importDeclaration.specifiers.length === 1) {
+                    // Only this import, remove entire import
+                    return fixer.remove(importDeclaration);
+                  } else {
+                    // Multiple imports, just remove this one
+                    const nextToken = sourceCode.getTokenAfter(node);
+                    const prevToken = sourceCode.getTokenBefore(node);
+                    if (nextToken && nextToken.value === ',') {
+                      return fixer.removeRange([node.range[0], nextToken.range[1]]);
+                    } else if (prevToken && prevToken.value === ',') {
+                      return fixer.removeRange([prevToken.range[0], node.range[1]]);
+                    }
+                    return fixer.remove(node);
+                  }
+                },
+              });
+            }
+          },
+        };
+      },
+    },
+    'prevent-direct-pino-logger-usage': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent direct pino() or pinoLogger usage. Use helpers (logError/logWarn) or logger wrapper instead',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          useHelperOrWrapper:
+            'Do not use direct pino() or pinoLogger. Use logError/logWarn/logInfo/logTrace from @heyclaude/shared-runtime or logger wrapper from @heyclaude/shared-runtime/@heyclaude/edge-runtime instead.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Skip if file is the logger config or logger implementation itself
+        // These files are allowed to use pino directly
+        if (
+          filename.includes('logger/config') || 
+          filename.includes('logger/index') ||
+          filename.includes('logging.ts') ||
+          filename.includes('logger.ts')
+        ) {
+          return {};
+        }
+
+        return {
+          VariableDeclarator(node) {
+            // Check for const pinoLogger = pino(...) or const logger = pino(...)
+            if (
+              node.id.type === 'Identifier' &&
+              (node.id.name === 'pinoLogger' || 
+               (node.id.name === 'logger' && 
+                node.init &&
+                node.init.type === 'CallExpression' &&
+                node.init.callee.type === 'Identifier' &&
+                node.init.callee.name === 'pino'))
+            ) {
+              // Check if this is in a logger config file (allowed)
+              // Files that use createPinoConfig are logger implementations
+              if (!fileText.includes('createPinoConfig')) {
+                context.report({
+                  node,
+                  messageId: 'useHelperOrWrapper',
+                });
+              }
+            }
+          },
+          CallExpression(node) {
+            // Check for direct pino() calls (not in logger implementation files)
+            if (
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'pino' &&
+              !fileText.includes('createPinoConfig')
+            ) {
+              context.report({
+                node,
+                messageId: 'useHelperOrWrapper',
+              });
+            }
+
+            // Check for pinoLogger.error/warn/info calls (not in logger implementation files)
+            // Allow pinoLogger calls in files that use createPinoConfig (logger implementations)
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.object.type === 'Identifier' &&
+              node.callee.object.name === 'pinoLogger' &&
+              node.callee.property.type === 'Identifier' &&
+              ['error', 'warn', 'info', 'debug', 'trace', 'fatal'].includes(node.callee.property.name) &&
+              !fileText.includes('createPinoConfig')
+            ) {
+              context.report({
+                node,
+                messageId: 'useHelperOrWrapper',
+              });
+            }
+          },
+        };
+      },
+    },
+    'require-context-creation-functions': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Ensure standardized context creation functions are used instead of manual object creation in edge functions',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          useCreationFunction:
+            'Use standardized context creation functions (createDataApiContext, createEmailHandlerContext, etc.) instead of manual object creation for consistency.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+
+        // Only apply to edge functions
+        const isEdgeFunction = filename.includes('apps/edge/functions');
+        if (!isEdgeFunction) {
+          return {};
+        }
+
+        return {
+          VariableDeclarator(node) {
+            // Check for manual logContext creation
+            if (
+              node.id.type === 'Identifier' &&
+              (node.id.name.includes('logContext') ||
+               node.id.name.includes('Context') ||
+               node.id.name === 'context')
+            ) {
+              // Check if init is an object expression with function, action, request_id, started_at
+              if (
+                node.init &&
+                node.init.type === 'ObjectExpression'
+              ) {
+                const properties = node.init.properties;
+                const hasFunction = properties.some(
+                  (prop) =>
+                    prop.type === 'Property' &&
+                    prop.key.type === 'Identifier' &&
+                    prop.key.name === 'function'
+                );
+                const hasAction = properties.some(
+                  (prop) =>
+                    prop.type === 'Property' &&
+                    prop.key.type === 'Identifier' &&
+                    prop.key.name === 'action'
+                );
+                const hasRequestId = properties.some(
+                  (prop) =>
+                    prop.type === 'Property' &&
+                    prop.key.type === 'Identifier' &&
+                    (prop.key.name === 'request_id' || prop.key.name === 'requestId')
+                );
+                const hasStartedAt = properties.some(
+                  (prop) =>
+                    prop.type === 'Property' &&
+                    prop.key.type === 'Identifier' &&
+                    prop.key.name === 'started_at'
+                );
+
+                // If it has all the standard fields, suggest using creation function
+                if (hasFunction && hasAction && hasRequestId && hasStartedAt) {
+                  context.report({
+                    node,
+                    messageId: 'useCreationFunction',
+                  });
+                }
+              }
             }
           },
         };

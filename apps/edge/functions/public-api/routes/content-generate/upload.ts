@@ -30,7 +30,6 @@ import {
   traceStep,
   uploadObject,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
   createDataApiContext,
@@ -70,7 +69,7 @@ interface UploadPackageResponse {
  */
 export async function handleUploadPackage(
   request: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Create log context if not provided
   const finalLogContext = logContext || createDataApiContext('content-generate-upload', {
@@ -85,8 +84,8 @@ export async function handleUploadPackage(
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: finalLogContext.request_id,
-    operation: finalLogContext.action || 'package-upload',
+    requestId: typeof finalLogContext['request_id'] === 'string' ? finalLogContext['request_id'] : undefined,
+    operation: typeof finalLogContext['action'] === 'string' ? finalLogContext['action'] : 'package-upload',
     method: request.method,
   });
   

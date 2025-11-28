@@ -111,8 +111,8 @@ export async function handleSubscribe(req: Request): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'subscribe',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'subscribe',
     email: normalizedEmail,
   });
 
@@ -385,8 +385,8 @@ export async function handleWelcome(req: Request): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'welcome',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'welcome',
     triggerSource: triggerSource || 'unknown',
   });
 
@@ -428,10 +428,10 @@ export async function handleWelcome(req: Request): Promise<Response> {
       'Resend welcome email send timed out'
     );
 
-  if (error) {
-    await logError('Welcome email failed', logContext, error);
-    return await errorResponse(new Error(error.message || 'Welcome email failed'), 'handleWelcome', publicCorsHeaders, logContext);
-  }
+    if (error) {
+      await logError('Welcome email failed', logContext, error);
+      return await errorResponse(new Error(error.message || 'Welcome email failed'), 'handleWelcome', publicCorsHeaders, logContext);
+    }
 
     await enrollInOnboardingSequence(email, logContext);
 
@@ -539,8 +539,8 @@ export async function handleTransactional(req: Request): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'transactional',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'transactional',
     type,
     ...(typeof email === 'string' ? { email } : {}),
   });
@@ -615,8 +615,8 @@ export async function handleDigest(): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'digest',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'digest',
   });
 
   // Check rate limiting
@@ -827,8 +827,8 @@ export async function handleSequence(): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'sequence',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'sequence',
   });
 
   traceStep('Fetching due sequence emails', logContext);
@@ -948,8 +948,8 @@ export async function handleJobLifecycleEmail(req: Request, action: string): Pro
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || action,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : action,
     action,
     jobId,
   });
@@ -1033,8 +1033,8 @@ export async function handleGetNewsletterCount(): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'get-newsletter-count',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'get-newsletter-count',
   });
   
   try {
@@ -1105,8 +1105,8 @@ export async function handleContactSubmission(req: Request): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'contact-submission',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'contact-submission',
     submissionId,
     category,
     ...(typeof email === 'string' ? { email } : {}),

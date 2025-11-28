@@ -14,7 +14,6 @@ import {
   traceRequestComplete,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
   highlightCode,
@@ -493,7 +492,7 @@ function performHighlight(
  */
 export async function handleContentHighlight(
   req: Request,
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<Response> {
   // Minimal implementation to avoid complex body parsing differences if any
   if (req.method === 'OPTIONS') {
@@ -549,7 +548,7 @@ export async function handleContentHighlight(
  */
 export async function handleContentProcess(
   req: Request,
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<Response> {
   // Initialize request logging with trace and bindings
   initRequestLogging(logContext);
@@ -557,8 +556,8 @@ export async function handleContentProcess(
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'content-process',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'content-process',
     method: req.method,
   });
   

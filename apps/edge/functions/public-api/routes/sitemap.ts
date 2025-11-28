@@ -14,7 +14,6 @@ import {
   traceRequestComplete,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
   createDataApiContext,
@@ -49,7 +48,7 @@ export async function handleSitemapRoute(
   url: URL,
   method: string,
   req: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Create log context if not provided
   const finalLogContext = logContext || createDataApiContext('sitemap', {
@@ -64,8 +63,8 @@ export async function handleSitemapRoute(
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: finalLogContext.request_id,
-    operation: finalLogContext.action || 'sitemap',
+    requestId: typeof finalLogContext['request_id'] === 'string' ? finalLogContext['request_id'] : undefined,
+    operation: typeof finalLogContext['action'] === 'string' ? finalLogContext['action'] : 'sitemap',
     method,
   });
   
@@ -94,7 +93,7 @@ export async function handleSitemapRoute(
  * @param logContext - Optional logging context used for tracing and for error responses.
  * @returns A `Response` containing sitemap XML when `format` is not `json`, or a JSON object with `urls` and `meta` when `format=json`. Error responses use appropriate 4xx/5xx statuses on validation or database failures.
  */
-async function handleSitemapGet(url: URL, logContext: BaseLogContext): Promise<Response> {
+async function handleSitemapGet(url: URL, logContext: Record<string, unknown>): Promise<Response> {
   const format = (url.searchParams.get('format') || 'xml').toLowerCase();
   
   traceStep(`Generating sitemap (format: ${format})`, logContext);
@@ -229,7 +228,7 @@ async function handleSitemapGet(url: URL, logContext: BaseLogContext): Promise<R
  *   - `502` when the IndexNow HTTP response is not OK,
  *   - Database-related errors will return an error response describing the RPC failure.
  */
-async function handleSitemapIndexNow(req: Request, logContext: BaseLogContext): Promise<Response> {
+async function handleSitemapIndexNow(req: Request, logContext: Record<string, unknown>): Promise<Response> {
   traceStep('Processing IndexNow submission', logContext);
   
   const triggerKey = req.headers.get('X-IndexNow-Trigger-Key');
@@ -245,7 +244,25 @@ async function handleSitemapIndexNow(req: Request, logContext: BaseLogContext): 
     );
   }
 
-  if (triggerKey !== INDEXNOW_TRIGGER_KEY) {
+  // Timing-safe comparison to prevent timing attacks
+  const encoder = new TextEncoder();
+  const triggerKeyBytes = encoder.encode(triggerKey ?? '');
+  const expectedKeyBytes = encoder.encode(INDEXNOW_TRIGGER_KEY ?? '');
+  
+  if (triggerKeyBytes.length !== expectedKeyBytes.length) {
+    return jsonResponse({ error: 'Unauthorized', message: 'Invalid trigger key' }, 401, CORS);
+  }
+  
+  let result = 0;
+  for (let i = 0; i < triggerKeyBytes.length; i++) {
+    const triggerByte = triggerKeyBytes[i];
+    const expectedByte = expectedKeyBytes[i];
+    if (triggerByte !== undefined && expectedByte !== undefined) {
+      result |= triggerByte ^ expectedByte;
+    }
+  }
+  
+  if (result !== 0) {
     return jsonResponse({ error: 'Unauthorized', message: 'Invalid trigger key' }, 401, CORS);
   }
 

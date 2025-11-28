@@ -22,6 +22,7 @@
 
 import pino from 'pino';
 import { createPinoConfig } from '@heyclaude/shared-runtime/logger/config.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 
 // Create Pino logger instance with edge-runtime service name
 // This ensures logs from edge-runtime utilities are properly identified
@@ -41,8 +42,10 @@ export const logger = {
   error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
     const logData: Record<string, unknown> = { ...(context || {}) };
     if (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      logData['err'] = errorObj;
+      // Use normalizeError() for consistent error normalization across codebase
+      // Pino's stdSerializers.err will automatically serialize the Error object
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     pinoLogger.error(logData, message);
   },
@@ -55,8 +58,10 @@ export const logger = {
   fatal: (message: string, error?: unknown, context?: Record<string, unknown>) => {
     const logData: Record<string, unknown> = { ...(context || {}) };
     if (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      logData['err'] = errorObj;
+      // Use normalizeError() for consistent error normalization across codebase
+      // Pino's stdSerializers.err will automatically serialize the Error object
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     pinoLogger.fatal(logData, message);
   },

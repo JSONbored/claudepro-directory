@@ -12,8 +12,9 @@ export {
   ComponentConfigContextProvider,
   type ComponentCardConfig,
   DEFAULT_COMPONENT_CARD_CONFIG,
-  mapComponentCardConfig,
 } from './use-component-card-config.tsx';
+// mapComponentCardConfig moved to utils/component-card-config.ts (server-safe)
+export { mapComponentCardConfig } from '../utils/component-card-config.ts';
 export * from './use-pulse.ts';
 export * from './use-recently-viewed.ts';
 export * from './use-view-transition.ts';

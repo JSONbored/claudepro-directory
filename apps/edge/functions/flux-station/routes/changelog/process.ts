@@ -209,9 +209,9 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'changelog-process',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'changelog-process',
+    function: typeof logContext['function'] === 'string' ? logContext['function'] : 'unknown',
     attempt: message.read_ct,
   });
   // webhook_event_id is required in ChangelogWebhookProcessingJob interface
@@ -543,9 +543,9 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'changelog-process',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'changelog-process',
+    function: typeof logContext['function'] === 'string' ? logContext['function'] : 'unknown',
   });
   
   try {

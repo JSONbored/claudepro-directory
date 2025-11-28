@@ -20,6 +20,7 @@ import {
   successResponse,
   traceRequestComplete,
   traceStep,
+  unauthorizedResponse,
 } from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
@@ -83,7 +84,7 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
 
   // Require a valid authenticated caller for creating global notifications
   if (!authResult) {
-    return badRequestResponse(
+    return unauthorizedResponse(
       'Unauthorized: missing or invalid Authorization header',
       notificationCorsHeaders
     );
@@ -100,8 +101,8 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'create-notification',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'create-notification',
     userId: authResult.user.id,
   });
 

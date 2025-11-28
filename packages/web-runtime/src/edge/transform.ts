@@ -6,7 +6,7 @@ import { normalizeError } from '../errors.ts';
 import { getEnvVar } from '@heyclaude/shared-runtime';
 import type { ContentHeadingMetadata } from '../types/component.types.ts';
 
-const EDGE_TRANSFORM_URL = `${getEnvVar('NEXT_PUBLIC_SUPABASE_URL')}/functions/v1/transform-api`;
+const EDGE_TRANSFORM_URL = `${getEnvVar('NEXT_PUBLIC_SUPABASE_URL')}/functions/v1/public-api`;
 
 export interface HighlightCodeOptions {
   language?: string;
@@ -59,7 +59,7 @@ export async function highlightCodeEdge(
   }
 
   try {
-    const response = await fetch(`${EDGE_TRANSFORM_URL}/content/highlight`, {
+    const response = await fetch(`${EDGE_TRANSFORM_URL}/transform/highlight`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, language, showLineNumbers }),
@@ -88,11 +88,24 @@ export async function highlightCodeEdge(
     return data.html;
   } catch (error) {
     const normalized = normalizeError(error, 'Edge highlighting failed, using fallback');
-    logger.warn('Edge highlighting failed, using fallback', {
-      err: normalized,
-      language,
-      codePreview: code.slice(0, 80),
-    });
+    
+    // During build, edge functions may be unavailable - this is expected
+    // Only log at debug level during build, warn during runtime
+    const isBuildTime = process.env['NEXT_PHASE'] === 'phase-production-build' || 
+                        process.env['NEXT_PUBLIC_VERCEL_ENV'] === undefined;
+    
+    if (isBuildTime) {
+      logger.debug('Edge highlighting unavailable during build, using fallback', {
+        language,
+        codePreview: code.slice(0, 80),
+      });
+    } else {
+      logger.warn('Edge highlighting failed, using fallback', {
+        err: normalized,
+        language,
+        codePreview: code.slice(0, 80),
+      });
+    }
 
     const escapedCode = code
       .replace(/&/g, '&amp;')
@@ -121,7 +134,7 @@ export async function processContentEdge(
     contentType,
   } = options;
 
-  const response = await fetch(`${EDGE_TRANSFORM_URL}/content/process`, {
+  const response = await fetch(`${EDGE_TRANSFORM_URL}/transform/process`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

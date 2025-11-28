@@ -29,7 +29,6 @@ import {
   methodNotAllowedResponse,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { buildSecurityHeaders, createDataApiContext, logInfo, logger, validateSlug } from '@heyclaude/shared-runtime';
 import { handlePaginatedContent } from './content-paginated.ts';
 import { handleRecordExport } from './content-record.ts';
@@ -54,7 +53,7 @@ export async function handleContentRoute(
   url: URL,
   method: string,
   _request: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Create log context if not provided
   const finalLogContext = logContext || createDataApiContext('content', {
@@ -69,9 +68,9 @@ export async function handleContentRoute(
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: finalLogContext.request_id,
-    operation: finalLogContext.action || 'content-route',
-    function: finalLogContext.function,
+    requestId: typeof finalLogContext['request_id'] === 'string' ? finalLogContext['request_id'] : undefined,
+    operation: typeof finalLogContext['action'] === 'string' ? finalLogContext['action'] : 'content-route',
+    function: typeof finalLogContext['function'] === 'string' ? finalLogContext['function'] : 'unknown',
     method,
   });
   
@@ -164,7 +163,7 @@ export async function handleContentRoute(
  *
  * @returns A Response containing sitewide LLMS plain-text when `format` is `llms` or `llms-txt`; otherwise a 400 Bad Request Response that explains the valid formats.
  */
-async function handleSitewideContent(url: URL, logContext?: BaseLogContext): Promise<Response> {
+async function handleSitewideContent(url: URL, logContext?: Record<string, unknown>): Promise<Response> {
   const format = (url.searchParams.get('format') || 'llms').toLowerCase();
 
   if (format === 'llms' || format === 'llms-txt') {
@@ -186,7 +185,7 @@ async function handleSitewideContent(url: URL, logContext?: BaseLogContext): Pro
  *
  * @returns A `Response` containing the sitewide LLMS export as UTF-8 plain text; on failure, an error response with an appropriate status and JSON body.
  */
-async function handleSitewideLlmsTxt(logContext?: BaseLogContext): Promise<Response> {
+async function handleSitewideLlmsTxt(logContext?: Record<string, unknown>): Promise<Response> {
   const service = new ContentService(supabaseAnon);
 
   try {
@@ -472,7 +471,7 @@ async function handleCategoryConfigs(): Promise<Response> {
 async function handleMcpbGeneration(
   slug: string,
   _request: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Validate slug format (prevent path traversal)
   const sanitizedSlug = slug.trim();

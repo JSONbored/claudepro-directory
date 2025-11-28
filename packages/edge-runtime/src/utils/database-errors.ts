@@ -5,7 +5,6 @@
 
 import { errorToString } from '@heyclaude/shared-runtime';
 import { badRequestResponse, errorResponse, jsonResponse, publicCorsHeaders } from './http.ts';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { logError } from '@heyclaude/shared-runtime';
 
 /**
@@ -14,7 +13,7 @@ import { logError } from '@heyclaude/shared-runtime';
  */
 export async function handleDatabaseError(
   error: unknown,
-  logContext: BaseLogContext,
+  logContext: Record<string, unknown>,
   context: string
 ): Promise<Response | null> {
   // Type guard for Supabase PostgrestError which has 'code' and 'message' properties

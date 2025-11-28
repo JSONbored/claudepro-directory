@@ -11,7 +11,6 @@ import {
   traceRequestComplete,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
   createDataApiContext,
@@ -38,12 +37,13 @@ const CORS = getOnlyCorsHeaders;
  * @param request - Optional original Request object; used to detect internal loopback via headers
  * @param logContext - Optional logging context to attach to request logs and traces
  * @returns A Response containing a JSON body with `metadata` and `schemas` on success; otherwise an HTTP error response describing the failure.
+ */
 export async function handleSeoRoute(
   segments: string[],
   url: URL,
   method: string,
   request?: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Create log context if not provided
   const finalLogContext = logContext || createDataApiContext('seo', {
@@ -58,8 +58,8 @@ export async function handleSeoRoute(
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: finalLogContext.request_id,
-    operation: finalLogContext.action || 'seo-route',
+    requestId: typeof finalLogContext['request_id'] === 'string' ? finalLogContext['request_id'] : undefined,
+    operation: typeof finalLogContext['action'] === 'string' ? finalLogContext['action'] : 'seo-route',
     method,
   });
   

@@ -8,7 +8,6 @@ import type { Resend } from 'npm:resend@6.5.2';
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { sendEmail } from '../../utils/integrations/resend.ts';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { createEmailHandlerContext, logError, logInfo } from '@heyclaude/shared-runtime';
 import { renderEmailTemplate } from './base-template.tsx';
 import { ONBOARDING_FROM } from './templates/manifest.ts';
@@ -37,7 +36,7 @@ export const STEP_TEMPLATES: Record<number, FC<{ email: string }>> = {
 export async function processSequenceEmail(
   resend: Resend,
   item: DatabaseGenerated['public']['CompositeTypes']['due_sequence_email_item'],
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<void> {
   // Note: PostgreSQL composite types don't support NOT NULL constraints,
   // but the RPC selects from table columns that ARE NOT NULL, so these values

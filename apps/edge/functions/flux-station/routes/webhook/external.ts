@@ -48,9 +48,9 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'external-webhook',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'external-webhook',
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
   });
   
   try {

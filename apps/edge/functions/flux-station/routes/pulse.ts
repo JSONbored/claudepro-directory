@@ -23,7 +23,6 @@ import {
   updateContactEngagement,
 } from '@heyclaude/edge-runtime';
 import {
-  type BaseLogContext,
   createUtilityContext,
   errorToString,
   logError,
@@ -547,7 +546,7 @@ export async function handlePulse(_req: Request): Promise<Response> {
   // Validate batch size (safety limits)
   const safeBatchSize = Math.max(1, Math.min(batchSize, 500)); // Between 1 and 500
 
-  const logContext: BaseLogContext = {
+  const logContext: Record<string, unknown> = {
     function: 'flux-station:pulse',
     action: 'pulse-processing',
     request_id: crypto.randomUUID(),
@@ -563,9 +562,9 @@ export async function handlePulse(_req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'pulse-processing',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'pulse-processing',
+    function: typeof logContext['function'] === 'string' ? logContext['function'] : 'unknown',
     queue: PULSE_QUEUE_NAME,
     batchSize: safeBatchSize,
   });

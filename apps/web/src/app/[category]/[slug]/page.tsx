@@ -198,9 +198,24 @@ export default async function DetailPage({
     // Content may not exist (deleted, never existed, or invalid slug)
     // This is expected behavior during build-time static generation when generateStaticParams
     // generates paths for content that may have been removed from the database
-    reqLogger.warn('DetailPage: get_content_detail_core returned null - content may not exist', {
-      section: 'core-content-fetch',
-    });
+    // During build, missing content is expected - only log at debug level
+    // During runtime, log at warn level to catch real issues
+    const isBuildTime = process.env['NEXT_PHASE'] === 'phase-production-build' || 
+                        process.env['NEXT_PUBLIC_VERCEL_ENV'] === undefined;
+    
+    if (isBuildTime) {
+      reqLogger.debug('DetailPage: content not found during build (expected)', {
+        section: 'core-content-fetch',
+        category,
+        slug,
+      });
+    } else {
+      reqLogger.warn('DetailPage: get_content_detail_core returned null - content may not exist', {
+        section: 'core-content-fetch',
+        category,
+        slug,
+      });
+    }
     notFound();
   }
 

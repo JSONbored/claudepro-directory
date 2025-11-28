@@ -5,10 +5,10 @@
  * This script helps you get a JWT token for testing the authenticated MCP server.
  * 
  * Usage:
- *   tsx scripts/get-mcp-test-token.ts
+ *   tsx packages/generators/src/commands/get-mcp-test-token.ts
  * 
  * Or with email/password:
- *   tsx scripts/get-mcp-test-token.ts --email your@email.com --password yourpassword
+ *   tsx packages/generators/src/commands/get-mcp-test-token.ts --email your@email.com --password yourpassword
  * 
  * Note: For a better experience, use `pnpm exec heyclaude-mcp-login` instead.
  */
@@ -91,14 +91,14 @@ async function getToken() {
   if (error) {
     console.error('❌ Error getting session:', error.message);
     console.error('\n💡 Try signing in with:');
-    console.error('   tsx scripts/get-mcp-test-token.ts --email your@email.com --password yourpassword');
+    console.error('   tsx packages/generators/src/commands/get-mcp-test-token.ts --email your@email.com --password yourpassword');
     process.exit(1);
   }
 
   if (!session) {
     console.log('❌ No active session found');
     console.log('\n💡 Sign in with:');
-    console.log('   tsx scripts/get-mcp-test-token.ts --email your@email.com --password yourpassword');
+    console.log('   tsx packages/generators/src/commands/get-mcp-test-token.ts --email your@email.com --password yourpassword');
     console.log('\n💡 Or sign in via web app and extract token from browser DevTools');
     process.exit(1);
   }

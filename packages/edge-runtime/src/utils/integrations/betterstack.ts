@@ -3,7 +3,6 @@
  * Handles heartbeat calls for scheduled tasks
  */
 
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { logWarn } from '@heyclaude/shared-runtime';
 import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
 
@@ -16,7 +15,7 @@ import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
 export async function sendBetterStackHeartbeat(
   url: string | undefined,
   failedCount: number,
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<void> {
   if (!url) {
     return;

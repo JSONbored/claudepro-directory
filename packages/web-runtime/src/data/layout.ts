@@ -16,8 +16,8 @@ import { generateRequestId } from '../utils/request-id';
 
 import { getActiveAnnouncement } from './announcements';
 
-// Export layout flags (static defaults)
-export { getLayoutFlags, type LayoutFlags } from './layout/flags';
+// Note: getLayoutFlags is exported from data-client.ts (client-safe entry point)
+// Do not export from here to avoid 'use server' restrictions
 
 const NAVIGATION_TTL_KEY = 'cache.navigation.ttl_seconds';
 

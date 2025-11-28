@@ -68,6 +68,7 @@ export async function handleGetContentByTag(
         tags,
         logic,
         category: category || 'all',
+        count: 0,
       },
     };
   }
@@ -98,6 +99,7 @@ export async function handleGetContentByTag(
           tags,
           logic,
           category: category || 'all',
+          count: 0,
         },
       };
     }

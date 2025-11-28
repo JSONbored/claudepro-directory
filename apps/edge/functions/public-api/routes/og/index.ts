@@ -22,7 +22,6 @@ import {
   traceStep,
 } from '@heyclaude/edge-runtime';
 import {
-  type BaseLogContext,
   buildSecurityHeaders,
   CIRCUIT_BREAKER_CONFIGS,
   deriveTitleFromRoute,
@@ -79,7 +78,7 @@ export interface OGImageParams {
  * @param options - Additional context properties to merge into the returned context
  * @returns A BaseLogContext containing `function: 'og-image'`, the provided `action`, a generated `request_id` (UUID), an ISO `started_at` timestamp, and any supplied `options`
  */
-function createOGImageContext(action: string, options?: Record<string, unknown>): BaseLogContext {
+function createOGImageContext(action: string, options?: Record<string, unknown>): Record<string, unknown> {
   return {
     function: 'og-image',
     action,
@@ -147,7 +146,7 @@ function extractMetadataFromResponse(data: unknown): {
  */
 async function fetchMetadataFromRoute(
   route: string,
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<OGImageParams> {
   const supabaseUrl = edgeEnv.supabase.url;
   // Compute route type upfront to reuse across all return paths
@@ -601,9 +600,9 @@ export async function handleOGImageRequest(req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'og-image-generate',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'og-image-generate',
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
   });
 
   let params: OGImageParams;

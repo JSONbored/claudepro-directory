@@ -212,9 +212,9 @@ function respondWithAnalytics(handler: () => Promise<Response>): Promise<Respons
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'embedding-webhook',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'embedding-webhook',
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
   });
 
   const logEvent = async (status: number, outcome: 'success' | 'error', error?: unknown) => {

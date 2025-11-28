@@ -2,6 +2,7 @@ import 'server-only';
 
 import { JobsService, SearchService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
+import { logError } from '@heyclaude/shared-runtime';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
@@ -187,18 +188,17 @@ export async function getFilteredJobs(
   if (noCache) {
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
-      pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
+      pulseJobSearch(searchQuery, {}, 0).catch(async (error: unknown) => {
         // Note: Using explicit context here for nested async callbacks
         // While parent bindings are available at runtime, explicit context ensures
         // proper correlation and traceability for fire-and-forget operations
-        const normalized = normalizeError(error, 'Failed to pulse job search');
         const callbackRequestId = generateRequestId();
-        logger.error('Failed to pulse job search', normalized, {
+        await logError('Failed to pulse job search', {
           requestId: callbackRequestId,
           operation: 'pulseJobSearch',
           module: 'data/jobs',
           searchQuery,
-        });
+        }, error);
       });
     }
     return getFilteredJobsDirect(options);
@@ -208,18 +208,17 @@ export async function getFilteredJobs(
   try {
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
-      pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
+      pulseJobSearch(searchQuery, {}, 0).catch(async (error: unknown) => {
         // Note: Using explicit context here for nested async callbacks
         // While parent bindings are available at runtime, explicit context ensures
         // proper correlation and traceability for fire-and-forget operations
-        const normalized = normalizeError(error, 'Failed to pulse job search');
         const callbackRequestId = generateRequestId();
-        logger.error('Failed to pulse job search', normalized, {
+        await logError('Failed to pulse job search', {
           requestId: callbackRequestId,
           operation: 'pulseJobSearch',
           module: 'data/jobs',
           searchQuery,
-        });
+        }, error);
       });
     }
 

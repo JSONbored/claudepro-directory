@@ -66,8 +66,8 @@ export async function handleRecordExport(
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'content-record-export',
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'content-record-export',
     category,
     slug,
   });
@@ -176,6 +176,7 @@ async function handleJsonFormat(
  *          `Content-Type: text/markdown; charset=utf-8`, `Content-Disposition` with a sanitized filename,
  *          `X-Content-ID`, `X-Generated-By`, plus security, CORS, and cache headers. Error conditions produce
  *          bad-request or RPC error responses.
+ */
 async function handleMarkdownFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,

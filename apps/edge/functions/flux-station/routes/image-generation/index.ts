@@ -12,7 +12,6 @@
  */
 
 import { edgeEnv, initRequestLogging, pgmqDelete, pgmqRead, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   createUtilityContext,
   errorToString,
@@ -61,9 +60,10 @@ interface ImageGenerationMessage {
  * @param message - The ImageGenerationMessage containing fields used for the request (`type`, `content_id`, `company_id`, `image_data`, and `params`).
  * @param logContext - Context object used for structured logging.
  * @returns `{ success: true }` when the image generation request completed successfully, `{ success: false, error: string }` when it failed.
+ */
 async function processImageGeneration(
   message: ImageGenerationMessage,
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<{ success: boolean; error?: string }> {
   const { type, content_id, company_id, params } = message;
 

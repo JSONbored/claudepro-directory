@@ -419,6 +419,85 @@ export function logClientDebug(
  * @see {@link ../client/error-handler.createErrorBoundaryFallback | createErrorBoundaryFallback} - Error boundary fallback utility
  * @see {@link logClientError} - For non-boundary errors
  */
+/**
+ * Create client-safe log context with requestId (compatible with server-side createWebAppContextWithId)
+ * 
+ * **Client-Safe Alternative to Server-Side createWebAppContextWithId**
+ * - ✅ **SAFE** to use in client components
+ * - Uses client-safe utilities (no server-only dependencies)
+ * - Matches server-side API signature for consistency
+ * 
+ * **Usage:**
+ * ```typescript
+ * 'use client';
+ * 
+ * import { generateRequestId, createWebAppContextWithIdClient } from '@heyclaude/web-runtime/logging/client';
+ * 
+ * const requestId = generateRequestId();
+ * const logContext = createWebAppContextWithIdClient(requestId, '/account/jobs', 'JobsPage', {
+ *   userId: user.id,
+ * });
+ * logger.error('Error occurred', error, logContext);
+ * ```
+ * 
+ * @param requestId - Pre-generated request ID (use generateRequestId())
+ * @param route - The HTTP/website route path (e.g., '/account/jobs')
+ * @param operation - The operation name (e.g., 'JobsPage', 'ErrorBoundary')
+ * @param options - Additional context fields
+ * @returns Client-safe log context compatible with server-side structure
+ * 
+ * @see {@link createClientLogContext} - Lower-level client context builder
+ * @see {@link ../logging/server.createWebAppContextWithId | createWebAppContextWithId} - Server-side version
+ */
+export function createWebAppContextWithIdClient(
+  requestId: string,
+  route: string,
+  operation: string,
+  options?: Record<string, unknown>
+): LogContext {
+  const clientContext = createClientLogContext(operation, {
+    route,
+    ...options,
+  });
+  
+  // Convert to LogContext format (compatible with logger.error signature)
+  const logContext: LogContext = {
+    requestId,
+    route,
+    operation: clientContext.operation,
+    sessionId: clientContext.sessionId,
+  };
+  
+  // Add optional fields if they exist (use bracket notation for index signature compatibility)
+  if (clientContext['module'] !== undefined) {
+    logContext['module'] = toLogContextValue(clientContext['module']);
+  }
+  if (clientContext['component'] !== undefined) {
+    logContext['component'] = toLogContextValue(clientContext['component']);
+  }
+  if (clientContext['action'] !== undefined) {
+    logContext['action'] = toLogContextValue(clientContext['action']);
+  }
+  
+  // Add any additional fields from options, converting to LogContextValue
+  if (options) {
+    for (const [key, value] of Object.entries(options)) {
+      if (!['module', 'component', 'action', 'route'].includes(key) && value !== undefined) {
+        logContext[key] = toLogContextValue(value);
+      }
+    }
+  }
+  
+  // Also include any additional fields from clientContext
+  for (const [key, value] of Object.entries(clientContext)) {
+    if (!['operation', 'sessionId', 'module', 'component', 'action'].includes(key) && value !== undefined) {
+      logContext[key] = toLogContextValue(value);
+    }
+  }
+  
+  return logContext;
+}
+
 export function logClientErrorBoundary(
   message: string,
   error: unknown,

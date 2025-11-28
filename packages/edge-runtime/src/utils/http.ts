@@ -4,9 +4,7 @@
 
 import { edgeEnv } from '../config/env.ts';
 import { getCacheConfigNumber } from '../config/static-cache-config.ts';
-import { logError, type BaseLogContext } from '@heyclaude/shared-runtime';
-import { createUtilityContext } from '@heyclaude/shared-runtime';
-import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
+import { logError, createUtilityContext, buildSecurityHeaders } from '@heyclaude/shared-runtime';
 
 /* ----------------------------- CORS PRESETS ----------------------------- */
 
@@ -173,11 +171,11 @@ export async function errorResponse(
   error: unknown,
   context: string,
   cors: Record<string, string> = publicCorsHeaders,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Use provided logContext if available (preserves request_id), otherwise create new one
-  const finalLogContext: BaseLogContext = logContext
-    ? { ...logContext, action: logContext.action || 'error-response', context }
+  const finalLogContext: Record<string, unknown> = logContext
+    ? { ...logContext, action: typeof logContext['action'] === 'string' ? logContext['action'] : 'error-response', context }
     : createUtilityContext('http-utils', 'error-response', {
         context,
       });

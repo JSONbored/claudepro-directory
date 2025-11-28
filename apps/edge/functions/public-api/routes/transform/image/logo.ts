@@ -98,8 +98,8 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'logo-optimize',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'logo-optimize',
     method: req.method,
   });
 
@@ -165,12 +165,26 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
       }
 
       const imageData = new Uint8Array(await imageFile.arrayBuffer());
+      
+      // Validate maxDimension if provided
+      let maxDimension: number | undefined;
+      if (maxDimensionStr) {
+        const parsed = Number.parseInt(maxDimensionStr, 10);
+        if (Number.isNaN(parsed) || parsed < 0) {
+          return badRequestResponse(
+            `Invalid maxDimension: must be a non-negative integer, got "${maxDimensionStr}"`,
+            CORS
+          );
+        }
+        maxDimension = parsed;
+      }
+      
       body = {
         imageData,
         userId,
         ...(companyId ? { companyId } : {}),
         ...(oldLogoPath ? { oldLogoPath } : {}),
-        ...(maxDimensionStr ? { maxDimension: Number.parseInt(maxDimensionStr, 10) } : {}),
+        ...(maxDimension !== undefined ? { maxDimension } : {}),
       };
     } else {
       return badRequestResponse('Content-Type must be application/json or multipart/form-data', CORS);
@@ -230,7 +244,20 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
 
     // Optimize image - using PNG format (following Supabase example pattern exactly)
     // The Supabase example uses img.write((data) => data) which outputs PNG
-    const maxDimension = body.maxDimension ?? LOGO_MAX_DIMENSION;
+    // Validate maxDimension from JSON body if provided
+    let maxDimension = LOGO_MAX_DIMENSION;
+    if (body.maxDimension !== undefined) {
+      const value = typeof body.maxDimension === 'number' 
+        ? body.maxDimension 
+        : Number(body.maxDimension);
+      if (!Number.isFinite(value) || value <= 0) {
+        return badRequestResponse(
+          `Invalid maxDimension: must be a finite positive number, got "${body.maxDimension}"`,
+          CORS
+        );
+      }
+      maxDimension = value;
+    }
     const optimizedImage = await optimizeImage(
       imageBytes,
       maxDimension,
@@ -238,25 +265,24 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
       LOGO_QUALITY
     );
     
-    // Verify output is PNG (Supabase example outputs PNG)
+    // Verify output is PNG (processImage always outputs PNG)
     const isPng = optimizedImage[0] === 0x89 && optimizedImage[1] === 0x50 && 
                    optimizedImage[2] === 0x4e && optimizedImage[3] === 0x47;
-    const isJpeg = optimizedImage[0] === 0xff && optimizedImage[1] === 0xd8;
     
-    if (!isPng && !isJpeg) {
-      await logError('Optimized image format is unrecognized', logContext, new Error('Invalid image format'));
+    if (!isPng) {
+      await logError('Optimized image format is unrecognized', logContext, new Error('Invalid image format - expected PNG'));
       return jsonResponse(
         {
           success: false,
-          error: 'Image optimization failed - output format is invalid',
+          error: 'Image optimization failed - output format is invalid (expected PNG)',
         } satisfies LogoOptimizeResponse,
         500,
         CORS
       );
     }
 
-    const actualFormat = isPng ? 'png' : 'jpeg';
-    const actualMimeType = isPng ? 'image/png' : 'image/jpeg';
+    const actualFormat = 'png';
+    const actualMimeType = 'image/png';
 
     // Get optimized dimensions
     const optimizedDimensions = await getImageDimensions(optimizedImage);

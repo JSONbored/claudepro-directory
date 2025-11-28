@@ -102,8 +102,8 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'thumbnail-generate',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'thumbnail-generate',
     method: req.method,
   });
 

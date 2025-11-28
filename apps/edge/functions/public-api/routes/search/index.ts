@@ -239,9 +239,9 @@ export async function handleSearch(req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: searchLogContext.request_id,
-    operation: searchLogContext.action || 'search',
-    function: searchLogContext.function,
+    requestId: typeof searchLogContext['request_id'] === 'string' ? searchLogContext['request_id'] : undefined,
+    operation: typeof searchLogContext['action'] === 'string' ? searchLogContext['action'] : 'search',
+    function: typeof searchLogContext['function'] === 'string' ? searchLogContext['function'] : 'unknown',
     query: query || undefined,
   });
 
@@ -470,9 +470,9 @@ export async function handleAutocomplete(req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'autocomplete',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'autocomplete',
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
     query,
   });
   
@@ -554,9 +554,9 @@ export async function handleFacets(): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'facets',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'facets',
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
   });
   
   const { data, error } = await supabaseAnon.rpc('get_search_facets', undefined);

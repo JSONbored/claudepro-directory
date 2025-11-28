@@ -52,6 +52,11 @@ export async function handleGetContentDetail(
     .single();
 
   if (error) {
+    // PGRST116: JSON object requested, multiple (or no) rows returned
+    if ((error as any).code === 'PGRST116') {
+      throw new Error(`Content not found: ${category}/${slug}`);
+    }
+
     // Use dbQuery serializer for consistent database query formatting
     await logError('Database query failed in getContentDetail', {
       dbQuery: {
@@ -65,10 +70,6 @@ export async function handleGetContentDetail(
       },
     }, error);
     throw new Error(`Failed to fetch content details: ${error.message}`);
-  }
-
-  if (!data) {
-    throw new Error(`Content not found: ${category}/${slug}`);
   }
 
   // Format the response - data is now a single object, not an array

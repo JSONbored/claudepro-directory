@@ -18,8 +18,8 @@ export * from '../utils/url-validation.ts';
 // export * from '../utils/log-context.ts'; // Use @heyclaude/web-runtime/logging/server instead
 // export * from '../utils/request-context.ts'; // Use @heyclaude/web-runtime/logging/server instead
 export * from '../utils/request-id.ts'; // Client-safe request ID generation
-// Export log context builders for backward compatibility (prefer logging/server barrel)
-export { createWebAppContext, createWebAppContextWithId, type WebAppLogContext } from '../utils/log-context.ts';
+// Note: createWebAppContext/createWebAppContextWithId removed - use @heyclaude/web-runtime/logging/server for server components
+// or @heyclaude/web-runtime/logging/client for client components
 export * from '../utils/homepage-error-tracking.ts';
 export * from '../utils/client-session.ts';
 export * from '../utils/client-logger.ts';

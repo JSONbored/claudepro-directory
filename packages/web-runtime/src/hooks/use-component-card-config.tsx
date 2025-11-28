@@ -8,56 +8,14 @@
  */
 
 import { createContext, type ReactNode, useContext } from 'react';
+import {
+  type ComponentCardConfig,
+  DEFAULT_COMPONENT_CARD_CONFIG,
+} from '../utils/component-card-config.ts';
 
-export type ComponentCardConfig = {
-  showCopyButton: boolean;
-  showBookmark: boolean;
-  showViewCount: boolean;
-  showCopyCount: boolean;
-  showRating: boolean;
-};
-
-export const DEFAULT_COMPONENT_CARD_CONFIG: ComponentCardConfig = {
-  showCopyButton: true,
-  showBookmark: true,
-  showViewCount: true,
-  showCopyCount: true,
-  showRating: true,
-};
-
-export function mapComponentCardConfig(
-  record: Record<string, unknown> | null
-): ComponentCardConfig {
-  if (!record) {
-    return DEFAULT_COMPONENT_CARD_CONFIG;
-  }
-
-  const coerce = (value: unknown, fallback: boolean) =>
-    typeof value === 'boolean' ? value : fallback;
-
-  return {
-    showCopyButton: coerce(
-      record['cards.show_copy_button' as string],
-      DEFAULT_COMPONENT_CARD_CONFIG.showCopyButton
-    ),
-    showBookmark: coerce(
-      record['cards.show_bookmark' as string],
-      DEFAULT_COMPONENT_CARD_CONFIG.showBookmark
-    ),
-    showViewCount: coerce(
-      record['cards.show_view_count' as string],
-      DEFAULT_COMPONENT_CARD_CONFIG.showViewCount
-    ),
-    showCopyCount: coerce(
-      record['cards.show_copy_count' as string],
-      DEFAULT_COMPONENT_CARD_CONFIG.showCopyCount
-    ),
-    showRating: coerce(
-      record['cards.show_rating' as string],
-      DEFAULT_COMPONENT_CARD_CONFIG.showRating
-    ),
-  };
-}
+// Re-export types and constants for backward compatibility
+export type { ComponentCardConfig };
+export { DEFAULT_COMPONENT_CARD_CONFIG };
 
 const ComponentConfigContext = createContext<ComponentCardConfig>(DEFAULT_COMPONENT_CARD_CONFIG);
 

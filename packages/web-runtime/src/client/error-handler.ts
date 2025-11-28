@@ -2,10 +2,10 @@
 
 import {
   generateRequestId,
-  createWebAppContextWithId,
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/core';
+import { createWebAppContextWithIdClient } from '@heyclaude/web-runtime/logging/client';
 
 type ErrorResponse = {
   success: false;
@@ -38,8 +38,8 @@ export function createErrorBoundaryFallback(
     const route = typeof window !== 'undefined' ? window.location.pathname : 'unknown';
     const normalized = normalizeError(error, 'React error boundary triggered');
     
-    // Create standardized log context
-    const logContext = createWebAppContextWithId(requestId, route, 'ReactErrorBoundary', {
+    // Create standardized log context (client-safe version)
+    const logContext = createWebAppContextWithIdClient(requestId, route, 'ReactErrorBoundary', {
       errorType,
       componentStack: errorInfo.componentStack || '',
       errorBoundary: true,
@@ -64,7 +64,7 @@ export function createErrorBoundaryFallback(
     const fallbackRequestId = generateRequestId();
     const normalized = normalizeError(fallbackError, 'Error boundary fallback failed');
     try {
-      const logContext = createWebAppContextWithId(
+      const logContext = createWebAppContextWithIdClient(
         fallbackRequestId,
         typeof window !== 'undefined' ? window.location.pathname : 'unknown',
         'ReactErrorBoundary',

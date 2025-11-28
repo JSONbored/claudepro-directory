@@ -22,7 +22,6 @@ import {
   traceRequestComplete,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   createUtilityContext,
   errorToString,
@@ -63,7 +62,7 @@ interface PackageGenerationQueueMessage {
  */
 async function processPackageGeneration(
   message: PackageGenerationQueueMessage,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<{ success: boolean; errors: string[] }> {
   const errors: string[] = [];
   const { content_id, category, slug } = message.message;
@@ -159,7 +158,7 @@ async function processPackageGeneration(
  */
 export async function handlePackageGenerationQueue(
   _req: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Create log context if not provided
   const finalLogContext = logContext || createUtilityContext('content-generate', 'package-generation-queue', {});

@@ -2,7 +2,6 @@ import { supabaseServiceRole } from '../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { invalidateCacheByKey } from '../utils/cache.ts';
 import { errorToString } from '@heyclaude/shared-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { logger } from '../utils/logger.ts';
 
 const MAX_NOTIFICATION_IDS = 50;
@@ -27,7 +26,7 @@ export interface NotificationInsertPayload {
 export async function getActiveNotificationsForUser(
   userId: string,
   dismissedIds: string[],
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<NotificationRecord[]> {
   const sanitizedDismissedIds = Array.from(
     new Set(dismissedIds.map((id) => id.trim()).filter(Boolean))
@@ -59,7 +58,7 @@ export async function getActiveNotificationsForUser(
 
 export async function insertNotification(
   payload: NotificationInsertPayload,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<NotificationRecord> {
   const record = {
     id: payload.id ?? crypto.randomUUID(),
@@ -139,7 +138,7 @@ export async function insertNotification(
 export async function dismissNotificationsForUser(
   userId: string,
   notificationIds: string[],
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ) {
   const sanitizedIds = Array.from(
     new Set(notificationIds.map((id) => id.trim()).filter(Boolean))

@@ -10,6 +10,9 @@
       "default": "./src/index.ts"
     }
   },
+  "scripts": {
+    "build": "tsc --build"
+  },
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",
     "@supabase/supabase-js": "^2.84.0",

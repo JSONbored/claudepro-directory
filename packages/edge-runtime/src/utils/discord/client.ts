@@ -1,6 +1,5 @@
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
 import { logger } from '../logger.ts';
 
@@ -13,7 +12,7 @@ export interface DiscordWebhookLogOptions {
   relatedId?: string;
   metadata?: Record<string, unknown>;
   logType?: WebhookEventType;
-  logContext?: BaseLogContext;
+  logContext?: Record<string, unknown>;
 }
 
 export interface DiscordMessageCreateOptions extends DiscordWebhookLogOptions {
@@ -274,7 +273,7 @@ export async function updateDiscordMessage(
     eventType: WebhookEventType,
     relatedId?: string,
     metadata?: Record<string, unknown>,
-    logContext?: BaseLogContext
+    logContext?: Record<string, unknown>
   ): Promise<{ status: number; deleted: boolean; retryCount: number }> {
   let lastError: Error | null = null;
 

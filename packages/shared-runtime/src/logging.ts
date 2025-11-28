@@ -1,8 +1,11 @@
 /**
  * Standardized logging context builders for edge functions
  * Ensures consistent log structure across all functions
+ * 
+ * @deprecated BaseLogContext interface is deprecated. Use Record<string, unknown> instead.
+ * The mixin function automatically injects context from logger.bindings(), so explicit
+ * BaseLogContext typing is no longer needed. All context creators now return Record<string, unknown>.
  */
-
 export interface BaseLogContext {
   function: string;
   action?: string;
@@ -17,7 +20,7 @@ export interface BaseLogContext {
 export function createEmailHandlerContext(
   action: string,
   options?: { email?: string; requestId?: string; subscriptionId?: string; [key: string]: unknown }
-): BaseLogContext {
+): Record<string, unknown> {
   const { email, requestId, subscriptionId, ...rest } = options || {};
   return {
     function: 'email-handler',
@@ -36,7 +39,7 @@ export function createEmailHandlerContext(
 export function createDataApiContext(
   route: string,
   options?: { path?: string; method?: string; resource?: string; app?: string; requestId?: string; [key: string]: unknown }
-): BaseLogContext {
+): Record<string, unknown> {
   const { path, method, resource, app, requestId, ...rest } = options || {};
   return {
     function: app ?? 'data-api',
@@ -58,7 +61,7 @@ export function createSearchContext(options?: {
   searchType?: string;
   filters?: Record<string, unknown>;
   app?: string;
-}): BaseLogContext {
+}): Record<string, unknown> {
   return {
     function: options?.app ?? 'public-api',
     action: options?.searchType ?? 'search',
@@ -82,7 +85,7 @@ export function createNotificationRouterContext(
     userId?: string;
     source?: string;
   }
-): BaseLogContext {
+): Record<string, unknown> {
   return {
     function: 'flux-station',
     action,
@@ -105,7 +108,7 @@ export function createChangelogHandlerContext(options?: {
   branch?: string;
   changelogId?: string;
   slug?: string;
-}): BaseLogContext {
+}): Record<string, unknown> {
   return {
     function: 'changelog-handler',
     action: 'sync',
@@ -130,7 +133,7 @@ export function createDiscordHandlerContext(
     category?: string;
     slug?: string;
   }
-): BaseLogContext {
+): Record<string, unknown> {
   return {
     function: 'discord-handler',
     action: notificationType,
@@ -150,7 +153,7 @@ export function createDiscordHandlerContext(
 export function createNotificationsServiceContext(
   action: string,
   options?: { notificationId?: string; userId?: string }
-): BaseLogContext {
+): Record<string, unknown> {
   return {
     function: 'notifications-service',
     action,
@@ -165,9 +168,9 @@ export function createNotificationsServiceContext(
  * Helper to merge context with additional fields
  */
 export function withContext(
-  base: BaseLogContext,
+  base: Record<string, unknown>,
   additional: Record<string, unknown>
-): BaseLogContext {
+): Record<string, unknown> {
   return {
     ...base,
     ...additional,
@@ -183,7 +186,7 @@ export function createUtilityContext(
   utilityName: string,
   action: string,
   options?: Record<string, unknown>
-): BaseLogContext {
+): Record<string, unknown> {
   return {
     function: 'shared-utils',
     action: `${utilityName}.${action}`,
@@ -200,7 +203,7 @@ export function createUtilityContext(
 export function createTransformApiContext(
   route: string,
   options?: { path?: string; method?: string }
-): BaseLogContext {
+): Record<string, unknown> {
   return {
     function: 'transform-api',
     action: route,
@@ -223,6 +226,7 @@ export function createTransformApiContext(
 
 import pino from 'pino';
 import { createPinoConfig } from './logger/config.ts';
+import { normalizeError } from './error-handling.ts';
 
 // Create Pino logger instance with centralized configuration
 // Pino automatically handles error serialization and redaction
@@ -235,7 +239,7 @@ const pinoLogger = pino(createPinoConfig({ service: 'shared-runtime' }));
  * @param message - Log message
  * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
  */
-export function logInfo(message: string, logContext: Partial<BaseLogContext> & Record<string, unknown>): void {
+export function logInfo(message: string, logContext: Record<string, unknown>): void {
   // Pino handles redaction automatically via config
   // Mixin automatically injects bindings (requestId, operation, userId, etc.) from logger.bindings()
   // Only pass logContext fields that aren't already in bindings (mixin handles bindings automatically)
@@ -250,7 +254,7 @@ export function logInfo(message: string, logContext: Partial<BaseLogContext> & R
  * @param message - Log message
  * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
  */
-export function logTrace(message: string, logContext: Partial<BaseLogContext> & Record<string, unknown>): void {
+export function logTrace(message: string, logContext: Record<string, unknown>): void {
   // Only log if trace level is enabled (avoids unnecessary work)
   // Mixin automatically injects bindings (requestId, operation, userId, etc.) from logger.bindings()
   if (pinoLogger.isLevelEnabled('trace')) {
@@ -271,7 +275,7 @@ export function logTrace(message: string, logContext: Partial<BaseLogContext> & 
  * @param error - Optional error object to include in log
  * @returns Promise that resolves when logs are flushed
  */
-export async function logError(message: string, logContext: Partial<BaseLogContext> & Record<string, unknown>, error?: unknown): Promise<void> {
+export async function logError(message: string, logContext: Record<string, unknown>, error?: unknown): Promise<void> {
   // Build log data - mixin will automatically inject bindings (requestId, operation, userId, etc.)
   // Only include logContext fields that aren't already in bindings (mixin handles bindings automatically)
   const logData: Record<string, unknown> = {
@@ -279,8 +283,10 @@ export async function logError(message: string, logContext: Partial<BaseLogConte
   };
   
   if (error) {
-    const errorObj = error instanceof Error ? error : new Error(String(error));
-    logData['err'] = errorObj;
+    // Use normalizeError() for consistent error normalization across codebase
+    // Pino's stdSerializers.err will automatically serialize the Error object
+    const normalized = normalizeError(error, message);
+    logData['err'] = normalized;
   }
   
   // Pino's mixin function will automatically inject:
@@ -295,8 +301,11 @@ export async function logError(message: string, logContext: Partial<BaseLogConte
   await new Promise<void>((resolve, reject) => {
     pinoLogger.flush((err) => {
       if (err) {
-        // Log flush errors to stderr as a last resort (can't use logger here)
-        console.error('Failed to flush logs:', err);
+        // Write directly to stderr as a last resort (can't use logger here to avoid infinite loops)
+        // This is the only acceptable use of process.stderr.write in the codebase
+        if (typeof process !== 'undefined' && process.stderr) {
+          process.stderr.write(`Failed to flush logs: ${err instanceof Error ? err.message : String(err)}\n`);
+        }
         reject(err);
       } else {
         resolve();
@@ -313,15 +322,17 @@ export async function logError(message: string, logContext: Partial<BaseLogConte
  * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
  * @param error - Optional error object to include in log
  */
-export function logWarn(message: string, logContext: Partial<BaseLogContext> & Record<string, unknown>, error?: unknown): void {
+export function logWarn(message: string, logContext: Record<string, unknown>, error?: unknown): void {
   // Build log data - mixin will automatically inject bindings (requestId, operation, userId, etc.)
   const logData: Record<string, unknown> = {
     ...logContext,
   };
   
   if (error) {
-    const errorObj = error instanceof Error ? error : new Error(String(error));
-    logData['err'] = errorObj;
+    // Use normalizeError() for consistent error normalization across codebase
+    // Pino's stdSerializers.err will automatically serialize the Error object
+    const normalized = normalizeError(error, message);
+    logData['err'] = normalized;
   }
   
   // Pino handles redaction automatically via config
@@ -344,8 +355,10 @@ export const logger = {
   error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
     const logData: Record<string, unknown> = { ...(context || {}) };
     if (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      logData['err'] = errorObj;
+      // Use normalizeError() for consistent error normalization across codebase
+      // Pino's stdSerializers.err will automatically serialize the Error object
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     pinoLogger.error(logData, message);
   },
@@ -358,8 +371,10 @@ export const logger = {
   fatal: (message: string, error?: unknown, context?: Record<string, unknown>) => {
     const logData: Record<string, unknown> = { ...(context || {}) };
     if (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      logData['err'] = errorObj;
+      // Use normalizeError() for consistent error normalization across codebase
+      // Pino's stdSerializers.err will automatically serialize the Error object
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     pinoLogger.fatal(logData, message);
   },

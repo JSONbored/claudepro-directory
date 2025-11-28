@@ -33,8 +33,8 @@ export async function handleDirectoryIndex(ctx: PublicApiContext): Promise<Respo
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'directory-index',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'directory-index',
     method: ctx.originalMethod,
   });
   const response = jsonResponse(

@@ -142,9 +142,9 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'changelog-notify',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'changelog-notify',
+    function: typeof logContext['function'] === 'string' ? logContext['function'] : 'unknown',
     entryId: changelogEntry.entryId,
     slug: changelogEntry.slug,
     attempt: message.read_ct,

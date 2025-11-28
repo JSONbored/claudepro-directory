@@ -383,13 +383,13 @@ function validateTokenAudience(token: string, expectedAudience: string): boolean
  * @returns A WWW-Authenticate header string containing `Bearer`, `realm="mcp"`, `resource_metadata="<url>"`, and optionally `scope="<scopes>"`
  */
 function createWwwAuthenticateHeader(resourceMetadataUrl: string, scope?: string): string {
-  const params = ['Bearer', `realm="mcp"`, `resource_metadata="${resourceMetadataUrl}"`];
+  const params = [`realm="mcp"`, `resource_metadata="${resourceMetadataUrl}"`];
 
   if (scope) {
     params.push(`scope="${scope}"`);
   }
 
-  return params.join(', ');
+  return `Bearer ${params.join(', ')}`;
 }
 
 /**
@@ -414,9 +414,9 @@ mcpApp.all('/mcp', async (c) => {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'mcp-protocol',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'mcp-protocol',
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
     method: c.req.method,
   });
 

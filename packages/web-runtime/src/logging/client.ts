@@ -52,6 +52,7 @@ export {
   logClientDebug,
   logClientErrorBoundary,
   createClientLogContext,
+  createWebAppContextWithIdClient,
   type ClientLogContext,
 } from '../utils/client-logger.ts';
 

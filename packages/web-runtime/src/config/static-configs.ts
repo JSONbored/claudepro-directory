@@ -18,7 +18,7 @@ import {
   RECENTLY_VIEWED_CONFIG_DEFAULTS,
   TIMEOUT_CONFIG_DEFAULTS,
 } from '../feature-flags/defaults.ts';
-import { mapComponentCardConfig } from '../hooks/use-component-card-config.tsx';
+import { mapComponentCardConfig } from '../utils/component-card-config.ts';
 
 /**
  * Get component configuration

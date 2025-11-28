@@ -43,8 +43,8 @@ export async function handleActiveNotifications(req: Request): Promise<Response>
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'get-active-notifications',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'get-active-notifications',
     userId: authResult.user.id,
   });
 

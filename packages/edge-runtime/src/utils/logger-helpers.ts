@@ -12,7 +12,7 @@
  * - Mixin reads from logger.bindings() and injects automatically
  */
 
-import { logTrace, logger, type BaseLogContext } from '@heyclaude/shared-runtime';
+import { logTrace, logger } from '@heyclaude/shared-runtime';
 
 /**
  * Initialize request logging with trace and bindings
@@ -21,11 +21,11 @@ import { logTrace, logger, type BaseLogContext } from '@heyclaude/shared-runtime
  * Sets bindings that will be automatically injected into all subsequent log calls via mixin.
  * This eliminates the need to manually pass requestId, operation, function in every log call.
  * 
- * @param logContext - Base log context for the request
+ * @param logContext - Base log context for the request (Record<string, unknown>)
  * @param additionalBindings - Additional context to set as bindings (will be auto-injected via mixin)
  */
 export function initRequestLogging(
-  logContext: BaseLogContext,
+  logContext: Record<string, unknown>,
   additionalBindings?: Record<string, unknown>
 ): void {
   // Trace request entry for detailed debugging
@@ -33,10 +33,11 @@ export function initRequestLogging(
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   // This means you don't need to manually pass requestId, operation, function in log calls
+  // Extract standard fields from logContext (function, action, request_id) if present
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'unknown',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'unknown',
+    function: typeof logContext['function'] === 'string' ? logContext['function'] : 'unknown',
     ...additionalBindings,
   });
 }
@@ -56,9 +57,9 @@ export function updateRequestBindings(bindings: Record<string, unknown>): void {
  * Only logs if trace level is enabled (avoids unnecessary work)
  * 
  * @param message - Trace message
- * @param logContext - Log context
+ * @param logContext - Log context (Record<string, unknown>)
  */
-export function traceStep(message: string, logContext: BaseLogContext): void {
+export function traceStep(message: string, logContext: Record<string, unknown>): void {
   logTrace(message, logContext);
 }
 
@@ -66,9 +67,9 @@ export function traceStep(message: string, logContext: BaseLogContext): void {
  * Trace request completion
  * Call this before returning successful responses
  * 
- * @param logContext - Log context
+ * @param logContext - Log context (Record<string, unknown>)
  */
-export function traceRequestComplete(logContext: BaseLogContext): void {
+export function traceRequestComplete(logContext: Record<string, unknown>): void {
   logTrace('Request completed successfully', logContext);
 }
 
