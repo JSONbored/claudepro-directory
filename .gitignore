@@ -42,6 +42,16 @@ lerna-debug.log*
 .cursor/
 docs/
 
+# CodeRabbit generated reports/summaries (should not be committed)
+DELIVERABLES.md
+FINAL_TEST_REPORT.md
+README_TESTS.md
+TESTING_COMPLETE.md
+TESTS_CREATED.txt
+TEST_RESULTS.md
+TEST_SUMMARY.md
+fix-test-issues.sh
+
 # Source ZIPs in content/skills/ are git-tracked for GitHub discoverability
 apps/web/public/downloads/skills/*.zip
 
