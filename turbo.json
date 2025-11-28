@@ -4,57 +4,121 @@
     "signature": true
   },
   "tasks": {
-    "generate:categories:exec": {
+    "generate:config": {
       "outputs": [
-        "src/lib/config/category-config.generated.ts"
+        "packages/web-runtime/src/config/generated-config.ts"
       ],
       "inputs": [
-        "scripts/build/generate-category-config.ts",
+        "packages/generators/src/**/*"
+      ],
+      "cache": false,
+      "passThroughEnv": ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"]
+    },
+    "generate:categories:exec": {
+      "outputs": [
+        "packages/web-runtime/src/data/config/category/category-config.generated.ts"
+      ],
+      "inputs": [
+        "packages/generators/src/**/*",
         ".build-cache/cache.json"
       ],
       "cache": true,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY"]
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
     },
     "build:skills:exec": {
       "outputs": [
         "content/skills/*.zip",
-        "public/downloads/skills/*.zip"
+        "apps/web/public/downloads/skills/*.zip"
       ],
       "inputs": [
         "content/skills/*.json",
         "content/skills/*.zip",
-        "scripts/build/generate-skill-packages.ts",
-        "src/lib/transformers/skill-to-md.ts",
+        "packages/generators/src/**/*",
+        "packages/web-runtime/src/transformers/skill-to-md.ts",
         ".build-cache/cache.json"
       ],
       "cache": true,
       "persistent": true,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY"]
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
     },
     "generate:service-worker:exec": {
       "dependsOn": ["generate:categories:exec"],
-      "outputs": ["public/service-worker.js"],
+      "outputs": ["apps/web/public/service-worker.js"],
       "inputs": [
-        "scripts/build/generate-service-worker.ts",
-        "src/lib/config/category-config.ts",
-        "src/lib/config/category-config.generated.ts",
-        "src/lib/constants/security.ts",
+        "packages/generators/src/**/*",
+        "packages/web-runtime/src/data/config/category/category-config.generated.ts",
+        "apps/web/src/lib/data/config/constants.ts",
+        "apps/web/src/lib/data/config/constants.server.ts",
         "package.json",
         ".build-cache/cache.json"
       ],
       "cache": true
     },
+    "build": {
+      "outputs": [".next/**", "!.next/cache/**"],
+      "inputs": [
+        "apps/web/**/*",
+        "packages/**/src/**/*",
+        "packages/**/package.json",
+        "package.json",
+        "pnpm-lock.yaml",
+        "next.config.mjs",
+        "tsconfig.json"
+      ],
+      "dependsOn": [
+        "^build",
+        "generate:categories:exec",
+        "generate:service-worker:exec"
+      ]
+    },
     "type-check": {
       "outputs": ["**/*.tsbuildinfo"],
       "cache": true
     },
+      "type-check:web": {
+        "outputs": [],
+        "inputs": [
+          "apps/web/**/*",
+          "packages/**/src/**/*",
+          "tsconfig.json"
+        ],
+        "cache": true,
+        "dependsOn": ["^generate:categories:exec"]
+      },
+      "type-check:packages": {
+        "outputs": [],
+        "inputs": [
+          "packages/**/src/**/*",
+          "packages/**/tsconfig.json"
+        ],
+        "cache": true
+      },
+      "type-check:edge": {
+        "outputs": [],
+        "inputs": [
+          "apps/edge/functions/**/*",
+          "apps/edge/functions/tsconfig.json",
+          "apps/edge/functions/deno.json"
+        ],
+        "cache": true
+      },
     "lint": {
       "outputs": [],
       "cache": true
     },
+      "lint:edge": {
+        "outputs": [],
+        "inputs": [
+          "apps/edge/functions/**/*"
+        ],
+        "cache": true
+      },
     "test:unit": {
       "outputs": ["coverage/**"],
       "cache": true
+    },
+    "generators:build": {
+      "dependsOn": ["^build"]
     }
   },
   "globalDependencies": ["package.json", "pnpm-lock.yaml"],
@@ -78,6 +142,8 @@
     "VERCEL_GIT_PULL_REQUEST_ID",
     "TURBO_REMOTE_CACHE_SIGNATURE_KEY",
     "CI",
-    "CONTINUOUS_INTEGRATION"
+    "CONTINUOUS_INTEGRATION",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY"
   ]
 }

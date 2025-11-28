@@ -1,32 +1,26 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.7/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
   "files": {
     "includes": [
       "*.{ts,tsx,js,jsx,mjs,cjs}",
-      "src/**/*",
-      "tests/**/*",
-      "scripts/**/*.ts",
-      "scripts/**/*.mjs",
-      "scripts/utils/**/*.js",
+      "apps/web/src/**/*",
+      "packages/generators/src/**/*.ts",
+      "packages/generators/src/**/*.mjs",
       "content/**/*",
       "config/**/*",
-      "supabase/functions/**/*.ts"
-    ],
-    "experimentalScannerIgnores": [
-      ".next/**/*",
-      "out/**/*",
-      "dist/**/*",
-      "generated/**/*",
-      "src/generated/**/*",
-      "src/lib/schemas/generated/**/*",
-      "src/lib/schemas/generated/db-schemas.d.ts",
-      "src/types/database.types.ts",
-      "scripts/build/templates/**/*",
-      "scripts/build/templates/service-worker.template.js",
-      "node_modules/**/*",
-      "test-results/**/*",
-      "playwright-report/**/*",
-      "playwright/.cache/**/*"
+      "apps/edge/functions/**/*.ts",
+      "!**/.next",
+      "!**/out",
+      "!**/dist",
+      "!**/generated",
+      "!**/apps/web/src/generated",
+      "!**/apps/web/src/lib/schemas/generated",
+      "!**/apps/web/src/lib/schemas/generated/db-schemas.d.ts",
+      "!**/packages/database-types/src/index.ts",
+      "!**/packages/generators/src/templates",
+      "!**/packages/generators/src/templates/service-worker.template.js",
+      "!**/node_modules",
+      "!**/playwright-report"
     ],
     "ignoreUnknown": false
   },
@@ -53,8 +47,12 @@
     }
   },
   "css": {
+    "parser": {
+      "cssModules": false,
+      "tailwindDirectives": true
+    },
     "linter": {
-      "enabled": false
+      "enabled": true
     }
   },
   "linter": {
@@ -64,6 +62,7 @@
       "suspicious": {
         "noExplicitAny": "error",
         "noImplicitAnyLet": "error",
+        "noEvolvingTypes": "error",
         "noArrayIndexKey": "warn",
         "noDoubleEquals": "error",
         "noDebugger": "error",
@@ -75,7 +74,7 @@
         "noCompareNegZero": "error",
         "noConfusingLabels": "error",
         "noConfusingVoidType": "error",
-        "noConstEnum": "off",
+        "noConstEnum": "error",
         "noControlCharactersInRegex": "error",
         "noDuplicateCase": "error",
         "noDuplicateClassMembers": "error",
@@ -123,7 +122,7 @@
         "noVoid": "error",
         "useArrowFunction": "warn",
         "useFlatMap": "error",
-        "useLiteralKeys": "error",
+        "useLiteralKeys": "off",
         "useOptionalChain": "error",
         "useRegexLiterals": "error",
         "useSimpleNumberKeys": "error",
@@ -153,6 +152,9 @@
         "noUnreachableSuper": "error",
         "noUnsafeFinally": "error",
         "noUnsafeOptionalChaining": "error",
+        "noUnknownTypeSelector": {
+          "level": "off"
+        },
         "noUnusedImports": "error",
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
@@ -174,7 +176,7 @@
       },
       "style": {
         "noDefaultExport": "off",
-        "noImplicitBoolean": "off",
+        "noImplicitBoolean": "warn",
         "noInferrableTypes": "warn",
         "noNamespace": "off",
         "noNegationElse": "warn",
@@ -183,6 +185,7 @@
         "noParameterProperties": "off",
         "noRestrictedGlobals": "off",
         "noRestrictedImports": {
+          "level": "error",
           "options": {
             "patterns": [
               {
@@ -207,6 +210,15 @@
               {
                 "group": ["**/generated/**", "**/src/generated/**"],
                 "message": "⛔ DEPRECATED: /generated directory is obsolete. Content now lives in Supabase database. Use supabase-content-loader.ts instead."
+              },
+              {
+                "group": [
+                  "**/packages/web-runtime/src/data/**",
+                  "**/packages/web-runtime/src/cache/**",
+                  "**/packages/web-runtime/src/supabase/server.ts",
+                  "**/packages/web-runtime/src/supabase/server-anon.ts"
+                ],
+                "message": "⛔ Client components should not import server-only data fetching functions. Pass data as props from Server Components instead."
               }
             ]
           }
@@ -228,7 +240,7 @@
         "useImportType": "error",
         "useLiteralEnumMembers": "error",
         "useNamingConvention": "off",
-        "useNodeAssertStrict": "off",
+        "useNodeAssertStrict": "warn",
         "useNodejsImportProtocol": "off",
         "useNumberNamespace": "error",
         "useSelfClosingElements": "error",
@@ -273,9 +285,7 @@
         "noFloatingPromises": "error",
         "noMisusedPromises": "error",
         "noUnresolvedImports": "off",
-        "noDuplicateDependencies": "error",
         "noImportCycles": "error",
-        "noReactForwardRef": "warn",
         "useSortedClasses": "warn"
       }
     }
@@ -318,7 +328,7 @@
       }
     },
     {
-      "includes": ["scripts/**/*.ts", "scripts/**/*.js"],
+      "includes": ["packages/generators/src/**/*.ts", "packages/generators/src/**/*.js"],
       "linter": {
         "rules": {
           "suspicious": {
@@ -357,7 +367,6 @@
     {
       "includes": [
         "src/lib/content/supabase-content-loader.ts",
-        "scripts/sync/sync-content-supabase-client.ts",
         "src/lib/config/category-types.ts"
       ],
       "linter": {
@@ -375,11 +384,7 @@
       }
     },
     {
-      "includes": [
-        "src/lib/schemas/factories/client-input-schema.factory.ts",
-        "src/lib/security/html-sanitizer.ts",
-        "src/components/content-search-client.tsx"
-      ],
+      "includes": ["src/lib/schemas/factories/client-input-schema.factory.ts"],
       "linter": {
         "rules": {
           "suspicious": {
@@ -389,17 +394,17 @@
       }
     },
     {
-      "includes": ["src/lib/supabase/validators.ts"],
+      "includes": ["apps/web/src/lib/supabase/validators.ts"],
       "linter": {
         "rules": {
           "suspicious": {
-            "noExplicitAny": "off"
+            "noExplicitAny": "error"
           }
         }
       }
     },
     {
-      "includes": ["scripts/build/templates/**/*.js"],
+      "includes": ["packages/generators/src/templates/**/*.js"],
       "linter": {
         "enabled": false
       },
@@ -408,7 +413,7 @@
       }
     },
     {
-      "includes": ["supabase/functions/**/*.ts", "supabase/functions/**/*.tsx"],
+      "includes": ["apps/edge/functions/**/*.ts", "apps/edge/functions/**/*.tsx"],
       "linter": {
         "rules": {
           "suspicious": {
@@ -416,6 +421,26 @@
           },
           "correctness": {
             "noUndeclaredVariables": "off"
+          },
+          "complexity": {
+            "useOptionalChain": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/edge/functions/deno-imports.d.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off",
+            "noRedeclare": "off"
+          },
+          "performance": {
+            "noReExportAll": "off"
+          },
+          "complexity": {
+            "noBannedTypes": "off"
           }
         }
       }

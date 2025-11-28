@@ -1,0 +1,1974 @@
+@import "tailwindcss";
+@import "../styles/tabs.css";
+
+/* ================================================
+   CLAUDE DESKTOP THEME SYSTEM - OKLCH Color Space
+   ================================================
+   
+   Theme switching via data-theme attribute on html element:
+   - data-theme="dark" forces dark mode
+   - data-theme="light" forces light mode
+   - No attribute = follows system preference
+*/
+
+@theme {
+  /* ========================================
+     TAILWIND V4 THEME CONFIGURATION
+     Pure CSS-First Approach - Auto-generates utilities
+     ======================================== */
+
+  /* Font Families - Auto-generates font-* utilities */
+  --font-sans: var(--font-inter, "Inter"), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono, "GeistMono"), "SF Mono", Consolas, "Monaco", monospace;
+
+  /* Border Radius - Auto-generates rounded-* utilities */
+  --radius: 0.375rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+
+  /* Container Configuration */
+  --breakpoint-2xl: 1400px;
+
+  /* Animation Keyframes */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-border-beam: border-beam linear infinite;
+
+  /* Performance Optimizations - GPU Acceleration & Paint Isolation */
+  /* will-change utilities for GPU acceleration */
+  --will-change-transform: transform;
+  --will-change-opacity: opacity;
+  --will-change-transform-opacity: transform, opacity;
+  --will-change-auto: auto;
+
+  /* contain utilities for animation isolation */
+  --contain-layout: layout;
+  --contain-paint: paint;
+  --contain-content: content;
+  --contain-strict: strict;
+  --contain-size: size;
+
+  /* ========================================
+     COLOR DEFINITIONS - Both Themes
+     ======================================== */
+
+  /* Dark Mode Colors */
+  --dark-bg-primary: oklch(24% 0.008 60);
+  --dark-bg-secondary: oklch(28% 0.006 60);
+  --dark-bg-tertiary: oklch(32% 0.008 60);
+  --dark-bg-quaternary: oklch(36% 0.009 60);
+  --dark-bg-selected: oklch(40% 0.01 60);
+  --dark-bg-code: oklch(12% 0.003 60);
+  --dark-bg-overlay: oklch(18% 0.005 0 / 0.8);
+
+  --dark-text-primary: oklch(94% 0.005 60);
+  --dark-text-secondary: oklch(78% 0.008 60);
+  --dark-text-tertiary: oklch(
+    72% 0.01 60
+  ); /* Increased from 69% to 72% for improved WCAG AA contrast (4.5:1 minimum) */
+  --dark-text-disabled: oklch(57% 0.012 60);
+  --dark-text-inverse: oklch(100% 0 0);
+
+  --dark-border-default: oklch(30% 0.005 60 / 0.5);
+  --dark-border-light: oklch(28% 0.005 60 / 0.3);
+  --dark-border-medium: oklch(34% 0.008 60 / 0.6);
+  --dark-border-strong: oklch(74% 0.2 35);
+
+  /* Light Mode Colors - Claude Desktop Light */
+  --light-bg-primary: oklch(99% 0.003 90);
+  --light-bg-secondary: oklch(97.5% 0.005 85);
+  --light-bg-tertiary: oklch(96% 0.007 80);
+  --light-bg-quaternary: oklch(94% 0.008 75);
+  --light-bg-selected: oklch(92% 0.025 42);
+  --light-bg-code: oklch(98% 0.004 85);
+  --light-bg-overlay: oklch(98% 0.003 90 / 0.9);
+
+  --light-text-primary: oklch(18% 0.014 75);
+  --light-text-secondary: oklch(42% 0.012 70);
+  --light-text-tertiary: oklch(
+    44% 0.01 65
+  ); /* Decreased from 67% to 44% for improved WCAG AA contrast (4.5:1 minimum) on light backgrounds */
+  --light-text-disabled: oklch(68% 0.008 60);
+  --light-text-inverse: oklch(100% 0 0);
+
+  --light-border-default: oklch(92% 0.006 75);
+  --light-border-light: oklch(95% 0.004 80);
+  --light-border-medium: oklch(88% 0.008 70);
+  --light-border-strong: oklch(70% 0.2 35);
+
+  /* Shared Brand Colors - EXACT match to logo icon (#F97316 / #FB923C range) */
+  --claude-orange: oklch(74% 0.2 35);
+  --claude-orange-hover: oklch(78% 0.19 35);
+  --claude-orange-active: oklch(70% 0.21 35);
+  --claude-orange-light: oklch(82% 0.17 37);
+  --claude-orange-muted: oklch(65% 0.18 33);
+
+  /* Light mode adjustments for orange */
+  --light-accent: oklch(70% 0.2 35);
+  --light-accent-hover: oklch(54% 0.17 40);
+  --light-accent-active: oklch(50% 0.175 39);
+  --light-accent-subtle: oklch(95% 0.035 42);
+
+  /* Semantic Colors - Dark Mode */
+  --dark-success: oklch(72% 0.19 145); /* Increased from 64% for WCAG AA contrast (4.5:1) */
+  --dark-success-bg: oklch(35% 0.08 145 / 0.15);
+  --dark-success-border: oklch(64% 0.19 145 / 0.3);
+  --dark-warning: oklch(75% 0.155 65); /* Increased from 68% for WCAG AA contrast (4.5:1) */
+  --dark-warning-bg: oklch(45% 0.08 65 / 0.15);
+  --dark-warning-border: oklch(68% 0.155 65 / 0.3);
+  --dark-error: oklch(70% 0.195 25); /* Increased from 63% for WCAG AA contrast (4.5:1) */
+  --dark-error-bg: oklch(40% 0.08 25 / 0.15);
+  --dark-error-border: oklch(63% 0.195 25 / 0.3);
+  --dark-info: oklch(
+    78% 0.168 250
+  ); /* Increased from 65% for WCAG AA contrast (4.5:1) - was worst at 2.82:1 */
+  --dark-info-bg: oklch(40% 0.08 250 / 0.15);
+  --dark-info-border: oklch(65% 0.168 250 / 0.3);
+
+  /* Semantic Colors - Light Mode */
+  --light-success: oklch(52% 0.18 145);
+  --light-success-bg: oklch(96% 0.08 145 / 0.2);
+  --light-success-border: oklch(52% 0.18 145 / 0.3);
+  --light-warning: oklch(58% 0.16 65);
+  --light-warning-bg: oklch(97% 0.08 65 / 0.2);
+  --light-warning-border: oklch(58% 0.16 65 / 0.3);
+  --light-error: oklch(53% 0.19 25);
+  --light-error-bg: oklch(97% 0.08 25 / 0.2);
+  --light-error-border: oklch(53% 0.19 25 / 0.3);
+  --light-info: oklch(54% 0.17 250);
+  --light-info-bg: oklch(97% 0.08 250 / 0.2);
+  --light-info-border: oklch(54% 0.17 250 / 0.3);
+
+  /* Shadows - Different for each theme */
+  --dark-shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.02);
+  --dark-shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.04);
+  --dark-shadow-md: 0 2px 4px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+  --dark-shadow-lg: 0 4px 6px oklch(0% 0 0 / 0.08), 0 2px 4px oklch(0% 0 0 / 0.05);
+  --dark-shadow-xl: 0 8px 10px oklch(0% 0 0 / 0.1), 0 4px 6px oklch(0% 0 0 / 0.06);
+  --dark-shadow-2xl: 0 12px 20px oklch(0% 0 0 / 0.15);
+
+  --light-shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.03);
+  --light-shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.06);
+  --light-shadow-md: 0 4px 6px oklch(0% 0 0 / 0.08);
+  --light-shadow-lg: 0 10px 15px oklch(0% 0 0 / 0.1);
+  --light-shadow-xl: 0 15px 20px oklch(0% 0 0 / 0.12);
+  --light-shadow-2xl: 0 20px 30px oklch(0% 0 0 / 0.18);
+
+  /* ========================================
+     BRAND & UTILITY COLORS - OKLCH
+     ======================================== */
+
+  /* Discord Brand Color */
+  --color-discord: oklch(58% 0.185 272); /* #5865F2 */
+  --color-discord-hover: oklch(58% 0.185 272 / 0.1);
+  --color-discord-border: oklch(58% 0.185 272 / 0.3);
+
+  /* Syntax Highlighting Colors */
+  --color-syntax-keyword: oklch(65% 0.17 45); /* #ff8c00 - Orange */
+  --color-syntax-function: oklch(68% 0.14 220); /* #00bcd4 - Cyan */
+  --color-syntax-number: oklch(64% 0.15 140); /* #4caf50 - Green */
+  --color-syntax-string: oklch(74% 0.2 35); /* Claude orange - matches logo */
+  --color-syntax-comment: oklch(62% 0.01 60); /* Muted gray */
+
+  /* ========================================
+     CATEGORY COLOR SYSTEM - OKLCH
+     Consistent colors for content types
+     ======================================== */
+
+  /* Agents - Green */
+  --color-category-agents: oklch(64% 0.19 145);
+  --color-category-agents-bg: oklch(64% 0.19 145 / 0.2);
+  --color-category-agents-border: oklch(64% 0.19 145 / 0.3);
+  --color-category-agents-hover: oklch(64% 0.19 145 / 0.6);
+
+  /* MCP - Purple */
+  --color-category-mcp: oklch(58% 0.195 305);
+  --color-category-mcp-bg: oklch(58% 0.195 305 / 0.2);
+  --color-category-mcp-border: oklch(58% 0.195 305 / 0.3);
+  --color-category-mcp-hover: oklch(58% 0.195 305 / 0.6);
+
+  /* Rules - Blue */
+  --color-category-rules: oklch(58% 0.19 250);
+  --color-category-rules-bg: oklch(58% 0.19 250 / 0.2);
+  --color-category-rules-border: oklch(58% 0.19 250 / 0.3);
+  --color-category-rules-hover: oklch(58% 0.19 250 / 0.6);
+
+  /* Commands - Orange (proportionally brighter +12%) */
+  --color-category-commands: oklch(77% 0.2 38);
+  --color-category-commands-bg: oklch(77% 0.2 38 / 0.2);
+  --color-category-commands-border: oklch(77% 0.2 38 / 0.3);
+  --color-category-commands-hover: oklch(77% 0.2 38 / 0.6);
+
+  /* Hooks - Pink */
+  --color-category-hooks: oklch(65% 0.24 350);
+  --color-category-hooks-bg: oklch(65% 0.24 350 / 0.2);
+  --color-category-hooks-border: oklch(65% 0.24 350 / 0.3);
+  --color-category-hooks-hover: oklch(65% 0.24 350 / 0.6);
+
+  /* Statuslines - Purple */
+  --color-category-statuslines: oklch(60% 0.2 290);
+  --color-category-statuslines-bg: oklch(60% 0.2 290 / 0.2);
+  --color-category-statuslines-border: oklch(60% 0.2 290 / 0.3);
+  --color-category-statuslines-hover: oklch(60% 0.2 290 / 0.6);
+
+  /* Collections - Indigo */
+  --color-category-collections: oklch(58% 0.19 270);
+  --color-category-collections-bg: oklch(58% 0.19 270 / 0.2);
+  --color-category-collections-border: oklch(58% 0.19 270 / 0.3);
+  --color-category-collections-hover: oklch(58% 0.19 270 / 0.6);
+
+  /* Guides - Indigo */
+  --color-category-guides: oklch(58% 0.19 280);
+  --color-category-guides-bg: oklch(58% 0.19 280 / 0.2);
+  --color-category-guides-border: oklch(58% 0.19 280 / 0.3);
+  --color-category-guides-hover: oklch(58% 0.19 280 / 0.6);
+
+  /* Skills - Violet */
+  --color-category-skills: oklch(65% 0.2 310);
+  --color-category-skills-bg: oklch(65% 0.2 310 / 0.2);
+  --color-category-skills-border: oklch(65% 0.2 310 / 0.3);
+  --color-category-skills-hover: oklch(65% 0.2 310 / 0.6);
+
+  /* Tutorials - Green (same as agents) */
+  --color-category-tutorials: oklch(64% 0.19 145);
+  --color-category-tutorials-bg: oklch(64% 0.19 145 / 0.2);
+  --color-category-tutorials-border: oklch(64% 0.19 145 / 0.3);
+
+  /* Workflows - Pink (same as hooks) */
+  --color-category-workflows: oklch(65% 0.24 350);
+  --color-category-workflows-bg: oklch(65% 0.24 350 / 0.2);
+  --color-category-workflows-border: oklch(65% 0.24 350 / 0.3);
+
+  /* Use Cases - Blue (same as rules) */
+  --color-category-use-cases: oklch(58% 0.19 250);
+  --color-category-use-cases-bg: oklch(58% 0.19 250 / 0.2);
+  --color-category-use-cases-border: oklch(58% 0.19 250 / 0.3);
+
+  /* Troubleshooting - Red */
+  --color-category-troubleshooting: oklch(63% 0.195 25);
+  --color-category-troubleshooting-bg: oklch(63% 0.195 25 / 0.2);
+  --color-category-troubleshooting-border: oklch(63% 0.195 25 / 0.3);
+
+  /* Default/Fallback - Gray */
+  --color-category-default: oklch(60% 0.005 60);
+  --color-category-default-bg: oklch(60% 0.005 60 / 0.2);
+  --color-category-default-border: oklch(60% 0.005 60 / 0.3);
+
+  /* ========================================
+     MICRO TYPOGRAPHY
+     ======================================== */
+
+  --font-size-3xs: 0.6875rem; /* 11px */
+  --font-size-2xs: 0.625rem; /* 10px */
+
+  /* ========================================
+     DEFAULT THEME (Dark)
+     ======================================== */
+
+  /* Active theme colors - defaults to dark */
+  --color-bg-primary: var(--dark-bg-primary);
+  --color-bg-secondary: var(--dark-bg-secondary);
+  --color-bg-tertiary: var(--dark-bg-tertiary);
+  --color-bg-quaternary: var(--dark-bg-quaternary);
+  --color-bg-selected: var(--dark-bg-selected);
+  --color-bg-code: var(--dark-bg-code);
+  --color-bg-overlay: var(--dark-bg-overlay);
+
+  --color-text-primary: var(--dark-text-primary);
+  --color-text-secondary: var(--dark-text-secondary);
+  --color-text-tertiary: var(--dark-text-tertiary);
+  --color-text-disabled: var(--dark-text-disabled);
+  --color-text-inverse: var(--dark-text-inverse);
+
+  --color-accent: var(--claude-orange);
+  --color-accent-foreground: oklch(
+    20% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --color-accent-hover: var(--claude-orange-hover);
+  --color-accent-active: var(--claude-orange-active);
+  --color-accent-light: var(--claude-orange-light);
+  --color-accent-muted: var(--claude-orange-muted);
+  --color-accent-subtle: oklch(45% 0.08 35);
+
+  --color-border-default: var(--dark-border-default);
+  --color-border-light: var(--dark-border-light);
+  --color-border-medium: var(--dark-border-medium);
+  --color-border-strong: var(--dark-border-strong);
+
+  --color-success: var(--dark-success);
+  --color-success-bg: var(--dark-success-bg);
+  --color-success-border: var(--dark-success-border);
+  --color-warning: var(--dark-warning);
+  --color-warning-bg: var(--dark-warning-bg);
+  --color-warning-border: var(--dark-warning-border);
+  --color-error: var(--dark-error);
+  --color-error-bg: var(--dark-error-bg);
+  --color-error-border: var(--dark-error-border);
+  --color-info: var(--dark-info);
+  --color-info-bg: var(--dark-info-bg);
+  --color-info-border: var(--dark-info-border);
+
+  --shadow-xs: var(--dark-shadow-xs);
+  --shadow-sm: var(--dark-shadow-sm);
+  --shadow-md: var(--dark-shadow-md);
+  --shadow-lg: var(--dark-shadow-lg);
+  --shadow-xl: var(--dark-shadow-xl);
+  --shadow-2xl: var(--dark-shadow-2xl);
+
+  /* Tailwind CSS variable mappings for shadcn/ui compatibility */
+  --color-background: var(--color-bg-primary);
+  --color-foreground: var(--color-text-primary);
+  --color-card: var(--color-bg-secondary);
+  --color-card-foreground: var(--color-text-primary);
+  --color-popover: var(--color-bg-secondary);
+  --color-popover-foreground: var(--color-text-primary);
+  --color-primary: var(--color-accent);
+  --color-primary-foreground: var(--color-text-inverse);
+  --color-secondary: var(--color-bg-tertiary);
+  --color-secondary-foreground: var(--color-text-secondary);
+  --color-muted: var(--color-bg-tertiary);
+  --color-muted-foreground: var(--color-text-tertiary);
+  --color-border: var(--color-border-default);
+  --color-input: var(--color-bg-secondary);
+  --color-ring: var(--color-accent);
+  --color-destructive: var(--color-error);
+  --color-destructive-foreground: var(--color-text-primary);
+
+  /* Typography - Shared */
+  --font-family-sans: var(--font-inter, "Inter"), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-mono: var(--font-geist-mono, "GeistMono"), "SF Mono", Consolas, "Monaco", monospace;
+
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* Letter Spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* Border Radius */
+  --radius: 0.375rem;
+  --radius-none: 0;
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Spacing */
+  --spacing-0: 0;
+  --spacing-px: 1px;
+  --spacing-0_5: 0.125rem;
+  --spacing-1: 0.25rem;
+  --spacing-1_5: 0.375rem;
+  --spacing-2: 0.5rem;
+  --spacing-2_5: 0.625rem;
+  --spacing-3: 0.75rem;
+  --spacing-3_5: 0.875rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-7: 1.75rem;
+  --spacing-8: 2rem;
+  --spacing-9: 2.25rem;
+  --spacing-10: 2.5rem;
+  --spacing-11: 2.75rem;
+  --spacing-12: 3rem;
+  --spacing-14: 3.5rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-28: 7rem;
+  --spacing-32: 8rem;
+
+  /* Animation Durations */
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+
+  /* Animation Easings */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ========================================
+   SYSTEM PREFERENCE: LIGHT MODE
+   ======================================== */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --color-bg-primary: var(--light-bg-primary);
+    --color-bg-secondary: var(--light-bg-secondary);
+    --color-bg-tertiary: var(--light-bg-tertiary);
+    --color-bg-quaternary: var(--light-bg-quaternary);
+    --color-bg-selected: var(--light-bg-selected);
+    --color-bg-code: var(--light-bg-code);
+    --color-bg-overlay: var(--light-bg-overlay);
+
+    --color-text-primary: var(--light-text-primary);
+    --color-text-secondary: var(--light-text-secondary);
+    --color-text-tertiary: var(--light-text-tertiary);
+    --color-text-disabled: var(--light-text-disabled);
+    --color-text-inverse: var(--light-text-inverse);
+
+    --color-accent: var(--light-accent);
+    --color-accent-hover: var(--light-accent-hover);
+    --color-accent-active: var(--light-accent-active);
+    --color-accent-subtle: var(--light-accent-subtle);
+    --color-accent-light: var(--claude-orange-light);
+    --color-accent-muted: var(--claude-orange-muted);
+
+    --color-border-default: var(--light-border-default);
+    --color-border-light: var(--light-border-light);
+    --color-border-medium: var(--light-border-medium);
+    --color-border-strong: var(--light-border-strong);
+
+    --color-success: var(--light-success);
+    --color-success-bg: var(--light-success-bg);
+    --color-success-border: var(--light-success-border);
+    --color-warning: var(--light-warning);
+    --color-warning-bg: var(--light-warning-bg);
+    --color-warning-border: var(--light-warning-border);
+    --color-error: var(--light-error);
+    --color-error-bg: var(--light-error-bg);
+    --color-error-border: var(--light-error-border);
+    --color-info: var(--light-info);
+    --color-info-bg: var(--light-info-bg);
+    --color-info-border: var(--light-info-border);
+
+    --shadow-xs: var(--light-shadow-xs);
+    --shadow-sm: var(--light-shadow-sm);
+    --shadow-md: var(--light-shadow-md);
+    --shadow-lg: var(--light-shadow-lg);
+    --shadow-xl: var(--light-shadow-xl);
+    --shadow-2xl: var(--light-shadow-2xl);
+  }
+}
+
+/* ========================================
+   FORCED LIGHT MODE
+   ======================================== */
+[data-theme="light"] {
+  --color-bg-primary: var(--light-bg-primary);
+  --color-bg-secondary: var(--light-bg-secondary);
+  --color-bg-tertiary: var(--light-bg-tertiary);
+  --color-bg-quaternary: var(--light-bg-quaternary);
+  --color-bg-selected: var(--light-bg-selected);
+  --color-bg-code: var(--light-bg-code);
+  --color-bg-overlay: var(--light-bg-overlay);
+
+  --color-text-primary: var(--light-text-primary);
+  --color-text-secondary: var(--light-text-secondary);
+  --color-text-tertiary: var(--light-text-tertiary);
+  --color-text-disabled: var(--light-text-disabled);
+  --color-text-inverse: var(--light-text-inverse);
+
+  --color-accent: var(--light-accent);
+  --color-accent-foreground: oklch(
+    20% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --color-accent-hover: var(--light-accent-hover);
+  --color-accent-active: var(--light-accent-active);
+  --color-accent-subtle: var(--light-accent-subtle);
+  --color-accent-light: var(--claude-orange-light);
+  --color-accent-muted: var(--claude-orange-muted);
+
+  --color-border-default: var(--light-border-default);
+  --color-border-light: var(--light-border-light);
+  --color-border-medium: var(--light-border-medium);
+  --color-border-strong: var(--light-border-strong);
+
+  --color-success: var(--light-success);
+  --color-success-bg: var(--light-success-bg);
+  --color-success-border: var(--light-success-border);
+  --color-warning: var(--light-warning);
+  --color-warning-bg: var(--light-warning-bg);
+  --color-warning-border: var(--light-warning-border);
+  --color-error: var(--light-error);
+  --color-error-bg: var(--light-error-bg);
+  --color-error-border: var(--light-error-border);
+  --color-info: var(--light-info);
+  --color-info-bg: var(--light-info-bg);
+  --color-info-border: var(--light-info-border);
+
+  --shadow-xs: var(--light-shadow-xs);
+  --shadow-sm: var(--light-shadow-sm);
+  --shadow-md: var(--light-shadow-md);
+  --shadow-lg: var(--light-shadow-lg);
+  --shadow-xl: var(--light-shadow-xl);
+  --shadow-2xl: var(--light-shadow-2xl);
+}
+
+/* ========================================
+   FORCED DARK MODE
+   ======================================== */
+[data-theme="dark"] {
+  --color-bg-primary: var(--dark-bg-primary);
+  --color-bg-secondary: var(--dark-bg-secondary);
+  --color-bg-tertiary: var(--dark-bg-tertiary);
+  --color-bg-quaternary: var(--dark-bg-quaternary);
+  --color-bg-selected: var(--dark-bg-selected);
+  --color-bg-code: var(--dark-bg-code);
+  --color-bg-overlay: var(--dark-bg-overlay);
+
+  --color-text-primary: var(--dark-text-primary);
+  --color-text-secondary: var(--dark-text-secondary);
+  --color-text-tertiary: var(--dark-text-tertiary);
+  --color-text-disabled: var(--dark-text-disabled);
+  --color-text-inverse: var(--dark-text-inverse);
+
+  --color-accent: var(--claude-orange);
+  --color-accent-foreground: oklch(
+    20% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --color-accent-hover: var(--claude-orange-hover);
+  --color-accent-active: var(--claude-orange-active);
+  --color-accent-subtle: oklch(45% 0.08 35);
+  --color-accent-light: var(--claude-orange-light);
+  --color-accent-muted: var(--claude-orange-muted);
+
+  --color-border-default: var(--dark-border-default);
+  --color-border-light: var(--dark-border-light);
+  --color-border-medium: var(--dark-border-medium);
+  --color-border-strong: var(--dark-border-strong);
+
+  --color-success: var(--dark-success);
+  --color-success-bg: var(--dark-success-bg);
+  --color-success-border: var(--dark-success-border);
+  --color-warning: var(--dark-warning);
+  --color-warning-bg: var(--dark-warning-bg);
+  --color-warning-border: var(--dark-warning-border);
+  --color-error: var(--dark-error);
+  --color-error-bg: var(--dark-error-bg);
+  --color-error-border: var(--dark-error-border);
+  --color-info: var(--dark-info);
+  --color-info-bg: var(--dark-info-bg);
+  --color-info-border: var(--dark-info-border);
+
+  --shadow-xs: var(--dark-shadow-xs);
+  --shadow-sm: var(--dark-shadow-sm);
+  --shadow-md: var(--dark-shadow-md);
+  --shadow-lg: var(--dark-shadow-lg);
+  --shadow-xl: var(--dark-shadow-xl);
+  --shadow-2xl: var(--dark-shadow-2xl);
+}
+
+@layer base {
+  :root {
+    /* Custom gradient variables */
+    --gradient-primary: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+    --gradient-hero: linear-gradient(135deg, var(--color-bg-primary), var(--color-bg-secondary));
+    --gradient-card: linear-gradient(145deg, var(--color-bg-secondary), var(--color-bg-tertiary));
+    --gradient-border: linear-gradient(90deg, transparent, var(--color-accent) / 0.2, transparent);
+
+    /* Shadow effects */
+    --shadow-glow: 0 0 20px var(--color-accent) / 0.1;
+    --shadow-orange: 0 0 20px var(--color-accent) / 0.3;
+
+    /* Transition presets */
+    --transition-fast: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Monospace font family */
+    --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Monaco", monospace;
+  }
+
+  * {
+    border-color: var(--color-border-default);
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+    font-family: var(--font-inter, "Inter"), system-ui, sans-serif;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition:
+      background-color 200ms ease-in-out,
+      color 200ms ease-in-out;
+  }
+
+  code {
+    @apply text-sm;
+    font-family: var(--font-family-mono);
+    background: var(--color-bg-code);
+    color: var(--color-text-secondary);
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+  }
+}
+
+/* Utility Classes */
+@layer utilities {
+  /* Background Utilities */
+  .bg-primary {
+    background-color: var(--color-bg-primary);
+  }
+  .bg-secondary {
+    background-color: var(--color-bg-secondary);
+  }
+  .bg-tertiary {
+    background-color: var(--color-bg-tertiary);
+  }
+  .bg-quaternary {
+    background-color: var(--color-bg-quaternary);
+  }
+  .bg-selected {
+    background-color: var(--color-bg-selected);
+  }
+  .bg-code {
+    background-color: var(--color-bg-code);
+  }
+
+  /* Text Color Utilities */
+  .text-primary {
+    color: var(--color-text-primary);
+  }
+  .text-secondary {
+    color: var(--color-text-secondary);
+  }
+  .text-tertiary {
+    color: var(--color-text-tertiary);
+  }
+  .text-disabled {
+    color: var(--color-text-disabled);
+  }
+  .text-inverse {
+    color: var(--color-text-inverse);
+  }
+
+  /* Accent Color Utilities */
+  .text-accent {
+    color: var(--color-accent);
+  }
+  .text-accent-hover {
+    color: var(--color-accent-hover);
+  }
+  .text-accent-light {
+    color: var(--color-accent-light);
+  }
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+  .bg-accent-hover {
+    background-color: var(--color-accent-hover);
+  }
+  .bg-accent-subtle {
+    background-color: var(--color-accent-subtle);
+  }
+
+  /* Border Utilities */
+  .border-default {
+    border-color: var(--color-border-default);
+  }
+  .border-light {
+    border-color: var(--color-border-light);
+  }
+  .border-medium {
+    border-color: var(--color-border-medium);
+  }
+  .border-strong {
+    border-color: var(--color-border-strong);
+  }
+
+  /* Semantic Color Utilities */
+  .text-success {
+    color: var(--color-success);
+  }
+  .text-warning {
+    color: var(--color-warning);
+  }
+  .text-error {
+    color: var(--color-error);
+  }
+  .text-info {
+    color: var(--color-info);
+  }
+
+  .bg-success {
+    background-color: var(--color-success-bg);
+  }
+  .bg-warning {
+    background-color: var(--color-warning-bg);
+  }
+  .bg-error {
+    background-color: var(--color-error-bg);
+  }
+  .bg-info {
+    background-color: var(--color-info-bg);
+  }
+
+  .border-success {
+    border-color: var(--color-success-border);
+  }
+  .border-warning {
+    border-color: var(--color-warning-border);
+  }
+  .border-error {
+    border-color: var(--color-error-border);
+  }
+  .border-info {
+    border-color: var(--color-info-border);
+  }
+
+  /* Transition Utilities */
+  .transition-smooth {
+    transition: var(--transition-normal);
+  }
+
+  .transition-fast {
+    transition: var(--transition-fast);
+  }
+
+  .transition-slow {
+    transition: var(--transition-slow);
+  }
+}
+
+/* Global Link Reset - Removes Browser Default Underlines */
+@layer base {
+  /* Remove default browser underlines from all links
+     Component-level classes (like .claude-link with hover:underline) will still work
+     Custom accent underlines in navigation will display correctly without double underlines */
+  a {
+    text-decoration: none;
+  }
+}
+
+/* Link Micro-Interaction Utilities */
+@layer utilities {
+  /* Custom accent underline (orange) on hover - matches navigation style */
+  .link-accent-underline {
+    position: relative;
+    display: inline-block;
+  }
+
+  .link-accent-underline::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--color-accent);
+    transition: width 0.3s ease;
+  }
+
+  .link-accent-underline:hover::after {
+    width: 100%;
+  }
+
+  /* Icon links - no underline, just color change */
+  .link-icon {
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .link-icon:hover {
+    color: var(--color-accent);
+  }
+}
+
+/* Component Classes */
+@layer components {
+  /* Hero Section with Claude Orange Gradient */
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  /* Card styling with warm charcoal background */
+  .card-gradient {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    transition: var(--transition-normal);
+  }
+
+  .card-gradient:hover {
+    background: var(--color-bg-tertiary);
+    border-color: color-mix(in oklch, var(--color-primary), transparent 70%);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Claude orange glow effects */
+  .glow-effect {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .orange-glow {
+    box-shadow: var(--shadow-orange);
+  }
+
+  /* Claude Card */
+  .claude-card {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--duration-200) var(--ease-in-out);
+  }
+
+  .claude-card:hover {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-border-medium);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Claude Buttons */
+  .claude-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2) var(--spacing-4);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-md);
+    transition: all var(--duration-150) var(--ease-in-out);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .claude-btn-primary {
+    background-color: var(--color-accent);
+    color: white;
+    border: 1px solid var(--color-accent);
+  }
+
+  .claude-btn-primary:hover {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+    box-shadow: 0 0 0 1px var(--color-accent) / 0.2;
+  }
+
+  .claude-btn-primary:active {
+    background-color: var(--color-accent-active);
+  }
+
+  .claude-btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent) / 0.5;
+  }
+
+  .claude-btn-secondary {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border-default);
+  }
+
+  .claude-btn-secondary:hover {
+    background-color: var(--color-bg-quaternary);
+    border-color: var(--color-border-medium);
+  }
+
+  .claude-btn-ghost {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid transparent;
+  }
+
+  .claude-btn-ghost:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  /* Claude Input */
+  .claude-input {
+    width: 100%;
+    padding: var(--spacing-2) var(--spacing-3);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    transition: all var(--duration-150) var(--ease-in-out);
+  }
+
+  .claude-input:hover {
+    border-color: var(--color-border-medium);
+  }
+
+  .claude-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent) / 0.2;
+  }
+
+  .claude-input::placeholder {
+    color: var(--color-text-tertiary);
+  }
+
+  .claude-input:disabled {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+  }
+
+  /* Claude Badge */
+  .claude-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-0_5) var(--spacing-2);
+    background-color: var(--color-accent-subtle);
+    color: var(--color-accent-light);
+    border: 1px solid var(--color-accent-muted);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  /* Claude Link */
+  .claude-link {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: all var(--duration-150) var(--ease-in-out);
+    text-underline-offset: 2px;
+  }
+
+  .claude-link:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+  }
+
+  .claude-link:active {
+    color: var(--color-accent-active);
+  }
+
+  /* Claude Code Block */
+  .claude-code {
+    display: block;
+    padding: var(--spacing-4);
+    background-color: var(--color-bg-code);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    line-height: var(--leading-relaxed);
+    overflow-x: auto;
+    color: var(--color-text-secondary);
+  }
+
+  .claude-code-inline {
+    padding: var(--spacing-0_5) var(--spacing-1);
+    background-color: var(--color-bg-code);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-xs);
+    font-family: var(--font-family-mono);
+    font-size: 0.875em;
+    color: var(--color-accent-light);
+  }
+
+  /* ========================================
+     CODE BLOCK ENHANCEMENTS
+     Phase 1: Unified styling + max-height
+     ======================================== */
+
+  /* Sugar High syntax highlighting - line and word highlights */
+  .line--highlighted {
+    background-color: var(--color-accent-subtle);
+    border-left: 2px solid var(--color-accent);
+    padding-left: 0.75rem;
+    margin-left: -0.75rem;
+    display: block;
+  }
+
+  .word--highlighted {
+    background-color: var(--color-accent-subtle);
+    border-radius: 0.25rem;
+    padding: 0.125rem 0.25rem;
+    color: var(--color-accent-light);
+  }
+
+  /* Line numbers for code blocks using data-line attribute */
+  .line-number::before {
+    content: attr(data-line);
+    display: inline-block;
+    width: 2rem;
+    margin-right: 1.5rem;
+    padding-right: 0.5rem;
+    text-align: right;
+    color: var(--color-text-tertiary);
+    opacity: 0.6;
+    user-select: none;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .line-number {
+    display: block;
+  }
+
+  /* ========================================
+     SEARCH RESULT HIGHLIGHTING
+     ======================================== */
+
+  /* Base mark styling - semantic HTML5 element for search highlighting */
+  mark {
+    background-color: rgb(250 204 21 / 0.3); /* yellow-300 with 30% opacity */
+    color: inherit; /* Inherit text color for proper contrast */
+    padding: 0.125rem 0.25rem; /* Subtle padding */
+    border-radius: 0.25rem; /* Rounded corners */
+    font-weight: 500; /* Slightly bolder */
+    text-decoration: none; /* No underline */
+    box-decoration-break: clone; /* Ensure background wraps across lines */
+    -webkit-box-decoration-break: clone; /* Safari support */
+  }
+
+  /* Dark mode */
+  @media (prefers-color-scheme: dark) {
+    mark {
+      background-color: rgb(234 179 8 / 0.4); /* yellow-600 with 40% opacity */
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    mark {
+      background-color: rgb(250 204 21 / 0.5); /* More opaque for better visibility */
+      border: 1px solid rgb(234 179 8); /* Add border for clarity */
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    mark {
+      transition: none; /* No transitions if user prefers reduced motion */
+    }
+  }
+
+  /* Print styles - remove highlighting for printing */
+  @media print {
+    mark {
+      background-color: transparent;
+      color: inherit;
+      font-weight: bold; /* Use bold instead of background for print */
+    }
+  }
+
+  /* ========================================
+     PRODUCTION-GRADE CUSTOM SCROLLBARS
+     ======================================== */
+
+  /* Horizontal & vertical scrollbar for code blocks */
+  pre::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+  }
+
+  pre::-webkit-scrollbar-track {
+    background: var(--color-bg-muted);
+    border-radius: 999px;
+    margin: 0.25rem;
+  }
+
+  pre::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 999px;
+    transition: background 200ms ease-in-out;
+  }
+
+  pre::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-medium);
+  }
+
+  pre::-webkit-scrollbar-corner {
+    background: var(--color-bg-muted);
+  }
+
+  /* Firefox scrollbar styling */
+  pre {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-medium) transparent;
+    scrollbar-gutter: stable;
+  }
+
+  /* General scrollbar styling for containers */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    border: 2px solid var(--color-border-medium);
+    border-radius: 999px;
+    background-color: transparent;
+    background-clip: content-box;
+    transition: all 200ms ease-in-out;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+    background-clip: padding-box;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-medium) transparent;
+  }
+
+  /* Claude Navigation */
+  .claude-nav-item {
+    padding: var(--spacing-2) var(--spacing-3);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-md);
+    transition: all var(--duration-150) var(--ease-in-out);
+    cursor: pointer;
+  }
+
+  .claude-nav-item:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  .claude-nav-item.active {
+    background-color: var(--color-accent-subtle);
+    color: var(--color-accent);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* Claude Divider */
+  .claude-divider {
+    height: 1px;
+    background-color: var(--color-border-default);
+    margin: var(--spacing-4) 0;
+  }
+
+  /* Claude List Item */
+  .claude-list-item {
+    padding: var(--spacing-3) var(--spacing-4);
+    border-bottom: 1px solid var(--color-border-light);
+    transition: background-color var(--duration-150) var(--ease-in-out);
+  }
+
+  .claude-list-item:hover {
+    background-color: var(--color-bg-tertiary);
+  }
+
+  .claude-list-item:last-child {
+    border-bottom: none;
+  }
+
+  .claude-list-item.selected {
+    background-color: var(--color-bg-selected);
+    border-left: 2px solid var(--color-accent);
+    padding-left: calc(var(--spacing-4) - 2px);
+  }
+
+  /* ========================================
+     SHA-2099: Custom Utility Classes
+     Brand colors, syntax highlighting, categories
+     ======================================== */
+
+  /* Discord Brand Utilities */
+  .bg-discord {
+    background-color: var(--color-discord);
+  }
+  .bg-discord\/10 {
+    background-color: var(--color-discord-hover);
+  }
+  .text-discord {
+    color: var(--color-discord);
+  }
+  .border-discord\/30 {
+    border-color: var(--color-discord-border);
+  }
+
+  /* Syntax Highlighting Utilities */
+  .text-syntax-keyword {
+    color: var(--color-syntax-keyword);
+  }
+  .text-syntax-function {
+    color: var(--color-syntax-function);
+  }
+  .text-syntax-number {
+    color: var(--color-syntax-number);
+  }
+
+  /* Category Badge Utilities */
+  .badge-category-agents {
+    background-color: var(--color-category-agents-bg);
+    color: var(--color-category-agents);
+    border-color: var(--color-category-agents-border);
+  }
+  .badge-category-mcp {
+    background-color: var(--color-category-mcp-bg);
+    color: var(--color-category-mcp);
+    border-color: var(--color-category-mcp-border);
+  }
+  .badge-category-rules {
+    background-color: var(--color-category-rules-bg);
+    color: var(--color-category-rules);
+    border-color: var(--color-category-rules-border);
+  }
+  .badge-category-commands {
+    background-color: var(--color-category-commands-bg);
+    color: var(--color-category-commands);
+    border-color: var(--color-category-commands-border);
+  }
+  .badge-category-hooks {
+    background-color: var(--color-category-hooks-bg);
+    color: var(--color-category-hooks);
+    border-color: var(--color-category-hooks-border);
+  }
+  .badge-category-statuslines {
+    background-color: var(--color-category-statuslines-bg);
+    color: var(--color-category-statuslines);
+    border-color: var(--color-category-statuslines-border);
+  }
+  .badge-category-collections {
+    background-color: var(--color-category-collections-bg);
+    color: var(--color-category-collections);
+    border-color: var(--color-category-collections-border);
+  }
+  .badge-category-guides {
+    background-color: var(--color-category-guides-bg);
+    color: var(--color-category-guides);
+    border-color: var(--color-category-guides-border);
+  }
+  .badge-category-skills {
+    background-color: var(--color-category-skills-bg);
+    color: var(--color-category-skills);
+    border-color: var(--color-category-skills-border);
+  }
+
+  /* Micro Font Sizes */
+  .text-3xs {
+    font-size: var(--font-size-3xs);
+  }
+  .text-2xs {
+    font-size: var(--font-size-2xs);
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Navigation styling */
+  .nav-backdrop {
+    background: color-mix(in oklch, var(--color-background), transparent 5%);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .nav-link {
+    color: var(--color-secondary-foreground);
+    transition: var(--transition-normal);
+  }
+
+  .nav-link:hover {
+    color: var(--color-foreground);
+  }
+
+  .nav-link.active {
+    color: var(--color-primary);
+  }
+
+  /* Light mode specific adjustments */
+  [data-theme="light"] .claude-card {
+    box-shadow: 0 1px 3px oklch(0% 0 0 / 0.08);
+  }
+
+  [data-theme="light"] .claude-btn-primary {
+    font-weight: 600;
+  }
+
+  /* Smooth theme transition - REMOVED conflicting universal selector */
+  /* Now handled by micro-interactions.css with targeted selectors for better performance */
+
+  /* ========================================
+     VIEW TRANSITIONS API - CIRCLE BLUR ANIMATION
+     Modern theme toggle animation for Chrome/Edge 111+
+     ======================================== */
+
+  /** Circle blur animation for theme toggle (progressive enhancement). */
+  @supports (view-transition-name: root) {
+    /* Disable old view animation (fade out instantly) */
+    ::view-transition-old(root) {
+      animation: none;
+      opacity: 0;
+    }
+
+    /* Animate new view with enhanced circle blur expansion */
+    ::view-transition-new(root) {
+      animation: circle-blur-expand 700ms cubic-bezier(0.22, 1, 0.36, 1);
+      mix-blend-mode: normal;
+      /* Animation origin set dynamically via inline style */
+    }
+  }
+
+  @keyframes circle-blur-expand {
+    from {
+      clip-path: circle(0% at var(--x, 50%) var(--y, 50%));
+      filter: blur(8px) brightness(0.95);
+      transform: scale(1.02);
+    }
+    to {
+      clip-path: circle(200% at var(--x, 50%) var(--y, 50%));
+      filter: blur(0) brightness(1);
+      transform: scale(1);
+    }
+  }
+
+  /* ========================================
+     VIEW TRANSITIONS API - CARD → DETAIL PAGE MORPHING
+     Baseline support as of October 2025
+     ======================================== */
+
+  /** Smooth card→detail morphing using view transitions (Prog. enhancement). */
+  @supports (view-transition-name: none) {
+    /* Root transition: Subtle cross-fade for layout context */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: 350ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Shared element transitions: Smooth morphing for cards
+     * Applies to all view-transition elements (cards, images, etc.)
+     * CSS wildcards in pseudo-elements are not supported by optimizers
+     */
+    ::view-transition-group(*),
+    ::view-transition-image-pair(*) {
+      animation-duration: 400ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Old view (card): Scale down and fade out */
+    ::view-transition-old(*) {
+      animation-duration: 400ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      animation-name: card-shrink-fade-out;
+      mix-blend-mode: normal;
+    }
+
+    /* New view (detail page): Scale up and fade in */
+    ::view-transition-new(*) {
+      animation-duration: 400ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      animation-name: card-grow-fade-in;
+      mix-blend-mode: normal;
+    }
+  }
+
+  /* Card shrink and fade out animation */
+  @keyframes card-shrink-fade-out {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  /* Card grow and fade in animation */
+  @keyframes card-grow-fade-in {
+    from {
+      opacity: 0;
+      transform: scale(1.05);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Respect prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    html ::view-transition-old(*),
+    html ::view-transition-new(*) {
+      animation-duration: 1ms;
+      animation-delay: 0s;
+    }
+  }
+}
+
+/* ========================================
+   CUSTOM UTILITIES - Tailwind v4 @utility
+   ======================================== */
+
+/* Container utility with custom centering and padding */
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 2rem;
+
+  @media (min-width: 1400px) {
+    max-width: 1400px;
+  }
+}
+
+/* ========================================
+   KEYFRAME ANIMATIONS
+   ======================================== */
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-accent {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Magic UI Component Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes borderBeamSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes border-beam {
+  0% {
+    offset-distance: 0%;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes rippleEffect {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes marqueeLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes marqueeRight {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes marqueeUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes marqueeDown {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes gridMove {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(40px, 40px);
+  }
+}
+
+/* Animation Utilities */
+.animate-fade-in {
+  animation: fadeIn var(--duration-200) var(--ease-out) both;
+}
+
+.animate-slide-up {
+  animation: slideUp var(--duration-300) var(--ease-out) both;
+}
+
+.animate-scale-in {
+  animation: scale-in var(--duration-200) var(--ease-out) both;
+}
+
+.animate-pulse {
+  animation: pulse-accent var(--duration-1000) var(--ease-in-out) infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+.animate-gridMove {
+  animation: gridMove 20s linear infinite;
+}
+
+.animate-border-beam {
+  animation: border-beam linear infinite;
+  animation-duration: var(--duration);
+}
+
+/* Text Roll Animation - Apple Hello Effect */
+@keyframes textRoll {
+  0% {
+    transform: translateY(0) rotateX(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-20px) rotateX(90deg);
+    opacity: 0;
+  }
+  51% {
+    transform: translateY(20px) rotateX(-90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-textRoll {
+  animation: textRoll 600ms ease-in-out;
+}
+
+/* Additional animations for enhanced components */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* ========================================
+   FONT OPTIMIZATION - Next.js Font System
+   ======================================== */
+
+/* Next.js automatically handles font optimization, preloading, and FOIT prevention */
+/* The Inter font is optimized via next/font/google with display: 'swap' */
+
+/* Enhanced system font fallback for improved layout stability */
+.font-sans {
+  font-family:
+    var(--font-inter, "Inter"), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
+  font-feature-settings: "cv11", "ss01";
+  font-variation-settings: "opsz" 32;
+}
+
+/* Optimize font rendering performance */
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   CSS CONTAINER QUERIES & CONTAINMENT
+   ======================================== */
+
+/* Container Query Definitions */
+.container-responsive {
+  container-type: inline-size;
+  container-name: responsive;
+}
+
+.container-card {
+  container-type: inline-size;
+  container-name: card;
+}
+
+.container-sidebar {
+  container-type: inline-size;
+  container-name: sidebar;
+}
+
+.container-content {
+  container-type: inline-size;
+  container-name: content;
+}
+
+/* CSS Containment for performance isolation */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+.contain-size {
+  contain: size;
+}
+
+.contain-strict {
+  contain: strict;
+}
+
+.contain-content {
+  contain: content;
+}
+
+/* Container Query Responsive Styles */
+@container responsive (min-width: 320px) {
+  .container-responsive-text {
+    font-size: 0.875rem;
+  }
+
+  .container-responsive-padding {
+    padding: 0.75rem;
+  }
+
+  .container-responsive-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@container responsive (min-width: 480px) {
+  .container-responsive-text {
+    font-size: 1rem;
+  }
+
+  .container-responsive-padding {
+    padding: 1rem;
+  }
+
+  .container-responsive-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@container responsive (min-width: 640px) {
+  .container-responsive-text {
+    font-size: 1.125rem;
+  }
+
+  .container-responsive-padding {
+    padding: 1.5rem;
+  }
+
+  .container-responsive-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@container responsive (min-width: 768px) {
+  .container-responsive-text {
+    font-size: 1.25rem;
+  }
+
+  .container-responsive-padding {
+    padding: 2rem;
+  }
+
+  .container-responsive-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Card Container Queries */
+@container card (max-width: 400px) {
+  .card-title {
+    font-size: 1rem;
+  }
+
+  .card-description {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .card-content {
+    padding: 0.75rem;
+  }
+
+  .card-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@container card (min-width: 401px) {
+  .card-title {
+    font-size: 1.25rem;
+  }
+
+  .card-description {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .card-content {
+    padding: 1.25rem;
+  }
+
+  .card-actions {
+    flex-direction: row;
+    gap: 1rem;
+  }
+}
+
+/* Sidebar Container Queries */
+@container sidebar (max-width: 250px) {
+  .sidebar-item {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .sidebar-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .sidebar-label {
+    display: none;
+  }
+}
+
+@container sidebar (min-width: 251px) {
+  .sidebar-item {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+
+  .sidebar-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .sidebar-label {
+    display: inline;
+  }
+}
+
+/* Content Area Container Queries */
+@container content (min-width: 320px) and (max-width: 640px) {
+  .content-columns {
+    columns: 1;
+  }
+
+  .content-header {
+    font-size: 1.5rem;
+  }
+}
+
+@container content (min-width: 641px) and (max-width: 1024px) {
+  .content-columns {
+    columns: 2;
+    column-gap: 2rem;
+  }
+
+  .content-header {
+    font-size: 2rem;
+  }
+}
+
+@container content (min-width: 1025px) {
+  .content-columns {
+    columns: 3;
+    column-gap: 2.5rem;
+  }
+
+  .content-header {
+    font-size: 2.5rem;
+  }
+}
+
+/* CSS Subgrid Support */
+.grid-subgrid {
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-template-columns: subgrid;
+}
+
+.subgrid-rows {
+  display: grid;
+  grid-template-rows: subgrid;
+}
+
+.subgrid-cols {
+  display: grid;
+  grid-template-columns: subgrid;
+}
+
+/* Complex layout with subgrid */
+.layout-parent {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto 1fr auto;
+  gap: 1rem;
+}
+
+.layout-child {
+  grid-column: span 12;
+  display: grid;
+  grid-template-columns: subgrid;
+}
+
+@container responsive (min-width: 768px) {
+  .layout-child {
+    grid-column: span 6;
+  }
+}
+
+@container responsive (min-width: 1024px) {
+  .layout-child {
+    grid-column: span 4;
+  }
+}

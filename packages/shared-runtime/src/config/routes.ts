@@ -1,0 +1,36 @@
+/**
+ * Route Constants
+ * Type-safe route constants for navigation
+ */
+export const ROUTES = {
+  HOME: '/',
+  COMMUNITY: '/community',
+  COMPANIES: '/companies',
+  LLMS_TXT: '/llms.txt',
+  LOGIN: '/login',
+  PARTNER: '/partner',
+  SUBMIT: '/submit',
+  AGENTS: '/agents',
+  CHANGELOG: '/changelog',
+  COLLECTIONS: '/collections',
+  COMMANDS: '/commands',
+  GUIDES: '/guides',
+  HOOKS: '/hooks',
+  JOBS: '/jobs',
+  MCP: '/mcp',
+  RULES: '/rules',
+  SKILLS: '/skills',
+  STATUSLINES: '/statuslines',
+  ACCOUNT: '/account',
+  ACCOUNT_ACTIVITY: '/account/activity',
+  ACCOUNT_COMPANIES: '/account/companies',
+  ACCOUNT_JOBS: '/account/jobs',
+  ACCOUNT_JOBS_NEW: '/account/jobs/new',
+  ACCOUNT_LIBRARY: '/account/library',
+  ACCOUNT_LIBRARY_NEW: '/account/library/new',
+  ACCOUNT_SETTINGS: '/account/settings',
+  ACCOUNT_SPONSORSHIPS: '/account/sponsorships',
+  ACCOUNT_SUBMISSIONS: '/account/submissions',
+  TOOLS_CONFIG_RECOMMENDER: '/tools/config-recommender',
+  AUTH_AUTH_CODE_ERROR: '/auth/auth-code-error',
+} as const;

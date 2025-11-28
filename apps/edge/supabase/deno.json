@@ -1,0 +1,57 @@
+{
+	"nodeModulesDir": "auto",
+	"imports": {
+		"@heyclaude/database-types": "../../../packages/database-types/src/index.ts",
+		"@heyclaude/shared-runtime/": "../../../packages/shared-runtime/src/",
+		"@heyclaude/shared-runtime": "../../../packages/shared-runtime/src/index.ts",
+		"@heyclaude/edge-runtime/": "../../../packages/edge-runtime/src/",
+		"@heyclaude/edge-runtime": "../../../packages/edge-runtime/src/index.ts",
+		"@heyclaude/data-layer/": "../../../packages/data-layer/src/",
+		"@heyclaude/data-layer": "../../../packages/data-layer/src/index.ts",
+		"@supabase/supabase-js": "npm:@supabase/supabase-js@2.84.0",
+		"@supabase/supabase-js/": "npm:@supabase/supabase-js@2.84.0/",
+		"zod": "npm:zod@3.24.1",
+		"mcp-lite": "npm:mcp-lite@0.8.2",
+		"hono": "npm:hono@4.6.14",
+		"hono/": "npm:hono@4.6.14/",
+		// sanitize-html@2.17.0 is the latest version (verified 2025-01-27)
+		// Security audit shows no known vulnerabilities (pnpm audit verified)
+		"sanitize-html": "npm:sanitize-html@2.17.0",
+		"sugar-high": "npm:sugar-high@0.9.5",
+		"react": "npm:react@18.3.1",
+		"yoga-layout": "npm:yoga-layout@3.2.1",
+		"https://esm.sh/yoga-layout@3.2.1": "npm:yoga-layout@3.2.1",
+		"https://esm.sh/yoga-layout@3.2.1/": "npm:yoga-layout@3.2.1/",
+		"@imagemagick/magick-wasm": "npm:@imagemagick/magick-wasm@0.0.30",
+		"pino": "npm:pino@10.1.0"
+	},
+	"lint": {
+		"include": ["**/*.ts", "**/*.tsx"],
+		"exclude": ["node_modules/**", "deno.lock"],
+		"rules": {
+			"tags": ["recommended"],
+			"exclude": ["no-var", "no-explicit-any"]
+		}
+	},
+	"compilerOptions": {
+		"lib": ["deno.ns", "deno.unstable", "dom"],
+		"types": ["@heyclaude/edge-runtime/deno-globals.d.ts", "@heyclaude/edge-runtime/jsx-types.d.ts", "./tsconfig-setup.d.ts"],
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"strictFunctionTypes": true,
+		"strictPropertyInitialization": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noImplicitOverride": true,
+		"allowUnusedLabels": false,
+		"allowUnreachableCode": false,
+		"skipLibCheck": true
+	}
+}

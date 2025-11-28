@@ -1,0 +1,52 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2022", "DOM"],
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"typeRoots": [],
+		"allowImportingTsExtensions": true,
+		"noEmit": true,
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"strictFunctionTypes": true,
+		"strictPropertyInitialization": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noImplicitOverride": true,
+		"allowUnusedLabels": false,
+		"allowUnreachableCode": false,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"forceConsistentCasingInFileNames": true,
+		"jsx": "react-jsx",
+		"baseUrl": ".",
+		"paths": {
+			"@heyclaude/database-types": ["../../../packages/database-types/src/index.ts"],
+			"@heyclaude/shared-runtime": ["../../../packages/shared-runtime/src/index.ts"],
+			"@heyclaude/shared-runtime/*": ["../../../packages/shared-runtime/src/*"],
+			"@heyclaude/edge-runtime": ["../../../packages/edge-runtime/src/index.ts"],
+			"@heyclaude/edge-runtime/*": ["../../../packages/edge-runtime/src/*"],
+			"@heyclaude/data-layer": ["../../../packages/data-layer/src/index.ts"],
+			"@heyclaude/data-layer/*": ["../../../packages/data-layer/src/*"]
+		}
+	},
+	"include": [
+		"tsconfig-setup.d.ts",
+		"deno-imports.d.ts",
+		"**/*.ts",
+		"**/*.tsx"
+	],
+	"exclude": ["node_modules"]
+}

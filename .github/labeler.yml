@@ -35,13 +35,13 @@ dependencies:
       - 'package.json'
       - 'package-lock.json'
 
-# Documentation only (README, CHANGELOG, docs/, guides/)
+# Documentation only (README, CHANGELOG, guides/)
+# Note: docs/ is intentionally gitignored, so it's excluded from labeling
 documentation:
   - changed-files:
     - any-glob-to-any-file:
       - 'README.md'
       - 'CHANGELOG.md'
-      - 'docs/**'
       - 'content/guides/**/*.mdx'
     - all-globs-to-all-files:
       - '!src/**'

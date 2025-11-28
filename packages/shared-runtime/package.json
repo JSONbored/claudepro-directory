@@ -1,0 +1,34 @@
+{
+  "name": "@heyclaude/shared-runtime",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build && node scripts/build-js-simple.js"
+  },
+  "devDependencies": {
+    "@types/sanitize-html": "^2.16.0",
+    "esbuild": "^0.27.0"
+  },
+  "dependencies": {
+    "@heyclaude/database-types": "workspace:*",
+    "@supabase/supabase-js": "^2.84.0",
+    "pino": "^10.1.0",
+    "sanitize-html": "^2.17.0",
+    "sugar-high": "^0.9.5",
+    "zod": "^4.1.12"
+  }
+}

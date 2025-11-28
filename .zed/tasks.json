@@ -1,0 +1,37 @@
+[
+  {
+    "label": "Type Check: Full Workspace",
+    "command": "pnpm type-check",
+    "args": [],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "env": {}
+  },
+  {
+    "label": "Lint: Full Workspace",
+    "command": "pnpm lint",
+    "args": [],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "env": {}
+  },
+  {
+    "label": "Type Check: Edge Functions",
+    "command": "pnpm type-check:edge",
+    "args": [],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "env": {}
+  },
+  {
+    "label": "Lint: Edge Functions",
+    "command": "pnpm lint:edge",
+    "args": [],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "env": {}
+  },
+  {
+    "label": "Full Analysis: All Checks",
+    "command": "pnpm type-check && pnpm lint && pnpm type-check:edge && pnpm lint:edge",
+    "args": [],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "env": {}
+  }
+]

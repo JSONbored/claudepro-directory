@@ -1,0 +1,150 @@
+import type { VercelWebhookPayload } from '@heyclaude/edge-runtime/changelog/service.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import {
+  badRequestResponse,
+  changelogCorsHeaders,
+  errorResponse,
+  successResponse,
+} from '@heyclaude/edge-runtime/utils/http.ts';
+import { createChangelogHandlerContext, withContext } from '@heyclaude/shared-runtime';
+import { pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
+import {
+  ingestWebhookEvent,
+  WebhookIngestError,
+  type WebhookIngestResult,
+} from '@heyclaude/edge-runtime/utils/webhook/ingest.ts';
+
+export async function handleChangelogSyncRequest(req: Request): Promise<Response> {
+  const logContext = createChangelogHandlerContext();
+
+  try {
+    const body = await req.text();
+
+    // Parse payload early to extract deployment_id for logging
+    let payload: VercelWebhookPayload;
+    try {
+      payload = JSON.parse(body) as VercelWebhookPayload;
+    } catch (_parseError) {
+      return badRequestResponse('Invalid JSON payload', changelogCorsHeaders);
+    }
+
+    // Update logContext with deployment info
+    const updatedContext = withContext(logContext, {
+      deployment_id: payload.payload?.deployment?.id,
+      branch: payload.payload?.deployment?.meta?.branch,
+    });
+
+    // Ingest webhook event (validates signature, stores in webhook_events table)
+    let ingestResult: WebhookIngestResult;
+    try {
+      ingestResult = await ingestWebhookEvent(body, req.headers);
+    } catch (error) {
+      if (error instanceof WebhookIngestError) {
+        return await errorResponse(error, 'changelog-sync:ingest', changelogCorsHeaders);
+      }
+      throw error;
+    }
+
+    // If duplicate webhook, return early (idempotent)
+    if (ingestResult.duplicate) {
+      logger.info('Duplicate webhook detected, skipping', updatedContext);
+      return successResponse(
+        { skipped: true, reason: 'Duplicate webhook', duplicate: true },
+        200,
+        changelogCorsHeaders
+      );
+    }
+
+    // Validate webhook type before processing
+    if (payload.type !== 'deployment.succeeded') {
+      return successResponse(
+        { skipped: true, reason: `Unsupported webhook type: ${payload.type}` },
+        200,
+        changelogCorsHeaders
+      );
+    }
+
+    let webhookEventId = ingestResult.webhookId;
+    if (!webhookEventId) {
+      const idempotencyKey = payload.id || req.headers.get('x-vercel-id');
+      if (!idempotencyKey) {
+        logger.error('Missing idempotency key', updatedContext);
+        return await errorResponse(
+          new Error('Missing idempotency key in webhook'),
+          'changelog-sync:missing-idempotency-key',
+          changelogCorsHeaders
+        );
+      }
+
+      const { data: webhookEvent, error: webhookError } = await supabaseServiceRole
+        .from('webhook_events')
+        .select('id')
+        .eq('svix_id', idempotencyKey)
+        .eq('source', 'vercel')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single<{ id: string }>();
+
+      if (webhookError || !webhookEvent) {
+        const errorObj = webhookError instanceof Error ? webhookError : new Error(String(webhookError));
+        logger.error('Failed to retrieve webhook event ID', {
+          ...updatedContext,
+          idempotencyKey,
+          err: errorObj,
+        });
+        return await errorResponse(
+          new Error('Failed to retrieve webhook event ID'),
+          'changelog-sync:webhook-query',
+          changelogCorsHeaders
+        );
+      }
+
+      webhookEventId = webhookEvent.id;
+    }
+
+    // Extract deployment_id for logging
+    const deploymentId = payload.payload?.deployment?.id;
+
+    // Enqueue minimal job to changelog_process queue
+    const queueJob = {
+      webhook_event_id: webhookEventId,
+      deployment_id: deploymentId,
+    };
+
+    try {
+      await pgmqSend('changelog_process', queueJob);
+      logger.info('Webhook processing job enqueued', {
+        ...updatedContext,
+        webhook_event_id: webhookEventId,
+      });
+    } catch (queueError) {
+      const errorMsg = queueError instanceof Error ? queueError.message : String(queueError);
+      const errorObj = queueError instanceof Error ? queueError : new Error(errorMsg);
+      logger.error('Failed to enqueue webhook processing job', {
+        ...updatedContext,
+        webhook_event_id: webhookEventId,
+        err: errorObj,
+      });
+      return await errorResponse(
+        new Error(`Failed to enqueue processing job: ${errorMsg}`),
+        'changelog-sync:enqueue',
+        changelogCorsHeaders
+      );
+    }
+
+    // Return success immediately (processing happens asynchronously in worker)
+    return successResponse(
+      {
+        ingested: true,
+        webhook_event_id: webhookEventId,
+        queue_enqueued: true,
+        message: 'Webhook received and queued for processing',
+      },
+      200,
+      changelogCorsHeaders
+    );
+  } catch (error) {
+    return await errorResponse(error, 'changelog-sync:error', changelogCorsHeaders);
+  }
+}

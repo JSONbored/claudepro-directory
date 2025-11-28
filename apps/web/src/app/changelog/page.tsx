@@ -1,0 +1,258 @@
+/**
+ * Changelog List Page
+ *
+ * Main changelog page displaying all entries with category filtering.
+ * Follows existing category list page patterns with ISR.
+ *
+ * Architecture:
+ * - Server component with ISR (5-minute revalidation)
+ * - Client-side filtering via CategoryFilter component
+ * - Chronological display (newest first)
+ * - SEO-optimized with metadata
+ *
+ * Performance:
+ * - ISR: 300s (5 minutes) for fresh content
+ * - Database-cached entry loading
+ * - Static generation at build time
+ *
+ * Production Standards:
+ * - Type-safe with Next.js 15.5.4
+ * - Proper error handling
+ * - Accessibility support
+ * - Responsive design
+ */
+
+import { Constants } from '@heyclaude/database-types';
+import type { Database } from '@heyclaude/database-types';
+import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { ArrowLeft } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { UI_CLASSES, NavLink  } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import dynamicImport from 'next/dynamic';
+
+const NewsletterCTAVariant = dynamicImport(
+  () =>
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
+      default: module_.NewsletterCTAVariant,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+  }
+);
+
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
+
+/**
+ * ISR: 1 hour (3600s) - Changelog list updates periodically
+ * Uses ISR for better performance while keeping content fresh
+ */
+export const revalidate = 3600;
+
+/**
+ * Build metadata for the changelog page and include RSS and Atom feed alternates.
+ *
+ * If metadata generation fails, returns a fallback metadata object with a default title,
+ * description, and the same RSS/Atom alternates.
+ *
+ * @returns Page metadata for the `/changelog` route. The metadata includes feed discovery
+ *          URLs under `alternates.types` for `application/rss+xml` and `application/atom+xml`.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  // Generate requestId for metadata generation (separate from page render)
+  const metadataRequestId = generateRequestId();
+  
+  // Create request-scoped child logger to avoid race conditions
+  const metadataLogger = logger.child({
+    requestId: metadataRequestId,
+    operation: 'ChangelogPageMetadata',
+    route: '/changelog',
+    module: 'apps/web/src/app/changelog',
+  });
+
+  try {
+    const baseMetadata = await generatePageMetadata('/changelog');
+
+    // Add RSS/Atom feed discovery links
+    return {
+      ...baseMetadata,
+      alternates: {
+        types: {
+          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
+          'application/atom+xml': `${APP_CONFIG.url}/changelog/atom.xml`,
+        },
+      },
+    };
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to generate changelog metadata');
+    metadataLogger.error('Failed to generate changelog metadata', normalized, {
+      section: 'metadata-generation',
+    });
+    return {
+      title: 'Changelog - Claude Pro Directory',
+      description: 'Track all updates, features, and improvements to Claude Pro Directory.',
+      alternates: {
+        types: {
+          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
+          'application/atom+xml': `${APP_CONFIG.url}/changelog/atom.xml`,
+        },
+      },
+    };
+  }
+}
+
+/**
+ * Render the Changelog page with server-loaded entries, client-side filtering, structured data, and a newsletter CTA.
+ *
+ * Loads published changelog entries, displays totals and latest release information, and delegates interactive filtering to the client-side list component. If loading fails, a minimal fallback UI is returned.
+ *
+ * @returns The React element for the changelog page, or a minimal fallback UI when data loading fails.
+ */
+export default async function ChangelogPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'ChangelogPage',
+    route: '/changelog',
+    module: 'apps/web/src/app/changelog',
+  });
+
+  try {
+    // Load changelog overview with entries, metadata, and featured (database-cached)
+    // This replaces getAllChangelogEntries() + client-side category counting
+    const overview = await getChangelogOverview({
+      publishedOnly: true, // Only get published entries
+      limit: 10_000,
+      offset: 0,
+    });
+
+    // Normalize entries: ensure contributors and keywords are arrays (never null)
+    // changelog_overview_entry has keywords but not contributors, so we default contributors to []
+    const publishedEntries = (overview.entries ?? []).map((entry) => {
+      // keywords is already text[] in database (may be null in overview)
+      // contributors is not in changelog_overview_entry, so default to []
+      const keywords = Array.isArray(entry.keywords) ? entry.keywords : [];
+      const contributors: string[] = [];
+
+      return {
+        ...entry,
+        canonical_url: null,
+        commit_count: null,
+        contributors,
+        git_commit_sha: null,
+        json_ld: null,
+        keywords,
+        og_image: null,
+        og_type: null,
+        robots_follow: null,
+        robots_index: null,
+        source: null,
+        twitter_card: null,
+        content: entry.content ?? '',
+        changes: entry.changes ?? {},
+        created_at: entry.created_at ?? '',
+        updated_at: entry.updated_at ?? '',
+      } as Database['public']['Tables']['changelog']['Row'];
+    });
+
+    // Get category counts from metadata (database-calculated, not client-side)
+    // Cast category_counts from Json to Record<string, number>
+    const categoryCountsJson = overview.metadata?.category_counts as Record<string, number> | null;
+    const categoryCounts: Record<string, number> = {
+      All: overview.metadata?.total_entries ?? 0,
+      Added: categoryCountsJson?.['Added'] ?? 0,
+      Changed: categoryCountsJson?.['Changed'] ?? 0,
+      Fixed: categoryCountsJson?.['Fixed'] ?? 0,
+      Removed: categoryCountsJson?.['Removed'] ?? 0,
+      Deprecated: categoryCountsJson?.['Deprecated'] ?? 0,
+      Security: categoryCountsJson?.['Security'] ?? 0,
+    };
+
+    return (
+      <>
+        <StructuredData route="/changelog" />
+
+        <div className="container max-w-6xl space-y-8 py-8">
+          {/* Header */}
+          <div className="space-y-4">
+            <NavLink
+              href="/"
+              className="inline-flex items-center gap-2 text-muted-foreground text-sm"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Home</span>
+            </NavLink>
+
+            <div className="space-y-2">
+              <h1 className="font-bold text-4xl tracking-tight">Changelog</h1>
+              <p className="text-lg text-muted-foreground">
+                Track all updates, new features, bug fixes, and improvements to Claude Pro
+                Directory.
+              </p>
+            </div>
+
+            {/* Stats */}
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-muted-foreground text-sm`}>
+              <div>
+                <span className="font-semibold text-foreground">
+                  {overview.metadata?.total_entries ?? publishedEntries.length}
+                </span>{' '}
+                total updates
+              </div>
+              {publishedEntries.length > 0 &&
+                publishedEntries[0]?.release_date && (
+                  <div>
+                    Latest:{' '}
+                    <time
+                      dateTime={publishedEntries[0].release_date}
+                      className="font-medium text-foreground"
+                    >
+                      {new Date(publishedEntries[0].release_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </time>
+                  </div>
+                )}
+            </div>
+          </div>
+
+          {/* Client-side filtered list */}
+          <ChangelogListClient entries={publishedEntries} categoryCounts={categoryCounts} />
+        </div>
+
+        {/* Email CTA - Footer section (matching homepage pattern) */}
+        <section className={'mx-auto px-4 py-12'}>
+          <NewsletterCTAVariant
+            source="content_page"
+            variant="hero"
+            category={Constants.public.Enums.content_category[10]} // 'changelog' - Context needed for analytics and correct copy
+          />
+        </section>
+      </>
+    );
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load changelog page');
+    reqLogger.error('Failed to load changelog page', normalized, {
+      section: 'data-fetch',
+    });
+
+    // Fallback UI on error
+    return (
+      <div className="container max-w-6xl py-8">
+        <div className="space-y-4">
+          <h1 className="font-bold text-4xl tracking-tight">Changelog</h1>
+          <p className="text-muted-foreground">
+            Unable to load changelog entries. Please try again later.
+          </p>
+        </div>
+      </div>
+    );
+  }
+}

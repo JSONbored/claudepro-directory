@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "files": [],
+  "references": [
+    { "path": "../packages/database-types/tsconfig.json" },
+    { "path": "../packages/shared-runtime/tsconfig.json" },
+    { "path": "../packages/web-runtime/tsconfig.json" },
+    { "path": "../packages/edge-runtime/tsconfig.json" },
+    { "path": "../packages/data-layer/tsconfig.json" },
+    { "path": "../packages/generators/tsconfig.json" },
+    { "path": "../apps/web/tsconfig.json" }
+  ]
+}

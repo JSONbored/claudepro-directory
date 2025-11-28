@@ -9,18 +9,6 @@ on:
       deps:
         description: 'Dependency changes present'
         value: ${{ jobs.filter.outputs.deps }}
-      tests:
-        description: 'Test changes present'
-        value: ${{ jobs.filter.outputs.tests }}
-      database:
-        description: 'Database schema changes present'
-        value: ${{ jobs.filter.outputs.database }}
-      public:
-        description: 'Public assets changed'
-        value: ${{ jobs.filter.outputs.public }}
-      generated:
-        description: 'Auto-generated files changed'
-        value: ${{ jobs.filter.outputs.generated }}
 
 jobs:
   filter:
@@ -30,10 +18,6 @@ jobs:
     outputs:
       code: ${{ steps.filter.outputs.code }}
       deps: ${{ steps.filter.outputs.deps }}
-      tests: ${{ steps.filter.outputs.tests }}
-      database: ${{ steps.filter.outputs.database }}
-      public: ${{ steps.filter.outputs.public }}
-      generated: ${{ steps.filter.outputs.generated }}
 
     steps:
       - uses: actions/checkout@v5
@@ -42,30 +26,17 @@ jobs:
         id: filter
         uses: dorny/paths-filter@v3
         with:
-          filters: |
-            code:
-              - 'src/**/*.{ts,tsx,js,jsx}'
-              - 'scripts/**'
-              - 'config/**'
-              - 'supabase/functions/**'
-              - 'next.config.mjs'
-              - 'tailwind.config.ts'
-            deps:
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-            tests:
-              - 'tests/**'
-              - 'src/**/*.test.{ts,tsx,js,jsx}'
-              - 'jest.config.*'
-              - 'config/tools/playwright.config.ts'
-            database:
-              - 'supabase/schema.sql'
-              - 'supabase/migrations/**'
-              - 'src/types/database.types.ts'
-              - 'generated/db-schemas.ts'
-            public:
-              - 'public/**'
-            generated:
-              - 'generated/**'
-              - 'src/types/database.types.ts'
-              - 'public/service-worker.js'
+            filters: |
+                code:
+                  - 'apps/web/src/**/*.{ts,tsx,js,jsx}'
+                  - 'apps/web/next.config.mjs'
+                  - 'apps/web/postcss.config.js'
+                  - 'packages/**'
+                  - 'config/**'
+                  - 'apps/edge/functions/**/*.ts'
+                  - 'apps/edge/functions/**/*.tsx'
+                  - 'apps/edge/**/*.sql'
+                  - 'tailwind.config.ts'
+                deps:
+                  - 'package.json'
+                  - 'pnpm-lock.yaml'

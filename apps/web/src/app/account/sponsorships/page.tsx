@@ -1,0 +1,276 @@
+import {
+  generatePageMetadata,
+  getAuthenticatedUser,
+  getUserSponsorships,
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { UI_CLASSES, UnifiedBadge, Button ,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle  } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated user sponsorships
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/sponsorships');
+}
+
+/**
+ * Check if a sponsorship is currently active
+ * A sponsorship is active if:
+ * - The active flag is true (not null or false)
+ * - Current date is between start_date and end_date (inclusive)
+ */
+function isSponsorshipActive(
+  sponsorship: { active: boolean | null; start_date: string; end_date: string },
+  now: Date
+): boolean {
+  return (
+    sponsorship.active === true &&
+    new Date(sponsorship.start_date) <= now &&
+    new Date(sponsorship.end_date) >= now
+  );
+}
+
+export default async function SponsorshipsPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'SponsorshipsPage',
+    route: '/account/sponsorships',
+    module: 'apps/web/src/app/account/sponsorships',
+  });
+
+  // Section: Authentication
+  const { user } = await getAuthenticatedUser({ context: 'SponsorshipsPage' });
+
+  if (!user) {
+    reqLogger.warn('SponsorshipsPage: unauthenticated access attempt', {
+      section: 'authentication',
+      timestamp: new Date().toISOString(),
+    });
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to manage your sponsorship campaigns.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true}>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Create new child logger with user context
+  // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  const userLogger = reqLogger.child({
+    userId: user.id, // Redaction will automatically hash this
+  });
+
+  // Section: Sponsorships Data Fetch
+  let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>>;
+  try {
+    sponsorships = await getUserSponsorships(user.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user sponsorships');
+    userLogger.error('SponsorshipsPage: getUserSponsorships threw', normalized, {
+      section: 'sponsorships-data-fetch',
+    });
+    return (
+      <div className="space-y-6">
+        <div className="text-destructive">Failed to load sponsorships. Please try again later.</div>
+      </div>
+    );
+  }
+
+  if (sponsorships.length === 0) {
+    userLogger.info('SponsorshipsPage: user has no sponsorships');
+    return (
+      <div className="space-y-6">
+        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+          <div>
+            <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
+            <p className="text-muted-foreground">No active campaigns yet</p>
+          </div>
+          <Button variant="outline" asChild={true}>
+            <Link href={ROUTES.PARTNER}>
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Become a Sponsor
+            </Link>
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            You haven't launched any sponsorship campaigns yet.
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const orderedSponsorships = [...sponsorships].toSorted(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+
+  // Compute active count once using consistent logic
+  const now = new Date();
+  const activeCount = orderedSponsorships.filter((s) => isSponsorshipActive(s, now)).length;
+
+  return (
+    <div className="space-y-6">
+      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+        <div>
+          <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
+          <p className="text-muted-foreground">
+            {activeCount} active {activeCount === 1 ? 'campaign' : 'campaigns'}
+          </p>
+        </div>
+        <Button variant="outline" asChild={true}>
+          <Link href={ROUTES.PARTNER}>
+            <TrendingUp className="mr-2 h-4 w-4" />
+            Become a Sponsor
+          </Link>
+        </Button>
+      </div>
+
+      <div className="grid gap-4">
+        {orderedSponsorships.map((sponsorship) => {
+          const isActive = isSponsorshipActive(sponsorship, now);
+
+          const impressionCount = sponsorship.impression_count ?? 0;
+          const clickCount = sponsorship.click_count ?? 0;
+
+          const hasHitLimit =
+            sponsorship.impression_limit != undefined && impressionCount >= sponsorship.impression_limit;
+
+          const ctr =
+            impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
+
+          // Use generated ENUM type directly - no validation needed
+          const safeTier = sponsorship.tier;
+
+          return (
+            <Card key={sponsorship.id}>
+              <CardHeader>
+                <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                  <div className="flex-1">
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                      <UnifiedBadge variant="sponsored" tier={safeTier} showIcon={true} />
+                      {isActive ? (
+                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_APPROVED}>
+                          Active
+                        </UnifiedBadge>
+                      ) : (
+                        <UnifiedBadge variant="base" style="outline">
+                          Inactive
+                        </UnifiedBadge>
+                      )}
+                      {hasHitLimit && (
+                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_WARNING}>
+                          Limit Reached
+                        </UnifiedBadge>
+                      )}
+                    </div>
+                    <CardTitle className="mt-2">
+                      {sponsorship.content_type} - ID: {sponsorship.content_id}
+                    </CardTitle>
+                    <CardDescription>
+                      {new Date(sponsorship.start_date).toLocaleDateString()} -{' '}
+                      {new Date(sponsorship.end_date).toLocaleDateString()}
+                    </CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" asChild={true}>
+                    <Link href={`/account/sponsorships/${sponsorship.id}/analytics`}>
+                      <BarChart className="mr-1 h-3 w-3" />
+                      Analytics
+                    </Link>
+                  </Button>
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                {/* Quick stats */}
+                <div className="mb-4 grid grid-cols-3 gap-4">
+                  <div>
+                    <div
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
+                    >
+                      <Eye className="h-3 w-3" />
+                      Impressions
+                    </div>
+                    <div className="font-bold text-2xl">{impressionCount.toLocaleString()}</div>
+                    {sponsorship.impression_limit && (
+                      <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                        of {sponsorship.impression_limit.toLocaleString()}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <div
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
+                    >
+                      <MousePointer className="h-3 w-3" />
+                      Clicks
+                    </div>
+                    <div className="font-bold text-2xl">{clickCount.toLocaleString()}</div>
+                  </div>
+
+                  <div>
+                    <div
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
+                    >
+                      <BarChart className="h-3 w-3" />
+                      CTR
+                    </div>
+                    <div className="font-bold text-2xl">{ctr}%</div>
+                  </div>
+                </div>
+
+                {/* Progress bar if has limit */}
+                {sponsorship.impression_limit && (
+                  <div
+                    className="h-2 w-full rounded-full bg-muted"
+                    role="progressbar"
+                    aria-valuenow={impressionCount}
+                    aria-valuemin={0}
+                    aria-valuemax={sponsorship.impression_limit}
+                    aria-label={`Impressions: ${impressionCount} of ${sponsorship.impression_limit}`}
+                  >
+                    <div
+                      className="h-2 rounded-full bg-primary transition-all"
+                      style={{
+                        width: `${Math.min(100, (impressionCount / sponsorship.impression_limit) * 100)}%`,
+                      }}
+                      aria-hidden="true"
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,35 @@
+{
+  "typescript": {
+    "tsconfig": "tsconfig.json"
+  },
+  "deno": {
+    "enable": true,
+    "config": "./apps/edge/functions/deno.json",
+    "lint": true,
+    "unstable": true,
+    "internal_debug": false
+  },
+  "languages": {
+    "Deno": {
+      "language_servers": ["deno", "!typescript-language-server", "!vtsls"]
+    },
+    "TypeScript": {
+      "language_servers": ["vtsls", "typescript-language-server", "!deno"]
+    },
+    "JavaScript": {
+      "language_servers": ["vtsls", "typescript-language-server", "!deno"]
+    }
+  },
+  "lsp": {
+    "deno": {
+      "settings": {
+        "deno": {
+          "enable": true,
+          "config": "./apps/edge/functions/deno.json",
+          "lint": true,
+          "unstable": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,214 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { supabaseAnon, supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { errorToString } from '@heyclaude/shared-runtime';
+import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
+
+export type StorageServiceClient = SupabaseClient<DatabaseGenerated>;
+
+export interface BuildStorageObjectPathOptions {
+  /**
+   * Optional folder prefix (e.g., bucket namespace, entity type)
+   */
+  prefix?: string;
+
+  /**
+   * User identifier to isolate uploads
+   */
+  userId?: string;
+
+  /**
+   * Explicit filename without extension
+   */
+  fileName?: string;
+
+  /**
+   * File extension (e.g., "png" / ".png")
+   */
+  extension?: string;
+
+  /**
+   * Append a millisecond timestamp to prevent collisions (default: true)
+   */
+  includeTimestamp?: boolean;
+
+  /**
+   * Sanitize filename to safe characters (default: true)
+   */
+  sanitize?: boolean;
+}
+
+export interface DeleteStorageResult {
+  success: boolean;
+  error?: string;
+}
+
+export interface SignedStorageUrlResult {
+  success: boolean;
+  signedUrl?: string;
+  error?: string;
+}
+
+const DEFAULT_TIMESTAMP = true;
+const DEFAULT_SANITIZE = true;
+const DEFAULT_SIGNED_URL_TTL = 60 * 60; // 1 hour
+
+export function getStorageServiceClient(): StorageServiceClient {
+  return supabaseServiceRole;
+}
+
+export function getStorageAnonClient(): StorageServiceClient {
+  return supabaseAnon;
+}
+
+export function sanitizeStorageFileName(value: string): string {
+  return value.replace(/[^a-zA-Z0-9.-]/g, '_');
+}
+
+export function buildStorageObjectPath(options: BuildStorageObjectPathOptions = {}): string {
+  const {
+    prefix,
+    userId,
+    fileName = 'upload',
+    extension,
+    includeTimestamp = DEFAULT_TIMESTAMP,
+    sanitize = DEFAULT_SANITIZE,
+  } = options;
+
+  if (!extension) {
+    throw new Error('extension is required for buildStorageObjectPath');
+  }
+
+  const segments: string[] = [];
+
+  if (prefix) {
+    // Remove leading and trailing slashes safely without ReDoS vulnerability
+    // Use simple string iteration to avoid regex backtracking issues
+    let start = 0;
+    let end = prefix.length;
+    while (start < end && prefix[start] === '/') {
+      start++;
+    }
+    while (end > start && prefix[end - 1] === '/') {
+      end--;
+    }
+    const trimmed = prefix.slice(start, end);
+    segments.push(trimmed);
+  }
+
+  if (userId) {
+    segments.push(userId);
+  }
+
+  const normalizedName = sanitize ? sanitizeStorageFileName(fileName) : fileName;
+  const normalizedExt = extension ? extension.replace(/^\./, '').toLowerCase() : undefined;
+
+  const baseName = includeTimestamp ? `${Date.now()}-${normalizedName}` : normalizedName;
+  const fullName = normalizedExt ? `${baseName}.${normalizedExt}` : baseName;
+
+  segments.push(fullName);
+
+  return segments.join('/');
+}
+
+export function getPublicStorageUrl(bucket: string, path: string): string {
+  const { data } = getStorageServiceClient().storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+export async function deleteStorageObject(
+  bucket: string,
+  path: string
+): Promise<DeleteStorageResult> {
+  return deleteStorageObjects(bucket, [path]);
+}
+
+export async function deleteStorageObjects(
+  bucket: string,
+  paths: string[]
+): Promise<DeleteStorageResult> {
+  try {
+    if (!paths.length) {
+      return { success: true };
+    }
+
+    const { error } = await getStorageServiceClient().storage.from(bucket).remove(paths);
+
+    if (error) {
+      const logContext = createUtilityContext('storage-client', 'delete', {
+        bucket,
+        pathCount: paths.length,
+      });
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Delete failed', {
+        ...logContext,
+        err: errorObj,
+      });
+      return { success: false, error: errorMessage };
+    }
+
+    return { success: true };
+  } catch (error) {
+    const logContext = createUtilityContext('storage-client', 'delete', {
+      bucket,
+      pathCount: paths.length,
+    });
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.error('Delete error', {
+      ...logContext,
+      err: errorObj,
+    });
+    return {
+      success: false,
+      error: errorToString(error),
+    };
+  }
+}
+
+export async function createSignedStorageUrl(
+  bucket: string,
+  path: string,
+  options?: { expiresIn?: number; downloadFileName?: string }
+): Promise<SignedStorageUrlResult> {
+  const expiresIn = options?.expiresIn ?? DEFAULT_SIGNED_URL_TTL;
+
+  try {
+    const { data, error } = await getStorageServiceClient()
+      .storage.from(bucket)
+      .createSignedUrl(path, expiresIn, {
+        ...(options?.downloadFileName !== undefined ? { download: options.downloadFileName } : {}),
+      });
+
+    if (error) {
+      const logContext = createUtilityContext('storage-client', 'create-signed-url', {
+        bucket,
+        path,
+      });
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Signed URL error', {
+        ...logContext,
+        err: errorObj,
+      });
+      return { success: false, error: errorMessage };
+    }
+
+    return { success: true, signedUrl: data?.signedUrl };
+  } catch (error) {
+    const logContext = createUtilityContext('storage-client', 'create-signed-url', {
+      bucket,
+      path,
+    });
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.error('Signed URL exception', {
+      ...logContext,
+      err: errorObj,
+    });
+    return {
+      success: false,
+      error: errorToString(error),
+    };
+  }
+}

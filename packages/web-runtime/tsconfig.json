@@ -1,0 +1,25 @@
+{
+  "extends": "../../config/tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "types": ["next/types/global"],
+    "paths": {
+      "@heyclaude/database-types": ["../database-types/dist/index"],
+      "@heyclaude/shared-runtime": ["../shared-runtime/src/index.ts"],
+      "@heyclaude/data-layer": ["../data-layer/dist/index"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+  "references": [
+    { "path": "../database-types/tsconfig.json" },
+    { "path": "../shared-runtime/tsconfig.json" },
+    { "path": "../data-layer/tsconfig.json" }
+  ]
+}

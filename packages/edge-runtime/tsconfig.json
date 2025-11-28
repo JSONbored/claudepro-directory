@@ -1,0 +1,33 @@
+{
+  "extends": "../../config/tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@heyclaude/database-types": ["../database-types/src/index.ts"],
+      "@heyclaude/shared-runtime": ["../shared-runtime/src/index.ts"],
+      "@heyclaude/edge-runtime": ["./src/index.ts"],
+      "@heyclaude/edge-runtime/*": ["./src/*"]
+    },
+    "typeRoots": ["src/types", "../../node_modules/@types"],
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*",
+    "src/types/**/*.d.ts",
+    "../../types/deno-email-modules.d.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ],
+  "references": [
+    { "path": "../database-types/tsconfig.json" },
+    { "path": "../shared-runtime/tsconfig.json" }
+  ]
+}

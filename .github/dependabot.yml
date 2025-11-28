@@ -3,7 +3,7 @@
 
 version: 2
 updates:
-  # NPM dependencies
+  # NPM dependencies (works with npm, yarn, and pnpm)
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -47,7 +47,10 @@ updates:
       # Group linting and formatting tools
       linting:
         patterns:
-          - "ultracite"
+          - "eslint"
+          - "eslint-*"
+          - "@typescript-eslint/*"
+          - "eslint-plugin-*"
           - "lefthook"
       # Group Tailwind and CSS tooling
       styling:
@@ -55,25 +58,10 @@ updates:
           - "tailwindcss"
           - "@tailwindcss/*"
           - "tailwind-*"
-      # Group security packages
-      security:
-        patterns:
-          - "@arcjet/*"
-          - "@nosecone/*"
-      # Group content processing
-      content:
-        patterns:
-          - "marked"
-          - "gray-matter"
-          - "next-mdx-remote"
-          - "rehype-*"
-          - "remark-*"
       # Group infrastructure
       infrastructure:
         patterns:
-          - "@upstash/*"
           - "@vercel/*"
-          - "sharp"
     # Ignore specific packages that require manual review
     ignore:
       # Pin Node.js types to match engine version
