@@ -9,11 +9,16 @@ export const revalidate = 7200;
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
- * Generate static params for popular/recent content items
- * Pre-renders top 50 items per category at build time for optimal SEO and performance
+ * Produce static route parameters for a subset of popular content to pre-render at build time.
  *
- * Strategy: Pre-render popular content (most likely to be accessed) while allowing
- * other content to be rendered on-demand via ISR. This balances build time with performance.
+ * Returns an array of { category, slug } entries containing up to 30 top items per homepage category.
+ * Invalid or missing slugs are excluded; other pages remain available for on-demand rendering via dynamicParams.
+ *
+ * @returns An array of objects with `category` and `slug` to be used as static params for pre-rendering
+ *
+ * @see getHomepageCategoryIds
+ * @see getContentByCategory
+ * @see dynamicParams
  */
 export async function generateStaticParams() {
   // Dynamic imports only for data modules (category/content)
@@ -124,15 +129,28 @@ const CATEGORY_TO_RECENTLY_VIEWED: Record<string, RecentlyViewedCategory> = {
 // Stable constant for collections category (replaces brittle array index access)
 const COLLECTION_CATEGORY = 'collections' as const;
 
+/**
+ * Map a category key to its RecentlyViewedCategory equivalent.
+ *
+ * @param category - The category key to map (for example, "articles" or "collections")
+ * @returns The corresponding `RecentlyViewedCategory`, or `null` if the category has no mapping
+ *
+ * @see CATEGORY_TO_RECENTLY_VIEWED
+ * @see RecentlyViewedCategory
+ */
 function mapCategoryToRecentlyViewed(category: string): RecentlyViewedCategory | null {
   return CATEGORY_TO_RECENTLY_VIEWED[category] ?? null;
 }
 
 /**
- * Builds page metadata for a detail route using the provided route parameters and category configuration.
+ * Produce page metadata for a detail route based on the route params and category configuration.
  *
- * @param params - A promise that resolves to an object containing `category` and `slug` route parameters.
- * @returns A Metadata object for the detail page. If `category` is invalid, returns the default metadata for the `/:category/:slug` route; otherwise includes `category`, `slug`, and `categoryConfig` when available.
+ * @param params - Promise resolving to an object with `category` and `slug` route parameters.
+ * @returns A Metadata object for the detail page. If `category` is invalid, returns the default metadata for `/:category/:slug`.
+ *
+ * @see generatePageMetadata
+ * @see getCategoryConfig
+ * @see isValidCategory
  */
 export async function generateMetadata({
   params,
@@ -159,12 +177,19 @@ export async function generateMetadata({
 }
 
 /**
- * Render the detail page for a content item identified by category and slug.
+ * Render the content detail page for a given category and slug.
  *
- * Validates the requested category and content (triggering a 404 for invalid or missing items) and composes the page UI including analytics pulses, structured data, recently-viewed tracking when applicable, and any collection-specific section.
+ * Validates the category and category configuration (returns a 404 for invalid or missing config), ensures the core content exists (returns a 404 if missing), and composes the page using the core item plus deferred analytics and related-item data. Conditionally includes recently-viewed tracking for supported categories and a collection-specific section when the item is a collection.
  *
- * @param params - A promise that resolves to an object with `category` and `slug` route parameters
+ * @param params - Promise resolving to the route parameters object with `category` and `slug`
  * @returns A React element representing the content detail page
+ *
+ * @see getContentDetailCore
+ * @see getContentAnalytics
+ * @see getRelatedContent
+ * @see UnifiedDetailPage
+ * @see RecentlyViewedTracker
+ * @see CollectionDetailView
  */
 export default async function DetailPage({
   params,

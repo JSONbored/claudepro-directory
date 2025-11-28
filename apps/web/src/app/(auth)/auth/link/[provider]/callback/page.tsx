@@ -24,6 +24,25 @@ import { use, useEffect, useRef, useState } from 'react';
 
 
 
+/**
+ * Initiates the client-side OAuth account linking flow for the given provider, handling validation,
+ * authentication checks, and redirects to the OAuth provider or login as needed.
+ *
+ * This component:
+ * - Validates the `provider` parameter.
+ * - If the user is not signed in, shows an error message and redirects to the login page (preserving a validated `next`).
+ * - If the user is signed in, constructs a callback URL with `next` and `link=true`, calls `supabaseClient.auth.linkIdentity`,
+ *   and navigates to the returned provider URL.
+ * - Renders a loading UI while the flow is in progress and an error UI on failure.
+ *
+ * @param params - A promise that resolves to an object containing the OAuth provider slug (e.g., `{ provider: 'github' }`).
+ * @returns The component's rendered JSX for the linking UI or error state.
+ *
+ * @see isValidProvider
+ * @see validateNextParameter
+ * @see useAuthenticatedUser
+ * @see supabaseClient.auth.linkIdentity
+ */
 export default function OAuthLinkCallbackPage({
   params,
 }: {

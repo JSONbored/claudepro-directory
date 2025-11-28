@@ -6,8 +6,16 @@ import { useEffect } from 'react';
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
 /**
- * Client-side error boundary for category routes.
- * Logs errors using the standardized client-side error boundary logging utility.
+ * Error boundary component for the category route that logs the client-side error and renders a category-specific fallback UI.
+ *
+ * Logs the provided error via the client-side error boundary logger on mount or when the `error` changes, and renders a SegmentErrorFallback with navigation and retry actions.
+ *
+ * @param error - The caught error; may include an optional `digest` property used for error correlation.
+ * @param reset - Callback invoked to retry or reset the failing route (passed to the fallback's reset action).
+ * @returns The JSX element rendering the category error fallback UI.
+ *
+ * @see logClientErrorBoundary
+ * @see SegmentErrorFallback
  */
 export default function CategoryError({
   error,

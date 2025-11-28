@@ -22,6 +22,25 @@ import { type NextRequest, NextResponse } from 'next/server';
  */
 export const dynamic = 'force-dynamic';
 
+/**
+ * Handle the OAuth callback: exchange the authorization code, refresh the user profile, optionally subscribe the user to the newsletter, and redirect the user to the validated next URL.
+ *
+ * This handler:
+ * - Reads `code`, `newsletter`, `link`, and `next` from the request's query string and computes a validated redirect target.
+ * - Exchanges the `code` for a Supabase session; on success it refreshes the user's profile.
+ * - When newsletter opt-in is requested and the user has an email, attempts subscription and, on success, sets a short-lived `newsletter_opt_in` cookie.
+ * - Validates the forwarded host against `SECURITY_CONFIG.allowedOrigins` to prevent open redirects and chooses the final redirect URL based on environment and host validation.
+ * - Returns a redirect `NextResponse` and sets cache-control headers to prevent caching.
+ *
+ * @param request - The incoming NextRequest containing query parameters and headers used to perform the callback flow.
+ * @returns A NextResponse that redirects the client to the computed `next` URL (or to `/auth/auth-code-error` on failure). The response may include a `newsletter_opt_in` cookie and cache-control headers.
+ *
+ * @see createSupabaseServerClient
+ * @see refreshProfileFromOAuthServer
+ * @see subscribeViaOAuthAction
+ * @see validateNextParameter
+ * @see SECURITY_CONFIG
+ */
 export async function GET(request: NextRequest) {
   // Generate single requestId for this route request
   const requestId = generateRequestId();

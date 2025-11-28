@@ -19,10 +19,32 @@ const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Produce the page metadata for the authentication code error route.
+ *
+ * @returns Metadata for the auth code error page
+ * @see generatePageMetadata
+ * @see AUTH_CODE_ERROR_PATH
+ * @see {@link https://nextjs.org/docs/app/building-your-application/metadata Metadata (Next.js)}
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata(AUTH_CODE_ERROR_PATH);
 }
 
+/**
+ * Renders an authentication error page when an authorization code flow fails.
+ *
+ * This server component executes per request (dynamic = 'force-dynamic'), reads `searchParams`
+ * for `code`, `provider`, and `message`, emits a redacted informational log entry, and returns
+ * a centered card UI offering actions to retry sign-in or return home.
+ *
+ * @param properties - Next.js page props containing `searchParams` with optional `code`, `provider`, and `message` query values
+ * @returns The page's JSX element displaying the authentication error and action buttons
+ *
+ * @see ROUTES
+ * @see generateRequestId
+ * @see logger
+ */
 export default async function AuthCodeError(properties: PagePropsWithSearchParams) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
