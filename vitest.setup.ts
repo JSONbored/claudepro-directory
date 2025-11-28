@@ -14,28 +14,62 @@ import { vi } from 'vitest';
 
 // Mock @heyclaude/shared-runtime globally to prevent module resolution issues
 // This MUST be hoisted before any module that imports it (like logger.ts)
-vi.mock('@heyclaude/shared-runtime', () => ({
-  createPinoConfig: vi.fn((options?: { service?: string }) => ({
-    level: 'info',
-    ...(options?.service && { service: options.service }),
-  })),
-  normalizeError: vi.fn((error: unknown) => {
-    if (error instanceof Error) return error;
-    return new Error(String(error));
-  }),
-  logError: vi.fn(),
-  logInfo: vi.fn(),
-  logWarn: vi.fn(),
-  createUtilityContext: vi.fn((domain, action, meta) => ({ domain, action, ...meta })),
-  withTimeout: vi.fn((promise) => promise),
-  TimeoutError: class TimeoutError extends Error {
-    constructor(message: string, public readonly timeoutMs?: number) {
-      super(message);
-      this.name = 'TimeoutError';
+// Using async factory to ensure proper module resolution via alias
+vi.mock('@heyclaude/shared-runtime', async () => {
+  // The alias should resolve this, but if it doesn't, the mock will still work
+  // Try to import actual module using the alias path to get all exports
+  let actualExports: any = {};
+  try {
+    // Use the file path that vitest's alias should resolve to
+    const modulePath = await import('./packages/shared-runtime/src/index.ts').catch(() => null);
+    if (modulePath) {
+      actualExports = modulePath;
     }
-  },
-  TIMEOUT_PRESETS: { rpc: 30000, external: 10000, storage: 15000 },
-}));
+  } catch {
+    // If import fails, we'll use mocks only
+  }
+  
+  return {
+    // Mock functions that need to be spies
+    createPinoConfig: vi.fn((options?: { service?: string }) => ({
+      level: 'info',
+      ...(options?.service && { service: options.service }),
+    })),
+    normalizeError: vi.fn((error: unknown) => {
+      if (error instanceof Error) return error;
+      return new Error(String(error));
+    }),
+    logError: vi.fn(),
+    logInfo: vi.fn(),
+    logWarn: vi.fn(),
+    createUtilityContext: vi.fn((domain, action, meta) => ({ domain, action, ...meta })),
+    withTimeout: vi.fn((promise) => promise),
+    TimeoutError: class TimeoutError extends Error {
+      constructor(message: string, public readonly timeoutMs?: number) {
+        super(message);
+        this.name = 'TimeoutError';
+      }
+    },
+    TIMEOUT_PRESETS: { rpc: 30000, external: 10000, storage: 15000 },
+    // Export commonly used utilities that might be imported
+    getEnvVar: vi.fn((key: string) => process.env[key]),
+    hashUserId: vi.fn((userId: string) => `hashed_${userId}`),
+    buildSecurityHeaders: vi.fn(() => ({})),
+    // Use actual exports if available, otherwise use empty objects
+    APP_CONFIG: actualExports.APP_CONFIG || {},
+    SECURITY_CONFIG: actualExports.SECURITY_CONFIG || {},
+    ROUTES: actualExports.ROUTES || {},
+    EXTERNAL_SERVICES: actualExports.EXTERNAL_SERVICES || {},
+    TIME_CONSTANTS: actualExports.TIME_CONSTANTS || {},
+    // Re-export any other non-function exports from actual module
+    ...Object.keys(actualExports).reduce((acc, key) => {
+      if (!acc[key] && typeof actualExports[key] !== 'function' && !key.startsWith('_')) {
+        acc[key] = actualExports[key];
+      }
+      return acc;
+    }, {} as Record<string, unknown>),
+  };
+});
 
 // ============================================================================
 // Next.js API Mocks

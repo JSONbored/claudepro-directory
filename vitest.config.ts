@@ -82,11 +82,13 @@ export default defineConfig({
       '@heyclaude/web-runtime': resolve(__dirname, './packages/web-runtime/src'),
       '@heyclaude/data-layer': resolve(__dirname, './packages/data-layer/src'),
       // Use src for tests to avoid needing dist build
-      '@heyclaude/shared-runtime': resolve(__dirname, './packages/shared-runtime/src'),
+      // Point to index.ts explicitly to ensure proper module resolution
+      '@heyclaude/shared-runtime': resolve(__dirname, './packages/shared-runtime/src/index.ts'),
       '@heyclaude/database-types': resolve(__dirname, './packages/database-types/src'),
       '@heyclaude/edge-runtime': resolve(__dirname, './packages/edge-runtime/src'),
     },
     // Ensure mocks take precedence over actual module resolution
-    conditions: ['import', 'module', 'browser', 'default'],
+    // 'development' condition allows using source files in tests (from package.json exports)
+    conditions: ['development', 'import', 'module', 'browser', 'default'],
   },
 });
