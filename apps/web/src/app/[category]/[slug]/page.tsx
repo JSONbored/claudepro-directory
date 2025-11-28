@@ -334,8 +334,7 @@ export default async function DetailPage({
         
         // Extract description safely - ensure it's a string
         const itemDescription = 
-          typeof fullItem.description === 'string' ? fullItem.description : 
-          (fullItem.description == null ? '' : String(fullItem.description));
+          typeof fullItem.description === 'string' ? fullItem.description : '';
         
         return (
           <RecentlyViewedTracker
