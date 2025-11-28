@@ -321,21 +321,29 @@ export default async function DetailPage({
       {(() => {
         const recentlyViewedCategory = mapCategoryToRecentlyViewed(category);
         if (!recentlyViewedCategory) return null;
+        
+        // Extract tags safely before passing to client component
+        const itemTags = 'tags' in fullItem ? ensureStringArray(fullItem.tags).slice(0, 3) : [];
+        const tagsProp = itemTags.length > 0 ? { tags: itemTags } : {};
+        
+        // Extract title safely
+        const itemTitle = 
+          ('display_title' in fullItem && typeof fullItem.display_title === 'string' ? fullItem.display_title : undefined) ??
+          ('title' in fullItem && typeof fullItem.title === 'string' ? fullItem.title : undefined) ??
+          slug;
+        
+        // Extract description safely - ensure it's a string
+        const itemDescription = 
+          typeof fullItem.description === 'string' ? fullItem.description : 
+          (fullItem.description == null ? '' : String(fullItem.description));
+        
         return (
           <RecentlyViewedTracker
             category={recentlyViewedCategory}
             slug={slug}
-            title={
-              ('display_title' in fullItem && typeof fullItem.display_title === 'string' ? fullItem.display_title : undefined) ??
-              ('title' in fullItem && typeof fullItem.title === 'string' ? fullItem.title : undefined) ??
-              slug
-            }
-            description={fullItem.description}
-            {...(() => {
-              const itemTags =
-                'tags' in fullItem ? ensureStringArray(fullItem.tags).slice(0, 3) : [];
-              return itemTags.length > 0 ? { tags: itemTags } : {};
-            })()}
+            title={itemTitle}
+            description={itemDescription}
+            {...tagsProp}
           />
         );
       })()}

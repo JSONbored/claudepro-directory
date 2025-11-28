@@ -874,9 +874,18 @@ export async function UnifiedDetailPage({
       collectionSections,
     };
 
+    // Extract only serializable fields from config for client components
+    // The icon field is a React component and cannot be serialized
+    const serializableConfig = {
+      typeName: config.typeName,
+      sections: config.sections,
+      primaryAction: config.primaryAction,
+      secondaryActions: config.secondaryActions,
+    };
+
     return (
       <div className={'min-h-screen bg-background'}>
-        <DetailHeader displayTitle={displayTitle} item={item} config={config} />
+        <DetailHeader displayTitle={displayTitle} item={item} config={serializableConfig as typeof config} />
         {viewCountPromise ? (
           <Suspense
             fallback={<DetailMetadata item={item} viewCount={undefined} copyCount={copyCount} />}
@@ -894,7 +903,7 @@ export async function UnifiedDetailPage({
 
         <TabbedDetailLayout
           item={item}
-          config={config}
+          config={serializableConfig as typeof config}
           tabs={configuredTabs}
           sectionData={sectionData}
           relatedItems={relatedItems}
@@ -910,10 +919,19 @@ export async function UnifiedDetailPage({
     );
   }
 
+  // Extract only serializable fields from config for client components
+  // The icon field is a React component and cannot be serialized
+  const serializableConfig = {
+    typeName: config.typeName,
+    sections: config.sections,
+    primaryAction: config.primaryAction,
+    secondaryActions: config.secondaryActions,
+  };
+
   return (
     <div className={'min-h-screen bg-background'}>
       {/* Header - Client component for interactivity */}
-      <DetailHeader displayTitle={displayTitle} item={item} config={config} />
+      <DetailHeader displayTitle={displayTitle} item={item} config={serializableConfig as typeof config} />
 
       {/* Metadata - Stream view count if promise provided */}
       {viewCountPromise ? (

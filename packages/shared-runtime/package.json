@@ -11,6 +11,20 @@
       "import": "./dist/index.js",
       "require": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./privacy.ts": {
+      "development": "./src/privacy.ts",
+      "types": "./dist/privacy.d.ts",
+      "import": "./dist/privacy.js",
+      "require": "./dist/privacy.js",
+      "default": "./dist/privacy.js"
+    },
+    "./logger/config.ts": {
+      "development": "./src/logger/config.ts",
+      "types": "./dist/logger/config.d.ts",
+      "import": "./dist/logger/config.js",
+      "require": "./dist/logger/config.js",
+      "default": "./dist/logger/config.js"
     }
   },
   "main": "./dist/index.js",

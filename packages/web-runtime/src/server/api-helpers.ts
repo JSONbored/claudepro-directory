@@ -1,4 +1,9 @@
-'use server';
+/**
+ * API Route Helper Utilities
+ * 
+ * These are utility functions for Next.js API routes, NOT server actions.
+ * Do not add 'use server' directive - these are used in route handlers.
+ */
 
 import { NextResponse } from 'next/server';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';

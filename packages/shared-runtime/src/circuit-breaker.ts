@@ -1,4 +1,4 @@
-import { createUtilityContext, logInfo, logWarn } from '@heyclaude/shared-runtime/logging.ts';
+import { createUtilityContext, logInfo, logWarn } from './logging.ts';
 /**
  * Circuit breaker pattern for resilient database calls
  * Prevents cascading failures by opening circuit after threshold failures
