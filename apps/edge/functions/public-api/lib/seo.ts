@@ -36,11 +36,11 @@ function validateInclude(include: string): SeoIncludeOption {
 }
 
 /**
- * Retrieve SEO metadata for a given route by invoking the database RPC directly.
+ * Retrieve SEO metadata for a route.
  *
  * @param route - The route path to generate metadata for (e.g., "/agents/some-slug")
  * @param include - Which data to include: `'metadata'` or `'metadata,schemas'` (default: `'metadata'`)
- * @returns `SeoMetadataResult` with `title`, `description`, and `keywords`, or `null` if metadata is missing, invalid, or generation fails
+ * @returns `SeoMetadataResult` with `title`, `description`, and `keywords`, or `null` if the metadata is missing, invalid, or cannot be generated
  */
 export async function getSeoMetadata(
   route: string,

@@ -108,10 +108,10 @@ mcpApp.use('/*', async (c, next) => {
  */
 
 /**
- * Create a Supabase client bound to the provided user access token.
+ * Create a Supabase client that sends the provided user access token with every request.
  *
- * @param token - The user's access token to include as `Authorization: Bearer <token>` on every request
- * @returns A Supabase client instance configured to send the provided token with each request
+ * @param token - Access token to include as `Authorization: Bearer <token>` on each request
+ * @returns A Supabase client instance configured to include the provided token on outbound requests
  */
 function getAuthenticatedSupabase(_user: User, token: string) {
   const {
@@ -130,14 +130,15 @@ function getAuthenticatedSupabase(_user: User, token: string) {
  */
 
 /**
- * Register the directory MCP tools on the provided server so they operate against the given per-request Supabase client.
+ * Register the HeyClaude directory MCP tools on the provided server using the given per-request Supabase client.
  *
- * Registers the set of directory tools (listCategories, searchContent, getContentDetail, getTrending, getFeatured,
- * getTemplates, getMcpServers, getRelatedContent, getContentByTag, getPopular, and getRecent) to route requests to
- * handlers that use the authenticated Supabase instance for the current request.
+ * Registers the directory toolset and binds each tool's handler to the supplied authenticated Supabase client so
+ * all tool operations run in the context of the current request's user/token. Tools registered include listing
+ * categories, searching content, retrieving content details, trending/featured/templates, MCP servers listing,
+ * related content, content-by-tag, popular, and recent endpoints.
  *
  * @param mcpServer - MCP server instance to register tools on
- * @param supabase - Authenticated per-request Supabase client bound to the request's user/token
+ * @param supabase - Authenticated, per-request Supabase client bound to the request's user/token
  */
 function registerAllTools(
   mcpServer: McpServer,
@@ -287,7 +288,7 @@ mcpApp.get('/.well-known/oauth-authorization-server', handleAuthorizationServerM
 mcpApp.get('/oauth/authorize', handleOAuthAuthorize);
 
 /**
- * Provide the MCP server resource URL used to validate token audience.
+ * Gets the MCP server resource URL used to validate token audience.
  *
  * @returns The MCP server resource URL — the value of the `MCP_SERVER_URL` environment variable if set, otherwise `https://mcp.heyclau.de/mcp`.
  */
@@ -377,11 +378,11 @@ function validateTokenAudience(token: string, expectedAudience: string): boolean
 }
 
 /**
- * Constructs a WWW-Authenticate header value for MCP Bearer authentication.
+ * Builds the value for a WWW-Authenticate header used for MCP Bearer authentication.
  *
  * @param resourceMetadataUrl - URL of the protected-resource metadata to include as `resource_metadata`
  * @param scope - Optional space-delimited scope string to include as `scope`
- * @returns The header value starting with `Bearer ` and containing `realm="mcp"`, `resource_metadata="<url>"`, and optionally `scope="<scopes>"`
+ * @returns The WWW-Authenticate header value starting with `Bearer ` and containing `realm="mcp"`, `resource_metadata="<url>"`, and optionally `scope="<scopes>"`
  */
 function createWwwAuthenticateHeader(resourceMetadataUrl: string, scope?: string): string {
   const params = [`realm="mcp"`, `resource_metadata="${resourceMetadataUrl}"`];

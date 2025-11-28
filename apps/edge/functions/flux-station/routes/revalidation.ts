@@ -85,9 +85,9 @@ function isValidContentCategory(
 }
 
 /**
- * Processes messages from the content revalidation queue: validates payloads and secrets, invalidates Next.js cache tags for eligible records, manages queue deletion or retries, and aggregates per-message results.
+ * Consume and process messages from the content revalidation queue, validating payloads and secrets, invalidating cache tags for eligible records, and managing queue deletion or retries.
  *
- * @returns A Response containing a summary object with the total processed count and an array of per-message results (each with message id, status, and optional reason/errors); on failure returns an error response. 
+ * @returns A Response whose body is a summary object with `processed` (number) and `results` (array of per-message outcomes: `msg_id`, `status`, optional `reason`/`errors`, and `will_retry`); on unrecoverable failure returns an error response. 
  */
 export async function handleRevalidation(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('flux-station', 'content-revalidation', {});

@@ -91,10 +91,10 @@ function respondWithAnalytics(
 }
 
 /**
- * Handle a content highlight transform request: enforce rate limits, initialize logging/tracing, and forward the request to the content-highlight processor.
+ * Process a content highlight transform request, enforcing rate limits and recording request analytics.
  *
  * @param req - Incoming HTTP request for content highlighting (expected POST to the transform endpoint)
- * @returns A Response containing the highlighted content on success, or an error response (including a rate-limit error with CORS headers when limits are exceeded)
+ * @returns A Response with the highlighted content on success, or an error response; if the request exceeds rate limits, returns a rate-limit error response that includes CORS headers
  */
 export async function handleContentHighlightRoute(req: Request): Promise<Response> {
   const rateLimit = checkRateLimit(req, RATE_LIMIT_PRESETS.transform);

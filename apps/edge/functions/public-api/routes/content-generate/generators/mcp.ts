@@ -39,10 +39,10 @@ function createTemplateVar(variable: string): string {
 }
 
 /**
- * Escape characters so a string can be embedded inside a single-quoted JavaScript string literal.
+ * Produce a string safe for embedding in a single-quoted JavaScript string literal.
  *
  * @param s - The input string to escape
- * @returns The input with backslashes, single quotes, dollar signs (`$`), and backticks escaped for safe inclusion in a single-quoted JS string
+ * @returns The input with backslashes, single quotes, dollar signs (`$`), and backticks escaped
  */
 function escapeForSingleQuotedLiteral(s: string): string {
   // Escape backslashes, then single quotes, then template literal chars ($ and `)
@@ -687,10 +687,10 @@ function dateToDosTime(date: Date): number {
 }
 
 /**
- * Convert a JavaScript Date into a 16-bit DOS date value.
+ * Converts a Date into a 16-bit DOS date value.
  *
- * @param date - The date to convert
- * @returns A 16-bit DOS date where bits encode the year since 1980, month, and day
+ * @param date - Date to convert
+ * @returns A 16-bit DOS date where bits encode year since 1980 (bits 15–9), month (bits 8–5), and day (bits 4–0)
  */
 function dateToDosDate(date: Date): number {
   const year = date.getFullYear() - 1980;

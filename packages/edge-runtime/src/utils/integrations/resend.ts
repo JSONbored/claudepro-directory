@@ -190,8 +190,18 @@ export function resolveNewsletterInterest(
 }
 
 /**
- * Infer initial topics based on signup context
- * Auto-assigns relevant topics to maximize engagement
+ * Determine initial Resend topic IDs to assign to a new contact based on content category.
+ *
+ * Always includes the weekly digest topic and adds category-specific topics when `copyCategory`
+ * matches a recognized content category.
+ *
+ * @param _source - Optional signup source value (currently not used for topic selection)
+ * @param copyCategory - Optional content category or copy category; recognized values:
+ *   - "agents" or "rules" -> agents/prompts topic
+ *   - "mcp" -> mcp/integrations topic
+ *   - "commands", "hooks", or "statuslines" -> commands/automation topic
+ *   - "guides" -> guides/tutorials topic
+ * @returns An array of Resend topic IDs to assign to the contact; always contains the weekly_digest topic and contains no duplicates.
  */
 export function inferInitialTopics(
   _source: Database['public']['Enums']['newsletter_source'] | string | null,
@@ -656,6 +666,12 @@ export async function updateContactEngagement(
   }
 }
 
+/**
+ * Retrieve the list of segment IDs associated with a Resend contact.
+ *
+ * @param contactId - The Resend contact's ID to list segments for
+ * @returns An array of segment IDs the contact belongs to
+ */
 async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise<string[]> {
   const response = await runWithRetry(
     () =>

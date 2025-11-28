@@ -52,9 +52,13 @@ import { ChangelogListClient } from '@/src/components/features/changelog/changel
 export const revalidate = 3600;
 
 /**
- * Builds page metadata for the changelog route, including RSS and Atom feed alternates.
+ * Build metadata for the changelog page and include RSS and Atom feed alternates.
  *
- * @returns Page metadata for the changelog route, including RSS (`/changelog/rss.xml`) and Atom (`/changelog/atom.xml`) alternates.
+ * If metadata generation fails, returns a fallback metadata object with a default title,
+ * description, and the same RSS/Atom alternates.
+ *
+ * @returns Page metadata for the `/changelog` route. The metadata includes feed discovery
+ *          URLs under `alternates.types` for `application/rss+xml` and `application/atom+xml`.
  */
 export async function generateMetadata(): Promise<Metadata> {
   // Generate requestId for metadata generation (separate from page render)
@@ -100,11 +104,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Renders the changelog list page with server-loaded entries, client-side filtering, and a newsletter CTA.
+ * Render the Changelog page with server-loaded entries, client-side filtering, structured data, and a newsletter CTA.
  *
- * Loads a published changelog overview, normalizes entries and category counts, and renders structured data, a header with stats, the client-side filtered changelog list, and a newsletter CTA. If data loading fails the error is logged and a minimal fallback UI is returned.
+ * Loads published changelog entries, displays totals and latest release information, and delegates interactive filtering to the client-side list component. If loading fails, a minimal fallback UI is returned.
  *
- * @returns The React element for the changelog page or a minimal fallback UI when loading fails.
+ * @returns The React element for the changelog page, or a minimal fallback UI when data loading fails.
  */
 export default async function ChangelogPage() {
   // Generate single requestId for this page request

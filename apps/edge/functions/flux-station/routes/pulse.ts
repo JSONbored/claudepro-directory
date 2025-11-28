@@ -526,16 +526,17 @@ async function deletePulseMessages(msgIds: bigint[]): Promise<void> {
 }
 
 /**
- * Process a batch of pulse queue messages, route events to their destinations, and manage deletion and retry behavior.
+ * Orchestrates reading, validating, routing, and post-processing of a batch of pulse queue messages.
  *
- * Reads up to the configured batch size from the pulse queue, validates message structure (removing invalid/poison messages),
- * routes events with interaction_type "search" to the search_queries insert path and other events to the user_interactions RPC batch,
- * optionally triggers Resend engagement updates for eligible events, deletes successfully consumed messages, and removes messages that
- * exceed the maximum retry attempts while leaving other failed messages for retry.
+ * Reads up to the configured batch size from the pulse queue, removes invalid (poison) messages,
+ * routes events with interaction_type "search" to the search insert path and other events to the user_interactions RPC,
+ * optionally triggers Resend engagement updates for eligible events, and manages deletion or retry behavior for processed messages
+ * (consuming successful messages and removing messages that exceed the maximum retry attempts).
  *
  * Side effects: reads from and deletes messages in the pulse queue, performs database inserts/RPCs, and may call the Resend API.
  *
- * @returns A Response containing a processing summary with `processed`, `inserted`, `failed`, and an optional `errors` array. */
+ * @returns A Response containing a processing summary with `processed`, `inserted`, `failed`, and an optional `errors` array.
+ */
 export async function handlePulse(_req: Request): Promise<Response> {
   // Get batch size from static config (with fallback)
   const batchSize = getCacheConfigNumber('queue.pulse.batch_size', PULSE_BATCH_SIZE_DEFAULT);

@@ -262,8 +262,9 @@ interface EmbeddingGenerationQueueMessage {
 }
 
 /**
- * Checks whether a value is a queue message containing a string `content_id`.
+ * Determine whether a value is a queue message that contains a string `content_id`.
  *
+ * @param msg - The value to validate as a queue message
  * @returns `true` if `msg` is an object with a string `content_id`, `false` otherwise.
  */
 function isValidQueueMessage(
@@ -277,10 +278,12 @@ function isValidQueueMessage(
 }
 
 /**
- * Processes a single embedding generation queue message and persists an embedding for the referenced content.
+ * Process one embedding-generation queue message for the given content and persist an embedding when applicable.
  *
- * @param message - Queue message containing a `content_id` and metadata for the embedding job
- * @returns An object with `success` indicating whether processing completed or was skipped, and `errors` containing any error messages encountered during processing
+ * Attempts to fetch the referenced content, build a searchable text summary, generate a normalized embedding, and store the embedding record. If the content has no searchable text the message is considered handled (skipped) and treated as successful.
+ *
+ * @param message - Queue message containing the `content_id` and job metadata
+ * @returns An object with `success` (`true` if processing completed or the message was intentionally skipped, `false` on failure) and `errors` (array of error messages encountered during processing)
  */
 async function processEmbeddingGeneration(
   message: EmbeddingGenerationQueueMessage
@@ -557,13 +560,17 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
 }
 
 /**
- * Handle incoming Supabase content webhooks to generate and store embeddings for content records.
+ * Process a Supabase content webhook to generate and store an embedding for the referenced content record.
  *
- * Validates webhook signature and timestamp, accepts only INSERT and UPDATE events for the `public.content` table,
- * builds searchable text from the record, generates an embedding, and upserts the embedding into storage.
+ * Validates the webhook signature and optional timestamp, enforces the webhook originates from the `public.content`
+ * table, and handles only INSERT and UPDATE events. For valid events it builds searchable text from the record,
+ * generates a normalized embedding, and upserts the embedding into storage. DELETE events and records that yield
+ * empty searchable text are acknowledged and skipped.
  *
  * @param req - Incoming HTTP request containing the Supabase database webhook payload and signature headers
- * @returns An HTTP Response describing the outcome. On success for generated embeddings, the response includes `content_id` and `embedding_dim`; for skipped events the response includes a `reason` (e.g., `delete_event`, `empty_text`); on failure the response contains standardized error information and appropriate status codes.
+ * @returns An HTTP Response describing the outcome. On successful generation the response includes `content_id` and
+ * `embedding_dim`; for skipped events the response includes a `reason` (for example, `delete_event` or `empty_text`);
+ * on failure the response contains standardized error information and an appropriate status code.
  */
 export async function handleEmbeddingWebhook(req: Request): Promise<Response> {
   // Otherwise, handle as direct webhook (legacy)

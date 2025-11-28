@@ -163,6 +163,14 @@ export function jsonResponse(
   });
 }
 
+/**
+ * Create an HTTP JSON response for a successful request.
+ *
+ * @param data - The response payload; will be sanitized before serialization
+ * @param status - HTTP status code to use (defaults to 200)
+ * @param cors - CORS headers to include in the response
+ * @returns The HTTP Response whose body is the sanitized JSON `data` and whose headers include CORS and security-related directives
+ */
 export function successResponse(data: unknown, status = 200, cors = publicCorsHeaders): Response {
   return jsonResponse(data, status, cors);
 }
@@ -316,6 +324,12 @@ export function buildCacheHeaders(
   };
 }
 
+/**
+ * Get the resolved time-to-live (TTL) in seconds for a cache preset.
+ *
+ * @param key - The cache preset key to resolve
+ * @returns The resolved TTL in seconds for the given cache preset (always at least 1)
+ */
 export function getCacheTtlSeconds(key: CachePresetKey): number {
   return resolveCachePreset(key).ttl;
 }

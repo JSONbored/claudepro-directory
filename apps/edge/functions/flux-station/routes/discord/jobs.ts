@@ -99,11 +99,11 @@ function isValidWebhookType(value: string): value is 'INSERT' | 'UPDATE' | 'DELE
 }
 
 /**
- * Processes the "discord_jobs" queue and sends Discord notifications for relevant job INSERT/UPDATE events.
+ * Process queued job webhook messages and dispatch Discord notifications for relevant INSERT and UPDATE events.
  *
- * This handler reads up to a batch of queued webhook messages, validates each payload and webhook type, applies trigger-like filtering (skipping drafts, placeholders, DELETE events, and updates where monitored fields did not change), invokes the direct job-notification handler for eligible messages, and deletes or retains queue messages according to outcome (invalid messages and handled/skipped messages are deleted; processing errors leave the message for retry).
+ * Reads a batch of messages, validates and filters payloads (skipping drafts, placeholders, DELETE events, and updates where monitored fields did not change), invokes the direct job-notification handler for eligible items, and deletes or retains queue messages according to outcome.
  *
- * @returns An HTTP Response summarizing work performed, including the number of processed messages and a per-message results array with statuses (`success`, `skipped`, or `failed`), reasons or errors when applicable, and whether failed items will be retried.
+ * @returns An HTTP Response whose body is a summary object with `processed` (number) and `results` (array). Each result contains `msg_id`, `status` (`success` | `skipped` | `failed`), and optional `reason`, `errors`, and `will_retry` fields indicating whether a failed item will be retried.
  */
 export async function handleDiscordJobs(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('flux-station', 'discord-jobs', {});

@@ -217,12 +217,12 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
 };
 
 /**
- * Build a matcher that checks whether an incoming request path starts with a given segment pattern.
+ * Create a matcher that determines whether a request path begins with a given segment pattern.
  *
- * The pattern is split on `/` and compared segment-by-segment against `ctx.segments`. Leading and trailing slashes in `pathPattern` are ignored; an empty pattern matches only when there are no segments.
+ * Leading and trailing slashes in `pathPattern` are ignored; an empty pattern matches only when the request has no segments.
  *
- * @param pathPattern - Route pattern using `/`-separated segments (e.g. "/search/auto" or "sitemap"); leading/trailing slashes are ignored
- * @returns `true` when `ctx.segments` begins with the pattern's segments (exact segment-wise prefix), `false` otherwise
+ * @param pathPattern - Route pattern using `/`-separated segments (for example "search/auto" or "sitemap")
+ * @returns `true` if `ctx.segments` begins with the pattern's segments (segment-wise prefix), `false` otherwise
  */
 function createPathMatcher(pathPattern: string) {
   const parts = pathPattern.split('/').filter(Boolean);

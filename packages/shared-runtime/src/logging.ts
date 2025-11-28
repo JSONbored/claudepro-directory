@@ -244,12 +244,12 @@ export function withContext(
 
 
 /**
- * Build a standardized log context for shared utility functions.
+ * Builds a standardized log context for shared utilities.
  *
  * @param utilityName - Name of the utility producing the log
  * @param action - Action performed by the utility
  * @param options - Additional context fields to merge into the returned object
- * @returns A log context object containing `function: 'shared-utils'`, `action` set to `utilityName.action`, a generated `request_id`, a `started_at` timestamp, a `utility` field, and any provided `options`
+ * @returns A log context object with `function: 'shared-utils'`, `action` set to `${utilityName}.${action}`, a generated `request_id`, a `started_at` timestamp, a `utility` field containing `utilityName`, and any fields from `options`
  */
 export function createUtilityContext(
   utilityName: string,
@@ -337,12 +337,14 @@ export function logTrace(message: string, logContext: Record<string, unknown>): 
 }
 
 /**
- * Log an error message with optional error normalization and ensure logs are flushed.
+ * Log an error message with optional error normalization and flush buffered logs.
+ *
+ * The logger's bindings are mixed into the provided context automatically before logging.
  *
  * @param message - Human-readable log message
- * @param logContext - Additional context fields to include; logger bindings (e.g., requestId, operation, userId) are mixed in automatically
- * @param error - Optional error to normalize and attach as `err` in the log
- * @returns Void when the log flush completes
+ * @param logContext - Additional structured fields to include in the log; logger bindings (for example `requestId`, `operation`, `userId`) are merged automatically
+ * @param error - Optional error to normalize and attach to the log as the `err` field
+ * @returns Void
  */
 export async function logError(message: string, logContext: Record<string, unknown>, error?: unknown): Promise<void> {
   // Build log data - mixin will automatically inject bindings (requestId, operation, userId, etc.)
@@ -384,11 +386,11 @@ export async function logError(message: string, logContext: Record<string, unkno
 }
 
 /**
- * Log a warning-level message including provided context and an optional error.
+ * Emit a warning-level log with the provided structured context and optional error.
  *
  * @param message - The log message
- * @param logContext - Additional context fields to include; these are merged with the logger's runtime bindings before emitting
- * @param error - Optional error or value to attach as `err` in the log; the value will be normalized for consistent output
+ * @param logContext - Structured context fields to include in the log
+ * @param error - Optional error or value to attach as the `err` field; it will be normalized for consistent output
  */
 export function logWarn(message: string, logContext: Record<string, unknown>, error?: unknown): void {
   // Build log data - mixin will automatically inject bindings (requestId, operation, userId, etc.)

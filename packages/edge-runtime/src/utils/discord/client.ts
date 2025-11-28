@@ -190,6 +190,28 @@ export async function sendDiscordWebhook(
   throw lastError || new Error('Max retries exceeded');
 }
 
+/**
+ * Sends a Discord webhook message and records the outbound event and its result in the webhook_events log.
+ *
+ * Logs an outbound event (optionally using provided metadata or logType), performs an HTTP POST to the webhook URL
+ * (optionally waiting for the Discord API response), updates the logged event with success or failure details, and
+ * returns the HTTP status, any Discord message id, retry count, and the parsed raw response when available.
+ *
+ * @param webhookUrl - Full Discord webhook URL to call.
+ * @param payload - JSON-serializable payload to send to the webhook.
+ * @param eventType - The webhook event enum value to record for this outbound event.
+ * @param options - Optional settings:
+ *   - relatedId: id to associate the webhook event with an application entity.
+ *   - metadata: object to record in the event log instead of the raw payload.
+ *   - logType: override eventType used in the event log.
+ *   - waitForResponse: when true (default), append `?wait=true` so Discord returns the created message.
+ * @returns An object with:
+ *   - `status`: HTTP status code returned by Discord,
+ *   - `messageId`: created Discord message id or empty string if missing,
+ *   - `retryCount`: always 0 for this operation,
+ *   - `rawResponse` (optional): parsed JSON response from Discord when available.
+ * @throws Error when the Discord API responds with a non-success status.
+ */
 export async function createDiscordMessageWithLogging(
   webhookUrl: string,
   payload: Record<string, unknown>,

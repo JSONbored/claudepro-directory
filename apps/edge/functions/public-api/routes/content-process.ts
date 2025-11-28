@@ -236,9 +236,13 @@ interface FilenameGeneratorOptions {
 }
 
 /**
- * Generate a sanitized filename for an item based on category rules, requested format, and language.
+ * Generates a sanitized filename for an item using category rules, requested format, and language.
  *
- * @param options.item - Item descriptor with required `category` and optional `slug`, `name`, and `hook_type`; used to derive the filename base
+ * The filename base is derived from the item's `slug`, `name`, or `category`; extensions are chosen from `language`.
+ * For `format === 'multi'` a sanitized `section` is appended. If the category rule requires a hook type and the item
+ * provides `hook_type`, the hook-type kebab form will be used as the base name.
+ *
+ * @param options.item - Item descriptor with required `category` and optional `slug`, `name`, and `hook_type`
  * @param options.language - Language hint used to determine the file extension
  * @param options.format - Optional filename format; when `'multi'` the `section` is appended, when `'hook'` hook-type naming may apply
  * @param options.section - Section key used when `format` is `'multi'` to produce a section-specific filename
@@ -454,12 +458,12 @@ interface ProcessResponse {
  */
 
 /**
- * Produce HTML-highlighted code and the resolved language for rendering.
+ * Generate highlighted HTML for source code and report the resolved language.
  *
- * @param code - Source code to highlight; if empty or whitespace, a placeholder HTML is returned
- * @param language - Optional language hint used to choose the highlighter; when `code` is present defaults to `javascript` if unspecified, when `code` is empty the returned language defaults to `text`
- * @param showLineNumbers - When `true`, include line numbers in the highlighted output
- * @returns An object with `html` containing the highlighted HTML (or a placeholder) and `language` set to the resolved language used for highlighting
+ * @param code - Source code to highlight; if empty or only whitespace a placeholder HTML is returned
+ * @param language - Optional language hint; when `code` is present and this is omitted the highlighter defaults to `javascript`; when `code` is empty the returned language defaults to `text`
+ * @param showLineNumbers - Include line numbers in the highlighted output when `true`
+ * @returns An object with `html` containing the highlighted HTML (or placeholder) and `language` set to the language used for highlighting
  */
 function performHighlight(
   code: string,

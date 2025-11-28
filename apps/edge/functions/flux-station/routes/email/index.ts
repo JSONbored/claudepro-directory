@@ -65,9 +65,9 @@ const NEWSLETTER_COUNT_TTL_SECONDS = edgeEnv.newsletter.countTtlSeconds;
 let newsletterCountCache: { value: number; expiresAt: number } | null = null;
 
 /**
- * Process a newsletter subscription request, create or update the subscriber record, sync contact data with the email provider, invalidate related caches, attempt to send a welcome email, and return the resulting subscription details.
+ * Handle a newsletter subscription request: create or update the subscriber, sync contact data with the email provider, invalidate related caches, and attempt to send a welcome email.
  *
- * @returns A Response containing subscription result and metadata: `subscription_id`, `email`, `resend_contact_id`, `sync_status`, `email_sent`, and `email_id`, or an error response on failure.
+ * @returns A Response containing subscription result and metadata: `subscription_id`, `email`, `resend_contact_id`, `sync_status`, `email_sent`, and `email_id` on success; an error response on failure.
  */
 export async function handleSubscribe(req: Request): Promise<Response> {
 
@@ -594,13 +594,15 @@ export async function handleTransactional(req: Request): Promise<Response> {
 /**
  * Generate and send the weekly digest to all subscribers and record the run timestamp.
  *
- * Fetches the weekly digest content, skips if rate-limited or there's no content/subscribers,
- * sends digest emails in batch, and attempts to upsert the last successful run timestamp with retries.
- * If the timestamp upsert fails after retries, the function still returns success reflecting the email send results.
+ * Fetches digest content for the previous week, skips processing if rate-limited or if the digest
+ * contains no content or has no subscribers, sends digest emails in batch, and attempts to upsert
+ * the last successful run timestamp. If the timestamp upsert ultimately fails, the function still
+ * reports the email send results.
  *
- * @returns An object describing the outcome:
- *  - If skipped: `{ skipped: true, reason: string, ... }` where `reason` is one of `rate_limited`, `invalid_data`, `no_content`, or `no_subscribers`.
- *  - If processed: `{ sent: number, failed: number, rate: number }` with counts of successful and failed sends and the success rate.
+ * @returns If skipped: an object with `{ skipped: true, reason: string, ... }` where `reason` is one of
+ * `rate_limited`, `invalid_data`, `no_content`, or `no_subscribers`. If processed: an object with
+ * `{ sent: number, failed: number, rate: number }` containing counts of successful and failed sends
+ * and the success rate.
  */
 export async function handleDigest(): Promise<Response> {
   const logContext = createEmailHandlerContext('digest');
@@ -895,10 +897,10 @@ export async function handleSequence(): Promise<Response> {
 }
 
 /**
- * Send the configured job-lifecycle email (for example onboarding or status updates) to the specified user for a job.
+ * Send the configured job-lifecycle email (for example onboarding or status updates) to a user for a specific job.
  *
  * @param action - Key identifying which entry in `JOB_EMAIL_CONFIGS` to use for template, props, and subject
- * @returns `{ sent: true, id: string | undefined, jobId: string }` on success, or an error response when validation or delivery fails
+ * @returns A Response whose successful JSON body is `{ sent: true, id?: string, jobId: string }`; otherwise an appropriate HTTP error response
  */
 export async function handleJobLifecycleEmail(req: Request, action: string): Promise<Response> {
 
@@ -1014,9 +1016,9 @@ async function getCachedNewsletterCount(): Promise<number> {
 }
 
 /**
- * Serve the current newsletter subscriber count and associated caching headers.
+ * Provides the current newsletter subscriber count along with cache-related and CORS headers.
  *
- * @returns A Response containing the newsletter subscriber count in JSON (`{ count: number }`) and appropriate Cache-Control and CORS headers
+ * @returns A JSON response body `{ count: number }` with Cache-Control and CORS headers set
  */
 export async function handleGetNewsletterCount(): Promise<Response> {
   const logContext = createEmailHandlerContext('get-newsletter-count');
@@ -1055,14 +1057,9 @@ export async function handleGetNewsletterCount(): Promise<Response> {
 }
 
 /**
- * Process a contact form submission: validate required fields and category, send an admin notification and a user confirmation email, and return the outcome.
+ * Handle a contact form submission by validating input and category, notifying admins, sending a confirmation to the user, and returning the outcomes.
  *
- * @returns An object with the send outcome:
- * - `sent`: `true` if the handler completed its send attempts,
- * - `submission_id`: the provided submission identifier,
- * - `admin_email_sent`: `true` if the admin notification was sent, `false` on failure,
- * - `user_email_sent`: `true` if the user confirmation was sent, `false` on failure,
- * - `user_email_id`: the Resend message id for the user email, or `null` when unavailable
+ * @returns A Response containing JSON with the send outcome: `sent` (true if the handler completed its send attempts), `submission_id`, `admin_email_sent` (`true` if the admin notification was sent, `false` otherwise), `user_email_sent` (`true` if the user confirmation was sent, `false` otherwise), and `user_email_id` (the Resend message id for the user email, or `null` when unavailable).
  */
 export async function handleContactSubmission(req: Request): Promise<Response> {
 

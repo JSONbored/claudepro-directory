@@ -203,17 +203,14 @@ async function processInternalQueue(
 }
 
 /**
- * Invoke an external edge-function queue endpoint and return its processing outcome.
+ * Invokes the configured external edge-function for a queue and returns its processing result.
  *
- * Sends a signed POST to the configured endpoint, attempts to extract optional
- * `processed` and `error` values from a JSON response, and converts HTTP or
- * runtime failures into a `QueueProcessingResult`.
+ * Attempts to extract optional `processed` and `error` fields from the function's response
+ * and includes the observed `queueLength` in the returned result. `config.endpoint` must be present.
  *
- * @param config - Queue configuration for an external queue; must provide `endpoint`
- * @param queueLength - Number of messages present in the queue at the time of check
- * @returns A `QueueProcessingResult` containing the queue name, `success` flag,
- *          the observed `queueLength`, and optionally `processed` (number of messages
- *          processed) or `error` (error message)
+ * @param config - Queue configuration for the external queue; must include `endpoint`
+ * @param queueLength - Number of messages observed in the queue when checked
+ * @returns A `QueueProcessingResult` containing the queue name, `success` flag, the observed `queueLength`, and optionally `processed` (number of messages processed) or `error` (error message)
  */
 async function processExternalQueue(
   config: QueueConfig,

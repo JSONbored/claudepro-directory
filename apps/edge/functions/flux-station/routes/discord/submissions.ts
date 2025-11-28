@@ -32,10 +32,10 @@ const SUBMISSION_DISCORD_QUEUE = 'discord_submissions';
 const QUEUE_BATCH_SIZE = 10;
 
 /**
- * Checks whether a value matches the expected database webhook payload shape for content submissions.
+ * Type guard that verifies a value conforms to the `DatabaseWebhookPayload<ContentSubmission>` shape for content submissions.
  *
- * @param value - The value to validate
- * @returns `true` if the value matches `DatabaseWebhookPayload<ContentSubmission>`, `false` otherwise.
+ * @param value - Value to validate
+ * @returns `true` if `value` conforms to `DatabaseWebhookPayload<ContentSubmission>`, `false` otherwise.
  */
 function isValidSubmissionWebhookPayload(
   value: unknown

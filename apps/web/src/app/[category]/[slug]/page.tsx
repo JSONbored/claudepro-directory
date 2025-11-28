@@ -124,6 +124,12 @@ function mapCategoryToRecentlyViewed(category: string): RecentlyViewedCategory |
   return CATEGORY_TO_RECENTLY_VIEWED[category] ?? null;
 }
 
+/**
+ * Builds page metadata for a detail route using the provided route parameters and category configuration.
+ *
+ * @param params - A promise that resolves to an object containing `category` and `slug` route parameters.
+ * @returns A Metadata object for the detail page. If `category` is invalid, returns the default metadata for the `/:category/:slug` route; otherwise includes `category`, `slug`, and `categoryConfig` when available.
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -151,10 +157,10 @@ export async function generateMetadata({
 /**
  * Render the detail page for a content item identified by category and slug.
  *
- * Validates the category, loads core content required for the page (blocking), and initiates non-blocking analytics and related-content fetches for Suspense-based rendering. If the category is invalid or the requested content is missing, the function triggers a 404 (calls `notFound()`).
+ * Validates the requested category and content (triggering a 404 for invalid or missing items) and composes the page UI including analytics pulses, structured data, recently-viewed tracking when applicable, and any collection-specific section.
  *
  * @param params - A promise that resolves to an object with `category` and `slug` route parameters
- * @returns A React element that composes the content detail UI, analytics pulses, structured data, recently-viewed tracking (when supported), and any collection-specific section
+ * @returns A React element representing the content detail page
  */
 export default async function DetailPage({
   params,

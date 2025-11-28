@@ -149,10 +149,10 @@ export async function handleGeneratePackage(
   }
 
   /**
-   * Determines whether a value is a valid `content_category` enum member.
+   * Check whether a value is one of the `content_category` enum values.
    *
    * @param value - The value to validate as a `content_category`
-   * @returns `true` if `value` matches one of the `content_category` enum values, `false` otherwise.
+   * @returns `true` if `value` matches a `content_category` enum value, `false` otherwise.
    */
   function isValidContentCategory(
     value: unknown
