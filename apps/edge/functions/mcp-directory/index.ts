@@ -108,8 +108,10 @@ mcpApp.use('/*', async (c, next) => {
  */
 
 /**
- * Get authenticated Supabase client for tool handlers
- * Creates client with user's auth context for RLS enforcement
+ * Create a Supabase client that sends the provided user access token with every request.
+ *
+ * @param token - Access token to include as `Authorization: Bearer <token>` on each request
+ * @returns A Supabase client instance configured to include the provided token on outbound requests
  */
 function getAuthenticatedSupabase(_user: User, token: string) {
   const {
@@ -128,8 +130,15 @@ function getAuthenticatedSupabase(_user: User, token: string) {
  */
 
 /**
- * Register all tools with a given Supabase client
- * This function is called for each request with an authenticated client
+ * Register the HeyClaude directory MCP tools on the provided server using the given per-request Supabase client.
+ *
+ * Registers the directory toolset and binds each tool's handler to the supplied authenticated Supabase client so
+ * all tool operations run in the context of the current request's user/token. Tools registered include listing
+ * categories, searching content, retrieving content details, trending/featured/templates, MCP servers listing,
+ * related content, content-by-tag, popular, and recent endpoints.
+ *
+ * @param mcpServer - MCP server instance to register tools on
+ * @param supabase - Authenticated, per-request Supabase client bound to the request's user/token
  */
 function registerAllTools(
   mcpServer: McpServer,
@@ -279,7 +288,9 @@ mcpApp.get('/.well-known/oauth-authorization-server', handleAuthorizationServerM
 mcpApp.get('/oauth/authorize', handleOAuthAuthorize);
 
 /**
- * Get MCP server resource URL for audience validation
+ * Gets the MCP server resource URL used to validate token audience.
+ *
+ * @returns The MCP server resource URL — the value of the `MCP_SERVER_URL` environment variable if set, otherwise `https://mcp.heyclau.de/mcp`.
  */
 function getMcpServerResourceUrl(): string {
   // Use environment variable if set, otherwise default to production URL
@@ -287,8 +298,14 @@ function getMcpServerResourceUrl(): string {
 }
 
 /**
- * Validate JWT token audience claim
- * Per MCP spec (RFC 8707), tokens MUST be issued for this specific resource
+ * Determine whether a JWT's `aud` claim includes the MCP resource or a compatible Supabase audience.
+ *
+ * Inspects the token's `aud` claim (string or array) and returns `true` if it contains `expectedAudience`
+ * or a recognized Supabase project audience; returns `false` if `aud` is missing or does not match.
+ *
+ * @param token - The JWT string to inspect
+ * @param expectedAudience - The MCP resource URL that must be present in the token's `aud` claim
+ * @returns `true` if the token's `aud` includes `expectedAudience` or a compatible Supabase audience, `false` otherwise
  */
 function validateTokenAudience(token: string, expectedAudience: string): boolean {
   try {
@@ -361,16 +378,20 @@ function validateTokenAudience(token: string, expectedAudience: string): boolean
 }
 
 /**
- * Create WWW-Authenticate header per MCP spec (RFC 9728)
+ * Builds the value for a WWW-Authenticate header used for MCP Bearer authentication.
+ *
+ * @param resourceMetadataUrl - URL of the protected-resource metadata to include as `resource_metadata`
+ * @param scope - Optional space-delimited scope string to include as `scope`
+ * @returns The WWW-Authenticate header value starting with `Bearer ` and containing `realm="mcp"`, `resource_metadata="<url>"`, and optionally `scope="<scopes>"`
  */
 function createWwwAuthenticateHeader(resourceMetadataUrl: string, scope?: string): string {
-  const params = ['Bearer', `realm="mcp"`, `resource_metadata="${resourceMetadataUrl}"`];
+  const params = [`realm="mcp"`, `resource_metadata="${resourceMetadataUrl}"`];
 
   if (scope) {
     params.push(`scope="${scope}"`);
   }
 
-  return params.join(', ');
+  return `Bearer ${params.join(', ')}`;
 }
 
 /**
@@ -395,9 +416,9 @@ mcpApp.all('/mcp', async (c) => {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'mcp-protocol',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'mcp-protocol',
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
     method: c.req.method,
   });
 

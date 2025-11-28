@@ -24,6 +24,16 @@ const BASE_CORS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+/**
+ * Executes a handler while emitting analytics for the given transform route.
+ *
+ * Logs a success or error event containing route, path, method, status, and optional error details; errors are logged and rethrown.
+ *
+ * @param routeName - Identifier used in analytics for the route
+ * @param handler - Callback that performs the route work and yields a Response
+ * @returns The Response produced by the handler
+ * @throws Rethrows any error produced by the handler after logging it
+ */
 function respondWithAnalytics(
   routeName: string,
   handler: () => Promise<Response>
@@ -80,6 +90,12 @@ function respondWithAnalytics(
     });
 }
 
+/**
+ * Process a content highlight transform request, enforcing rate limits and recording request analytics.
+ *
+ * @param req - Incoming HTTP request for content highlighting (expected POST to the transform endpoint)
+ * @returns A Response with the highlighted content on success, or an error response; if the request exceeds rate limits, returns a rate-limit error response that includes CORS headers
+ */
 export async function handleContentHighlightRoute(req: Request): Promise<Response> {
   const rateLimit = checkRateLimit(req, RATE_LIMIT_PRESETS.transform);
   if (!rateLimit.allowed) {
@@ -102,8 +118,8 @@ export async function handleContentHighlightRoute(req: Request): Promise<Respons
     
     // Set bindings for this request
     logger.setBindings({
-      requestId: logContext.request_id,
-      operation: logContext.action || 'content-highlight',
+      requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+      operation: typeof logContext['action'] === "string" ? logContext['action'] : 'content-highlight',
       method: req.method,
     });
     
@@ -113,6 +129,14 @@ export async function handleContentHighlightRoute(req: Request): Promise<Respons
   });
 }
 
+/**
+ * Handle the content processing transform route, enforcing rate limits, initializing logging/tracing, and returning the processed response.
+ *
+ * If the request exceeds the transform rate limit, returns a rate-limit error response with the module's CORS headers. For allowed requests, initializes request logging and tracing, binds request metadata to the logger, invokes content processing, and attaches rate-limit headers to the response.
+ *
+ * @param req - Incoming HTTP request for the content processing route
+ * @returns The HTTP response to return to the client; a rate-limit error response with CORS headers when over the limit, otherwise the processed response with rate-limit headers applied
+ */
 export async function handleContentProcessRoute(req: Request): Promise<Response> {
   const rateLimit = checkRateLimit(req, RATE_LIMIT_PRESETS.transform);
   if (!rateLimit.allowed) {
@@ -135,8 +159,8 @@ export async function handleContentProcessRoute(req: Request): Promise<Response>
     
     // Set bindings for this request
     logger.setBindings({
-      requestId: logContext.request_id,
-      operation: logContext.action || 'content-process',
+      requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+      operation: typeof logContext['action'] === "string" ? logContext['action'] : 'content-process',
       method: req.method,
     });
     

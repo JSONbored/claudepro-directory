@@ -29,17 +29,19 @@ const GENERATORS = new Map<ContentCategory, PackageGenerator>([
 ]);
 
 /**
- * Get generator for a category
- * @param category - Content category
- * @returns Generator instance or null if not supported
+ * Retrieve the package generator associated with a content category.
+ *
+ * @param category - The content category to look up
+ * @returns The generator instance for `category`, or `null` if no generator is registered for that category
  */
 export function getGenerator(category: ContentCategory): PackageGenerator | null {
   return GENERATORS.get(category) ?? null;
 }
 
 /**
- * Get all supported categories
- * @returns Array of categories that support package generation
+ * Lists content categories that have a registered package generator.
+ *
+ * @returns An array of supported content categories.
  */
 export function getSupportedCategories(): ContentCategory[] {
   // Array.from returns the correct type, no assertion needed
@@ -47,9 +49,10 @@ export function getSupportedCategories(): ContentCategory[] {
 }
 
 /**
- * Check if category supports package generation
- * @param category - Content category
- * @returns true if category has a generator
+ * Determine whether a content category has a registered package generator.
+ *
+ * @param category - The content category to check
+ * @returns `true` if the category has a registered generator, `false` otherwise.
  */
 export function isCategorySupported(category: ContentCategory): boolean {
   return GENERATORS.has(category);

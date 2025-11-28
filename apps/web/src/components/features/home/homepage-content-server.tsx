@@ -1,5 +1,4 @@
 import {
-  createWebAppContextWithId,
   generateRequestId,
   logger,
   normalizeError,
@@ -7,6 +6,7 @@ import {
   trackRPCFailure,
   trackValidationFailure,
 } from '@heyclaude/web-runtime/core';
+import { createWebAppContextWithId } from '@heyclaude/web-runtime/logging/server';
 import { getHomepageCategoryIds, getHomepageData } from '@heyclaude/web-runtime/server';
 import type { SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
 import { HomePageClient } from '@/src/components/features/home/home-sections';

@@ -30,7 +30,6 @@ import {
   traceStep,
   uploadObject,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
   createDataApiContext,
@@ -60,16 +59,17 @@ interface UploadPackageResponse {
 }
 
 /**
- * Handle package upload request
- * POST /content/generate-package/upload
+ * Handle internal MCP package uploads for an existing content entry.
  *
- * Body: { content_id, category: 'mcp', mcpb_file: base64, content_hash }
+ * Validates service-role authorization, accepts a base64-encoded `.mcpb` package for content with category `mcp`, stores the file in object storage, updates the content record with the storage URL and build metadata, and returns the upload result.
  *
- * Authentication: Requires SUPABASE_SERVICE_ROLE_KEY (via Authorization: Bearer header)
+ * @param request - The incoming HTTP request
+ * @param logContext - Optional logging context to attach to request logs and traces; if omitted a context is created
+ * @returns An UploadPackageResponse object containing `success`, `content_id`, `category`, `slug`, `storage_url`, and an optional `message` or `error`
  */
 export async function handleUploadPackage(
   request: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Create log context if not provided
   const finalLogContext = logContext || createDataApiContext('content-generate-upload', {
@@ -84,8 +84,8 @@ export async function handleUploadPackage(
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: finalLogContext.request_id,
-    operation: finalLogContext.action || 'package-upload',
+    requestId: typeof finalLogContext['request_id'] === 'string' ? finalLogContext['request_id'] : undefined,
+    operation: typeof finalLogContext['action'] === 'string' ? finalLogContext['action'] : 'package-upload',
     method: request.method,
   });
   
@@ -161,7 +161,14 @@ export async function handleUploadPackage(
     return badRequestResponse('Missing or invalid content_id', CORS);
   }
 
-  // Validate category enum type
+  /**
+   * Checks whether a value is one of the known `content_category` enum values.
+   *
+   * Narrows the type to `DatabaseGenerated['public']['Enums']['content_category']` when true.
+   *
+   * @param value - The value to validate as a `content_category`
+   * @returns `true` if `value` matches a `content_category` enum member, `false` otherwise.
+   */
   function isValidContentCategory(
     value: unknown
   ): value is DatabaseGenerated['public']['Enums']['content_category'] {

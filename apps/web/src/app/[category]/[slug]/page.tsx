@@ -124,6 +124,12 @@ function mapCategoryToRecentlyViewed(category: string): RecentlyViewedCategory |
   return CATEGORY_TO_RECENTLY_VIEWED[category] ?? null;
 }
 
+/**
+ * Builds page metadata for a detail route using the provided route parameters and category configuration.
+ *
+ * @param params - A promise that resolves to an object containing `category` and `slug` route parameters.
+ * @returns A Metadata object for the detail page. If `category` is invalid, returns the default metadata for the `/:category/:slug` route; otherwise includes `category`, `slug`, and `categoryConfig` when available.
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -148,6 +154,14 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Render the detail page for a content item identified by category and slug.
+ *
+ * Validates the requested category and content (triggering a 404 for invalid or missing items) and composes the page UI including analytics pulses, structured data, recently-viewed tracking when applicable, and any collection-specific section.
+ *
+ * @param params - A promise that resolves to an object with `category` and `slug` route parameters
+ * @returns A React element representing the content detail page
+ */
 export default async function DetailPage({
   params,
 }: {
@@ -198,9 +212,24 @@ export default async function DetailPage({
     // Content may not exist (deleted, never existed, or invalid slug)
     // This is expected behavior during build-time static generation when generateStaticParams
     // generates paths for content that may have been removed from the database
-    reqLogger.warn('DetailPage: get_content_detail_core returned null - content may not exist', {
-      section: 'core-content-fetch',
-    });
+    // During build, missing content is expected - only log at debug level
+    // During runtime, log at warn level to catch real issues
+    const isBuildTime = process.env['NEXT_PHASE'] === 'phase-production-build' || 
+                        process.env['NEXT_PUBLIC_VERCEL_ENV'] === undefined;
+    
+    if (isBuildTime) {
+      reqLogger.debug('DetailPage: content not found during build (expected)', {
+        section: 'core-content-fetch',
+        category,
+        slug,
+      });
+    } else {
+      reqLogger.warn('DetailPage: get_content_detail_core returned null - content may not exist', {
+        section: 'core-content-fetch',
+        category,
+        slug,
+      });
+    }
     notFound();
   }
 

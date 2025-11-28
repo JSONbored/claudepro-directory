@@ -2,7 +2,6 @@ import { supabaseServiceRole } from '../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { invalidateCacheByKey } from '../utils/cache.ts';
 import { errorToString } from '@heyclaude/shared-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { logger } from '../utils/logger.ts';
 
 const MAX_NOTIFICATION_IDS = 50;
@@ -24,10 +23,20 @@ export interface NotificationInsertPayload {
   metadata?: Record<string, unknown> | null;
 }
 
+/**
+ * Retrieve active notifications for a user, excluding specified dismissed notifications.
+ *
+ * The provided `dismissedIds` are sanitized (trimmed, deduplicated, filtered, and limited to 50) before being applied.
+ *
+ * @param userId - The identifier of the user whose active notifications to fetch
+ * @param dismissedIds - Notification IDs to exclude from the results
+ * @param logContext - Optional additional fields to include in structured logs
+ * @returns An array of `NotificationRecord` objects representing active notifications; an empty array if none are found
+ */
 export async function getActiveNotificationsForUser(
   userId: string,
   dismissedIds: string[],
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<NotificationRecord[]> {
   const sanitizedDismissedIds = Array.from(
     new Set(dismissedIds.map((id) => id.trim()).filter(Boolean))
@@ -57,9 +66,18 @@ export async function getActiveNotificationsForUser(
   return (data as NotificationRecord[]) ?? [];
 }
 
+/**
+ * Creates a notification record in the database and returns the stored row.
+ *
+ * Inserts a notification using values from `payload` (generating an `id` if absent). If the insert fails with a unique-constraint conflict for the same `id`, returns the existing record. After a successful insert the function attempts to invalidate notification caches; cache invalidation failures are logged and do not cause the operation to fail. Other insert errors are logged and rethrown.
+ *
+ * @param payload - Fields used to build the notification; missing optional fields receive sensible defaults (e.g., `id` is generated, `priority` defaults to `"medium"`, `type` defaults to `"announcement"`, `active` defaults to `true`). Note: `metadata` in the payload interface is not written to the database.
+ * @param logContext - Optional structured context merged into log entries.
+ * @returns The inserted or reused `NotificationRecord`.
+ */
 export async function insertNotification(
   payload: NotificationInsertPayload,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<NotificationRecord> {
   const record = {
     id: payload.id ?? crypto.randomUUID(),
@@ -136,10 +154,20 @@ export async function insertNotification(
   return data;
 }
 
+/**
+ * Marks a set of notifications as dismissed for a specific user.
+ *
+ * Persists dismissal records for the provided notification IDs, invalidates the notifications cache, and logs the outcome. Notification IDs are trimmed, deduplicated, filtered for emptiness, and limited to the configured maximum.
+ *
+ * @param userId - The ID of the user who is dismissing notifications
+ * @param notificationIds - Notification IDs to dismiss; values will be trimmed, deduplicated, filtered, and capped at the configured maximum
+ * @param logContext - Optional additional context included in structured logs
+ * @throws Throws the database error if persisting dismissal records fails
+ */
 export async function dismissNotificationsForUser(
   userId: string,
   notificationIds: string[],
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ) {
   const sanitizedIds = Array.from(
     new Set(notificationIds.map((id) => id.trim()).filter(Boolean))
@@ -215,6 +243,12 @@ function isConflictError(error: unknown): error is {
   );
 }
 
+/**
+ * Fetches a notification by its id.
+ *
+ * @param id - The id of the notification to retrieve
+ * @returns The notification record matching `id`, or `null` if none is found or an error occurs
+ */
 async function getNotificationById(id: string): Promise<NotificationRecord | null> {
   const { data, error } = await supabaseServiceRole
     .from('notifications')

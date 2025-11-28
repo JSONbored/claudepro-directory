@@ -26,6 +26,16 @@ import {
   validateBodySize,
 } from '@heyclaude/shared-runtime';
 
+/**
+ * Handle an incoming external webhook: validate payload size, ingest and route the event, and return a CORS-enabled HTTP response.
+ *
+ * @param req - The incoming HTTP request for the external webhook route
+ * @returns An HTTP Response indicating the outcome:
+ *  `200` with payload `{ message: 'OK', source, duplicate }` on success;
+ *  `400` for invalid or oversized payloads;
+ *  `401` for unauthorized requests;
+ *  or an error response for processing failures. Responses include appropriate CORS headers.
+ */
 export async function handleExternalWebhook(req: Request): Promise<Response> {
   const logContext = createNotificationRouterContext('external-webhook', {
     source: 'unknown',
@@ -37,9 +47,9 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'external-webhook',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'external-webhook',
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
   });
   
   try {

@@ -22,7 +22,6 @@ import {
   traceStep,
 } from '@heyclaude/edge-runtime';
 import {
-  type BaseLogContext,
   buildSecurityHeaders,
   CIRCUIT_BREAKER_CONFIGS,
   deriveTitleFromRoute,
@@ -47,6 +46,12 @@ const OG_HEIGHT = 630;
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
+/**
+ * Determines whether a string is one of the recognized content category values.
+ *
+ * @param value - The candidate content category to validate
+ * @returns `true` if `value` matches a known content category, `false` otherwise
+ */
 function isValidContentCategory(
   value: string
 ): value is DatabaseGenerated['public']['Enums']['content_category'] {
@@ -67,9 +72,13 @@ export interface OGImageParams {
 }
 
 /**
- * Create OG image specific log context (more specific than shared-utils)
+ * Create a per-request logging context for OG image generation.
+ *
+ * @param action - Short label describing the action or step being performed
+ * @param options - Additional context properties to merge into the returned object
+ * @returns An object containing `function: 'og-image'`, the provided `action`, a generated `request_id` (UUID), an ISO `started_at` timestamp, and any supplied `options`
  */
-function createOGImageContext(action: string, options?: Record<string, unknown>): BaseLogContext {
+function createOGImageContext(action: string, options?: Record<string, unknown>): Record<string, unknown> {
   return {
     function: 'og-image',
     action,
@@ -80,8 +89,12 @@ function createOGImageContext(action: string, options?: Record<string, unknown>)
 }
 
 /**
- * Extract metadata from HTTP response data
- * Handles both { metadata: {...} } and {...} response shapes
+ * Normalize SEO metadata from an HTTP response into an object with `title`, `description`, and `keywords` when present.
+ *
+ * Accepts responses shaped either as `{ metadata: { ... } }` or as a top-level metadata object and extracts only
+ * string `title` and `description` and an array of string `keywords`. Only valid fields are included in the result.
+ *
+ * @returns An object containing any of `title`, `description`, and `keywords` (array of strings) when those fields exist and are of the expected types.
  */
 function extractMetadataFromResponse(data: unknown): {
   title?: string;
@@ -122,13 +135,17 @@ function extractMetadataFromResponse(data: unknown): {
 }
 
 /**
- * Fetch metadata from SEO service with direct function call (no HTTP loopback)
- * Falls back to HTTP call if direct call fails, then to route-based title extraction
- * Always returns OGImageParams (never null)
+ * Resolve Open Graph metadata for a given URL route using layered fallbacks.
+ *
+ * Attempts to obtain title, description, type, and tags from primary SEO generation, then an internal SEO HTTP endpoint, then a database RPC for content routes, and finally derives a title from the route when other methods fail. Returned values use sensible defaults when specific metadata is unavailable.
+ *
+ * @param route - The URL path to resolve metadata for (for example, `/agents/foo`)
+ * @param logContext - Per-request logging context used for observability and logging
+ * @returns OGImageParams containing `title`, `description`, `type`, and `tags`; `title` and `description` will fall back to defaults when not available, and `tags` will be an empty array if none are found
  */
 async function fetchMetadataFromRoute(
   route: string,
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<OGImageParams> {
   const supabaseUrl = edgeEnv.supabase.url;
   // Compute route type upfront to reuse across all return paths
@@ -333,7 +350,10 @@ async function fetchMetadataFromRoute(
 }
 
 /**
- * Extract category/type from route path
+ * Determine the content category implied by a URL path.
+ *
+ * @param route - The URL path (e.g., "/", "/agents/code-reviewer", "/mcp/github")
+ * @returns The first path segment if it matches a known content category, otherwise "website"
  */
 function extractTypeFromRoute(route: string): string {
   // Routes like /agents/code-reviewer -> "agents"
@@ -349,7 +369,10 @@ function extractTypeFromRoute(route: string): string {
 }
 
 /**
- * Generate heyclaude logo component (hey + claude chip style)
+ * Create a React element that renders the "HeyClaude" logo with a two-part "hey" text and a rounded "claude" pill.
+ *
+ * @param size - Visual size of the logo; `'sm'` | `'md'` | `'lg'` adjust the rendered font size
+ * @returns A React element containing the styled HeyClaude logo
  */
 function createHeyClaudeLogo(size: 'sm' | 'md' | 'lg' = 'md') {
   const fontSize = size === 'sm' ? '28px' : size === 'md' ? '36px' : '44px';
@@ -388,8 +411,13 @@ function createHeyClaudeLogo(size: 'sm' | 'md' | 'lg' = 'md') {
 }
 
 /**
- * Generate OG image using React and og_edge
- * Redesigned to match static og-image.webp style
+ * Creates an Open Graph PNG image suitable for use as a social preview based on provided OG image parameters.
+ *
+ * The generated image includes a category pill, prominent title, optional description, up to five tag pills,
+ * and bottom-branding (logo and domain). Layout and styling are optimized for a consistent og-image appearance.
+ *
+ * @param params - OGImageParams with `title`, optional `description`, `type` (category), and `tags` array
+ * @returns A Response containing the generated PNG image for use in Open Graph previews
  */
 function generateOGImage(params: OGImageParams): Response {
   const { title, description, type, tags } = params;
@@ -546,7 +574,10 @@ function generateOGImage(params: OGImageParams): Response {
 }
 
 /**
- * Handle OG image generation request
+ * Generates an Open Graph PNG image from a route or explicit metadata.
+ *
+ * @param req - Incoming Request whose URL query must supply either `route` or one or more of `title`, `description`, `type`, `tags`
+ * @returns An HTTP Response with the generated PNG image and appropriate headers; returns a 400 response for missing or invalid parameters or an error response when image generation fails.
  */
 export async function handleOGImageRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);
@@ -566,9 +597,9 @@ export async function handleOGImageRequest(req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'og-image-generate',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'og-image-generate',
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
   });
 
   let params: OGImageParams;

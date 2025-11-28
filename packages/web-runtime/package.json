@@ -178,6 +178,9 @@
     "zod": "^4.1.12",
     "zustand": "^5.0.2"
   },
+  "scripts": {
+    "build": "tsc --build"
+  },
   "devDependencies": {
     "@types/canvas-confetti": "^1.6.4",
     "@types/dompurify": "^3.0.5",

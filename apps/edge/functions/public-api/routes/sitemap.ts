@@ -14,7 +14,6 @@ import {
   traceRequestComplete,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
   createDataApiContext,
@@ -32,12 +31,22 @@ const INDEXNOW_API_URL = 'https://api.indexnow.org/IndexNow';
 const INDEXNOW_API_KEY = edgeEnv.indexNow.apiKey;
 const INDEXNOW_TRIGGER_KEY = edgeEnv.indexNow.triggerKey;
 
+/**
+ * Dispatches sitemap requests: serves a sitemap for `GET` or processes an IndexNow submission for `POST`.
+ *
+ * @param segments - URL path segments after the sitemap base; must be empty or the request is rejected
+ * @param url - The request URL (used to read query parameters for `GET`)
+ * @param method - The HTTP method; only `GET` and `POST` are handled
+ * @param req - The original Request object; forwarded to the `POST` handler
+ * @param logContext - Optional logging/context object to associate with the request
+ * @returns A Response containing sitemap XML or JSON for `GET`, an IndexNow submission result for `POST`, or an error response for invalid requests
+ */
 export async function handleSitemapRoute(
   segments: string[],
   url: URL,
   method: string,
   req: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Create log context if not provided
   const finalLogContext = logContext || createDataApiContext('sitemap', {
@@ -52,8 +61,8 @@ export async function handleSitemapRoute(
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: finalLogContext.request_id,
-    operation: finalLogContext.action || 'sitemap',
+    requestId: typeof finalLogContext['request_id'] === 'string' ? finalLogContext['request_id'] : undefined,
+    operation: typeof finalLogContext['action'] === 'string' ? finalLogContext['action'] : 'sitemap',
     method,
   });
   
@@ -72,7 +81,17 @@ export async function handleSitemapRoute(
   return methodNotAllowedResponse('GET, POST', CORS);
 }
 
-async function handleSitemapGet(url: URL, logContext: BaseLogContext): Promise<Response> {
+/**
+ * Serve the sitemap either as XML (default) or as structured JSON when `format=json` is provided.
+ *
+ * When `format=json` this fetches site URLs from the database and returns a JSON payload with `urls` and `meta`.
+ * Otherwise it generates sitemap XML via a database RPC and returns the XML with appropriate security and cache headers.
+ *
+ * @param url - The request URL; the `format` search param (accepted values: `xml`, `json`) controls the response format.
+ * @param logContext - Optional logging context used for tracing and for error responses.
+ * @returns A `Response` containing sitemap XML when `format` is not `json`, or a JSON object with `urls` and `meta` when `format=json`. Error responses use appropriate 4xx/5xx statuses on validation or database failures.
+ */
+async function handleSitemapGet(url: URL, logContext: Record<string, unknown>): Promise<Response> {
   const format = (url.searchParams.get('format') || 'xml').toLowerCase();
   
   traceStep(`Generating sitemap (format: ${format})`, logContext);
@@ -192,7 +211,21 @@ async function handleSitemapGet(url: URL, logContext: BaseLogContext): Promise<R
   });
 }
 
-async function handleSitemapIndexNow(req: Request, logContext: BaseLogContext): Promise<Response> {
+/**
+ * Handle an IndexNow submission by validating the trigger and API keys, collecting site URLs, and submitting them to the IndexNow API.
+ *
+ * @param req - Incoming request; the `X-IndexNow-Trigger-Key` header is used to validate the trigger.
+ * @param logContext - Optional logging/tracing context merged into request logs and traces.
+ * @returns A Response reflecting the outcome:
+ *  - `200` with `{ ok: true, submitted: number }` on success,
+ *  - `200` with `{ ok: true, submitted: number, warning: string }` when submission failed non-blocking,
+ *  - `401` when the provided trigger key is invalid,
+ *  - `503` when required IndexNow configuration (trigger key or API key) is missing,
+ *  - `500` when there are no URLs available to submit,
+ *  - `502` when the IndexNow HTTP response is not OK,
+ *  - Database RPC failures are returned via the service's standardized error response.
+ */
+async function handleSitemapIndexNow(req: Request, logContext: Record<string, unknown>): Promise<Response> {
   traceStep('Processing IndexNow submission', logContext);
   
   const triggerKey = req.headers.get('X-IndexNow-Trigger-Key');
@@ -208,7 +241,25 @@ async function handleSitemapIndexNow(req: Request, logContext: BaseLogContext): 
     );
   }
 
-  if (triggerKey !== INDEXNOW_TRIGGER_KEY) {
+  // Timing-safe comparison to prevent timing attacks
+  const encoder = new TextEncoder();
+  const triggerKeyBytes = encoder.encode(triggerKey ?? '');
+  const expectedKeyBytes = encoder.encode(INDEXNOW_TRIGGER_KEY ?? '');
+  
+  if (triggerKeyBytes.length !== expectedKeyBytes.length) {
+    return jsonResponse({ error: 'Unauthorized', message: 'Invalid trigger key' }, 401, CORS);
+  }
+  
+  let result = 0;
+  for (let i = 0; i < triggerKeyBytes.length; i++) {
+    const triggerByte = triggerKeyBytes[i];
+    const expectedByte = expectedKeyBytes[i];
+    if (triggerByte !== undefined && expectedByte !== undefined) {
+      result |= triggerByte ^ expectedByte;
+    }
+  }
+  
+  if (result !== 0) {
     return jsonResponse({ error: 'Unauthorized', message: 'Invalid trigger key' }, 401, CORS);
   }
 

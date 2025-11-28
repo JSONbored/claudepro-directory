@@ -46,7 +46,15 @@ const JOB_MONITORED_FIELDS = [
   'category',
 ] as const;
 
-// Type guard to validate database webhook payload structure
+/**
+ * Type guard that validates whether a value matches the DatabaseWebhookPayload<JobRow> shape for job webhooks.
+ *
+ * Checks that `type` is 'INSERT' | 'UPDATE' | 'DELETE', `table` and `schema` are strings, `record` is a non-null object,
+ * and `old_record` is either absent, `null`, or an object.
+ *
+ * @param value - The value to validate as a `DatabaseWebhookPayload<JobRow]`
+ * @returns `true` if `value` matches the expected webhook payload shape for a job, `false` otherwise.
+ */
 function isValidJobWebhookPayload(value: unknown): value is DatabaseWebhookPayload<JobRow> {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -80,11 +88,23 @@ function isValidJobWebhookPayload(value: unknown): value is DatabaseWebhookPaylo
   return true;
 }
 
-// Type guard to validate webhook type enum
+/**
+ * Checks whether a string is a valid webhook operation type.
+ *
+ * @param value - The string to validate as a webhook type.
+ * @returns `true` if `value` is 'INSERT', 'UPDATE', or 'DELETE', `false` otherwise.
+ */
 function isValidWebhookType(value: string): value is 'INSERT' | 'UPDATE' | 'DELETE' {
   return value === 'INSERT' || value === 'UPDATE' || value === 'DELETE';
 }
 
+/**
+ * Process queued job webhook messages and dispatch Discord notifications for relevant INSERT and UPDATE events.
+ *
+ * Reads a batch of messages, validates and filters payloads (skipping drafts, placeholders, DELETE events, and updates where monitored fields did not change), invokes the direct job-notification handler for eligible items, and deletes or retains queue messages according to outcome.
+ *
+ * @returns An HTTP Response whose body is a summary object with `processed` (number) and `results` (array). Each result contains `msg_id`, `status` (`success` | `skipped` | `failed`), and optional `reason`, `errors`, and `will_retry` fields indicating whether a failed item will be retried.
+ */
 export async function handleDiscordJobs(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('flux-station', 'discord-jobs', {});
   

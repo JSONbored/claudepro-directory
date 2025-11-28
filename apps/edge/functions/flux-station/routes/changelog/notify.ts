@@ -62,7 +62,12 @@ interface QueueMessage {
   message: ChangelogReleaseJob;
 }
 
-// Type guard to validate queue message structure
+/**
+ * Check whether a value conforms to the ChangelogReleaseJob shape.
+ *
+ * @param value - The value to validate
+ * @returns `true` if `value` matches the `ChangelogReleaseJob` structure, `false` otherwise.
+ */
 function isValidChangelogReleaseJob(value: unknown): value is ChangelogReleaseJob {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -104,6 +109,13 @@ function isValidChangelogReleaseJob(value: unknown): value is ChangelogReleaseJo
   return true;
 }
 
+/**
+ * Process a single changelog release queue message by sending a Discord webhook, inserting a site notification,
+ * attempting cache invalidation, and triggering page revalidation while collecting any step errors.
+ *
+ * @param message - The queue message envelope containing `msg_id`, `read_ct`, and the changelog payload (`message`)
+ * @returns An object where `success` is `true` only if the site notification was inserted, and `errors` lists any error messages produced by individual steps
+ */
 async function processChangelogRelease(message: QueueMessage): Promise<{
   success: boolean;
   errors: string[];
@@ -130,9 +142,9 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'changelog-notify',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'changelog-notify',
+    function: typeof logContext['function'] === 'string' ? logContext['function'] : 'unknown',
     entryId: changelogEntry.entryId,
     slug: changelogEntry.slug,
     attempt: message.read_ct,
@@ -341,6 +353,13 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
   return { success, errors };
 }
 
+/**
+ * Delete a processed message from the changelog notifications queue.
+ *
+ * If deletion fails the error is logged and the function does not throw so the message remains available for retry.
+ *
+ * @param msgId - The queue message ID to delete
+ */
 async function deleteQueueMessage(msgId: bigint): Promise<void> {
   try {
     await pgmqDelete(CHANGELOG_NOTIFICATIONS_QUEUE, msgId);
@@ -353,6 +372,15 @@ async function deleteQueueMessage(msgId: bigint): Promise<void> {
   }
 }
 
+/**
+ * Process a batch of changelog_notify queue messages and return batch processing results.
+ *
+ * Reads up to the configured batch size from the changelog_notify queue, validates each message,
+ * processes valid changelog release jobs (sending notifications, optional cache invalidation and revalidation),
+ * deletes invalid messages or successfully processed messages, and aggregates per-message outcomes.
+ *
+ * @returns A Response containing the batch outcome (message, processed count and per-message `results`), or an error response if a fatal error occurs.
+ */
 export async function handleChangelogNotify(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('flux-station', 'changelog-notify', {});
   

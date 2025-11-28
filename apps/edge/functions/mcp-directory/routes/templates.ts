@@ -13,6 +13,16 @@ import type { GetTemplatesInput } from '../lib/types.ts';
 type ContentTemplatesItem = Database['public']['CompositeTypes']['content_templates_item'];
 type TemplateField = { name: string; description?: string; type?: string };
 
+/**
+ * Fetches content submission templates from the database, normalizes their shape,
+ * and returns a human-readable text summary together with structured template metadata.
+ *
+ * @param input - Input containing optional `category` to filter templates; when omitted the RPC defaults to `'agents'`
+ * @returns An object with:
+ *  - `content`: an array containing a single text element with a header and per-template summary (name, category, description, and fields),
+ *  - `_meta`: an object with `templates` (the normalized templates array) and `count` (number of templates).
+ *          If no templates are found, `content` contains a friendly "no templates configured" message, `_meta.templates` is an empty array, and `count` is 0.
+ */
 export async function handleGetTemplates(
   supabase: SupabaseClient<Database>,
   input: GetTemplatesInput

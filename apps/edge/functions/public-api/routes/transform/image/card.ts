@@ -75,7 +75,10 @@ export interface ContentCardGenerateResponse {
 }
 
 /**
- * Generate content card image using React and og_edge
+ * Generate a social-preview content card image from the provided card parameters.
+ *
+ * @param params - Card content and style options (title, description, category, tags, author, authorAvatar, featured, rating, viewCount, backgroundColor, textColor, accentColor)
+ * @returns An ImageResponse containing the rendered card image with dimensions 1200×630
  */
 function generateContentCardImage(params: ContentCardParams): Response {
   const {
@@ -308,7 +311,11 @@ function generateContentCardImage(params: ContentCardParams): Response {
 }
 
 /**
- * Handle content card generation request
+ * Handle POST requests to generate a content card image, optimize it, and optionally store and register it.
+ *
+ * Expects a JSON body matching ContentCardGenerateRequest with a required `params.title`. Generates a 1200x630 card image, runs image optimization and size validation, and — unless `saveToStorage` is false or `userId` is missing — uploads the optimized image to the `content-cards` storage bucket. When an upload succeeds the handler may delete an `oldCardPath` and update the content record (`contentId`) in the database (by id or slug). Handles CORS preflight (OPTIONS) and returns appropriate HTTP error statuses for invalid methods, invalid input, optimization failures, upload failures, and size limit violations.
+ *
+ * @returns An HTTP Response whose JSON payload conforms to ContentCardGenerateResponse. On success (200) the payload includes `success: true` and metadata such as `originalSize`, `optimizedSize`, `dimensions`, and, if applicable, `publicUrl` and `path`. Error responses use 400, 405, or 500 with `success: false` and an `error` message.
  */
 export async function handleContentCardGenerateRoute(req: Request): Promise<Response> {
   const logContext = createDataApiContext('transform-image-card', {
@@ -323,8 +330,8 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'card-generate',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'card-generate',
     method: req.method,
   });
 

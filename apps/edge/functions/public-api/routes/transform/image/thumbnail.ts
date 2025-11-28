@@ -76,10 +76,18 @@ interface ThumbnailGenerateResponse {
 }
 
 /**
- * Handle thumbnail generation request
- * 
- * POST /transform/image/thumbnail
- * Body: { imageData: string (base64) | Uint8Array, userId: string, contentId?: string, ... }
+ * Handle POST requests to generate an optimized thumbnail from provided image data and upload it to storage.
+ *
+ * Supports multipart/form-data (file or base64 field) and JSON bodies (base64 or binary-like types). Validates required
+ * fields (userId), optional parameters (contentId, useSlug, oldThumbnailPath, maxDimension), enforces input and output
+ * size limits, initializes ImageMagick, computes original and optimized dimensions, compresses/resizes the image
+ * to PNG/JPEG, uploads the optimized thumbnail to the `content-thumbnails` bucket, optionally deletes an old thumbnail,
+ * and optionally updates a content record's `og_image` field. Returns structured results and non-critical warnings for
+ * recoverable failures (e.g., failed old-file deletion or database update).
+ *
+ * @returns A Response whose JSON body is a ThumbnailGenerateResponse containing `success`, and on success may include
+ *          `publicUrl`, `path`, `originalSize`, `optimizedSize`, `dimensions`, and an optional `warning`; on failure
+ *          includes `success: false` and an `error` message.
  */
 export async function handleThumbnailGenerateRoute(req: Request): Promise<Response> {
   const logContext = createDataApiContext('transform-image-thumbnail', {
@@ -94,8 +102,8 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'thumbnail-generate',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'thumbnail-generate',
     method: req.method,
   });
 

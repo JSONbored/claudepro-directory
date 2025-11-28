@@ -16,6 +16,12 @@ import { buildSecurityHeaders, createDataApiContext, logger } from '@heyclaude/s
 const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
+/**
+ * Map an input string to a recognized `content_category` enum value.
+ *
+ * @param value - Input string to map; leading/trailing whitespace and letter case are ignored.
+ * @returns The matching `content_category` enum value, or `undefined` if the input is not recognized.
+ */
 function toContentCategory(
   value: string | undefined
 ): DatabaseGenerated['public']['Enums']['content_category'] | undefined {
@@ -28,6 +34,16 @@ function toContentCategory(
     : undefined;
 }
 
+/**
+ * Serve a paginated content listing based on URL query parameters.
+ *
+ * Parses `offset`, `limit`, and `category` from `url`, validates them, queries the database for the requested page of content, and returns the resulting items as a JSON array with security, CORS, and caching headers.
+ *
+ * @param url - The request URL containing query parameters:
+ *   - `offset`: non-negative integer, defaults to `0`
+ *   - `limit`: integer between `1` and `100`, defaults to `30`
+ *   - `category`: `'all'` or a content category string (case-insensitive)
+ * @returns A Response whose body is the JSON array of content items on success; for invalid parameters or RPC failures returns a structured error response. Responses include security, CORS, and cache headers.
 export async function handlePaginatedContent(url: URL): Promise<Response> {
   const logContext = createDataApiContext('content-paginated', {
     path: url.pathname,
@@ -41,8 +57,8 @@ export async function handlePaginatedContent(url: URL): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'content-paginated',
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'content-paginated',
     method: 'GET',
   });
   

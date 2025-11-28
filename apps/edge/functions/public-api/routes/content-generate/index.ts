@@ -26,7 +26,6 @@ import {
   traceRequestComplete,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { buildSecurityHeaders, logError, logInfo, logger, timingSafeEqual } from '@heyclaude/shared-runtime';
 import { getGenerator, getSupportedCategories, isCategorySupported } from './registry.ts';
 import type { GeneratePackageRequest, GeneratePackageResponse } from './types.ts';
@@ -37,16 +36,14 @@ type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
 const CORS = getOnlyCorsHeaders;
 
 /**
- * Handle package generation request
- * POST /content/generate-package
+ * Handle incoming requests to generate a content package for a given content ID and category.
  *
- * Body: { content_id: string, category: ContentCategory }
- *
- * Authentication: Requires SUPABASE_SERVICE_ROLE_KEY (via Authorization: Bearer header)
+ * @param logContext - Optional request-level logging context (will be created automatically if omitted)
+ * @returns An HTTP Response representing the result of the request — e.g. 200 for successful synchronous generation, 202 when queued for asynchronous processing, or an appropriate error status (400, 401, 404, 405, 500) with an explanatory payload.
  */
 export async function handleGeneratePackage(
   request: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Create log context if not provided
   const finalLogContext = logContext || {
@@ -77,8 +74,8 @@ export async function handleGeneratePackage(
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: finalLogContext.request_id,
-    operation: finalLogContext.action || 'generate-package',
+    requestId: typeof finalLogContext['request_id'] === 'string' ? finalLogContext['request_id'] : undefined,
+    operation: typeof finalLogContext['action'] === 'string' ? finalLogContext['action'] : 'generate-package',
     method: request.method,
   });
 
@@ -151,7 +148,12 @@ export async function handleGeneratePackage(
     return badRequestResponse('category is required and must be a string', CORS);
   }
 
-  // Validate category enum type
+  /**
+   * Check whether a value is one of the `content_category` enum values.
+   *
+   * @param value - The value to validate as a `content_category`
+   * @returns `true` if `value` matches a `content_category` enum value, `false` otherwise.
+   */
   function isValidContentCategory(
     value: unknown
   ): value is DatabaseGenerated['public']['Enums']['content_category'] {

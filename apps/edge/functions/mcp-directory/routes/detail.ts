@@ -10,6 +10,15 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { logError } from '@heyclaude/shared-runtime';
 import type { GetContentDetailInput } from '../lib/types.ts';
 
+/**
+ * Fetches a content item by slug and category and returns a markdown-like text summary plus a normalized `_meta` details object.
+ *
+ * Queries the `content` table for the specified item, normalizes missing fields with sensible defaults, and builds a readable text block and metadata summary.
+ *
+ * @param input - Object containing `slug` and `category` of the content item to retrieve
+ * @returns An object with `content` — an array containing a single text block (`type: 'text'`, `text`: string) — and `_meta` — a details object containing `slug`, `title`, `displayTitle`, `category`, `description`, `content`, `tags`, `author`, `authorProfileUrl`, `dateAdded`, `dateUpdated`, `createdAt`, `metadata`, and `stats` (`views`, `bookmarks`, `copies`)
+ * @throws If no content is found for the provided category/slug, or if the database query fails (the error is logged and rethrown)
+ */
 export async function handleGetContentDetail(
   supabase: SupabaseClient<Database>,
   input: GetContentDetailInput
@@ -42,6 +51,11 @@ export async function handleGetContentDetail(
     .single();
 
   if (error) {
+    // PGRST116: JSON object requested, multiple (or no) rows returned
+    if ((error as any).code === 'PGRST116') {
+      throw new Error(`Content not found: ${category}/${slug}`);
+    }
+
     // Use dbQuery serializer for consistent database query formatting
     await logError('Database query failed in getContentDetail', {
       dbQuery: {
@@ -55,10 +69,6 @@ export async function handleGetContentDetail(
       },
     }, error);
     throw new Error(`Failed to fetch content details: ${error.message}`);
-  }
-
-  if (!data) {
-    throw new Error(`Content not found: ${category}/${slug}`);
   }
 
   // Format the response - data is now a single object, not an array

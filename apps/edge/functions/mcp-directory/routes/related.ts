@@ -10,6 +10,13 @@ import type { GetRelatedContentInput } from '../lib/types.ts';
 
 type RelatedContentItem = Database['public']['CompositeTypes']['related_content_item'];
 
+/**
+ * Retrieves related content for a given slug and category and returns a textual summary and metadata.
+ *
+ * @param input - Query parameters: `slug` of the source item, `category` to match, and optional `limit` for number of results.
+ * @returns A payload containing a single text content block summarizing the related items and an `_meta` object with `items`, `source`, and `count` (when results exist) or an empty `items` array when none are found.
+ * @throws Error when the backend RPC call to fetch related content fails.
+ */
 export async function handleGetRelatedContent(
   supabase: SupabaseClient<Database>,
   input: GetRelatedContentInput

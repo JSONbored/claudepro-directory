@@ -4,9 +4,7 @@
 
 import { edgeEnv } from '../config/env.ts';
 import { getCacheConfigNumber } from '../config/static-cache-config.ts';
-import { logError, type BaseLogContext } from '@heyclaude/shared-runtime';
-import { createUtilityContext } from '@heyclaude/shared-runtime';
-import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
+import { logError, createUtilityContext, buildSecurityHeaders } from '@heyclaude/shared-runtime';
 
 /* ----------------------------- CORS PRESETS ----------------------------- */
 
@@ -165,19 +163,36 @@ export function jsonResponse(
   });
 }
 
+/**
+ * Create an HTTP JSON response for a successful request.
+ *
+ * @param data - The response payload; will be sanitized before serialization
+ * @param status - HTTP status code to use (defaults to 200)
+ * @param cors - CORS headers to include in the response
+ * @returns The HTTP Response whose body is the sanitized JSON `data` and whose headers include CORS and security-related directives
+ */
 export function successResponse(data: unknown, status = 200, cors = publicCorsHeaders): Response {
   return jsonResponse(data, status, cors);
 }
 
+/**
+ * Logs an internal error and returns a standardized 500 JSON response.
+ *
+ * @param error - The error or value to log.
+ * @param context - Short string describing the operation or request context to include in the response and logs.
+ * @param cors - CORS headers to include on the response.
+ * @param logContext - Optional additional structured fields to merge into the logged context (may include request identifiers); `action` will be normalized to a string when present.
+ * @returns A Response with a JSON body containing an `error` message and the provided `context`. If the logged error is a `TimeoutError`, the `error` message is `Request timeout`; otherwise it is `Internal Server Error`.
+ */
 export async function errorResponse(
   error: unknown,
   context: string,
   cors: Record<string, string> = publicCorsHeaders,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Use provided logContext if available (preserves request_id), otherwise create new one
-  const finalLogContext: BaseLogContext = logContext
-    ? { ...logContext, action: logContext.action || 'error-response', context }
+  const finalLogContext: Record<string, unknown> = logContext
+    ? { ...logContext, action: typeof logContext['action'] === 'string' ? logContext['action'] : 'error-response', context }
     : createUtilityContext('http-utils', 'error-response', {
         context,
       });
@@ -309,6 +324,12 @@ export function buildCacheHeaders(
   };
 }
 
+/**
+ * Get the resolved time-to-live (TTL) in seconds for a cache preset.
+ *
+ * @param key - The cache preset key to resolve
+ * @returns The resolved TTL in seconds for the given cache preset (always at least 1)
+ */
 export function getCacheTtlSeconds(key: CachePresetKey): number {
   return resolveCachePreset(key).ttl;
 }

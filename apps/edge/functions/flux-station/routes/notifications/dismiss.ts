@@ -24,6 +24,12 @@ import {
   validateBodySize,
 } from '@heyclaude/shared-runtime';
 
+/**
+ * Dismisses one or more notifications for the authenticated user from a POST /dismiss request.
+ *
+ * @param req - Incoming HTTP request whose JSON body must include `notificationIds`, an array of strings
+ * @returns A Response whose success body contains `{ dismissed: number, traceId: string }`; on failure returns a 400 for invalid or oversized requests or an error response for internal failures
+ */
 export async function handleDismissNotifications(req: Request): Promise<Response> {
   const authResult = await requireAuthUser(req, {
     cors: notificationCorsHeaders,
@@ -45,8 +51,8 @@ export async function handleDismissNotifications(req: Request): Promise<Response
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'dismiss-notifications',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'dismiss-notifications',
     userId: authResult.user.id,
   });
 

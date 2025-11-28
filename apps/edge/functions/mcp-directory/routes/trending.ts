@@ -10,6 +10,16 @@ import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { GetTrendingInput } from '../lib/types.ts';
 
+/**
+ * Fetches trending content (optionally filtered by category) and returns a formatted text summary plus metadata.
+ *
+ * @param input - Query options; may include `category` to filter results and `limit` to bound the number of items returned
+ * @returns An object with:
+ *   - `content`: an array with a single text item summarizing the trending results or a no-content message,
+ *   - `_meta.items`: an array of formatted items (`slug`, `title`, `category`, `description` trimmed to 150 characters, `tags`, `author`, `views`, `dateAdded`),
+ *   - `_meta.category`: the requested category or `'all'`,
+ *   - `_meta.count` (when items exist): the number of returned items
+ */
 export async function handleGetTrending(
   supabase: SupabaseClient<Database>,
   input: GetTrendingInput

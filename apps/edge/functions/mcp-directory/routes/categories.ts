@@ -10,6 +10,14 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { logError } from '@heyclaude/shared-runtime';
 import type { ListCategoriesInput } from '../lib/types.ts';
 
+/**
+ * Retrieve directory category configurations with optional content counts and produce a textual summary and structured metadata.
+ *
+ * If fetching content counts fails, categories are still returned and each category's `count` defaults to `0`.
+ *
+ * @returns An object with `content`: an array containing a single text block summarizing categories, and `_meta`: an object with `categories` (array of category objects with `name`, `slug`, `description`, `count`, and `icon`) and `total` (number of categories)
+ * @throws Error if the `get_category_configs_with_features` RPC fails or returns no data
+ */
 export async function handleListCategories(
   supabase: SupabaseClient<Database>,
   _input: ListCategoriesInput

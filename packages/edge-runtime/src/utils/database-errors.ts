@@ -5,16 +5,21 @@
 
 import { errorToString } from '@heyclaude/shared-runtime';
 import { badRequestResponse, errorResponse, jsonResponse, publicCorsHeaders } from './http.ts';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { logError } from '@heyclaude/shared-runtime';
 
 /**
- * Handle database errors with appropriate responses
- * Returns Response if error should be returned, null if should be re-thrown
+ * Produce an HTTP response for known database errors or indicate the error should be re-thrown.
+ *
+ * Handles specific database error cases (unique-constraint and rate-limit) and logs other errors before
+ * converting them to a standardized error response.
+ *
+ * @param logContext - Additional fields to include with the logged error
+ * @param context - Context identifier used when building the standardized error response
+ * @returns A `Response` representing the appropriate HTTP error for handled database errors, or `null` to signal the caller should re-throw the original error
  */
 export async function handleDatabaseError(
   error: unknown,
-  logContext: BaseLogContext,
+  logContext: Record<string, unknown>,
   context: string
 ): Promise<Response | null> {
   // Type guard for Supabase PostgrestError which has 'code' and 'message' properties

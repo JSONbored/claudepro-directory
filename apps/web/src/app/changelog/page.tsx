@@ -52,8 +52,13 @@ import { ChangelogListClient } from '@/src/components/features/changelog/changel
 export const revalidate = 3600;
 
 /**
- * Generate metadata for changelog list page
- * Includes RSS/Atom feed discovery links (2025 best practice)
+ * Build metadata for the changelog page and include RSS and Atom feed alternates.
+ *
+ * If metadata generation fails, returns a fallback metadata object with a default title,
+ * description, and the same RSS/Atom alternates.
+ *
+ * @returns Page metadata for the `/changelog` route. The metadata includes feed discovery
+ *          URLs under `alternates.types` for `application/rss+xml` and `application/atom+xml`.
  */
 export async function generateMetadata(): Promise<Metadata> {
   // Generate requestId for metadata generation (separate from page render)
@@ -82,7 +87,9 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog metadata');
-    metadataLogger.error('Failed to generate changelog metadata', normalized);
+    metadataLogger.error('Failed to generate changelog metadata', normalized, {
+      section: 'metadata-generation',
+    });
     return {
       title: 'Changelog - Claude Pro Directory',
       description: 'Track all updates, features, and improvements to Claude Pro Directory.',
@@ -97,7 +104,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Changelog List Page Component
+ * Render the Changelog page with server-loaded entries, client-side filtering, structured data, and a newsletter CTA.
+ *
+ * Loads published changelog entries, displays totals and latest release information, and delegates interactive filtering to the client-side list component. If loading fails, a minimal fallback UI is returned.
+ *
+ * @returns The React element for the changelog page, or a minimal fallback UI when data loading fails.
  */
 export default async function ChangelogPage() {
   // Generate single requestId for this page request
@@ -228,7 +239,9 @@ export default async function ChangelogPage() {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog page');
-    reqLogger.error('Failed to load changelog page', normalized);
+    reqLogger.error('Failed to load changelog page', normalized, {
+      section: 'data-fetch',
+    });
 
     // Fallback UI on error
     return (

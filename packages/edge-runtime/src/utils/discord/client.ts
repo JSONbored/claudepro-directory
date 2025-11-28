@@ -1,6 +1,5 @@
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
 import { logger } from '../logger.ts';
 
@@ -13,7 +12,7 @@ export interface DiscordWebhookLogOptions {
   relatedId?: string;
   metadata?: Record<string, unknown>;
   logType?: WebhookEventType;
-  logContext?: BaseLogContext;
+  logContext?: Record<string, unknown>;
 }
 
 export interface DiscordMessageCreateOptions extends DiscordWebhookLogOptions {
@@ -191,6 +190,28 @@ export async function sendDiscordWebhook(
   throw lastError || new Error('Max retries exceeded');
 }
 
+/**
+ * Sends a Discord webhook message and records the outbound event and its result in the webhook_events log.
+ *
+ * Logs an outbound event (optionally using provided metadata or logType), performs an HTTP POST to the webhook URL
+ * (optionally waiting for the Discord API response), updates the logged event with success or failure details, and
+ * returns the HTTP status, any Discord message id, retry count, and the parsed raw response when available.
+ *
+ * @param webhookUrl - Full Discord webhook URL to call.
+ * @param payload - JSON-serializable payload to send to the webhook.
+ * @param eventType - The webhook event enum value to record for this outbound event.
+ * @param options - Optional settings:
+ *   - relatedId: id to associate the webhook event with an application entity.
+ *   - metadata: object to record in the event log instead of the raw payload.
+ *   - logType: override eventType used in the event log.
+ *   - waitForResponse: when true (default), append `?wait=true` so Discord returns the created message.
+ * @returns An object with:
+ *   - `status`: HTTP status code returned by Discord,
+ *   - `messageId`: created Discord message id or empty string if missing,
+ *   - `retryCount`: always 0 for this operation,
+ *   - `rawResponse` (optional): parsed JSON response from Discord when available.
+ * @throws Error when the Discord API responds with a non-success status.
+ */
 export async function createDiscordMessageWithLogging(
   webhookUrl: string,
   payload: Record<string, unknown>,
@@ -267,6 +288,22 @@ export async function createDiscordMessageWithLogging(
   };
 }
 
+/**
+ * Update an existing Discord message through the webhook while recording and updating an outbound webhook event log.
+ *
+ * Attempts to PATCH the message at the webhook URL with exponential backoff up to MAX_RETRIES. Creates an outbound
+ * webhook event record before the first attempt and updates that record on success, failure, or when the message is not found.
+ *
+ * @param webhookUrl - Base webhook URL (without trailing `/messages/:id`)
+ * @param messageId - Discord message identifier to update
+ * @param payload - Request body to send as the PATCH payload
+ * @param eventType - Webhook event type used when logging the outbound event
+ * @param relatedId - Optional related entity id to associate with the webhook event log
+ * @param metadata - Optional additional metadata to include in the webhook event log; merged with `discord_message_id`
+ * @param logContext - Optional contextual fields merged into structured logs
+ * @returns An object containing the HTTP status, whether the message was deleted (404), and the number of attempts performed
+ * @throws Error If a client (4xx) error occurs or if the update fails after exhausting retries
+ */
 export async function updateDiscordMessage(
     webhookUrl: string,
     messageId: string,
@@ -274,7 +311,7 @@ export async function updateDiscordMessage(
     eventType: WebhookEventType,
     relatedId?: string,
     metadata?: Record<string, unknown>,
-    logContext?: BaseLogContext
+    logContext?: Record<string, unknown>
   ): Promise<{ status: number; deleted: boolean; retryCount: number }> {
   let lastError: Error | null = null;
 

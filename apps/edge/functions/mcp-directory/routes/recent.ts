@@ -10,6 +10,16 @@ import type { GetRecentInput } from '../lib/types.ts';
 
 type RecentContentItem = Database['public']['Functions']['get_recent_content']['Returns'][number];
 
+/**
+ * Retrieve recent content (optionally filtered by category) and return a formatted textual summary plus metadata.
+ *
+ * @param input - Query options; may include `category` to filter results and `limit` to cap the number of items returned.
+ * @returns An object with:
+ *   - `content`: an array containing a single text block summarizing recently added items,
+ *   - `_meta.items`: the mapped list of items (slug, title, category, description, tags, author, dateAdded),
+ *   - `_meta.category`: the requested category or `'all'`,
+ *   - `_meta.count`: the number of items (when items are present).
+ */
 export async function handleGetRecent(supabase: SupabaseClient<Database>, input: GetRecentInput) {
   const { category, limit } = input;
 

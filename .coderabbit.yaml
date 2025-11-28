@@ -220,3 +220,128 @@ knowledge_base:
     scope: auto
   pull_requests:
     scope: auto
+
+# ============================================================================
+# Unit Test Generation Configuration
+# ============================================================================
+# CodeRabbit can automatically generate unit tests for your code changes.
+# Use: Comment "@coderabbitai generate unit tests" in any PR, or check the
+# "Generate unit tests" checkbox in CodeRabbit Walkthrough.
+#
+# Test files are co-located with source files using *.test.ts naming.
+# Example: content.ts → content.test.ts (same directory)
+# ============================================================================
+code_generation:
+  unit_tests:
+    path_instructions:
+      # Data Layer Services - RPC-focused testing
+      - path: "packages/data-layer/src/services/**/*.ts"
+        instructions: |
+          Use vitest for testing framework.
+          Mock SupabaseClient using vi.mock().
+          Test RPC error handling, input validation, and return types.
+          Use @heyclaude/database-types for type assertions.
+          Test edge cases: empty results, null values, database errors.
+          Follow the pattern from packages/edge-runtime/src/utils/integrations/resend.test.ts for mocking structure.
+          Co-locate tests: content.ts → content.test.ts (same directory).
+      
+      # Server Actions - Schema validation and auth
+      - path: "packages/web-runtime/src/actions/**/*.ts"
+        instructions: |
+          Use vitest for testing framework.
+          Test Zod schema validation (invalid inputs should fail).
+          Mock authentication context (authedAction vs optionalAuthAction).
+          Test rate limiting behavior.
+          Mock data layer services (don't call real RPCs).
+          Test error handling and logging.
+          Verify action metadata is correct.
+          Mock next/headers and next/cache (already set up in vitest.setup.ts).
+          Co-locate tests: content.ts → content.test.ts (same directory).
+      
+      # RPC Utilities - Error handling and logging
+      - path: "packages/web-runtime/src/rpc/**/*.ts"
+        instructions: |
+          Use vitest for testing framework.
+          Mock SupabaseClient and test error scenarios.
+          Verify error normalization and logging context.
+          Test timeout handling if applicable.
+          Co-locate tests: run-rpc.ts → run-rpc.test.ts (same directory).
+      
+      # Cache Utilities - Cache behavior
+      - path: "packages/web-runtime/src/cache/**/*.ts"
+        instructions: |
+          Use vitest for testing framework.
+          Mock Next.js unstable_cache (already set up in vitest.setup.ts).
+          Test cache key generation, TTL, and tag invalidation.
+          Test fallback values and cache miss scenarios.
+          Co-locate tests: fetch-cached.ts → fetch-cached.test.ts (same directory).
+      
+      # Validation Scripts - Pattern matching
+      - path: "packages/web-runtime/src/utils/validate-*.ts"
+        instructions: |
+          Use vitest for testing framework.
+          Test with valid and invalid config files.
+          Test pattern matching accuracy.
+          Test error message clarity.
+          Use file system mocks (vi.mock('fs')).
+          Co-locate tests: validate-next-config.ts → validate-next-config.test.ts (same directory).
+      
+      # Error Handling - Normalization
+      - path: "packages/web-runtime/src/errors.ts"
+        instructions: |
+          Use vitest for testing framework.
+          Test error normalization with various error types.
+          Test context preservation.
+          Test logging integration.
+          Co-locate tests: errors.ts → errors.test.ts (same directory).
+      
+      # Data Access Functions - Server-side data fetching
+      - path: "packages/web-runtime/src/data/**/*.ts"
+        instructions: |
+          Use vitest for testing framework.
+          Mock SupabaseClient and data layer services.
+          Test caching behavior (fetchCached wrapper).
+          Test error handling and fallback values.
+          Test input validation and type safety.
+          Co-locate tests: content.ts → content.test.ts (same directory).
+      
+      # Generator Commands - CLI utilities
+      - path: "packages/generators/src/commands/**/*.ts"
+        instructions: |
+          Use vitest for testing framework.
+          Test command-line argument parsing.
+          Mock file system operations (vi.mock('fs')).
+          Test error handling and user feedback.
+          Mock external API calls and database operations.
+          Co-locate tests: mcp-login.ts → mcp-login.test.ts (same directory).
+      
+      # Edge Runtime Utilities - Deno-compatible code
+      - path: "packages/edge-runtime/src/**/*.ts"
+        instructions: |
+          Use vitest for testing framework.
+          Test Deno-compatible code (no Node.js-specific APIs).
+          Mock Supabase and external services.
+          Test error handling and logging.
+          Follow existing test patterns from packages/edge-runtime/src/utils/integrations/resend.test.ts.
+          Co-locate tests: resend.ts → resend.test.ts (same directory).
+      
+      # Shared Runtime - Cross-platform utilities
+      - path: "packages/shared-runtime/src/**/*.ts"
+        instructions: |
+          Use vitest for testing framework.
+          Test isomorphic code (works in both Node.js and Deno).
+          Mock external dependencies.
+          Test error handling, validation, and utility functions.
+          Co-locate tests: error-handling.ts → error-handling.test.ts (same directory).
+      
+      # General TypeScript files (fallback)
+      - path: "**/*.ts"
+        instructions: |
+          Use vitest for testing framework.
+          Generate comprehensive test cases including edge cases and error conditions.
+          Include proper TypeScript types in test expectations.
+          Follow existing test patterns from packages/edge-runtime/src/utils/integrations/resend.test.ts.
+          Mock external dependencies (Supabase, Next.js APIs, etc.).
+          Co-locate tests with source files: source.ts → source.test.ts (same directory).
+          Use describe blocks for organization, it blocks for individual test cases.
+          Exclude generated files (*.generated.ts) and test files (*.test.ts, *.spec.ts).

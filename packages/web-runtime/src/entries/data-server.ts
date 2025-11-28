@@ -44,6 +44,8 @@ export * from '../data/search/facets.ts';
 export * from '../data/changelog.ts';
 export * from '../data/forms/submission-form-fields.ts';
 export * from '../data/layout.ts';
+// Layout flags - exported separately since layout.ts no longer exports it (due to 'use server' restrictions)
+export { getLayoutFlags, type LayoutFlags } from '../data/layout/flags.ts';
 // REMOVED: export * from '../data/config/categories.ts'; - Has module-level feature-flags import, but re-export specific functions
 export { getHomepageFeaturedCategories, getHomepageTabCategories } from '../data/config/categories.ts';
 export * from '../data/config/category/index.ts';

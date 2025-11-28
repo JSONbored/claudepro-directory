@@ -8,6 +8,7 @@
     "./services/trending": "./src/services/trending.ts"
   },
   "scripts": {
+    "build": "tsc --build",
     "lint": "eslint . --config ../../config/tools/eslint.config.mjs",
     "type-check": "tsc --noEmit"
   },

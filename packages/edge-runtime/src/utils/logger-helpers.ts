@@ -12,20 +12,23 @@
  * - Mixin reads from logger.bindings() and injects automatically
  */
 
-import { logTrace, logger, type BaseLogContext } from '@heyclaude/shared-runtime';
+import { logTrace, logger } from '@heyclaude/shared-runtime';
 
 /**
- * Initialize request logging with trace and bindings
- * Call this at the start of edge function handlers
- * 
- * Sets bindings that will be automatically injected into all subsequent log calls via mixin.
- * This eliminates the need to manually pass requestId, operation, function in every log call.
- * 
- * @param logContext - Base log context for the request
- * @param additionalBindings - Additional context to set as bindings (will be auto-injected via mixin)
+ * Initialize request-scoped logging: emit an entry trace and set logger bindings for the request.
+ *
+ * The function emits a trace "Request received" using the provided `logContext` and sets logger
+ * bindings that will be injected into subsequent log calls. Standard fields are extracted from
+ * `logContext` when present: `request_id` -> `requestId`, `action` -> `operation`, and
+ * `function` -> `function` (defaults for `operation` and `function` are `"unknown"`; `requestId`
+ * is left `undefined` if not a string).
+ *
+ * @param logContext - Arbitrary request log context; may contain `request_id`, `action`, and `function`
+ *                      keys used to populate bindings
+ * @param additionalBindings - Extra key/value pairs to merge into the logger bindings
  */
 export function initRequestLogging(
-  logContext: BaseLogContext,
+  logContext: Record<string, unknown>,
   additionalBindings?: Record<string, unknown>
 ): void {
   // Trace request entry for detailed debugging
@@ -33,42 +36,40 @@ export function initRequestLogging(
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   // This means you don't need to manually pass requestId, operation, function in log calls
+  // Extract standard fields from logContext (function, action, request_id) if present
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'unknown',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'unknown',
+    function: typeof logContext['function'] === 'string' ? logContext['function'] : 'unknown',
     ...additionalBindings,
   });
 }
 
 /**
- * Update request bindings dynamically
- * Use this when context changes (e.g., after authentication, user identified)
- * 
- * @param bindings - Additional context to add to logger bindings
+ * Update the current request's logger bindings with the provided fields.
+ *
+ * @param bindings - Fields to apply to the logger's current bindings for the request
  */
 export function updateRequestBindings(bindings: Record<string, unknown>): void {
   logger.setBindings(bindings);
 }
 
 /**
- * Trace a processing step
- * Only logs if trace level is enabled (avoids unnecessary work)
- * 
- * @param message - Trace message
- * @param logContext - Log context
+ * Log a processing step at trace level using the provided context.
+ *
+ * @param message - Human-readable trace message describing the step
+ * @param logContext - Contextual bindings to include with the trace (e.g., `request_id`, `action`, `function`)
  */
-export function traceStep(message: string, logContext: BaseLogContext): void {
+export function traceStep(message: string, logContext: Record<string, unknown>): void {
   logTrace(message, logContext);
 }
 
 /**
- * Trace request completion
- * Call this before returning successful responses
- * 
- * @param logContext - Log context
+ * Log a trace-level message indicating the request completed successfully.
+ *
+ * @param logContext - Context object whose string-keyed properties are attached to the trace
  */
-export function traceRequestComplete(logContext: BaseLogContext): void {
+export function traceRequestComplete(logContext: Record<string, unknown>): void {
   logTrace('Request completed successfully', logContext);
 }
 
@@ -83,10 +84,9 @@ export function isTraceEnabled(): boolean {
 }
 
 /**
- * Get current logger bindings for error context enrichment
- * Use this in error handlers to include current context
- * 
- * @returns Current logger bindings
+ * Retrieve the current logger bindings for the active logging context.
+ *
+ * @returns The current logger bindings object
  */
 export function getCurrentBindings(): Record<string, unknown> {
   return logger.bindings();

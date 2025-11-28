@@ -22,7 +22,6 @@ import {
   traceRequestComplete,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   createUtilityContext,
   errorToString,
@@ -51,11 +50,19 @@ interface PackageGenerationQueueMessage {
 }
 
 /**
- * Process a single package generation job
+ * Process a single package generation job from a queue message.
+ *
+ * Fetches the content row, locates the generator for the message's category,
+ * validates that the content can be generated, executes generation (generate → upload → update DB),
+ * and logs outcomes.
+ *
+ * @param message - The queue message containing `content_id`, `category`, `slug`, and metadata
+ * @param logContext - Optional structured logging context used for enriched logs
+ * @returns An object with `success` indicating overall outcome and `errors` containing human-readable error messages
  */
 async function processPackageGeneration(
   message: PackageGenerationQueueMessage,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<{ success: boolean; errors: string[] }> {
   const errors: string[] = [];
   const { content_id, category, slug } = message.message;
@@ -139,12 +146,19 @@ async function processPackageGeneration(
 }
 
 /**
- * Main queue worker handler
- * POST /content/generate-package/process
+ * Process a batch of package generation queue messages and return a summary response.
+ *
+ * Processes up to QUEUE_BATCH_SIZE messages from the package_generation queue, validates each message,
+ * invokes package generation for valid messages, deletes messages that succeeded or are structurally invalid,
+ * and leaves failed messages for automatic retry via the queue visibility timeout.
+ *
+ * @param _req - Incoming HTTP request (unused; present for route handler compatibility)
+ * @param logContext - Optional logging context to attach to structured logs and traces
+ * @returns A Response containing a summary object with `processed` (number) and `results` (per-message status, errors, and optional `will_retry`) or an error response on fatal failure
  */
 export async function handlePackageGenerationQueue(
   _req: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Create log context if not provided
   const finalLogContext = logContext || createUtilityContext('content-generate', 'package-generation-queue', {});
@@ -192,6 +206,12 @@ export async function handlePackageGenerationQueue(
       return undefined;
     };
 
+    /**
+     * Determine whether a raw queue message contains the required string fields and a valid content category.
+     *
+     * @param msg - Raw queue message to validate
+     * @returns `true` if `msg` is an object with string `content_id`, `slug`, and `created_at`, and a `category` equal to one of the allowed content category enum values, `false` otherwise.
+     */
     function isValidQueueMessage(msg: unknown): msg is {
       content_id: string;
       category: DatabaseGenerated['public']['Enums']['content_category'];

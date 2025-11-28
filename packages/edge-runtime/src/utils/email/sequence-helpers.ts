@@ -8,7 +8,6 @@ import type { Resend } from 'npm:resend@6.5.2';
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { sendEmail } from '../../utils/integrations/resend.ts';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { createEmailHandlerContext, logError, logInfo } from '@heyclaude/shared-runtime';
 import { renderEmailTemplate } from './base-template.tsx';
 import { ONBOARDING_FROM } from './templates/manifest.ts';
@@ -32,12 +31,19 @@ export const STEP_TEMPLATES: Record<number, FC<{ email: string }>> = {
 };
 
 /**
- * Process a single sequence email: send email, mark as processed, schedule next step
+ * Process one onboarding sequence email: render the step-specific template, send the email, mark the item processed, and schedule the next step.
+ *
+ * @param item - Database record for the due sequence email; must include `id`, `email`, and `step`
+ * @param logContext - Additional structured context merged into logs for this operation
+ *
+ * @throws Error when the step or subject is unknown.
+ * @throws Error with the send result message when the email send fails.
+ * @throws Error when a database RPC fails while marking the item processed or scheduling the next step.
  */
 export async function processSequenceEmail(
   resend: Resend,
   item: DatabaseGenerated['public']['CompositeTypes']['due_sequence_email_item'],
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<void> {
   // Note: PostgreSQL composite types don't support NOT NULL constraints,
   // but the RPC selects from table columns that ARE NOT NULL, so these values

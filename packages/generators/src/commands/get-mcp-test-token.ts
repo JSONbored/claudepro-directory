@@ -5,10 +5,10 @@
  * This script helps you get a JWT token for testing the authenticated MCP server.
  * 
  * Usage:
- *   tsx scripts/get-mcp-test-token.ts
+ *   tsx packages/generators/src/commands/get-mcp-test-token.ts
  * 
  * Or with email/password:
- *   tsx scripts/get-mcp-test-token.ts --email your@email.com --password yourpassword
+ *   tsx packages/generators/src/commands/get-mcp-test-token.ts --email your@email.com --password yourpassword
  * 
  * Note: For a better experience, use `pnpm exec heyclaude-mcp-login` instead.
  */
@@ -31,6 +31,13 @@ if (!SUPABASE_ANON_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/**
+ * Obtain a Supabase access token for MCP testing by signing in with provided credentials or reusing an existing session, and print the token and usage instructions.
+ *
+ * Reads `--email` and `--password` from process arguments; if both are provided, attempts to sign in and prints the session token and user info. If no credentials are provided, checks for an existing Supabase session and prints the session token and user info when found.
+ *
+ * Exits the process with code 1 on sign-in failure, when no session is returned, or when no active session exists.
+ */
 async function getToken() {
   const args = process.argv.slice(2);
   const emailIndex = args.indexOf('--email');
@@ -91,14 +98,14 @@ async function getToken() {
   if (error) {
     console.error('❌ Error getting session:', error.message);
     console.error('\n💡 Try signing in with:');
-    console.error('   tsx scripts/get-mcp-test-token.ts --email your@email.com --password yourpassword');
+    console.error('   tsx packages/generators/src/commands/get-mcp-test-token.ts --email your@email.com --password yourpassword');
     process.exit(1);
   }
 
   if (!session) {
     console.log('❌ No active session found');
     console.log('\n💡 Sign in with:');
-    console.log('   tsx scripts/get-mcp-test-token.ts --email your@email.com --password yourpassword');
+    console.log('   tsx packages/generators/src/commands/get-mcp-test-token.ts --email your@email.com --password yourpassword');
     console.log('\n💡 Or sign in via web app and extract token from browser DevTools');
     process.exit(1);
   }

@@ -47,6 +47,12 @@ const getStringProperty = (obj: unknown, key: string): string | undefined => {
   return typeof value === 'string' ? value : undefined;
 };
 
+/**
+ * Checks whether a value matches the RevalidationPayload shape.
+ *
+ * @param value - The value to validate
+ * @returns `true` if `value` has non-empty string properties `type`, `table`, `schema` and a non-null object `record`, `false` otherwise.
+ */
 function isValidRevalidationPayload(value: unknown): value is RevalidationPayload {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -65,7 +71,12 @@ function isValidRevalidationPayload(value: unknown): value is RevalidationPayloa
 }
 
 // Type guard to validate content_category enum
-// Uses canonical enum values from database-types to prevent drift
+/**
+ * Determines whether a string is a valid canonical `content_category` enum value.
+ *
+ * @param value - The string to validate against the canonical enum values
+ * @returns `true` if `value` is a member of the canonical `content_category` enum, `false` otherwise.
+ */
 function isValidContentCategory(
   value: string
 ): value is DatabaseGenerated['public']['Enums']['content_category'] {
@@ -73,6 +84,11 @@ function isValidContentCategory(
   return validCategories.includes(value as DatabaseGenerated['public']['Enums']['content_category']);
 }
 
+/**
+ * Consume and process messages from the content revalidation queue, validating payloads and secrets, invalidating cache tags for eligible records, and managing queue deletion or retries.
+ *
+ * @returns A Response whose body is a summary object with `processed` (number) and `results` (array of per-message outcomes: `msg_id`, `status`, optional `reason`/`errors`, and `will_retry`); on unrecoverable failure returns an error response. 
+ */
 export async function handleRevalidation(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('flux-station', 'content-revalidation', {});
   

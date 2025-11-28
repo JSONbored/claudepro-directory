@@ -2,6 +2,7 @@ import 'server-only';
 
 import { JobsService, SearchService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
+import { logError } from '@heyclaude/shared-runtime';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
@@ -29,7 +30,10 @@ export interface JobsFilterOptions {
 }
 
 /**
- * Direct job filtering without cache (for filtered queries - uncached SSR)
+ * Fetches jobs matching the provided filter options directly from the data source without using cache.
+ *
+ * @param options - Filtering options (may include `searchQuery`, `category`, `employment`, `experience`, `remote`, `limit`, `offset`, `sort`)
+ * @returns The filtered jobs result, or `null` if an error occurs
  */
 async function getFilteredJobsDirect(
   options: JobsFilterOptions
@@ -120,10 +124,11 @@ async function getFilteredJobsDirect(
 }
 
 /**
- * Gets jobs with filtering
- * 
- * @param options - Filter options
- * @param noCache - If true, bypass cache for filtered queries (uncached SSR)
+ * Retrieve jobs using the provided filter options, optionally bypassing the cache.
+ *
+ * @param options - Filtering parameters (searchQuery, category, employment, experience, remote, limit, offset, sort)
+ * @param noCache - When true, bypass cached results for filtered queries (uncached server-side rendering)
+ * @returns Filtered jobs result including hits and pagination metadata, or `null` if retrieval fails
  */
 export async function getFilteredJobs(
   options: JobsFilterOptions,
@@ -187,18 +192,17 @@ export async function getFilteredJobs(
   if (noCache) {
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
-      pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
+      pulseJobSearch(searchQuery, {}, 0).catch(async (error: unknown) => {
         // Note: Using explicit context here for nested async callbacks
         // While parent bindings are available at runtime, explicit context ensures
         // proper correlation and traceability for fire-and-forget operations
-        const normalized = normalizeError(error, 'Failed to pulse job search');
         const callbackRequestId = generateRequestId();
-        logger.error('Failed to pulse job search', normalized, {
+        await logError('Failed to pulse job search', {
           requestId: callbackRequestId,
           operation: 'pulseJobSearch',
           module: 'data/jobs',
           searchQuery,
-        });
+        }, error);
       });
     }
     return getFilteredJobsDirect(options);
@@ -208,18 +212,17 @@ export async function getFilteredJobs(
   try {
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
-      pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
+      pulseJobSearch(searchQuery, {}, 0).catch(async (error: unknown) => {
         // Note: Using explicit context here for nested async callbacks
         // While parent bindings are available at runtime, explicit context ensures
         // proper correlation and traceability for fire-and-forget operations
-        const normalized = normalizeError(error, 'Failed to pulse job search');
         const callbackRequestId = generateRequestId();
-        logger.error('Failed to pulse job search', normalized, {
+        await logError('Failed to pulse job search', {
           requestId: callbackRequestId,
           operation: 'pulseJobSearch',
           module: 'data/jobs',
           searchQuery,
-        });
+        }, error);
       });
     }
 
@@ -317,7 +320,10 @@ export async function getJobBySlug(slug: string) {
 }
 
 /**
- * Gets featured jobs
+ * Retrieve a list of featured jobs for display.
+ *
+ * @param limit - Maximum number of featured jobs to return (default 5)
+ * @returns An array of featured job records; returns an empty array if none are available or if an error occurs
  */
 export async function getFeaturedJobs(limit = 5) {
   // Create request-scoped child logger to avoid race conditions

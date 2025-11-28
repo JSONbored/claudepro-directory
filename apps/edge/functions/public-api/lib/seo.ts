@@ -22,9 +22,10 @@ export type SeoIncludeOption = 'metadata' | 'metadata,schemas';
 const VALID_INCLUDE_VALUES: readonly SeoIncludeOption[] = ['metadata', 'metadata,schemas'] as const;
 
 /**
- * Validates and normalizes the include parameter
- * @param include - The include value to validate
- * @returns A valid include value, defaulting to 'metadata' if invalid
+ * Validate and normalize an SEO include option.
+ *
+ * @param include - The input include value (e.g., `'metadata'` or `'metadata,schemas'`)
+ * @returns `'metadata'` or `'metadata,schemas'`, defaulting to `'metadata'` when the input is invalid
  */
 function validateInclude(include: string): SeoIncludeOption {
   if (VALID_INCLUDE_VALUES.includes(include as SeoIncludeOption)) {
@@ -35,13 +36,11 @@ function validateInclude(include: string): SeoIncludeOption {
 }
 
 /**
- * Get SEO metadata for a route by calling the database RPC directly
- * This avoids HTTP loopback calls and reduces latency
+ * Retrieve SEO metadata for a route.
  *
- * @param route - The route path (e.g., '/agents/some-slug')
- * @param supabase - Supabase client instance
- * @param include - What to include in the response (default: 'metadata')
- * @returns SEO metadata or null if generation fails
+ * @param route - The route path to generate metadata for (e.g., "/agents/some-slug")
+ * @param include - Which data to include: `'metadata'` or `'metadata,schemas'` (default: `'metadata'`)
+ * @returns `SeoMetadataResult` with `title`, `description`, and `keywords`, or `null` if the metadata is missing, invalid, or cannot be generated
  */
 export async function getSeoMetadata(
   route: string,

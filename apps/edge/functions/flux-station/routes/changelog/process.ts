@@ -67,7 +67,15 @@ const getStringProperty = (obj: unknown, key: string): string | undefined => {
   return typeof value === 'string' ? value : undefined;
 };
 
-// Type guard to validate VercelWebhookPayload structure
+/**
+ * Type guard that checks whether a value matches the expected Vercel webhook payload shape.
+ *
+ * Validates presence and types of top-level `type`, `id`, `createdAt`, and `payload`; and ensures
+ * `payload.deployment` contains `id`, `url`, and a `meta` object with a `commitId` string.
+ *
+ * @param value - The value to validate as a Vercel webhook payload
+ * @returns `true` if `value` conforms to `VercelWebhookPayload`, `false` otherwise
+ */
 function isValidVercelWebhookPayload(value: unknown): value is VercelWebhookPayload {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -109,7 +117,12 @@ function isValidVercelWebhookPayload(value: unknown): value is VercelWebhookPayl
   return true;
 }
 
-// Type guard to validate ChangelogWebhookProcessingJob structure
+/**
+ * Determines whether a value matches the ChangelogWebhookProcessingJob structure.
+ *
+ * @param value - The value to validate
+ * @returns `true` if `value` has a non-empty `webhook_event_id` string and, if present, a string `deployment_id`; `false` otherwise.
+ */
 function isValidChangelogWebhookProcessingJob(
   value: unknown
 ): value is ChangelogWebhookProcessingJob {
@@ -131,7 +144,12 @@ function isValidChangelogWebhookProcessingJob(
   return true;
 }
 
-// Type guard to validate GitHubCommit array
+/**
+ * Determines whether a value is an array of GitHub commit objects with the expected fields.
+ *
+ * @param value - The value to validate
+ * @returns `true` if `value` is an array where each item has `sha`, `html_url`, a `commit.message`, and a `commit.author.name`; `false` otherwise.
+ */
 function isValidGitHubCommitArray(value: unknown): value is GitHubCommit[] {
   if (!Array.isArray(value)) {
     return false;
@@ -166,6 +184,12 @@ function isValidGitHubCommitArray(value: unknown): value is GitHubCommit[] {
   return true;
 }
 
+/**
+ * Process a single changelog webhook queue message, generate and insert a changelog entry when applicable, enqueue notifications, and mark the related webhook event as processed.
+ *
+ * @param message - Queue wrapper containing a `message` payload with `webhook_event_id` (required) and optional `deployment_id`.
+ * @returns An object with `success` indicating whether processing completed without unrecoverable errors, and `errors` listing any error messages encountered. `success` is `true` when the message was acknowledged or a changelog was created, `false` otherwise.
+ */
 async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): Promise<{
   success: boolean;
   errors: string[];
@@ -185,9 +209,9 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'changelog-process',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'changelog-process',
+    function: typeof logContext['function'] === 'string' ? logContext['function'] : 'unknown',
     attempt: message.read_ct,
   });
   // webhook_event_id is required in ChangelogWebhookProcessingJob interface
@@ -502,6 +526,14 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
   }
 }
 
+/**
+ * Process a batch of changelog webhook queue messages from the changelog_process queue.
+ *
+ * Reads up to the configured batch size, validates each message, runs the changelog processing pipeline for valid messages,
+ * deletes messages that succeeded, and collects per-message outcomes.
+ *
+ * @returns An HTTP Response containing a summary of the batch operation and a `results` array with per-message status, errors, and retry intent; on fatal processing error, an error Response with diagnostic details.
+ */
 export async function handleChangelogProcess(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('flux-station', 'changelog-process', {});
   
@@ -511,9 +543,9 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'changelog-process',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'changelog-process',
+    function: typeof logContext['function'] === 'string' ? logContext['function'] : 'unknown',
   });
   
   try {

@@ -20,6 +20,7 @@ import {
   successResponse,
   traceRequestComplete,
   traceStep,
+  unauthorizedResponse,
 } from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
@@ -37,6 +38,12 @@ type NotificationPriority = DatabaseGenerated['public']['Enums']['notification_p
 const notificationTypeValues = Constants.public.Enums.notification_type;
 const notificationPriorityValues = Constants.public.Enums.notification_priority;
 
+/**
+ * Checks whether a string matches one of the allowed notification type values.
+ *
+ * @param value - The string to validate as a notification type
+ * @returns `true` if `value` is a valid `NotificationType`, `false` otherwise
+ */
 function isValidNotificationType(value: string): value is NotificationType {
   for (const validType of notificationTypeValues) {
     if (value === validType) {
@@ -46,6 +53,12 @@ function isValidNotificationType(value: string): value is NotificationType {
   return false;
 }
 
+/**
+ * Checks whether a string is one of the allowed notification priority values.
+ *
+ * @param value - The string to validate as a notification priority
+ * @returns `true` if `value` is a valid `NotificationPriority`, `false` otherwise.
+ */
 function isValidNotificationPriority(value: string): value is NotificationPriority {
   for (const validPriority of notificationPriorityValues) {
     if (value === validPriority) {
@@ -55,6 +68,15 @@ function isValidNotificationPriority(value: string): value is NotificationPriori
   return false;
 }
 
+/**
+ * Handle POST /notifications/create requests and create a global notification for an authenticated user.
+ *
+ * Validates authorization, request body size and JSON, enforces required `title` and `message` fields,
+ * validates optional `type`, `priority`, `action_label`, and `action_href`, then persists the notification
+ * and returns its representation along with the created trace ID.
+ *
+ * @returns A Response containing the created `notification` object and `traceId` on success; on failure returns a structured error response (e.g., 400 for validation/authorization errors or an error response for insertion failures).
+ */
 export async function handleCreateNotification(req: Request): Promise<Response> {
   // Optional auth - use for logging context if provided
   const authHeader = req.headers.get('Authorization');
@@ -62,7 +84,7 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
 
   // Require a valid authenticated caller for creating global notifications
   if (!authResult) {
-    return badRequestResponse(
+    return unauthorizedResponse(
       'Unauthorized: missing or invalid Authorization header',
       notificationCorsHeaders
     );
@@ -79,8 +101,8 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'create-notification',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'create-notification',
     userId: authResult.user.id,
   });
 

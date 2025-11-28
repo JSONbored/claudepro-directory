@@ -15,7 +15,11 @@ const SUPABASE_URL = edgeEnv.supabase.url;
 const SUPABASE_AUTH_URL = `${SUPABASE_URL}/auth/v1`;
 
 /**
- * Common logging setup for metadata endpoints
+ * Create and initialize a logging context for metadata endpoints and bind it to the global logger.
+ *
+ * @param action - The name of the logging action or operation for this request
+ * @param method - The HTTP method associated with the request; defaults to `'GET'`
+ * @returns The created logging context for the request
  */
 function setupMetadataLogging(action: string, method: string = 'GET') {
   const logContext = createDataApiContext(action, {
@@ -29,9 +33,9 @@ function setupMetadataLogging(action: string, method: string = 'GET') {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || action,
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : action,
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
     method,
   });
 
@@ -39,14 +43,9 @@ function setupMetadataLogging(action: string, method: string = 'GET') {
 }
 
 /**
- * Get OAuth Protected Resource Metadata (RFC 9728)
+ * Serve the protected-resource metadata (RFC 9728) for this MCP server.
  *
- * Endpoint: GET /.well-known/oauth-protected-resource
- *
- * This metadata document tells MCP clients:
- * - Where to find the authorization server (Supabase Auth)
- * - What scopes are supported
- * - The resource identifier for this MCP server
+ * @returns A Response containing the protected resource metadata JSON (HTTP 200) on success, or an error JSON (HTTP 500) on failure
  */
 export async function handleProtectedResourceMetadata(_c: Context): Promise<Response> {
   const logContext = setupMetadataLogging('oauth-protected-resource-metadata');
@@ -84,12 +83,11 @@ export async function handleProtectedResourceMetadata(_c: Context): Promise<Resp
 }
 
 /**
- * Get Authorization Server Metadata (RFC 8414 / OIDC Discovery)
+ * Serves OAuth 2.0 / OIDC authorization server metadata for this service.
  *
- * This endpoint proxies to Supabase Auth's OIDC discovery endpoint
- * or returns metadata pointing to it.
+ * Returns metadata that advertises the issuer and endpoints, points clients to Supabase's OIDC discovery for full configuration, and exposes the service's proxy authorization endpoint to support the resource parameter.
  *
- * Endpoint: GET /.well-known/oauth-authorization-server
+ * @returns The HTTP Response containing the authorization server metadata JSON
  */
 export async function handleAuthorizationServerMetadata(_c: Context): Promise<Response> {
   const logContext = setupMetadataLogging('oauth-authorization-server-metadata');

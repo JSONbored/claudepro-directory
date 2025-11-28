@@ -75,7 +75,17 @@ interface SearchResponse {
 }
 
 /**
- * Main search endpoint with analytics tracking and caching
+ * Process an incoming search HTTP request and return a structured search response.
+ *
+ * Validates and normalizes query parameters, chooses between content, unified, or jobs search,
+ * executes the corresponding data-layer RPC, optionally adds HTML highlights for matched terms,
+ * enqueues search analytics (fire-and-forget), and returns a JSON payload with results,
+ * filters, pagination metadata, and the resolved search type. Returns HTTP 400 for client-side
+ * validation errors and an error response for server-side failures.
+ *
+ * @param req - Incoming HTTP request; may include query parameters and an optional Authorization header
+ * @returns A JSON response containing `results` (possibly with highlighted fields), `query`, `filters`,
+ * `pagination` (total, limit, offset, hasMore), and `searchType` ("content" | "unified" | "jobs")
  */
 export async function handleSearch(req: Request): Promise<Response> {
   const url = new URL(req.url);
@@ -229,9 +239,9 @@ export async function handleSearch(req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: searchLogContext.request_id,
-    operation: searchLogContext.action || 'search',
-    function: searchLogContext.function,
+    requestId: typeof searchLogContext['request_id'] === 'string' ? searchLogContext['request_id'] : undefined,
+    operation: typeof searchLogContext['action'] === 'string' ? searchLogContext['action'] : 'search',
+    function: typeof searchLogContext['function'] === 'string' ? searchLogContext['function'] : 'unknown',
     query: query || undefined,
   });
 
@@ -443,7 +453,9 @@ export async function handleSearch(req: Request): Promise<Response> {
 }
 
 /**
- * Autocomplete endpoint
+ * Return search suggestions for a short query string.
+ *
+ * @returns A Response whose JSON body contains `suggestions` — an array of suggestion objects `{ text, searchCount, isPopular }` — and the original `query`.
  */
 export async function handleAutocomplete(req: Request): Promise<Response> {
   const url = new URL(req.url);
@@ -458,9 +470,9 @@ export async function handleAutocomplete(req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'autocomplete',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'autocomplete',
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
     query,
   });
   
@@ -527,7 +539,13 @@ export async function handleAutocomplete(req: Request): Promise<Response> {
 }
 
 /**
- * Facets endpoint
+ * Return normalized search facets (categories, tag lists, and author lists) for the public API.
+ *
+ * @returns A Response whose JSON body is an object with a `facets` array. Each facet object contains:
+ * - `category`: the facet category string
+ * - `contentCount`: the number of items in that category
+ * - `tags`: an array of tag strings
+ * - `authors`: an array of author strings
  */
 export async function handleFacets(): Promise<Response> {
   const logContext = createSearchContext({ searchType: 'facets', app: 'public-api' });
@@ -538,9 +556,9 @@ export async function handleFacets(): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'facets',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'facets',
+    function: typeof logContext['function'] === "string" ? logContext['function'] : "unknown",
   });
   
   const { data, error } = await supabaseAnon.rpc('get_search_facets', undefined);
@@ -580,7 +598,19 @@ export async function handleFacets(): Promise<Response> {
 }
 
 /**
- * Track search analytics - Queue-Based
+ * Enqueues search analytics data for later processing.
+ *
+ * If `query` is empty, this function exits without enqueuing anything.
+ *
+ * @param query - The search query text to record
+ * @param filters - Optional contextual filters applied to the search; may include:
+ *   - `categories`, `tags`, `authors`: arrays of selected values
+ *   - `sort`: requested sort option
+ *   - `entities`: requested entity types (e.g., `content`, `job`)
+ *   - `job_category`, `job_employment`, `job_experience`, `job_remote`: job-specific filters
+ *   - `entity`: single entity override
+ * @param resultCount - Number of results returned to the caller for this query
+ * @param authorizationHeader - Optional `Authorization` header value to attribute the request
  */
 async function trackSearchAnalytics(
   query: string,

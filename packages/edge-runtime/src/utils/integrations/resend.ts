@@ -7,7 +7,6 @@ import type { Resend } from 'npm:resend@6.5.2';
 import { RESEND_ENV } from '../../config/email-config.ts';
 import { Constants, type Database, type Database as DatabaseGenerated } from '@heyclaude/database-types';
 
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { createUtilityContext, logError, logInfo, logWarn, normalizeError } from '@heyclaude/shared-runtime';
 import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
 import { runWithRetry } from './http-client.ts';
@@ -191,8 +190,18 @@ export function resolveNewsletterInterest(
 }
 
 /**
- * Infer initial topics based on signup context
- * Auto-assigns relevant topics to maximize engagement
+ * Determine initial Resend topic IDs to assign to a new contact based on content category.
+ *
+ * Always includes the weekly digest topic and adds category-specific topics when `copyCategory`
+ * matches a recognized content category.
+ *
+ * @param _source - Optional signup source value (currently not used for topic selection)
+ * @param copyCategory - Optional content category or copy category; recognized values:
+ *   - "agents" or "rules" -> agents/prompts topic
+ *   - "mcp" -> mcp/integrations topic
+ *   - "commands", "hooks", or "statuslines" -> commands/automation topic
+ *   - "guides" -> guides/tutorials topic
+ * @returns An array of Resend topic IDs to assign to the contact; always contains the weekly_digest topic and contains no duplicates.
  */
 export function inferInitialTopics(
   _source: Database['public']['Enums']['newsletter_source'] | string | null,
@@ -233,11 +242,20 @@ export function inferInitialTopics(
   return [...new Set(topics)];
 }
 
+/**
+ * Assigns the provided topic IDs to a Resend contact and opts the contact into each topic.
+ *
+ * If `topicIds` is empty the function is a no-op. The operation is retried on transient failures;
+ * successes and errors are logged with the provided `logContext`.
+ *
+ * @param contactId - The Resend contact identifier to update
+ * @param topicIds - Array of Resend topic IDs to opt the contact into
+ */
 async function assignTopicsToContact(
   resend: Resend,
   contactId: string,
   topicIds: string[],
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<void> {
   if (topicIds.length === 0) {
     return;
@@ -648,6 +666,12 @@ export async function updateContactEngagement(
   }
 }
 
+/**
+ * Retrieve the list of segment IDs associated with a Resend contact.
+ *
+ * @param contactId - The Resend contact's ID to list segments for
+ * @returns An array of segment IDs the contact belongs to
+ */
 async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise<string[]> {
   const response = await runWithRetry(
     () =>
@@ -665,9 +689,20 @@ async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise
 }
 
 /**
- * Send email via Resend with timeout and logging
- * Centralized email sending utility for consistent error handling and logging
- */
+ * Send an email through Resend and return the API response while logging failures.
+ *
+ * Sends a message with the provided fields, logs an error if the send fails, and returns the Resend response payload.
+ *
+ * @param options - Message fields.
+ * @param options.to - Recipient email address.
+ * @param options.subject - Email subject line.
+ * @param options.html - HTML body of the email.
+ * @param options.from - Sender email address.
+ * @param options.tags - Optional list of tag objects to attach to the message.
+ * @param options.replyTo - Optional reply-to email address.
+ * @param logContext - Context object added to logs for correlating this operation.
+ * @param timeoutMessage - Message used when the send operation times out.
+ * @returns An object with `data` containing `{ id }` when the send succeeded, or `error` containing `{ message }` when it failed.
 export async function sendEmail(
   resend: Resend,
   options: {
@@ -678,7 +713,7 @@ export async function sendEmail(
     tags?: Array<{ name: string; value: string }>;
     replyTo?: string;
   },
-  logContext: BaseLogContext,
+  logContext: Record<string, unknown>,
   timeoutMessage = 'Resend email send timed out'
 ): Promise<{ data: { id: string } | null; error: { message: string } | null }> {
   const { data, error } = (await withTimeout(
@@ -702,8 +737,16 @@ export async function sendEmail(
 }
 
 /**
- * Sync contact to Resend: create contact, assign topics, assign segment
- * Returns sync status and contact ID for database storage
+ * Create or find a contact in Resend, assign initial newsletter topics and an engagement segment, and report sync outcome.
+ *
+ * @param contactProperties - Properties to set on the Resend contact (used to compute engagement and metadata).
+ * @param validatedSource - The signup source value (newsletter_source enum or string) used to infer topics.
+ * @param copy_category - The content category value (content_category enum or string) used to infer topics; may be null/undefined.
+ * @returns An object with:
+ *  - `resendContactId`: the Resend contact ID when created or found, otherwise `null`;
+ *  - `syncStatus`: `'synced'`, `'skipped'`, or `'failed'` indicating the result for database persistence;
+ *  - `syncError`: an error message when `syncStatus` is `'failed'` or `'skipped'`, otherwise `null`;
+ *  - `topicIds`: the list of topic IDs that were assigned (may be empty)
  */
 export async function syncContactToResend(
   resend: Resend,
@@ -715,7 +758,7 @@ export async function syncContactToResend(
     | string
     | null
     | undefined,
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<{
   resendContactId: string | null;
   syncStatus: DatabaseGenerated['public']['Enums']['newsletter_sync_status'];
@@ -817,12 +860,16 @@ export async function syncContactToResend(
 }
 
 /**
- * Enroll email in onboarding sequence
- * Helper function to avoid duplication
+ * Enrolls an email address into the onboarding email sequence.
+ *
+ * Attempts to invoke the Supabase RPC `enroll_in_email_sequence` for the given email and logs any failure.
+ *
+ * @param email - The email address to enroll
+ * @param logContext - Additional context to include in logs if the enrollment fails
  */
 export async function enrollInOnboardingSequence(
   email: string,
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<void> {
   try {
     const { supabaseServiceRole: supabaseClient } = await import('../../clients/supabase.ts');

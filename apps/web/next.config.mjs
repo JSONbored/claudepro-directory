@@ -160,17 +160,8 @@ const nextConfig = {
           }
         } catch (error) {
           // If VERCEL_URL parsing fails, log warning and skip (origins already has production domains)
-          // Use Pino logger for consistent structured logging (config files can use Pino)
-          try {
-            const { createLogger } = await import('@heyclaude/shared-runtime/logger');
-            const logger = createLogger({ service: 'next-config' });
-            const errorObj = error instanceof Error ? error : new Error(String(error));
-            logger.warn('Failed to parse VERCEL_URL', {
-              vercelUrl: process.env.VERCEL_URL,
-              err: errorObj,
-            });
-          } catch {
-            // Fallback to console if logger import fails (shouldn't happen, but be safe)
+          // Use console.warn as fallback (config files can use console, and we avoid async imports in sync context)
+          if (process.env.NODE_ENV === 'development') {
             console.warn('[next.config] Failed to parse VERCEL_URL:', process.env.VERCEL_URL, error);
           }
         }

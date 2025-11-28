@@ -15,6 +15,14 @@ import { buildSecurityHeaders, createDataApiContext, logger } from '@heyclaude/s
 
 const CORS = getOnlyCorsHeaders;
 
+/**
+ * Handle the /company public API route: validate request and return company profile for the provided slug.
+ *
+ * @param segments - Remaining path segments; must be empty for this route
+ * @param url - Full request URL containing the `slug` query parameter
+ * @param method - HTTP method of the request; only `GET` is allowed
+ * @returns An HTTP Response with the company profile JSON on success (status 200), or an error JSON and appropriate status code (400 for bad requests, 404 when not found, 405 when method not allowed). Successful responses include security headers, CORS headers, cache headers for `company_profile`, and an `X-Generated-By` header.
+ */
 export async function handleCompanyRoute(
   segments: string[],
   url: URL,
@@ -32,8 +40,8 @@ export async function handleCompanyRoute(
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'company',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'company',
     method,
   });
   

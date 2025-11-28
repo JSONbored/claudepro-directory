@@ -51,6 +51,37 @@ pre-commit:
         git add -u
       fail_text: "❌ ESLint found errors. Fix them before committing."
 
+    # 4. Validate Next.js config can be loaded (catches syntax errors ESLint/TS miss)
+    validate-next-config:
+      glob: "apps/web/next.config.mjs"
+      run: |
+        echo "🔍 Validating next.config.mjs syntax..."
+        pnpm validate:next-config
+      fail_text: "❌ next.config.mjs has syntax errors. Fix them before committing."
+
+    # 5. Validate client/server boundaries (catches build-time import issues)
+    validate-client-server:
+      glob: "apps/web/src/**/*.{ts,tsx}"
+      run: |
+        echo "🔍 Validating client/server boundaries..."
+        pnpm validate:client-server
+      fail_text: "❌ Client/server boundary violations found. Fix them before committing."
+
+    # 6. Run tests for changed files (fast feedback, only affected tests)
+    test-affected:
+      glob: "**/*.{ts,tsx}"
+      exclude: "apps/edge/functions/**"
+      run: |
+        echo "🧪 Running tests for changed files..."
+        # Run only tests related to changed files (vitest --changed)
+        # This is fast and only runs tests that might be affected by changes
+        pnpm test --run --changed || {
+          echo "⚠️  No tests found for changed files, running all tests..."
+          pnpm test --run
+        }
+      fail_text: "❌ Tests failed. Fix failing tests before committing."
+      stage_fixed: false
+
 # ============================================================================
 # PRE-PUSH: Comprehensive checks before code reaches remote
 # ============================================================================

@@ -23,7 +23,6 @@ import {
   updateContactEngagement,
 } from '@heyclaude/edge-runtime';
 import {
-  type BaseLogContext,
   createUtilityContext,
   errorToString,
   logError,
@@ -56,7 +55,18 @@ interface PulseQueueMessage {
 }
 
 /**
- * Process search events batch - inserts into search_queries table
+ * Insert a batch of search-related pulse events into the search_queries table.
+ *
+ * Validates `user_id` and `session_id` as UUIDs, extracts `query`, optional `filters`,
+ * and `result_count` from each event's metadata, and performs a single batch insert.
+ * If filters are present they are included as JSON; on a failure the function records
+ * an error message and reports all messages as failed.
+ *
+ * @param messages - Array of pulse queue messages containing search events
+ * @returns An object with:
+ *  - `inserted` — number of rows successfully inserted,
+ *  - `failed` — number of messages considered failed,
+ *  - `errors` — array of error messages (empty when there are no errors)
  */
 async function processSearchEventsBatch(messages: PulseQueueMessage[]): Promise<{
   inserted: number;
@@ -156,8 +166,15 @@ async function processSearchEventsBatch(messages: PulseQueueMessage[]): Promise<
 }
 
 /**
- * Update Resend contact engagement for copy/view events
- * Non-blocking, fire-and-forget - failures don't affect batch processing
+ * Send Resend engagement events for user copy and view interactions.
+ *
+ * Looks up emails for users referenced in `messages`, filters to active newsletter subscribers,
+ * and records a `copy_content` or `visit_page` engagement per subscribed user via Resend.
+ *
+ * The function returns early if Resend is not configured or no eligible events/users are found.
+ * Per-event failures are silenced (fire-and-forget) and do not affect batch processing.
+ *
+ * @param messages - Array of pulse queue messages to inspect for copy/view interactions
  */
 async function updateResendEngagement(messages: PulseQueueMessage[]): Promise<void> {
   if (!RESEND_ENV.apiKey) {
@@ -237,7 +254,20 @@ async function updateResendEngagement(messages: PulseQueueMessage[]): Promise<vo
 }
 
 /**
- * Process user interactions batch - inserts into user_interactions table (table name unchanged, queue is now 'pulse')
+ * Insert a batch of pulse events into the user_interactions store and aggregate results.
+ *
+ * Processes each message into the `user_interaction_input` composite type, calls the
+ * `batch_insert_user_interactions` RPC once for the batch, and returns aggregated counts
+ * and per-item error messages produced by the RPC.
+ *
+ * Side effects:
+ * - May trigger a best-effort, non-blocking Resend engagement update for copy/view events when inserts succeed.
+ *
+ * @param messages - Array of queued pulse messages to convert and insert
+ * @returns An object with:
+ *   - `inserted`: number of interactions successfully inserted,
+ *   - `failed`: number of interactions that failed insertion,
+ *   - `errors`: array of human-readable error messages for failed items or batch failures
  */
 async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Promise<{
   inserted: number;
@@ -249,7 +279,12 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
   let failed = 0;
 
   try {
-    // Validate content_category enum
+    /**
+     * Determines whether a value is a valid member of the `content_category` enum.
+     *
+     * @param value - Value to check
+     * @returns `true` if `value` is a valid `content_category` enum member, `false` otherwise.
+     */
     function isValidContentCategory(
       value: unknown
     ): value is DatabaseGenerated['public']['Enums']['content_category'] {
@@ -265,7 +300,12 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
       return false;
     }
 
-    // Validate interaction_type enum
+    /**
+     * Checks whether a value matches one of the allowed `interaction_type` enum values.
+     *
+     * @param value - The value to test for membership in the `interaction_type` enum
+     * @returns `true` if `value` matches an allowed `interaction_type`, `false` otherwise.
+     */
     function isValidInteractionType(
       value: unknown
     ): value is DatabaseGenerated['public']['Enums']['interaction_type'] {
@@ -400,6 +440,16 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
   }
 }
 
+/**
+ * Routes a batch of pulse queue messages to their respective processors and aggregates the processing outcome.
+ *
+ * @param messages - Array of queued pulse messages to process. Messages with `interaction_type === 'search'` are routed to the search queries pipeline; all other interaction types are routed to the user interactions pipeline.
+ * @returns An object containing:
+ *   - `success`: `true` if at least one row was inserted, `false` otherwise.
+ *   - `inserted`: total number of successfully inserted records across all pipelines.
+ *   - `failed`: total number of failed records across all pipelines.
+ *   - `errors`: array of human-readable error messages encountered during processing.
+ */
 async function processPulseBatch(messages: PulseQueueMessage[]): Promise<{
   success: boolean;
   inserted: number;
@@ -447,6 +497,11 @@ async function processPulseBatch(messages: PulseQueueMessage[]): Promise<{
   };
 }
 
+/**
+ * Deletes the specified pulse queue messages from the pulse queue, performing deletions in parallel with a controlled concurrency.
+ *
+ * @param msgIds - Array of `msg_id` values (pgmq message IDs) to remove from the pulse queue
+ */
 async function deletePulseMessages(msgIds: bigint[]): Promise<void> {
   // Delete all processed messages in parallel batches for better performance
   // Use concurrency limit to avoid overwhelming the database
@@ -470,6 +525,18 @@ async function deletePulseMessages(msgIds: bigint[]): Promise<void> {
   }
 }
 
+/**
+ * Orchestrates reading, validating, routing, and post-processing of a batch of pulse queue messages.
+ *
+ * Reads up to the configured batch size from the pulse queue, removes invalid (poison) messages,
+ * routes events with interaction_type "search" to the search insert path and other events to the user_interactions RPC,
+ * optionally triggers Resend engagement updates for eligible events, and manages deletion or retry behavior for processed messages
+ * (consuming successful messages and removing messages that exceed the maximum retry attempts).
+ *
+ * Side effects: reads from and deletes messages in the pulse queue, performs database inserts/RPCs, and may call the Resend API.
+ *
+ * @returns A Response containing a processing summary with `processed`, `inserted`, `failed`, and an optional `errors` array.
+ */
 export async function handlePulse(_req: Request): Promise<Response> {
   // Get batch size from static config (with fallback)
   const batchSize = getCacheConfigNumber('queue.pulse.batch_size', PULSE_BATCH_SIZE_DEFAULT);
@@ -477,7 +544,7 @@ export async function handlePulse(_req: Request): Promise<Response> {
   // Validate batch size (safety limits)
   const safeBatchSize = Math.max(1, Math.min(batchSize, 500)); // Between 1 and 500
 
-  const logContext: BaseLogContext = {
+  const logContext: Record<string, unknown> = {
     function: 'flux-station:pulse',
     action: 'pulse-processing',
     request_id: crypto.randomUUID(),
@@ -493,9 +560,9 @@ export async function handlePulse(_req: Request): Promise<Response> {
   
   // Set bindings for this request - mixin will automatically inject these into all subsequent logs
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'pulse-processing',
-    function: logContext.function,
+    requestId: typeof logContext['request_id'] === 'string' ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === 'string' ? logContext['action'] : 'pulse-processing',
+    function: typeof logContext['function'] === 'string' ? logContext['function'] : 'unknown',
     queue: PULSE_QUEUE_NAME,
     batchSize: safeBatchSize,
   });

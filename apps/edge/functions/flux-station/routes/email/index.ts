@@ -65,7 +65,9 @@ const NEWSLETTER_COUNT_TTL_SECONDS = edgeEnv.newsletter.countTtlSeconds;
 let newsletterCountCache: { value: number; expiresAt: number } | null = null;
 
 /**
- * Handle Newsletter Subscription
+ * Handle a newsletter subscription request: create or update the subscriber, sync contact data with the email provider, invalidate related caches, and attempt to send a welcome email.
+ *
+ * @returns A Response containing subscription result and metadata: `subscription_id`, `email`, `resend_contact_id`, `sync_status`, `email_sent`, and `email_id` on success; an error response on failure.
  */
 export async function handleSubscribe(req: Request): Promise<Response> {
 
@@ -109,8 +111,8 @@ export async function handleSubscribe(req: Request): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'subscribe',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'subscribe',
     email: normalizedEmail,
   });
 
@@ -360,6 +362,12 @@ export async function handleSubscribe(req: Request): Promise<Response> {
   }
 }
 
+/**
+ * Handle incoming triggers to send welcome emails for newsletter subscriptions or OAuth signups.
+ *
+ * @param req - Incoming Request for the welcome email handler
+ * @returns A Response with the operation result: `sent: true` and `id` plus `subscription_id` (newsletter) or `user_id` (auth signup) on success; `{ skipped: true, reason }` when an auth hook action is not a signup; an error Response on failure; may return a verification Response if webhook verification dictates.
+ */
 export async function handleWelcome(req: Request): Promise<Response> {
   const triggerSource = req.headers.get('X-Trigger-Source');
   
@@ -373,8 +381,8 @@ export async function handleWelcome(req: Request): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'welcome',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'welcome',
     triggerSource: triggerSource || 'unknown',
   });
 
@@ -416,10 +424,10 @@ export async function handleWelcome(req: Request): Promise<Response> {
       'Resend welcome email send timed out'
     );
 
-  if (error) {
-    await logError('Welcome email failed', logContext, error);
-    return await errorResponse(new Error(error.message || 'Welcome email failed'), 'handleWelcome', publicCorsHeaders, logContext);
-  }
+    if (error) {
+      await logError('Welcome email failed', logContext, error);
+      return await errorResponse(new Error(error.message || 'Welcome email failed'), 'handleWelcome', publicCorsHeaders, logContext);
+    }
 
     await enrollInOnboardingSequence(email, logContext);
 
@@ -493,6 +501,11 @@ export async function handleWelcome(req: Request): Promise<Response> {
   return successResponse({ sent: true, id: data?.id, user_id: user.id });
 }
 
+/**
+ * Handle incoming transactional email requests and send the configured email.
+ *
+ * @returns A Response containing the send result; on success the JSON body is `{ sent: true, id: string | undefined, type: string }`, otherwise an error response describing the failure.
+ */
 export async function handleTransactional(req: Request): Promise<Response> {
 
   const parseResult = await parseJsonBody<{
@@ -522,8 +535,8 @@ export async function handleTransactional(req: Request): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'transactional',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'transactional',
     type,
     ...(typeof email === 'string' ? { email } : {}),
   });
@@ -578,6 +591,19 @@ export async function handleTransactional(req: Request): Promise<Response> {
   return successResponse({ sent: true, id: data?.id, type });
 }
 
+/**
+ * Generate and send the weekly digest to all subscribers and record the run timestamp.
+ *
+ * Fetches digest content for the previous week, skips processing if rate-limited or if the digest
+ * contains no content or has no subscribers, sends digest emails in batch, and attempts to upsert
+ * the last successful run timestamp. If the timestamp upsert ultimately fails, the function still
+ * reports the email send results.
+ *
+ * @returns If skipped: an object with `{ skipped: true, reason: string, ... }` where `reason` is one of
+ * `rate_limited`, `invalid_data`, `no_content`, or `no_subscribers`. If processed: an object with
+ * `{ sent: number, failed: number, rate: number }` containing counts of successful and failed sends
+ * and the success rate.
+ */
 export async function handleDigest(): Promise<Response> {
   const logContext = createEmailHandlerContext('digest');
   
@@ -587,8 +613,8 @@ export async function handleDigest(): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'digest',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'digest',
   });
 
   // Check rate limiting
@@ -782,6 +808,14 @@ export async function handleDigest(): Promise<Response> {
   });
 }
 
+/**
+ * Process and send due sequence emails in batched concurrent tasks.
+ *
+ * Fetches all sequence emails that are due, sends each via the sequence processor,
+ * records per-item failures, emits an observability heartbeat, and returns a summary.
+ *
+ * @returns A Response containing `sent` and `failed` counts for processed sequence emails
+ */
 export async function handleSequence(): Promise<Response> {
   const logContext = createEmailHandlerContext('sequence');
   
@@ -791,8 +825,8 @@ export async function handleSequence(): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'sequence',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'sequence',
   });
 
   traceStep('Fetching due sequence emails', logContext);
@@ -862,6 +896,12 @@ export async function handleSequence(): Promise<Response> {
   return successResponse({ sent: sentCount, failed: failedCount });
 }
 
+/**
+ * Send the configured job-lifecycle email (for example onboarding or status updates) to a user for a specific job.
+ *
+ * @param action - Key identifying which entry in `JOB_EMAIL_CONFIGS` to use for template, props, and subject
+ * @returns A Response whose successful JSON body is `{ sent: true, id?: string, jobId: string }`; otherwise an appropriate HTTP error response
+ */
 export async function handleJobLifecycleEmail(req: Request, action: string): Promise<Response> {
 
   const parseResult = await parseJsonBody<
@@ -904,8 +944,8 @@ export async function handleJobLifecycleEmail(req: Request, action: string): Pro
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || action,
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : action,
     action,
     jobId,
   });
@@ -954,6 +994,11 @@ export async function handleJobLifecycleEmail(req: Request, action: string): Pro
   return successResponse({ sent: true, id: data?.id, jobId });
 }
 
+/**
+ * Retrieves the newsletter subscriber count, using an in-memory cache and refreshing from NewsletterService when the cached value has expired.
+ *
+ * @returns The current newsletter subscriber count.
+ */
 async function getCachedNewsletterCount(): Promise<number> {
   const now = Date.now();
   if (newsletterCountCache && newsletterCountCache.expiresAt > now) {
@@ -970,6 +1015,11 @@ async function getCachedNewsletterCount(): Promise<number> {
   return count;
 }
 
+/**
+ * Provides the current newsletter subscriber count along with cache-related and CORS headers.
+ *
+ * @returns A JSON response body `{ count: number }` with Cache-Control and CORS headers set
+ */
 export async function handleGetNewsletterCount(): Promise<Response> {
   const logContext = createEmailHandlerContext('get-newsletter-count');
   
@@ -979,8 +1029,8 @@ export async function handleGetNewsletterCount(): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'get-newsletter-count',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'get-newsletter-count',
   });
   
   try {
@@ -1007,7 +1057,9 @@ export async function handleGetNewsletterCount(): Promise<Response> {
 }
 
 /**
- * Contact Form Submission Handler
+ * Handle a contact form submission by validating input and category, notifying admins, sending a confirmation to the user, and returning the outcomes.
+ *
+ * @returns A Response containing JSON with the send outcome: `sent` (true if the handler completed its send attempts), `submission_id`, `admin_email_sent` (`true` if the admin notification was sent, `false` otherwise), `user_email_sent` (`true` if the user confirmation was sent, `false` otherwise), and `user_email_id` (the Resend message id for the user email, or `null` when unavailable).
  */
 export async function handleContactSubmission(req: Request): Promise<Response> {
 
@@ -1040,8 +1092,8 @@ export async function handleContactSubmission(req: Request): Promise<Response> {
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'contact-submission',
+    requestId: typeof logContext['request_id'] === "string" ? logContext['request_id'] : undefined,
+    operation: typeof logContext['action'] === "string" ? logContext['action'] : 'contact-submission',
     submissionId,
     category,
     ...(typeof email === 'string' ? { email } : {}),

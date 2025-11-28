@@ -31,7 +31,12 @@ type ContentSubmission = DatabaseGenerated['public']['Tables']['content_submissi
 const SUBMISSION_DISCORD_QUEUE = 'discord_submissions';
 const QUEUE_BATCH_SIZE = 10;
 
-// Type guard to validate database webhook payload structure
+/**
+ * Type guard that verifies a value conforms to the `DatabaseWebhookPayload<ContentSubmission>` shape for content submissions.
+ *
+ * @param value - Value to validate
+ * @returns `true` if `value` conforms to `DatabaseWebhookPayload<ContentSubmission>`, `false` otherwise.
+ */
 function isValidSubmissionWebhookPayload(
   value: unknown
 ): value is DatabaseWebhookPayload<ContentSubmission> {
@@ -69,11 +74,23 @@ function isValidSubmissionWebhookPayload(
 
 // Type guard to validate webhook type enum
 // NOTE: This could be extracted to a shared module, but keeping it local for now
-// as it's a simple type guard used only in this file
+/**
+ * Checks whether a string is a valid database webhook type used by the handler.
+ *
+ * @param value - The input string to validate as a webhook type
+ * @returns `true` if `value` is `'INSERT'`, `'UPDATE'`, or `'DELETE'`, `false` otherwise
+ */
 function isValidWebhookType(value: string): value is 'INSERT' | 'UPDATE' | 'DELETE' {
   return value === 'INSERT' || value === 'UPDATE' || value === 'DELETE';
 }
 
+/**
+ * Process up to 10 messages from the 'discord_submissions' queue and send Discord notifications for content submissions.
+ *
+ * Validates each queue message, deletes invalid messages to prevent retries, dispatches INSERT payloads to submission notification handling and UPDATE payloads to content notification handling, skips DELETE payloads, and leaves messages in the queue on handler errors for retry.
+ *
+ * @returns A Response with a summary object containing `message` (string), `processed` (number), and `results` (array of per-message results with `msg_id`, `status`, and optional `reason`, `errors`, and `will_retry`). In case of a top-level error, returns an error response with code `flux-station:discord-submissions-error`.
+ */
 export async function handleDiscordSubmissions(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('flux-station', 'discord-submissions', {});
   

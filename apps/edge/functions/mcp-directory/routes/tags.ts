@@ -11,6 +11,18 @@ import type { GetContentByTagInput } from '../lib/types.ts';
 
 type ContentPaginatedItem = Database['public']['CompositeTypes']['content_paginated_item'];
 
+/**
+ * Fetches content matching the provided tags (with optional AND/OR logic and category) and returns a human-readable summary plus structured metadata.
+ *
+ * @param input - Query options:
+ *   - `tags`: Array of tag strings to match.
+ *   - `logic`: `'AND'` to require all tags or any other value to use OR semantics.
+ *   - `category`: Optional category to filter results.
+ *   - `limit`: Maximum number of items to retrieve.
+ * @returns An object containing:
+ *   - `content`: An array with a single text block summarizing the found items and their matching tags.
+ *   - `_meta`: Structured metadata including `items` (formatted results with slug, title, category, truncated description, tags, matchingTags, author, dateAdded), `tags`, `logic`, `category` (or `'all'`), and `count` (number of returned items).
+ */
 export async function handleGetContentByTag(
   supabase: SupabaseClient<Database>,
   input: GetContentByTagInput
@@ -56,6 +68,7 @@ export async function handleGetContentByTag(
         tags,
         logic,
         category: category || 'all',
+        count: 0,
       },
     };
   }
@@ -86,6 +99,7 @@ export async function handleGetContentByTag(
           tags,
           logic,
           category: category || 'all',
+          count: 0,
         },
       };
     }

@@ -11,7 +11,6 @@ import {
   traceRequestComplete,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
   createDataApiContext,
@@ -25,12 +24,27 @@ import {
 
 const CORS = getOnlyCorsHeaders;
 
+/**
+ * Handle incoming GET requests to generate SEO metadata and JSON-LD schemas for a given route.
+ *
+ * Validates the request (must be GET with no nested segments), reads `route` (required) and `include`
+ * (optional) from the URL query, detects internal loopback via the `X-Internal-Loopback` header,
+ * invokes the SEO RPC to produce metadata and schemas, validates/serializes the result, and returns
+ * a JSON response with appropriate security, CORS, and cache headers.
+ *
+ * @param segments - Path segments for the route; must be empty (nested segments are rejected)
+ * @param url - Incoming request URL; `route` and `include` are read from its query parameters
+ * @param method - The HTTP method of the request
+ * @param request - Optional original Request object; used to detect internal loopback via headers
+ * @param logContext - Optional logging context attached to request logs and traces
+ * @returns A Response whose body is JSON containing `metadata` and `schemas` on success, or an HTTP error response on failure
+ */
 export async function handleSeoRoute(
   segments: string[],
   url: URL,
   method: string,
   request?: Request,
-  logContext?: BaseLogContext
+  logContext?: Record<string, unknown>
 ): Promise<Response> {
   // Create log context if not provided
   const finalLogContext = logContext || createDataApiContext('seo', {
@@ -45,8 +59,8 @@ export async function handleSeoRoute(
   
   // Set bindings for this request
   logger.setBindings({
-    requestId: finalLogContext.request_id,
-    operation: finalLogContext.action || 'seo-route',
+    requestId: typeof finalLogContext['request_id'] === 'string' ? finalLogContext['request_id'] : undefined,
+    operation: typeof finalLogContext['action'] === 'string' ? finalLogContext['action'] : 'seo-route',
     method,
   });
   

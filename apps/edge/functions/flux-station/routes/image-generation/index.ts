@@ -12,7 +12,6 @@
  */
 
 import { edgeEnv, initRequestLogging, pgmqDelete, pgmqRead, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
-import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   createUtilityContext,
   errorToString,
@@ -52,11 +51,17 @@ interface ImageGenerationMessage {
 }
 
 /**
- * Process a single image generation job
+ * Process a single image-generation job by invoking the appropriate internal image transform API.
+ *
+ * Supports message types `card`, `thumbnail`, and `logo` and constructs the request payload from the message fields.
+ *
+ * @param message - Image generation job payload (uses `type`, `content_id`, `company_id`, `image_data`, and `params`)
+ * @param logContext - Context object used for structured logging
+ * @returns `{ success: true }` when the job succeeded, `{ success: false, error: string }` when it failed
  */
 async function processImageGeneration(
   message: ImageGenerationMessage,
-  logContext: BaseLogContext
+  logContext: Record<string, unknown>
 ): Promise<{ success: boolean; error?: string }> {
   const { type, content_id, company_id, params } = message;
 
@@ -175,7 +180,13 @@ async function processImageGeneration(
 }
 
 /**
- * Main queue worker handler
+ * Process up to QUEUE_BATCH_SIZE image-generation queue messages and return a summary of results.
+ *
+ * Validates each message, invokes the appropriate image transformation, deletes messages that
+ * are invalid or successfully processed, and removes messages that have exceeded the maximum
+ * retry attempts; messages that fail but have remaining attempts are left for retry.
+ *
+ * @returns A Response containing a JSON summary of processing results. On normal completion returns status 200 with `{ processed, total, success, failed, results }`. On an unexpected error returns status 500 with `{ error: 'An unexpected error occurred', processed: 0 }`.
  */
 export async function handleImageGenerationQueue(_req: Request): Promise<Response> {
   const logContext = createUtilityContext('image-generation', 'queue-processor', {});

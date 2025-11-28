@@ -49,6 +49,7 @@ export * from './data/content/homepage.ts';
 export * from './data/changelog.ts';
 export * from './data/forms/submission-form-fields.ts';
 export * from './data/layout.ts';
+export { getLayoutData } from './data/layout.ts'; // Explicit export for build resolution
 export * from './data/config/categories.ts';
 export * from './data/config/category/index.ts';
 export * from './data/search/facets.ts';

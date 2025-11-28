@@ -12,6 +12,17 @@ import type { GetMcpServersInput } from '../lib/types.ts';
 
 type ContentPaginatedItem = Database['public']['CompositeTypes']['content_paginated_item'];
 
+/**
+ * Fetches MCP entries from the HeyClaude directory, enriches them with available metadata and download URLs, and returns a formatted text summary plus a metadata payload containing the full server representations.
+ *
+ * @param supabase - Supabase client used to read content and metadata rows
+ * @param input - Input options; `limit` controls the maximum number of MCP items to fetch
+ * @returns An object with:
+ *  - `content`: an array containing a single text item with a human-readable list of MCP servers and a total count
+ *  - `_meta`: an object with `servers` (the full array of server objects) and `count` (number of servers)
+ *
+ * Each server object in `_meta.servers` includes: `slug`, `title`, `description` (trimmed to 200 chars), `author`, `dateAdded`, `tags`, `mcpbUrl` (string or `null`), `requiresAuth` (boolean), `tools` (array of `{ name, description }`), `configuration` (object), and `stats` (`views` and `bookmarks`).
+ */
 export async function handleGetMcpServers(
   supabase: SupabaseClient<Database>,
   input: GetMcpServersInput
