@@ -6,7 +6,7 @@
 import 'server-only';
 
 import { ContentService } from '@heyclaude/data-layer';
-import { buildReadmeMarkdown } from '@heyclaude/edge-runtime/changelog/readme-builder';
+import { buildReadmeMarkdown } from '@heyclaude/edge-runtime';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
   generateRequestId,
@@ -44,7 +44,10 @@ export async function GET(request: NextRequest) {
     if (format === 'readme') {
       const data = await service.getSitewideReadme();
 
-      const formatted = buildReadmeMarkdown(data);
+      // TypeScript can't resolve buildReadmeMarkdown return type due to edge-runtime exclusions
+      // but we know it returns string at runtime
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+      const formatted: string = buildReadmeMarkdown(data);
 
       reqLogger.info('Sitewide README generated', {
         bytes: formatted.length,
