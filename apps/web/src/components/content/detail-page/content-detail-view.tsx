@@ -901,13 +901,64 @@ export async function UnifiedDetailPage({
           <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />
         )}
 
-        <TabbedDetailLayout
-          item={item}
-          config={serializableConfig as typeof config}
-          tabs={configuredTabs}
-          sectionData={sectionData}
-          relatedItems={relatedItems}
-        />
+        {/* Main content with sidebar */}
+        <div
+          className="container mx-auto px-4 py-8"
+          style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
+        >
+          <div id="detail-main-content" className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            {/* Primary content */}
+            <div className="lg:col-span-2">
+              <TabbedDetailLayout
+                item={item}
+                config={serializableConfig as typeof config}
+                tabs={configuredTabs}
+                sectionData={sectionData}
+                relatedItems={relatedItems}
+              />
+            </div>
+
+            {/* Sidebars - Related content + Recently Viewed */}
+            <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+              {/* Detail Sidebar - Related content */}
+              {relatedItemsPromise && config ? (
+                <Suspense
+                  fallback={
+                    <DetailSidebar
+                      item={item}
+                      relatedItems={[]}
+                      config={{
+                        typeName: config.typeName,
+                        metadata: config.metadata,
+                      }}
+                    />
+                  }
+                >
+                  <SidebarWithRelated
+                    item={item}
+                    relatedItemsPromise={relatedItemsPromise}
+                    config={{
+                      typeName: config.typeName,
+                      metadata: config.metadata,
+                    }}
+                  />
+                </Suspense>
+              ) : config ? (
+                <DetailSidebar
+                  item={item}
+                  relatedItems={relatedItems}
+                  config={{
+                    typeName: config.typeName,
+                    metadata: config.metadata,
+                  }}
+                />
+              ) : null}
+
+              {/* Recently Viewed Sidebar */}
+              <RecentlyViewedSidebar />
+            </aside>
+          </div>
+        </div>
 
         <div className="container mx-auto px-4 pb-8">
           <NewsletterScrollTrigger

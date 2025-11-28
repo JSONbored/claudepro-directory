@@ -6,6 +6,7 @@
 import 'server-only';
 
 import { ContentService } from '@heyclaude/data-layer';
+import { buildReadmeMarkdown } from '@heyclaude/edge-runtime/changelog/readme-builder';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
   generateRequestId,
@@ -34,17 +35,41 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const format = (url.searchParams.get('format') ?? 'llms').toLowerCase();
 
-    if (format !== 'llms' && format !== 'llms-txt') {
-      return badRequestResponse(
-        `Invalid sitewide format '${format}'. Valid formats: llms, llms-txt`,
-        CORS
-      );
-    }
-
     reqLogger.info('Sitewide content request received', { format });
 
     const supabase = createSupabaseAnonClient();
     const service = new ContentService(supabase);
+
+    // Handle README format
+    if (format === 'readme') {
+      const data = await service.getSitewideReadme();
+
+      const formatted = buildReadmeMarkdown(data);
+
+      reqLogger.info('Sitewide README generated', {
+        bytes: formatted.length,
+      });
+
+      return new NextResponse(formatted, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/markdown; charset=utf-8',
+          'X-Generated-By': 'supabase.rpc.generate_readme_data',
+          ...buildSecurityHeaders(),
+          ...CORS,
+          ...buildCacheHeaders('content_export'),
+        },
+      });
+    }
+
+    // Handle LLMs format (default)
+    if (format !== 'llms' && format !== 'llms-txt') {
+      return badRequestResponse(
+        `Invalid sitewide format '${format}'. Valid formats: llms, llms-txt, readme`,
+        CORS
+      );
+    }
+
     const data = await service.getSitewideLlmsTxt();
 
     if (!data) {

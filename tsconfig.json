@@ -12,6 +12,7 @@
       "@heyclaude/shared-runtime/*": ["./packages/shared-runtime/src/*"],
       "@heyclaude/edge-runtime": ["./packages/edge-runtime/src/index.ts"],
       "@heyclaude/edge-runtime/*": ["./packages/edge-runtime/src/*"],
+      "@heyclaude/edge-runtime/changelog/readme-builder": ["./packages/edge-runtime/src/changelog/readme-builder.ts"],
       "@heyclaude/web-runtime": ["./packages/web-runtime/src/index.ts"],
       "@heyclaude/data-layer": ["./packages/data-layer/dist/index"],
       "@heyclaude/data-layer/*": ["./packages/data-layer/dist/*"],
@@ -59,6 +60,10 @@
     "packages/edge-runtime/src/utils/email",
     "packages/edge-runtime/src/utils/email/**",
     "packages/edge-runtime/src/utils/email/**/*",
-    "packages/edge-runtime"
+    "packages/edge-runtime/src/app.ts",
+    "packages/edge-runtime/src/utils/integrations/resend.ts",
+    "packages/edge-runtime/src/utils/webhook/auth-hook.ts",
+    "packages/edge-runtime/src/utils/email/digest-helpers.ts",
+    "packages/edge-runtime/src/utils/email/sequence-helpers.ts"
   ]
 }
