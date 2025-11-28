@@ -96,7 +96,7 @@
     "@heyclaude/generators": "workspace:*",
     "@react-email/components": "^0.0.22",
     "@react-email/render": "^2.0.0",
-    "react": "^18.3.1",
+    "react": "^19.2.0",
     "@supabase/supabase-js": "^2.86.0",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/archiver": "^7.0.0",
