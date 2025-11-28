@@ -162,6 +162,30 @@ async function SidebarWithRelated({
   return <DetailSidebar item={item} relatedItems={relatedItems} config={config} />;
 }
 
+/**
+ * Renders the unified detail page for a content item, including header, metadata, content/code sections,
+ * configuration, installation, examples, sidebars, and optional tabbed layout.
+ *
+ * This server-rendered component performs server-side preprocessing (syntax highlighting, language detection,
+ * filename generation, markdown heading extraction, and config formatting) in parallel before streaming the UI.
+ * It also suspends to stream view-count and related-items data when promises are provided.
+ *
+ * @param props.item - The content item row or expanded content detail used to build the page.
+ * @param props.relatedItems - Eagerly provided related items for the sidebar (optional).
+ * @param props.viewCount - Pre-fetched view count to render immediately (optional).
+ * @param props.copyCount - Pre-fetched copy count to render immediately (optional).
+ * @param props.relatedItemsPromise - Promise that resolves to related items; used to stream sidebar content (optional).
+ * @param props.viewCountPromise - Promise that resolves to the view count; used to stream metadata (optional).
+ * @param props.copyCountPromise - Promise that resolves to the copy count; used to stream metadata (optional).
+ * @param props.collectionSections - React node containing collection-specific sections to include in the main content (optional).
+ * @param props.tabsEnabled - When true and the category config defines tabs, the page renders a tabbed layout instead of the default single-column layout.
+ *
+ * @returns The fully rendered detail page JSX for the provided content item.
+ *
+ * @see getCategoryConfig
+ * @see highlightCode
+ * @see extractCodeBlocksFromMarkdown
+ */
 export async function UnifiedDetailPage({
   item,
   relatedItems = [],
@@ -901,13 +925,64 @@ export async function UnifiedDetailPage({
           <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />
         )}
 
-        <TabbedDetailLayout
-          item={item}
-          config={serializableConfig as typeof config}
-          tabs={configuredTabs}
-          sectionData={sectionData}
-          relatedItems={relatedItems}
-        />
+        {/* Main content with sidebar */}
+        <div
+          className="container mx-auto px-4 py-8"
+          style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
+        >
+          <div id="detail-main-content" className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            {/* Primary content */}
+            <div className="lg:col-span-2">
+              <TabbedDetailLayout
+                item={item}
+                config={serializableConfig as typeof config}
+                tabs={configuredTabs}
+                sectionData={sectionData}
+                relatedItems={relatedItems}
+              />
+            </div>
+
+            {/* Sidebars - Related content + Recently Viewed */}
+            <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+              {/* Detail Sidebar - Related content */}
+              {relatedItemsPromise && config ? (
+                <Suspense
+                  fallback={
+                    <DetailSidebar
+                      item={item}
+                      relatedItems={[]}
+                      config={{
+                        typeName: config.typeName,
+                        metadata: config.metadata,
+                      }}
+                    />
+                  }
+                >
+                  <SidebarWithRelated
+                    item={item}
+                    relatedItemsPromise={relatedItemsPromise}
+                    config={{
+                      typeName: config.typeName,
+                      metadata: config.metadata,
+                    }}
+                  />
+                </Suspense>
+              ) : config ? (
+                <DetailSidebar
+                  item={item}
+                  relatedItems={relatedItems}
+                  config={{
+                    typeName: config.typeName,
+                    metadata: config.metadata,
+                  }}
+                />
+              ) : null}
+
+              {/* Recently Viewed Sidebar */}
+              <RecentlyViewedSidebar />
+            </aside>
+          </div>
+        </div>
 
         <div className="container mx-auto px-4 pb-8">
           <NewsletterScrollTrigger
