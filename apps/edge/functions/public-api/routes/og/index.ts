@@ -135,13 +135,11 @@ function extractMetadataFromResponse(data: unknown): {
 }
 
 /**
- * Resolve Open Graph metadata for a given URL route using layered fallbacks.
- *
- * Attempts to obtain title, description, type, and tags from primary SEO generation, then an internal SEO HTTP endpoint, then a database RPC for content routes, and finally derives a title from the route when other methods fail. Returned values use sensible defaults when specific metadata is unavailable.
+ * Resolve Open Graph metadata for a given URL route and return normalized values for title, description, type, and tags, applying sensible defaults when specific metadata is unavailable.
  *
  * @param route - The URL path to resolve metadata for (for example, `/agents/foo`)
- * @param logContext - Per-request logging context used for observability and logging
- * @returns OGImageParams containing `title`, `description`, `type`, and `tags`; `title` and `description` will fall back to defaults when not available, and `tags` will be an empty array if none are found
+ * @param logContext - Per-request logging context used for observability and structured logs
+ * @returns OGImageParams containing `title`, `description`, `type`, and `tags`; `title` and `description` will fall back to defaults when absent, and `tags` will be an empty array if none are found
  */
 async function fetchMetadataFromRoute(
   route: string,

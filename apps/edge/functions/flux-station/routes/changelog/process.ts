@@ -145,10 +145,10 @@ function isValidChangelogWebhookProcessingJob(
 }
 
 /**
- * Determines whether a value is an array of GitHub commit objects with the expected fields.
+ * Type guard that verifies a value is an array of GitHub commit objects containing required fields.
  *
  * @param value - The value to validate
- * @returns `true` if `value` is an array where each item has `sha`, `html_url`, a `commit.message`, and a `commit.author.name`; `false` otherwise.
+ * @returns `true` if `value` is an array where each item includes `sha`, `html_url`, `commit.message`, and `commit.author.name`; `false` otherwise.
  */
 function isValidGitHubCommitArray(value: unknown): value is GitHubCommit[] {
   if (!Array.isArray(value)) {

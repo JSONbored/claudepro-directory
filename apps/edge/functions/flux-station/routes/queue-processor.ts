@@ -131,11 +131,11 @@ async function checkQueueMetrics(queueName: string): Promise<number> {
 }
 
 /**
- * Invoke an internal queue handler and produce a structured processing result.
+ * Invoke the configured internal handler for a single queue and produce its processing result.
  *
- * @param config - Queue configuration (must include `handlerFn` for internal queues); `config.name` is used in the result.
+ * @param config - Queue configuration; must include `handlerFn`. `config.name` is used as the `queue` in the result.
  * @param queueLength - Observed number of messages in the queue at the time of the check.
- * @returns A QueueProcessingResult containing the queue name, whether processing succeeded, the observed `queueLength`, and optional `processed` count and `error` message.
+ * @returns A `QueueProcessingResult` containing the queue name, `success` flag, the observed `queueLength`, and optionally `processed` (number of messages processed) and `error` (error message) when present.
  */
 async function processInternalQueue(
   config: QueueConfig,

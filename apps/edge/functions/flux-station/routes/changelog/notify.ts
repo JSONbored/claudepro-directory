@@ -354,9 +354,9 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
 }
 
 /**
- * Delete a processed message from the changelog notifications queue.
+ * Deletes a processed message from the changelog notifications queue.
  *
- * If deletion fails the error is logged and the function does not throw so the message remains available for retry.
+ * If deletion fails, the error is logged and the function returns without throwing so the message remains available for retry.
  *
  * @param msgId - The queue message ID to delete
  */

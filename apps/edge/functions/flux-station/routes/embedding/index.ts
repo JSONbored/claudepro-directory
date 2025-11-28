@@ -88,11 +88,11 @@ function buildSearchableText(record: ContentRow): string {
 }
 
 /**
- * Generate a normalized numeric embedding for the provided text using the `gte-small` AI model.
+ * Generates a normalized numeric embedding for the provided text using the `gte-small` AI model.
  *
  * @param text - The input content used to produce the embedding
- * @returns The embedding vector as an array of numbers
- * @throws Error if the model returns a non-array, an empty array, or values that are not numbers; may also throw on timeout or circuit-breaker failure
+ * @returns An array of numbers representing the embedding vector
+ * @throws Error if the model returns a non-array, an empty array, or non-numeric values; may also throw on timeout or circuit-breaker failure
  */
 async function generateEmbedding(text: string): Promise<number[]> {
   const generateEmbeddingInternal = async () => {
@@ -132,16 +132,15 @@ async function generateEmbedding(text: string): Promise<number[]> {
 }
 
 /**
- * Persist a content embedding record to the database.
+ * Store a content embedding record in the `content_embeddings` table.
  *
- * Stores the provided embedding (as a JSON string) along with the content text and
- * a generated-at timestamp into the `content_embeddings` table. The operation is
- * protected by a circuit breaker and a timeout.
+ * Persists the provided embedding (as a JSON string), the searchable content text,
+ * and a generation timestamp so the embedding can be retrieved for search/analysis.
  *
  * @param contentId - The content record's unique identifier
  * @param contentText - The searchable text associated with the content (stored for retrieval/search)
  * @param embedding - The numeric embedding vector for `contentText`
- * @throws Error If the database upsert fails or if the operation is aborted by the circuit breaker or timeout
+ * @throws Error If the database upsert fails or if the operation is aborted by a circuit breaker or times out
  */
 async function storeEmbedding(
   contentId: string,

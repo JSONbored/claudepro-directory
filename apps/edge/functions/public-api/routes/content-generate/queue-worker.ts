@@ -50,15 +50,13 @@ interface PackageGenerationQueueMessage {
 }
 
 /**
- * Process a single package generation job from a queue message.
+ * Process a single package generation job represented by a queue message.
  *
- * Fetches the content row, locates the generator for the message's category,
- * validates that the content can be generated, executes generation (generate → upload → update DB),
- * and logs outcomes.
+ * Fetches the content row, resolves the generator for the message's category, verifies generation eligibility, and runs the generator to produce and persist the package.
  *
- * @param message - The queue message containing `content_id`, `category`, `slug`, and metadata
- * @param logContext - Optional structured logging context used for enriched logs
- * @returns An object with `success` indicating overall outcome and `errors` containing human-readable error messages
+ * @param message - Queue message envelope containing `content_id`, `category`, `slug`, and timestamps
+ * @param logContext - Optional structured context added to logs for correlation and diagnostics
+ * @returns An object with `success` set to `true` if generation completed successfully, `false` otherwise. `errors` contains human-readable error messages when `success` is `false`.
  */
 async function processPackageGeneration(
   message: PackageGenerationQueueMessage,

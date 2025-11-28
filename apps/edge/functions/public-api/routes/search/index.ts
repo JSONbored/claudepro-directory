@@ -75,17 +75,20 @@ interface SearchResponse {
 }
 
 /**
- * Process an incoming search HTTP request and return a structured search response.
+ * Handle an incoming HTTP search request and produce a structured JSON search response.
  *
- * Validates and normalizes query parameters, chooses between content, unified, or jobs search,
- * executes the corresponding data-layer RPC, optionally adds HTML highlights for matched terms,
- * enqueues search analytics (fire-and-forget), and returns a JSON payload with results,
- * filters, pagination metadata, and the resolved search type. Returns HTTP 400 for client-side
- * validation errors and an error response for server-side failures.
+ * Validates and normalizes query parameters, selects between content, unified, or jobs search,
+ * executes the appropriate data-layer RPC, optionally includes HTML-highlighted fields when a
+ * query is present, enqueues analytics (fire-and-forget), and returns an HTTP response with the
+ * assembled search payload. Returns HTTP 400 for client validation errors and an error response
+ * on server-side failures.
  *
- * @param req - Incoming HTTP request; may include query parameters and an optional Authorization header
- * @returns A JSON response containing `results` (possibly with highlighted fields), `query`, `filters`,
- * `pagination` (total, limit, offset, hasMore), and `searchType` ("content" | "unified" | "jobs")
+ * @param req - The incoming Request (may include query parameters such as `q`, `categories`, `tags`,
+ * `authors`, `entities`, job filters, `limit`, `offset`, and may include an `Authorization` header)
+ * @returns A Response whose JSON body contains `results` (items; fields may include highlighted HTML
+ * like `title_highlighted`, `description_highlighted`, etc. when a query was provided), `query`,
+ * `filters` (applied request filters and sort), `pagination` (total, limit, offset, hasMore), and
+ * `searchType` (`"content" | "unified" | "jobs"`)
  */
 export async function handleSearch(req: Request): Promise<Response> {
   const url = new URL(req.url);

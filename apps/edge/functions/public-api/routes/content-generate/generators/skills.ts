@@ -17,10 +17,10 @@ import type { ContentRow, GenerateResult, PackageGenerator } from '../types.ts';
 const FIXED_DATE = new Date('2024-01-01T00:00:00.000Z');
 
 /**
- * Compute the CRC-32 checksum for the given byte array.
+ * Computes the CRC-32 checksum of the given bytes.
  *
- * @param data - The input bytes to checksum
- * @returns The CRC-32 checksum as an unsigned 32‑bit number
+ * @param data - Input bytes to checksum
+ * @returns The CRC-32 checksum as an unsigned 32-bit number
  */
 function crc32(data: Uint8Array): number {
   let crc = 0xffffffff;

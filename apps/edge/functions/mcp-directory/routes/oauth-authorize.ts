@@ -22,13 +22,13 @@ const MCP_SERVER_URL = getEnvVar('MCP_SERVER_URL') ?? 'https://mcp.heyclau.de';
 const MCP_RESOURCE_URL = `${MCP_SERVER_URL}/mcp`;
 
 /**
- * Create an OAuth-style JSON error response and include CORS and JSON content-type headers.
+ * Build a standardized OAuth JSON error response and set JSON and CORS headers.
  *
- * @param c - The request/response context used to build the response
+ * @param c - Request/response context used to construct the response
  * @param error - OAuth error code to return (e.g., `invalid_request`, `server_error`)
- * @param description - Human-readable error description to include as `error_description`
+ * @param description - Human-readable text to include as `error_description`
  * @param status - HTTP status code to send (400 or 500); defaults to 400
- * @returns A Response whose JSON body contains `error` and `error_description` and whose headers include `Content-Type: application/json` and `Access-Control-Allow-Origin: *`
+ * @returns A Response with a JSON body `{ error, error_description }` and headers `Content-Type: application/json` and `Access-Control-Allow-Origin: *`
  */
 function jsonError(
   c: Context,

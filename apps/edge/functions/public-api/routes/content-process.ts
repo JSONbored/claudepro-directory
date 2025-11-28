@@ -118,10 +118,11 @@ function normalizeSlug(value: string): string {
 }
 
 /**
- * Produce a filesystem-safe filename from a raw candidate string.
+ * Produce a filesystem-safe filename from a raw candidate string, slugifying and sanitizing it and truncating the result to MAX_FILENAME_LENGTH.
  *
- * @param input - The raw filename or title to sanitize; may be undefined.
- * @returns The sanitized, slugified filename, or `'untitled'` if `input` is missing or invalid. */
+ * @param input - Raw filename or title to sanitize; may be undefined.
+ * @returns The sanitized filename (slugified and truncated to MAX_FILENAME_LENGTH), or `untitled` if `input` is missing or invalid.
+ */
 function sanitizeFilename(input: string | undefined): string {
   if (!input || typeof input !== 'string') {
     return 'untitled';
@@ -482,16 +483,14 @@ function performHighlight(
 }
 
 /**
- * Handle HTTP requests that return syntax-highlighted HTML for a code snippet.
+ * Return syntax-highlighted HTML and the resolved language for a provided code snippet.
  *
- * Accepts POST with JSON { code, language?, showLineNumbers? } and returns a JSON response
- * containing highlighted HTML and the resolved language. Responds to OPTIONS with 204 and
- * rejects non-POST methods.
+ * Accepts a POST with a JSON body containing `code` (required), and optional `language` and
+ * `showLineNumbers`. Responds to OPTIONS with 204 and rejects non-POST methods.
  *
- * @param req - The incoming Request object containing the JSON payload
+ * @param req - Incoming Request whose JSON body should be `{ code, language?, showLineNumbers? }`
  * @param logContext - Logging context used for error reporting
- * @returns A Response whose JSON body contains `{ html: string, language: string }` on success,
- * or `{ error: string }` on failure
+ * @returns A JSON body containing `html` and `language` on success, or `{ error: string }` on failure
  */
 export async function handleContentHighlight(
   req: Request,

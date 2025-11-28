@@ -36,15 +36,11 @@ function toContentCategory(value: string | null): ContentCategory | null {
 const CORS = getOnlyCorsHeaders;
 
 /**
- * Call a database RPC, log failures with context, and return the RPC result.
+ * Executes a database RPC, logs failures with context, and returns the RPC's data.
  *
- * Invokes the provided `rpcCall` and returns its `data` when present. If the RPC yields an `error`
- * or returns `null` data, logs the failure with `rpcName` and `args` and then throws the RPC error
- * or a new `Error` indicating a null result.
- *
- * @param rpcName - Identifier for the RPC used in logs and error messages
+ * @param rpcName - Identifier used in logs and error messages
  * @param rpcCall - Function that performs the RPC and resolves to an object with `data` and `error`
- * @param args - Arguments passed to the RPC (included in logged context; may be redacted)
+ * @param args - Arguments passed to the RPC; included in logged context (may be redacted)
  * @returns The `data` returned by the RPC
  * @throws The RPC `error` if present, or an `Error` when the RPC returned `null` data
  */

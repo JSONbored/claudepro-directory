@@ -69,13 +69,12 @@ function isValidNotificationPriority(value: string): value is NotificationPriori
 }
 
 /**
- * Handle POST /notifications/create requests and create a global notification for an authenticated user.
+ * Create a global notification for an authenticated user from a POST /notifications/create request.
  *
- * Validates authorization, request body size and JSON, enforces required `title` and `message` fields,
- * validates optional `type`, `priority`, `action_label`, and `action_href`, then persists the notification
- * and returns its representation along with the created trace ID.
+ * Validates the authorization header, request body size and JSON shape, enforces non-empty `title` and `message`,
+ * validates optional `type`, `priority`, `action_label`, and `action_href`, persists the notification, and records a trace.
  *
- * @returns A Response containing the created `notification` object and `traceId` on success; on failure returns a structured error response (e.g., 400 for validation/authorization errors or an error response for insertion failures).
+ * @returns An object with the created `notification` and its `traceId` on success; a structured error response on failure.
  */
 export async function handleCreateNotification(req: Request): Promise<Response> {
   // Optional auth - use for logging context if provided

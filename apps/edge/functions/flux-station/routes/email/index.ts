@@ -363,10 +363,14 @@ export async function handleSubscribe(req: Request): Promise<Response> {
 }
 
 /**
- * Handle incoming triggers to send welcome emails for newsletter subscriptions or OAuth signups.
+ * Send a welcome email in response to either a newsletter subscription trigger or an OAuth signup webhook.
  *
- * @param req - Incoming Request for the welcome email handler
- * @returns A Response with the operation result: `sent: true` and `id` plus `subscription_id` (newsletter) or `user_id` (auth signup) on success; `{ skipped: true, reason }` when an auth hook action is not a signup; an error Response on failure; may return a verification Response if webhook verification dictates.
+ * @returns A Response indicating one of:
+ * - success: `{ sent: true, id, subscription_id }` for newsletter-triggered sends
+ * - success: `{ sent: true, id, user_id }` for OAuth signup sends
+ * - skipped: `{ skipped: true, reason, action_type? }` when an auth hook action is not a signup
+ * - a verification `Response` when webhook verification requires an early return
+ * - an error `Response` on failure
  */
 export async function handleWelcome(req: Request): Promise<Response> {
   const triggerSource = req.headers.get('X-Trigger-Source');
@@ -592,12 +596,11 @@ export async function handleTransactional(req: Request): Promise<Response> {
 }
 
 /**
- * Generate and send the weekly digest to all subscribers and record the run timestamp.
+ * Generate and send the weekly digest to subscribers and record the run timestamp.
  *
- * Fetches digest content for the previous week, skips processing if rate-limited or if the digest
- * contains no content or has no subscribers, sends digest emails in batch, and attempts to upsert
- * the last successful run timestamp. If the timestamp upsert ultimately fails, the function still
- * reports the email send results.
+ * Fetches digest content for the previous week, skips processing when rate-limited or when there
+ * is no digest content or no subscribers, sends digest emails in batch, and attempts to upsert
+ * the last successful run timestamp; timestamp upsert failures do not cause the digest run to fail.
  *
  * @returns If skipped: an object with `{ skipped: true, reason: string, ... }` where `reason` is one of
  * `rate_limited`, `invalid_data`, `no_content`, or `no_subscribers`. If processed: an object with
@@ -809,12 +812,9 @@ export async function handleDigest(): Promise<Response> {
 }
 
 /**
- * Process and send due sequence emails in batched concurrent tasks.
+ * Process due sequence emails and return counts of sent and failed deliveries.
  *
- * Fetches all sequence emails that are due, sends each via the sequence processor,
- * records per-item failures, emits an observability heartbeat, and returns a summary.
- *
- * @returns A Response containing `sent` and `failed` counts for processed sequence emails
+ * @returns A Response with a JSON payload containing `sent` (number of successfully processed emails) and `failed` (number of failed emails)
  */
 export async function handleSequence(): Promise<Response> {
   const logContext = createEmailHandlerContext('sequence');
@@ -897,10 +897,10 @@ export async function handleSequence(): Promise<Response> {
 }
 
 /**
- * Send the configured job-lifecycle email (for example onboarding or status updates) to a user for a specific job.
+ * Send a job-lifecycle email (for example onboarding or status updates) to the specified user for a given job.
  *
  * @param action - Key identifying which entry in `JOB_EMAIL_CONFIGS` to use for template, props, and subject
- * @returns A Response whose successful JSON body is `{ sent: true, id?: string, jobId: string }`; otherwise an appropriate HTTP error response
+ * @returns A Response whose successful JSON body is `{ sent: true, id?: string, jobId: string }`
  */
 export async function handleJobLifecycleEmail(req: Request, action: string): Promise<Response> {
 
@@ -1057,9 +1057,9 @@ export async function handleGetNewsletterCount(): Promise<Response> {
 }
 
 /**
- * Handle a contact form submission by validating input and category, notifying admins, sending a confirmation to the user, and returning the outcomes.
+ * Process a contact form submission: validate fields and category, notify admins, send a user confirmation, and report outcomes.
  *
- * @returns A Response containing JSON with the send outcome: `sent` (true if the handler completed its send attempts), `submission_id`, `admin_email_sent` (`true` if the admin notification was sent, `false` otherwise), `user_email_sent` (`true` if the user confirmation was sent, `false` otherwise), and `user_email_id` (the Resend message id for the user email, or `null` when unavailable).
+ * @returns An object with send outcomes: `sent` (`true` if send attempts completed), `submission_id` (the submission identifier), `admin_email_sent` (`true` if the admin notification was sent, `false` otherwise), `user_email_sent` (`true` if the user confirmation was sent, `false` otherwise), and `user_email_id` (the Resend message id for the user email, or `null` when unavailable).
  */
 export async function handleContactSubmission(req: Request): Promise<Response> {
 

@@ -108,10 +108,10 @@ mcpApp.use('/*', async (c, next) => {
  */
 
 /**
- * Create a Supabase client that sends the provided user access token with every request.
+ * Creates a Supabase client that includes the provided access token on all outbound requests.
  *
- * @param token - Access token to include as `Authorization: Bearer <token>` on each request
- * @returns A Supabase client instance configured to include the provided token on outbound requests
+ * @param token - Access token to include in the `Authorization` header as `Bearer <token>`
+ * @returns A Supabase client configured to send the token in the `Authorization` header
  */
 function getAuthenticatedSupabase(_user: User, token: string) {
   const {
@@ -130,15 +130,15 @@ function getAuthenticatedSupabase(_user: User, token: string) {
  */
 
 /**
- * Register the HeyClaude directory MCP tools on the provided server using the given per-request Supabase client.
+ * Register the HeyClaude directory MCP tools on the given MCP server.
  *
- * Registers the directory toolset and binds each tool's handler to the supplied authenticated Supabase client so
- * all tool operations run in the context of the current request's user/token. Tools registered include listing
- * categories, searching content, retrieving content details, trending/featured/templates, MCP servers listing,
- * related content, content-by-tag, popular, and recent endpoints.
+ * Registers the directory toolset (listing, search, detail, trending, featured,
+ * templates, MCP servers, related content, tag-based filters, popular, and recent)
+ * and binds each tool's handler to the provided per-request Supabase client so
+ * tool operations execute in the request's authenticated context.
  *
  * @param mcpServer - MCP server instance to register tools on
- * @param supabase - Authenticated, per-request Supabase client bound to the request's user/token
+ * @param supabase - Authenticated, per-request Supabase client used by tool handlers for row-level access
  */
 function registerAllTools(
   mcpServer: McpServer,

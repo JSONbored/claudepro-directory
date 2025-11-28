@@ -254,20 +254,12 @@ async function updateResendEngagement(messages: PulseQueueMessage[]): Promise<vo
 }
 
 /**
- * Insert a batch of pulse events into the user_interactions store and aggregate results.
+ * Insert a batch of pulse events into the user_interactions store and return aggregated results.
  *
- * Processes each message into the `user_interaction_input` composite type, calls the
- * `batch_insert_user_interactions` RPC once for the batch, and returns aggregated counts
- * and per-item error messages produced by the RPC.
- *
- * Side effects:
- * - May trigger a best-effort, non-blocking Resend engagement update for copy/view events when inserts succeed.
+ * Triggers a best-effort Resend engagement update for copy/view events when inserts succeed.
  *
  * @param messages - Array of queued pulse messages to convert and insert
- * @returns An object with:
- *   - `inserted`: number of interactions successfully inserted,
- *   - `failed`: number of interactions that failed insertion,
- *   - `errors`: array of human-readable error messages for failed items or batch failures
+ * @returns An object with `inserted`: the number of interactions successfully inserted, `failed`: the number of interactions that failed insertion, and `errors`: an array of human-readable error messages for failed items or batch failures
  */
 async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Promise<{
   inserted: number;
@@ -441,14 +433,14 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
 }
 
 /**
- * Routes a batch of pulse queue messages to their respective processors and aggregates the processing outcome.
+ * Routes a batch of pulse queue messages to the appropriate processors and aggregates their results.
  *
- * @param messages - Array of queued pulse messages to process. Messages with `interaction_type === 'search'` are routed to the search queries pipeline; all other interaction types are routed to the user interactions pipeline.
- * @returns An object containing:
- *   - `success`: `true` if at least one row was inserted, `false` otherwise.
- *   - `inserted`: total number of successfully inserted records across all pipelines.
- *   - `failed`: total number of failed records across all pipelines.
- *   - `errors`: array of human-readable error messages encountered during processing.
+ * @param messages - Queue messages to process; messages with `interaction_type === 'search'` are sent to the search pipeline, all others are sent to the user interactions pipeline.
+ * @returns An object with aggregated processing results:
+ *  - `success`: `true` if at least one record was inserted, `false` otherwise.
+ *  - `inserted`: total number of successfully inserted records across all pipelines.
+ *  - `failed`: total number of records that failed to insert across all pipelines.
+ *  - `errors`: array of human-readable error messages encountered during processing.
  */
 async function processPulseBatch(messages: PulseQueueMessage[]): Promise<{
   success: boolean;
@@ -498,9 +490,11 @@ async function processPulseBatch(messages: PulseQueueMessage[]): Promise<{
 }
 
 /**
- * Deletes the specified pulse queue messages from the pulse queue, performing deletions in parallel with a controlled concurrency.
+ * Remove the given pulse queue messages in parallel using a bounded concurrency to avoid overloading the database.
  *
- * @param msgIds - Array of `msg_id` values (pgmq message IDs) to remove from the pulse queue
+ * Deletes each provided `msg_id` from the pulse queue; individual deletion failures are logged and do not stop other deletions.
+ *
+ * @param msgIds - Array of pgmq `msg_id` values to delete from the pulse queue
  */
 async function deletePulseMessages(msgIds: bigint[]): Promise<void> {
   // Delete all processed messages in parallel batches for better performance
@@ -601,7 +595,11 @@ export async function handlePulse(_req: Request): Promise<Response> {
     logInfo(`Processing ${messages.length} pulse events`, logContext);
     traceStep(`Processing ${messages.length} pulse events`, logContext);
 
-    // Safely validate queue message structure
+    /**
+     * Validate that a value has the expected pulse event structure.
+     *
+     * @returns `true` if `value` conforms to `PulseEvent` (has a string `interaction_type` and acceptable `content_type`, `content_slug`, `user_id`, and `session_id` values), `false` otherwise.
+     */
     function isValidPulseEvent(value: unknown): value is PulseEvent {
       if (typeof value !== 'object' || value === null) {
         return false;

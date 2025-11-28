@@ -47,12 +47,12 @@ const JOB_MONITORED_FIELDS = [
 ] as const;
 
 /**
- * Type guard that validates whether a value matches the DatabaseWebhookPayload<JobRow> shape for job webhooks.
+ * Type guard that verifies a value matches the DatabaseWebhookPayload<JobRow> shape for job webhooks.
  *
- * Checks that `type` is 'INSERT' | 'UPDATE' | 'DELETE', `table` and `schema` are strings, `record` is a non-null object,
- * and `old_record` is either absent, `null`, or an object.
+ * Checks that `type` is one of `'INSERT' | 'UPDATE' | 'DELETE'`, `table` and `schema` are strings, `record` is a non-null
+ * object, and `old_record` is either absent, `null`, or an object.
  *
- * @param value - The value to validate as a `DatabaseWebhookPayload<JobRow]`
+ * @param value - The value to validate as a `DatabaseWebhookPayload<JobRow>`
  * @returns `true` if `value` matches the expected webhook payload shape for a job, `false` otherwise.
  */
 function isValidJobWebhookPayload(value: unknown): value is DatabaseWebhookPayload<JobRow> {
@@ -99,9 +99,9 @@ function isValidWebhookType(value: string): value is 'INSERT' | 'UPDATE' | 'DELE
 }
 
 /**
- * Process queued job webhook messages and dispatch Discord notifications for relevant INSERT and UPDATE events.
+ * Process a batch of job webhook queue messages and dispatch Discord notifications for eligible INSERT and UPDATE events.
  *
- * Reads a batch of messages, validates and filters payloads (skipping drafts, placeholders, DELETE events, and updates where monitored fields did not change), invokes the direct job-notification handler for eligible items, and deletes or retains queue messages according to outcome.
+ * Validates and filters queue payloads (skipping deletes, drafts, placeholders, and updates with no monitored-field changes), invokes the direct job-notification handler for eligible items, and deletes or retains queue messages according to processing outcomes.
  *
  * @returns An HTTP Response whose body is a summary object with `processed` (number) and `results` (array). Each result contains `msg_id`, `status` (`success` | `skipped` | `failed`), and optional `reason`, `errors`, and `will_retry` fields indicating whether a failed item will be retried.
  */

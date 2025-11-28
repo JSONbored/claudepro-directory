@@ -177,13 +177,9 @@ async function handleSitewideContent(url: URL, logContext?: Record<string, unkno
 }
 
 /**
- * Generate and return the sitewide LLMS export as plain text.
+ * Return the sitewide LLMS export as UTF-8 plain text.
  *
- * Fetches the sitewide LLMS text from the content service, converts escaped newlines to real newlines,
- * logs the generation (when `logContext` is provided), and returns an HTTP `Response` with `Content-Type: text/plain`
- * plus security, CORS, and cache headers.
- *
- * @returns A `Response` containing the sitewide LLMS export as UTF-8 plain text; on failure, an error response with an appropriate status and JSON body.
+ * @returns A `Response` with the exported LLMS text as `text/plain; charset=utf-8`, or an error `Response` with a JSON body and an appropriate status code.
  */
 async function handleSitewideLlmsTxt(logContext?: Record<string, unknown>): Promise<Response> {
   const service = new ContentService(supabaseAnon);
@@ -227,10 +223,10 @@ async function handleSitewideLlmsTxt(logContext?: Record<string, unknown>): Prom
 }
 
 /**
- * Serve the changelog index in the requested format.
+ * Serve the changelog index in the requested output format.
  *
- * @param format - Desired output format; currently only `"llms-changelog"` is accepted.
- * @returns A `Response` containing the changelog in LLMS text when `format` is `"llms-changelog"`, or a 400 Bad Request `Response` describing the invalid format otherwise.
+ * @param format - Desired output format; only `"llms-changelog"` is supported.
+ * @returns A `Response` containing the changelog in LLMS text when `format` is `"llms-changelog"`, or a `400` Bad Request `Response` describing the invalid format otherwise.
  */
 async function handleChangelogIndex(format: string): Promise<Response> {
   if (format === 'llms-changelog') {
@@ -360,10 +356,10 @@ async function handleChangelogLlmsTxt(): Promise<Response> {
 }
 
 /**
- * Generate the LLMS.txt representation for a changelog entry identified by `slug`.
+ * Produce the LLMS.txt plain-text representation for a changelog entry identified by `slug`.
  *
  * @param slug - The changelog entry slug to retrieve and format
- * @returns A Response containing the changelog entry as plain text: `200` with the formatted LLMS.txt on success, `400` if not found or invalid, or an error response on failure
+ * @returns A Response containing the changelog entry as `text/plain` on success (`200`), `400` if the entry is missing or invalid, or an error response mapped from the underlying service on failure
  */
 async function handleChangelogEntryLlmsTxt(slug: string): Promise<Response> {
   const service = new ContentService(supabaseAnon);

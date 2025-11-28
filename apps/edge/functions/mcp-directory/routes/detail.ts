@@ -11,13 +11,11 @@ import { logError } from '@heyclaude/shared-runtime';
 import type { GetContentDetailInput } from '../lib/types.ts';
 
 /**
- * Fetches a content item by slug and category and returns a markdown-like text summary plus a normalized `_meta` details object.
+ * Retrieve a content item by slug and category and produce a markdown-like text summary with normalized metadata.
  *
- * Queries the `content` table for the specified item, normalizes missing fields with sensible defaults, and builds a readable text block and metadata summary.
- *
- * @param input - Object containing `slug` and `category` of the content item to retrieve
- * @returns An object with `content` — an array containing a single text block (`type: 'text'`, `text`: string) — and `_meta` — a details object containing `slug`, `title`, `displayTitle`, `category`, `description`, `content`, `tags`, `author`, `authorProfileUrl`, `dateAdded`, `dateUpdated`, `createdAt`, `metadata`, and `stats` (`views`, `bookmarks`, `copies`)
- * @throws If no content is found for the provided category/slug, or if the database query fails (the error is logged and rethrown)
+ * @param input - Object containing `slug` and `category` that identify the content item
+ * @returns An object with `content`: an array containing a single text block (`{ type: 'text', text: string }`), and `_meta`: a details object with `slug`, `title`, `displayTitle`, `category`, `description`, `content`, `tags`, `author`, `authorProfileUrl`, `dateAdded`, `dateUpdated`, `createdAt`, `metadata`, and `stats` (`views`, `bookmarks`, `copies`)
+ * @throws If no content is found for the provided `category`/`slug`, or if the database query fails
  */
 export async function handleGetContentDetail(
   supabase: SupabaseClient<Database>,

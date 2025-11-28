@@ -29,10 +29,10 @@ type UserConfigEntry = {
 };
 
 /**
- * Builds a manifest template placeholder in the form `${variable}`.
+ * Create a manifest template placeholder in the form `${variable}`.
  *
  * @param variable - The template variable name to embed
- * @returns The placeholder string formatted as `${variable}`
+ * @returns The placeholder string (e.g., `${variable}`)
  */
 function createTemplateVar(variable: string): string {
   return `\${${variable}}`;
@@ -629,7 +629,7 @@ function createZipCentralDirEntry(
 }
 
 /**
- * Compute the CRC-32 checksum of a byte array.
+ * Computes the CRC-32 checksum of a byte array.
  *
  * @param data - The input bytes to checksum
  * @returns The CRC-32 checksum of `data` as an unsigned 32-bit integer

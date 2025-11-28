@@ -6,7 +6,7 @@ import { SITE_URL, supabaseAnon } from '@heyclaude/edge-runtime';
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 /**
- * Determine whether a string is one of the allowed content category enum values.
+ * Determines if a string is an allowed content category value.
  *
  * @param value - The candidate category string to validate
  * @returns `true` if `value` equals one of the allowed content category enum values, `false` otherwise
