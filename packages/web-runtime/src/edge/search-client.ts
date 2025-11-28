@@ -99,12 +99,11 @@ async function executeSearchDirect<T>(
         return String(e);
       }) ?? ['content'];
       
+      // search_unified only accepts: p_query, p_entities, p_limit, p_offset
+      // Categories, tags, and authors filtering must be done client-side after search
       const serviceResponse = await service.searchUnified({
         p_query: options.query,
         p_entities: entities,
-        ...(options.filters?.categories ? { p_categories: options.filters.categories } : {}),
-        ...(options.filters?.tags ? { p_tags: options.filters.tags } : {}),
-        ...(options.filters?.authors ? { p_authors: options.filters.authors } : {}),
         p_limit: options.filters?.limit ?? 20,
         p_offset: options.filters?.offset ?? 0
       });
@@ -123,18 +122,41 @@ async function executeSearchDirect<T>(
       }
       
       const data = serviceResponse.data;
-      const totalCount = typeof serviceResponse.total_count === 'number' 
-        ? serviceResponse.total_count 
-        : (Array.isArray(data) ? data.length : 0);
       
       // Type guard: Ensure results is an array
-      const results: UnifiedSearchResult[] = Array.isArray(data) 
+      let results: UnifiedSearchResult[] = Array.isArray(data) 
         ? data.filter((item): item is UnifiedSearchResult => 
             item !== null && typeof item === 'object' && 'id' in item
           )
         : [];
       
-      return { results, totalCount };
+      // Client-side filtering for categories, tags, and authors (since search_unified doesn't support these)
+      if (options.filters?.categories && options.filters.categories.length > 0) {
+        results = results.filter((item) => 
+          item.category && options.filters?.categories?.includes(item.category)
+        );
+      }
+      
+      if (options.filters?.tags && options.filters.tags.length > 0) {
+        results = results.filter((item) => {
+          if (!item.tags || !Array.isArray(item.tags)) return false;
+          return options.filters?.tags?.some((tag) => item.tags?.includes(tag));
+        });
+      }
+      
+      // Note: UnifiedSearchResult doesn't have an 'author' field
+      // Author filtering would need to be done at the database level or removed
+      // For now, skip author filtering on client side
+      // if (options.filters?.authors && options.filters.authors.length > 0) {
+      //   results = results.filter((item) => 
+      //     'author' in item && item.author && options.filters?.authors?.includes(item.author)
+      //   );
+      // }
+      
+      // Update totalCount to reflect filtered results
+      const filteredTotalCount = results.length;
+      
+      return { results, totalCount: filteredTotalCount };
     },
     {
       operation: 'executeSearchDirect',

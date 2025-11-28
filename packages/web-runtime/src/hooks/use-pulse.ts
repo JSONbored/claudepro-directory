@@ -76,7 +76,7 @@ export interface PulseScreenshotParams {
 export interface PulseDownloadParams {
   category: Database['public']['Enums']['content_category'];
   slug: string;
-  action_type?: 'download_zip' | 'download_markdown' | 'llmstxt' | 'download_mcpb';
+  action_type?: 'download_zip' | 'download_markdown' | 'llmstxt' | 'download_mcpb' | 'download_code';
 }
 
 /**
@@ -253,13 +253,14 @@ export function usePulse(): UsePulseReturn {
 
       /**
        * Track download action
-       * Maps to trackUsage() for download_zip/download_markdown/llmstxt/download_mcpb
+       * Maps to trackUsage() for download_zip/download_markdown/download_code/llmstxt/download_mcpb
        * or trackInteraction() for generic download
        */
       download: async ({ category, slug, action_type = 'download_zip' }) => {
         if (
           action_type === 'download_zip' ||
           action_type === 'download_markdown' ||
+          action_type === 'download_code' ||
           action_type === 'llmstxt' ||
           action_type === 'download_mcpb'
         ) {

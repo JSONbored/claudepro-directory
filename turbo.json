@@ -116,6 +116,9 @@
     "test:unit": {
       "outputs": ["coverage/**"],
       "cache": true
+    },
+    "generators:build": {
+      "dependsOn": ["^build"]
     }
   },
   "globalDependencies": ["package.json", "pnpm-lock.yaml"],

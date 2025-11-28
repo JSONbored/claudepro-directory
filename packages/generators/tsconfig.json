@@ -16,11 +16,11 @@
       "@heyclaude/database-types": ["../database-types/dist/index"],
       "@heyclaude/web-runtime": ["../web-runtime/dist/index"],
       "@heyclaude/web-runtime/*": ["../web-runtime/dist/*"],
-      "@heyclaude/shared-runtime": ["../shared-runtime/src/index.ts"]
+      "@heyclaude/shared-runtime": ["../shared-runtime/dist/index"]
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules"],
+  "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
   "references": [
     { "path": "../database-types/tsconfig.json" },
     { "path": "../web-runtime/tsconfig.json" },

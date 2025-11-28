@@ -1,4 +1,4 @@
-import { edgeEnv } from './env.ts';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 
 /**
  * Shared Email Configuration for Supabase Edge Functions

@@ -1,19 +1,19 @@
-import type { VercelWebhookPayload } from '../../changelog/service.ts';
-import { supabaseServiceRole } from '../../clients/supabase.ts';
+import type { VercelWebhookPayload } from '@heyclaude/edge-runtime/changelog/service.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import {
   badRequestResponse,
   changelogCorsHeaders,
   errorResponse,
   successResponse,
-} from '../../utils/http.ts';
+} from '@heyclaude/edge-runtime/utils/http.ts';
 import { createChangelogHandlerContext, withContext } from '@heyclaude/shared-runtime';
-import { pgmqSend } from '../../utils/pgmq-client.ts';
-import { logger } from '../../utils/logger.ts';
+import { pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 import {
   ingestWebhookEvent,
   WebhookIngestError,
   type WebhookIngestResult,
-} from '../../utils/webhook/ingest.ts';
+} from '@heyclaude/edge-runtime/utils/webhook/ingest.ts';
 
 export async function handleChangelogSyncRequest(req: Request): Promise<Response> {
   const logContext = createChangelogHandlerContext();

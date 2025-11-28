@@ -14,7 +14,7 @@
  */
 
 import pino from 'pino';
-import { createPinoConfig } from '@heyclaude/shared-runtime/logger/config';
+import { createPinoConfig } from '@heyclaude/shared-runtime';
 
 // Create Pino logger instance with centralized configuration
 // For CLI tools, we use a pretty-printed format for better readability

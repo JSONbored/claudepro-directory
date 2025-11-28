@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { edgeEnv } from '../config/env.ts';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 import type { Database } from '@heyclaude/database-types';
 
 const {

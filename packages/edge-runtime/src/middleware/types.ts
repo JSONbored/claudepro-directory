@@ -1,4 +1,4 @@
-import type { RouterContext } from '../utils/router.ts';
+import type { RouterContext } from '@heyclaude/edge-runtime/utils/router.ts';
 
 export type Next = () => Promise<Response>;
 

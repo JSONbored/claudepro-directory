@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { runGenerateServerActions } from '../commands/generate-server-actions.js';
-import { logger } from '../toolkit/logger.ts';
+import { logger } from '../toolkit/logger.js';
 
 const args = process.argv.slice(2);
 const targetAction = args[0];

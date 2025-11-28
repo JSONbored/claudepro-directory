@@ -9,7 +9,7 @@ import React from "npm:react@18.3.1";
 // Mark React as used for TypeScript (required for Deno JSX runtime)
 void React;
 import type { Database as DatabaseGenerated } from "@heyclaude/database-types";
-import { BaseLayout } from "../base-template.tsx";
+import { BaseLayout } from "@heyclaude/edge-runtime/utils/email/base-template.tsx";
 
 type ContactCategory = DatabaseGenerated['public']['Enums']['contact_category'];
 import {
@@ -21,9 +21,9 @@ import {
 	paragraphStyle,
 	strongStyle,
 	subheadingStyle,
-} from "../common-styles.ts";
-import { EmailCtaSection } from "../components/cta.tsx";
-import { EMAIL_UTM_TEMPLATES } from "../utm-templates.ts";
+} from "@heyclaude/edge-runtime/utils/email/common-styles.ts";
+import { EmailCtaSection } from "@heyclaude/edge-runtime/utils/email/components/cta.tsx";
+import { EMAIL_UTM_TEMPLATES } from "@heyclaude/edge-runtime/utils/email/utm-templates.ts";
 
 export interface ContactSubmissionAdminProps {
 	submissionId: string;
@@ -138,7 +138,7 @@ export function ContactSubmissionAdmin({
 export async function renderContactSubmissionAdminEmail(
 	props: ContactSubmissionAdminProps,
 ): Promise<string> {
-	const { renderEmailTemplate } = await import("../base-template.tsx");
+	const { renderEmailTemplate } = await import("@heyclaude/edge-runtime/utils/email/base-template.tsx");
 	return renderEmailTemplate(ContactSubmissionAdmin, props);
 }
 

@@ -54,7 +54,7 @@ export async function callEdgeFunction<T = unknown>(
     return (await response.json()) as T;
   } catch (error) {
     // Import logger dynamically to avoid circular dependencies
-    const { logger } = await import('./logger.ts');
+    const { logger } = await import('./logger.js');
     const errorObj = error instanceof Error ? error : new Error(String(error));
     
     if (errorObj.name === 'AbortError') {

@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "lint": "cd functions && deno lint",
-    "lint:fix": "cd functions && deno lint --fix",
-    "type-check": "cd functions && deno check --config deno.json '**/*.ts' '**/*.tsx'",
+    "lint": "cd supabase/functions && deno lint",
+    "lint:fix": "cd supabase/functions && deno lint --fix",
+    "type-check": "cd supabase && for dir in functions/*/; do if [ -d \"$dir\" ]; then echo \"Type-checking $(basename $dir)...\"; (cd \"$dir\" && deno check --config ../../deno.json '**/*.ts' '**/*.tsx') || exit 1; fi; done",
     "deploy": "pnpm exec heyclaude-deploy-edge"
   }
 }

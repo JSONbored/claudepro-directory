@@ -16,7 +16,7 @@
  */
 
 import pino from 'pino';
-import { createPinoConfig } from './config.ts';
+import { createPinoConfig } from '@heyclaude/shared-runtime/logger/config.ts';
 
 /**
  * Create a Pino logger instance with centralized configuration
@@ -168,7 +168,7 @@ export {
   SENSITIVE_PATTERNS, 
   BASE_CONTEXT,
   type PinoConfigOptions 
-} from './config.ts';
+} from '@heyclaude/shared-runtime/logger/config.ts';
 
 // Re-export Pino utilities for advanced usage
 export { 

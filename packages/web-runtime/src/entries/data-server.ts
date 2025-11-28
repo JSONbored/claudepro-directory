@@ -1,5 +1,7 @@
 // Update entry point
 export * from '../actions/safe-action.ts';
+// Export ParseStrategy and safeParse from data.ts (exports both value and type)
+export { ParseStrategy, safeParse } from '../data.ts';
 // REMOVED: export * from '../actions/feature-flags.ts'; - Causes module-level evaluation during SSR, use lazy imports
 export * from '../storage/image-storage.ts';
 export * from '../storage/image-utils.ts';

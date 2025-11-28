@@ -3,6 +3,8 @@ import type { LucideIcon } from 'lucide-react';
 
 export type SectionId =
   | 'description'
+  | 'content'
+  | 'code'
   | 'features'
   | 'requirements'
   | 'use_cases'

@@ -1,5 +1,5 @@
-import { createRouter, type RouterContext, type RouterOptions } from './utils/router.ts';
-import { jsonResponse } from './utils/http.ts';
+import { createRouter, type RouterContext, type RouterOptions } from '@heyclaude/edge-runtime/utils/router.ts';
+import { jsonResponse } from '@heyclaude/edge-runtime/utils/http.ts';
 
 export interface EdgeAppOptions<T extends RouterContext> extends RouterOptions<T> {
   // No extra options needed yet, just re-exporting router options

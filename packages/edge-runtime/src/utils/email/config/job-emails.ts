@@ -5,12 +5,12 @@
 
 import type * as React from 'npm:react@18.3.1';
 import type { FC } from 'npm:react@18.3.1';
-import { JobApproved } from '../templates/job-approved.tsx';
-import { JobExpired } from '../templates/job-expired.tsx';
-import { JobExpiring } from '../templates/job-expiring.tsx';
-import { JobPaymentConfirmed } from '../templates/job-payment-confirmed.tsx';
-import { JobRejected } from '../templates/job-rejected.tsx';
-import { JobSubmitted } from '../templates/job-submitted.tsx';
+import { JobApproved } from '@heyclaude/edge-runtime/utils/email/templates/job-approved.tsx';
+import { JobExpired } from '@heyclaude/edge-runtime/utils/email/templates/job-expired.tsx';
+import { JobExpiring } from '@heyclaude/edge-runtime/utils/email/templates/job-expiring.tsx';
+import { JobPaymentConfirmed } from '@heyclaude/edge-runtime/utils/email/templates/job-payment-confirmed.tsx';
+import { JobRejected } from '@heyclaude/edge-runtime/utils/email/templates/job-rejected.tsx';
+import { JobSubmitted } from '@heyclaude/edge-runtime/utils/email/templates/job-submitted.tsx';
 
 export interface JobEmailConfig<TProps = Record<string, unknown>> {
   template: FC<TProps> | ((props: TProps) => React.ReactElement);

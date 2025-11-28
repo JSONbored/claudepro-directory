@@ -1,7 +1,7 @@
 import { errorToString } from '@heyclaude/shared-runtime';
-import type { WebhookIngestResult } from './ingest.ts';
-import { finishWebhookEventRun, startWebhookEventRun } from './run-logger.ts';
-import { logger } from '../logger.ts';
+import type { WebhookIngestResult } from '@heyclaude/edge-runtime/utils/webhook/ingest.ts';
+import { finishWebhookEventRun, startWebhookEventRun } from '@heyclaude/edge-runtime/utils/webhook/run-logger.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 type ResendEventPayload = {
   type?: string;

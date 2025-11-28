@@ -19,6 +19,7 @@ export * from './utils/auth.ts';
 export * from './utils/integrations/http-client.ts';
 export * from './utils/integrations/betterstack.ts';
 export * from './utils/integrations/resend.ts';
+export { sendEmail } from './utils/integrations/resend.ts';
 
 // Config
 export * from './config/env.ts';

@@ -5,7 +5,7 @@
  * @module packages/edge-runtime/src/utils/email/email-utm
  */
 
-import type { EmailUTMParams } from './utm-templates.ts';
+import type { EmailUTMParams } from '@heyclaude/edge-runtime/utils/email/utm-templates.ts';
 
 /**
  * Generate UTM query string from parameters

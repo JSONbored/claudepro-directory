@@ -32,48 +32,6 @@ function sanitizePathSegment(segment: string): string | null {
   return segment;
 }
 
-/**
- * Validate and sanitize Supabase storage URL for safe use in window.location.href
- * Only allows HTTPS URLs from Supabase storage domains
- * Returns canonicalized URL or null if invalid
- */
-function getSafeStorageUrl(url: string | null | undefined): string | null {
-  if (!url || typeof url !== 'string') return null;
-
-  try {
-    const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol
-    if (parsed.protocol !== 'https:') return null;
-
-    // Validate it's from Supabase storage
-    // Supabase storage URLs typically have pattern: https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
-    // Require BOTH valid Supabase hostname AND storage path
-    const isSupabaseStorage =
-      (parsed.hostname.endsWith('.supabase.co') || parsed.hostname.endsWith('.supabase.in')) &&
-      parsed.pathname.startsWith('/storage/v1/object/public/');
-
-    if (!isSupabaseStorage) return null;
-
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // Sanitize: remove credentials
-    parsed.username = '';
-    parsed.password = '';
-    // Normalize hostname
-    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-    // Remove default ports
-    if (parsed.port === '443') {
-      parsed.port = '';
-    }
-
-    // Return canonicalized href
-    return parsed.href;
-  } catch {
-    return null;
-  }
-}
-
 import type { Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { useCopyToClipboard, usePulse } from '@heyclaude/web-runtime/hooks';
@@ -387,53 +345,36 @@ export function DetailHeaderActions({
     category: Database['public']['Enums']['content_category'],
     pulse: ReturnType<typeof usePulse>
   ) => {
-    if (downloadType === 'mcpb') {
-      const safeSlug = sanitizePathSegment(contentItem.slug);
-      if (!safeSlug) {
-        toasts.raw.error('Invalid content slug', {
-          description: 'The download link is not available.',
-        });
-        return;
-      }
-
-      const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
-      if (!supabaseUrl) {
-        toasts.raw.error('Configuration error', {
-          description: 'Unable to generate download link.',
-        });
-        return;
-      }
-
-      // Use edge function proxy for cached egress (critical for cost optimization)
-      const downloadUrl = `${supabaseUrl}/functions/v1/public-api/content/mcp/${safeSlug}?format=storage`;
-      window.location.href = downloadUrl;
-      pulse
-        .download({ category, slug: contentItem.slug, action_type: 'download_mcpb' })
-        .catch((error) => {
-          logUnhandledPromise('trackInteraction:download_mcpb', error, {
-            slug: contentItem.slug,
-            category,
-          });
-        });
-    } else {
-      // For Skills content, use direct storage URL
-      const safeStorageUrl = getSafeStorageUrl(contentItem.storage_url as string);
-      if (!safeStorageUrl) {
-        toasts.raw.error('Invalid download URL', {
-          description: 'The download link is not available.',
-        });
-        return;
-      }
-      window.location.href = safeStorageUrl;
-      pulse
-        .download({ category, slug: contentItem.slug, action_type: 'download_zip' })
-        .catch((error) => {
-          logUnhandledPromise('trackInteraction:download', error, {
-            slug: contentItem.slug,
-            category,
-          });
-        });
+    const safeSlug = sanitizePathSegment(contentItem.slug);
+    if (!safeSlug) {
+      toasts.raw.error('Invalid content slug', {
+        description: 'The download link is not available.',
+      });
+      return;
     }
+
+    const downloadUrl =
+      downloadType === 'mcpb'
+        ? `/api/content/mcp/${safeSlug}?format=storage`
+        : `/api/content/skills/${safeSlug}?format=storage`;
+
+    window.location.href = downloadUrl;
+    pulse
+      .download({
+        category,
+        slug: contentItem.slug,
+        action_type: downloadType === 'mcpb' ? 'download_mcpb' : 'download_zip',
+      })
+      .catch((error) => {
+        logUnhandledPromise(
+          downloadType === 'mcpb' ? 'trackInteraction:download_mcpb' : 'trackInteraction:download',
+          error,
+          {
+            slug: contentItem.slug,
+            category,
+          }
+        );
+      });
 
     toasts.raw.success('Download started!', {
       description: `Downloading ${contentItem.title || contentItem.slug} package...`,

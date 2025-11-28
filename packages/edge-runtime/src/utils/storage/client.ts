@@ -1,9 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabaseAnon, supabaseServiceRole } from '../../clients/supabase.ts';
+import { supabaseAnon, supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { errorToString } from '@heyclaude/shared-runtime';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
-import { logger } from '../logger.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 export type StorageServiceClient = SupabaseClient<DatabaseGenerated>;
 

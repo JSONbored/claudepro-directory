@@ -52,7 +52,7 @@ Essential utilities and configuration.
 ### 🚀 Edge (`@heyclaude/web-runtime/edge`)
 Utilities for Edge Runtimes (Middleware / Edge Functions).
 -   `callEdgeFunction`: Invoke Supabase Edge Functions.
--   `processContentEdge`: Content processing helpers.
+-   `processContentEdge`: Server-side content processing helpers.
 
 ### 📦 Cache (`@heyclaude/web-runtime/cache`)
 Caching strategies and tag management.

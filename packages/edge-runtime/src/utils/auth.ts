@@ -1,7 +1,7 @@
 import type { User } from '@supabase/supabase-js';
 
-import { supabaseServiceRole } from '../clients/supabase.ts';
-import { unauthorizedResponse } from './http.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { unauthorizedResponse } from '@heyclaude/edge-runtime/utils/http.ts';
 
 const BEARER_PREFIX = 'Bearer ';
 type AuthResult =

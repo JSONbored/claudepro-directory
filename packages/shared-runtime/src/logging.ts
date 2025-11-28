@@ -298,8 +298,8 @@ export function createTransformApiContext(
  */
 
 import pino from 'pino';
-import { createPinoConfig } from './logger/config.ts';
-import { normalizeError } from './error-handling.ts';
+import { createPinoConfig } from '@heyclaude/shared-runtime/logger/config.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 
 // Create Pino logger instance with centralized configuration
 // Pino automatically handles error serialization and redaction
@@ -374,8 +374,13 @@ export async function logError(message: string, logContext: Record<string, unkno
       if (err) {
         // Write directly to stderr as a last resort (can't use logger here to avoid infinite loops)
         // This is the only acceptable use of process.stderr.write in the codebase
+        // Fallback to console.error for Edge Runtime environments
+        const errorMessage = `Failed to flush logs: ${err instanceof Error ? err.message : String(err)}\n`;
         if (typeof process !== 'undefined' && process.stderr) {
-          process.stderr.write(`Failed to flush logs: ${err instanceof Error ? err.message : String(err)}\n`);
+          process.stderr.write(errorMessage);
+        } else if (typeof console !== 'undefined' && console.error) {
+          // Fallback for Edge Runtime environments where process.stderr is not available
+          console.error(errorMessage);
         }
         reject(err);
       } else {

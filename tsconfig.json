@@ -21,6 +21,9 @@
     "noEmit": true,
     "incremental": true,
     "tsBuildInfoFile": "apps/web/.next/cache/.tsbuildinfo",
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
     "plugins": [
       {
         "name": "next"
@@ -34,9 +37,12 @@
     "apps/web/.next/types/**/*.ts",
     "scripts/**/*.ts",
     "packages/web-runtime/src/**/*.ts",
+    "packages/web-runtime/src/**/*.d.ts",
     "packages/shared-runtime/src/**/*.ts",
-    "packages/data-layer/dist/**/*.ts",
-    "packages/database-types/**/*.ts"
+    "packages/data-layer/src/**/*.ts",
+    "packages/generators/src/**/*.ts",
+    "packages/database-types/**/*.ts",
+    "types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",
@@ -47,6 +53,8 @@
     "**/*.spec.ts",
     "**/*.spec.tsx",
     "apps/edge/functions",
+    "packages/edge-runtime/src/utils/email/**/*.tsx",
+    "packages/edge-runtime/src/utils/email/**/*.ts",
     "packages/edge-runtime"
   ]
 }

@@ -1,5 +1,3 @@
-'use server';
-
 import { MiscService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import { revalidateTag } from 'next/cache';

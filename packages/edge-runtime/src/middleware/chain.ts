@@ -1,5 +1,5 @@
-import type { Handler, Middleware } from './types.ts';
-import type { RouterContext } from '../utils/router.ts';
+import type { Handler, Middleware } from '@heyclaude/edge-runtime/middleware/types.ts';
+import type { RouterContext } from '@heyclaude/edge-runtime/utils/router.ts';
 
 /**
  * Composes multiple middleware functions into a single middleware.

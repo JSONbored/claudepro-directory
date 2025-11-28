@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { runGenerateEdgeRoutes } from '../commands/generate-edge-routes.js';
-import { logger } from '../toolkit/logger.ts';
+import { logger } from '../toolkit/logger.js';
 
 runGenerateEdgeRoutes().catch((err) => {
   const errorObj = err instanceof Error ? err : new Error(String(err));

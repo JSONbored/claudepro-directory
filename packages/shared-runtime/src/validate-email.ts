@@ -3,7 +3,7 @@
  * Validates email format and normalizes for storage
  */
 
-import { createUtilityContext, logWarn } from './logging.ts';
+import { createUtilityContext, logWarn } from '@heyclaude/shared-runtime/logging.ts';
 
 export interface ValidateEmailResult {
   valid: boolean;

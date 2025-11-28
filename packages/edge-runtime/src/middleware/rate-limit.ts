@@ -1,7 +1,7 @@
 import { checkRateLimit, RATE_LIMIT_PRESETS } from '@heyclaude/shared-runtime';
-import type { Middleware } from './types.ts';
-import type { RouterContext } from '../utils/router.ts';
-import { jsonResponse } from '../utils/http.ts';
+import type { Middleware } from '@heyclaude/edge-runtime/middleware/types.ts';
+import type { RouterContext } from '@heyclaude/edge-runtime/utils/router.ts';
+import { jsonResponse } from '@heyclaude/edge-runtime/utils/http.ts';
 
 type RateLimitPresetKey = keyof typeof RATE_LIMIT_PRESETS;
 type RateLimitSelector = (ctx: RouterContext) => RateLimitPresetKey;

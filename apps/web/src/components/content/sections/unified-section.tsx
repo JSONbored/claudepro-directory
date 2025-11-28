@@ -10,6 +10,7 @@ import {
   Briefcase,
   Code,
   Copy,
+  Download,
   FileText,
   type LucideIcon,
   Package,
@@ -279,6 +280,22 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             filename={props.filename}
             maxLines={20}
           />
+          {/* Download button below code block for better UX */}
+          {props.filename && (
+            <div className="mt-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  downloadTextFile(props.filename, props.code);
+                  trackDownload();
+                }}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download {props.filename}
+              </Button>
+            </div>
+          )}
         </Wrapper>
       );
 
@@ -327,6 +344,22 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     showLineNumbers={props.showLineNumbers}
                     className="shadow-sm"
                   />
+                  {/* Download button for example code */}
+                  {ex.filename && (
+                    <div className="mt-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          downloadTextFile(ex.filename, ex.code);
+                          trackDownload();
+                        }}
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Download {ex.filename}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </article>
             ))}
@@ -345,14 +378,31 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           >
             <div className="space-y-6">
               {props.configs.map((c) => (
-                <ProductionCodeBlock
-                  key={c.key}
-                  html={c.html}
-                  code={c.code}
-                  language="json"
-                  filename={c.filename}
-                  maxLines={25}
-                />
+                <div key={c.key}>
+                  <ProductionCodeBlock
+                    html={c.html}
+                    code={c.code}
+                    language="json"
+                    filename={c.filename}
+                    maxLines={25}
+                  />
+                  {/* Download button for config */}
+                  {c.filename && (
+                    <div className="mt-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          downloadTextFile(c.filename, c.code);
+                          trackDownload();
+                        }}
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Download {c.filename}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </Wrapper>
@@ -433,6 +483,22 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             filename={props.filename}
             maxLines={25}
           />
+          {/* Download button for configuration */}
+          {props.filename && (
+            <div className="mt-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  downloadTextFile(props.filename, props.code);
+                  trackDownload();
+                }}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download {props.filename}
+              </Button>
+            </div>
+          )}
         </Wrapper>
       );
     }

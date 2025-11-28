@@ -1,44 +1,44 @@
-import { type CollectionSharedProps, renderCollectionSharedEmail } from './collection-shared.tsx';
+import { type CollectionSharedProps, renderCollectionSharedEmail } from '@heyclaude/edge-runtime/utils/email/templates/collection-shared.tsx';
 import {
   type ContactSubmissionAdminProps,
   renderContactSubmissionAdminEmail,
-} from './contact-submission-admin.tsx';
+} from '@heyclaude/edge-runtime/utils/email/templates/contact-submission-admin.tsx';
 import {
   type ContactSubmissionUserProps,
   renderContactSubmissionUserEmail,
-} from './contact-submission-user.tsx';
-import { type JobApprovedProps, renderJobApprovedEmail } from './job-approved.tsx';
-import { type JobExpiredProps, renderJobExpiredEmail } from './job-expired.tsx';
-import { type JobExpiringProps, renderJobExpiringEmail } from './job-expiring.tsx';
+} from '@heyclaude/edge-runtime/utils/email/templates/contact-submission-user.tsx';
+import { type JobApprovedProps, renderJobApprovedEmail } from '@heyclaude/edge-runtime/utils/email/templates/job-approved.tsx';
+import { type JobExpiredProps, renderJobExpiredEmail } from '@heyclaude/edge-runtime/utils/email/templates/job-expired.tsx';
+import { type JobExpiringProps, renderJobExpiringEmail } from '@heyclaude/edge-runtime/utils/email/templates/job-expiring.tsx';
 import {
   type JobPaymentConfirmedProps,
   renderJobPaymentConfirmedEmail,
-} from './job-payment-confirmed.tsx';
-import { type JobPostedProps, renderJobPostedEmail } from './job-posted.tsx';
-import { type JobRejectedProps, renderJobRejectedEmail } from './job-rejected.tsx';
-import { type JobSubmittedProps, renderJobSubmittedEmail } from './job-submitted.tsx';
+} from '@heyclaude/edge-runtime/utils/email/templates/job-payment-confirmed.tsx';
+import { type JobPostedProps, renderJobPostedEmail } from '@heyclaude/edge-runtime/utils/email/templates/job-posted.tsx';
+import { type JobRejectedProps, renderJobRejectedEmail } from '@heyclaude/edge-runtime/utils/email/templates/job-rejected.tsx';
+import { type JobSubmittedProps, renderJobSubmittedEmail } from '@heyclaude/edge-runtime/utils/email/templates/job-submitted.tsx';
 import {
   type NewsletterWelcomeProps,
   renderNewsletterWelcomeEmail,
-} from './newsletter-welcome.tsx';
+} from '@heyclaude/edge-runtime/utils/email/templates/newsletter-welcome.tsx';
 import {
   type OnboardingCommunityProps,
   renderOnboardingCommunityEmail,
-} from './onboarding-community.tsx';
+} from '@heyclaude/edge-runtime/utils/email/templates/onboarding-community.tsx';
 import {
   type OnboardingGettingStartedProps,
   renderOnboardingGettingStartedEmail,
-} from './onboarding-getting-started.tsx';
+} from '@heyclaude/edge-runtime/utils/email/templates/onboarding-getting-started.tsx';
 import {
   type OnboardingPowerTipsProps,
   renderOnboardingPowerTipsEmail,
-} from './onboarding-power-tips.tsx';
+} from '@heyclaude/edge-runtime/utils/email/templates/onboarding-power-tips.tsx';
 import {
   type OnboardingStayEngagedProps,
   renderOnboardingStayEngagedEmail,
-} from './onboarding-stay-engaged.tsx';
-import { renderSignupOAuthEmail, type SignupOAuthProps } from './signup-oauth.tsx';
-import { renderWeeklyDigestEmail, type WeeklyDigestProps } from './weekly-digest.tsx';
+} from '@heyclaude/edge-runtime/utils/email/templates/onboarding-stay-engaged.tsx';
+import { renderSignupOAuthEmail, type SignupOAuthProps } from '@heyclaude/edge-runtime/utils/email/templates/signup-oauth.tsx';
+import { renderWeeklyDigestEmail, type WeeklyDigestProps } from '@heyclaude/edge-runtime/utils/email/templates/weekly-digest.tsx';
 
 export const JOBS_FROM = 'Claude Pro Directory <jobs@mail.claudepro.directory>';
 export const COMMUNITY_FROM = 'Claude Pro Directory <community@mail.claudepro.directory>';

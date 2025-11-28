@@ -5,9 +5,9 @@
 
 import type * as React from 'npm:react@18.3.1';
 import type { FC } from 'npm:react@18.3.1';
-import { CollectionShared } from '../templates/collection-shared.tsx';
-import { JobPosted } from '../templates/job-posted.tsx';
-import { COMMUNITY_FROM, JOBS_FROM } from '../templates/manifest.ts';
+import { CollectionShared } from '@heyclaude/edge-runtime/utils/email/templates/collection-shared.tsx';
+import { JobPosted } from '@heyclaude/edge-runtime/utils/email/templates/job-posted.tsx';
+import { COMMUNITY_FROM, JOBS_FROM } from '@heyclaude/edge-runtime/utils/email/templates/manifest.ts';
 
 export interface TransactionalEmailConfig<TProps = Record<string, unknown>> {
   template: FC<TProps> | ((props: TProps) => React.ReactElement);

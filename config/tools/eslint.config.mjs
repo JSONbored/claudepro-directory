@@ -213,6 +213,8 @@ export default tseslint.config(
       'architectural-rules/no-server-imports-in-client': 'error',
       'architectural-rules/no-direct-auth-getuser': 'error',
       'architectural-rules/no-data-layer-violations': 'error',
+      // Import Map Rules - Prevent relative imports in Deno import map packages
+      'architectural-rules/no-relative-imports-in-import-map-packages': 'error',
       // New custom rules
       'architectural-rules/require-database-types-for-enums': 'error',
       'architectural-rules/no-hardcoded-enum-values': 'error',
@@ -445,6 +447,23 @@ export default tseslint.config(
     },
   },
   {
+    files: [
+      '../../apps/web/public/scripts/*.js',
+      '../../apps/web/public/scripts/**/*.js',
+      '**/apps/web/public/scripts/*.js',
+      '**/apps/web/public/scripts/**/*.js',
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+        projectService: null,
+      },
+    },
+    rules: {
+      '@typescript-eslint/await-thenable': 'off',
+    },
+  },
+  {
     ignores: [
       'node_modules/**',
       '.next/**',
@@ -453,6 +472,14 @@ export default tseslint.config(
       'generated/**',
       '**/*.config.js',
       '**/*.config.mjs',
+      'apps/web/public/scripts/**/*.js',
+      '../../apps/web/public/scripts/**/*.js',
+      'public/scripts/**/*.js',
+      '**/public/scripts/**/*.js',
+      'apps/web/public/service-worker.js',
+      '../../apps/web/public/service-worker.js',
+      'public/service-worker.js',
+      '**/public/service-worker.js',
     ],
   }
 );

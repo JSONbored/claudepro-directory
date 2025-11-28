@@ -26,7 +26,7 @@ export async function HomepageHeroServer({ memberCount }: { memberCount: number 
 
       <div className={'container relative z-10 mx-auto px-4 py-10 sm:py-16 lg:py-24'}>
         <div className={'mx-auto max-w-3xl text-center'}>
-          <h1 className="mb-4 font-bold text-4xl leading-tight tracking-tight sm:mb-6 sm:text-5xl sm:leading-tight lg:text-6xl lg:leading-tight">
+          <h1 className="mb-4 font-bold text-3xl leading-tight tracking-tight sm:mb-6 sm:text-4xl sm:leading-tight lg:text-5xl lg:leading-tight">
             <span className="block">The ultimate directory for Claude</span>
             <RollingText
               words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}

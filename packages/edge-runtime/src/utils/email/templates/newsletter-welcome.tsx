@@ -15,13 +15,13 @@ import { Hr, Section, Text } from "npm:@react-email/components@0.0.22";
 import React from "npm:react@18.3.1";
 // Mark React as used for TypeScript (required for Deno JSX runtime)
 void React;
-import { BaseLayout } from "../base-template.tsx";
-import { EmailFooterNote } from "../components/footer-note.tsx";
-import { HeyClaudeEmailLogo } from "../components/heyclaude-logo.tsx";
-import { buildSubscriptionFooter } from "../config/footer-presets.ts";
-import { buildEmailCtaUrl } from "../cta.ts";
-import { brandColors, emailTheme, spacing, typography } from "../theme.ts";
-import { EMAIL_UTM_TEMPLATES } from "../utm-templates.ts";
+import { BaseLayout } from "@heyclaude/edge-runtime/utils/email/base-template.tsx";
+import { EmailFooterNote } from "@heyclaude/edge-runtime/utils/email/components/footer-note.tsx";
+import { HeyClaudeEmailLogo } from "@heyclaude/edge-runtime/utils/email/components/heyclaude-logo.tsx";
+import { buildSubscriptionFooter } from "@heyclaude/edge-runtime/utils/email/config/footer-presets.ts";
+import { buildEmailCtaUrl } from "@heyclaude/edge-runtime/utils/email/cta.ts";
+import { brandColors, emailTheme, spacing, typography } from "@heyclaude/edge-runtime/utils/email/theme.ts";
+import { EMAIL_UTM_TEMPLATES } from "@heyclaude/edge-runtime/utils/email/utm-templates.ts";
 
 const WHAT_TO_EXPECT = [
 	{
@@ -183,7 +183,7 @@ export default NewsletterWelcome;
 export async function renderNewsletterWelcomeEmail(
 	props: NewsletterWelcomeProps,
 ): Promise<string> {
-	const { renderEmailTemplate } = await import("../base-template.tsx");
+	const { renderEmailTemplate } = await import("@heyclaude/edge-runtime/utils/email/base-template.tsx");
 	return renderEmailTemplate(NewsletterWelcome, props);
 }
 

@@ -6,12 +6,16 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build && node scripts/build-js-simple.js"
+  },
+  "devDependencies": {
+    "@types/sanitize-html": "^2.16.0",
+    "esbuild": "^0.27.0"
   },
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",
@@ -20,8 +24,5 @@
     "sanitize-html": "^2.17.0",
     "sugar-high": "^0.9.5",
     "zod": "^4.1.12"
-  },
-  "devDependencies": {
-    "@types/sanitize-html": "^2.16.0"
   }
 }

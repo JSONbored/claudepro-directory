@@ -5,7 +5,7 @@
 
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
 import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime';
-import { badRequestResponse, publicCorsHeaders } from '../http.ts';
+import { badRequestResponse, publicCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
 
 /**
  * Verified auth hook payload structure

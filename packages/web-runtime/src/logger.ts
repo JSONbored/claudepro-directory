@@ -32,7 +32,7 @@
  * @see {@link @heyclaude/shared-runtime/logger/config | Pino Configuration} - Centralized config
  */
 import pino from 'pino';
-import { createPinoConfig } from '@heyclaude/shared-runtime/logger/config';
+import { createPinoConfig } from '@heyclaude/shared-runtime';
 import { normalizeError } from './errors';
 const pinoInstance = pino(
   createPinoConfig({

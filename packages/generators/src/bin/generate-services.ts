@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { runGenerateServices } from '../commands/generate-services.js';
-import { logger } from '../toolkit/logger.ts';
+import { logger } from '../toolkit/logger.js';
 
 const args = process.argv.slice(2);
 const target = args[0];

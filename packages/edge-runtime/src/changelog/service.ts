@@ -1,9 +1,9 @@
-import { SITE_URL } from '../clients/supabase.ts';
-import { edgeEnv } from '../config/env.ts';
+import { SITE_URL } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import { invalidateCacheByKey } from '../utils/cache.ts';
-import type { ChangelogSection, GitHubCommit } from '../utils/discord/embeds.ts';
-import { logger } from '../utils/logger.ts';
+import { invalidateCacheByKey } from '@heyclaude/edge-runtime/utils/cache.ts';
+import type { ChangelogSection, GitHubCommit } from '@heyclaude/edge-runtime/utils/discord/embeds.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 const GITHUB_TOKEN = edgeEnv.github.token;
 const GITHUB_REPO_OWNER = edgeEnv.github.repoOwner;

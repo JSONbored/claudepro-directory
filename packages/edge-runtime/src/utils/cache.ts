@@ -4,10 +4,10 @@
  * Non-blocking error handling
  */
 
-import { edgeEnv } from '../config/env.ts';
-import { getCacheConfigStringArray } from '../config/static-cache-config.ts';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { getCacheConfigStringArray } from '@heyclaude/edge-runtime/config/static-cache-config.ts';
 import type { Database } from '@heyclaude/database-types';
-import { logger } from './logger.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 const REVALIDATE_SECRET = edgeEnv.revalidate.secret;
 const SITE_URL = edgeEnv.site.siteUrl;

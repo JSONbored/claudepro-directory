@@ -5,7 +5,7 @@
  * Provides static cache configuration values from version-controlled defaults.
  */
 
-import { CACHE_CONFIG_DEFAULTS } from './cache-defaults.ts';
+import { CACHE_CONFIG_DEFAULTS } from '@heyclaude/edge-runtime/config/cache-defaults.ts';
 
 /**
  * Get cache config number value

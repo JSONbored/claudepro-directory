@@ -10,19 +10,19 @@ import React from "npm:react@18.3.1";
 void React;
 
 import { Hr, Section, Text } from "npm:@react-email/components@0.0.22";
-import { BaseLayout } from "../base-template.tsx";
+import { BaseLayout } from "@heyclaude/edge-runtime/utils/email/base-template.tsx";
 import {
 	contentSection,
 	dividerStyle,
 	paragraphStyle,
 	sectionTitleStyle,
-} from "../common-styles.ts";
-import { EmailCtaSection } from "../components/cta.tsx";
-import { EmailFooterNote } from "../components/footer-note.tsx";
-import { CardListSection, HeroBlock } from "../components/sections.tsx";
-import { buildSubscriptionFooter } from "../config/footer-presets.ts";
-import { buildEmailCtaUrl } from "../cta.ts";
-import { EMAIL_UTM_TEMPLATES } from "../utm-templates.ts";
+} from "@heyclaude/edge-runtime/utils/email/common-styles.ts";
+import { EmailCtaSection } from "@heyclaude/edge-runtime/utils/email/components/cta.tsx";
+import { EmailFooterNote } from "@heyclaude/edge-runtime/utils/email/components/footer-note.tsx";
+import { CardListSection, HeroBlock } from "@heyclaude/edge-runtime/utils/email/components/sections.tsx";
+import { buildSubscriptionFooter } from "@heyclaude/edge-runtime/utils/email/config/footer-presets.ts";
+import { buildEmailCtaUrl } from "@heyclaude/edge-runtime/utils/email/cta.ts";
+import { EMAIL_UTM_TEMPLATES } from "@heyclaude/edge-runtime/utils/email/utm-templates.ts";
 
 // Use generated types directly from @heyclaude/database-types - snake_case matches database
 export interface DigestContentItem {
@@ -156,7 +156,7 @@ export function WeeklyDigest({
 export async function renderWeeklyDigestEmail(
 	props: WeeklyDigestProps,
 ): Promise<string> {
-	const { renderEmailTemplate } = await import("../base-template.tsx");
+	const { renderEmailTemplate } = await import("@heyclaude/edge-runtime/utils/email/base-template.tsx");
 	return renderEmailTemplate(WeeklyDigest, props);
 }
 

@@ -142,7 +142,7 @@ const trackUsageSchema = z.object({
     ...Database['public']['Enums']['content_category'][],
   ]),
   content_slug: z.string(),
-  action_type: z.enum(['copy', 'download_zip', 'download_markdown', 'llmstxt', 'download_mcpb']),
+  action_type: z.enum(['copy', 'download_zip', 'download_markdown', 'llmstxt', 'download_mcpb', 'download_code']),
 });
 
 const getSimilarConfigsSchema = z.object({

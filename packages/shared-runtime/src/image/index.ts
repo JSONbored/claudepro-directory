@@ -4,4 +4,4 @@
  * Exports for image manipulation utilities using magick-wasm
  */
 
-export * from './manipulation.ts';
+export * from '@heyclaude/shared-runtime/image/manipulation.ts';

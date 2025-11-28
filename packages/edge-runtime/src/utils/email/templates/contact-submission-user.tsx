@@ -9,7 +9,7 @@ import React from "npm:react@18.3.1";
 // Mark React as used for TypeScript (required for Deno JSX runtime)
 void React;
 import type { Database as DatabaseGenerated } from "@heyclaude/database-types";
-import { BaseLayout } from "../base-template.tsx";
+import { BaseLayout } from "@heyclaude/edge-runtime/utils/email/base-template.tsx";
 
 type ContactCategory = DatabaseGenerated['public']['Enums']['contact_category'];
 import {
@@ -20,10 +20,10 @@ import {
 	listStyle,
 	paragraphStyle,
 	subheadingStyle,
-} from "../common-styles.ts";
-import { buildEmailCtaUrl } from "../cta.ts";
-import { emailTheme, spacing, typography } from "../theme.ts";
-import { EMAIL_UTM_TEMPLATES } from "../utm-templates.ts";
+} from "@heyclaude/edge-runtime/utils/email/common-styles.ts";
+import { buildEmailCtaUrl } from "@heyclaude/edge-runtime/utils/email/cta.ts";
+import { emailTheme, spacing, typography } from "@heyclaude/edge-runtime/utils/email/theme.ts";
+import { EMAIL_UTM_TEMPLATES } from "@heyclaude/edge-runtime/utils/email/utm-templates.ts";
 
 export interface ContactSubmissionUserProps {
 	name: string;
@@ -131,7 +131,7 @@ export function ContactSubmissionUser({
 export async function renderContactSubmissionUserEmail(
 	props: ContactSubmissionUserProps,
 ): Promise<string> {
-	const { renderEmailTemplate } = await import("../base-template.tsx");
+	const { renderEmailTemplate } = await import("@heyclaude/edge-runtime/utils/email/base-template.tsx");
 	return renderEmailTemplate(ContactSubmissionUser, props);
 }
 

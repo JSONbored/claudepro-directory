@@ -4660,5 +4660,68 @@ export default {
         };
       },
     },
+    'no-relative-imports-in-import-map-packages': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent relative imports in packages accessible via Deno import maps',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          useImportMapPath: 'Files in packages accessible via import map (shared-runtime, edge-runtime, data-layer) must use import map paths instead of relative imports. Use "@heyclaude/package-name/path/to/file.ts" instead of "./path/to/file.ts" or "../path/to/file.ts".',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        
+        // Only apply to packages that are accessible via import map
+        const isImportMapPackage = 
+          filename.includes('packages/shared-runtime/src/') ||
+          filename.includes('packages/edge-runtime/src/') ||
+          filename.includes('packages/data-layer/src/');
+        
+        if (!isImportMapPackage) {
+          return {};
+        }
+        
+        // Skip test files - they're typically not imported via import map
+        if (filename.includes('.test.') || filename.includes('.spec.')) {
+          return {};
+        }
+        
+        return {
+          ImportDeclaration(node) {
+            const source = node.source.value;
+            
+            // Check for relative imports (./ or ../)
+            if (typeof source === 'string' && (source.startsWith('./') || source.startsWith('../'))) {
+              // Allow relative imports to npm packages (e.g., './node_modules/...')
+              if (source.includes('node_modules/')) {
+                return;
+              }
+              
+              // Allow relative imports to npm: packages
+              if (source.startsWith('npm:')) {
+                return;
+              }
+              
+              // Allow relative imports to https:// packages
+              if (source.startsWith('https://')) {
+                return;
+              }
+              
+              // Report relative import
+              context.report({
+                node: node.source,
+                messageId: 'useImportMapPath',
+              });
+            }
+          },
+        };
+      },
+    },
   },
 };

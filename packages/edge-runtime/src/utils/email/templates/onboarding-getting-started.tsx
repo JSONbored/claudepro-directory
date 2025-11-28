@@ -11,25 +11,25 @@ import { Button, Hr, Section, Text } from "npm:@react-email/components@0.0.22";
 import React from "npm:react@18.3.1";
 // Mark React as used for TypeScript (required for Deno JSX runtime)
 void React;
-import { BaseLayout, renderEmailTemplate } from "../base-template.tsx";
+import { BaseLayout, renderEmailTemplate } from "@heyclaude/edge-runtime/utils/email/base-template.tsx";
 import {
 	contentSection,
 	dividerStyle,
 	paragraphStyle,
 	secondaryButtonStyle,
 	sectionTitleStyle,
-} from "../common-styles.ts";
-import { EmailCtaSection } from "../components/cta.tsx";
-import { EmailFooterNote } from "../components/footer-note.tsx";
+} from "@heyclaude/edge-runtime/utils/email/common-styles.ts";
+import { EmailCtaSection } from "@heyclaude/edge-runtime/utils/email/components/cta.tsx";
+import { EmailFooterNote } from "@heyclaude/edge-runtime/utils/email/components/footer-note.tsx";
 import {
 	BulletListSection,
 	HeroBlock,
 	StepCardList,
-} from "../components/sections.tsx";
-import { buildOnboardingFooter } from "../config/footer-presets.ts";
-import { buildEmailCtaUrl } from "../cta.ts";
-import { borderRadius, emailTheme, spacing, typography } from "../theme.ts";
-import { EMAIL_UTM_TEMPLATES } from "../utm-templates.ts";
+} from "@heyclaude/edge-runtime/utils/email/components/sections.tsx";
+import { buildOnboardingFooter } from "@heyclaude/edge-runtime/utils/email/config/footer-presets.ts";
+import { buildEmailCtaUrl } from "@heyclaude/edge-runtime/utils/email/cta.ts";
+import { borderRadius, emailTheme, spacing, typography } from "@heyclaude/edge-runtime/utils/email/theme.ts";
+import { EMAIL_UTM_TEMPLATES } from "@heyclaude/edge-runtime/utils/email/utm-templates.ts";
 
 export interface OnboardingGettingStartedProps {
 	/**

@@ -20,4 +20,4 @@
  */
 
 // Re-export from shared-runtime for backward compatibility
-export { hashUserId } from '@heyclaude/shared-runtime/privacy';
+export { hashUserId } from '@heyclaude/shared-runtime';

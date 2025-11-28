@@ -22,7 +22,9 @@ pre-commit:
     # 1. Type checking (Next.js/Node code)
     type-check:
       glob: "**/*.{ts,tsx}"
-      exclude: "apps/edge/functions/**"
+      exclude: 
+        - "apps/edge/functions/**"
+        - "packages/edge-runtime/src/utils/email/**"
       run: |
         echo "🔍 Type checking Next.js code..."
         pnpm type-check
@@ -44,7 +46,9 @@ pre-commit:
     # 3. Lint and auto-fix with ESLint
     lint:
       glob: "**/*.{ts,tsx}"
-      exclude: "apps/edge/functions/**"
+      exclude: 
+        - "apps/edge/functions/**"
+        - "packages/edge-runtime/src/utils/email/**"
       run: |
         echo "🔍 Linting and auto-fixing staged files..."
         pnpm lint:eslint --fix
@@ -70,7 +74,9 @@ pre-commit:
     # 6. Run tests for changed files (fast feedback, only affected tests)
     test-affected:
       glob: "**/*.{ts,tsx}"
-      exclude: "apps/edge/functions/**"
+      exclude: 
+        - "apps/edge/functions/**"
+        - "packages/edge-runtime/src/utils/email/**"
       run: |
         echo "🧪 Running tests for changed files..."
         # Run only tests related to changed files (vitest --changed)

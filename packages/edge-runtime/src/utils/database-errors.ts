@@ -4,7 +4,7 @@
  */
 
 import { errorToString } from '@heyclaude/shared-runtime';
-import { badRequestResponse, errorResponse, jsonResponse, publicCorsHeaders } from './http.ts';
+import { badRequestResponse, errorResponse, jsonResponse, publicCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
 import { logError } from '@heyclaude/shared-runtime';
 
 /**

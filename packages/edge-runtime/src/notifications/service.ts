@@ -1,8 +1,8 @@
-import { supabaseServiceRole } from '../clients/supabase.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { invalidateCacheByKey } from '../utils/cache.ts';
+import { invalidateCacheByKey } from '@heyclaude/edge-runtime/utils/cache.ts';
 import { errorToString } from '@heyclaude/shared-runtime';
-import { logger } from '../utils/logger.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 const MAX_NOTIFICATION_IDS = 50;
 

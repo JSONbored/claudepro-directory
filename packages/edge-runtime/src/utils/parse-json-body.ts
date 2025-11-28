@@ -3,7 +3,7 @@
  * Validates body size, parses JSON, and provides type-safe results
  */
 
-import { badRequestResponse, publicCorsHeaders } from './http.ts';
+import { badRequestResponse, publicCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
 import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime';
 import { createUtilityContext, logError, logWarn } from '@heyclaude/shared-runtime';
 

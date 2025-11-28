@@ -1,9 +1,9 @@
-import { supabaseServiceRole } from '../../clients/supabase.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
 import { errorToString } from '@heyclaude/shared-runtime';
-import type { WebhookIngestResult } from './ingest.ts';
-import { finishWebhookEventRun, startWebhookEventRun } from './run-logger.ts';
-import { logger } from '../logger.ts';
+import type { WebhookIngestResult } from '@heyclaude/edge-runtime/utils/webhook/ingest.ts';
+import { finishWebhookEventRun, startWebhookEventRun } from '@heyclaude/edge-runtime/utils/webhook/run-logger.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 const POLAR_EVENT_RPC_MAP: Record<string, keyof DatabaseGenerated['public']['Functions']> = {
   'order.paid': 'handle_polar_order_paid',

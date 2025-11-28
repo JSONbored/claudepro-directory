@@ -1,4 +1,4 @@
-import { SITE_URL } from '../clients/supabase.ts';
+import { SITE_URL } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 
 const ICON_EMOJI_MAP: Record<string, string> = {

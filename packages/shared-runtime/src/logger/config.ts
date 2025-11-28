@@ -31,7 +31,7 @@
  */
 
 import pino from 'pino';
-import { hashUserId, hashEmail } from '../privacy.ts';
+import { hashUserId, hashEmail } from '@heyclaude/shared-runtime/privacy.ts';
 
 /**
  * Sensitive data patterns for redaction

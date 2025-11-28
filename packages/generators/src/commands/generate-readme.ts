@@ -97,13 +97,13 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
       );
     }
 
-    logger.info('📝 Generating README.md from edge function...\n', { script: 'generate-readme' });
-    logger.info('   Endpoint: /functions/v1/public-api/content/sitewide?format=readme', {
+    logger.info('📝 Generating README.md via Next.js API...\n', { script: 'generate-readme' });
+    logger.info('   Endpoint: /api/content/sitewide?format=readme', {
       script: 'generate-readme',
     });
 
     const readme = await callEdgeFunction<string>(
-      '/public-api/content/sitewide?format=readme',
+      '/api/content/sitewide?format=readme',
       {},
       { responseType: 'text', requireAuth: false, timeoutMs: 15_000 }
     );
@@ -122,7 +122,7 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
       script: 'generate-readme',
       bytes: validatedReadme.length,
     });
-    logger.info('   Source: Supabase Edge Function (public-api/content)', {
+    logger.info('   Source: Next.js API (api/content/sitewide)', {
       script: 'generate-readme',
     });
   } catch (error) {

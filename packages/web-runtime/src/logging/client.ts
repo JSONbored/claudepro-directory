@@ -66,4 +66,4 @@ export { generateRequestId } from '../utils/request-id.ts';
 export { normalizeError } from '../errors.ts';
 
 // Privacy utilities (PII-safe user ID hashing) - client-safe, isomorphic
-export { hashUserId } from '@heyclaude/shared-runtime/privacy';
+export { hashUserId } from '@heyclaude/shared-runtime';

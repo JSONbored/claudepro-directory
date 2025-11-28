@@ -72,7 +72,7 @@ export { normalizeError } from '../errors.ts';
 
 // Privacy utilities (PII-safe user ID hashing)
 // Note: Use userId/user_id/user.id directly in logs - redaction automatically hashes them
-export { hashUserId } from '@heyclaude/shared-runtime/privacy';
+export { hashUserId } from '@heyclaude/shared-runtime';
 
 // Error response utilities (server-only, for API routes)
 export { createErrorResponse, handleApiError } from '../utils/error-handler.ts';

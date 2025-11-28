@@ -2,8 +2,8 @@
  * Consolidated HTTP helpers: CORS presets, JSON responses, cache headers.
  */
 
-import { edgeEnv } from '../config/env.ts';
-import { getCacheConfigNumber } from '../config/static-cache-config.ts';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { getCacheConfigNumber } from '@heyclaude/edge-runtime/config/static-cache-config.ts';
 import { logError, createUtilityContext, buildSecurityHeaders } from '@heyclaude/shared-runtime';
 
 /* ----------------------------- CORS PRESETS ----------------------------- */
@@ -273,7 +273,7 @@ const DEFAULT_CACHE_PRESETS = {
   company_profile: { ttl: 60 * 30, stale: 60 * 60 }, // 30m / 1h
   trending_page: { ttl: 60 * 60, stale: 60 * 60 * 6 }, // 1h / 6h
   trending_sidebar: { ttl: 600, stale: 3600 }, // 10m / 1h
-  search: { ttl: 300, stale: 60 }, // 5m / 1m
+  search: { ttl: 300, stale: 600 }, // 5m / 10m
   search_autocomplete: { ttl: 3600, stale: 3600 }, // 1h / 1h
   search_facets: { ttl: 3600, stale: 3600 }, // 1h / 1h
   transform: { ttl: 60 * 60 * 24 * 365, stale: 60 * 60 * 24 * 365 }, // 1y / 1y (immutable)

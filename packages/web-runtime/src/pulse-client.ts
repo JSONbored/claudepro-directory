@@ -139,7 +139,7 @@ export async function trackNewsletterEvent(
 export async function trackUsage(params: {
   content_type: Database['public']['Enums']['content_category'];
   content_slug: string;
-  action_type: 'copy' | 'download_zip' | 'download_markdown' | 'llmstxt' | 'download_mcpb';
+  action_type: 'copy' | 'download_zip' | 'download_markdown' | 'llmstxt' | 'download_mcpb' | 'download_code';
 }): Promise<void> {
   const result = await trackUsageAction(params);
   if (result?.serverError) {

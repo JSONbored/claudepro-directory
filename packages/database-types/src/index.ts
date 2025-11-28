@@ -4484,8 +4484,10 @@ export type Database = {
         }
         Returns: {
           author: string
+          bookmark_count: number
           category: Database["public"]["Enums"]["content_category"]
           copy_count: number
+          date_added: string
           description: string
           popularity_score: number
           slug: string

@@ -7,7 +7,7 @@ const STANDARD_TABS: ReadonlyArray<TabConfig> = [
     id: 'overview',
     label: 'Overview',
     mobileLabel: 'Overview',
-    sections: ['description', 'features', 'use_cases', 'requirements'],
+    sections: ['content', 'description', 'features', 'use_cases', 'requirements'],
     order: 1,
   },
   {
@@ -39,7 +39,7 @@ const SIMPLE_TABS: ReadonlyArray<TabConfig> = [
     id: 'overview',
     label: 'Overview',
     mobileLabel: 'Overview',
-    sections: ['description', 'features', 'use_cases', 'requirements'],
+    sections: ['content', 'description', 'features', 'use_cases', 'requirements'],
     order: 1,
   },
   {

@@ -1,6 +1,6 @@
 import { createUtilityContext } from '@heyclaude/shared-runtime';
-import { getStorageAnonClient } from './client.ts';
-import { logger } from '../logger.ts';
+import { getStorageAnonClient } from '@heyclaude/edge-runtime/utils/storage/client.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 export interface StorageProxyOptions {
   bucket: string;

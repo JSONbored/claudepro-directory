@@ -1,6 +1,6 @@
-import { supabaseServiceRole } from '../../clients/supabase.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import { resolveWebhookRequest, type WebhookRegistryError } from './registry.ts';
+import { resolveWebhookRequest, type WebhookRegistryError } from '@heyclaude/edge-runtime/utils/webhook/registry.ts';
 
 export class WebhookIngestError extends Error {
   constructor(

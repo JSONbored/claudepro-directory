@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'path';
 import { createServiceRoleClient } from '../toolkit/supabase.js';
-import { logger } from '../toolkit/logger.ts';
+import { logger } from '../toolkit/logger.js';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, '../../../..');

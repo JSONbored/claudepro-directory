@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { logger } from './logger.ts';
+import { logger } from './logger.js';
 
 const ROOT = fileURLToPath(new URL('../../../../', import.meta.url));
 const CACHE_DIR = join(ROOT, '.build-cache');

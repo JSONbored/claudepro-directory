@@ -1,7 +1,7 @@
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { getAuthUserFromHeader } from '../auth.ts';
-import { pgmqSend } from '../pgmq-client.ts';
-import { logger } from '../logger.ts';
+import { getAuthUserFromHeader } from '@heyclaude/edge-runtime/utils/auth.ts';
+import { pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 type SearchQueryInsert = DatabaseGenerated['public']['Tables']['search_queries']['Insert'];
 

@@ -1,6 +1,4 @@
-import { createUtilityContext } from '../logging.ts';
-import { errorToString } from '../error-handling.ts';
-import { logger } from '../logger/index.ts';
+import { createUtilityContext, errorToString, logger } from '@heyclaude/shared-runtime';
 
 type GlobalWithBuffer = typeof globalThis & {
   Buffer?: {
@@ -97,7 +95,7 @@ export async function verifySvixSignature({
   } catch (error) {
     const logContext = createUtilityContext('webhook-crypto', 'verify-svix-signature');
     const errorObj = error instanceof Error ? error : new Error(errorToString(error));
-    logger.error({ ...logContext, err: errorObj }, 'Svix signature verification error');
+    logger.error('Svix signature verification error', errorObj, logContext);
     return false;
   }
 }
@@ -165,7 +163,7 @@ export async function verifySupabaseDatabaseWebhook({
   } catch (error) {
     const logContext = createUtilityContext('webhook-crypto', 'verify-supabase-database-webhook');
     const errorObj = error instanceof Error ? error : new Error(errorToString(error));
-    logger.error({ ...logContext, err: errorObj }, 'Supabase database webhook verification error');
+    logger.error('Supabase database webhook verification error', errorObj, logContext);
     return false;
   }
 }
@@ -239,7 +237,7 @@ export async function verifyDiscordWebhookSignature({
   } catch (error) {
     const logContext = createUtilityContext('webhook-crypto', 'verify-discord-webhook-signature');
     const errorObj = error instanceof Error ? error : new Error(errorToString(error));
-    logger.error({ ...logContext, err: errorObj }, 'Discord webhook signature verification error');
+    logger.error('Discord webhook signature verification error', errorObj, logContext);
     return false;
   }
 }

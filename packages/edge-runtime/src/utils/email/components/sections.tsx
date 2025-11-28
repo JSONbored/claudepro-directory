@@ -15,7 +15,7 @@ import {
 	secondaryButtonStyle,
 	strongStyle,
 	subheadingStyle,
-} from "../common-styles.ts";
+} from "@heyclaude/edge-runtime/utils/email/common-styles.ts";
 
 export interface HeroBlockProps {
 	title: string;

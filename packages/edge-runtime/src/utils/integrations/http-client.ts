@@ -1,5 +1,5 @@
 import { createUtilityContext } from '@heyclaude/shared-runtime';
-import { logger } from '../logger.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 export interface FetchWithRetryOptions {
   url: string;

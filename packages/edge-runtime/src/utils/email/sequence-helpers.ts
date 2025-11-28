@@ -5,16 +5,16 @@
 
 import type { FC } from 'npm:react@18.3.1';
 import type { Resend } from 'npm:resend@6.5.2';
-import { supabaseServiceRole } from '../../clients/supabase.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { sendEmail } from '../../utils/integrations/resend.ts';
+import { sendEmail } from '@heyclaude/edge-runtime/utils/integrations/resend.ts';
 import { createEmailHandlerContext, logError, logInfo } from '@heyclaude/shared-runtime';
-import { renderEmailTemplate } from './base-template.tsx';
-import { ONBOARDING_FROM } from './templates/manifest.ts';
-import { OnboardingCommunity } from './templates/onboarding-community.tsx';
-import { OnboardingGettingStarted } from './templates/onboarding-getting-started.tsx';
-import { OnboardingPowerTips } from './templates/onboarding-power-tips.tsx';
-import { OnboardingStayEngaged } from './templates/onboarding-stay-engaged.tsx';
+import { renderEmailTemplate } from '@heyclaude/edge-runtime/utils/email/base-template.tsx';
+import { ONBOARDING_FROM } from '@heyclaude/edge-runtime/utils/email/templates/manifest.ts';
+import { OnboardingCommunity } from '@heyclaude/edge-runtime/utils/email/templates/onboarding-community.tsx';
+import { OnboardingGettingStarted } from '@heyclaude/edge-runtime/utils/email/templates/onboarding-getting-started.tsx';
+import { OnboardingPowerTips } from '@heyclaude/edge-runtime/utils/email/templates/onboarding-power-tips.tsx';
+import { OnboardingStayEngaged } from '@heyclaude/edge-runtime/utils/email/templates/onboarding-stay-engaged.tsx';
 
 export const STEP_SUBJECTS: Record<number, string> = {
   2: 'Getting Started with Claude Pro Directory',

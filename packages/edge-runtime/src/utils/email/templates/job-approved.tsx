@@ -10,7 +10,7 @@ import React from "npm:react@18.3.1";
 void React;
 
 import { Hr, Section, Text } from "npm:@react-email/components@0.0.22";
-import { BaseLayout } from "../base-template.tsx";
+import { BaseLayout } from "@heyclaude/edge-runtime/utils/email/base-template.tsx";
 import {
 	contentSection,
 	dividerStyle,
@@ -20,11 +20,11 @@ import {
 	paragraphStyle,
 	strongStyle,
 	subheadingStyle,
-} from "../common-styles.ts";
-import { EmailCtaSection } from "../components/cta.tsx";
-import { JobDetailsSection } from "../components/job.tsx";
-import { formatCurrency } from "../formatters.ts";
-import { EMAIL_UTM_TEMPLATES } from "../utm-templates.ts";
+} from "@heyclaude/edge-runtime/utils/email/common-styles.ts";
+import { EmailCtaSection } from "@heyclaude/edge-runtime/utils/email/components/cta.tsx";
+import { JobDetailsSection } from "@heyclaude/edge-runtime/utils/email/components/job.tsx";
+import { formatCurrency } from "@heyclaude/edge-runtime/utils/email/formatters.ts";
+import { EMAIL_UTM_TEMPLATES } from "@heyclaude/edge-runtime/utils/email/utm-templates.ts";
 
 export interface JobApprovedProps {
 	jobTitle: string;
@@ -108,6 +108,6 @@ export function JobApproved(props: JobApprovedProps) {
 export async function renderJobApprovedEmail(
 	props: JobApprovedProps,
 ): Promise<string> {
-	const { renderEmailTemplate } = await import("../base-template.tsx");
+	const { renderEmailTemplate } = await import("@heyclaude/edge-runtime/utils/email/base-template.tsx");
 	return renderEmailTemplate(JobApproved, props);
 }

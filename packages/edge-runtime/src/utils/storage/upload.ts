@@ -3,13 +3,13 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { errorToString } from '@heyclaude/shared-runtime';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
-import { logger } from '../logger.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 import {
   type BuildStorageObjectPathOptions,
   buildStorageObjectPath,
   getPublicStorageUrl,
   getStorageServiceClient,
-} from './client.ts';
+} from '@heyclaude/edge-runtime/utils/storage/client.ts';
 
 export interface FileValidationPolicy {
   maxFileSize: number;

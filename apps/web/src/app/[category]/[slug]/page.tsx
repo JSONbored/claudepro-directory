@@ -263,7 +263,7 @@ export default async function DetailPage({
 
   // Content detail tabs - static default
   // Set to false to disable tabbed layout, true to enable
-  const tabsEnabled = false;
+  const tabsEnabled = true;
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles

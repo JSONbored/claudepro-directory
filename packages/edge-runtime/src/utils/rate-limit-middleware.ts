@@ -3,10 +3,14 @@
  * Reduces code duplication for rate limiting across edge functions
  */
 
-import { badRequestResponse, jsonResponse, publicCorsHeaders } from './http.ts';
+import {
+  badRequestResponse,
+  jsonResponse,
+  publicCorsHeaders,
+} from '@heyclaude/edge-runtime/utils/http.ts';
 import type { RateLimitResult } from '@heyclaude/shared-runtime';
 import { RATE_LIMIT_PRESETS } from '@heyclaude/shared-runtime';
-import type { RouterContext } from './router.ts';
+import type { RouterContext } from '@heyclaude/edge-runtime/utils/router.ts';
 
 export interface RateLimitMiddlewareOptions {
   preset: keyof typeof RATE_LIMIT_PRESETS;

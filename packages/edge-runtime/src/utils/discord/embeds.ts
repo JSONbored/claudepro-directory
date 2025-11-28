@@ -1,5 +1,5 @@
-import { SITE_URL } from '../../clients/supabase.ts';
-import { edgeEnv } from '../../config/env.ts';
+import { SITE_URL } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 
 const CATEGORY_COLORS: Record<string, number> = {

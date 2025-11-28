@@ -1,12 +1,34 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ContentService } from './content.ts';
 import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient, PostgrestError } from '@supabase/supabase-js';
 
 // Mock rpc-error-logging
 vi.mock('../utils/rpc-error-logging.ts', () => ({
   logRpcError: vi.fn(),
 }));
+
+// Helper to create proper PostgrestError objects
+function createPostgrestError(message: string, code: string): PostgrestError {
+  return {
+    message,
+    code,
+    details: '',
+    hint: null,
+    name: 'PostgrestError',
+  };
+}
+
+// Helper to create proper mock responses
+function createMockResponse<T>(data: T | null) {
+  return {
+    data,
+    error: null,
+    count: null,
+    status: 200,
+    statusText: 'OK' as const,
+  };
+}
 
 describe('ContentService', () => {
   let mockSupabase: SupabaseClient<Database>;
@@ -28,37 +50,31 @@ describe('ContentService', () => {
         last_updated: '2024-01-01',
       };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      });
+      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
 
       const result = await contentService.getSitewideReadme();
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_readme_data');
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_readme_data', {});
       expect(result).toEqual(mockData);
     });
 
     it('should throw error when RPC fails', async () => {
-      const mockError = {
-        message: 'Database error',
-        code: 'PGRST116',
-      };
+      const mockError = createPostgrestError('Database error', 'PGRST116');
 
       vi.mocked(mockSupabase.rpc).mockResolvedValue({
         data: null,
         error: mockError,
+        count: null,
+        status: 400,
+        statusText: 'Bad Request',
       });
 
       await expect(contentService.getSitewideReadme()).rejects.toThrow();
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_readme_data');
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_readme_data', {});
     });
 
     it('should handle null data gracefully', async () => {
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: null,
-      });
+      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(null));
 
       const result = await contentService.getSitewideReadme();
       expect(result).toBeNull();
@@ -72,26 +88,23 @@ describe('ContentService', () => {
         categories: ['agents', 'skills'],
       };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      });
+      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
 
       const result = await contentService.getSitewideLlmsTxt();
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_sitewide_llms_txt');
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_sitewide_llms_txt', {});
       expect(result).toEqual(mockData);
     });
 
     it('should throw error on RPC failure', async () => {
-      const mockError = {
-        message: 'RPC timeout',
-        code: 'TIMEOUT',
-      };
+      const mockError = createPostgrestError('RPC timeout', 'TIMEOUT');
 
       vi.mocked(mockSupabase.rpc).mockResolvedValue({
         data: null,
         error: mockError,
+        count: null,
+        status: 500,
+        statusText: 'Internal Server Error',
       });
 
       await expect(contentService.getSitewideLlmsTxt()).rejects.toThrow();
@@ -105,22 +118,18 @@ describe('ContentService', () => {
         entries: [],
       };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      });
+      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
 
       const result = await contentService.getChangelogLlmsTxt();
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_changelog_llms_txt');
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_changelog_llms_txt', {});
       expect(result).toEqual(mockData);
     });
 
     it('should handle empty changelog data', async () => {
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: { content: '', entries: [] },
-        error: null,
-      });
+      vi.mocked(mockSupabase.rpc).mockResolvedValue(
+        createMockResponse({ content: '', entries: [] })
+      );
 
       const result = await contentService.getChangelogLlmsTxt();
       expect(result).toHaveProperty('content');
@@ -131,11 +140,14 @@ describe('ContentService', () => {
   describe('error handling', () => {
     it('should log errors with proper context', async () => {
       const { logRpcError } = await import('../utils/rpc-error-logging.ts');
-      const mockError = { message: 'Test error', code: 'ERR' };
+      const mockError = createPostgrestError('Test error', 'ERR');
 
       vi.mocked(mockSupabase.rpc).mockResolvedValue({
         data: null,
         error: mockError,
+        count: null,
+        status: 500,
+        statusText: 'Internal Server Error',
       });
 
       await expect(contentService.getSitewideReadme()).rejects.toThrow();

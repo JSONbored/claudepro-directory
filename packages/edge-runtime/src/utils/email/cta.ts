@@ -1,5 +1,5 @@
-import { addUTMToURL } from './email-utm.ts';
-import type { EmailUTMParams } from './utm-templates.ts';
+import { addUTMToURL } from '@heyclaude/edge-runtime/utils/email/email-utm.ts';
+import type { EmailUTMParams } from '@heyclaude/edge-runtime/utils/email/utm-templates.ts';
 
 export function buildEmailCtaUrl(
   href: string,

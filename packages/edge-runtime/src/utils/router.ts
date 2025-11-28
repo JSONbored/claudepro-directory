@@ -1,4 +1,4 @@
-import { errorResponse, methodNotAllowedResponse, publicCorsHeaders } from './http.ts';
+import { errorResponse, methodNotAllowedResponse, publicCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';
 

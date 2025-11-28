@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { runCacheCli, showCacheCliHelp } from '../commands/cache-cli.js';
-import { logger } from '../toolkit/logger.ts';
+import { logger } from '../toolkit/logger.js';
 
 const args = process.argv.slice(2).filter((arg) => arg !== '--');
 const [command, pattern] = args;

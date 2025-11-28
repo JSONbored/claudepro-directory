@@ -20,6 +20,7 @@ import {
   Check,
   ChevronDown,
   Copy,
+  Download,
   Linkedin,
   Share2,
   Twitter,
@@ -363,6 +364,79 @@ export function ProductionCodeBlock({
   };
 
   /**
+   * Handle download code as file
+   * Downloads the code block content as a text file
+   */
+  const handleDownload = () => {
+    try {
+      // Generate filename from provided filename or use default
+      let downloadFilename = filename;
+      if (!downloadFilename) {
+        // Map language to file extension
+        const languageExtensions: Record<string, string> = {
+          typescript: 'ts',
+          javascript: 'js',
+          tsx: 'tsx',
+          jsx: 'jsx',
+          python: 'py',
+          json: 'json',
+          yaml: 'yml',
+          yml: 'yml',
+          bash: 'sh',
+          shell: 'sh',
+          sh: 'sh',
+          markdown: 'md',
+          md: 'md',
+          html: 'html',
+          css: 'css',
+          sql: 'sql',
+          text: 'txt',
+        };
+        const normalizedLanguage = language?.toLowerCase() ?? 'text';
+        const ext = languageExtensions[normalizedLanguage] || normalizedLanguage || 'txt';
+        const baseSlug = slug?.trim() || 'untitled';
+        const sanitizedSlug = baseSlug
+          .replace(/[/\\:*?"|<>]/g, '-')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 64);
+        const safeSlug = sanitizedSlug || 'untitled';
+        downloadFilename = `code-${safeSlug}.${ext}`;
+      }
+      
+      // Create blob and download
+      const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = downloadFilename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+
+      toasts.success.codeDownloadStarted();
+
+      // Track download
+      pulse
+        .download({ category, slug, action_type: 'download_code' })
+        .catch((error) => {
+          logUnhandledPromise('interactive-code-block:download', error, {
+            category,
+            slug,
+          });
+        });
+    } catch (error) {
+      toasts.error.downloadFailed();
+      logger.error('Download failed', normalizeError(error), {
+        category,
+        slug,
+      });
+    }
+  };
+
+  /**
    * Handle share link copy
    * Performance: Reuse pathname parsing, UTM tracking for viral attribution
    */
@@ -462,6 +536,16 @@ export function ProductionCodeBlock({
               )}
             </motion.button>
 
+            {/* Download button */}
+            <motion.button
+              type="button"
+              onClick={handleDownload}
+              className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
+              title="Download code"
+            >
+              <Download className={UI_CLASSES.ICON_XS} />
+            </motion.button>
+
             {/* Language badge */}
             {language && language !== 'text' && (
               <div className="rounded-full border border-accent/30 bg-linear-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-md backdrop-blur-md">
@@ -533,6 +617,16 @@ export function ProductionCodeBlock({
               ) : (
                 <Copy className={`${UI_CLASSES.ICON_XS} text-muted-foreground`} />
               )}
+            </motion.button>
+
+            {/* Download button */}
+            <motion.button
+              type="button"
+              onClick={handleDownload}
+              className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
+              title="Download code"
+            >
+              <Download className={UI_CLASSES.ICON_XS} />
             </motion.button>
 
             {/* Language badge */}

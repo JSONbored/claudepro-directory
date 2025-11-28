@@ -223,23 +223,27 @@ export function JobCard({ job }: JobCardProps) {
           <Button
             variant="outline"
             asChild={true}
-            onClick={() => {
-              pulse
-                .click({
-                  category: 'jobs',
-                  slug: job.slug,
-                  metadata: {
-                    action: 'view_details',
-                  },
-                })
-                .catch((error) => {
-                  logUnhandledPromise('JobCard: view details click pulse failed', error, {
-                    slug: job.slug,
-                  });
-                });
-            }}
           >
-            <Link href={`/jobs/${job.slug}`}>View Details</Link>
+            <Link 
+              href={`/jobs/${job.slug}`}
+              onClick={() => {
+                pulse
+                  .click({
+                    category: 'jobs',
+                    slug: job.slug,
+                    metadata: {
+                      action: 'view_details',
+                    },
+                  })
+                  .catch((error) => {
+                    logUnhandledPromise('JobCard: view details click pulse failed', error, {
+                      slug: job.slug,
+                    });
+                  });
+              }}
+            >
+              View Details
+            </Link>
           </Button>
         </div>
       </CardContent>

@@ -3,7 +3,7 @@
 import type { Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
-import { ArrowRight, RefreshCw } from '@heyclaude/web-runtime/icons';
+import { ArrowRight, Trash } from '@heyclaude/web-runtime/icons';
 import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
@@ -107,56 +107,58 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
   return (
     <section
       aria-labelledby="recently-viewed-rail-heading"
-      className="space-y-6 rounded-3xl border border-border/60 bg-card/60 p-6 shadow-lg backdrop-blur-xl"
+      className="container mx-auto space-y-6 px-4 py-8"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-muted-foreground text-xs uppercase tracking-wide">Keep exploring</p>
-          <h2 id="recently-viewed-rail-heading" className="font-semibold text-2xl">
-            Recently viewed
-          </h2>
+      <div className="mx-auto max-w-7xl space-y-6 rounded-2xl border border-border/60 bg-card/60 p-4 shadow-md backdrop-blur-xl sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide">Keep exploring</p>
+            <h2 id="recently-viewed-rail-heading" className="font-semibold text-2xl">
+              Recently viewed
+            </h2>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-sm"
+              onClick={handleResumeSearch}
+              aria-label="Resume your last search"
+            >
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              Resume search
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-sm"
+              onClick={handleClearHistory}
+              aria-label="Clear recently viewed history"
+            >
+              <Trash className="h-4 w-4 text-destructive" aria-hidden="true" />
+              Clear history
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2 text-sm"
-            onClick={handleResumeSearch}
-            aria-label="Resume your last search"
-          >
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            Resume search
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2 text-sm"
-            onClick={handleClearHistory}
-            aria-label="Clear recently viewed history"
-          >
-            <RefreshCw className="h-4 w-4" aria-hidden="true" />
-            Clear history
-          </Button>
-        </div>
-      </div>
 
-      <div
-        className={cn(
-          'grid gap-4',
-          railItems.length >= 3 && 'md:grid-cols-2 xl:grid-cols-3',
-          railItems.length < 3 && 'md:grid-cols-2'
-        )}
-      >
-        {railItems.map((item) => (
-          <ConfigCard
-            key={`${item.category}-${item.slug}`}
-            item={item}
-            showCategory={true}
-            showActions={true}
-            enableSwipeGestures={false}
-            useViewTransitions={true}
-          />
-        ))}
+        <div
+          className={cn(
+            'grid gap-4',
+            railItems.length >= 3 && 'md:grid-cols-2 xl:grid-cols-3',
+            railItems.length < 3 && 'md:grid-cols-2'
+          )}
+        >
+          {railItems.map((item) => (
+            <ConfigCard
+              key={`${item.category}-${item.slug}`}
+              item={item}
+              showCategory={true}
+              showActions={true}
+              enableSwipeGestures={false}
+              useViewTransitions={true}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -1,4 +1,4 @@
-import { edgeEnv } from '../../../config/env.ts';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 
 const BASE_URL = edgeEnv.site.siteUrl;
 

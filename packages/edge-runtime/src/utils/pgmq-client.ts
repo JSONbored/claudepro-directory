@@ -6,11 +6,11 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { edgeEnv } from '../config/env.ts';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import type { ExtendedDatabase } from '../database-extensions.types.ts';
+import type { ExtendedDatabase } from '@heyclaude/edge-runtime/database-extensions.types.ts';
 import { errorToString } from '@heyclaude/shared-runtime';
-import { logger } from './logger.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 const {
   supabase: { url: SUPABASE_URL, serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY },

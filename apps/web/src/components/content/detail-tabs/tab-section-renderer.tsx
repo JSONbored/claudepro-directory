@@ -66,6 +66,51 @@ export function TabSectionRenderer({
       // Description is handled in header/metadata, not as a separate section
       return null;
 
+    case 'content':
+    case 'code': {
+      if (!sectionData.contentData) return null;
+      const contentData = sectionData.contentData;
+      if (Array.isArray(contentData)) {
+        // Render multiple code blocks from markdown
+        return (
+          <>
+            {contentData.map((block, index) => (
+              <UnifiedSection
+                key={`content-block-${index}`}
+                variant="code"
+                title={
+                  index === 0
+                    ? `${config.typeName} Content`
+                    : `${config.typeName} Content (${index + 1})`
+                }
+                description={
+                  index === 0
+                    ? `The main content for this ${config.typeName.toLowerCase()}.`
+                    : `Additional code example for this ${config.typeName.toLowerCase()}.`
+                }
+                html={block.html}
+                code={block.code}
+                language={block.language}
+                filename={block.filename}
+              />
+            ))}
+          </>
+        );
+      }
+      // Render single code block
+      return (
+        <UnifiedSection
+          variant="code"
+          title={`${config.typeName} Content`}
+          description={`The main content for this ${config.typeName.toLowerCase()}.`}
+          html={contentData.html}
+          code={contentData.code}
+          language={contentData.language}
+          filename={contentData.filename}
+        />
+      );
+    }
+
     case 'features': {
       if (!config.sections.features || features.length === 0) return null;
       const validCategory = isValidCategory(item.category) ? item.category : 'agents';
@@ -194,7 +239,17 @@ export function TabSectionRenderer({
       return collectionSections ? collectionSections : null;
 
     case 'guide_sections':
-      if (!guideSections || guideSections.length === 0) return null;
+      if (!guideSections || guideSections.length === 0) {
+        // Log warning for debugging - guides should always have sections
+        if (item.category === 'guides') {
+          console.warn('Guide sections missing or empty', {
+            slug: item.slug,
+            guideSectionsLength: guideSections?.length ?? 0,
+            guideSectionsType: typeof guideSections,
+          });
+        }
+        return null;
+      }
       // guideSections is already a processed array of sections with html
       // JSONSectionRenderer accepts arrays (checks Array.isArray internally)
       return <JSONSectionRenderer sections={guideSections} />;

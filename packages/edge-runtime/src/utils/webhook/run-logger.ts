@@ -1,7 +1,7 @@
-import { supabaseServiceRole } from '../../clients/supabase.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
 import { errorToString } from '@heyclaude/shared-runtime';
-import { logger } from '../logger.ts';
+import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 type WebhookEventRunRow = DatabaseGenerated['public']['Tables']['webhook_event_runs']['Row'];
 type WebhookDeliveryStatus = DatabaseGenerated['public']['Enums']['webhook_delivery_status'];

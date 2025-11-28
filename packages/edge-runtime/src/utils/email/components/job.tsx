@@ -7,7 +7,7 @@ import {
 	contentSection,
 	paragraphStyle,
 	strongStyle,
-} from "../common-styles.ts";
+} from "@heyclaude/edge-runtime/utils/email/common-styles.ts";
 
 export interface JobDetailItem {
 	label: string;

@@ -9,8 +9,8 @@ import {
 	footerNoteSection,
 	footerNoteStyle,
 	strongStyle,
-} from "../common-styles.ts";
-import type { FooterLine } from "../config/footer-presets.ts";
+} from "@heyclaude/edge-runtime/utils/email/common-styles.ts";
+import type { FooterLine } from "@heyclaude/edge-runtime/utils/email/config/footer-presets.ts";
 
 interface EmailFooterNoteProps {
 	lines: FooterLine[];

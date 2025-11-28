@@ -683,14 +683,27 @@ export type InfoBoxProps = {
  * Pre-processed section data passed from server component
  */
 export interface ProcessedSectionData {
-  // Content/Code section data
-  contentData?: {
-    html: string;
-    code: string;
-    language: string;
-    filename: string;
-    headings?: ContentHeadingMetadata[];
-  } | null;
+  // Content/Code section data - can be single block or array of blocks (from markdown parsing)
+  contentData?:
+    | {
+        html: string;
+        code: string;
+        language: string;
+        filename: string;
+        headings?: ContentHeadingMetadata[];
+        markdownBefore?: string;
+        markdownAfter?: string;
+      }
+    | Array<{
+        html: string;
+        code: string;
+        language: string;
+        filename: string;
+        headings?: ContentHeadingMetadata[];
+        markdownBefore?: string;
+        markdownAfter?: string;
+      }>
+    | null;
 
   // Configuration section data
   configData?:

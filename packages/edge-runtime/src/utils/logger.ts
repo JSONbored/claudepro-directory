@@ -21,8 +21,7 @@
  */
 
 import pino from 'pino';
-import { createPinoConfig } from '@heyclaude/shared-runtime/logger/config.ts';
-import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { createPinoConfig, normalizeError } from '@heyclaude/shared-runtime';
 
 // Create Pino logger instance with edge-runtime service name
 // This ensures logs from edge-runtime utilities are properly identified

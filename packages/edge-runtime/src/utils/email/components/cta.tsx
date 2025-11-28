@@ -11,14 +11,14 @@ import {
 	paragraphStyle,
 	primaryButtonStyle,
 	secondaryButtonStyle,
-} from "../common-styles.ts";
+} from "@heyclaude/edge-runtime/utils/email/common-styles.ts";
 import {
 	type EmailCtaPreset,
 	type EmailCtaPresetId,
 	getCtaPreset,
-} from "../config/cta-presets.ts";
-import { buildEmailCtaUrl } from "../cta.ts";
-import type { EmailUTMParams } from "../utm-templates.ts";
+} from "@heyclaude/edge-runtime/utils/email/config/cta-presets.ts";
+import { buildEmailCtaUrl } from "@heyclaude/edge-runtime/utils/email/cta.ts";
+import type { EmailUTMParams } from "@heyclaude/edge-runtime/utils/email/utm-templates.ts";
 
 type ButtonVariant = "primary" | "secondary";
 

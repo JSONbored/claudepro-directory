@@ -3,21 +3,18 @@
 import type { Database } from '@heyclaude/database-types';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
-import { getEnvVar } from '@heyclaude/shared-runtime';
 import type { ContentHeadingMetadata } from '../types/component.types.ts';
-
-const EDGE_TRANSFORM_URL = `${getEnvVar('NEXT_PUBLIC_SUPABASE_URL')}/functions/v1/public-api`;
+import {
+  detectLanguage,
+  extractMarkdownHeadings,
+  generateFilename,
+  generateHookFilename,
+  highlightCode,
+} from '@heyclaude/shared-runtime';
 
 export interface HighlightCodeOptions {
   language?: string;
   showLineNumbers?: boolean;
-}
-
-export interface HighlightCodeResponse {
-  html: string;
-  cached: boolean;
-  cacheKey?: string;
-  error?: string;
 }
 
 export interface ProcessContentItem {
@@ -72,53 +69,14 @@ export async function highlightCodeEdge(
   }
 
   try {
-    const response = await fetch(`${EDGE_TRANSFORM_URL}/transform/highlight`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, language, showLineNumbers }),
-      cache: 'force-cache',
-      next: {
-        revalidate: 31536000,
-        tags: ['transform:highlight'],
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Highlight failed: ${response.status} ${errorText}`);
-    }
-
-    const data = (await response.json()) as HighlightCodeResponse;
-
-    if (data.error) {
-      logger.warn('Edge highlighting used fallback', undefined, {
-        error: data.error,
-        language,
-        codePreview: code.slice(0, 80),
-      });
-    }
-
-    return data.html;
+    return highlightCode(code, language, { showLineNumbers });
   } catch (error) {
-    const normalized = normalizeError(error, 'Edge highlighting failed, using fallback');
-    
-    // During build, edge functions may be unavailable - this is expected
-    // Only log at debug level during build, warn during runtime
-    const isBuildTime = process.env['NEXT_PHASE'] === 'phase-production-build' || 
-                        process.env['NEXT_PUBLIC_VERCEL_ENV'] === undefined;
-    
-    if (isBuildTime) {
-      logger.debug('Edge highlighting unavailable during build, using fallback', {
-        language,
-        codePreview: code.slice(0, 80),
-      });
-    } else {
-      logger.warn('Edge highlighting failed, using fallback', {
-        err: normalized,
-        language,
-        codePreview: code.slice(0, 80),
-      });
-    }
+    const normalized = normalizeError(error, 'Local highlighting failed, using fallback');
+    logger.warn('Local highlighting failed, using fallback', {
+      err: normalized,
+      language,
+      codePreview: code.slice(0, 80),
+    });
 
     const escapedCode = code
       .replace(/&/g, '&amp;')
@@ -154,38 +112,85 @@ export async function processContentEdge(
     contentType,
   } = options;
 
-  const response = await fetch(`${EDGE_TRANSFORM_URL}/transform/process`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      operation,
-      code,
-      language,
-      languageHint,
-      showLineNumbers,
-      item,
-      format,
-      section,
-      sectionKey,
-      contentType,
-    }),
-    cache: 'force-cache',
-    next: {
-      revalidate: 31536000,
-      tags: ['transform:content'],
-    },
-  });
+  try {
+    if (!operation || !['full', 'filename', 'highlight'].includes(operation)) {
+      throw new Error("Invalid operation. Must be 'full', 'filename', or 'highlight'.");
+    }
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Process content failed: ${response.status} ${errorText}`);
-  }
+    const codeString = typeof code === 'string' ? code : undefined;
+    const normalizedItem = item?.category
+      ? {
+          category: item.category,
+          slug: item.slug ?? null,
+          name: item.name ?? null,
+          hook_type: item.hook_type ?? null,
+        }
+      : undefined;
 
-  const data = (await response.json()) as ProcessContentResponse;
-  if (data.error) {
-    const normalized = normalizeError(new Error(data.error), 'Process content edge error');
-    // Pino's stdSerializers.err automatically handles error serialization
-    logger.warn('processContentEdge fallback', { err: normalized });
+    if ((operation === 'full' || operation === 'highlight') && !codeString?.trim()) {
+      throw new Error('Code is required for the requested operation.');
+    }
+
+    if ((operation === 'full' || operation === 'filename') && !normalizedItem) {
+      throw new Error('Item is required for the requested operation.');
+    }
+
+    if (operation === 'full') {
+      const detectedLanguage = detectLanguage(codeString!, languageHint);
+      const filename =
+        format === 'multi' && section
+          ? generateFilename({
+              item: normalizedItem!,
+              language: detectedLanguage,
+              format,
+              section,
+            })
+          : generateFilename({
+              item: normalizedItem!,
+              language: detectedLanguage,
+              ...(format ? { format } : {}),
+            });
+
+      const html = highlightCode(codeString!, detectedLanguage, { showLineNumbers });
+      const headings = extractMarkdownHeadings(codeString!);
+
+      return {
+        html,
+        language: detectedLanguage,
+        filename,
+        ...(headings.length > 0 ? { headings } : {}),
+      };
+    }
+
+    if (operation === 'filename') {
+      let filename: string;
+      if (format === 'multi' && sectionKey) {
+        filename = generateFilename({
+          item: normalizedItem!,
+          language: language || 'json',
+          format: 'multi',
+          section: sectionKey,
+        });
+      } else if (format === 'hook' && contentType) {
+        filename = generateHookFilename(normalizedItem!, contentType, language || 'json');
+      } else {
+        filename = generateFilename({
+          item: normalizedItem!,
+          language: language || 'json',
+          ...(format ? { format } : {}),
+          ...(section ? { section } : {}),
+        });
+      }
+      return { filename };
+    }
+
+    // operation === 'highlight'
+    const highlightLanguage = language ?? languageHint ?? 'javascript';
+    const html = highlightCode(codeString!, highlightLanguage, { showLineNumbers });
+    return { html, language: highlightLanguage };
+  } catch (error) {
+    const normalized = normalizeError(error, 'processContentEdge failed');
+    logger.warn('processContentEdge error', { err: normalized });
+    throw error instanceof Error ? error : new Error(String(error));
   }
-  return data;
 }

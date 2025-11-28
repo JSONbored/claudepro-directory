@@ -446,83 +446,70 @@ const nextConfig = {
   },
 
   async rewrites() {
-    const supabaseUrl =
-      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
-    // Unified public-api monolith (formerly data-api)
-    // WARNING: These rewrites depend on the public-api Supabase edge function being deployed.
-    // If the public-api function (and its internal routes /content, /sitemap.xml, /feeds, plus category exports)
-    // is not already deployed and wired up, these endpoints will return 404s.
-    // Ensure deployment before merging changes to this section.
-    //
-    // To verify public-api function exists and rewrites are configured correctly, run:
-    //   ./scripts/verify-public-api-rewrites.sh
-    const publicApi = `${supabaseUrl}/functions/v1/public-api`;
-    const contentApi = `${publicApi}/content`;
-
     return [
-      // Sitemap.xml - proxy to edge function
+      // Sitemap + feeds handled locally via Next.js API routes
       {
         source: '/sitemap.xml',
-        destination: `${publicApi}/sitemap.xml`,
+        destination: '/api/sitemap',
       },
-      { source: '/rss.xml', destination: `${publicApi}/feeds?type=rss` },
-      { source: '/atom.xml', destination: `${publicApi}/feeds?type=atom` },
+      { source: '/rss.xml', destination: '/api/feeds?type=rss' },
+      { source: '/atom.xml', destination: '/api/feeds?type=atom' },
       {
         source: '/changelog/rss.xml',
-        destination: `${publicApi}/feeds?type=rss&category=changelog`,
+        destination: '/api/feeds?type=rss&category=changelog',
       },
       {
         source: '/changelog/atom.xml',
-        destination: `${publicApi}/feeds?type=atom&category=changelog`,
+        destination: '/api/feeds?type=atom&category=changelog',
       },
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/rss.xml',
-        destination: `${publicApi}/feeds?type=rss&category=:category`,
+        destination: '/api/feeds?type=rss&category=:category',
       },
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/atom.xml',
-        destination: `${publicApi}/feeds?type=atom&category=:category`,
+        destination: '/api/feeds?type=atom&category=:category',
       },
 
-      // LLMs.txt rewrites → public-api content routes
-      { source: '/llms.txt', destination: `${contentApi}/sitewide?format=llms-txt` },
+      // LLMs.txt exports now backed by local API routes
+      { source: '/llms.txt', destination: '/api/content/sitewide?format=llms-txt' },
       {
         source: '/changelog/llms.txt',
-        destination: `${contentApi}/changelog?format=llms-changelog`,
+        destination: '/api/content/changelog?format=llms-changelog',
       },
       {
         source: '/changelog/:slug/llms.txt',
-        destination: `${contentApi}/changelog/:slug?format=llms-entry`,
+        destination: '/api/content/changelog/:slug?format=llms-entry',
       },
       {
         source: '/tools/config-recommender/llms.txt',
-        destination: `${contentApi}/tools/config-recommender?format=llms-tool`,
+        destination: '/api/content/tools/config-recommender?format=llms-tool',
       },
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/llms.txt',
-        destination: `${contentApi}/:category?format=llms-category`,
+        destination: '/api/content/:category?format=llms-category',
       },
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug/llms.txt',
-        destination: `${contentApi}/:category/:slug?format=llms-txt`,
+        destination: '/api/content/:category/:slug?format=llms-txt',
       },
 
-      // JSON API rewrites → public-api content routes
+      // JSON API rewrites → local content export route
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug.json',
-        destination: `${contentApi}/:category/:slug?format=json`,
+        destination: '/api/content/:category/:slug?format=json',
       },
 
-      // Markdown export rewrites → public-api content routes
+      // Markdown export rewrites → local content export route
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug.md',
-        destination: `${contentApi}/:category/:slug?format=markdown`,
+        destination: '/api/content/:category/:slug?format=markdown',
       },
     ];
   },

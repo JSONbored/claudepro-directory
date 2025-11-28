@@ -38,6 +38,8 @@ const TOAST_MESSAGES = {
   link_copied: 'Link copied to clipboard!',
   code_copied: 'Code copied to clipboard!',
   screenshot_copied: 'Screenshot copied & downloaded!',
+  code_download_started: 'Code download started',
+  code_download_failed: 'Failed to download code',
   bookmark_added: 'Bookmark added',
   bookmark_removed: 'Bookmark removed',
   changes_saved: 'Changes saved successfully',
@@ -85,6 +87,7 @@ export const successToasts = {
   linkCopied: () => toast.success(TOAST_MESSAGES.link_copied),
   codeCopied: () => toast.success(TOAST_MESSAGES.code_copied),
   screenshotCopied: () => toast.success(TOAST_MESSAGES.screenshot_copied),
+  codeDownloadStarted: () => toast.success(TOAST_MESSAGES.code_download_started),
   savedToLibrary: (count: number, total?: number) =>
     toast.success(
       total
@@ -119,6 +122,7 @@ export const errorToasts = {
   rateLimited: () => toast.error(TOAST_MESSAGES.rate_limited),
   copyFailed: (item?: string) => toast.error(`Failed to copy${item ? ` ${item}` : ''}`),
   screenshotFailed: () => toast.error(TOAST_MESSAGES.screenshot_failed),
+  downloadFailed: () => toast.error(TOAST_MESSAGES.code_download_failed),
   shareFailed: () => toast.error('Failed to share'),
   profileUpdateFailed: () => toast.error(TOAST_MESSAGES.profile_update_failed),
   profileRefreshFailed: () => toast.error('Failed to refresh profile'),

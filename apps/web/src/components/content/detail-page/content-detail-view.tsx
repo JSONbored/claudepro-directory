@@ -14,11 +14,18 @@ import {
 } from '@heyclaude/web-runtime/core';
 import {
   getCategoryConfig,
-  highlightCodeEdge,
-  processContentEdge,
 } from '@heyclaude/web-runtime/data';
+import { 
+  highlightCode,
+  detectLanguage,
+  generateFilename,
+  generateHookFilename,
+  extractMarkdownHeadings,
+} from '@heyclaude/shared-runtime';
+import { extractCodeBlocksFromMarkdown, type ExtractedCodeBlock } from '@heyclaude/web-runtime';
 import type {
   ContentItem,
+  ContentHeadingMetadata,
   InstallationSteps,
   ProcessedSectionData,
 } from '@heyclaude/web-runtime/types/component.types';
@@ -229,7 +236,27 @@ export async function UnifiedDetailPage({
 
   // Parallelize independent preprocessing blocks to reduce TTFB
   // Start all promises first, then await them together
-  const contentDataPromise = (async () => {
+  const contentDataPromise = (async (): Promise<
+    | {
+        html: string;
+        code: string;
+        language: string;
+        filename: string;
+        headings?: ContentHeadingMetadata[];
+        markdownBefore?: string;
+        markdownAfter?: string;
+      }
+    | Array<{
+        html: string;
+        code: string;
+        language: string;
+        filename: string;
+        headings?: ContentHeadingMetadata[];
+        markdownBefore?: string;
+        markdownAfter?: string;
+      }>
+    | null
+  > => {
     // GUIDES: Skip content processing - structured sections rendered separately
     if (item.category === Constants.public.Enums.content_category[7]) { // 'guides'
       return null;
@@ -247,14 +274,78 @@ export async function UnifiedDetailPage({
     if (!content) return null;
 
     try {
+      // Parse markdown to extract individual code blocks
+      const codeBlocks = extractCodeBlocksFromMarkdown(content);
+      
+      // If we found code blocks, process each separately using shared-runtime utilities
+      if (codeBlocks.length > 0) {
+        const processedBlocks = codeBlocks.map((block: ExtractedCodeBlock, index: number) => {
+          try {
+            // Use shared-runtime utilities directly (no edge function call)
+            const detectedLanguage = detectLanguage(
+              block.code,
+              block.language !== 'text' ? block.language : undefined
+            );
+            const generatedFilename = generateFilename({
+              item: {
+                category: item.category,
+                slug: item.slug ?? null,
+                name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
+                hook_type:
+                  'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+              },
+              language: detectedLanguage,
+            });
+            const highlightedHtml = highlightCode(block.code, detectedLanguage, {
+              showLineNumbers: true,
+            });
+            const headings = extractMarkdownHeadings(block.code);
+            // Map HeadingMetadata to ContentHeadingMetadata (same structure)
+            const contentHeadings: ContentHeadingMetadata[] | undefined = headings.length > 0 ? headings.map(h => ({
+              id: h.id,
+              anchor: h.anchor,
+              title: h.title,
+              level: h.level,
+            })) : undefined;
+
+            return {
+              html: highlightedHtml,
+              code: block.code,
+              language: detectedLanguage,
+              filename: generatedFilename || `${item.slug || 'code'}-${index + 1}.txt`,
+              ...(contentHeadings && { headings: contentHeadings }),
+              markdownBefore: block.markdownBefore,
+              markdownAfter: block.markdownAfter,
+            };
+          } catch (error) {
+            logDetailProcessingWarning('contentData.codeBlock', error, item);
+            return null;
+          }
+        });
+
+        // Filter out null results and return array
+        const validBlocks = processedBlocks.filter(
+          (block: typeof processedBlocks[0] | null): block is NonNullable<typeof processedBlocks[0]> => block !== null
+        );
+
+        return validBlocks.length > 0 ? (validBlocks as Array<{
+          html: string;
+          code: string;
+          language: string;
+          filename: string;
+          headings?: ContentHeadingMetadata[];
+          markdownBefore?: string;
+          markdownAfter?: string;
+        }>) : null;
+      }
+
+      // Fallback: If no code blocks found, process entire content as single block
       const languageHint =
         'language' in item ? (item as { language?: string }).language : undefined;
 
-      // Batched processing: detectLanguage + generateFilename + highlightCodeEdge
-      const result = await processContentEdge({
-        operation: 'full',
-        code: content,
-        ...(languageHint && { languageHint }),
+      // Use shared-runtime utilities directly (no edge function call)
+      const detectedLanguage = detectLanguage(content, languageHint);
+      const generatedFilename = generateFilename({
         item: {
           category: item.category,
           slug: item.slug ?? null,
@@ -262,20 +353,26 @@ export async function UnifiedDetailPage({
           hook_type:
             'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
         },
+        language: detectedLanguage,
       });
-
-      if (!(result.html && result.language && result.filename)) {
-        throw new Error('Content processing returned incomplete result');
-      }
+      const highlightedHtml = highlightCode(content, detectedLanguage, {
+        showLineNumbers: true,
+      });
+      const headings = extractMarkdownHeadings(content);
+      // Map HeadingMetadata to ContentHeadingMetadata (same structure)
+      const contentHeadings: ContentHeadingMetadata[] | undefined = headings.length > 0 ? headings.map(h => ({
+        id: h.id,
+        anchor: h.anchor,
+        title: h.title,
+        level: h.level,
+      })) : undefined;
 
       return {
-        html: result.html,
+        html: highlightedHtml,
         code: content,
-        language: result.language,
-        filename: result.filename,
-        ...(Array.isArray(result.headings) && result.headings.length > 0
-          ? { headings: result.headings }
-          : {}),
+        language: detectedLanguage,
+        filename: generatedFilename || `${item.slug || 'code'}.txt`,
+        ...(contentHeadings && { headings: contentHeadings }),
       };
     } catch (error) {
       logDetailProcessingWarning('contentData', error, item);
@@ -307,40 +404,35 @@ export async function UnifiedDetailPage({
       };
 
       try {
-        const highlightedConfigs = await Promise.all(
-          Object.entries(config).map(async ([key, value]) => {
-            if (!value) return null;
+        const highlightedConfigs = Object.entries(config).map(([key, value]) => {
+          if (!value) return null;
 
-            const displayValue =
-              key === 'claudeDesktop' || key === 'claudeCode'
-                ? transformMcpConfigForDisplay(value as Record<string, unknown>)
-                : value;
+          const displayValue =
+            key === 'claudeDesktop' || key === 'claudeCode'
+              ? transformMcpConfigForDisplay(value as Record<string, unknown>)
+              : value;
 
-            const code = JSON.stringify(displayValue, null, 2);
+          const code = JSON.stringify(displayValue, null, 2);
 
-            // Highlight code and generate filename in parallel
-            const [html, filenameResult] = await Promise.all([
-              highlightCodeEdge(code, { language: 'json' }),
-              processContentEdge({
-                operation: 'filename',
-                language: 'json',
-                item: {
-                  category: item.category,
-                  slug: item.slug ?? null,
-                  name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
-                  hook_type:
-                    'hook_type' in item
-                      ? ((item as { hook_type?: string }).hook_type ?? null)
-                      : null,
-                },
-                format: 'multi',
-                sectionKey: key,
-              }),
-            ]);
+          // Use shared-runtime utilities directly
+          const html = highlightCode(code, 'json', { showLineNumbers: true });
+          const generatedFilename = generateFilename({
+            item: {
+              category: item.category,
+              slug: item.slug ?? null,
+              name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
+              hook_type:
+                'hook_type' in item
+                  ? ((item as { hook_type?: string }).hook_type ?? null)
+                  : null,
+            },
+            language: 'json',
+            format: 'multi',
+            section: key,
+          });
 
-            return { key, html, code, filename: filenameResult.filename || 'config.json' };
-          })
-        );
+          return { key, html, code, filename: generatedFilename || 'config.json' };
+        });
 
         return {
           format: 'multi' as const,
@@ -370,33 +462,19 @@ export async function UnifiedDetailPage({
             'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
         };
 
-        const [highlightedHookConfig, highlightedScript, hookConfigFilename, scriptFilename] =
-          await Promise.all([
-            config.hookConfig
-              ? highlightCodeEdge(JSON.stringify(config.hookConfig, null, 2), { language: 'json' })
-              : Promise.resolve(null),
-            config.scriptContent
-              ? highlightCodeEdge(config.scriptContent, { language: 'bash' })
-              : Promise.resolve(null),
-            config.hookConfig
-              ? processContentEdge({
-                  operation: 'filename',
-                  language: 'json',
-                  item: itemData,
-                  format: 'hook',
-                  contentType: 'hookConfig',
-                })
-              : Promise.resolve(null),
-            config.scriptContent
-              ? processContentEdge({
-                  operation: 'filename',
-                  language: 'bash',
-                  item: itemData,
-                  format: 'hook',
-                  contentType: 'scriptContent',
-                })
-              : Promise.resolve(null),
-          ]);
+        // Use shared-runtime utilities directly
+        const highlightedHookConfig = config.hookConfig
+          ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json', { showLineNumbers: true })
+          : null;
+        const highlightedScript = config.scriptContent
+          ? highlightCode(config.scriptContent, 'bash', { showLineNumbers: true })
+          : null;
+        const hookConfigFilename = config.hookConfig
+          ? generateHookFilename(itemData, 'hookConfig', 'json')
+          : null;
+        const scriptFilename = config.scriptContent
+          ? generateHookFilename(itemData, 'scriptContent', 'bash')
+          : null;
 
         return {
           format: 'hook' as const,
@@ -404,7 +482,7 @@ export async function UnifiedDetailPage({
             ? {
                 html: highlightedHookConfig,
                 code: JSON.stringify(config.hookConfig, null, 2),
-                filename: hookConfigFilename?.filename || 'hook-config.json',
+                filename: hookConfigFilename || 'hook-config.json',
               }
             : null,
           scriptContent:
@@ -412,7 +490,7 @@ export async function UnifiedDetailPage({
               ? {
                   html: highlightedScript,
                   code: config.scriptContent,
-                  filename: scriptFilename?.filename || 'hook-script.sh',
+                  filename: scriptFilename || 'hook-script.sh',
                 }
               : null,
         };
@@ -425,27 +503,24 @@ export async function UnifiedDetailPage({
     try {
       const code = JSON.stringify(configuration, null, 2);
 
-      // Highlight code and generate filename in parallel
-      const [html, filenameResult] = await Promise.all([
-        highlightCodeEdge(code, { language: 'json' }),
-        processContentEdge({
-          operation: 'filename',
-          language: 'json',
-          item: {
-            category: item.category,
-            slug: item.slug ?? null,
-            name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
-            hook_type:
-              'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
-          },
-        }),
-      ]);
+      // Use shared-runtime utilities directly
+      const html = highlightCode(code, 'json', { showLineNumbers: true });
+      const generatedFilename = generateFilename({
+        item: {
+          category: item.category,
+          slug: item.slug ?? null,
+          name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
+          hook_type:
+            'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+        },
+        language: 'json',
+      });
 
       return {
         format: 'json' as const,
         html,
         code,
-        filename: filenameResult.filename || 'config.json',
+        filename: generatedFilename || 'config.json',
       };
     } catch (error) {
       logDetailProcessingWarning('configData.json', error, item);
@@ -471,59 +546,58 @@ export async function UnifiedDetailPage({
         description?: string;
       }>;
 
-      const highlightedExamplesResults = await Promise.all(
-        examples.map(async (example) => {
-          // Validate required fields before processing
-          if (
-            typeof example.code !== 'string' ||
-            typeof example.language !== 'string' ||
-            typeof example.title !== 'string' ||
-            example.title.trim().length === 0
-          ) {
-            logDetailProcessingWarning(
-              'examplesData',
-              new Error(
-                `Invalid example entry: code=${typeof example.code}, language=${typeof example.language}, title=${typeof example.title}`
-              ),
-              item
-            );
-            return null;
-          }
+      const highlightedExamplesResults = examples.map((example) => {
+        // Validate required fields before processing
+        if (
+          typeof example.code !== 'string' ||
+          typeof example.language !== 'string' ||
+          typeof example.title !== 'string' ||
+          example.title.trim().length === 0
+        ) {
+          logDetailProcessingWarning(
+            'examplesData',
+            new Error(
+              `Invalid example entry: code=${typeof example.code}, language=${typeof example.language}, title=${typeof example.title}`
+            ),
+            item
+          );
+          return null;
+        }
 
-          try {
-            const html = await highlightCodeEdge(example.code, { language: example.language });
-            // Generate filename from title
-            const filename = `${example.title
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/^-+|-+$/g, '')}.${
-              {
-                typescript: 'ts',
-                javascript: 'js',
-                json: 'json',
-                bash: 'sh',
-                shell: 'sh',
-                python: 'py',
-                yaml: 'yml',
-                markdown: 'md',
-                plaintext: 'txt',
-              }[example.language] || 'txt'
-            }`;
+        try {
+          // Use shared-runtime utilities directly
+          const html = highlightCode(example.code, example.language, { showLineNumbers: true });
+          // Generate filename from title
+          const filename = `${example.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')}.${
+            {
+              typescript: 'ts',
+              javascript: 'js',
+              json: 'json',
+              bash: 'sh',
+              shell: 'sh',
+              python: 'py',
+              yaml: 'yml',
+              markdown: 'md',
+              plaintext: 'txt',
+            }[example.language] || 'txt'
+          }`;
 
-            return {
-              title: example.title,
-              ...(example.description && { description: example.description }),
-              html,
-              code: example.code,
-              language: example.language,
-              filename,
-            };
-          } catch (error) {
-            logDetailProcessingWarning('examplesData', error, item);
-            return null;
-          }
-        })
-      );
+          return {
+            title: example.title,
+            ...(example.description && { description: example.description }),
+            html,
+            code: example.code,
+            language: example.language,
+            filename,
+          };
+        } catch (error) {
+          logDetailProcessingWarning('examplesData', error, item);
+          return null;
+        }
+      });
 
       // Filter out null results after Promise.all resolves
       const highlightedExamples = highlightedExamplesResults.filter(
@@ -557,53 +631,45 @@ export async function UnifiedDetailPage({
       const mcpbStepsFromMetadata = installation.mcpb?.steps || [];
       const shouldAutoGenerateMcpbSteps = hasMcpbPackage && mcpbStepsFromMetadata.length === 0;
 
-      const [claudeCodeSteps, claudeDesktopSteps, sdkSteps, mcpbSteps] = await Promise.all([
-        installation.claudeCode?.steps
-          ? Promise.all(
-              installation.claudeCode.steps.map(async (step) => {
-                if (isCommandStep(step)) {
-                  const html = await highlightCodeEdge(step, { language: 'bash' });
-                  return { type: 'command' as const, html, code: step };
-                }
-                return { type: 'text' as const, text: step };
-              })
-            )
-          : Promise.resolve(null),
-        installation.claudeDesktop?.steps
-          ? Promise.all(
-              installation.claudeDesktop.steps.map(async (step) => {
-                if (isCommandStep(step)) {
-                  const html = await highlightCodeEdge(step, { language: 'bash' });
-                  return { type: 'command' as const, html, code: step };
-                }
-                return { type: 'text' as const, text: step };
-              })
-            )
-          : Promise.resolve(null),
-        installation.sdk?.steps
-          ? Promise.all(
-              installation.sdk.steps.map(async (step) => {
-                if (isCommandStep(step)) {
-                  const html = await highlightCodeEdge(step, { language: 'bash' });
-                  return { type: 'command' as const, html, code: step };
-                }
-                return { type: 'text' as const, text: step };
-              })
-            )
-          : Promise.resolve(null),
+        // Use shared-runtime utilities directly (synchronous, no Promise.all needed)
+        const claudeCodeSteps = installation.claudeCode?.steps
+          ? installation.claudeCode.steps.map((step) => {
+              if (isCommandStep(step)) {
+                const html = highlightCode(step, 'bash', { showLineNumbers: true });
+                return { type: 'command' as const, html, code: step };
+              }
+              return { type: 'text' as const, text: step };
+            })
+          : null;
+        const claudeDesktopSteps = installation.claudeDesktop?.steps
+          ? installation.claudeDesktop.steps.map((step) => {
+              if (isCommandStep(step)) {
+                const html = highlightCode(step, 'bash', { showLineNumbers: true });
+                return { type: 'command' as const, html, code: step };
+              }
+              return { type: 'text' as const, text: step };
+            })
+          : null;
+        const sdkSteps = installation.sdk?.steps
+          ? installation.sdk.steps.map((step) => {
+              if (isCommandStep(step)) {
+                const html = highlightCode(step, 'bash', { showLineNumbers: true });
+                return { type: 'command' as const, html, code: step };
+              }
+              return { type: 'text' as const, text: step };
+            })
+          : null;
         // Process .mcpb steps from metadata OR auto-generate if package exists
-        mcpbStepsFromMetadata.length > 0
-          ? Promise.all(
-              mcpbStepsFromMetadata.map(async (step) => {
-                if (isCommandStep(step)) {
-                  const html = await highlightCodeEdge(step, { language: 'bash' });
-                  return { type: 'command' as const, html, code: step };
-                }
-                return { type: 'text' as const, text: step };
-              })
-            )
+        const mcpbSteps = mcpbStepsFromMetadata.length > 0
+          ? mcpbStepsFromMetadata.map((step) => {
+              if (isCommandStep(step)) {
+                const html = highlightCode(step, 'bash', { showLineNumbers: true });
+                return { type: 'command' as const, html, code: step };
+              }
+              return { type: 'text' as const, text: step };
+            })
           : shouldAutoGenerateMcpbSteps
-            ? Promise.resolve([
+            ? [
                 {
                   type: 'text' as const,
                   text: 'Download the .mcpb package using the button above, then double-click the file to install in Claude Desktop.',
@@ -612,9 +678,8 @@ export async function UnifiedDetailPage({
                   type: 'text' as const,
                   text: 'After installation, restart Claude Desktop to activate the MCP server.',
                 },
-              ])
-            : Promise.resolve(null),
-      ]);
+              ]
+            : null;
 
       return {
         claudeCode: claudeCodeSteps
@@ -653,7 +718,16 @@ export async function UnifiedDetailPage({
     if (item.category !== Constants.public.Enums.content_category[7]) return null; // 'guides'
 
     const itemMetadata = getMetadata(item);
-    if (!(itemMetadata?.['sections'] && Array.isArray(itemMetadata['sections']))) return null;
+    if (!(itemMetadata?.['sections'] && Array.isArray(itemMetadata['sections']))) {
+      // Log warning if sections are missing for guides
+      logger.warn('Guides content missing sections in metadata', {
+        category: item.category,
+        slug: item.slug,
+        hasMetadata: !!itemMetadata,
+        sectionsType: itemMetadata?.['sections'] ? typeof itemMetadata['sections'] : 'undefined',
+      });
+      return null;
+    }
 
     const sections = itemMetadata['sections'] as Array<{
       type: string;
@@ -676,9 +750,12 @@ export async function UnifiedDetailPage({
             return section;
           }
           try {
-            const html = await highlightCodeEdge(section.code, {
-              language: typeof section.language === 'string' ? section.language : 'text',
-            });
+            // Use shared-runtime utilities directly
+            const html = highlightCode(
+              section.code,
+              typeof section.language === 'string' ? section.language : 'text',
+              { showLineNumbers: true }
+            );
             return { ...section, html };
           } catch (error) {
             logDetailProcessingWarning('guideSections', error, item);
@@ -687,55 +764,57 @@ export async function UnifiedDetailPage({
         }
 
         if (section.type === 'code_group' && section.tabs) {
-          const tabs = await Promise.all(
-            section.tabs.map(async (tab) => {
-              if (typeof tab.code !== 'string') {
-                logDetailProcessingWarning(
-                  'guideSections',
-                  new Error(`Invalid code_group tab: code is ${typeof tab.code}`),
-                  item
-                );
-                return tab;
-              }
-              try {
-                const html = await highlightCodeEdge(tab.code, {
-                  language: typeof tab.language === 'string' ? tab.language : 'text',
-                });
-                return { ...tab, html };
-              } catch (error) {
-                logDetailProcessingWarning('guideSections', error, item);
-                return tab;
-              }
-            })
-          );
+          const tabs = section.tabs.map((tab) => {
+            if (typeof tab.code !== 'string') {
+              logDetailProcessingWarning(
+                'guideSections',
+                new Error(`Invalid code_group tab: code is ${typeof tab.code}`),
+                item
+              );
+              return tab;
+            }
+            try {
+              // Use shared-runtime utilities directly
+              const html = highlightCode(
+                tab.code,
+                typeof tab.language === 'string' ? tab.language : 'text',
+                { showLineNumbers: true }
+              );
+              return { ...tab, html };
+            } catch (error) {
+              logDetailProcessingWarning('guideSections', error, item);
+              return tab;
+            }
+          });
           return { ...section, tabs };
         }
 
         if (section.type === 'steps' && section.steps) {
-          const steps = await Promise.all(
-            section.steps.map(async (step) => {
-              if (step.code) {
-                if (typeof step.code !== 'string') {
-                  logDetailProcessingWarning(
-                    'guideSections',
-                    new Error(`Invalid steps step: code is ${typeof step.code}`),
-                    item
-                  );
-                  return step;
-                }
-                try {
-                  const html = await highlightCodeEdge(step.code, {
-                    language: typeof step.language === 'string' ? step.language : 'bash',
-                  });
-                  return { ...step, html };
-                } catch (error) {
-                  logDetailProcessingWarning('guideSections', error, item);
-                  return step;
-                }
+          const steps = section.steps.map((step) => {
+            if (step.code) {
+              if (typeof step.code !== 'string') {
+                logDetailProcessingWarning(
+                  'guideSections',
+                  new Error(`Invalid steps step: code is ${typeof step.code}`),
+                  item
+                );
+                return step;
               }
-              return step;
-            })
-          );
+              try {
+                // Use shared-runtime utilities directly
+                const html = highlightCode(
+                  step.code,
+                  typeof step.language === 'string' ? step.language : 'bash',
+                  { showLineNumbers: true }
+                );
+                return { ...step, html };
+              } catch (error) {
+                logDetailProcessingWarning('guideSections', error, item);
+                return step;
+              }
+            }
+            return step;
+          });
           return { ...section, steps };
         }
 
@@ -754,7 +833,10 @@ export async function UnifiedDetailPage({
       guideSectionsPromise,
     ]);
 
-  const headingMetadata = contentData?.headings ?? null;
+  // Extract headings from contentData (handle both single and array)
+  const headingMetadata = Array.isArray(contentData)
+    ? contentData.flatMap((block) => block.headings || [])
+    : contentData?.headings ?? null;
   const shouldRenderDetailToc = Array.isArray(headingMetadata) && headingMetadata.length >= 3;
 
   // Handle case where config is not found - AFTER ALL HOOKS
@@ -880,15 +962,42 @@ export async function UnifiedDetailPage({
 
             {/* Content/Code section (non-guides) */}
             {contentData && config && (
-              <UnifiedSection
-                variant="code"
-                title={`${config.typeName} Content`}
-                description={`The main content for this ${config.typeName.toLowerCase()}.`}
-                html={contentData.html}
-                code={contentData.code}
-                language={contentData.language}
-                filename={contentData.filename}
-              />
+              <>
+                {Array.isArray(contentData) ? (
+                  // Render multiple code blocks from markdown
+                  contentData.map((block, index) => (
+                    <UnifiedSection
+                      key={`content-block-${index}`}
+                      variant="code"
+                      title={
+                        index === 0
+                          ? `${config.typeName} Content`
+                          : `${config.typeName} Content (${index + 1})`
+                      }
+                      description={
+                        index === 0
+                          ? `The main content for this ${config.typeName.toLowerCase()}.`
+                          : `Additional code example for this ${config.typeName.toLowerCase()}.`
+                      }
+                      html={block.html}
+                      code={block.code}
+                      language={block.language}
+                      filename={block.filename}
+                    />
+                  ))
+                ) : (
+                  // Render single code block
+                  <UnifiedSection
+                    variant="code"
+                    title={`${config.typeName} Content`}
+                    description={`The main content for this ${config.typeName.toLowerCase()}.`}
+                    html={contentData.html}
+                    code={contentData.code}
+                    language={contentData.language}
+                    filename={contentData.filename}
+                  />
+                )}
+              </>
             )}
 
             {/* Features Section */}
