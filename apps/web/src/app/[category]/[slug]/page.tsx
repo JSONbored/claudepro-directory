@@ -179,10 +179,10 @@ export async function generateMetadata({
 /**
  * Render the content detail page for a given category and slug.
  *
- * Validates the category and category configuration (returns a 404 for invalid or missing config), ensures the core content exists (returns a 404 if missing), and composes the page using the core item plus deferred analytics and related-item data. Conditionally includes recently-viewed tracking for supported categories and a collection-specific section when the item is a collection.
+ * Fetches core content required for the page (blocking for LCP) and composes the UI while deferring analytics and related-item data for Suspense. Validates the category and its configuration and returns a 404 when invalid or when the core content is missing. Conditionally includes recently-viewed tracking for supported categories and a collection-specific section when the item is a collection.
  *
- * @param params - Promise resolving to the route parameters object with `category` and `slug`
- * @returns A React element representing the content detail page
+ * @param params - Route parameters object containing `category` and `slug`
+ * @returns A React element for the requested content detail page
  *
  * @see getContentDetailCore
  * @see getContentAnalytics
