@@ -22,6 +22,25 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 
+/**
+ * Serve sitewide content in one of several export formats based on the request query.
+ *
+ * Handles GET requests to /api/content/sitewide. Supported formats:
+ * - "llms" and "llms-txt": returns sitewide LLMs export as plain text (default).
+ * - "readme": returns a generated sitewide README as Markdown.
+ *
+ * For "readme" the response is `text/markdown; charset=utf-8` and includes a generation header
+ * identifying the supabase RPC used. For LLMs exports the response is `text/plain; charset=utf-8`.
+ * Responses include standard security, CORS, and content cache headers. Invalid formats produce
+ * a 400 Bad Request JSON response; failures while generating LLMs export produce a 500 JSON error.
+ *
+ * @param request - The incoming NextRequest containing query parameters (optional `format`).
+ * @returns A NextResponse containing the exported content or a JSON error payload.
+ *
+ * @see buildReadmeMarkdown
+ * @see ContentService
+ * @see createSupabaseAnonClient
+ */
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({
