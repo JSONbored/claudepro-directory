@@ -17,6 +17,19 @@ import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
 
+/**
+ * Renders a client-side 500 Server Error page with actions to reload or go home.
+ *
+ * The component logs a structured client-side error on mount (includes requestId, route,
+ * module, userAgent, url, segment, and statusCode 500) and displays a centered card with
+ * a descriptive message and two actions: reload the page or navigate to the home route.
+ *
+ * @returns The Server Error page as a JSX element.
+ *
+ * @see generateRequestId
+ * @see logClientError
+ * @see ROUTES.HOME
+ */
 export default function ServerError() {
   useEffect(() => {
     const requestId = generateRequestId();
