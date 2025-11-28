@@ -18,7 +18,7 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
   return (
     <div className={`relative ${DIMENSIONS.FULL_VIEWPORT} overflow-hidden bg-background`}>
       {/* Desktop: Side-by-side layout */}
-      <div className="hidden h-full lg:grid lg:grid-cols-2">
+      <div className="hidden h-full lg:grid lg:grid-cols-2 lg:items-center">
         {/* Left: Brand content */}
         <motion.div
           className="flex items-center justify-center px-16"

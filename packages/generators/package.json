@@ -27,6 +27,10 @@
     "heyclaude-mcp-login": "./dist/bin/mcp-login.js"
   },
   "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
     "./toolkit/logger": "./src/toolkit/logger.ts",
     "./toolkit/env": "./src/toolkit/env.ts",
     "./toolkit/cache": "./src/toolkit/cache.ts",

@@ -31,7 +31,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc --build && node scripts/build-js-simple.js"
+    "build": "tsc --build"
   },
   "devDependencies": {
     "@types/sanitize-html": "^2.16.0",

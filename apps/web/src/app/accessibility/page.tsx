@@ -46,6 +46,7 @@ export default function AccessibilityPage() {
             We aim to conform to the{' '}
             <NavLink
               href="https://www.w3.org/WAI/WCAG21/quickref/"
+              external={true}
               target="_blank"
               rel="noopener noreferrer"
             >

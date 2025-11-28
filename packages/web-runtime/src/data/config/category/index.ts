@@ -10,7 +10,7 @@ import {
   
   CATEGORY_CONFIGS,
   
-} from './category-config.generated.ts';
+} from './category-config.ts';
 import { getTabConfigForCategory } from './default-tab-configs.ts';
 
 
@@ -61,4 +61,4 @@ export function getTotalResourceCount(stats: Record<string, number>): number {
   return Object.values(stats).reduce((sum, count) => sum + count, 0);
 }
 
-export {ALL_CATEGORY_IDS, ALL_CATEGORY_IDS as getAllCategoryIds, HOMEPAGE_CATEGORY_IDS, HOMEPAGE_CATEGORY_IDS as getHomepageCategoryIds, CACHEABLE_CATEGORY_IDS, CACHEABLE_CATEGORY_IDS as getCacheableCategoryIds} from './category-config.generated.ts';
+export {ALL_CATEGORY_IDS, ALL_CATEGORY_IDS as getAllCategoryIds, HOMEPAGE_CATEGORY_IDS, HOMEPAGE_CATEGORY_IDS as getHomepageCategoryIds, CACHEABLE_CATEGORY_IDS, CACHEABLE_CATEGORY_IDS as getCacheableCategoryIds} from './category-config.ts';

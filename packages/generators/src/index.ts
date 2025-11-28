@@ -18,3 +18,4 @@ export {
   getServiceRoleConfig,
   getSupabaseUrl,
 } from './toolkit/supabase.js';
+export { buildReadmeMarkdown } from './utils/readme-builder.js';

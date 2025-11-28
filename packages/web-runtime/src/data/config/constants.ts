@@ -10,7 +10,7 @@
 
 import { z } from 'zod';
 
-import { GENERATED_CONFIG } from '../../config/generated-config.ts';
+import { GENERATED_CONFIG } from '../../config/app-config.ts';
 import { SOCIAL_LINKS } from '../../config/social-links.ts';
 import type { SocialLinkKey } from '../../config/social-links.ts';
 

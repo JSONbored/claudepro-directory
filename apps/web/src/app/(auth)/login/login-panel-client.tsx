@@ -90,8 +90,6 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
           subscriberCountLabel={subscriberCountLabel}
           isLoadingCount={isLoading}
           headline={tileProperties.tileHeadline}
-          description={tileProperties.tileDescription}
-          benefits={tileProperties.tileBenefits}
           safetyCopy={tileProperties.tileSafety}
           badgePrefix={tileProperties.badgePrefix}
         />

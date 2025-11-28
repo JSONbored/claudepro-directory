@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd ../.. && turbo run generate:config generate:categories:exec generate:service-worker:exec --concurrency=4 && cd apps/web && next build --turbopack",
+  "buildCommand": "turbo build --filter=web",
   "outputDirectory": ".next",
   "framework": "nextjs"
 }

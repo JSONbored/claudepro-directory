@@ -6,7 +6,6 @@
 import 'server-only';
 
 import { ContentService } from '@heyclaude/data-layer';
-import { buildReadmeMarkdown } from '@heyclaude/edge-runtime';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
   generateRequestId,
@@ -18,7 +17,8 @@ import { createSupabaseAnonClient,
   badRequestResponse,
   getOnlyCorsHeaders,
   buildCacheHeaders } from '@heyclaude/web-runtime/server';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 
@@ -27,17 +27,17 @@ const CORS = getOnlyCorsHeaders;
  *
  * Handles GET requests to /api/content/sitewide. Supported formats:
  * - "llms" and "llms-txt": returns sitewide LLMs export as plain text (default).
- * - "readme": returns a generated sitewide README as Markdown.
+ * - "readme": returns raw JSON data from `generate_readme_data` RPC (for CLI script to format).
  *
- * For "readme" the response is `text/markdown; charset=utf-8` and includes a generation header
- * identifying the supabase RPC used. For LLMs exports the response is `text/plain; charset=utf-8`.
- * Responses include standard security, CORS, and content cache headers. Invalid formats produce
- * a 400 Bad Request JSON response; failures while generating LLMs export produce a 500 JSON error.
+ * For "readme" the response is `application/json; charset=utf-8` containing raw data from the RPC.
+ * The CLI script (`generate-readme.ts`) formats this data into markdown. For LLMs exports the
+ * response is `text/plain; charset=utf-8`. Responses include standard security, CORS, and content
+ * cache headers. Invalid formats produce a 400 Bad Request JSON response; failures while generating
+ * LLMs export produce a 500 JSON error.
  *
  * @param request - The incoming NextRequest containing query parameters (optional `format`).
  * @returns A NextResponse containing the exported content or a JSON error payload.
  *
- * @see buildReadmeMarkdown
  * @see ContentService
  * @see createSupabaseAnonClient
  */
@@ -59,23 +59,19 @@ export async function GET(request: NextRequest) {
     const supabase = createSupabaseAnonClient();
     const service = new ContentService(supabase);
 
-    // Handle README format
+    // Handle README format - returns raw JSON data for CLI script to format
     if (format === 'readme') {
       const data = await service.getSitewideReadme();
 
-      // TypeScript can't resolve buildReadmeMarkdown return type due to edge-runtime exclusions
-      // but we know it returns string at runtime
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-      const formatted: string = buildReadmeMarkdown(data);
-
-      reqLogger.info('Sitewide README generated', {
-        bytes: formatted.length,
+      reqLogger.info('Sitewide README data fetched', {
+        categoriesCount: data.categories?.length ?? 0,
+        totalCount: data.total_count ?? 0,
       });
 
-      return new NextResponse(formatted, {
+      return NextResponse.json(data, {
         status: 200,
         headers: {
-          'Content-Type': 'text/markdown; charset=utf-8',
+          'Content-Type': 'application/json; charset=utf-8',
           'X-Generated-By': 'supabase.rpc.generate_readme_data',
           ...buildSecurityHeaders(),
           ...CORS,

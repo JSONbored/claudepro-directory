@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { GENERATED_CONFIG } from './generated-config.ts';
+import { GENERATED_CONFIG } from './app-config.ts';
 
 const socialLinksSchema = z.object({
   github: z.string().url(),

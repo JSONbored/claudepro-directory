@@ -1,10 +1,11 @@
 import { writeFileSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
-import { callEdgeFunction } from '../toolkit/edge.js';
+import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { ensureEnvVars } from '../toolkit/env.js';
 import { normalizeError } from '../toolkit/errors.js';
 import { logger } from '../toolkit/logger.js';
 import { DEFAULT_SUPABASE_URL } from '../toolkit/supabase.js';
+import { buildReadmeMarkdown } from '../utils/readme-builder.js';
 import { resolveRepoPath } from '../utils/paths.js';
 
 export interface GenerateReadmeOptions {
@@ -98,21 +99,47 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
     }
 
     logger.info('📝 Generating README.md via Next.js API...\n', { script: 'generate-readme' });
-    logger.info('   Endpoint: /api/content/sitewide?format=readme', {
-      script: 'generate-readme',
+
+    // Call Next.js API route (not edge functions)
+    const siteUrl = process.env['NEXT_PUBLIC_SITE_URL'] || 'http://localhost:3000';
+    const apiUrl = `${siteUrl}/api/content/sitewide?format=readme`;
+
+    logger.info(`   Endpoint: ${apiUrl}`, { script: 'generate-readme' });
+
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
-    const readme = await callEdgeFunction<string>(
-      '/api/content/sitewide?format=readme',
-      {},
-      { responseType: 'text', requireAuth: false, timeoutMs: 15_000 }
-    );
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '');
+      throw new Error(
+        `API request failed (${response.status} ${response.statusText}): ${errorText}`
+      );
+    }
 
-    // CRITICAL SECURITY: Validate HTTP-sourced content before writing to file system
-    // This prevents arbitrary file upload attacks. The validateReadmeContent function
+    const data = (await response.json()) as DatabaseGenerated['public']['Functions']['generate_readme_data']['Returns'];
+
+    if (!data) {
+      throw new Error('API returned null or invalid data');
+    }
+
+    logger.info(`✅ Fetched data: ${data.total_count ?? 0} total items, ${data.categories?.length ?? 0} categories`, {
+      script: 'generate-readme',
+      totalCount: data.total_count ?? 0,
+      categoriesCount: data.categories?.length ?? 0,
+    });
+
+    // Format the data into markdown using the CLI utility
+    const formattedMarkdown = buildReadmeMarkdown(data);
+
+    // CRITICAL SECURITY: Validate content before writing to file system
+    // This prevents arbitrary file writes. The validateReadmeContent function
     // performs comprehensive checks: type validation, size limits, path safety,
     // markdown format validation, and malicious pattern detection.
-    const validatedReadme = validateReadmeContent(readme, README_PATH);
+    const validatedReadme = validateReadmeContent(formattedMarkdown, README_PATH);
 
     // Safe to write: content has passed all security validations
     writeFileSync(README_PATH, validatedReadme, 'utf-8');
