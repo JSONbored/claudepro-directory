@@ -16,6 +16,25 @@ interface NewsletterOptInTileProps {
   badgePrefix?: string;
 }
 
+/**
+ * Renders an interactive newsletter opt-in tile with a checkbox, headline, badge, and safety copy.
+ *
+ * The tile is clickable to toggle the checked state, shows a subscriber-count badge (or a loading label),
+ * and exposes an accessible checkbox for keyboard and screen-reader users.
+ *
+ * @param checked - Whether the tile is currently selected.
+ * @param onChange - Callback invoked with the next boolean checked state when the tile or checkbox changes.
+ * @param subscriberCountLabel - Text shown after the badge prefix to indicate subscriber count.
+ * @param isLoadingCount - When true, replaces the badge with a loading label.
+ * @param headline - Optional headline text; defaults to "Your weekly Claude upgrade drop".
+ * @param safetyCopy - Optional secondary copy; defaults to "No spam. Unsubscribe anytime.".
+ * @param badgePrefix - Optional prefix for the badge; defaults to "✨ Trusted by".
+ *
+ * @returns The newsletter opt-in tile React element.
+ *
+ * @see Checkbox
+ * @see cn
+ */
 export function NewsletterOptInTile({
   checked,
   onChange,

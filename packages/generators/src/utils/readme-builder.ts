@@ -14,6 +14,18 @@ const ICON_EMOJI_MAP: Record<string, string> = {
   Code: '💻',
 };
 
+/**
+ * Build a complete README markdown document from the structured RPC data.
+ *
+ * Produces a Markdown string containing site header, overview, quick start,
+ * content catalog (generated from categories and their items), and activity section.
+ *
+ * @param data - RPC result object containing `categories` and `total_count`. Each category may include `title`, `description`, `icon_name`, `url_slug`, and an `items` array; each item may include `slug`, `title`, and `description`.
+ * @returns The assembled README as a Markdown string.
+ *
+ * @example
+ * // const md = buildReadmeMarkdown(rpcResult);
+ */
 export function buildReadmeMarkdown(
   data: DatabaseGenerated['public']['Functions']['generate_readme_data']['Returns']
 ): string {

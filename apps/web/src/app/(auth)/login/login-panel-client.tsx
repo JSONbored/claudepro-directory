@@ -18,10 +18,10 @@ interface LoginPanelClientProperties {
 }
 
 /**
- * Render a sign-in panel that includes OAuth provider buttons and an optional newsletter opt-in tile.
+ * Renders a sign-in panel with OAuth provider buttons and an optional newsletter opt-in tile.
  *
  * The component manages local newsletter opt-in state, loads remote newsletter display configuration on mount,
- * and displays a subscriber count when available.
+ * and displays a formatted subscriber count when available.
  *
  * @param redirectTo - Optional URL to redirect to after successful OAuth sign-in.
  * @returns A JSX element containing the sign-in panel with provider buttons and a newsletter opt-in tile.
