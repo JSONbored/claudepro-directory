@@ -61,6 +61,35 @@ const NewsletterCTAVariant = dynamicImport(
  */
 export const revalidate = 900;
 
+/**
+ * Streaming Jobs Count Badge
+ * Fetches total job count independently to avoid duplicate RPC calls
+ * OPTIMIZATION: This component streams its own data, eliminating the
+ * redundant count-only query in the main page component.
+ */
+async function JobsCountBadge() {
+  let totalJobs = 0;
+  try {
+    const response = await getFilteredJobs({ limit: 1, offset: 0 }, false);
+    totalJobs = response?.total_count ?? 0;
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to fetch jobs count for badge');
+    logger.warn('JobsCountBadge failed to fetch count', {
+      err: normalized,
+      requestId: generateRequestId(),
+      route: '/jobs',
+      operation: 'JobsCountBadge',
+    });
+    // Badge will show 0 jobs
+  }
+  return (
+    <UnifiedBadge variant="base" style="secondary">
+      <Briefcase className="mr-1 h-3 w-3" />
+      {totalJobs} Jobs Available
+    </UnifiedBadge>
+  );
+}
+
 export async function generateMetadata({
   searchParams,
 }: PagePropsWithSearchParams): Promise<Metadata> {
@@ -255,17 +284,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
     limit,
   });
 
-  // Section: Total Jobs Count Fetch
-  let totalJobs = 0;
-  try {
-    const totalResponse = await getFilteredJobs({ limit: 1, offset: 0 }, false);
-    totalJobs = totalResponse?.total_count ?? 0;
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load jobs total count');
-    reqLogger.error('JobsPage: getFilteredJobs for total count failed', normalized, {
-      section: 'total-count-fetch',
-    });
-  }
+  // OPTIMIZATION: Removed redundant totalJobs fetch
+  // Total count is now streamed via JobsCountBadge component
+  // Filter section always shown for better UX
 
   const baseId = 'jobs-page';
   const searchInputId = `${baseId}-search`;
@@ -317,10 +338,16 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </p>
 
             <div className="mb-8 flex flex-wrap justify-center gap-2">
-              <UnifiedBadge variant="base" style="secondary">
-                <Briefcase className="mr-1 h-3 w-3" />
-                {totalJobs || 0} Jobs Available
-              </UnifiedBadge>
+              <Suspense
+                fallback={
+                  <UnifiedBadge variant="base" style="secondary">
+                    <Briefcase className="mr-1 h-3 w-3" />
+                    <span className="inline-block h-4 w-16 animate-pulse rounded bg-muted/40" />
+                  </UnifiedBadge>
+                }
+              >
+                <JobsCountBadge />
+              </Suspense>
               <UnifiedBadge variant="base" style="outline">
                 Community Driven
               </UnifiedBadge>
@@ -339,12 +366,12 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         </div>
       </section>
 
-      {totalJobs > 0 && (
-        <section className="px-4 pb-8">
-          <div className="container mx-auto">
-            <Card className="card-gradient glow-effect">
-              <CardContent className="space-y-4 p-6">
-                <form method="GET" action="/jobs" className={UI_CLASSES.GRID_RESPONSIVE_4}>
+      {/* OPTIMIZATION: Always show filter section for better UX */}
+      <section className="px-4 pb-8">
+        <div className="container mx-auto">
+          <Card className="card-gradient glow-effect">
+            <CardContent className="space-y-4 p-6">
+              <form method="GET" action="/jobs" className={UI_CLASSES.GRID_RESPONSIVE_4}>
                   <div className="relative">
                     <Search
                       className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_LEFT} -translate-y-1/2 h-4 w-4 transform text-muted-foreground`}
@@ -540,7 +567,6 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </Card>
           </div>
         </section>
-      )}
 
       <section className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">

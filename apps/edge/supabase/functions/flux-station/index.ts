@@ -296,7 +296,7 @@ serveEdgeApp<FluxStationContext>({
       name: 'email-job-lifecycle',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/email/job-lifecycle',
-      handler: chain<FluxStationContext>(rateLimit('email'))(async (ctx) => {
+      handler: chain<FluxStationContext>(rateLimit('email'))((ctx) => {
         const action = (ctx.request.headers.get('X-Email-Action') || '').trim();
 
         if (!action) {

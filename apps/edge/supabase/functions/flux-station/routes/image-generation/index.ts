@@ -146,7 +146,9 @@ async function processImageGeneration(
     try {
       result = await response.json();
     } catch (parseError) {
-      // If JSON parsing fails, read the raw body from the cloned response for better error reporting
+      // If JSON parsing fails, log the parse error and read the raw body for better error reporting
+      const normalized = normalizeError(parseError, 'JSON parsing failed for image generation response');
+      await logError('Image generation response JSON parse failed', { ...logContext, err: normalized });
       const rawBody = await responseClone.text().catch(() => 'Unable to read response body');
       throw new Error(
         `Image generation API returned non-JSON response (${response.status} ${response.statusText}): ${rawBody}`

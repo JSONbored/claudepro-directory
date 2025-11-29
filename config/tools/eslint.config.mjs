@@ -118,10 +118,10 @@ export default tseslint.config(
         typescript: true,
         node: true,
       },
-      // Better Tailwind CSS settings (disabled due to monorepo Tailwind setup)
-      // 'better-tailwindcss': {
-      //   entryPoint: 'apps/web/src/app/globals.css',
-      // },
+      // Better Tailwind CSS settings for Tailwind v4 (CSS-based config)
+      'better-tailwindcss': {
+        entryPoint: 'apps/web/src/app/globals.css',
+      },
     },
     rules: {
       // ============================================

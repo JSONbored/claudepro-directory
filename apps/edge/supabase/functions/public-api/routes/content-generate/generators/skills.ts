@@ -231,7 +231,7 @@ function escapeYamlString(str: string): string {
  * @param skillMdContent - The SKILL.md file content to include in the archive
  * @returns A Uint8Array containing the bytes of the ZIP archive with one entry: `{slug}/SKILL.md`
  */
-async function generateZipBuffer(slug: string, skillMdContent: string): Promise<Uint8Array> {
+function generateZipBuffer(slug: string, skillMdContent: string): Uint8Array {
   // TODO: Replace with proper Deno-compatible ZIP library
   // For now, create a minimal ZIP structure manually
   // This is a simplified implementation - a proper ZIP library would be better

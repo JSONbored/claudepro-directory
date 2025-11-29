@@ -160,6 +160,7 @@
     "react": "^18.3.1",
     "react-dom": "18.3.1",
     "server-only": "^0.0.1",
+    "tailwindcss": "^4.1.17",
     "ts-prune": "^0.10.3",
     "tsx": "^4.20.6",
     "turbo": "^2.6.1",

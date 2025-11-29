@@ -128,6 +128,9 @@ importers:
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
+      tailwindcss:
+        specifier: ^4.1.17
+        version: 4.1.17
       ts-prune:
         specifier: ^0.10.3
         version: 0.10.3

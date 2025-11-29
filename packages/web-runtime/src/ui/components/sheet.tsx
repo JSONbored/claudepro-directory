@@ -12,8 +12,7 @@
  * - Respects prefers-reduced-motion
  */
 
-import { logger, normalizeError } from '../../entries/core.ts';
-import { getAnimationConfig } from '../../config/client-defaults.ts';
+import { UI_ANIMATION } from '../../config/unified-config.ts';
 import { X } from '../../icons.tsx';
 import { POSITION_PATTERNS, UI_CLASSES } from '../constants.ts';
 import { cn } from '../utils.ts';
@@ -21,7 +20,6 @@ import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion, useDragControls } from 'motion/react';
 import type * as React from 'react';
-import { useEffect, useState } from 'react';
 
 const Sheet = SheetPrimitive.Root;
 
@@ -72,6 +70,13 @@ interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
+/** Spring animation config from unified config */
+const springSmooth = {
+  type: 'spring' as const,
+  stiffness: UI_ANIMATION['spring.smooth.stiffness'],
+  damping: UI_ANIMATION['spring.smooth.damping'],
+};
+
 const SheetContent = ({
   side = 'right',
   className,
@@ -83,33 +88,6 @@ const SheetContent = ({
 }) => {
   // Drag controls for gesture handling
   const dragControls = useDragControls();
-  const [springSmooth, setSpringSmooth] = useState({
-    type: 'spring' as const,
-    stiffness: 300,
-    damping: 25,
-  });
-
-  useEffect(() => {
-    getAnimationConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setSpringSmooth({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.smooth.stiffness'],
-          damping: config['animation.spring.smooth.damping'],
-        });
-      })
-      .catch((error) => {
-        const normalized = normalizeError(error, 'Failed to load animation config');
-        logger.warn('[Animation] Failed to load config', {
-          err: normalized,
-          category: 'animation',
-          component: 'SheetContent',
-          recoverable: true,
-        });
-      });
-  }, []);
 
   // Ensure side has a default value for type safety
   const sheetSide = side || 'right';

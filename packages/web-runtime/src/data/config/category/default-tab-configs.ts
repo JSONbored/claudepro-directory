@@ -2,6 +2,9 @@ import  { type Database } from '@heyclaude/database-types';
 
 import  { type TabConfig } from '../../../types/category.ts';
 
+/**
+ * Standard tabs with Examples tab - for categories WITH examples data (mcp, skills)
+ */
 const STANDARD_TABS: ReadonlyArray<TabConfig> = [
   {
     id: 'overview',
@@ -34,7 +37,11 @@ const STANDARD_TABS: ReadonlyArray<TabConfig> = [
   },
 ] as const;
 
-const SIMPLE_TABS: ReadonlyArray<TabConfig> = [
+/**
+ * Standard tabs WITHOUT Examples - for categories without examples data (agents, hooks, statuslines)
+ * These categories have features/use_cases but examples are embedded in content field
+ */
+const STANDARD_NO_EXAMPLES_TABS: ReadonlyArray<TabConfig> = [
   {
     id: 'overview',
     label: 'Overview',
@@ -43,10 +50,10 @@ const SIMPLE_TABS: ReadonlyArray<TabConfig> = [
     order: 1,
   },
   {
-    id: 'usage',
-    label: 'Usage & Examples',
-    mobileLabel: 'Usage',
-    sections: ['examples', 'troubleshooting'],
+    id: 'installation',
+    label: 'Installation & Config',
+    mobileLabel: 'Setup',
+    sections: ['installation', 'configuration', 'troubleshooting'],
     order: 2,
   },
   {
@@ -59,19 +66,23 @@ const SIMPLE_TABS: ReadonlyArray<TabConfig> = [
   },
 ] as const;
 
-const GUIDE_TABS: ReadonlyArray<TabConfig> = [
+/**
+ * Simple tabs WITHOUT Examples - for rules and commands
+ * These have minimal structure with content + troubleshooting
+ */
+const SIMPLE_TABS: ReadonlyArray<TabConfig> = [
   {
-    id: 'guide',
-    label: 'Guide',
-    mobileLabel: 'Guide',
-    sections: ['guide_sections', 'description'],
+    id: 'overview',
+    label: 'Overview',
+    mobileLabel: 'Overview',
+    sections: ['content', 'description', 'features', 'use_cases', 'requirements'],
     order: 1,
   },
   {
-    id: 'examples',
-    label: 'Examples',
-    mobileLabel: 'Examples',
-    sections: ['examples', 'use_cases'],
+    id: 'usage',
+    label: 'Usage Tips',
+    mobileLabel: 'Usage',
+    sections: ['troubleshooting'],
     order: 2,
   },
   {
@@ -81,6 +92,27 @@ const GUIDE_TABS: ReadonlyArray<TabConfig> = [
     sections: ['reviews', 'related'],
     lazy: true,
     order: 3,
+  },
+] as const;
+
+/**
+ * Guide tabs - rich content via metadata.sections, no separate examples
+ */
+const GUIDE_TABS: ReadonlyArray<TabConfig> = [
+  {
+    id: 'guide',
+    label: 'Guide',
+    mobileLabel: 'Guide',
+    sections: ['guide_sections', 'description'],
+    order: 1,
+  },
+  {
+    id: 'discussion',
+    label: 'Discussion',
+    mobileLabel: 'Discuss',
+    sections: ['reviews', 'related'],
+    lazy: true,
+    order: 2,
   },
 ] as const;
 
@@ -112,15 +144,20 @@ const COLLECTION_TABS: ReadonlyArray<TabConfig> = [
 export const DEFAULT_TAB_CONFIGS: Readonly<
   Record<Database['public']['Enums']['content_category'], null | ReadonlyArray<TabConfig>>
 > = {
-  agents: STANDARD_TABS,
+  // Categories WITH structured examples data → show Examples tab
   mcp: STANDARD_TABS,
-  hooks: STANDARD_TABS,
-  statuslines: STANDARD_TABS,
   skills: STANDARD_TABS,
+  // Categories WITHOUT structured examples → no Examples tab (examples embedded in content)
+  agents: STANDARD_NO_EXAMPLES_TABS,
+  hooks: STANDARD_NO_EXAMPLES_TABS,
+  statuslines: STANDARD_NO_EXAMPLES_TABS,
+  // Simple content categories → minimal tabs
   rules: SIMPLE_TABS,
   commands: SIMPLE_TABS,
+  // Special layouts
   guides: GUIDE_TABS,
   collections: COLLECTION_TABS,
+  // No tabs
   jobs: null,
   changelog: null,
 } as const;

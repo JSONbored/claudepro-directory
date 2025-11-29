@@ -261,20 +261,13 @@ export function ProductionCodeBlock({
     setNeedsCollapse(lines > maxLines);
   }, [code, maxLines]);
 
-  // Fetch timeout config once on mount
+  // Load timeout config on mount
   useEffect(() => {
-    getTimeoutConfig()
-      .then((result) => {
-        const override = result?.['timeout.ui.clipboard_reset_delay_ms'];
-        if (typeof override === 'number' && Number.isFinite(override) && override > 0) {
-          setClipboardResetDelay(override);
-        }
-        // Otherwise keep the default value (2000ms)
-      })
-      .catch((error) => {
-        logger.error('ProductionCodeBlock: failed to load timeout config', normalizeError(error));
-        // Keep default value (2000ms) on error
-      });
+    const config = getTimeoutConfig();
+    const override = config['timeout.ui.clipboard_reset_delay_ms'];
+    if (typeof override === 'number' && Number.isFinite(override) && override > 0) {
+      setClipboardResetDelay(override);
+    }
   }, []);
 
   const handleCopy = async () => {
@@ -683,6 +676,7 @@ export function ProductionCodeBlock({
           ref={preRef}
           className={showLineNumbers ? 'code-with-line-numbers' : ''}
           // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist for Shiki
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify using strict allowlist for Shiki syntax highlighting
           dangerouslySetInnerHTML={{ __html: safeHtml }}
         />
       </div>

@@ -23,12 +23,99 @@ const PULSE_QUEUE_NAME = 'pulse';
 const PULSE_BATCH_SIZE_DEFAULT = 100; // Fallback if config unavailable
 const MAX_PULSE_RETRY_ATTEMPTS = 5; // Maximum number of retry attempts before giving up
 
+/**
+ * Safely extract a property from an unknown object using Object.getOwnPropertyDescriptor.
+ * This avoids prototype pollution vulnerabilities.
+ */
+const getProperty = (obj: unknown, key: string): unknown => {
+  if (typeof obj !== 'object' || obj === null) {
+    return undefined;
+  }
+  const desc = Object.getOwnPropertyDescriptor(obj, key);
+  return desc ? desc.value : undefined;
+};
+
+/**
+ * Determines whether a value is a valid member of the `content_category` enum.
+ *
+ * @param value - Value to check
+ * @returns `true` if `value` is a valid `content_category` enum member, `false` otherwise.
+ */
+function isValidContentCategory(
+  value: unknown
+): value is DatabaseGenerated['public']['Enums']['content_category'] {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  const validValues = Constants.public.Enums.content_category;
+  for (const validValue of validValues) {
+    if (value === validValue) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Checks whether a value matches one of the allowed `interaction_type` enum values.
+ *
+ * @param value - The value to test for membership in the `interaction_type` enum
+ * @returns `true` if `value` matches an allowed `interaction_type`, `false` otherwise.
+ */
+function isValidInteractionType(
+  value: unknown
+): value is DatabaseGenerated['public']['Enums']['interaction_type'] {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  const validValues = Constants.public.Enums.interaction_type;
+  for (const validValue of validValues) {
+    if (value === validValue) {
+      return true;
+    }
+  }
+  return false;
+}
+
 interface PulseEvent {
   user_id?: string | null;
   content_type: string | null;
   content_slug: string | null;
   interaction_type: string;
   session_id?: string | null;
+  metadata?: Json | null;
+}
+
+/**
+ * Safely validate queue message structure for PulseEvent.
+ * Uses getProperty to safely access properties without prototype pollution.
+ */
+function isValidPulseEvent(value: unknown): value is PulseEvent {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const interactionType = getProperty(value, 'interaction_type');
+  if (typeof interactionType !== 'string') {
+    return false;
+  }
+
+  // Validate required fields
+  const contentType = getProperty(value, 'content_type');
+  const contentSlug = getProperty(value, 'content_slug');
+  const userId = getProperty(value, 'user_id');
+  const sessionId = getProperty(value, 'session_id');
+
+  return (
+    (contentType === null || typeof contentType === 'string') &&
+    (contentSlug === null || typeof contentSlug === 'string') &&
+    (userId === null || userId === undefined || typeof userId === 'string') &&
+    (sessionId === null || sessionId === undefined || typeof sessionId === 'string')
+  );
+}
+
+// PulseEventExtended adds generic metadata typing for extended use cases
+interface PulseEventExtended extends PulseEvent {
   metadata?: unknown | null;
 }
 
@@ -265,48 +352,6 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
   let failed = 0;
 
   try {
-    /**
-     * Determines whether a value is a valid member of the `content_category` enum.
-     *
-     * @param value - Value to check
-     * @returns `true` if `value` is a valid `content_category` enum member, `false` otherwise.
-     */
-    function isValidContentCategory(
-      value: unknown
-    ): value is DatabaseGenerated['public']['Enums']['content_category'] {
-      if (typeof value !== 'string') {
-        return false;
-      }
-      const validValues = Constants.public.Enums.content_category;
-      for (const validValue of validValues) {
-        if (value === validValue) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    /**
-     * Checks whether a value matches one of the allowed `interaction_type` enum values.
-     *
-     * @param value - The value to test for membership in the `interaction_type` enum
-     * @returns `true` if `value` matches an allowed `interaction_type`, `false` otherwise.
-     */
-    function isValidInteractionType(
-      value: unknown
-    ): value is DatabaseGenerated['public']['Enums']['interaction_type'] {
-      if (typeof value !== 'string') {
-        return false;
-      }
-      const validValues = Constants.public.Enums.interaction_type;
-      for (const validValue of validValues) {
-        if (value === validValue) {
-          return true;
-        }
-      }
-      return false;
-    }
-
     // Construct composite type array from messages
     // Convert PulseEvent to user_interaction_input composite type
     const interactions: DatabaseGenerated['public']['CompositeTypes']['user_interaction_input'][] =
@@ -586,39 +631,6 @@ export async function handlePulse(_req: Request): Promise<Response> {
 
     logInfo(`Processing ${messages.length} pulse events`, logContext);
     traceStep(`Processing ${messages.length} pulse events`, logContext);
-
-    // Safely validate queue message structure
-    function isValidPulseEvent(value: unknown): value is PulseEvent {
-      if (typeof value !== 'object' || value === null) {
-        return false;
-      }
-
-      const getProperty = (obj: unknown, key: string): unknown => {
-        if (typeof obj !== 'object' || obj === null) {
-          return undefined;
-        }
-        const desc = Object.getOwnPropertyDescriptor(obj, key);
-        return desc ? desc.value : undefined;
-      };
-
-      const interactionType = getProperty(value, 'interaction_type');
-      if (typeof interactionType !== 'string') {
-        return false;
-      }
-
-      // Validate required fields
-      const contentType = getProperty(value, 'content_type');
-      const contentSlug = getProperty(value, 'content_slug');
-      const userId = getProperty(value, 'user_id');
-      const sessionId = getProperty(value, 'session_id');
-
-      return (
-        (contentType === null || typeof contentType === 'string') &&
-        (contentSlug === null || typeof contentSlug === 'string') &&
-        (userId === null || userId === undefined || typeof userId === 'string') &&
-        (sessionId === null || sessionId === undefined || typeof sessionId === 'string')
-      );
-    }
 
     const pulseMessages: PulseQueueMessage[] = [];
     const invalidMsgIds: bigint[] = [];

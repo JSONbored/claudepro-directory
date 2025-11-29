@@ -6,7 +6,7 @@
 
 'use client';
 
-import { getContactChannels, logger } from '@heyclaude/web-runtime/core';
+import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
 import {
@@ -85,24 +85,12 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
   });
 
   useEffect(() => {
-    getAnimationConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setSpringDefault({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.default.stiffness'],
-          damping: config['animation.spring.default.damping'],
-        });
-      })
-      .catch((error) => {
-        logger.warn('[Animation] Failed to load config', {
-          err: error,
-          category: 'animation',
-          component: 'NavigationMobile',
-          recoverable: true,
-        });
-      });
+    const config = getAnimationConfig();
+    setSpringDefault({
+      type: 'spring' as const,
+      stiffness: config['animation.spring.default.stiffness'],
+      damping: config['animation.spring.default.damping'],
+    });
   }, []);
 
   return (

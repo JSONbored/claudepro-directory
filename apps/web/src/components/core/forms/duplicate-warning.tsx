@@ -1,7 +1,6 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { logClientWarning } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
@@ -40,15 +39,8 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
 
   // Load debounce value from config
   useEffect(() => {
-    getTimeoutConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setDebounceMs(config['timeout.ui.form_debounce_ms']);
-      })
-      .catch((error) => {
-        logClientWarning('DuplicateWarning: failed to load form debounce config', error);
-      });
+    const config = getTimeoutConfig();
+    setDebounceMs(config['timeout.ui.form_debounce_ms']);
   }, []);
 
   const debouncedName = useDebounce(name, debounceMs);

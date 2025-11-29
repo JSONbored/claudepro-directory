@@ -90,11 +90,11 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
       method: ctx.method,
       segments: ctx.segments,
     }),
-  'content-generate': async (ctx) => {
+  'content-generate': (ctx) => {
     // segments[0] = 'content', segments[1] = 'generate-package', segments[2] = sub-route
     const subRoute = ctx.segments[2];
     if (subRoute === 'upload') {
-      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, () => {
         const logContext = createPublicApiContext('content-generate-upload', {
           path: ctx.pathname,
         });
@@ -102,14 +102,14 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
       });
     }
     if (subRoute === 'process') {
-      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, () => {
         const logContext = createPublicApiContext('content-generate-process', {
           path: ctx.pathname,
         });
         return handlePackageGenerationQueue(ctx.request, logContext);
       });
     }
-    return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+    return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, () => {
       const logContext = createPublicApiContext('content-generate', {
         path: ctx.pathname,
         method: ctx.method,

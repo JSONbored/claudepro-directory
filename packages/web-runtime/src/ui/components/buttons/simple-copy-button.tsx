@@ -41,7 +41,7 @@
  */
 
 import { logger, normalizeError } from '../../../entries/core.ts';
-import { TIMEOUT_CONFIG_CLIENT_DEFAULTS } from '../../../config/client-defaults.ts';
+import { UI_TIMEOUTS } from '../../../config/unified-config.ts';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { toasts } from '../../../client/toast.ts';
 import { Check, Copy } from 'lucide-react';
@@ -97,9 +97,8 @@ export function SimpleCopyButton({
       toasts.raw.success(successMessage);
       onCopySuccess?.();
 
-      // Use client-safe defaults (no async config loading needed for this component)
-      const resetDelay = TIMEOUT_CONFIG_CLIENT_DEFAULTS['timeout.ui.clipboard_reset_delay_ms'];
-      setTimeout(() => setCopied(false), resetDelay);
+      // Use unified config for timeout
+      setTimeout(() => setCopied(false), UI_TIMEOUTS.clipboard_reset_delay_ms);
     } catch (error) {
       const normalized = normalizeError(error, 'SimpleCopyButton: clipboard write failed');
       logger.warn('[Clipboard] Copy failed', {

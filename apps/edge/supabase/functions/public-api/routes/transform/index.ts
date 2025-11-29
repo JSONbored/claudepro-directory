@@ -46,7 +46,7 @@ export async function handleTransformImageRoute(
     });
   }
 
-  const respond = async () => {
+  const respond = () => {
     if (subRoute === 'logo') {
       return handleLogoOptimizeRoute(request);
     }

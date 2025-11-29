@@ -7,7 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { logClientWarning, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
@@ -166,15 +166,8 @@ function UnifiedSearchComponent({
   );
 
   useEffect(() => {
-    getTimeoutConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setDebounceMs(config['timeout.ui.debounce_ms']);
-      })
-      .catch((error) => {
-        logClientWarning('UnifiedSearchComponent: failed to load debounce config', error);
-      });
+    const config = getTimeoutConfig();
+    setDebounceMs(config['timeout.ui.debounce_ms']);
   }, []);
 
   useEffect(() => {

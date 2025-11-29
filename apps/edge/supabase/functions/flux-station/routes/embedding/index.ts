@@ -553,7 +553,7 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
  * `embedding_dim`; for skipped events the response includes a `reason` (for example, `delete_event` or `empty_text`);
  * on failure the response contains standardized error information and an appropriate status code.
  */
-export async function handleEmbeddingWebhook(req: Request): Promise<Response> {
+export function handleEmbeddingWebhook(req: Request): Promise<Response> {
   // Otherwise, handle as direct webhook (legacy)
   return respondWithAnalytics(async () => {
     const logContext = createUtilityContext('generate-embedding', 'webhook-handler');
