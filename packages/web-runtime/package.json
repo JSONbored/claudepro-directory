@@ -179,7 +179,9 @@
     "zustand": "^5.0.2"
   },
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --config ../../config/tools/eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.generated.tsx'"
   },
   "devDependencies": {
     "@types/canvas-confetti": "^1.6.4",

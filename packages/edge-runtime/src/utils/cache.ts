@@ -92,7 +92,7 @@ export async function invalidateCacheTags(
         tags,
       });
     }
-    return { success: false, error: errorMsg, tags };
+    return { success: false, error: errorObj.message, tags };
   }
 }
 

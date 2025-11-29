@@ -102,7 +102,7 @@ export function usePinboard(): UsePinboardReturn {
   const emitBookmarkPulse = useCallback(
     (action: 'add' | 'remove', payload: { category: PinboardCategory; slug: string }) => {
       if (!payload.slug) return;
-      pulse.bookmark({ category: payload.category, slug: payload.slug, action }).catch((error) => {
+      pulse.bookmark({ category: payload.category, slug: payload.slug, action }).catch((error: unknown) => {
         logger.warn('usePinboard: bookmark pulse failed', {
           error: normalizeError(error, "Operation failed").message,
         });

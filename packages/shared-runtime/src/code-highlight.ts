@@ -4,7 +4,8 @@
  */
 
 import { highlight } from 'sugar-high';
-import { createUtilityContext, logger, normalizeError } from '@heyclaude/shared-runtime';
+import { createUtilityContext, logger } from './logging.ts';
+import { normalizeError } from './error-handling.ts';
 
 export interface HighlightCodeOptions {
   showLineNumbers?: boolean;

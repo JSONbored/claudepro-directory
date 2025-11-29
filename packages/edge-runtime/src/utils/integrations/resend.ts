@@ -7,8 +7,9 @@ import type { Resend } from 'npm:resend@6.5.2';
 import { RESEND_ENV } from '@heyclaude/edge-runtime/config/email-config.ts';
 import { Constants, type Database, type Database as DatabaseGenerated } from '@heyclaude/database-types';
 
-import { createUtilityContext, logError, logInfo, logWarn, normalizeError } from '@heyclaude/shared-runtime';
-import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
+import { createUtilityContext, logError, logInfo, logWarn } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 import { runWithRetry } from '@heyclaude/edge-runtime/utils/integrations/http-client.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 

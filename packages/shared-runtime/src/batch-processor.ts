@@ -3,7 +3,7 @@
  * Handles errors, retries, and progress tracking
  */
 
-import { createUtilityContext, logError, logInfo, logWarn } from '@heyclaude/shared-runtime';
+import { createUtilityContext, logError, logInfo, logWarn } from './logging.ts';
 
 export interface BatchProcessOptions<T> {
   concurrency?: number;

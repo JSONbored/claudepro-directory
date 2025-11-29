@@ -3,28 +3,13 @@
  * POST /webhook - Default route for external webhooks (catches all unmatched POST requests)
  */
 
-import {
-  badRequestResponse,
-  errorResponse,
-  initRequestLogging,
-  ingestWebhookEvent,
-  processPolarWebhook,
-  processResendWebhook,
-  successResponse,
-  traceStep,
-  unauthorizedResponse,
-  WebhookIngestError,
-  webhookCorsHeaders,
-} from '@heyclaude/edge-runtime';
-import {
-  createNotificationRouterContext,
-  logError,
-  logInfo,
-  logWarn,
-  logger,
-  MAX_BODY_SIZE,
-  validateBodySize,
-} from '@heyclaude/shared-runtime';
+import { badRequestResponse, errorResponse, successResponse, unauthorizedResponse, webhookCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { ingestWebhookEvent, WebhookIngestError } from '@heyclaude/edge-runtime/utils/webhook/ingest.ts';
+import { processPolarWebhook } from '@heyclaude/edge-runtime/utils/webhook/polar.ts';
+import { processResendWebhook } from '@heyclaude/edge-runtime/utils/webhook/resend.ts';
+import { createNotificationRouterContext, logError, logInfo, logWarn, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime/input-validation.ts';
 
 /**
  * Handle an incoming external webhook: validate payload size, ingest and route the event, and return a CORS-enabled HTTP response.

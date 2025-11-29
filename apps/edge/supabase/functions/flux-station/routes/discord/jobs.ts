@@ -4,26 +4,15 @@
  */
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import type { DatabaseWebhookPayload } from '@heyclaude/edge-runtime';
-import {
-  errorResponse,
-  handleJobNotificationDirect,
-  initRequestLogging,
-  pgmqDelete,
-  pgmqRead,
-  publicCorsHeaders,
-  successResponse,
-  traceRequestComplete,
-  traceStep,
-} from '@heyclaude/edge-runtime';
-import {
-  createUtilityContext,
-  normalizeError,
-  getProperty,
-  logError,
-  TIMEOUT_PRESETS,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import type { DatabaseWebhookPayload } from '@heyclaude/edge-runtime/utils/webhook/database-events.ts';
+import { errorResponse, publicCorsHeaders, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { handleJobNotificationDirect } from '@heyclaude/edge-runtime/handlers/discord/handler.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { createUtilityContext, logError } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { getProperty } from '@heyclaude/shared-runtime/object-utils.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 
 type JobRow = DatabaseGenerated['public']['Tables']['jobs']['Row'];
 

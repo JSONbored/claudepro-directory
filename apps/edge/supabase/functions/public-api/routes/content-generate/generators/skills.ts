@@ -6,11 +6,9 @@
  */
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import {
-  getStorageServiceClient,
-  supabaseServiceRole,
-  uploadObject,
-} from '@heyclaude/edge-runtime';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { getStorageServiceClient } from '@heyclaude/edge-runtime/utils/storage/client.ts';
+import { uploadObject } from '@heyclaude/edge-runtime/utils/storage/upload.ts';
 import type { ContentRow, GenerateResult, PackageGenerator } from '../types.ts';
 
 // Fixed date for deterministic ZIP output

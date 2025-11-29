@@ -4,39 +4,21 @@
  */
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import {
-  buildChangelogEmbed,
-  type ChangelogSection,
-  edgeEnv,
-  errorResponse,
-  fetchWithRetry,
-  type GitHubCommit,
-  getCacheConfigNumber,
-  getCacheConfigStringArray,
-  initRequestLogging,
-  insertNotification,
-  pgmqDelete,
-  pgmqRead,
-  publicCorsHeaders,
-  revalidateChangelogPages,
-  SITE_URL,
-  sendDiscordWebhook,
-  successResponse,
-  traceRequestComplete,
-  traceStep,
-} from '@heyclaude/edge-runtime';
-import {
-  createNotificationRouterContext,
-  createUtilityContext,
-  getProperty,
-  logError,
-  logInfo,
-  logWarn,
-  logger,
-  normalizeError,
-  TIMEOUT_PRESETS,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { errorResponse, publicCorsHeaders, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { fetchWithRetry } from '@heyclaude/edge-runtime/utils/integrations/http-client.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { SITE_URL } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { getCacheConfigNumber, getCacheConfigStringArray } from '@heyclaude/edge-runtime/config/static-cache-config.ts';
+import { insertNotification } from '@heyclaude/edge-runtime/notifications/service.ts';
+import { revalidateChangelogPages } from '@heyclaude/edge-runtime/changelog/service.ts';
+import { sendDiscordWebhook } from '@heyclaude/edge-runtime/utils/discord/client.ts';
+import { buildChangelogEmbed, type ChangelogSection, type GitHubCommit } from '@heyclaude/edge-runtime/utils/discord/embeds.ts';
+import { createNotificationRouterContext, createUtilityContext, logError, logInfo, logWarn, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { getProperty } from '@heyclaude/shared-runtime/object-utils.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 
 const CHANGELOG_NOTIFICATIONS_QUEUE = 'changelog_notify';
 const CHANGELOG_NOTIFICATIONS_BATCH_SIZE = 5;

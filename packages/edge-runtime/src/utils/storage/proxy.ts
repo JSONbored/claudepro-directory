@@ -1,4 +1,4 @@
-import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { createUtilityContext } from '@heyclaude/shared-runtime/logging.ts';
 import { getStorageAnonClient } from '@heyclaude/edge-runtime/utils/storage/client.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 

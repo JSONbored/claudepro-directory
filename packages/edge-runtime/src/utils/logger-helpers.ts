@@ -12,7 +12,7 @@
  * - Mixin reads from logger.bindings() and injects automatically
  */
 
-import { logTrace, logger } from '@heyclaude/shared-runtime';
+import { logTrace, logger } from '@heyclaude/shared-runtime/logging.ts';
 
 /**
  * Initialize request-scoped logging: emit an entry trace and set logger bindings for the request.

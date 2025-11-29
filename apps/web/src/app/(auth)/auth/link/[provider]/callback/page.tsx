@@ -23,7 +23,8 @@ import { UI_CLASSES, Button ,
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 
-// This page is fully client-side (linkIdentity requires browser context)
+// Force dynamic rendering - auth callback pages should never be cached
+export const dynamic = 'force-dynamic';
 
 /**
  * Initiates the client-side OAuth account linking flow for the given provider, handling validation,

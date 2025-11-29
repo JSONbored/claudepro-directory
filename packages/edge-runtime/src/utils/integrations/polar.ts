@@ -1,5 +1,6 @@
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
-import { createUtilityContext, normalizeError } from '@heyclaude/shared-runtime';
+import { createUtilityContext } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { fetchWithRetry } from '@heyclaude/edge-runtime/utils/integrations/http-client.ts';
 import type { Database } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';

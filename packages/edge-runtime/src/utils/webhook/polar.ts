@@ -1,6 +1,6 @@
 import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import { normalizeError } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import type { WebhookIngestResult } from '@heyclaude/edge-runtime/utils/webhook/ingest.ts';
 import { finishWebhookEventRun, startWebhookEventRun } from '@heyclaude/edge-runtime/utils/webhook/run-logger.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';

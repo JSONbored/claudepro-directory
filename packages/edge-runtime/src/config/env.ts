@@ -3,7 +3,7 @@ import {
   getEnvVar as getOptionalEnvVar,
   getEnvVar as getEnvVarOrDefault,
   requireEnvVar,
-} from '@heyclaude/shared-runtime';
+} from '@heyclaude/shared-runtime/env.ts';
 
 export function getOptionalEnv(name: string): string | undefined {
   return getOptionalEnvVar(name);

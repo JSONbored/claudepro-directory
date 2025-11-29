@@ -16,23 +16,12 @@
  * - Returns early on validation failures
  */
 
-import {
-  badRequestResponse,
-  initRequestLogging,
-  publicCorsHeaders,
-  traceRequestComplete,
-  traceStep,
-  jsonResponse,
-  uploadObject,
-  getStorageServiceClient,
-} from '@heyclaude/edge-runtime';
-import {
-  createDataApiContext,
-  logError,
-  logInfo,
-  logger,
-  normalizeError,
-} from '@heyclaude/shared-runtime';
+import { badRequestResponse, publicCorsHeaders, jsonResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { uploadObject } from '@heyclaude/edge-runtime/utils/storage/upload.ts';
+import { getStorageServiceClient } from '@heyclaude/edge-runtime/utils/storage/client.ts';
+import { createDataApiContext, logError, logInfo, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import {
   optimizeImage,
   getImageDimensions,

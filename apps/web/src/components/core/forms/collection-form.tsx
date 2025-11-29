@@ -2,19 +2,24 @@
 
 /**
  * Collection Form Component
- * Form for creating and editing user collections
  *
- * Uses react-hook-form with zod validation
- * Follows patterns from existing forms in the codebase
+ * Form for creating and editing user collections.
+ * Uses the standardized `useFormSubmit` hook for submission handling.
+ *
+ * @example
+ * ```tsx
+ * <CollectionForm
+ *   bookmarks={userBookmarks}
+ *   mode="create"
+ * />
+ * ```
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { normalizeError } from '@heyclaude/shared-runtime';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useFormSubmit } from '@heyclaude/web-runtime/hooks';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useRouter } from 'next/navigation';
-import { useId, useState, useTransition } from 'react';
+import { useId, useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { FormField } from '@/src/components/core/forms/form-field-wrapper';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -25,19 +30,38 @@ type Bookmark = Database['public']['Tables']['bookmarks']['Row'];
 type CollectionData = Database['public']['Tables']['user_collections']['Row'];
 
 interface CollectionFormProps {
+  /** User's existing bookmarks to optionally add to collection */
   bookmarks: Bookmark[];
+  /** Form mode - 'create' for new collections, 'edit' for existing */
   mode: 'create' | 'edit';
+  /** Existing collection data (required for edit mode) */
   collection?: CollectionData;
 }
 
+/**
+ * Form component for creating and editing user collections.
+ * Handles validation, submission, and navigation automatically.
+ */
 export function CollectionForm({ bookmarks, mode, collection }: CollectionFormProps) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [selectedBookmarks, setSelectedBookmarks] = useState<string[]>([]);
-  const runLoggedAsync = useLoggedAsync({
+
+  // Use standardized form submission hook
+  const { isPending, handleSubmit, router } = useFormSubmit<CollectionData>({
     scope: 'CollectionForm',
-    defaultMessage: 'Collection operation failed',
-    defaultRethrow: false,
+    mode,
+    refreshOnSuccess: true,
+    messages: {
+      createSuccess: 'Collection created successfully',
+      editSuccess: 'Collection updated successfully',
+      errorTitle: 'Failed to save collection',
+    },
+    onSuccess: (result) => {
+      // Navigate to the collection page
+      router.push(`/account/library/${result.slug}`);
+    },
+    logContext: {
+      collectionId: collection?.id,
+    },
   });
 
   // Generate unique ID for checkbox (FormField auto-generates IDs for other fields)
@@ -62,9 +86,10 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Client-side validation
     if (!name.trim()) {
       toasts.error.validation('Collection name is required');
       return;
@@ -75,70 +100,42 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       return;
     }
 
-    startTransition(async () => {
-      try {
-        await runLoggedAsync(
-          async () => {
-            if (mode === 'create') {
-              const result = await createCollection({
-                name: name.trim(),
-                slug: slug.trim(),
-                description: description.trim() || null,
-                is_public: isPublic,
-              });
+    await handleSubmit(async () => {
+      if (mode === 'create') {
+        const result = await createCollection({
+          name: name.trim(),
+          slug: slug.trim(),
+          description: description.trim() || null,
+          is_public: isPublic,
+        });
 
-              if (result?.data?.success) {
-                if (!result.data.collection) {
-                  throw new Error('Collection data not returned');
-                }
-                toasts.success.itemCreated('Collection');
-                const collectionSlug = result.data.collection.slug;
-                router.push(`/account/library/${collectionSlug}`);
-                router.refresh();
-              } else {
-                throw new Error('Collection creation returned success: false');
-              }
-            } else if (collection) {
-              const result = await updateCollection({
-                id: collection.id,
-                name: name.trim(),
-                slug: slug.trim(),
-                description: description.trim() || null,
-                is_public: isPublic,
-              });
+        if (!result?.data?.success || !result.data.collection) {
+          throw new Error('Collection creation failed');
+        }
 
-              if (result?.data?.success) {
-                if (!result.data.collection) {
-                  throw new Error('Collection data not returned');
-                }
-                toasts.success.itemUpdated('Collection');
-                router.push(`/account/library/${result.data.collection.slug}`);
-                router.refresh();
-              } else {
-                throw new Error('Collection update returned success: false');
-              }
-            }
-          },
-          {
-            message: mode === 'create' ? 'Collection creation failed' : 'Collection update failed',
-            context: {
-              mode,
-              collectionId: collection?.id,
-            },
-          }
-        );
-      } catch (error) {
-        // Error already logged by useLoggedAsync
-        toasts.error.fromError(
-          normalizeError(error, 'Failed to save collection'),
-          'Failed to save collection'
-        );
+        return result.data.collection;
+      } else if (collection) {
+        const result = await updateCollection({
+          id: collection.id,
+          name: name.trim(),
+          slug: slug.trim(),
+          description: description.trim() || null,
+          is_public: isPublic,
+        });
+
+        if (!result?.data?.success || !result.data.collection) {
+          throw new Error('Collection update failed');
+        }
+
+        return result.data.collection;
       }
+
+      throw new Error('Invalid form state');
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className={UI_CLASSES.FORM_SECTION_SPACING}>
+    <form onSubmit={onSubmit} className={UI_CLASSES.FORM_SECTION_SPACING}>
       {/* Collection Name */}
       <FormField
         variant="input"

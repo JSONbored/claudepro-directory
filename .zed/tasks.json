@@ -1,7 +1,14 @@
 [
   {
-    "label": "Type Check: Full Workspace",
+    "label": "Type Check: Full Workspace (Turbo)",
     "command": "pnpm type-check",
+    "args": [],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "env": {}
+  },
+  {
+    "label": "Type Check: Build Dirs Only (Turbo)",
+    "command": "pnpm type-check:build",
     "args": [],
     "cwd": "$ZED_WORKTREE_ROOT",
     "env": {}

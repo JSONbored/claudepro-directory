@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
+import { fetchWithRetry, type FetchRetryConfig } from '@heyclaude/web-runtime/client';
 import { getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
@@ -19,53 +20,6 @@ const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
 const DEFAULT_MAX_RETRIES = 3;
 const DEFAULT_INITIAL_RETRY_DELAY_MS = 1000;
 const DEFAULT_RETRY_BACKOFF_MULTIPLIER = 2;
-
-interface RetryConfig {
-  maxRetries: number;
-  initialDelayMs: number;
-  backoffMultiplier: number;
-}
-
-/**
- * Retry helper with exponential backoff
- * Only retries on network errors or 5xx server errors
- */
-async function fetchWithRetry(
-  url: string,
-  options: RequestInit,
-  retryConfig: RetryConfig,
-  retries = retryConfig.maxRetries
-): Promise<Response> {
-  try {
-    const response = await fetch(url, options);
-
-    // Don't retry on client errors (4xx) - these are user/validation errors
-    if (!response.ok && response.status >= 400 && response.status < 500) {
-      return response;
-    }
-
-    // Retry on server errors (5xx)
-    if (!response.ok && response.status >= 500 && retries > 0) {
-      const delay = retryConfig.initialDelayMs * retryConfig.backoffMultiplier ** (retryConfig.maxRetries - retries);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      return fetchWithRetry(url, options, retryConfig, retries - 1);
-    }
-
-    return response;
-  } catch (error) {
-    // Retry on network errors
-    if (retries > 0) {
-      const delay = retryConfig.initialDelayMs * retryConfig.backoffMultiplier ** (retryConfig.maxRetries - retries);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      return fetchWithRetry(url, options, retryConfig, retries - 1);
-    }
-    logClientError('fetchWithRetry: request failed', error, 'useNewsletter.fetchWithRetry', {
-      url,
-      attempt: retryConfig.maxRetries - retries + 1,
-    });
-    throw error;
-  }
-}
 
 export interface UseNewsletterOptions {
   source: Database['public']['Enums']['newsletter_source'];
@@ -112,7 +66,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
   const pulse = usePulse();
 
   // Load retry config from static defaults (synchronous, per-hook instance)
-  const retryConfig = useMemo(() => {
+  const retryConfig: FetchRetryConfig = useMemo(() => {
     try {
       const config = getNewsletterConfig();
       return {
@@ -120,8 +74,8 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         initialDelayMs: config['newsletter.initial_retry_delay_ms'] ?? DEFAULT_INITIAL_RETRY_DELAY_MS,
         backoffMultiplier: config['newsletter.retry_backoff_multiplier'] ?? DEFAULT_RETRY_BACKOFF_MULTIPLIER,
       };
-    } catch (error) {
-      logClientWarn('useNewsletter: failed to load retry config', error, 'useNewsletter.loadConfig');
+    } catch (configError: unknown) {
+      logClientWarn('useNewsletter: failed to load retry config', configError, 'useNewsletter.loadConfig');
       return {
         maxRetries: DEFAULT_MAX_RETRIES,
         initialDelayMs: DEFAULT_INITIAL_RETRY_DELAY_MS,
@@ -202,8 +156,8 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
                 ...metadata,
               },
             }),
-          ]).catch((error) => {
-            logClientWarn('useNewsletter: signup success tracking failed', error, 'useNewsletter.trackSuccess', {
+          ]).catch((trackingError: unknown) => {
+            logClientWarn('useNewsletter: signup success tracking failed', trackingError, 'useNewsletter.trackSuccess', {
               source,
               email: normalizedEmail,
               subscriptionId: result.subscription_id,
@@ -235,8 +189,8 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
                 ...metadata,
               },
             })
-            .catch((error) => {
-              logClientWarn('useNewsletter: signup error tracking failed', error, 'useNewsletter.trackError', { source });
+            .catch((trackingError: unknown) => {
+              logClientWarn('useNewsletter: signup error tracking failed', trackingError, 'useNewsletter.trackError', { source });
             });
 
           logClientError('Newsletter subscription failed', errorMessage, 'useNewsletter.subscribe', {
@@ -271,8 +225,8 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
               ...metadata,
             },
           })
-          .catch((error) => {
-            logClientWarn('useNewsletter: exception tracking failed', error, 'useNewsletter.trackException', { source });
+          .catch((trackingError: unknown) => {
+            logClientWarn('useNewsletter: exception tracking failed', trackingError, 'useNewsletter.trackException', { source });
           });
 
         logClientError('Newsletter subscription error', err, 'useNewsletter.subscribe', {

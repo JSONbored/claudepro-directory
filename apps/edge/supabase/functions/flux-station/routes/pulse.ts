@@ -8,30 +8,16 @@
 import { Resend } from 'npm:resend@6.5.2';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import {
-  errorResponse,
-  getCacheConfigNumber,
-  initRequestLogging,
-  pgmqDelete,
-  pgmqRead,
-  publicCorsHeaders,
-  RESEND_ENV,
-  successResponse,
-  supabaseServiceRole,
-  traceRequestComplete,
-  traceStep,
-  updateContactEngagement,
-} from '@heyclaude/edge-runtime';
-import {
-  createUtilityContext,
-  logError,
-  logInfo,
-  logWarn,
-  logger,
-  normalizeError,
-  TIMEOUT_PRESETS,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import { errorResponse, publicCorsHeaders, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { getCacheConfigNumber } from '@heyclaude/edge-runtime/config/static-cache-config.ts';
+import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { RESEND_ENV } from '@heyclaude/edge-runtime/config/email-config.ts';
+import { updateContactEngagement } from '@heyclaude/edge-runtime/utils/integrations/resend.ts';
+import { createUtilityContext, logError, logInfo, logWarn, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 
 const PULSE_QUEUE_NAME = 'pulse';
 const PULSE_BATCH_SIZE_DEFAULT = 100; // Fallback if config unavailable

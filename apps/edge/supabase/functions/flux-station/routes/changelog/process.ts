@@ -4,46 +4,32 @@
  */
 
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import type { GitHubCommit } from '@heyclaude/edge-runtime';
+import type { GitHubCommit } from '@heyclaude/edge-runtime/utils/discord/embeds.ts';
+import { errorResponse, publicCorsHeaders, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { fetchWithRetry } from '@heyclaude/edge-runtime/utils/integrations/http-client.ts';
+import { pgmqDelete, pgmqRead, pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { supabaseServiceRole, SITE_URL } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { getCacheConfigNumber } from '@heyclaude/edge-runtime/config/static-cache-config.ts';
+import { startWebhookEventRun, finishWebhookEventRun } from '@heyclaude/edge-runtime/utils/webhook/run-logger.ts';
+import { initRequestLogging, traceStep, traceRequestComplete } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
 import {
   buildChangelogMetadata,
   type ChangelogInsert,
   type ChangelogRow,
   deriveChangelogKeywords,
-  errorResponse,
-  fetchWithRetry,
   filterConventionalCommits,
-  finishWebhookEventRun,
   generateMarkdownContent,
   generateTldr,
-  getCacheConfigNumber,
   groupCommitsByType,
   inferTitle,
-  pgmqDelete,
-  pgmqRead,
-  pgmqSend,
-  publicCorsHeaders,
-  SITE_URL,
-  startWebhookEventRun,
-  successResponse,
-  supabaseServiceRole,
   transformSectionsToChanges,
   type VercelWebhookPayload,
-} from '@heyclaude/edge-runtime';
-import {
-  CIRCUIT_BREAKER_CONFIGS,
-  createNotificationRouterContext,
-  createUtilityContext,
-  getProperty,
-  logError,
-  logInfo,
-  normalizeError,
-  TIMEOUT_PRESETS,
-  withCircuitBreaker,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
-import { initRequestLogging, traceStep, traceRequestComplete } from '@heyclaude/edge-runtime';
-import { logger } from '@heyclaude/shared-runtime';
+} from '@heyclaude/edge-runtime/changelog/service.ts';
+import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '@heyclaude/shared-runtime/circuit-breaker.ts';
+import { createNotificationRouterContext, createUtilityContext, logError, logInfo, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { getProperty } from '@heyclaude/shared-runtime/object-utils.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 
 const CHANGELOG_PROCESSING_QUEUE = 'changelog_process';
 const CHANGELOG_PROCESSING_BATCH_SIZE = 5;

@@ -4,7 +4,7 @@
  */
 
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
-import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime';
+import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime/input-validation.ts';
 import { badRequestResponse, publicCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
 
 /**

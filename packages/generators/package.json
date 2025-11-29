@@ -41,6 +41,8 @@
   },
   "scripts": {
     "build": "tsc -b",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --config ../../config/tools/eslint.config.mjs src --ignore-pattern '**/*.generated.ts'",
     "clean": "rm -rf dist"
   },
   "dependencies": {

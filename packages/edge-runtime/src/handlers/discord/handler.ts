@@ -14,7 +14,8 @@ import {
   buildErrorEmbed,
   buildSubmissionEmbed,
 } from '@heyclaude/edge-runtime/utils/discord/embeds.ts';
-import { normalizeError, logError, logInfo } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { logError, logInfo, createDiscordHandlerContext, withContext } from '@heyclaude/shared-runtime/logging.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 import {
   badRequestResponse,
@@ -22,7 +23,6 @@ import {
   errorResponse,
   successResponse,
 } from '@heyclaude/edge-runtime/utils/http.ts';
-import { createDiscordHandlerContext, withContext } from '@heyclaude/shared-runtime';
 import { pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
 import {
   type DatabaseWebhookPayload,

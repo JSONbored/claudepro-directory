@@ -1,3 +1,56 @@
+/**
+ * @heyclaude/web-runtime - Next.js Web Application Runtime
+ *
+ * This package provides client-safe utilities, components, and hooks for the
+ * Next.js web application. It is designed to be imported by both client and
+ * server components.
+ *
+ * ## Package Boundaries
+ *
+ * ### @heyclaude/shared-runtime
+ * - Pure TypeScript utilities (no React, no Next.js)
+ * - Environment-agnostic (works in Node, Deno, browser)
+ * - Examples: config, logging, error handling, schemas
+ *
+ * ### @heyclaude/web-runtime (this package)
+ * - React/Next.js specific utilities
+ * - Client-safe by default (main export)
+ * - Hooks, components, UI primitives
+ *
+ * ### @heyclaude/web-runtime/server
+ * - Server-only utilities (marked with 'server-only')
+ * - Supabase server clients, admin operations
+ * - Data loaders, cache configuration
+ * - NEVER import from client components
+ *
+ * ### @heyclaude/web-runtime/actions
+ * - Server actions (marked with 'use server')
+ * - Safe to import from client (Next.js handles serialization)
+ *
+ * ### @heyclaude/web-runtime/hooks
+ * - Client-side React hooks
+ * - State management, effects, callbacks
+ *
+ * ### @heyclaude/web-runtime/ui
+ * - UI components (client-safe)
+ * - Buttons, cards, forms, skeletons, etc.
+ *
+ * ### @heyclaude/data-layer
+ * - Database types and RPC utilities
+ * - Supabase-specific data operations
+ *
+ * ## When to Add to Which Package
+ *
+ * - **Pure utility function?** → shared-runtime
+ * - **React hook?** → web-runtime/hooks
+ * - **React component?** → web-runtime/ui
+ * - **Server-only data fetching?** → web-runtime/server
+ * - **Server action?** → web-runtime/actions
+ * - **Database types/schemas?** → data-layer
+ *
+ * @packageDocumentation
+ */
+
 export * from './config/social-links.ts';
 // Re-export from shared-runtime for backward compatibility during refactor
 export { APP_CONFIG, type AppConfig } from '@heyclaude/shared-runtime';

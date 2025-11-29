@@ -3,30 +3,24 @@
  * ... (comments preserved) ...
  */
 
+import { buildStandardContext, type StandardContext } from '@heyclaude/edge-runtime/utils/context.ts';
+import { chain } from '@heyclaude/edge-runtime/middleware/chain.ts';
+import type { Middleware } from '@heyclaude/edge-runtime/middleware/types.ts';
+import { rateLimit } from '@heyclaude/edge-runtime/middleware/rate-limit.ts';
+import { serveEdgeApp } from '@heyclaude/edge-runtime/app.ts';
+import { handleChangelogSyncRequest } from '@heyclaude/edge-runtime/handlers/changelog/handler.ts';
 import {
-  buildStandardContext,
-  chain,
   errorResponse,
-  handleChangelogSyncRequest,
   jsonResponse,
-  type Middleware,
   publicCorsHeaders,
-  rateLimit,
-  type StandardContext,
-  serveEdgeApp,
   badRequestResponse,
   unauthorizedResponse,
   discordCorsHeaders,
-} from '@heyclaude/edge-runtime';
-import {
-  createUtilityContext,
-  logError,
-  logWarn,
-  timingSafeEqual,
-  verifyDiscordWebhookSignature,
-  MAX_BODY_SIZE,
-  validateBodySize,
-} from '@heyclaude/shared-runtime';
+} from '@heyclaude/edge-runtime/utils/http.ts';
+import { createUtilityContext, logError, logWarn } from '@heyclaude/shared-runtime/logging.ts';
+import { timingSafeEqual } from '@heyclaude/shared-runtime/crypto-utils.ts';
+import { verifyDiscordWebhookSignature } from '@heyclaude/shared-runtime/webhook/crypto.ts';
+import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime/input-validation.ts';
 import { handleChangelogNotify } from './routes/changelog/notify.ts';
 import { handleChangelogProcess } from './routes/changelog/process.ts';
 import { handleDiscordDirect } from './routes/discord/direct.ts';

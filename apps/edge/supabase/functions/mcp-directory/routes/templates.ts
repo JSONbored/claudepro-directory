@@ -7,7 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { logError } from '@heyclaude/shared-runtime';
+import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import type { GetTemplatesInput } from '../lib/types.ts';
 
 type ContentTemplatesItem = Database['public']['CompositeTypes']['content_templates_item'];

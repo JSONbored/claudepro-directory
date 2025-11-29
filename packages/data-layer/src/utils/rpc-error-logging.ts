@@ -20,7 +20,8 @@
  */
 
 import pino from 'pino';
-import { createPinoConfig, normalizeError } from '@heyclaude/shared-runtime';
+import { createPinoConfig } from '@heyclaude/shared-runtime/logger/index.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 
 // Create Pino logger instance with centralized configuration
 // Pino automatically handles error serialization and redaction

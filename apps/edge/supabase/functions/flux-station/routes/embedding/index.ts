@@ -5,36 +5,17 @@
 /// <reference types="@heyclaude/edge-runtime/deno-globals.d.ts" />
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import {
-  badRequestResponse,
-  errorResponse,
-  initRequestLogging,
-  parseJsonBody,
-  pgmqDelete,
-  pgmqRead,
-  pgmqSend,
-  publicCorsHeaders,
-  successResponse,
-  supabaseServiceRole,
-  traceRequestComplete,
-  traceStep,
-  unauthorizedResponse,
-  webhookCorsHeaders,
-} from '@heyclaude/edge-runtime';
-import {
-  buildSecurityHeaders,
-  CIRCUIT_BREAKER_CONFIGS,
-  createUtilityContext,
-  normalizeError,
-  logError,
-  logInfo,
-  logWarn,
-  logger,
-  TIMEOUT_PRESETS,
-  verifySupabaseDatabaseWebhook,
-  withCircuitBreaker,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import { badRequestResponse, errorResponse, publicCorsHeaders, successResponse, unauthorizedResponse, webhookCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { parseJsonBody } from '@heyclaude/edge-runtime/utils/parse-json-body.ts';
+import { pgmqDelete, pgmqRead, pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { buildSecurityHeaders } from '@heyclaude/shared-runtime/security-headers.ts';
+import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '@heyclaude/shared-runtime/circuit-breaker.ts';
+import { createUtilityContext, logError, logInfo, logWarn, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
+import { verifySupabaseDatabaseWebhook } from '@heyclaude/shared-runtime/webhook/crypto.ts';
 
 // Webhook payload structure from Supabase database webhooks
 // Use generated type for the record (content table row)

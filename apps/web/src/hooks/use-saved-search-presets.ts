@@ -313,10 +313,10 @@ function sanitizeFilters(filters: FilterState = {}): FilterState {
     const normalizedTags = Array.from(
       new Set(
         filters.tags
-          .map((tag) => (typeof tag === 'string' ? tag.trim() : ''))
-          .filter((tag): tag is string => tag.length > 0)
+          .map((tag: string) => (typeof tag === 'string' ? tag.trim() : ''))
+          .filter((tag: string): tag is string => tag.length > 0)
       )
-    ).sort((a, b) => a.localeCompare(b));
+    ).sort((a: string, b: string) => a.localeCompare(b));
     if (normalizedTags.length > 0) {
       sanitized.tags = normalizedTags;
     }

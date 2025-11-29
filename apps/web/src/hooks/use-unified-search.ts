@@ -117,10 +117,10 @@ export function useUnifiedSearch({
   // Toggle tag selection
   const toggleTag = useCallback(
     (tag: string) => {
-      setFilters((prev) => {
+      setFilters((prev: FilterState) => {
         const currentTags = prev.tags || [];
         const newTags = currentTags.includes(tag)
-          ? currentTags.filter((t) => t !== tag)
+          ? currentTags.filter((t: string) => t !== tag)
           : [...currentTags, tag];
         const newFilters: FilterState = {
           ...prev,

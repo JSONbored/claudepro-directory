@@ -11,8 +11,10 @@
  * 4. Client uses token with MCP server
  */
 
-import { edgeEnv, initRequestLogging, traceStep } from '@heyclaude/edge-runtime';
-import { createDataApiContext, getEnvVar, logError, logger } from '@heyclaude/shared-runtime';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { initRequestLogging, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { createDataApiContext, logError, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { getEnvVar } from '@heyclaude/shared-runtime/env.ts';
 import type { Context } from 'hono';
 
 const SUPABASE_URL = edgeEnv.supabase.url;

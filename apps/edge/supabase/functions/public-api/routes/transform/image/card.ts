@@ -7,22 +7,12 @@
 
 import { ImageResponse } from 'https://deno.land/x/og_edge@0.0.4/mod.ts';
 import React from 'npm:react@18.3.1';
-import {
-  initRequestLogging,
-  publicCorsHeaders,
-  jsonResponse,
-  traceRequestComplete,
-  traceStep,
-  uploadObject,
-  getStorageServiceClient,
-} from '@heyclaude/edge-runtime';
-import {
-  createDataApiContext,
-  logError,
-  logInfo,
-  logger,
-  normalizeError,
-} from '@heyclaude/shared-runtime';
+import { publicCorsHeaders, jsonResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { uploadObject } from '@heyclaude/edge-runtime/utils/storage/upload.ts';
+import { getStorageServiceClient } from '@heyclaude/edge-runtime/utils/storage/client.ts';
+import { createDataApiContext, logError, logInfo, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import {
   ensureImageMagickInitialized,
   getImageDimensions,

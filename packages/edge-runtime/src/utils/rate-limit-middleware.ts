@@ -8,8 +8,8 @@ import {
   jsonResponse,
   publicCorsHeaders,
 } from '@heyclaude/edge-runtime/utils/http.ts';
-import type { RateLimitResult } from '@heyclaude/shared-runtime';
-import { RATE_LIMIT_PRESETS } from '@heyclaude/shared-runtime';
+import type { RateLimitResult } from '@heyclaude/shared-runtime/rate-limit.ts';
+import { RATE_LIMIT_PRESETS } from '@heyclaude/shared-runtime/rate-limit.ts';
 import type { RouterContext } from '@heyclaude/edge-runtime/utils/router.ts';
 
 export interface RateLimitMiddlewareOptions {

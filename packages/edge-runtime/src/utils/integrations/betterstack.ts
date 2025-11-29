@@ -3,8 +3,8 @@
  * Handles heartbeat calls for scheduled tasks
  */
 
-import { logWarn } from '@heyclaude/shared-runtime';
-import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
+import { logWarn } from '@heyclaude/shared-runtime/logging.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 
 /**
  * Send a BetterStack heartbeat for a scheduled task and record failures.

@@ -20,6 +20,7 @@ export * from './ui/components/cards/config-card.tsx';
 export * from './ui/components/cards/card-grid.tsx';
 export * from './ui/components/cards/swipeable-card.tsx';
 export * from './ui/components/error-boundary.tsx';
+export * from './ui/components/segment-error-boundary.tsx';
 export * from './ui/components/input.tsx';
 export * from './ui/components/label.tsx';
 export * from './ui/components/tabs.tsx';

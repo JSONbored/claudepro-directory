@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "sideEffects": false,
+  "scripts": {
+    "build": "tsc --build",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'Skipping lint for generated types'"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

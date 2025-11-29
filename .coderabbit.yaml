@@ -32,6 +32,19 @@ reviews:
     enabled: true
     drafts: false
   
+  # ============================================================================
+  # Finishing Touches - Auto-generate docstrings and unit tests
+  # ============================================================================
+  # When enabled, CodeRabbit will offer to generate docstrings and unit tests
+  # for new code in PRs. Can also trigger manually with:
+  # - @coderabbitai generate docstrings
+  # - @coderabbitai generate unit tests
+  finishing_touches:
+    docstrings:
+      enabled: true
+    unit_tests:
+      enabled: true
+  
   # PATH FILTERS - Critical for staying under file limit (now 200 with Pro)
   # Only include source code files that should be reviewed
   # Exclude everything else (generated files, binaries, docs, etc.)
@@ -234,6 +247,8 @@ knowledge_base:
 # ============================================================================
 code_generation:
   docstrings:
+    # Language for generated docstrings
+    language: "en-US"
     path_instructions:
       # Shared Runtime - Core utilities and logging
       - path: "packages/shared-runtime/src/**/*.ts"

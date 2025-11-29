@@ -2,7 +2,7 @@ import { getOptionalEnv } from '@heyclaude/edge-runtime/config/env.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { webhookCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
 import { verifyVercelSignature } from '@heyclaude/edge-runtime/utils/integrations/vercel.ts';
-import { verifySvixSignature } from '@heyclaude/shared-runtime';
+import { verifySvixSignature } from '@heyclaude/shared-runtime/webhook/crypto.ts';
 
 export type WebhookProviderName = Extract<
   DatabaseGenerated['public']['Enums']['webhook_source'],

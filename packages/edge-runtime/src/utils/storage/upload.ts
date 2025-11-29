@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { normalizeError } from '@heyclaude/shared-runtime';
-import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { createUtilityContext } from '@heyclaude/shared-runtime/logging.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 import {
   type BuildStorageObjectPathOptions,

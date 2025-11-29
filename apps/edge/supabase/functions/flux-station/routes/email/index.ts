@@ -3,60 +3,36 @@
  */
 
 import { Resend } from 'npm:resend@6.5.2';
-import { NewsletterService } from '@heyclaude/data-layer';
+import { NewsletterService } from '@heyclaude/data-layer/services/newsletter.ts';
 import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import {
-  AUTH_HOOK_ENV,
-  badRequestResponse,
-  buildContactProperties,
-  CONTACT_FROM,
-  ContactSubmissionAdmin,
-  ContactSubmissionUser,
-  checkDigestRateLimit,
-  edgeEnv,
-  enrollInOnboardingSequence,
-  errorResponse,
-  getAllSubscribers,
-  getPreviousWeekStart,
-  HELLO_FROM,
-  handleDatabaseError,
-  initRequestLogging,
-  invalidateCacheByKey,
-  JOB_EMAIL_CONFIGS,
-  JOBS_FROM,
-  jsonResponse,
-  NewsletterWelcome,
-  parseJsonBody,
-  processSequenceEmail,
-  publicCorsHeaders,
-  RESEND_ENV,
-  renderEmailTemplate,
-  renderSignupOAuthEmail,
-  resolveNewsletterInterest,
-  sendBatchDigest,
-  sendBetterStackHeartbeat,
-  sendEmail,
-  successResponse,
-  supabaseServiceRole,
-  syncContactToResend,
-  traceRequestComplete,
-  traceStep,
-  TRANSACTIONAL_EMAIL_CONFIGS,
-  validateEnvironment,
-  verifyAuthHookWebhook,
-} from '@heyclaude/edge-runtime';
-import {
-  batchProcess,
-  createEmailHandlerContext,
-  normalizeError,
-  logError,
-  logInfo,
-  logger,
-  logWarn,
-  MAX_BODY_SIZE,
-  normalizeError,
-  validateEmail,
-} from '@heyclaude/shared-runtime';
+// edge-runtime imports
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '@heyclaude/edge-runtime/config/email-config.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { badRequestResponse, errorResponse, jsonResponse, publicCorsHeaders, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { parseJsonBody } from '@heyclaude/edge-runtime/utils/parse-json-body.ts';
+import { handleDatabaseError } from '@heyclaude/edge-runtime/utils/database-errors.ts';
+import { invalidateCacheByKey } from '@heyclaude/edge-runtime/utils/cache.ts';
+import { sendBetterStackHeartbeat } from '@heyclaude/edge-runtime/utils/integrations/betterstack.ts';
+import { buildContactProperties, enrollInOnboardingSequence, resolveNewsletterInterest, sendEmail, syncContactToResend } from '@heyclaude/edge-runtime/utils/integrations/resend.ts';
+import { verifyAuthHookWebhook } from '@heyclaude/edge-runtime/utils/webhook/auth-hook.ts';
+import { checkDigestRateLimit, getAllSubscribers, getPreviousWeekStart, sendBatchDigest } from '@heyclaude/edge-runtime/utils/email/digest-helpers.ts';
+import { processSequenceEmail } from '@heyclaude/edge-runtime/utils/email/sequence-helpers.ts';
+import { renderEmailTemplate } from '@heyclaude/edge-runtime/utils/email/base-template.tsx';
+import { CONTACT_FROM, HELLO_FROM, JOBS_FROM } from '@heyclaude/edge-runtime/utils/email/templates/manifest.ts';
+import { NewsletterWelcome } from '@heyclaude/edge-runtime/utils/email/templates/newsletter-welcome.tsx';
+import { ContactSubmissionAdmin } from '@heyclaude/edge-runtime/utils/email/templates/contact-submission-admin.tsx';
+import { ContactSubmissionUser } from '@heyclaude/edge-runtime/utils/email/templates/contact-submission-user.tsx';
+import { renderSignupOAuthEmail } from '@heyclaude/edge-runtime/utils/email/templates/signup-oauth.tsx';
+import { JOB_EMAIL_CONFIGS } from '@heyclaude/edge-runtime/utils/email/config/job-emails.ts';
+import { TRANSACTIONAL_EMAIL_CONFIGS } from '@heyclaude/edge-runtime/utils/email/config/transactional-emails.ts';
+// shared-runtime imports
+import { batchProcess } from '@heyclaude/shared-runtime/batch-processor.ts';
+import { createEmailHandlerContext, logError, logInfo, logger, logWarn } from '@heyclaude/shared-runtime/logging.ts';
+import { MAX_BODY_SIZE } from '@heyclaude/shared-runtime/input-validation.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { validateEmail } from '@heyclaude/shared-runtime/validate-email.ts';
 
 validateEnvironment(['resend', 'auth-hook']);
 

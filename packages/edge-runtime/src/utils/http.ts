@@ -4,7 +4,8 @@
 
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 import { getCacheConfigNumber } from '@heyclaude/edge-runtime/config/static-cache-config.ts';
-import { logError, createUtilityContext, buildSecurityHeaders } from '@heyclaude/shared-runtime';
+import { logError, createUtilityContext } from '@heyclaude/shared-runtime/logging.ts';
+import { buildSecurityHeaders } from '@heyclaude/shared-runtime/security-headers.ts';
 
 /* ----------------------------- CORS PRESETS ----------------------------- */
 

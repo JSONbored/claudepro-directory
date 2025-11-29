@@ -1,5 +1,5 @@
 import sanitizeHtml from 'sanitize-html';
-import { createUtilityContext, logger } from '@heyclaude/shared-runtime';
+import { createUtilityContext, logger } from './logging.ts';
 
 export interface SanitizeTextOptions {
   maxLength?: number;

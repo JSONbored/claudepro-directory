@@ -11,16 +11,13 @@
  * Called by pg_cron job every 2 minutes to process all queues automatically.
  */
 
-import { edgeEnv, initRequestLogging, pgmqMetrics, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
-import {
-  createUtilityContext,
-  getProperty,
-  logError,
-  logInfo,
-  normalizeError,
-  TIMEOUT_PRESETS,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { pgmqMetrics } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { createUtilityContext, logError, logInfo } from '@heyclaude/shared-runtime/logging.ts';
+import { getProperty } from '@heyclaude/shared-runtime/object-utils.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 import { handleChangelogNotify } from './changelog/notify.ts';
 import { handleChangelogProcess } from './changelog/process.ts';
 import { handleDiscordJobs } from './discord/jobs.ts';

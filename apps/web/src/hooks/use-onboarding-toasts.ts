@@ -110,7 +110,7 @@ export function useOnboardingToasts({
       }
     };
 
-    fetchNotifications().catch((error) => {
+    fetchNotifications().catch((error: unknown) => {
       const normalized = normalizeError(error, 'Failed to fetch notifications');
       logger.warn('Failed to fetch notifications', { error: normalized.message });
     });
@@ -186,7 +186,7 @@ export function useOnboardingToasts({
       }
     };
 
-    createNotifications().catch((error) => {
+    createNotifications().catch((error: unknown) => {
       const normalized = normalizeError(error, 'Failed to create onboarding notifications');
       logger.warn('Failed to create onboarding notifications', { error: normalized.message });
     });

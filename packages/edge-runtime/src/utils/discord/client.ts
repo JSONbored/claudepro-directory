@@ -1,6 +1,7 @@
 import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import { createUtilityContext, normalizeError } from '@heyclaude/shared-runtime';
+import { createUtilityContext } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 const MAX_RETRIES = 3;

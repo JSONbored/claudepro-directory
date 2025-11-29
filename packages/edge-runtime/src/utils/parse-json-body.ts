@@ -4,8 +4,8 @@
  */
 
 import { badRequestResponse, publicCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
-import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime';
-import { createUtilityContext, logError, logWarn } from '@heyclaude/shared-runtime';
+import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime/input-validation.ts';
+import { createUtilityContext, logError, logWarn } from '@heyclaude/shared-runtime/logging.ts';
 
 export interface ParseJsonBodyOptions {
   maxSize?: number;

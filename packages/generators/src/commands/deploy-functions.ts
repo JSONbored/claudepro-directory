@@ -1,12 +1,40 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { logger } from '../toolkit/logger.js';
 
-const CLI_PACKAGE = 'supabase@1';
+// Use global supabase CLI if available, otherwise fall back to npx
+const USE_GLOBAL_CLI = true;
 const IGNORED_DIRECTORIES = new Set(['_shared', 'node_modules']);
+
+/**
+ * Load environment variables from .env files (simple sync loader)
+ */
+function loadEnvFiles(repoRoot: string): void {
+  const envFiles = ['.env.local', '.env'];
+  
+  for (const file of envFiles) {
+    const filePath = path.join(repoRoot, file);
+    if (existsSync(filePath)) {
+      try {
+        const content = readFileSync(filePath, 'utf-8');
+        for (const line of content.split('\n')) {
+          if (!line || line.startsWith('#')) continue;
+          const [key, ...values] = line.split('=');
+          if (key && !process.env[key]) {
+            // Remove surrounding quotes if present
+            const value = values.join('=').replace(/^["']|["']$/g, '');
+            process.env[key] = value;
+          }
+        }
+      } catch {
+        // Ignore errors reading env files
+      }
+    }
+  }
+}
 
 // Paths relative to this file (dist/commands/deploy-functions.js) -> root
 // This file is in packages/generators/src/commands/deploy-functions.ts
@@ -15,8 +43,8 @@ const __filename = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = path.dirname(__filename);
 const REPO_ROOT = path.resolve(SCRIPT_DIR, '../../../../');
 const EDGE_ROOT = path.join(REPO_ROOT, 'apps', 'edge');
-const FUNCTIONS_DIR = path.join(EDGE_ROOT, 'functions');
-const IMPORT_MAP_PATH = path.posix.join('functions', 'deno.json');
+const FUNCTIONS_DIR = path.join(EDGE_ROOT, 'supabase', 'functions');
+const IMPORT_MAP_PATH = path.posix.join('supabase', 'deno.json');
 
 function ensurePaths() {
   if (!existsSync(EDGE_ROOT)) {
@@ -89,13 +117,13 @@ function resolveProjectRef(): string | undefined {
 }
 
 function verifySupabaseCli() {
-  const result = spawnSync('npx', [CLI_PACKAGE, '--version'], {
+  const result = spawnSync('supabase', ['--version'], {
     stdio: 'ignore',
   });
 
   if (result.status !== 0) {
     logger.error(
-      'Supabase CLI is required. Install via "npm install -g supabase" or ensure npx can download it.',
+      'Supabase CLI is required. Install via "brew install supabase/tap/supabase" or "npm install -g supabase".',
       undefined,
       { script: 'deploy-functions' }
     );
@@ -126,9 +154,12 @@ export function runDeployFunctions() {
     process.exit(0);
   }
 
+  // Load environment variables from .env.local
+  loadEnvFiles(REPO_ROOT);
+
   const allFunctions = discoverFunctions();
   if (allFunctions.length === 0) {
-    logger.error('No edge functions found under apps/edge/functions.', undefined, {
+    logger.error('No edge functions found under apps/edge/supabase/functions.', undefined, {
       script: 'deploy-functions',
     });
     process.exit(1);
@@ -155,9 +186,8 @@ export function runDeployFunctions() {
   for (const fnName of functionsToDeploy) {
     logger.info(`🚀 Deploying edge function "${fnName}"...`, { script: 'deploy-functions' });
     const result = spawnSync(
-      'npx',
+      'supabase',
       [
-        CLI_PACKAGE,
         'functions',
         'deploy',
         fnName,

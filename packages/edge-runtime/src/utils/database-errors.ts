@@ -3,9 +3,9 @@
  * Provides consistent error handling for database operations
  */
 
-import { normalizeError } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { badRequestResponse, errorResponse, jsonResponse, publicCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
-import { logError } from '@heyclaude/shared-runtime';
+import { logError } from '@heyclaude/shared-runtime/logging.ts';
 
 /**
  * Produce an HTTP response for known database errors or indicate the error should be re-thrown.

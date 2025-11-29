@@ -3,26 +3,14 @@
  * POST /dismiss - Dismiss notifications for authenticated user
  */
 
-import {
-  badRequestResponse,
-  createNotificationTrace,
-  dismissNotificationsForUser,
-  errorResponse,
-  initRequestLogging,
-  notificationCorsHeaders,
-  requireAuthUser,
-  successResponse,
-  traceRequestComplete,
-  traceStep,
-} from '@heyclaude/edge-runtime';
-import {
-  createNotificationRouterContext,
-  getProperty,
-  logger,
-  MAX_BODY_SIZE,
-  normalizeError,
-  validateBodySize,
-} from '@heyclaude/shared-runtime';
+import { badRequestResponse, errorResponse, notificationCorsHeaders, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { requireAuthUser } from '@heyclaude/edge-runtime/utils/auth.ts';
+import { createNotificationTrace, dismissNotificationsForUser } from '@heyclaude/edge-runtime/notifications/service.ts';
+import { createNotificationRouterContext, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { getProperty } from '@heyclaude/shared-runtime/object-utils.ts';
+import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime/input-validation.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 
 /**
  * Dismisses one or more notifications for the authenticated user from a POST /dismiss request.

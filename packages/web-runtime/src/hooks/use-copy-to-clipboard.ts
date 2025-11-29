@@ -151,3 +151,105 @@ export function useCopyToClipboard(
 
   return { copied, copy, error, reset };
 }
+
+// =============================================================================
+// useButtonSuccess - Temporary success state for buttons
+// =============================================================================
+
+/**
+ * Options for useButtonSuccess hook
+ */
+export interface UseButtonSuccessOptions {
+  /**
+   * Duration in milliseconds before resetting success state
+   * @default Loaded from config, falls back to 2000ms
+   */
+  duration?: number;
+}
+
+/**
+ * Return type for useButtonSuccess hook
+ */
+export interface UseButtonSuccessReturn {
+  /** Whether the button is currently showing success state */
+  isSuccess: boolean;
+  /** Trigger the success state (will auto-reset after duration) */
+  triggerSuccess: () => void;
+  /** Manually reset the success state */
+  reset: () => void;
+}
+
+/**
+ * React hook for managing temporary button success state with auto-reset.
+ *
+ * Useful for showing feedback after successful actions like form submissions,
+ * copy operations, or bookmark toggles.
+ *
+ * @example
+ * ```tsx
+ * const { isSuccess, triggerSuccess } = useButtonSuccess({ duration: 2000 });
+ *
+ * const handleSave = async () => {
+ *   await saveData();
+ *   triggerSuccess();
+ * };
+ *
+ * return (
+ *   <Button onClick={handleSave}>
+ *     {isSuccess ? <Check /> : 'Save'}
+ *   </Button>
+ * );
+ * ```
+ *
+ * @param options - Configuration options
+ * @returns Object with success state and trigger functions
+ */
+export function useButtonSuccess(options: UseButtonSuccessOptions = {}): UseButtonSuccessReturn {
+  const { duration } = options;
+
+  // Load config synchronously per hook instance (static config, no async needed)
+  const defaultDuration = (() => {
+    try {
+      const config = getTimeoutConfig();
+      return config['timeout.ui.button_success_duration_ms'] ?? 2000;
+    } catch {
+      return 2000; // Safe fallback
+    }
+  })();
+
+  const actualDuration = duration ?? defaultDuration;
+  const [isSuccess, setIsSuccess] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const triggerSuccess = useCallback(() => {
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    setIsSuccess(true);
+    timeoutRef.current = setTimeout(() => {
+      setIsSuccess(false);
+      timeoutRef.current = null;
+    }, actualDuration);
+  }, [actualDuration]);
+
+  const reset = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setIsSuccess(false);
+  }, []);
+
+  return { isSuccess, triggerSuccess, reset };
+}

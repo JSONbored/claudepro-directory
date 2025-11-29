@@ -47,7 +47,7 @@
       "dependsOn": [
         "^build",
         "generate:service-worker:exec",
-        "type-check:build",
+        "^type-check",
         "lint:build"
       ]
     },
@@ -64,61 +64,20 @@
       "cache": true
     },
     "type-check": {
+      "dependsOn": ["^build"],
       "outputs": ["**/*.tsbuildinfo"],
       "cache": true
     },
-    "type-check:build": {
-      "outputs": ["**/*.tsbuildinfo"],
+    "type-check:edge": {
+      "outputs": [],
       "inputs": [
-        "apps/web/**/*",
-        "!apps/web/**/*.test.ts",
-        "!apps/web/**/*.test.tsx",
-        "!apps/web/**/*.spec.ts",
-        "!apps/web/**/*.spec.tsx",
-        "packages/web-runtime/src/**/*",
-        "!packages/web-runtime/src/**/*.test.ts",
-        "!packages/web-runtime/src/**/*.test.tsx",
-        "packages/data-layer/src/**/*",
-        "!packages/data-layer/src/**/*.test.ts",
-        "!packages/data-layer/src/**/*.test.tsx",
-        "packages/database-types/src/**/*",
-        "!packages/database-types/src/**/*.test.ts",
-        "!packages/database-types/src/**/*.test.tsx",
-        "packages/shared-runtime/src/**/*",
-        "!packages/shared-runtime/src/**/*.test.ts",
-        "!packages/shared-runtime/src/**/*.test.tsx",
-        "tsconfig.json"
+        "apps/edge/functions/**/*",
+        "apps/edge/supabase/deno.json"
       ],
       "cache": true
     },
-      "type-check:web": {
-        "outputs": [],
-        "inputs": [
-          "apps/web/**/*",
-          "packages/**/src/**/*",
-          "tsconfig.json"
-        ],
-        "cache": true,
-        "dependsOn": ["^generate:categories:exec"]
-      },
-      "type-check:packages": {
-        "outputs": [],
-        "inputs": [
-          "packages/**/src/**/*",
-          "packages/**/tsconfig.json"
-        ],
-        "cache": true
-      },
-      "type-check:edge": {
-        "outputs": [],
-        "inputs": [
-          "apps/edge/functions/**/*",
-          "apps/edge/functions/tsconfig.json",
-          "apps/edge/functions/deno.json"
-        ],
-        "cache": true
-      },
     "lint": {
+      "dependsOn": ["^build"],
       "outputs": [],
       "cache": true
     },
@@ -160,6 +119,11 @@
       "inputs": ["src/**/*", "tsconfig.json"],
       "cache": true,
       "dependsOn": ["^build"]
+    },
+    "@heyclaude/database-types#build": {
+      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
+      "inputs": ["src/**/*", "tsconfig.json"],
+      "cache": true
     },
     "dev:exec": {
       "dependsOn": ["generate:service-worker:exec"],
@@ -247,7 +211,6 @@
       "passThroughEnv": ["RESEND_API_KEY"]
     },
     "deploy:edge:exec": {
-      "dependsOn": ["generators:build"],
       "cache": false,
       "passThroughEnv": ["SUPABASE_PROJECT_REF", "NEXT_PUBLIC_SUPABASE_URL"]
     }

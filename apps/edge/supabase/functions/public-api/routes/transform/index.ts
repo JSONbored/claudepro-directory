@@ -1,11 +1,8 @@
 /// <reference path="@heyclaude/edge-runtime/deno-globals.d.ts" />
 
-import {
-  applyRateLimitHeaders,
-  createRateLimitErrorResponse,
-  jsonResponse,
-} from '@heyclaude/edge-runtime';
-import { checkRateLimit, RATE_LIMIT_PRESETS } from '@heyclaude/shared-runtime';
+import { jsonResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { applyRateLimitHeaders, createRateLimitErrorResponse } from '@heyclaude/edge-runtime/utils/rate-limit-middleware.ts';
+import { checkRateLimit, RATE_LIMIT_PRESETS } from '@heyclaude/shared-runtime/rate-limit.ts';
 import { handleLogoOptimizeRoute } from './image/logo.ts';
 import { handleThumbnailGenerateRoute } from './image/thumbnail.ts';
 import { handleContentCardGenerateRoute } from './image/card.ts';

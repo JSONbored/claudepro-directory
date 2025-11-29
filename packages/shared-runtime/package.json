@@ -32,13 +32,29 @@
       "import": "./dist/logger/config.js",
       "require": "./dist/logger/config.js",
       "default": "./dist/logger/config.js"
+    },
+    "./logger/index.ts": {
+      "development": "./src/logger/index.ts",
+      "types": "./dist/logger/index.d.ts",
+      "import": "./dist/logger/index.js",
+      "require": "./dist/logger/index.js",
+      "default": "./dist/logger/index.js"
+    },
+    "./error-handling.ts": {
+      "development": "./src/error-handling.ts",
+      "types": "./dist/error-handling.d.ts",
+      "import": "./dist/error-handling.js",
+      "require": "./dist/error-handling.js",
+      "default": "./dist/error-handling.js"
     }
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --config ../../config/tools/eslint.config.mjs src --ignore-pattern '**/*.generated.ts'"
   },
   "devDependencies": {
     "@types/sanitize-html": "^2.16.0",

@@ -9,7 +9,7 @@ import { createClient } from '@supabase/supabase-js';
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import type { ExtendedDatabase } from '@heyclaude/edge-runtime/database-extensions.types.ts';
-import { normalizeError } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 const {

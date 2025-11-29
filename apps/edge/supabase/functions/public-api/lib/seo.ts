@@ -3,9 +3,9 @@
  * Extracted from routes/seo.ts to enable direct function calls without HTTP loopback
  */
 
-import { SeoService } from '@heyclaude/data-layer';
+import { SeoService } from '@heyclaude/data-layer/services/seo.ts';
 import type { Database } from '@heyclaude/database-types';
-import { sanitizeRoute } from '@heyclaude/shared-runtime';
+import { sanitizeRoute } from '@heyclaude/shared-runtime/input-validation.ts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface SeoMetadataResult {

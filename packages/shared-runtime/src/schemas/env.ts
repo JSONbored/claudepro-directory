@@ -1,6 +1,9 @@
 /** Runtime environment variable validation schema */
 
-import { getEnvObject, logger, normalizeError, nonEmptyString, urlString } from '@heyclaude/shared-runtime';
+import { getEnvObject } from '../env.ts';
+import { logger } from '../logging.ts';
+import { normalizeError } from '../error-handling.ts';
+import { nonEmptyString, urlString } from './primitives.ts';
 import { z } from 'zod';
 
 /**

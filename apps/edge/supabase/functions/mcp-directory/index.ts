@@ -15,8 +15,10 @@
 
 import { zodToJsonSchema } from 'npm:zod-to-json-schema@3';
 import type { Database } from '@heyclaude/database-types';
-import { edgeEnv, initRequestLogging, requireAuthUser, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
-import { createDataApiContext, logError, logger } from '@heyclaude/shared-runtime';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { requireAuthUser } from '@heyclaude/edge-runtime/utils/auth.ts';
+import { createDataApiContext, logError, logger } from '@heyclaude/shared-runtime/logging.ts';
 import type { User } from '@supabase/supabase-js';
 import { createClient } from '@supabase/supabase-js';
 import { Hono } from 'hono';

@@ -11,16 +11,12 @@
  * Route: POST /image-generation/process
  */
 
-import { edgeEnv, initRequestLogging, pgmqDelete, pgmqRead, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
-import {
-  createUtilityContext,
-  normalizeError,
-  logError,
-  logInfo,
-  TIMEOUT_PRESETS,
-  withContext,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { createUtilityContext, withContext, logError, logInfo } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 
 const IMAGE_GENERATION_QUEUE = 'image_generation';
 const QUEUE_BATCH_SIZE = 5; // Process 5 messages at a time
