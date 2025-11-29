@@ -6,7 +6,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { logger } from '@heyclaude/web-runtime/core';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   getActiveAnnouncement as fetchActiveAnnouncement,
   getCacheTtl,
@@ -29,7 +29,7 @@ export const getActiveAnnouncement = cache(
         } catch (error) {
           logger.error(
             'Failed to load announcement',
-            error instanceof Error ? error : new Error(String(error)),
+            normalizeError(error, 'Failed to load announcement'),
             { source: 'AnnouncementBanner' }
           );
           return null;

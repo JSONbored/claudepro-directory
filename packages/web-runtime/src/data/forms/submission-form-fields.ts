@@ -1,7 +1,7 @@
 'use server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
@@ -9,16 +9,16 @@ import { cache } from 'react';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
-import type {
-  SubmissionContentType,
-  SubmissionFormConfig,
-  SubmissionFormSection,
-  FieldDefinition,
-  TextFieldDefinition,
-  TextareaFieldDefinition,
-  NumberFieldDefinition,
-  SelectFieldDefinition,
-  SelectOption
+import  {
+  type SubmissionContentType,
+  type SubmissionFormConfig,
+  type SubmissionFormSection,
+  type FieldDefinition,
+  type TextFieldDefinition,
+  type TextareaFieldDefinition,
+  type NumberFieldDefinition,
+  type SelectFieldDefinition,
+  type SelectOption
 } from '../../types/component.types.ts';
 import { generateRequestId } from '../../utils/request-id.ts';
 
@@ -81,7 +81,7 @@ function mapField(item: FormFieldConfigItem): FieldDefinition | null {
 
     case 'select': {
       const options: SelectOption[] = [];
-      if (item.select_options && Array.isArray(item.select_options)) {
+      if (Array.isArray(item.select_options) && item.select_options.length > 0) {
         for (const opt of item.select_options) {
           if (
             opt !== null &&
@@ -178,6 +178,11 @@ async function fetchFieldsForContentType(
       }
       case 'tags': {
         section.tags.push(field);
+        break;
+      }
+      case null: {
+        // Handle null field_group - add to common by default
+        section.common.push(field);
         break;
       }
       default: {

@@ -3,18 +3,11 @@
  * GET /active-notifications - Fetch active notifications for authenticated user
  */
 
-import {
-  createNotificationTrace,
-  errorResponse,
-  getActiveNotificationsForUser,
-  initRequestLogging,
-  notificationCorsHeaders,
-  requireAuthUser,
-  successResponse,
-  traceRequestComplete,
-  traceStep,
-} from '@heyclaude/edge-runtime';
-import { createNotificationRouterContext, logger } from '@heyclaude/shared-runtime';
+import { errorResponse, notificationCorsHeaders, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { requireAuthUser } from '@heyclaude/edge-runtime/utils/auth.ts';
+import { createNotificationTrace, getActiveNotificationsForUser } from '@heyclaude/edge-runtime/notifications/service.ts';
+import { createNotificationRouterContext, logger } from '@heyclaude/shared-runtime/logging.ts';
 
 /**
  * Handle GET /active-notifications: authenticate the caller, fetch active notifications for the user (excluding any dismissed IDs specified in the `dismissed` query parameter), and return them with a trace identifier.

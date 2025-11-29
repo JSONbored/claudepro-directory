@@ -8,7 +8,7 @@
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { logError } from '@heyclaude/shared-runtime';
+import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import type { GetFeaturedInput } from '../lib/types.ts';
 
 /**

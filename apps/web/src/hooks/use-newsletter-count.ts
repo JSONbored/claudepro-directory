@@ -7,8 +7,7 @@
  */
 
 import { getNewsletterCountAction } from '@heyclaude/web-runtime/actions';
-import { getPollingConfig } from '@heyclaude/web-runtime/config/static-configs';
-import { CACHE_CONFIG_DEFAULTS } from '@heyclaude/web-runtime/feature-flags/defaults';
+import { CACHE_TTL, POLLING_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useRef, useState } from 'react';
 
@@ -39,19 +38,16 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const configLoadedRef = useRef(false);
 
-  // Load config from static defaults once when hook mounts (client-side only)
+  // Load config from unified config once when hook mounts (client-side only)
   useEffect(() => {
     if (configLoadedRef.current) return;
     configLoadedRef.current = true;
 
-    // Load config from static defaults
-    const cache = CACHE_CONFIG_DEFAULTS as Record<string, unknown>;
-    const polling = getPollingConfig();
-    
-    const cacheTtlSeconds = (cache['cache.newsletter_count_ttl_s'] as number) ?? 300;
+    // Load from unified config
+    const cacheTtlSeconds = CACHE_TTL.newsletter_count ?? 300;
     setCacheTtlMs(cacheTtlSeconds * 1000);
-    
-    const pollInterval = (polling['polling.newsletter_count_ms'] as number) ?? 300000;
+
+    const pollInterval = POLLING_CONFIG.newsletter_count_ms ?? 300000;
     setPollIntervalMs(pollInterval);
   }, []);
 

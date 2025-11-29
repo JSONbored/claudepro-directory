@@ -135,7 +135,7 @@ export function detectLanguage(code: string, hint?: string): string {
  */
 function getExtensionFromLanguage(language: string): string {
   const normalized = language.toLowerCase().trim();
-  return LANGUAGE_EXTENSIONS[normalized] || 'txt';
+  return LANGUAGE_EXTENSIONS[normalized] ?? 'txt';
 }
 
 /**
@@ -143,20 +143,20 @@ function getExtensionFromLanguage(language: string): string {
  */
 function convertHookTypeToKebab(hook_type: string): string {
   return hook_type
-    .replace(/([A-Z])/g, '-$1')
+    .replaceAll(/([A-Z])/g, '-$1')
     .toLowerCase()
     .replace(/^-/, '');
 }
 
 export interface FilenameGeneratorOptions {
+  format?: 'hook' | 'json' | 'multi';
   item: {
     category: string;
-    slug?: string | null;
-    name?: string | null;
-    hook_type?: string | null;
+    hook_type?: null | string;
+    name?: null | string;
+    slug?: null | string;
   };
   language: string;
-  format?: 'json' | 'multi' | 'hook';
   section?: string;
 }
 
@@ -176,19 +176,19 @@ export interface FilenameGeneratorOptions {
 export function generateFilename(options: FilenameGeneratorOptions): string {
   const { item, language, format, section } = options;
 
-  if (!(item && language)) {
-    return `untitled.${getExtensionFromLanguage(language || 'text')}`;
+  if (!language) {
+    return `untitled.${getExtensionFromLanguage('text')}`;
   }
 
   const { category, slug } = item;
   const ext = getExtensionFromLanguage(language);
   const name = item.name;
-  const rawIdentifier = slug || name || category;
+  const rawIdentifier = slug ?? name ?? category;
   const rule = FILENAME_RULES[category];
   let identifier = sanitizeFilename(rawIdentifier);
 
   // Enforce length limit accounting for suffix + extension + dot
-  const reservedLength = (rule?.suffix?.length ?? 0) + ext.length + 1; // dot before extension
+  const reservedLength = (rule ? rule.suffix.length : 0) + ext.length + 1; // dot before extension
   const maxIdentifierLength = Math.max(10, MAX_FILENAME_LENGTH - reservedLength);
   if (identifier.length > maxIdentifierLength) {
     identifier = identifier.slice(0, maxIdentifierLength);
@@ -236,7 +236,9 @@ export function generateHookFilename(
     return `${sanitizeFilename(hookSlug)}-${suffix}.${ext}`;
   }
 
-  const identifier = sanitizeFilename(item.slug || 'hook');
+  const trimmedSlug = item.slug?.trim();
+  const slug = trimmedSlug && trimmedSlug.length > 0 ? trimmedSlug : 'hook';
+  const identifier = sanitizeFilename(slug);
   return `${identifier}-${suffix}.${ext}`;
 }
 
@@ -247,18 +249,18 @@ export function generateHookFilename(
  * @returns An array of heading metadata objects (id, anchor, title, level). `id` values are normalized and made unique within the document; at most 50 headings are returned.
  */
 export interface HeadingMetadata {
-  id: string;
   anchor: string;
-  title: string;
+  id: string;
   level: number;
+  title: string;
 }
 
 function normalizeSlug(value: string): string {
   return value
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
+    .replaceAll(/\s+/g, '-')
+    .replaceAll(/[^a-z0-9-]/g, '');
 }
 
 export function extractMarkdownHeadings(source: string): HeadingMetadata[] {
@@ -272,7 +274,7 @@ export function extractMarkdownHeadings(source: string): HeadingMetadata[] {
 
   for (const line of lines) {
     const match = line.match(/^(#{2,6})\s+(.+?)\s*$/);
-    if (!(match && match[1] && match[2])) continue;
+    if (!(match?.[1] && match[2])) continue;
 
     const level = Math.min(match[1].length, 6);
     const title = match[2].trim();

@@ -13,20 +13,14 @@
  */
 
 import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import {
-  badRequestResponse,
-  errorResponse,
-  getOnlyCorsHeaders,
-  initRequestLogging,
-  jsonResponse,
-  methodNotAllowedResponse,
-  parseJsonBody,
-  pgmqSend,
-  supabaseServiceRole,
-  traceRequestComplete,
-  traceStep,
-} from '@heyclaude/edge-runtime';
-import { buildSecurityHeaders, logError, logInfo, logger, timingSafeEqual } from '@heyclaude/shared-runtime';
+import { badRequestResponse, errorResponse, getOnlyCorsHeaders, jsonResponse, methodNotAllowedResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { parseJsonBody } from '@heyclaude/edge-runtime/utils/parse-json-body.ts';
+import { pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { buildSecurityHeaders } from '@heyclaude/shared-runtime/security-headers.ts';
+import { logError, logInfo, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { timingSafeEqual } from '@heyclaude/shared-runtime/crypto-utils.ts';
 import { getGenerator, getSupportedCategories, isCategorySupported } from './registry.ts';
 import type { GeneratePackageRequest, GeneratePackageResponse } from './types.ts';
 

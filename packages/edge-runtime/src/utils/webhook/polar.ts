@@ -1,6 +1,6 @@
 import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import { errorToString } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import type { WebhookIngestResult } from '@heyclaude/edge-runtime/utils/webhook/ingest.ts';
 import { finishWebhookEventRun, startWebhookEventRun } from '@heyclaude/edge-runtime/utils/webhook/run-logger.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
@@ -85,14 +85,14 @@ export async function processPolarWebhook(event: WebhookIngestResult): Promise<v
       });
     }
   } catch (error) {
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const errorObj = normalizeError(error, 'Failed to process Polar webhook');
     logger.error('Failed to process event', {
       ...logContext,
       err: errorObj,
     });
     if (run) {
       await finishWebhookEventRun(run.id, 'failed', {
-        errorMessage: errorToString(error),
+        errorMessage: normalizeError(error, "Operation failed").message,
         metadata: {
           rpc: rpcName,
           job_id: getMetadataValue<string>(event.payload as PolarPayload, 'job_id'),

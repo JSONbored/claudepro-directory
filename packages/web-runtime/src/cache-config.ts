@@ -2,11 +2,17 @@
  * Cache Configuration Utilities
  *
  * CRITICAL: This module is server-only. It must never execute in client/browser environments.
- * 
- * Uses static configuration defaults from feature-flags/defaults.ts (no external dependencies).
+ *
+ * Uses static configuration from unified-config.ts (single source of truth).
+ *
+ * @module web-runtime/cache-config
  */
 
-import { CACHE_CONFIG_DEFAULTS } from './feature-flags/defaults.ts';
+import { CACHE_INVALIDATION, CACHE_TTL } from './config/unified-config.ts';
+
+// =============================================================================
+// LEGACY KEY ARRAYS (for backward compatibility)
+// =============================================================================
 
 export const CACHE_TTL_KEYS = [
   'cache.homepage.ttl_seconds',
@@ -99,99 +105,97 @@ export const CACHE_INVALIDATE_KEYS = [
   'cache.invalidate.newsletter_subscribe',
 ] as const;
 
-export type CacheTtlKey = (typeof CACHE_TTL_KEYS)[number];
-export type CacheInvalidateKey = (typeof CACHE_INVALIDATE_KEYS)[number];
+// =============================================================================
+// TYPE DEFINITIONS
+// =============================================================================
 
-type CacheConfigSchema = { [K in CacheTtlKey]: number } & {
-  [K in CacheInvalidateKey]: readonly string[];
+/** Legacy TTL key format (e.g., 'cache.homepage.ttl_seconds') */
+export type CacheTtlKeyLegacy = (typeof CACHE_TTL_KEYS)[number];
+
+/** New simplified TTL key format (e.g., 'homepage') */
+export type CacheTtlKey = keyof typeof CACHE_TTL;
+
+/** Legacy invalidate key format (e.g., 'cache.invalidate.content_create') */
+export type CacheInvalidateKeyLegacy = (typeof CACHE_INVALIDATE_KEYS)[number];
+
+/** New simplified invalidate key format (e.g., 'content_create') */
+export type CacheInvalidateKey = keyof typeof CACHE_INVALIDATION;
+
+/** Cache configuration type - maps legacy keys to values */
+export type CacheConfig = {
+  [key: string]: number | readonly string[];
 };
 
-export type CacheConfig = CacheConfigSchema;
+// =============================================================================
+// INTERNAL CACHE
+// =============================================================================
 
-// Helper to split the flat CACHE_CONFIG_DEFAULTS into TTL and Invalidate parts
-const getBuildTimeTtls = (): Record<CacheTtlKey, number> => {
-  const ttls: Partial<Record<CacheTtlKey, number>> = {};
-  for (const key of CACHE_TTL_KEYS) {
-    // Type guard: Validate that the key exists in defaults and is a number
-    const value = CACHE_CONFIG_DEFAULTS[key as keyof typeof CACHE_CONFIG_DEFAULTS];
-    if (typeof value === 'number') {
-      ttls[key] = value;
-    } else {
-      ttls[key] = 3600; // Default fallback
-    }
-  }
-  // Type guard: Ensure all keys are present
-  if (Object.keys(ttls).length !== CACHE_TTL_KEYS.length) {
-    throw new Error('getBuildTimeTtls: Missing TTL values in CACHE_CONFIG_DEFAULTS');
-  }
-  return ttls as Record<CacheTtlKey, number>;
-};
+// Module-level cache for performance
+let cachedConfig: Record<string, number | readonly string[]> | null = null;
 
-const getBuildTimeInvalidations = (): Record<CacheInvalidateKey, readonly string[]> => {
-  const invalidations: Partial<Record<CacheInvalidateKey, readonly string[]>> = {};
-  for (const key of CACHE_INVALIDATE_KEYS) {
-    // Type guard: Validate that the key exists in defaults and is an array
-    const value = CACHE_CONFIG_DEFAULTS[key as keyof typeof CACHE_CONFIG_DEFAULTS];
-    if (Array.isArray(value) && value.every((item): item is string => typeof item === 'string')) {
-      invalidations[key] = value;
-    } else {
-      invalidations[key] = []; // Default fallback
-    }
-  }
-  // Type guard: Ensure all keys are present
-  if (Object.keys(invalidations).length !== CACHE_INVALIDATE_KEYS.length) {
-    throw new Error('getBuildTimeInvalidations: Missing invalidation values in CACHE_CONFIG_DEFAULTS');
-  }
-  return invalidations as Record<CacheInvalidateKey, readonly string[]>;
-};
+function buildCacheConfig(): Record<string, number | readonly string[]> {
+  if (cachedConfig) return cachedConfig;
 
-const BUILD_TIME_TTL_DEFAULTS = getBuildTimeTtls();
-const CACHE_INVALIDATE_DEFAULTS = getBuildTimeInvalidations();
+  const config: Record<string, number | readonly string[]> = {};
 
-// OPTIMIZATION: Store resolved config to avoid re-computing (module-scoped memoization)
-// NOTE: This is module/instance-scoped, not request-scoped. The config is static and doesn't change
-// per request, so module-level caching is appropriate. In serverless/edge environments, this will
-// persist across requests within the same runtime instance.
-let cachedConfig: CacheConfig | null = null;
-
-function loadCacheConfig(): CacheConfig {
-  // OPTIMIZATION: Return cached config if already loaded (module-scoped memoization)
-  if (cachedConfig !== null) {
-    return cachedConfig;
+  // Map CACHE_TTL to legacy key format
+  for (const [key, value] of Object.entries(CACHE_TTL)) {
+    const legacyKey = key === 'newsletter_count'
+      ? 'cache.newsletter_count_ttl_s'
+      : `cache.${key}.ttl_seconds`;
+    config[legacyKey] = value;
   }
 
-  const defaultConfig = {
-    ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
-    ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
-  } as CacheConfig;
-  
-  // Cache the config to avoid re-computing
-  cachedConfig = defaultConfig;
-  return defaultConfig;
+  // Map CACHE_INVALIDATION to legacy key format
+  for (const [key, value] of Object.entries(CACHE_INVALIDATION)) {
+    config[`cache.invalidate.${key}`] = value;
+  }
+
+  cachedConfig = config;
+  return config;
 }
 
+// =============================================================================
+// PUBLIC API
+// =============================================================================
+
+/**
+ * Get full cache configuration snapshot
+ */
 export function getCacheConfigSnapshot(): CacheConfig {
-  return loadCacheConfig();
+  return buildCacheConfig();
 }
 
-export function getCacheTtl(key: CacheTtlKey): number {
-  // OPTIMIZATION: Use cached config if available (request-scoped memoization)
-  if (cachedConfig !== null) {
-    return cachedConfig[key];
+/**
+ * Get cache TTL value for a specific key
+ * Accepts both legacy format ('cache.homepage.ttl_seconds') and new format ('homepage')
+ * @param key - The cache TTL key
+ */
+export function getCacheTtl(key: CacheTtlKeyLegacy | CacheTtlKey): number {
+  // Handle new simplified format
+  if (key in CACHE_TTL) {
+    return CACHE_TTL[key as CacheTtlKey];
   }
 
-  // Load static config
-  const config = loadCacheConfig();
-  return config[key];
+  // Handle legacy format
+  const config = buildCacheConfig();
+  const value = config[key];
+  return typeof value === 'number' ? value : 3600; // Default 1 hour
 }
 
-export function getCacheInvalidateTags(key: CacheInvalidateKey): readonly string[] {
-  // OPTIMIZATION: Use cached config if available (request-scoped memoization)
-  if (cachedConfig !== null) {
-    return cachedConfig[key];
+/**
+ * Get cache invalidation tags for a specific key
+ * Accepts both legacy format ('cache.invalidate.content_create') and new format ('content_create')
+ * @param key - The cache invalidation key
+ */
+export function getCacheInvalidateTags(key: CacheInvalidateKeyLegacy | CacheInvalidateKey): readonly string[] {
+  // Handle new simplified format
+  if (key in CACHE_INVALIDATION) {
+    return CACHE_INVALIDATION[key as CacheInvalidateKey];
   }
 
-  // Load static config
-  const config = loadCacheConfig();
-  return config[key];
+  // Handle legacy format
+  const config = buildCacheConfig();
+  const value = config[key];
+  return Array.isArray(value) ? value : [];
 }

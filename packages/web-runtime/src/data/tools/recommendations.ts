@@ -1,17 +1,17 @@
 'use server';
 
 import { QuizService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
 
 export interface RecommendationInput {
-  useCase: Database['public']['Enums']['use_case_type'];
   experienceLevel: Database['public']['Enums']['experience_level'];
-  toolPreferences: string[];
-  integrations?: Database['public']['Enums']['integration_type'][];
   focusAreas?: Database['public']['Enums']['focus_area_type'][];
+  integrations?: Database['public']['Enums']['integration_type'][];
   limit?: number;
+  toolPreferences: string[];
+  useCase: Database['public']['Enums']['use_case_type'];
   viewerId?: string;
 }
 

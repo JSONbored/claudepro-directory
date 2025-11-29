@@ -18,8 +18,8 @@ export type CollectionDetailData =
   Database['public']['Functions']['get_user_collection_detail']['Returns'];
 
 export async function getCommunityDirectory(options: {
-  searchQuery?: string;
   limit?: number;
+  searchQuery?: string;
 }): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
   const { searchQuery, limit = DEFAULT_DIRECTORY_LIMIT } = options;
   const requestId = generateRequestId();
@@ -156,8 +156,8 @@ export async function getPublicUserProfile(input: {
 }
 
 export async function getPublicCollectionDetail(input: {
-  userSlug: string;
   collectionSlug: string;
+  userSlug: string;
   viewerId?: string;
 }): Promise<CollectionDetailData | null> {
   const { userSlug, collectionSlug, viewerId } = input;

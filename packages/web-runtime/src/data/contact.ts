@@ -1,7 +1,7 @@
 'use server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
 

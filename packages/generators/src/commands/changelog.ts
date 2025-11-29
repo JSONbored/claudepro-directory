@@ -10,6 +10,9 @@ import {
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { logger } from '../toolkit/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -20,11 +23,11 @@ const CONFIG_PATH = join(ROOT, 'config/changelog/cliff.toml');
 
 interface GenerateOptions {
   branch?: string;
-  since?: string;
-  until?: string;
-  title?: string;
-  tag?: string;
   dryRun?: boolean;
+  since?: string;
+  tag?: string;
+  title?: string;
+  until?: string;
 }
 
 /**
@@ -94,7 +97,7 @@ function generateChangelog(options: GenerateOptions): string {
   try {
     const output = execSync(command, {
       cwd: ROOT,
-      encoding: 'utf-8',
+      encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'inherit'],
     });
 
@@ -102,7 +105,7 @@ function generateChangelog(options: GenerateOptions): string {
   } catch (error) {
     logger.error(
       '❌ Failed to generate changelog',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'Changelog generation failed'),
       {
         script: 'changelog-generate-entry',
       }
@@ -127,7 +130,7 @@ function prependToChangelog(newEntry: string): void {
   try {
     // Read existing content using file descriptor
     // readFileSync with fd reads from position 0 (beginning of file)
-    const content = readFileSync(fd, 'utf-8');
+    const content = readFileSync(fd, 'utf8');
     const existingContent = content.length > 0 ? content : '# Changelog\n';
 
     // Find where to insert (after the main header)
@@ -147,11 +150,11 @@ function prependToChangelog(newEntry: string): void {
     // Truncate file to 0 before writing to ensure clean overwrite
     ftruncateSync(fd, 0);
     // Write using file descriptor
-    writeFileSync(fd, newContent, 'utf-8');
+    writeFileSync(fd, newContent, 'utf8');
   } catch (error) {
     logger.error(
       'Error writing to CHANGELOG.md',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'Changelog file write failed'),
       {
         script: 'changelog-generate-entry',
       }
@@ -180,7 +183,7 @@ function parseArgs(): GenerateOptions {
     const arg = current.value;
 
     switch (arg) {
-      case '--branch':
+      case '--branch': {
         current = argsIterator.next();
         if (current.done || !current.value) {
           logger.error('Missing value for --branch', undefined, {
@@ -192,7 +195,8 @@ function parseArgs(): GenerateOptions {
         }
         options.branch = current.value;
         break;
-      case '--since':
+      }
+      case '--since': {
         current = argsIterator.next();
         if (current.done || !current.value) {
           logger.error('Missing value for --since', undefined, {
@@ -204,7 +208,8 @@ function parseArgs(): GenerateOptions {
         }
         options.since = current.value;
         break;
-      case '--until':
+      }
+      case '--until': {
         current = argsIterator.next();
         if (current.done || !current.value) {
           logger.error('Missing value for --until', undefined, {
@@ -216,7 +221,8 @@ function parseArgs(): GenerateOptions {
         }
         options.until = current.value;
         break;
-      case '--title':
+      }
+      case '--title': {
         current = argsIterator.next();
         if (current.done || !current.value) {
           logger.error('Missing value for --title', undefined, {
@@ -228,7 +234,8 @@ function parseArgs(): GenerateOptions {
         }
         options.title = current.value;
         break;
-      case '--tag':
+      }
+      case '--tag': {
         current = argsIterator.next();
         if (current.done || !current.value) {
           logger.error('Missing value for --tag', undefined, {
@@ -240,23 +247,27 @@ function parseArgs(): GenerateOptions {
         }
         options.tag = current.value;
         break;
+      }
       case '--dry-run':
-      case '--dry':
+      case '--dry': {
         options.dryRun = true;
         break;
+      }
       case '--help':
-      case '-h':
+      case '-h': {
         showHelp();
         process.exit(0);
         // @ts-expect-error - break is unreachable but required by Biome's noFallthroughSwitchClause rule
         break;
-      default:
+      }
+      default: {
         logger.error(`Unknown option: ${arg}\n`, undefined, {
           script: 'changelog-generate-entry',
           option: arg,
         });
         showHelp();
         process.exit(1);
+      }
     }
 
     current = argsIterator.next();
@@ -370,7 +381,7 @@ export async function runGenerateChangelog() {
   } catch (error) {
     logger.error(
       '❌ Generation failed',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'Changelog generation failed'),
       {
         script: 'changelog-generate-entry',
       }

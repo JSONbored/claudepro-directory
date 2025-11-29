@@ -8,14 +8,27 @@ import { resolve } from 'path';
  * Example: content.ts → content.test.ts (same directory)
  * 
  * This matches the existing pattern (resend.test.ts) and keeps related code together.
+ * 
+ * Environment:
+ * - .tsx test files use 'jsdom' (React component tests)
+ * - .ts test files use 'node' (server-side/utility tests)
  */
 export default defineConfig({
   test: {
     // Enable global test functions (describe, it, expect, vi)
     globals: true,
     
-    // Use Node.js environment (not jsdom - we're testing server-side code)
+    // Environment based on file extension
+    // Component tests (.tsx) need jsdom, server tests (.ts) use node
     environment: 'node',
+    environmentMatchGlobs: [
+      // React component tests need jsdom
+      ['**/*.test.tsx', 'jsdom'],
+      ['**/*.spec.tsx', 'jsdom'],
+      // Server-side tests use node (default)
+      ['**/*.test.ts', 'node'],
+      ['**/*.spec.ts', 'node'],
+    ],
     
     // Include test files (only in source directories, not node_modules)
     include: [

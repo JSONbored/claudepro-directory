@@ -1,7 +1,7 @@
 import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { invalidateCacheByKey } from '@heyclaude/edge-runtime/utils/cache.ts';
-import { errorToString } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 const MAX_NOTIFICATION_IDS = 50;
@@ -48,7 +48,7 @@ export async function getActiveNotificationsForUser(
   const { data, error } = await supabaseServiceRole.rpc('get_active_notifications', rpcArgs);
 
   if (error) {
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const errorObj = normalizeError(error, 'Notification operation failed');
     // Use dbQuery serializer for consistent database query formatting
     logger.error('get_active_notifications failed', {
       ...(logContext || {}),
@@ -116,7 +116,7 @@ export async function insertNotification(
         return existing;
       }
     }
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const errorObj = normalizeError(error, 'Notification operation failed');
     // Use dbQuery serializer for consistent database query formatting
     logger.error('Failed to insert notification', {
       ...(logContext || {}),
@@ -188,7 +188,7 @@ export async function dismissNotificationsForUser(
   const { error } = await supabaseServiceRole.from('notification_dismissals').upsert(upsertData);
 
   if (error) {
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const errorObj = normalizeError(error, 'Notification operation failed');
     // Use dbQuery serializer for consistent database query formatting
     logger.error('Failed to dismiss notifications', {
       ...(logContext || {}),
@@ -257,7 +257,7 @@ async function getNotificationById(id: string): Promise<NotificationRecord | nul
     .single<NotificationRecord>();
 
   if (error) {
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const errorObj = normalizeError(error, 'Notification operation failed');
     // Use dbQuery serializer for consistent database query formatting
     logger.error('Failed to load existing notification', {
       notification_id: id,

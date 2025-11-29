@@ -129,10 +129,10 @@ export async function getCompaniesList(
 }
 
 export interface CompanySearchResult {
+  description: null | string;
   id: string;
   name: string;
-  slug: string | null;
-  description: string | null;
+  slug: null | string;
 }
 
 async function fetchCompanySearchResults(

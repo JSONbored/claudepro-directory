@@ -1,12 +1,13 @@
 'use server';
 
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 
-import { getContentCount } from '../../data/content/index.ts';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import { generateRequestId } from '../../utils/request-id.ts';
+import { getContentCount } from "../content/index.ts";
 
 const DESCRIPTION_FALLBACK =
   'Open-source directory of Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.';
@@ -16,20 +17,21 @@ const HERO_DEFAULTS = {
   monthlyPageViews: 16_000,
 };
 
-const VERCEL_ANALYTICS_TOKEN = process.env['VERCEL_WEB_ANALYTICS_TOKEN'];
+const VERCEL_ANALYTICS_TOKEN = (env as Record<string, unknown>)['VERCEL_WEB_ANALYTICS_TOKEN'] as string | undefined;
 const VERCEL_PROJECT_ID =
-  process.env['VERCEL_PROJECT_ID'] ?? process.env['NEXT_PUBLIC_VERCEL_PROJECT_ID'];
+  (env as Record<string, unknown>)['VERCEL_PROJECT_ID'] as string | undefined ??
+  (env as Record<string, unknown>)['NEXT_PUBLIC_VERCEL_PROJECT_ID'] as string | undefined;
 
 interface VisitorStats {
-  monthlyVisitors: number;
   monthlyPageViews: number;
+  monthlyVisitors: number;
 }
 
 interface VercelAnalyticsResponse {
-  visitors?: {
+  pageViews?: {
     value?: number | string;
   };
-  pageViews?: {
+  visitors?: {
     value?: number | string;
   };
 }
@@ -127,8 +129,8 @@ export async function getContentDescriptionCopy(): Promise<string> {
 
 export interface PartnerHeroStats {
   configurationCount: number;
-  monthlyVisitors: number;
   monthlyPageViews: number;
+  monthlyVisitors: number;
 }
 
 export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {

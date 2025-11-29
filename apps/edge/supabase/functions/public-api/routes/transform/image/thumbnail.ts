@@ -16,24 +16,18 @@
  * - Returns early on validation failures
  */
 
-import { badRequestResponse, initRequestLogging, publicCorsHeaders, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
-import {
-  createDataApiContext,
-  logError,
-  logInfo,
-  logger,
-} from '@heyclaude/shared-runtime';
+import { badRequestResponse, publicCorsHeaders, jsonResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { uploadObject } from '@heyclaude/edge-runtime/utils/storage/upload.ts';
+import { getStorageServiceClient } from '@heyclaude/edge-runtime/utils/storage/client.ts';
+import { createDataApiContext, logError, logInfo, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import {
   ensureImageMagickInitialized,
   optimizeImage,
   getImageDimensions,
 } from '@heyclaude/shared-runtime/image/manipulation.ts';
 import { MagickFormat } from '@imagemagick/magick-wasm';
-import {
-  uploadObject,
-  getStorageServiceClient,
-  jsonResponse,
-} from '@heyclaude/edge-runtime';
 
 const CORS = publicCorsHeaders;
 
@@ -156,7 +150,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
             imageBytes[i] = binaryString.charCodeAt(i);
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorMessage = normalizeError(error, "Operation failed").message;
           await logError('Invalid base64 image data', logContext, error);
           return jsonResponse(
             {
@@ -240,7 +234,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
             (body.imageData as Uint8Array)[i] = binaryString.charCodeAt(i);
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorMessage = normalizeError(error, "Operation failed").message;
           await logError('Invalid base64 image data', logContext, error);
           return jsonResponse(
             {
@@ -566,7 +560,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
     return jsonResponse(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: normalizeError(error, 'Unknown error occurred').message,
       } satisfies ThumbnailGenerateResponse,
       500,
       CORS

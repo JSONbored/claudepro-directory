@@ -1,9 +1,11 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
 import { SECURITY_CONFIG } from '@heyclaude/shared-runtime';
 import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/data/config/category';
 import { z } from 'zod';
+
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
 import { logger } from '../toolkit/logger.js';
 import { resolvePackagePath, resolveRepoPath } from '../utils/paths.js';
@@ -18,8 +20,8 @@ export async function runGenerateServiceWorker(): Promise<boolean> {
   });
 
   try {
-    const serviceWorkerTemplate = await readFile(TEMPLATE_PATH, 'utf-8');
-    const packageJsonContent = await readFile(join(ROOT_DIR, 'package.json'), 'utf-8');
+    const serviceWorkerTemplate = await readFile(TEMPLATE_PATH, 'utf8');
+    const packageJsonContent = await readFile(join(ROOT_DIR, 'package.json'), 'utf8');
     const packageJsonSchema = z
       .object({
         version: z.string().optional(),
@@ -30,7 +32,7 @@ export async function runGenerateServiceWorker(): Promise<boolean> {
       strategy: ParseStrategy.VALIDATED_JSON,
     });
     const version = packageJson.version || '1.0.0';
-    const cacheVersion = version.replace(/\./g, '-');
+    const cacheVersion = version.replaceAll('.', '-');
 
     const categoryIds = VALID_CATEGORIES;
     logger.info(`📦 Found ${categoryIds.length} categories: ${categoryIds.join(', ')}`, {
@@ -60,14 +62,14 @@ export async function runGenerateServiceWorker(): Promise<boolean> {
     }
 
     const serviceWorkerCode = serviceWorkerTemplate
-      .replace(/{{VERSION}}/g, version)
-      .replace(/{{CACHE_VERSION}}/g, cacheVersion)
+      .replaceAll('{{VERSION}}', version)
+      .replaceAll('{{CACHE_VERSION}}', cacheVersion)
       .replace('{{ALLOWED_ORIGINS}}', `[\n  ${allowedOrigins.join(',\n  ')},\n]`)
       .replace('{{CONTENT_ROUTES}}', `[\n  ${contentRoutes.join(',\n  ')},\n]`)
       .replace('{{CATEGORY_PATTERN}}', categoryPattern);
 
     const outputPath = join(ROOT_DIR, 'apps/web/public', 'service-worker.js');
-    await writeFile(outputPath, serviceWorkerCode, 'utf-8');
+    await writeFile(outputPath, serviceWorkerCode, 'utf8');
 
     const duration = Date.now() - startTime;
 
@@ -91,14 +93,14 @@ export async function runGenerateServiceWorker(): Promise<boolean> {
     });
 
     return true;
-  } catch (err) {
+  } catch (error) {
     logger.error(
       '❌ Service worker generation failed',
-      err instanceof Error ? err : new Error(String(err)),
+      error instanceof Error ? error : new Error(String(error)),
       {
         script: 'generate-service-worker',
       }
     );
-    throw err;
+    throw error;
   }
 }

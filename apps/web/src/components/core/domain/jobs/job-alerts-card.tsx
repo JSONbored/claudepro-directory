@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@heyclaude/web-runtime/ui';
-import { useNewsletter } from '@/src/hooks/use-newsletter';
+import { useNewsletter } from '@heyclaude/web-runtime/hooks';
 
 // Use Constants for enum values
 const EXPERIENCE_OPTIONS = [

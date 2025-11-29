@@ -5,6 +5,7 @@
  * Used in metadata configuration across the application.
  */
 
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
 
 /**
@@ -26,7 +27,7 @@ export const OG_IMAGE_DIMENSIONS = {
  * @returns Full URL to the dynamic OG image edge function
  */
 export function generateOGImageUrl(path: string): string {
-  const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
   if (!supabaseUrl) {
     // Fallback to static image if Supabase URL is not available (e.g., during build)
     return `${APP_CONFIG.url}/og-images/og-image.webp`;

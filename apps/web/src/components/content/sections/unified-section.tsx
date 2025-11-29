@@ -1,7 +1,8 @@
 'use client';
 
+import * as React from 'react';
 import type { Database } from '@heyclaude/database-types';
-import { isValidCategory, logger } from '@heyclaude/web-runtime/core';
+import { isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   Bookmark,
@@ -95,6 +96,77 @@ function downloadTextFile(filename: string, content: string) {
   anchor.click();
   document.body.removeChild(anchor);
   URL.revokeObjectURL(url);
+}
+
+/**
+ * Tabbed code group component for displaying multiple code blocks in tabs
+ */
+function CodeGroupTabs({
+  blocks,
+  onDownload,
+}: {
+  blocks: Array<{
+    html: string;
+    code: string;
+    language: string;
+    filename?: string;
+    label: string;
+  }>;
+  onDownload?: () => void;
+}) {
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const activeBlock = blocks[activeIndex];
+
+  if (!activeBlock) return null;
+
+  return (
+    <div className="space-y-3">
+      {/* Tab buttons */}
+      <div className="flex flex-wrap gap-1 border-border border-b pb-2">
+        {blocks.map((block, index) => (
+          <button
+            key={`${block.label}-${index}`}
+            type="button"
+            onClick={() => setActiveIndex(index)}
+            className={cn(
+              'rounded-t-md px-3 py-1.5 font-medium text-xs transition-colors',
+              activeIndex === index
+                ? 'bg-accent/20 text-accent-foreground'
+                : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+            )}
+          >
+            {block.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Active code block */}
+      <ProductionCodeBlock
+        html={activeBlock.html}
+        code={activeBlock.code}
+        language={activeBlock.language}
+        filename={activeBlock.filename}
+        maxLines={25}
+      />
+
+      {/* Download button */}
+      {activeBlock.filename && (
+        <div className="mt-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              downloadTextFile(activeBlock.filename ?? 'code.txt', activeBlock.code);
+              onDownload?.();
+            }}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Download {activeBlock.filename}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function List({ items, color }: { items: string[]; color: string }) {
@@ -225,10 +297,15 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
       })
       .catch((error) => {
         // Log but don't throw - tracking failures shouldn't break user experience
-        logger.error('Failed to track download', error as Error, {
+        const normalized = normalizeError(error, 'Failed to track download');
+        logger.warn('[Share] Failed to track download', {
+          err: normalized,
+          category: 'share',
+          component: 'UnifiedSection',
+          nonCritical: true,
           context: 'unified_section_download',
-          category: itemCategory,
-          slug: itemSlug,
+          itemCategory,
+          itemSlug,
         });
       });
   };
@@ -287,7 +364,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  downloadTextFile(props.filename, props.code);
+                  downloadTextFile(props.filename ?? 'code.txt', props.code);
                   trackDownload();
                 }}
               >
@@ -298,6 +375,59 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           )}
         </Wrapper>
       );
+
+    case 'code-group': {
+      if (props.codeBlocks.length === 0) return null;
+
+      // If only one block, render as single code block
+      if (props.codeBlocks.length === 1) {
+        const block = props.codeBlocks[0];
+        if (!block) return null;
+        return (
+          <Wrapper
+            title={props.title}
+            {...(props.description && { description: props.description })}
+            {...(props.icon && { icon: props.icon })}
+            {...(props.className && { className: props.className })}
+          >
+            <ProductionCodeBlock
+              html={block.html}
+              code={block.code}
+              language={block.language}
+              filename={block.filename}
+              maxLines={20}
+            />
+            {block.filename && (
+              <div className="mt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    downloadTextFile(block.filename ?? 'code.txt', block.code);
+                    trackDownload();
+                  }}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download {block.filename}
+                </Button>
+              </div>
+            )}
+          </Wrapper>
+        );
+      }
+
+      // Multiple blocks: render with tabs
+      return (
+        <Wrapper
+          title={props.title}
+          {...(props.description && { description: props.description })}
+          {...(props.icon && { icon: props.icon })}
+          {...(props.className && { className: props.className })}
+        >
+          <CodeGroupTabs blocks={props.codeBlocks} onDownload={trackDownload} />
+        </Wrapper>
+      );
+    }
 
     case 'examples': {
       if (props.examples.length === 0) return null;

@@ -5,6 +5,8 @@
  * Use this for non-cached data fetching, direct DB queries, and external API calls.
  */
 
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
+
 import { logger } from '../logger.ts';
 import { generateRequestId } from './request-id.ts';
 import { normalizeError } from '../errors.ts';
@@ -96,7 +98,7 @@ export async function trackPerformance<T>(
         duration: roundedDuration,
         ...logMeta,
       });
-    } else if (logLevel === 'debug' && process.env.NODE_ENV === 'development') {
+    } else if (logLevel === 'debug' && isDevelopment) {
       // Only log in development for debug level
       perfLogger.info(`Operation completed: ${operationName}`, {
         duration: roundedDuration,
@@ -163,7 +165,7 @@ export function trackPerformanceSync<T>(
         duration: roundedDuration,
         ...logMeta,
       });
-    } else if (logLevel === 'debug' && process.env.NODE_ENV === 'development') {
+    } else if (logLevel === 'debug' && isDevelopment) {
       perfLogger.info(`Operation completed: ${operationName}`, {
         duration: roundedDuration,
         ...logMeta,

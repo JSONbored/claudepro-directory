@@ -1,13 +1,13 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
 
 export async function getSimilarContent(input: {
-  contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
+  contentType: Database['public']['Enums']['content_category'];
   limit?: number;
 }): Promise<Database['public']['Functions']['get_similar_content']['Returns'] | null> {
   const { contentType, contentSlug, limit = 6 } = input;

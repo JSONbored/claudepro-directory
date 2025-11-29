@@ -2,6 +2,7 @@
  * Auth Callback Route - OAuth redirect handler via Supabase Auth.
  */
 
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { refreshProfileFromOAuthServer, validateNextParameter  } from '@heyclaude/web-runtime';
 import { subscribeViaOAuthAction } from '@heyclaude/web-runtime/actions';
 import { SECURITY_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
@@ -134,7 +135,7 @@ export async function GET(request: NextRequest) {
       }
 
       const forwardedHost = request.headers.get('x-forwarded-host');
-      const isLocalEnvironment = process.env.NODE_ENV === 'development';
+      const isLocalEnvironment = env.NODE_ENV === 'development';
 
       // Validate forwarded host against allowed origins to prevent open redirect attacks
       const allowedHosts = SECURITY_CONFIG.allowedOrigins
@@ -167,7 +168,7 @@ export async function GET(request: NextRequest) {
           maxAge: 600, // 10 minutes
           httpOnly: false,
           sameSite: 'lax',
-          secure: process.env.NODE_ENV !== 'development',
+          secure: env.NODE_ENV !== 'development',
           path: '/',
         });
       }
@@ -177,10 +178,7 @@ export async function GET(request: NextRequest) {
       return response;
     }
 
-    const normalized = normalizeError(
-      error,
-      error instanceof Error ? error.message : 'Auth callback exchange failed'
-    );
+    const normalized = normalizeError(error, 'Auth callback exchange failed');
     reqLogger.error('Auth callback exchange failed', normalized, {
       hasCode: true,
       ...(error && typeof error === 'object' && 'code' in error && { errorCode: String(error.code) }),

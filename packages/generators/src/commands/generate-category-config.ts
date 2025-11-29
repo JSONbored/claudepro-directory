@@ -5,7 +5,9 @@
 
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Database } from '@heyclaude/database-types';
+
+import { type Database } from '@heyclaude/database-types';
+
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
 import { callEdgeFunction } from '../toolkit/edge.js';
 import { ensureEnvVars } from '../toolkit/env.js';
@@ -24,38 +26,38 @@ const OUTPUT_FILE = resolveRepoPath(
 );
 
 interface BadgeConfig {
-  text?: string;
-  icon?: string;
   hasDynamicCount?: boolean;
+  icon?: string;
+  text?: string;
 }
 
 type ConfigFormatEnum = Database['public']['Enums']['config_format'];
 type PrimaryActionTypeEnum = Database['public']['Enums']['primary_action_type'];
 
 interface DatabaseConfigWithFeatures {
+  api_schema: unknown;
+  badges: BadgeConfig[] | null;
   category: string;
-  title: string;
-  plural_title: string;
-  description: string;
-  icon_name: string;
   color_scheme: string;
+  config_format: ConfigFormatEnum | null;
+  content_loader: string;
+  description: string;
+  empty_state_message: null | string;
+  features: Record<string, boolean>;
+  generation_config: unknown;
+  icon_name: string;
   keywords: string;
   meta_description: string;
-  search_placeholder: string;
-  empty_state_message: string | null;
-  url_slug: string;
-  content_loader: string;
-  config_format: ConfigFormatEnum | null;
-  primary_action_type: PrimaryActionTypeEnum;
-  primary_action_label: string;
-  primary_action_config: unknown;
-  validation_config: unknown;
-  generation_config: unknown;
-  schema_name: string | null;
-  api_schema: unknown;
   metadata_fields: string[];
-  badges: BadgeConfig[] | null;
-  features: Record<string, boolean>;
+  plural_title: string;
+  primary_action_config: unknown;
+  primary_action_label: string;
+  primary_action_type: PrimaryActionTypeEnum;
+  schema_name: null | string;
+  search_placeholder: string;
+  title: string;
+  url_slug: string;
+  validation_config: unknown;
 }
 
 export async function runGenerateCategoryConfig(): Promise<boolean> {
@@ -139,7 +141,7 @@ export async function runGenerateCategoryConfig(): Promise<boolean> {
       };
 
       const cacheTTL = formatNumber(generationConfig.buildConfig?.cacheTTL, 300_000);
-      const maxItemsPerResponse = formatNumber(apiSchema.apiConfig?.maxItemsPerResponse, 1_000);
+      const maxItemsPerResponse = formatNumber(apiSchema.apiConfig?.maxItemsPerResponse, 1000);
 
       const badges = Array.isArray(dbConfig.badges)
         ? dbConfig.badges.map((badge: BadgeConfig) => {
@@ -149,9 +151,9 @@ export async function runGenerateCategoryConfig(): Promise<boolean> {
               // Escape backslashes first, then backticks and dollar signs for template literal safety
               // Order matters: backslashes must be escaped first to prevent double-escaping
               const template = badge.text
-                .replace(/\\/g, '\\\\')
-                .replace(/`/g, '\\`')
-                .replace(/\$/g, '\\$');
+                .replaceAll('\\', '\\\\')
+                .replaceAll('`', '\\`')
+                .replaceAll('$', String.raw`\$`);
               return badge.icon
                 ? `{ icon: ${JSON.stringify(badge.icon)}, text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`
                 : `{ text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`;
@@ -283,7 +285,7 @@ export const CACHEABLE_CATEGORY_IDS = ${JSON.stringify(
   if (!existsSync(outputDir)) {
     mkdirSync(outputDir, { recursive: true });
   }
-  writeFileSync(OUTPUT_FILE, output, 'utf-8');
+  writeFileSync(OUTPUT_FILE, output, 'utf8');
 
   const duration = Date.now() - startTime;
 

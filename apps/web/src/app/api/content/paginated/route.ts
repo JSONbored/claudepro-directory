@@ -5,7 +5,7 @@
 
 import 'server-only';
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import {
   generateRequestId,
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const itemsValue = (data as { items?: unknown } | null)?.items;
+    const itemsValue = (data as null | { items?: unknown })?.items;
     if (!Array.isArray(itemsValue)) {
       reqLogger.warn('Content paginated returned invalid data structure');
       return jsonResponse([], 200, CORS, {

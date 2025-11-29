@@ -1,3 +1,4 @@
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import type { Database } from '@heyclaude/database-types';
 import { logger } from './logger.ts';
 import { normalizeError } from './errors.ts';
@@ -25,10 +26,11 @@ interface NotificationDismissParams {
 }
 
 function getFluxStationUrl(): string {
-  return (
-    process.env['NEXT_PUBLIC_FLUX_STATION_URL'] ||
-    `${process.env['NEXT_PUBLIC_SUPABASE_URL']}/functions/v1/flux-station`
-  );
+  // Try env vars with fallback chain
+  const customUrl = (env as Record<string, unknown>)['NEXT_PUBLIC_FLUX_STATION_URL'] as string | undefined;
+  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+  
+  return customUrl || `${supabaseUrl}/functions/v1/flux-station`;
 }
 
 export async function dismissNotifications({

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { runGenerateReadme } from '../commands/generate-readme.js';
 import { logger } from '../toolkit/logger.js';
 
@@ -13,7 +15,7 @@ runGenerateReadme()
   .catch((error) => {
     logger.error(
       '💥 README generation failed',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'README generation failed'),
       {
         script: 'generate-readme',
       }

@@ -1,5 +1,7 @@
 'use client';
 
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
+
 import { logger } from '../logger.ts';
 import { ParseStrategy, safeParse } from '../data.ts';
 import { useCallback, useEffect, useState } from 'react';
@@ -170,7 +172,7 @@ export function useLocalStorage<T>(
 
   // 🔒 SECURITY: Runtime validation for sensitive key patterns (development only)
   // Warn developers if they accidentally try to store sensitive data in localStorage
-  if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+  if (isDevelopment && typeof window !== 'undefined') {
     if (containsSensitivePattern(key)) {
       logger.warn(
         'localStorage key matches sensitive pattern. Avoid storing secrets in localStorage.',
@@ -206,8 +208,11 @@ export function useLocalStorage<T>(
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
       const itemValue = window.localStorage.getItem(key);
-      logger.error('Failed to read from localStorage', errorObj, {
+      logger.warn('[Storage] Failed to read from localStorage', {
+        err: errorObj,
+        category: 'storage',
         component: 'useLocalStorage',
+        recoverable: true,
         action: 'initialize',
         key,
         item: itemValue ?? 'null',
@@ -251,8 +256,11 @@ export function useLocalStorage<T>(
           errorType = 'SERIALIZATION_ERROR';
         }
 
-        logger.error('Failed to write to localStorage', errorObj, {
+        logger.warn('[Storage] Failed to write to localStorage', {
+          err: errorObj,
+          category: 'storage',
           component: 'useLocalStorage',
+          recoverable: true,
           action: 'setValue',
           key,
           errorType,
@@ -280,8 +288,11 @@ export function useLocalStorage<T>(
       setError(null);
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      logger.error('Failed to remove from localStorage', errorObj, {
+      logger.warn('[Storage] Failed to remove from localStorage', {
+        err: errorObj,
+        category: 'storage',
         component: 'useLocalStorage',
+        recoverable: true,
         action: 'removeValue',
         key,
       });
@@ -318,8 +329,11 @@ export function useLocalStorage<T>(
           const errorType =
             errorObj.name === 'SyntaxError' ? 'JSON_PARSE_ERROR' : 'DESERIALIZE_ERROR';
 
-          logger.error('Failed to sync localStorage across tabs', errorObj, {
+          logger.warn('[Storage] Failed to sync localStorage across tabs', {
+            err: errorObj,
+            category: 'storage',
             component: 'useLocalStorage',
+            recoverable: true,
             action: 'sync',
             key,
             errorType,
@@ -342,8 +356,11 @@ export function useLocalStorage<T>(
       window.addEventListener('storage', handleStorageChange);
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      logger.error('Failed to add storage event listener', errorObj, {
+      logger.warn('[Storage] Failed to add storage event listener', {
+        err: errorObj,
+        category: 'storage',
         component: 'useLocalStorage',
+        recoverable: true,
         action: 'addEventListener',
         key,
       });

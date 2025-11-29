@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { runBackupDatabase } from '../commands/backup-database.js';
 import { logger } from '../toolkit/logger.js';
 
@@ -15,7 +17,7 @@ runBackupDatabase({ force })
   .catch((error) => {
     logger.error(
       '💥 Database backup failed',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'Database backup failed'),
       {
         script: 'backup-database',
       }

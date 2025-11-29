@@ -19,7 +19,6 @@
  * @module components/layout/user-menu
  */
 
-import { logger } from '@heyclaude/web-runtime/core';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
@@ -65,19 +64,12 @@ export function UserMenu({ className }: UserMenuProps) {
   const supabase = supabaseClient;
 
   useEffect(() => {
-    getAnimationConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setSpringDefault({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.default.stiffness'],
-          damping: config['animation.spring.default.damping'],
-        });
-      })
-      .catch((error) => {
-        logger.error('UserMenu: failed to load animation config', error);
-      });
+    const config = getAnimationConfig();
+    setSpringDefault({
+      type: 'spring' as const,
+      stiffness: config['animation.spring.default.stiffness'],
+      damping: config['animation.spring.default.damping'],
+    });
   }, []);
 
   const handleSignOut = async () => {

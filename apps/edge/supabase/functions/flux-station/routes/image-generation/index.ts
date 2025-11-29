@@ -11,16 +11,12 @@
  * Route: POST /image-generation/process
  */
 
-import { edgeEnv, initRequestLogging, pgmqDelete, pgmqRead, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
-import {
-  createUtilityContext,
-  errorToString,
-  logError,
-  logInfo,
-  TIMEOUT_PRESETS,
-  withContext,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { createUtilityContext, withContext, logError, logInfo } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 
 const IMAGE_GENERATION_QUEUE = 'image_generation';
 const QUEUE_BATCH_SIZE = 5; // Process 5 messages at a time
@@ -150,7 +146,9 @@ async function processImageGeneration(
     try {
       result = await response.json();
     } catch (parseError) {
-      // If JSON parsing fails, read the raw body from the cloned response for better error reporting
+      // If JSON parsing fails, log the parse error and read the raw body for better error reporting
+      const normalized = normalizeError(parseError, 'JSON parsing failed for image generation response');
+      await logError('Image generation response JSON parse failed', { ...logContext, err: normalized });
       const rawBody = await responseClone.text().catch(() => 'Unable to read response body');
       throw new Error(
         `Image generation API returned non-JSON response (${response.status} ${response.statusText}): ${rawBody}`
@@ -171,7 +169,7 @@ async function processImageGeneration(
 
     return { success: true };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorMessage = normalizeError(error, "Operation failed").message;
     await logError(`Image generation error (${type})`, logContext, error);
     return {
       success: false,
@@ -451,7 +449,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
         results.push({
           msg_id: msg.msg_id.toString(),
           status: 'failed',
-          error: errorToString(error),
+          error: normalizeError(error, "Operation failed").message,
         });
       }
     }

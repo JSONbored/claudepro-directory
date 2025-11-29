@@ -1,9 +1,11 @@
+import { env } from '@heyclaude/shared-runtime/schemas/env';
+
 export function isBuildTime(): boolean {
   if (typeof process === 'undefined') {
     return false;
   }
 
-  if (process.env['NEXT_PHASE'] === 'phase-production-build') {
+  if (env.NEXT_PHASE === 'phase-production-build') {
     return true;
   }
 
@@ -17,19 +19,19 @@ export function isBuildTime(): boolean {
   }
 
   const hasSupabaseEnv =
-    process.env['NEXT_PUBLIC_SUPABASE_URL'] && process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
+    env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!hasSupabaseEnv) {
     return true;
   }
 
-  if (process.env['NEXT_RUNTIME'] === 'nodejs') {
-    if (!(process.env['VERCEL'] || process.env['VERCEL_ENV'] || process.env['VERCEL_URL'])) {
+  if (env.NEXT_RUNTIME === 'nodejs') {
+    if (!(env.VERCEL || env.VERCEL_ENV || env.VERCEL_URL)) {
       return true;
     }
   }
 
-  if (!(process.env['VERCEL'] || process.env['VERCEL_ENV'] || process.env['VERCEL_URL'])) {
+  if (!(env.VERCEL || env.VERCEL_ENV || env.VERCEL_URL)) {
     return true;
   }
 

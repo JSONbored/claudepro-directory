@@ -1,5 +1,5 @@
 import { MiscService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { revalidateTag } from 'next/cache';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
@@ -46,8 +46,8 @@ export function revalidateNotificationCache(userId: string): void {
 }
 
 interface NotificationFetchParameters {
-  userId: string;
   dismissedIds?: string[];
+  userId: string;
 }
 
 export async function getActiveNotifications({

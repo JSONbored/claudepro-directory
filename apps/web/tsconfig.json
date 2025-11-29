@@ -19,15 +19,14 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx",
-    "../../packages/database-types/dist/**/*",
-    "../../packages/shared-runtime/src/**/*",
-    "../../packages/web-runtime/src/**/*",
-    "../../packages/data-layer/dist/**/*"
+    "**/*.tsx"
   ],
   "exclude": [
     "node_modules",
-    "../../packages/shared-runtime/src/image/**/*"
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
   ],
   "references": [
     { "path": "../../packages/database-types/tsconfig.json" },

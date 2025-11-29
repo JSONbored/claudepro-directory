@@ -30,7 +30,7 @@ import { NavigationTablet } from '@/src/components/core/layout/navigation-tablet
 import { UserMenu } from '@/src/components/core/layout/user-menu';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { Button } from '@heyclaude/web-runtime/ui';
-import { ACTION_LINKS } from '@/src/config/navigation';
+import { ACTION_LINKS } from '@heyclaude/web-runtime/config/navigation';
 import { usePinboard } from '@heyclaude/web-runtime/hooks';
 
 interface NavigationProps {

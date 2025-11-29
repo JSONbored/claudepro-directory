@@ -241,6 +241,16 @@ const nextConfig = {
       };
     }
 
+    // Ensure .ts and .tsx extensions are resolved for Deno-compatible imports
+    // This allows shared-runtime to use .ts extensions (required by Deno) while
+    // still working with Next.js webpack bundler
+    const existingExtensions = config.resolve.extensions || [];
+    const tsExtensions = ['.ts', '.tsx'];
+    const otherExtensions = existingExtensions.filter(
+      (ext) => !tsExtensions.includes(ext)
+    );
+    config.resolve.extensions = [...tsExtensions, ...otherExtensions];
+
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': resolve(__dirname, './'),

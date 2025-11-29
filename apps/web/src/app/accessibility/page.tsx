@@ -2,7 +2,7 @@ import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/c
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { NavLink } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -21,6 +21,17 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = 3600;
 
+/**
+ * Renders the site's Accessibility Statement, including conformance information, accessibility features, known limitations, testing approach, compatible technologies, feedback channels, and the last-updated timestamp.
+ *
+ * Fetches the site's last updated timestamp and contact channels during render and injects the organization name from APP_CONFIG. This page is intended to be statically generated and participates in the file's ISR/revalidation cycle.
+ *
+ * @returns The React element representing the full Accessibility Statement page.
+ * @see getLastUpdatedDate
+ * @see getContactChannels
+ * @see APP_CONFIG
+ * @see revalidate
+ */
 export default function AccessibilityPage() {
   const lastUpdated = getLastUpdatedDate();
   const channels = getContactChannels();
@@ -46,6 +57,7 @@ export default function AccessibilityPage() {
             We aim to conform to the{' '}
             <NavLink
               href="https://www.w3.org/WAI/WCAG21/quickref/"
+              external
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -148,7 +160,7 @@ export default function AccessibilityPage() {
           <ul className="list-disc space-y-2 pl-6">
             <li>
               Email:{' '}
-              <NavLink href={`mailto:${channels.email}`} external={true}>
+              <NavLink href={`mailto:${channels.email}`} external>
                 {channels.email}
               </NavLink>
             </li>
@@ -157,7 +169,7 @@ export default function AccessibilityPage() {
             </li>
             <li>
               GitHub Issues:{' '}
-              <NavLink href={`${channels.github}/issues`} external={true}>
+              <NavLink href={`${channels.github}/issues`} external>
                 Report an Issue
               </NavLink>
             </li>

@@ -5,16 +5,16 @@
 
 declare module '@imagemagick/magick-wasm' {
   export enum MagickFormat {
-    Png = 'Png',
     Jpeg = 'Jpeg',
+    Png = 'Png',
     WebP = 'WebP',
   }
 
   export interface IMagickImage {
-    width: number;
+    blur(radius: number, sigma: number): void;
     height: number;
     resize(width: number, height: number): void;
-    blur(radius: number, sigma: number): void;
+    width: number;
     write(callback: (data: Uint8Array) => Uint8Array): Uint8Array;
   }
 

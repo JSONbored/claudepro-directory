@@ -12,29 +12,67 @@
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import {
-  errorResponse,
-  initRequestLogging,
-  pgmqDelete,
-  pgmqRead,
-  successResponse,
-  supabaseServiceRole,
-  traceRequestComplete,
-  traceStep,
-} from '@heyclaude/edge-runtime';
-import {
-  createUtilityContext,
-  errorToString,
-  logError,
-  logInfo,
-  TIMEOUT_PRESETS,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import { errorResponse, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { createUtilityContext, logError, logInfo } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 import { getGenerator } from './registry.ts';
 import type { ContentRow } from './types.ts';
 
 const PACKAGE_GENERATION_QUEUE = 'package_generation';
 const QUEUE_BATCH_SIZE = 5; // Smaller batch size for expensive operations
+
+/**
+ * Safely extract a string property from an unknown object.
+ * Uses Object.getOwnPropertyDescriptor to avoid prototype pollution.
+ */
+const getStringProperty = (obj: unknown, key: string): string | undefined => {
+  if (typeof obj !== 'object' || obj === null) {
+    return undefined;
+  }
+  const desc = Object.getOwnPropertyDescriptor(obj, key);
+  if (desc && typeof desc.value === 'string') {
+    return desc.value;
+  }
+  return undefined;
+};
+
+/**
+ * Determine whether a raw queue message contains the required string fields and a valid content category.
+ *
+ * @param msg - Raw queue message to validate
+ * @returns `true` if `msg` is an object with string `content_id`, `slug`, and `created_at`, and a `category` equal to one of the allowed content category enum values, `false` otherwise.
+ */
+function isValidQueueMessage(msg: unknown): msg is {
+  content_id: string;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
+  slug: string;
+  created_at: string;
+} {
+  if (typeof msg !== 'object' || msg === null) {
+    return false;
+  }
+  const contentId = getStringProperty(msg, 'content_id');
+  const slug = getStringProperty(msg, 'slug');
+  const createdAt = getStringProperty(msg, 'created_at');
+  const category = getStringProperty(msg, 'category');
+
+  if (!(contentId && slug && createdAt && category)) {
+    return false;
+  }
+
+  // Validate category enum - use enum values directly from @heyclaude/database-types Constants
+  const validCategories = Constants.public.Enums.content_category;
+  for (const validCategory of validCategories) {
+    if (category === validCategory) {
+      return true;
+    }
+  }
+  return false;
+}
 
 interface PackageGenerationQueueMessage {
   msg_id: bigint;
@@ -127,7 +165,7 @@ async function processPackageGeneration(
 
     return { success: true, errors: [] };
   } catch (error) {
-    const errorMsg = errorToString(error);
+    const errorMsg = normalizeError(error, "Operation failed").message;
     errors.push(`Generation failed: ${errorMsg}`);
     if (logContext) {
       await logError(
@@ -194,52 +232,6 @@ export async function handlePackageGenerationQueue(
       will_retry?: boolean;
     }> = [];
 
-    // Safely extract properties from queue message
-    const getStringProperty = (obj: unknown, key: string): string | undefined => {
-      if (typeof obj !== 'object' || obj === null) {
-        return undefined;
-      }
-      const desc = Object.getOwnPropertyDescriptor(obj, key);
-      if (desc && typeof desc.value === 'string') {
-        return desc.value;
-      }
-      return undefined;
-    };
-
-    /**
-     * Determine whether a raw queue message contains the required string fields and a valid content category.
-     *
-     * @param msg - Raw queue message to validate
-     * @returns `true` if `msg` is an object with string `content_id`, `slug`, and `created_at`, and a `category` equal to one of the allowed content category enum values, `false` otherwise.
-     */
-    function isValidQueueMessage(msg: unknown): msg is {
-      content_id: string;
-      category: DatabaseGenerated['public']['Enums']['content_category'];
-      slug: string;
-      created_at: string;
-    } {
-      if (typeof msg !== 'object' || msg === null) {
-        return false;
-      }
-      const contentId = getStringProperty(msg, 'content_id');
-      const slug = getStringProperty(msg, 'slug');
-      const createdAt = getStringProperty(msg, 'created_at');
-      const category = getStringProperty(msg, 'category');
-
-      if (!(contentId && slug && createdAt && category)) {
-        return false;
-      }
-
-      // Validate category enum - use enum values directly from @heyclaude/database-types Constants
-      const validCategories = Constants.public.Enums.content_category;
-      for (const validCategory of validCategories) {
-        if (category === validCategory) {
-          return true;
-        }
-      }
-      return false;
-    }
-
     for (const msg of messages) {
       // Validate message structure
       if (!isValidQueueMessage(msg.message)) {
@@ -299,7 +291,7 @@ export async function handlePackageGenerationQueue(
           });
         }
       } catch (error) {
-        const errorMsg = errorToString(error);
+        const errorMsg = normalizeError(error, "Operation failed").message;
         await logError(
           'Unexpected error processing package generation',
           {

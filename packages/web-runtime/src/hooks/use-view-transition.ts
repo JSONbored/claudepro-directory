@@ -31,6 +31,8 @@
 
 'use client';
 
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
+
 import { logger, normalizeError } from '../entries/core.ts';
 import { logClientWarn } from '../utils/client-logger.ts';
 import { useCallback, useMemo } from 'react';
@@ -86,7 +88,7 @@ export function useViewTransition(): UseViewTransitionReturn {
       try {
         return document.startViewTransition(updateCallback);
       } catch (error) {
-        if (process.env.NODE_ENV === 'development') {
+        if (isDevelopment) {
           const normalized = normalizeError(error, 'View Transition failed');
           logger.warn('View Transition failed, falling back to instant update', {
             err: normalized,

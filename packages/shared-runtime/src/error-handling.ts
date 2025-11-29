@@ -1,48 +1,25 @@
 /**
- * Error handling utilities for edge functions
- * Provides consistent error stringification across all functions
+ * Error handling utilities
+ * Provides consistent error normalization across all functions
  */
 
 /**
- * Safely converts any error to a string message
- * Handles Error instances, PostgrestError objects, and plain objects
+ * Normalizes any error value into an Error instance.
  *
- * WARNING: This function may expose error messages that contain sensitive information.
- * Only use this for server-side logging. For user-facing error responses, always use
- * a generic message like "An unexpected error occurred" or use errorResponse() helper.
+ * This is the standard way to handle errors throughout the codebase:
+ * - If already an Error, returns as-is
+ * - If a string, wraps in new Error
+ * - If an object, attempts JSON stringification
+ * - Falls back to provided message
  *
- * @param error - The error to stringify
- * @returns A human-readable error message (for logging purposes only)
+ * Usage patterns:
+ * - In catch blocks: `const err = normalizeError(error, 'Operation failed');`
+ * - For message only: `normalizeError(error, 'Failed').message`
+ *
+ * @param error - The error to normalize (can be any type)
+ * @param fallbackMessage - Message to use if error cannot be converted
+ * @returns An Error instance
  */
-export function errorToString(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  if (typeof error === 'object' && error !== null) {
-    // Handle Supabase PostgrestError (has code and message)
-    if ('code' in error && 'message' in error && typeof (error as any).message === 'string') {
-      return (error as any).message;
-    }
-
-    // Handle objects with just a message property
-    if ('message' in error && typeof (error as any).message === 'string') {
-      return (error as any).message;
-    }
-
-    // Handle objects with code and message (different structure)
-    if ('code' in error && 'message' in error) {
-      return `${String((error as any).code)}: ${String((error as any).message)}`;
-    }
-
-    // Fallback: never return stack trace or all properties
-    return 'An unexpected error occurred';
-  }
-
-  // Never expose internal error details - always use generic message
-  return 'An unexpected error occurred';
-}
-
 export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'): Error {
   if (error instanceof Error) {
     return error;

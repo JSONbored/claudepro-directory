@@ -1,6 +1,7 @@
 import type { Middleware } from '@heyclaude/edge-runtime/middleware/types.ts';
 import type { StandardContext } from '@heyclaude/edge-runtime/utils/context.ts';
-import { createDataApiContext, logInfo, logError, errorToString } from '@heyclaude/shared-runtime';
+import { createDataApiContext, logInfo, logError } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 
 interface AnalyticsOptions {
   app?: string;
@@ -42,7 +43,7 @@ export function analytics(
         logData['resource'] = resource;
       }
       if (error) {
-        logData['error'] = errorToString(error);
+        logData['error'] = normalizeError(error, "Operation failed").message;
       }
 
       if (outcome === 'success') {

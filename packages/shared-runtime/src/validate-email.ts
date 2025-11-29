@@ -6,9 +6,9 @@
 import { createUtilityContext, logWarn } from './logging.ts';
 
 export interface ValidateEmailResult {
-  valid: boolean;
-  normalized?: string;
   error?: string;
+  normalized?: string;
+  valid: boolean;
 }
 
 /**
@@ -32,14 +32,14 @@ const MAX_EMAIL_LENGTH = 254;
 export function validateEmail(
   email: unknown,
   options: {
-    required?: boolean;
     maxLength?: number;
+    required?: boolean;
   } = {}
 ): ValidateEmailResult {
   const { required = true, maxLength = MAX_EMAIL_LENGTH } = options;
 
-  // Check if email is provided
-  if (!email) {
+  // Check if email is provided - handles null, undefined, empty string, and falsy values
+  if (email === null || email === undefined || email === '') {
     if (required) {
       return {
         valid: false,

@@ -3,9 +3,9 @@
  * Provides consistent error handling for database operations
  */
 
-import { errorToString } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { badRequestResponse, errorResponse, jsonResponse, publicCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
-import { logError } from '@heyclaude/shared-runtime';
+import { logError } from '@heyclaude/shared-runtime/logging.ts';
 
 /**
  * Produce an HTTP response for known database errors or indicate the error should be re-thrown.
@@ -47,8 +47,8 @@ export async function handleDatabaseError(
     );
   }
 
-  // Use errorToString for consistent error message extraction
-  const normalizedError = error instanceof Error ? error : new Error(errorToString(error));
+  // Use normalizeError for consistent error normalization
+  const normalizedError = normalizeError(error, 'Database operation failed');
   // Await to ensure logs are flushed before returning response
   await logError('Database operation failed', logContext, normalizedError);
   return await errorResponse(normalizedError, context);

@@ -527,8 +527,11 @@ export const BaseCard = memo(
       return cardContent;
     } catch (error) {
       const normalized = normalizeError(error, 'BaseCard: Rendering failed');
-      logger.error('BaseCard: Rendering failed', normalized, {
+      logger.warn('[Render] BaseCard rendering failed', {
+        err: normalized,
+        category: 'render',
         component: 'BaseCard',
+        recoverable: true,
         targetPath,
         hasTitle: Boolean(displayTitle),
       });

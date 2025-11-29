@@ -1,4 +1,4 @@
-import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { createUtilityContext } from '@heyclaude/shared-runtime/logging.ts';
 import { getStorageAnonClient } from '@heyclaude/edge-runtime/utils/storage/client.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
@@ -78,8 +78,8 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Re
       bucket,
       path,
     });
-    const { errorToString } = await import('@heyclaude/shared-runtime');
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const { normalizeError } = await import('@heyclaude/shared-runtime');
+    const errorObj = normalizeError(error, 'Storage proxy error');
     logger.error('Proxy error', {
       ...logContext,
       err: errorObj,
@@ -87,7 +87,7 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Re
     return buildErrorResponse(
       {
         error: 'proxy_failed',
-        message: errorToString(error),
+        message: normalizeError(error, "Operation failed").message,
         bucket,
         path,
       },

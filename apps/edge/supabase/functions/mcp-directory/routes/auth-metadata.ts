@@ -5,8 +5,11 @@
  * and provides authorization server discovery information.
  */
 
-import { edgeEnv, initRequestLogging, jsonResponse, traceStep } from '@heyclaude/edge-runtime';
-import { createDataApiContext, getEnvVar, logError, logger } from '@heyclaude/shared-runtime';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { initRequestLogging, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { jsonResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { createDataApiContext, logError, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { getEnvVar } from '@heyclaude/shared-runtime/env.ts';
 import type { Context } from 'hono';
 
 const MCP_SERVER_URL = getEnvVar('MCP_SERVER_URL') ?? 'https://mcp.heyclau.de';

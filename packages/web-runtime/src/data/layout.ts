@@ -1,20 +1,20 @@
 'use server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { cache } from 'react';
-
-/**
- * Promise status constant (JavaScript standard, not database enum)
- * Used to avoid lint rule false positives on Promise.allSettled status checks
- */
-const PROMISE_REJECTED_STATUS = 'rejected' as const;
 
 import { fetchCached } from '../cache/fetch-cached';
 import { logger, normalizeError } from '../index';
 import { generateRequestId } from '../utils/request-id';
 
 import { getActiveAnnouncement } from './announcements';
+
+/**
+ * Promise status constant (JavaScript standard, not database enum)
+ * Used to avoid lint rule false positives on Promise.allSettled status checks
+ */
+const PROMISE_REJECTED_STATUS = 'rejected' as const;
 
 // Note: getLayoutFlags is exported from data-client.ts (client-safe entry point)
 // Do not export from here to avoid 'use server' restrictions

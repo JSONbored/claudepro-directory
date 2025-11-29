@@ -17,13 +17,14 @@ import {
   normalizeError,
 } from '@heyclaude/web-runtime/logging/server';
 import { cn, UI_CLASSES, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
+
 const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
@@ -119,11 +120,11 @@ function mapSubmissionTypeToContentCategory(
 
 // Type guard for recent merged submissions
 function isValidRecentSubmission(submission: unknown): submission is {
-  id: string;
   content_name: string;
   content_type: Database['public']['Enums']['submission_type'];
+  id: string;
   merged_at: string;
-  user?: { name: string; slug: string } | null;
+  user?: null | { name: string; slug: string };
 } {
   return (
     submission !== null &&
@@ -195,7 +196,7 @@ export default async function SubmitPage() {
     formConfig = await getSubmissionFormFields();
     reqLogger.info('SubmitPage: form configuration loaded', {
       section: 'form-config',
-      hasConfig: !!formConfig,
+      hasConfig: Boolean(formConfig),
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission form config');
@@ -313,19 +314,19 @@ export default async function SubmitPage() {
             <CardContent className={UI_CLASSES.GRID_COLS_3_GAP_2}>
               {/* Total */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-blue-500/10')}>
-                <div className={'font-bold text-2xl text-blue-400'}>{stats.total}</div>
+                <div className="font-bold text-2xl text-blue-400">{stats.total}</div>
                 <div className={UI_CLASSES.TEXT_XS_MUTED}>Total</div>
               </div>
 
               {/* Pending */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-yellow-500/10')}>
-                <div className={'font-bold text-2xl text-yellow-400'}>{stats.pending}</div>
+                <div className="font-bold text-2xl text-yellow-400">{stats.pending}</div>
                 <div className={UI_CLASSES.TEXT_XS_MUTED}>Pending</div>
               </div>
 
               {/* This Week */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-green-500/10')}>
-                <div className={'font-bold text-2xl text-green-400'}>{stats.merged_this_week}</div>
+                <div className="font-bold text-2xl text-green-400">{stats.merged_this_week}</div>
                 <div className={UI_CLASSES.TEXT_XS_MUTED}>This Week</div>
               </div>
             </CardContent>
@@ -348,7 +349,7 @@ export default async function SubmitPage() {
       </div>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={'container mx-auto px-4 py-12'}>
+      <section className="container mx-auto px-4 py-12">
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

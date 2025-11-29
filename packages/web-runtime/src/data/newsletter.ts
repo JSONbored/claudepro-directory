@@ -4,7 +4,7 @@ import { NewsletterService } from '@heyclaude/data-layer';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
 
-export async function getNewsletterSubscriberCount(): Promise<number | null> {
+export async function getNewsletterSubscriberCount(): Promise<null | number> {
   return fetchCached(
     (client) => new NewsletterService(client).getNewsletterSubscriberCount(),
     {

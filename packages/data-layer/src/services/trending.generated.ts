@@ -5,8 +5,8 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 export class TrendingService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,7 +17,7 @@ export class TrendingService {
   async getTrendingMetrics(args: Database['public']['Functions']['get_trending_metrics_with_content']['Args']) {
     const { data, error } = await this.supabase.rpc('get_trending_metrics_with_content', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_trending_metrics_with_content']['Returns'];
+    return data;
   }
 
   /**
@@ -26,7 +26,7 @@ export class TrendingService {
   async getPopularContent(args: Database['public']['Functions']['get_popular_content']['Args']) {
     const { data, error } = await this.supabase.rpc('get_popular_content', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_popular_content']['Returns'];
+    return data;
   }
 
   /**
@@ -35,7 +35,7 @@ export class TrendingService {
   async getRecentContent(args: Database['public']['Functions']['get_recent_content']['Args']) {
     const { data, error } = await this.supabase.rpc('get_recent_content', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_recent_content']['Returns'];
+    return data;
   }
 
   /**
@@ -44,6 +44,6 @@ export class TrendingService {
   async getTrendingContent(args: Database['public']['Functions']['get_trending_content']['Args']) {
     const { data, error } = await this.supabase.rpc('get_trending_content', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_trending_content']['Returns'];
+    return data;
   }
 }

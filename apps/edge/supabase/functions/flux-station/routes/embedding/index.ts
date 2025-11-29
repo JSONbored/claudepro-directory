@@ -5,36 +5,17 @@
 /// <reference types="@heyclaude/edge-runtime/deno-globals.d.ts" />
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import {
-  badRequestResponse,
-  errorResponse,
-  initRequestLogging,
-  parseJsonBody,
-  pgmqDelete,
-  pgmqRead,
-  pgmqSend,
-  publicCorsHeaders,
-  successResponse,
-  supabaseServiceRole,
-  traceRequestComplete,
-  traceStep,
-  unauthorizedResponse,
-  webhookCorsHeaders,
-} from '@heyclaude/edge-runtime';
-import {
-  buildSecurityHeaders,
-  CIRCUIT_BREAKER_CONFIGS,
-  createUtilityContext,
-  errorToString,
-  logError,
-  logInfo,
-  logWarn,
-  logger,
-  TIMEOUT_PRESETS,
-  verifySupabaseDatabaseWebhook,
-  withCircuitBreaker,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import { badRequestResponse, errorResponse, publicCorsHeaders, successResponse, unauthorizedResponse, webhookCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { parseJsonBody } from '@heyclaude/edge-runtime/utils/parse-json-body.ts';
+import { pgmqDelete, pgmqRead, pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { buildSecurityHeaders } from '@heyclaude/shared-runtime/security-headers.ts';
+import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '@heyclaude/shared-runtime/circuit-breaker.ts';
+import { createUtilityContext, logError, logInfo, logWarn, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
+import { verifySupabaseDatabaseWebhook } from '@heyclaude/shared-runtime/webhook/crypto.ts';
 
 // Webhook payload structure from Supabase database webhooks
 // Use generated type for the record (content table row)
@@ -177,7 +158,7 @@ async function storeEmbedding(
           },
         },
       }, error);
-      throw new Error(`Failed to store embedding: ${errorToString(error)}`);
+      throw new Error(`Failed to store embedding: ${normalizeError(error, "Operation failed").message}`);
     }
   };
 
@@ -218,7 +199,7 @@ function respondWithAnalytics(handler: () => Promise<Response>): Promise<Respons
   });
 
   const logEvent = async (status: number, outcome: 'success' | 'error', error?: unknown) => {
-    const errorData = error ? { error: errorToString(error) } : {};
+    const errorData = error ? { error: normalizeError(error, "Operation failed").message } : {};
     const logData = {
       ...logContext,
       status,
@@ -361,7 +342,7 @@ async function processEmbeddingGeneration(
 
     return { success: true, errors: [] };
   } catch (error) {
-    const errorMsg = errorToString(error);
+    const errorMsg = normalizeError(error, "Operation failed").message;
     errors.push(`Embedding generation failed: ${errorMsg}`);
     const logContext = createUtilityContext('generate-embedding', 'generation-error');
     await logError(
@@ -526,7 +507,7 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
           }
         }
       } catch (error) {
-        const errorMsg = errorToString(error);
+        const errorMsg = normalizeError(error, "Operation failed").message;
         await logError(
           'Unexpected error processing embedding generation',
           {
@@ -572,7 +553,7 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
  * `embedding_dim`; for skipped events the response includes a `reason` (for example, `delete_event` or `empty_text`);
  * on failure the response contains standardized error information and an appropriate status code.
  */
-export async function handleEmbeddingWebhook(req: Request): Promise<Response> {
+export function handleEmbeddingWebhook(req: Request): Promise<Response> {
   // Otherwise, handle as direct webhook (legacy)
   return respondWithAnalytics(async () => {
     const logContext = createUtilityContext('generate-embedding', 'webhook-handler');

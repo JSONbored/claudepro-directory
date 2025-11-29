@@ -15,7 +15,7 @@ import { UI_CLASSES, UnifiedBadge, Button ,
   CardDescription,
   CardHeader,
   CardTitle  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -42,7 +42,7 @@ export const revalidate = 86_400;
  * Only allows HTTPS URLs (or HTTP for localhost in development)
  * Returns canonicalized URL or null if invalid
  */
-function getSafeWebsiteUrl(url: string | null | undefined): string | null {
+function getSafeWebsiteUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
 
   try {
@@ -126,13 +126,13 @@ export default async function CompaniesPage() {
   });
 
   return (
-    <div className={'min-h-screen bg-background'}>
+    <div className="min-h-screen bg-background">
       {/* Hero */}
       <section className={`${UI_CLASSES.CONTAINER_OVERFLOW_BORDER}`}>
-        <div className={'container mx-auto px-4 py-20'}>
-          <div className={'mx-auto max-w-3xl text-center'}>
-            <div className={'mb-6 flex justify-center'}>
-              <div className={'rounded-full bg-accent/10 p-3'}>
+        <div className="container mx-auto px-4 py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mb-6 flex justify-center">
+              <div className="rounded-full bg-accent/10 p-3">
                 <Building className="h-8 w-8 text-primary" />
               </div>
             </div>
@@ -143,7 +143,7 @@ export default async function CompaniesPage() {
               Discover companies building the future with Claude and Cursor
             </p>
 
-            <div className={'mb-8 flex justify-center gap-2'}>
+            <div className="mb-8 flex justify-center gap-2">
               <UnifiedBadge variant="base" style="secondary">
                 <Building className="mr-1 h-3 w-3" />
                 {companies.length} Companies
@@ -153,7 +153,7 @@ export default async function CompaniesPage() {
               </UnifiedBadge>
             </div>
 
-            <Button variant="outline" asChild={true}>
+            <Button variant="outline" asChild>
               <Link href={ROUTES.ACCOUNT_COMPANIES}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Your Company
@@ -164,16 +164,16 @@ export default async function CompaniesPage() {
       </section>
 
       {/* Companies Grid */}
-      <section className={'container mx-auto px-4 py-12'}>
+      <section className="container mx-auto px-4 py-12">
         {companies.length === 0 ? (
           <Card>
-            <CardContent className={'flex flex-col items-center py-12'}>
+            <CardContent className="flex flex-col items-center py-12">
               <Building className="mb-4 h-12 w-12 text-muted-foreground" />
               <h3 className="mb-2 font-semibold text-xl">No companies yet</h3>
-              <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
+              <p className="mb-4 max-w-md text-center text-muted-foreground">
                 Be the first company to join the directory!
               </p>
-              <Button asChild={true}>
+              <Button asChild>
                 <Link href={ROUTES.ACCOUNT_COMPANIES}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Your Company
@@ -185,27 +185,23 @@ export default async function CompaniesPage() {
           <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
             {companies.map((company, index) => (
               <Card key={company.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
-                {company.featured && (
-                  <div className="-top-2 -right-2 absolute z-10">
+                {company.featured ? <div className="-top-2 -right-2 absolute z-10">
                     <UnifiedBadge variant="base" className="bg-accent text-accent-foreground">
                       <Star className="mr-1 h-3 w-3" />
                       Featured
                     </UnifiedBadge>
-                  </div>
-                )}
+                  </div> : null}
 
                 <CardHeader>
                   <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                    {company.logo && (
-                      <Image
+                    {company.logo ? <Image
                         src={company.logo}
                         alt={`${company.name} logo`}
                         width={48}
                         height={48}
                         className="h-12 w-12 rounded-lg object-cover"
                         priority={index < 6}
-                      />
-                    )}
+                      /> : null}
                     <div className="flex-1">
                       <CardTitle>
                         <Link
@@ -215,21 +211,18 @@ export default async function CompaniesPage() {
                           {company.name}
                         </Link>
                       </CardTitle>
-                      {company.industry && <CardDescription>{company.industry}</CardDescription>}
+                      {company.industry ? <CardDescription>{company.industry}</CardDescription> : null}
                     </div>
                   </div>
                 </CardHeader>
 
                 <CardContent>
-                  {company.description && (
-                    <p className={'mb-4 line-clamp-2 text-muted-foreground text-sm'}>
+                  {company.description ? <p className="mb-4 line-clamp-2 text-muted-foreground text-sm">
                       {company.description}
-                    </p>
-                  )}
+                    </p> : null}
 
                   {/* Job Statistics from RPC/data layer (getCompanyProfile RPC) */}
-                  {company.stats && (company.stats.active_jobs ?? 0) > 0 && (
-                    <div className={'mb-4 flex flex-wrap gap-2'}>
+                  {company.stats && (company.stats.active_jobs ?? 0) > 0 ? <div className="mb-4 flex flex-wrap gap-2">
                       <UnifiedBadge variant="base" style="secondary" className="text-xs">
                         <Briefcase className="mr-1 h-3 w-3" />
                         {company.stats.active_jobs ?? 0} Active{' '}
@@ -248,16 +241,13 @@ export default async function CompaniesPage() {
                           {company.stats.remote_jobs ?? 0} Remote
                         </UnifiedBadge>
                       )}
-                    </div>
-                  )}
+                    </div> : null}
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
-                    {company.size && (
-                      <UnifiedBadge variant="base" style="outline" className="text-xs">
+                    {company.size ? <UnifiedBadge variant="base" style="outline" className="text-xs">
                         {company.size} employees
-                      </UnifiedBadge>
-                    )}
+                      </UnifiedBadge> : null}
 
                     {(() => {
                       const safeWebsiteUrl = getSafeWebsiteUrl(company.website);
@@ -268,7 +258,7 @@ export default async function CompaniesPage() {
                       // At this point, safeWebsiteUrl is validated and safe for use in external links
                       const validatedUrl: string = safeWebsiteUrl;
                       return (
-                        <Button variant="ghost" size="sm" asChild={true}>
+                        <Button variant="ghost" size="sm" asChild>
                           <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-3 w-3" />
                           </a>
@@ -284,7 +274,7 @@ export default async function CompaniesPage() {
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={'container mx-auto px-4 py-12'}>
+      <section className="container mx-auto px-4 py-12">
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

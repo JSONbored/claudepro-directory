@@ -5,8 +5,8 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 export class ContentService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,7 +17,7 @@ export class ContentService {
   async getSitewideReadme(args: Database['public']['Functions']['generate_readme_data']['Args']) {
     const { data, error } = await this.supabase.rpc('generate_readme_data', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['generate_readme_data']['Returns'];
+    return data;
   }
 
   /**
@@ -26,7 +26,7 @@ export class ContentService {
   async getSitewideLlmsTxt(args: Database['public']['Functions']['generate_sitewide_llms_txt']['Args']) {
     const { data, error } = await this.supabase.rpc('generate_sitewide_llms_txt', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['generate_sitewide_llms_txt']['Returns'];
+    return data;
   }
 
   /**
@@ -35,7 +35,7 @@ export class ContentService {
   async getChangelogLlmsTxt(args: Database['public']['Functions']['generate_changelog_llms_txt']['Args']) {
     const { data, error } = await this.supabase.rpc('generate_changelog_llms_txt', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['generate_changelog_llms_txt']['Returns'];
+    return data;
   }
 
   /**
@@ -44,7 +44,7 @@ export class ContentService {
   async getCategoryLlmsTxt(args: Database['public']['Functions']['generate_category_llms_txt']['Args']) {
     const { data, error } = await this.supabase.rpc('generate_category_llms_txt', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['generate_category_llms_txt']['Returns'];
+    return data;
   }
 
   /**
@@ -53,7 +53,7 @@ export class ContentService {
   async getChangelogEntryLlmsTxt(args: Database['public']['Functions']['generate_changelog_entry_llms_txt']['Args']) {
     const { data, error } = await this.supabase.rpc('generate_changelog_entry_llms_txt', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['generate_changelog_entry_llms_txt']['Returns'];
+    return data;
   }
 
   /**
@@ -62,7 +62,7 @@ export class ContentService {
   async getToolLlmsTxt(args: Database['public']['Functions']['generate_tool_llms_txt']['Args']) {
     const { data, error } = await this.supabase.rpc('generate_tool_llms_txt', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['generate_tool_llms_txt']['Returns'];
+    return data;
   }
 
   /**
@@ -71,7 +71,7 @@ export class ContentService {
   async getCategoryConfigs(args: Database['public']['Functions']['get_category_configs_with_features']['Args']) {
     const { data, error } = await this.supabase.rpc('get_category_configs_with_features', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_category_configs_with_features']['Returns'];
+    return data;
   }
 
   /**
@@ -80,7 +80,7 @@ export class ContentService {
   async getApiContentFull(args: Database['public']['Functions']['get_api_content_full']['Args']) {
     const { data, error } = await this.supabase.rpc('get_api_content_full', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_api_content_full']['Returns'];
+    return data;
   }
 
   /**
@@ -89,7 +89,7 @@ export class ContentService {
   async getContentDetailComplete(args: Database['public']['Functions']['get_content_detail_complete']['Args']) {
     const { data, error } = await this.supabase.rpc('get_content_detail_complete', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_content_detail_complete']['Returns'];
+    return data;
   }
 
   /**
@@ -98,7 +98,7 @@ export class ContentService {
   async getContentDetailCore(args: Database['public']['Functions']['get_content_detail_core']['Args']) {
     const { data, error } = await this.supabase.rpc('get_content_detail_core', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_content_detail_core']['Returns'];
+    return data;
   }
 
   /**
@@ -107,7 +107,7 @@ export class ContentService {
   async getContentAnalytics(args: Database['public']['Functions']['get_content_analytics']['Args']) {
     const { data, error } = await this.supabase.rpc('get_content_analytics', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_content_analytics']['Returns'];
+    return data;
   }
 
   /**
@@ -116,7 +116,7 @@ export class ContentService {
   async getEnrichedContentList(args: Database['public']['Functions']['get_enriched_content_list']['Args']) {
     const { data, error } = await this.supabase.rpc('get_enriched_content_list', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_enriched_content_list']['Returns'];
+    return data;
   }
 
   /**
@@ -125,7 +125,7 @@ export class ContentService {
   async getContentPaginated(args: Database['public']['Functions']['get_content_paginated']['Args']) {
     const { data, error } = await this.supabase.rpc('get_content_paginated', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_content_paginated']['Returns'];
+    return data;
   }
 
   /**
@@ -134,7 +134,7 @@ export class ContentService {
   async getHomepageComplete(args: Database['public']['Functions']['get_homepage_complete']['Args']) {
     const { data, error } = await this.supabase.rpc('get_homepage_complete', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_homepage_complete']['Returns'];
+    return data;
   }
 
   /**
@@ -143,7 +143,7 @@ export class ContentService {
   async getHomepageOptimized(args: Database['public']['Functions']['get_homepage_optimized']['Args']) {
     const { data, error } = await this.supabase.rpc('get_homepage_optimized', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_homepage_optimized']['Returns'];
+    return data;
   }
 
   /**
@@ -152,7 +152,7 @@ export class ContentService {
   async getReviewsWithStats(args: Database['public']['Functions']['get_reviews_with_stats']['Args']) {
     const { data, error } = await this.supabase.rpc('get_reviews_with_stats', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_reviews_with_stats']['Returns'];
+    return data;
   }
 
   /**
@@ -161,7 +161,7 @@ export class ContentService {
   async getRelatedContent(args: Database['public']['Functions']['get_related_content']['Args']) {
     const { data, error } = await this.supabase.rpc('get_related_content', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_related_content']['Returns'];
+    return data;
   }
 
   /**
@@ -170,7 +170,7 @@ export class ContentService {
   async getSimilarContent(args: Database['public']['Functions']['get_similar_content']['Args']) {
     const { data, error } = await this.supabase.rpc('get_similar_content', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_similar_content']['Returns'];
+    return data;
   }
 
   /**
@@ -179,7 +179,7 @@ export class ContentService {
   async getContentTemplates(args: Database['public']['Functions']['get_content_templates']['Args']) {
     const { data, error } = await this.supabase.rpc('get_content_templates', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_content_templates']['Returns'];
+    return data;
   }
 
   /**
@@ -188,6 +188,6 @@ export class ContentService {
   async getContentPaginatedSlim(args: Database['public']['Functions']['get_content_paginated_slim']['Args']) {
     const { data, error } = await this.supabase.rpc('get_content_paginated_slim', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_content_paginated_slim']['Returns'];
+    return data;
   }
 }

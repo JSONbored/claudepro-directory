@@ -7,6 +7,8 @@
  * Uses web-runtime UI primitives directly
  */
 
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
+
 import { AlertTriangle, Home, RefreshCw } from '../../icons.tsx';
 import type {
   ErrorBoundaryProps,
@@ -18,9 +20,6 @@ import { Button } from './button.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card.tsx';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
 import { useCallback } from 'react';
-
-// Client-safe environment check - doesn't trigger server env validation
-const isDevelopment = process.env.NODE_ENV === 'development';
 
 /**
  * ErrorFallback component using web-runtime UI primitives

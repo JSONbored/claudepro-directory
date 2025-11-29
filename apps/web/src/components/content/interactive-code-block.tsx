@@ -69,7 +69,13 @@ async function sanitizeShikiHtml(html: string): Promise<string> {
       FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'href', 'src'],
     });
   } catch (error) {
-    logger.error('sanitizeShikiHtml: Failed to load DOMPurify', normalizeError(error));
+    const normalized = normalizeError(error, 'Failed to load DOMPurify');
+    logger.warn('[Sanitize] Failed to load DOMPurify', {
+      err: normalized,
+      category: 'sanitize',
+      component: 'sanitizeShikiHtml',
+      recoverable: true,
+    });
     return html; // Fallback to original HTML
   }
 }
@@ -212,7 +218,12 @@ export function ProductionCodeBlock({
           setSafeHtml(sanitized);
         })
         .catch((error) => {
-          logger.error('ProductionCodeBlock: Failed to sanitize HTML', error);
+          logger.warn('[Sanitize] Failed to sanitize HTML', {
+            err: error,
+            category: 'sanitize',
+            component: 'ProductionCodeBlock',
+            recoverable: true,
+          });
           setSafeHtml(html); // Fallback to original
         });
     }
@@ -250,20 +261,13 @@ export function ProductionCodeBlock({
     setNeedsCollapse(lines > maxLines);
   }, [code, maxLines]);
 
-  // Fetch timeout config once on mount
+  // Load timeout config on mount
   useEffect(() => {
-    getTimeoutConfig()
-      .then((result) => {
-        const override = result?.['timeout.ui.clipboard_reset_delay_ms'];
-        if (typeof override === 'number' && Number.isFinite(override) && override > 0) {
-          setClipboardResetDelay(override);
-        }
-        // Otherwise keep the default value (2000ms)
-      })
-      .catch((error) => {
-        logger.error('ProductionCodeBlock: failed to load timeout config', normalizeError(error));
-        // Keep default value (2000ms) on error
-      });
+    const config = getTimeoutConfig();
+    const override = config['timeout.ui.clipboard_reset_delay_ms'];
+    if (typeof override === 'number' && Number.isFinite(override) && override > 0) {
+      setClipboardResetDelay(override);
+    }
   }, []);
 
   const handleCopy = async () => {
@@ -278,9 +282,15 @@ export function ProductionCodeBlock({
       });
     } catch (error) {
       setIsCopied(false);
-      logger.error('ProductionCodeBlock: copy failed', normalizeError(error), {
-        category,
-        slug,
+      const normalized = normalizeError(error, 'Copy failed');
+      logger.warn('[Clipboard] Copy failed', {
+        err: normalized,
+        category: 'clipboard',
+        component: 'ProductionCodeBlock',
+        recoverable: true,
+        userRetryable: true,
+        itemCategory: category,
+        itemSlug: slug,
       });
       toasts.error.copyFailed('code');
       return;
@@ -353,9 +363,15 @@ export function ProductionCodeBlock({
         });
     } catch (error) {
       toasts.error.screenshotFailed();
-      logger.error('Screenshot generation failed', normalizeError(error), {
-        category,
-        slug,
+      const normalized = normalizeError(error, 'Screenshot generation failed');
+      logger.warn('[Share] Screenshot generation failed', {
+        err: normalized,
+        category: 'share',
+        component: 'ProductionCodeBlock',
+        recoverable: true,
+        userRetryable: true,
+        itemCategory: category,
+        itemSlug: slug,
       });
     } finally {
       clearTimeout(failsafeTimeout);
@@ -429,9 +445,15 @@ export function ProductionCodeBlock({
         });
     } catch (error) {
       toasts.error.downloadFailed();
-      logger.error('Download failed', normalizeError(error), {
-        category,
-        slug,
+      const normalized = normalizeError(error, 'Download failed');
+      logger.warn('[Share] Download failed', {
+        err: normalized,
+        category: 'share',
+        component: 'ProductionCodeBlock',
+        recoverable: true,
+        userRetryable: true,
+        itemCategory: category,
+        itemSlug: slug,
       });
     }
   };
@@ -469,9 +491,15 @@ export function ProductionCodeBlock({
       setIsShareOpen(false);
     } catch (error) {
       toasts.error.shareFailed();
-      logger.error('Share failed', normalizeError(error), {
-        category,
-        slug,
+      const normalized = normalizeError(error, 'Share failed');
+      logger.warn('[Share] Share failed', {
+        err: normalized,
+        category: 'share',
+        component: 'ProductionCodeBlock',
+        recoverable: true,
+        userRetryable: true,
+        itemCategory: category,
+        itemSlug: slug,
         platform,
       });
     }
@@ -546,9 +574,9 @@ export function ProductionCodeBlock({
               <Download className={UI_CLASSES.ICON_XS} />
             </motion.button>
 
-            {/* Language badge */}
+            {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' && (
-              <div className="rounded-full border border-accent/30 bg-linear-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-md backdrop-blur-md">
+              <div className="px-2 py-0.5 font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
                 {language}
               </div>
             )}
@@ -556,14 +584,12 @@ export function ProductionCodeBlock({
         </div>
       )}
 
-      {/* Code block container with enhanced 4-layer shadow system */}
+      {/* Code block container - Polar-style clean design */}
       <div
         ref={codeBlockRef}
         className="relative overflow-hidden rounded-lg border border-border transition-[height] duration-300 ease-in-out"
         style={{
           height: needsCollapse && !isExpanded ? maxHeight : 'auto',
-          boxShadow:
-            '0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.15)',
         }}
       >
         {/* Top-right action buttons + badge (when no filename header) */}
@@ -629,22 +655,19 @@ export function ProductionCodeBlock({
               <Download className={UI_CLASSES.ICON_XS} />
             </motion.button>
 
-            {/* Language badge */}
+            {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' && (
-              <div className="rounded-full border border-accent/30 bg-linear-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-md backdrop-blur-md">
+              <div className="px-2 py-0.5 font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
                 {language}
               </div>
             )}
           </div>
         )}
 
-        {/* Gradient fade when collapsed - with smooth CSS transition */}
+        {/* Gradient fade when collapsed */}
         {needsCollapse && !isExpanded && (
           <div
-            className="${POSITION_PATTERNS.ABSOLUTE_BOTTOM_FULL} pointer-events-none z-10 h-24 transition-opacity duration-200"
-            style={{
-              background: 'linear-gradient(to bottom, transparent 0%, var(--color-bg-code) 90%)',
-            }}
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-20 bg-gradient-to-b from-transparent to-[#1e1e1e] dark:to-[#1e1e1e] [html[data-theme='light']_&]:to-[#fafafa]"
           />
         )}
 
@@ -653,29 +676,23 @@ export function ProductionCodeBlock({
           ref={preRef}
           className={showLineNumbers ? 'code-with-line-numbers' : ''}
           // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist for Shiki
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify using strict allowlist for Shiki syntax highlighting
           dangerouslySetInnerHTML={{ __html: safeHtml }}
         />
       </div>
 
-      {/* Expand/collapse button - always visible for better UX */}
+      {/* Expand/collapse button - Polar-style minimal */}
       {needsCollapse && (
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`flex w-full items-center justify-center gap-2 border-border/50 border-t bg-code/30 py-2 font-medium text-sm backdrop-blur-sm transition-all hover:scale-105 ${
-            isExpanded
-              ? 'text-foreground opacity-100'
-              : 'text-muted-foreground opacity-100 hover:text-foreground'
-          }`}
+          className="flex w-full items-center justify-center gap-1.5 border-border/40 border-t py-2 text-muted-foreground text-xs transition-colors hover:text-foreground"
         >
-          <div
-            className="transition-transform duration-200"
-            style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-          >
-            <ChevronDown className={UI_CLASSES.ICON_SM} />
-          </div>
-          <span className="text-xs">
-            {isExpanded ? 'Collapse' : `Expand ${code.split('\n').length} lines`}
+          <ChevronDown 
+            className={`h-3.5 w-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+          />
+          <span>
+            {isExpanded ? 'Collapse' : `Show ${code.split('\n').length} lines`}
           </span>
         </button>
       )}

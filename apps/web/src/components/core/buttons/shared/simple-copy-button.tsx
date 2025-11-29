@@ -1,6 +1,6 @@
 'use client';
 
-import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
+import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
@@ -55,8 +55,13 @@ export function SimpleCopyButton({
       }
       setTimeout(() => setCopied(false), resetDelay);
     } catch (error) {
-      const normalizedError = error instanceof Error ? error : new Error(String(error));
-      logger.error('SimpleCopyButton: clipboard write failed', normalizedError, {
+      const normalizedError = normalizeError(error, 'Copy operation failed');
+      logger.warn('[Clipboard] Copy failed', {
+        err: normalizedError,
+        category: 'clipboard',
+        component: 'SimpleCopyButton',
+        recoverable: true,
+        userRetryable: true,
         hasContent: Boolean(content),
         label: label ?? 'unnamed',
       });

@@ -819,11 +819,13 @@ export default {
           'apps/web/src/lib/data/marketing/contact.ts',
           'packages/web-runtime/src/data/config/constants.ts',
           'packages/web-runtime/src/data/marketing/site.ts',
+          'packages/web-runtime/src/config/social-links.ts', // Source definition file
           // Normalized paths
           'lib/data/config/constants.ts',
           'lib/data/marketing/contact.ts',
           'data/config/constants.ts',
           'data/marketing/site.ts',
+          'config/social-links.ts', // Source definition file (normalized)
         ]);
 
         // Normalize filename
@@ -1863,16 +1865,14 @@ export default {
         return {
           CallExpression(node) {
             // Check if this is a logger.{method} call
+            // All logger methods including custom levels (audit, security)
+            const LOGGER_METHODS = ['info', 'error', 'warn', 'debug', 'trace', 'fatal', 'audit', 'security'];
+            
             if (
               node.callee.type === 'MemberExpression' &&
               node.callee.object.type === 'Identifier' &&
               node.callee.object.name === 'logger' &&
-              (node.callee.property.name === 'info' ||
-                node.callee.property.name === 'error' ||
-                node.callee.property.name === 'warn' ||
-                node.callee.property.name === 'debug' ||
-                node.callee.property.name === 'trace' ||
-                node.callee.property.name === 'fatal')
+              LOGGER_METHODS.includes(node.callee.property.name)
             ) {
               const method = node.callee.property.name;
               const args = node.arguments;
@@ -3922,14 +3922,14 @@ export default {
         return {
           CallExpression(node) {
             // Check logger calls
+            // All logger methods including custom levels (audit, security)
+            const LOGGER_METHODS = ['info', 'error', 'warn', 'debug', 'trace', 'fatal', 'audit', 'security'];
+            
             if (
               node.callee.type === 'MemberExpression' &&
               node.callee.object.type === 'Identifier' &&
               node.callee.object.name === 'logger' &&
-              (node.callee.property.name === 'info' ||
-                node.callee.property.name === 'error' ||
-                node.callee.property.name === 'warn' ||
-                node.callee.property.name === 'debug')
+              LOGGER_METHODS.includes(node.callee.property.name)
             ) {
               // Check all arguments for raw userId
               for (const arg of node.arguments) {
@@ -4020,7 +4020,8 @@ export default {
                   return; // No error - redaction handles it
                 }
 
-                // Check if this is in a logger call context (info, error, warn, debug)
+                // Check if this is in a logger call context (all methods including audit, security)
+                const LOGGER_METHODS = ['info', 'error', 'warn', 'debug', 'trace', 'fatal', 'audit', 'security'];
                 let isInLoggerCall = false;
                 parent = node.parent;
                 while (parent) {
@@ -4030,10 +4031,7 @@ export default {
                     parent.callee.object.type === 'Identifier' &&
                     parent.callee.object.name === 'logger' &&
                     parent.callee.property.type === 'Identifier' &&
-                    (parent.callee.property.name === 'info' ||
-                     parent.callee.property.name === 'error' ||
-                     parent.callee.property.name === 'warn' ||
-                     parent.callee.property.name === 'debug')
+                    LOGGER_METHODS.includes(parent.callee.property.name)
                   ) {
                     isInLoggerCall = true;
                     break;
@@ -4718,6 +4716,2858 @@ export default {
                 node: node.source,
                 messageId: 'useImportMapPath',
               });
+            }
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // NEXT.JS & REACT SERVER COMPONENTS RULES
+    // ============================================================================
+
+    'require-proper-dynamic-exports': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require explicit dynamic or revalidate exports in page files',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingCacheConfig:
+            'Page files should export either "dynamic" or "revalidate" to make caching strategy explicit. Add "export const dynamic = \'force-dynamic\'" for dynamic rendering or "export const revalidate = <seconds>" for ISR.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check page.tsx files in app directory
+        if (!filename.includes('/app/') || !filename.endsWith('page.tsx')) {
+          return {};
+        }
+
+        // Skip test files
+        if (filename.includes('.test.') || filename.includes('.spec.')) {
+          return {};
+        }
+
+        let hasDynamicExport = false;
+        let hasRevalidateExport = false;
+
+        return {
+          ExportNamedDeclaration(node) {
+            if (node.declaration?.type === 'VariableDeclaration') {
+              for (const declarator of node.declaration.declarations) {
+                if (declarator.id.name === 'dynamic') {
+                  hasDynamicExport = true;
+                }
+                if (declarator.id.name === 'revalidate') {
+                  hasRevalidateExport = true;
+                }
+              }
+            }
+          },
+          'Program:exit'() {
+            if (!hasDynamicExport && !hasRevalidateExport) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                messageId: 'missingCacheConfig',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'no-mixed-server-client-patterns': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent mixing server-only and client-only code',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          mixedDirectives:
+            'File contains both "use server" and "use client" directives. Separate into different files.',
+          clientHookInServerFile:
+            'Client-only hook "{{hookName}}" used in server file without "use client" directive.',
+          asyncFunctionInClientFile:
+            'Server-only async cookies/headers() call in client component. Remove "use client" or use server components.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        const hasUseServer = fileText.includes("'use server'") || fileText.includes('"use server"');
+        const hasUseClient = fileText.includes("'use client'") || fileText.includes('"use client"');
+
+        const clientOnlyHooks = ['useState', 'useEffect', 'useLayoutEffect', 'useReducer', 'useRef', 'useCallback', 'useMemo', 'useContext'];
+
+        return {
+          Program(node) {
+            if (hasUseServer && hasUseClient) {
+              context.report({
+                node,
+                messageId: 'mixedDirectives',
+              });
+            }
+          },
+          CallExpression(node) {
+            // Check for client hooks in server files
+            if (!hasUseClient && node.callee.type === 'Identifier') {
+              if (clientOnlyHooks.includes(node.callee.name)) {
+                context.report({
+                  node,
+                  messageId: 'clientHookInServerFile',
+                  data: { hookName: node.callee.name },
+                });
+              }
+            }
+
+            // Check for cookies()/headers() in client files
+            if (hasUseClient && node.callee.type === 'Identifier') {
+              if (node.callee.name === 'cookies' || node.callee.name === 'headers') {
+                context.report({
+                  node,
+                  messageId: 'asyncFunctionInClientFile',
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'require-suspense-for-async-components': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Require Suspense boundaries for async Server Components',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingSuspense:
+            'Async Server Component should be wrapped in <Suspense> boundary. Add <Suspense fallback={<Loading />}> in parent component.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Skip client components
+        if (fileText.includes("'use client'") || fileText.includes('"use client"')) {
+          return {};
+        }
+
+        // Only check component files
+        if (!filename.endsWith('.tsx')) {
+          return {};
+        }
+
+        let hasAsyncComponent = false;
+        let hasSuspenseImport = false;
+
+        return {
+          ImportDeclaration(node) {
+            if (node.source.value === 'react') {
+              const suspenseSpecifier = node.specifiers.find(
+                (spec) => spec.imported && spec.imported.name === 'Suspense'
+              );
+              if (suspenseSpecifier) {
+                hasSuspenseImport = true;
+              }
+            }
+          },
+          FunctionDeclaration(node) {
+            if (node.async && node.id && /^[A-Z]/.test(node.id.name)) {
+              hasAsyncComponent = true;
+            }
+          },
+          'Program:exit'() {
+            // This is a basic check - in practice, Suspense might be in parent component
+            // This rule is marked as 'suggestion' severity to avoid false positives
+            if (hasAsyncComponent && !hasSuspenseImport) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                messageId: 'missingSuspense',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'no-client-component-data-fetching': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent direct data fetching in client components',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          clientDataFetching:
+            'Client components should not fetch data directly. Move data fetching to Server Component and pass as props, or use it in event handlers/effects.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        const hasUseClient = fileText.includes("'use client'") || fileText.includes('"use client"');
+
+        if (!hasUseClient) {
+          return {};
+        }
+
+        let inEventHandler = false;
+        let inUseEffect = false;
+
+        return {
+          CallExpression(node) {
+            // Track if we're in useEffect
+            if (node.callee.type === 'Identifier' && node.callee.name === 'useEffect') {
+              inUseEffect = true;
+            }
+
+            // Track if we're in event handler (onClick, onSubmit, etc.)
+            const parent = node.parent;
+            if (parent?.type === 'Property' && parent.key?.name?.startsWith('on')) {
+              inEventHandler = true;
+            }
+
+            // Check for Supabase client creation or fetch at component level
+            if (
+              node.callee.type === 'Identifier' &&
+              (node.callee.name === 'createSupabaseBrowserClient' ||
+                node.callee.name === 'createSupabaseServerClient' ||
+                node.callee.name === 'fetch')
+            ) {
+              // Allow in event handlers and useEffect
+              if (!inEventHandler && !inUseEffect) {
+                context.report({
+                  node,
+                  messageId: 'clientDataFetching',
+                });
+              }
+            }
+          },
+          'CallExpression:exit'(node) {
+            if (node.callee.type === 'Identifier' && node.callee.name === 'useEffect') {
+              inUseEffect = false;
+            }
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // SUPABASE & DATABASE RULES
+    // ============================================================================
+
+    'require-supabase-client-context': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Enforce correct Supabase client usage in appropriate contexts',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          wrongClientInContext:
+            'Wrong Supabase client for context. Use createSupabaseServerClient() in Server Components/Actions, createSupabaseBrowserClient() in client components, createSupabaseAnonClient() for public/unauthenticated contexts, createSupabaseAdminClient() only in admin operations.',
+          adminClientRequiresComment:
+            'createSupabaseAdminClient() bypasses RLS. Add comment explaining why admin access is required.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        const hasUseClient = fileText.includes("'use client'") || fileText.includes('"use client"');
+        const hasUseServer = fileText.includes("'use server'") || fileText.includes('"use server"');
+        const isServerComponent = filename.includes('/app/') && !hasUseClient && !hasUseServer;
+        const isApiRoute = filename.includes('/api/');
+        const isAction = filename.includes('/actions/') || hasUseServer;
+        const isClientComponent = hasUseClient;
+
+        return {
+          CallExpression(node) {
+            if (node.callee.type !== 'Identifier') return;
+
+            const functionName = node.callee.name;
+
+            // Check for wrong client in wrong context
+            if (functionName === 'createSupabaseServerClient') {
+              if (isClientComponent) {
+                context.report({
+                  node,
+                  messageId: 'wrongClientInContext',
+                });
+              }
+            }
+
+            if (functionName === 'createSupabaseBrowserClient') {
+              if (isServerComponent || isApiRoute || isAction) {
+                context.report({
+                  node,
+                  messageId: 'wrongClientInContext',
+                });
+              }
+            }
+
+            if (functionName === 'createSupabaseAdminClient') {
+              // Check for comment above admin client usage
+              const comments = sourceCode.getCommentsBefore(node);
+              const hasExplanation = comments.some((comment) =>
+                comment.value.toLowerCase().includes('admin') ||
+                comment.value.toLowerCase().includes('bypass') ||
+                comment.value.toLowerCase().includes('rls')
+              );
+
+              if (!hasExplanation) {
+                context.report({
+                  node,
+                  messageId: 'adminClientRequiresComment',
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'require-rpc-error-handling': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require proper error handling for RPC calls',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingErrorCheck:
+            'RPC call must check for errors. Add "if (error) throw error;" or use runRpc() wrapper.',
+          missingErrorLogging:
+            'RPC error should be logged with context before throwing. Use logger.error() with normalizeError().',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+
+        return {
+          CallExpression(node) {
+            // Look for .rpc() calls
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property.type === 'Identifier' &&
+              node.callee.property.name === 'rpc'
+            ) {
+              // Check if result is destructured
+              const parent = node.parent;
+              if (parent?.type === 'AwaitExpression') {
+                const grandParent = parent.parent;
+                if (grandParent?.type === 'VariableDeclarator') {
+                  const id = grandParent.id;
+                  if (id.type === 'ObjectPattern') {
+                    const hasErrorProperty = id.properties.some(
+                      (prop) => prop.key?.name === 'error'
+                    );
+                    
+                    if (!hasErrorProperty) {
+                      context.report({
+                        node,
+                        messageId: 'missingErrorCheck',
+                      });
+                    }
+                  }
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'no-direct-database-queries-in-components': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent direct database queries in components',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          directDatabaseQuery:
+            'Direct database queries in components bypass caching and logging. Extract to data layer function in packages/web-runtime/src/data/.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check component files
+        if (!filename.includes('/components/')) {
+          return {};
+        }
+
+        // Skip server action files and API routes
+        if (filename.includes('/actions/') || filename.includes('/api/')) {
+          return {};
+        }
+
+        return {
+          CallExpression(node) {
+            // Check for supabase.from() or supabase.rpc() calls
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property.type === 'Identifier'
+            ) {
+              if (node.callee.property.name === 'from' || node.callee.property.name === 'rpc') {
+                // Check if it's a supabase call
+                if (
+                  node.callee.object.type === 'Identifier' &&
+                  (node.callee.object.name === 'supabase' ||
+                    node.callee.object.name.toLowerCase().includes('supabase'))
+                ) {
+                  context.report({
+                    node,
+                    messageId: 'directDatabaseQuery',
+                  });
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'require-generated-types-for-database-queries': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require typed Supabase clients using Database types',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingDatabaseType:
+            'Supabase client should be typed with Database from @heyclaude/database-types. Use: createClient<Database>(url, key)',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        let hasDatabaseImport = false;
+
+        return {
+          ImportDeclaration(node) {
+            if (node.source.value === '@heyclaude/database-types') {
+              const hasDatabase = node.specifiers.some(
+                (spec) =>
+                  (spec.imported && spec.imported.name === 'Database') ||
+                  spec.local.name === 'Database'
+              );
+              if (hasDatabase) {
+                hasDatabaseImport = true;
+              }
+            }
+          },
+          CallExpression(node) {
+            // Check for createClient, createServerClient, createBrowserClient without type parameter
+            if (node.callee.type === 'Identifier') {
+              const name = node.callee.name;
+              if (
+                name === 'createClient' ||
+                name === 'createServerClient' ||
+                name === 'createBrowserClient'
+              ) {
+                if (!node.typeParameters && !hasDatabaseImport) {
+                  context.report({
+                    node,
+                    messageId: 'missingDatabaseType',
+                  });
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // CACHE & PERFORMANCE RULES
+    // ============================================================================
+
+    'require-cache-tags-for-mutations': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require cache invalidation after data mutations',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingCacheInvalidation:
+            'Data mutation detected without cache invalidation. Add revalidatePath() or revalidateTag() after mutation.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Only check server actions
+        if (!filename.includes('/actions/') && !fileText.includes("'use server'")) {
+          return {};
+        }
+
+        let hasMutation = false;
+        let hasRevalidation = false;
+
+        return {
+          CallExpression(node) {
+            // Check for mutation RPC calls (insert, update, delete, upsert)
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property.type === 'Identifier'
+            ) {
+              const methodName = node.callee.property.name;
+              if (['insert', 'update', 'delete', 'upsert'].includes(methodName)) {
+                hasMutation = true;
+              }
+              
+              // Check for revalidation calls
+              if (methodName === 'revalidatePath' || methodName === 'revalidateTag') {
+                hasRevalidation = true;
+              }
+            }
+
+            // Also check for RPC mutations
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property.name === 'rpc' &&
+              node.arguments.length > 0
+            ) {
+              const rpcName = node.arguments[0];
+              if (rpcName.type === 'Literal' && typeof rpcName.value === 'string') {
+                // Common mutation RPC patterns
+                if (
+                  rpcName.value.includes('create_') ||
+                  rpcName.value.includes('update_') ||
+                  rpcName.value.includes('delete_') ||
+                  rpcName.value.includes('manage_')
+                ) {
+                  hasMutation = true;
+                }
+              }
+            }
+          },
+          'Program:exit'() {
+            if (hasMutation && !hasRevalidation) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                messageId: 'missingCacheInvalidation',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'no-uncached-database-calls': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest caching for expensive database queries',
+          category: 'Performance',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          suggestCaching:
+            'Consider caching this database query with unstable_cache() or fetchCached() to improve performance.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Only check data layer files
+        if (!filename.includes('/data/')) {
+          return {};
+        }
+
+        // Skip if file already uses caching
+        if (fileText.includes('unstable_cache') || fileText.includes('fetchCached')) {
+          return {};
+        }
+
+        return {
+          CallExpression(node) {
+            // Check for database calls
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property.type === 'Identifier' &&
+              (node.callee.property.name === 'from' || node.callee.property.name === 'rpc')
+            ) {
+              context.report({
+                node,
+                messageId: 'suggestCaching',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'require-parallel-fetching': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest Promise.all for independent async operations',
+          category: 'Performance',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          usePromiseAll:
+            'Multiple independent await statements detected. Consider using Promise.all() or Promise.allSettled() for parallel execution.',
+        },
+      },
+      create(context) {
+        return {
+          FunctionDeclaration(node) {
+            if (!node.async) return;
+
+            // Count await statements in function body
+            const awaitStatements = [];
+            
+            function findAwaits(node) {
+              if (node.type === 'AwaitExpression') {
+                awaitStatements.push(node);
+              }
+              // Don't traverse into nested functions
+              if (
+                node.type !== 'FunctionDeclaration' &&
+                node.type !== 'FunctionExpression' &&
+                node.type !== 'ArrowFunctionExpression'
+              ) {
+                for (const key in node) {
+                  if (node[key] && typeof node[key] === 'object') {
+                    if (Array.isArray(node[key])) {
+                      node[key].forEach((child) => findAwaits(child));
+                    } else {
+                      findAwaits(node[key]);
+                    }
+                  }
+                }
+              }
+            }
+
+            if (node.body) {
+              findAwaits(node.body);
+            }
+
+            // If more than 2 sequential awaits, suggest parallelization
+            if (awaitStatements.length >= 3) {
+              context.report({
+                node,
+                messageId: 'usePromiseAll',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'no-blocking-operations-in-layouts': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent blocking operations in layout files',
+          category: 'Performance',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          blockingInLayout:
+            'Layout files should not contain blocking operations. Move data fetching to page level or use Suspense boundaries.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check layout.tsx files
+        if (!filename.endsWith('layout.tsx')) {
+          return {};
+        }
+
+        return {
+          AwaitExpression(node) {
+            // Allow Promise.allSettled (non-blocking pattern)
+            if (
+              node.argument.type === 'CallExpression' &&
+              node.argument.callee.type === 'MemberExpression' &&
+              node.argument.callee.property.name === 'allSettled'
+            ) {
+              return;
+            }
+
+            context.report({
+              node,
+              messageId: 'blockingInLayout',
+            });
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // ENVIRONMENT VARIABLES & CONFIGURATION RULES
+    // ============================================================================
+
+    'require-env-validation-schema': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require validated environment variables instead of direct process.env access',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          directEnvAccess:
+            'Direct process.env access is discouraged. Use validated env from packages/shared-runtime/src/schemas/env.ts or requireEnvVar()/getEnvVar() helpers.',
+          clientEnvAccess:
+            'Client components should not access process.env directly (exposes variables in bundle). Pass env vars from Server Components as props.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        const hasUseClient = fileText.includes("'use client'") || fileText.includes('"use client"');
+
+        // Skip env validation schema files themselves
+        if (filename.includes('/schemas/env.ts') || filename.includes('/env.ts')) {
+          return {};
+        }
+
+        // Skip config files and scripts
+        if (filename.includes('.config.') || filename.includes('/scripts/')) {
+          return {};
+        }
+
+        return {
+          MemberExpression(node) {
+            // Check for process.env['VAR'] or process.env.VAR
+            if (
+              node.object.type === 'MemberExpression' &&
+              node.object.object.type === 'Identifier' &&
+              node.object.object.name === 'process' &&
+              node.object.property.type === 'Identifier' &&
+              node.object.property.name === 'env'
+            ) {
+              context.report({
+                node,
+                messageId: hasUseClient ? 'clientEnvAccess' : 'directEnvAccess',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'no-hardcoded-urls': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent hardcoded URLs that break in different environments',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          hardcodedUrl:
+            'Hardcoded URL detected. Use environment variable (NEXT_PUBLIC_SITE_URL) or config constant instead.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Skip test files and config files
+        if (filename.includes('.test.') || filename.includes('.config.') || filename.includes('readme-builder')) {
+          return {};
+        }
+
+        return {
+          Literal(node) {
+            if (typeof node.value === 'string') {
+              // Check for hardcoded localhost or production URLs
+              if (
+                node.value.startsWith('http://localhost:') ||
+                node.value.startsWith('https://claudepro.directory') ||
+                node.value.startsWith('http://127.0.0.1:')
+              ) {
+                // Allow if it's in a comment or part of API endpoint pattern
+                const parent = node.parent;
+                if (parent?.type === 'Property' && parent.key?.name === 'url') {
+                  // Might be external API, check context
+                  return;
+                }
+
+                context.report({
+                  node,
+                  messageId: 'hardcodedUrl',
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'require-feature-flag-validation': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Require proper fallback for feature flag checks',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingFallback:
+            'Feature flag check should have explicit fallback/default value to handle undefined flags.',
+        },
+      },
+      create(context) {
+        // This is a placeholder - would need specific feature flag API to implement
+        return {};
+      },
+    },
+
+    // ============================================================================
+    // SERVER ACTIONS & FORM HANDLING RULES
+    // ============================================================================
+
+    'require-zod-schema-for-server-actions': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require Zod schema validation for server action inputs',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingInputSchema:
+            'Server action must use .inputSchema() with Zod validation. Add .inputSchema(z.object({...})) before .action().',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Only check server action files
+        if (!filename.includes('/actions/') && !fileText.includes("'use server'")) {
+          return {};
+        }
+
+        return {
+          CallExpression(node) {
+            // Look for actionClient.action() without inputSchema
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property.name === 'action'
+            ) {
+              // Check if there's .inputSchema() in the chain
+              let current = node.callee.object;
+              let hasInputSchema = false;
+
+              while (current) {
+                if (
+                  current.type === 'CallExpression' &&
+                  current.callee.type === 'MemberExpression' &&
+                  current.callee.property.name === 'inputSchema'
+                ) {
+                  hasInputSchema = true;
+                  break;
+                }
+                current = current.callee?.object;
+              }
+
+              if (!hasInputSchema) {
+                context.report({
+                  node,
+                  messageId: 'missingInputSchema',
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'require-database-enum-types-in-schemas': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require database enum types from @heyclaude/database-types in Zod schemas',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          hardcodedEnumInSchema:
+            'Use Constants.public.Enums from @heyclaude/database-types instead of hardcoded enum values in Zod schema.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+
+        // Only check action files with Zod schemas
+        if (!filename.includes('/actions/')) {
+          return {};
+        }
+
+        let hasConstantsImport = false;
+
+        return {
+          ImportDeclaration(node) {
+            if (node.source.value === '@heyclaude/database-types') {
+              const hasConstants = node.specifiers.some(
+                (spec) => spec.local.name === 'Constants'
+              );
+              if (hasConstants) {
+                hasConstantsImport = true;
+              }
+            }
+          },
+          CallExpression(node) {
+            // Look for z.enum([...]) with string literals
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.object.name === 'z' &&
+              node.callee.property.name === 'enum' &&
+              node.arguments.length > 0
+            ) {
+              const firstArg = node.arguments[0];
+              if (firstArg.type === 'ArrayExpression') {
+                // Check if array contains string literals
+                const hasStringLiterals = firstArg.elements.some(
+                  (el) => el && el.type === 'Literal' && typeof el.value === 'string'
+                );
+
+                if (hasStringLiterals && !hasConstantsImport) {
+                  context.report({
+                    node,
+                    messageId: 'hardcodedEnumInSchema',
+                  });
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'require-rate-limiting-for-public-actions': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require rate limiting for public server actions',
+          category: 'Security',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingRateLimit:
+            'Public action should use rateLimitedAction wrapper to prevent abuse. Replace optionalAuthAction with rateLimitedAction.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Only check server action files
+        if (!filename.includes('/actions/')) {
+          return {};
+        }
+
+        return {
+          VariableDeclarator(node) {
+            // Look for actions using optionalAuthAction
+            if (
+              node.init &&
+              node.init.type === 'CallExpression' &&
+              node.init.callee.type === 'MemberExpression'
+            ) {
+              let current = node.init.callee;
+              let usesOptionalAuth = false;
+
+              while (current) {
+                if (
+                  current.object?.type === 'Identifier' &&
+                  current.object.name === 'optionalAuthAction'
+                ) {
+                  usesOptionalAuth = true;
+                  break;
+                }
+                current = current.object;
+              }
+
+              // Check if it's a mutation action (has keywords like create, update, send, submit)
+              if (usesOptionalAuth && node.id.name) {
+                const actionName = node.id.name.toLowerCase();
+                if (
+                  actionName.includes('create') ||
+                  actionName.includes('update') ||
+                  actionName.includes('send') ||
+                  actionName.includes('submit') ||
+                  actionName.includes('post')
+                ) {
+                  context.report({
+                    node,
+                    messageId: 'missingRateLimit',
+                  });
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'no-sensitive-data-in-action-metadata': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent sensitive data in action metadata',
+          category: 'Security',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          sensitiveDataInMetadata:
+            'Sensitive data detected in action metadata. Avoid logging email, password, token, or other PII. Sanitize or hash before logging.',
+        },
+      },
+      create(context) {
+        const sensitiveKeys = ['password', 'token', 'secret', 'apiKey', 'api_key', 'accessToken', 'refreshToken'];
+
+        return {
+          CallExpression(node) {
+            // Look for .metadata() calls
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property.name === 'metadata' &&
+              node.arguments.length > 0
+            ) {
+              const metadata = node.arguments[0];
+              if (metadata.type === 'ObjectExpression') {
+                for (const prop of metadata.properties) {
+                  if (prop.key && prop.key.name) {
+                    const keyName = prop.key.name.toLowerCase();
+                    if (sensitiveKeys.some((sensitive) => keyName.includes(sensitive))) {
+                      context.report({
+                        node: prop,
+                        messageId: 'sensitiveDataInMetadata',
+                      });
+                    }
+                  }
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // TYPESCRIPT & TYPE SAFETY RULES
+    // ============================================================================
+
+    'require-explicit-return-types-for-data-functions': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Require explicit return types for data layer functions',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingReturnType:
+            'Data layer function should have explicit return type. Add : Promise<Type> to function signature.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check data layer files
+        if (!filename.includes('/data/')) {
+          return {};
+        }
+
+        return {
+          FunctionDeclaration(node) {
+            // Check if function is exported and lacks return type
+            const parent = node.parent;
+            const isExported = parent?.type === 'ExportNamedDeclaration';
+
+            if (isExported && !node.returnType && node.async) {
+              context.report({
+                node,
+                messageId: 'missingReturnType',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'no-type-assertions-without-comment': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Require explanatory comment for type assertions',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          assertionNeedsComment:
+            'Type assertion should have comment explaining why it\'s necessary. Consider fixing the type instead.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+
+        return {
+          TSAsExpression(node) {
+            // Check for comment before the assertion
+            const comments = sourceCode.getCommentsBefore(node);
+            const hasExplanation = comments.length > 0;
+
+            if (!hasExplanation) {
+              context.report({
+                node,
+                messageId: 'assertionNeedsComment',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'require-props-interface-for-components': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Require exported Props interface for React components',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingPropsInterface:
+            'React component should have exported Props interface. Add "export interface {{componentName}}Props" for better reusability.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check component files
+        if (!filename.includes('/components/') || !filename.endsWith('.tsx')) {
+          return {};
+        }
+
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Track exported interfaces
+        const exportedInterfaces = new Set();
+        let hasComponent = false;
+        let componentName = '';
+
+        return {
+          ExportNamedDeclaration(node) {
+            if (node.declaration?.type === 'TSInterfaceDeclaration') {
+              exportedInterfaces.add(node.declaration.id.name);
+            }
+          },
+          FunctionDeclaration(node) {
+            // Check if it's a React component (starts with capital letter)
+            if (node.id && /^[A-Z]/.test(node.id.name)) {
+              hasComponent = true;
+              componentName = node.id.name;
+            }
+          },
+          'Program:exit'() {
+            if (hasComponent && componentName) {
+              const expectedInterface = `${componentName}Props`;
+              if (!exportedInterfaces.has(expectedInterface)) {
+                context.report({
+                  loc: { line: 1, column: 0 },
+                  messageId: 'missingPropsInterface',
+                  data: { componentName },
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'no-any-in-public-api': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent any type in exported function signatures',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          anyInPublicApi:
+            'Exported function should not use "any" type. Use "unknown" or proper generic types instead.',
+        },
+      },
+      create(context) {
+        return {
+          ExportNamedDeclaration(node) {
+            if (node.declaration?.type === 'FunctionDeclaration') {
+              const func = node.declaration;
+
+              // Check parameters for any type
+              if (func.params) {
+                for (const param of func.params) {
+                  if (
+                    param.typeAnnotation?.typeAnnotation?.type === 'TSAnyKeyword'
+                  ) {
+                    context.report({
+                      node: param,
+                      messageId: 'anyInPublicApi',
+                    });
+                  }
+                }
+              }
+
+              // Check return type for any
+              if (func.returnType?.typeAnnotation?.type === 'TSAnyKeyword') {
+                context.report({
+                  node: func.returnType,
+                  messageId: 'anyInPublicApi',
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // SECURITY & DATA VALIDATION RULES
+    // ============================================================================
+
+    'require-input-sanitization-before-database': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require input validation before database operations',
+          category: 'Security',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingSanitization:
+            'User input should be validated with Zod schema before database operations. Add schema validation.',
+        },
+      },
+      create(context) {
+        // This rule is partially covered by require-zod-schema-for-server-actions
+        // and the existing safe-action middleware
+        return {};
+      },
+    },
+
+    'no-admin-client-in-non-admin-context': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Restrict admin client usage to admin-only files',
+          category: 'Security',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          adminClientInNonAdminFile:
+            'createSupabaseAdminClient() should only be used in admin-specific files. Move to /admin/ directory or use server client with RLS instead.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Skip files in admin directories or with admin in name
+        if (filename.includes('/admin/') || filename.includes('admin.ts')) {
+          return {};
+        }
+
+        return {
+          CallExpression(node) {
+            if (
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'createSupabaseAdminClient'
+            ) {
+              context.report({
+                node,
+                messageId: 'adminClientInNonAdminFile',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'require-auth-check-before-sensitive-operations': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require authentication check before sensitive operations',
+          category: 'Security',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingAuthCheck:
+            'Sensitive operation requires authentication check. Use getAuthenticatedUser() or authedAction wrapper.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Only check action files
+        if (!filename.includes('/actions/')) {
+          return {};
+        }
+
+        let usesAuthedAction = false;
+        let hasAuthCheck = false;
+
+        return {
+          VariableDeclarator(node) {
+            // Check if using authedAction or rateLimitedAction
+            if (
+              node.init &&
+              node.init.callee?.object?.name === 'authedAction' ||
+              node.init?.callee?.object?.name === 'rateLimitedAction'
+            ) {
+              usesAuthedAction = true;
+            }
+          },
+          CallExpression(node) {
+            // Check for getAuthenticatedUser calls
+            if (
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'getAuthenticatedUser'
+            ) {
+              hasAuthCheck = true;
+            }
+
+            // Check for mutations without auth
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property.name === 'rpc'
+            ) {
+              const rpcName = node.arguments[0];
+              if (rpcName?.type === 'Literal' && typeof rpcName.value === 'string') {
+                if (
+                  rpcName.value.includes('delete_') ||
+                  rpcName.value.includes('manage_') ||
+                  rpcName.value.includes('admin_')
+                ) {
+                  if (!usesAuthedAction && !hasAuthCheck) {
+                    context.report({
+                      node,
+                      messageId: 'missingAuthCheck',
+                    });
+                  }
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'no-exposed-secrets-in-client-code': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent secrets in client-side code',
+          category: 'Security',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          secretInClientCode:
+            'Secret/sensitive environment variable in client code. Move to server-only code or use server action.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        const hasUseClient = fileText.includes("'use client'") || fileText.includes('"use client"');
+
+        if (!hasUseClient) {
+          return {};
+        }
+
+        const secretKeys = [
+          'SERVICE_ROLE_KEY',
+          'SECRET',
+          'PRIVATE_KEY',
+          'API_SECRET',
+          'WEBHOOK_SECRET',
+          'ADMIN_KEY',
+        ];
+
+        return {
+          MemberExpression(node) {
+            // Check for process.env['SECRET_VAR']
+            if (
+              node.object.type === 'MemberExpression' &&
+              node.object.object.name === 'process' &&
+              node.object.property.name === 'env'
+            ) {
+              const propName = node.property.name || node.property.value;
+              if (propName && typeof propName === 'string') {
+                if (secretKeys.some((secret) => propName.includes(secret))) {
+                  context.report({
+                    node,
+                    messageId: 'secretInClientCode',
+                  });
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // API ROUTES & EDGE FUNCTIONS RULES
+    // ============================================================================
+
+    'require-http-method-validation': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require HTTP method validation in API routes',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingMethodValidation:
+            'API route should validate HTTP method. Add method check or use Next.js named exports (GET, POST, etc.).',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check API route files
+        if (!filename.includes('/api/') || !filename.endsWith('route.ts')) {
+          return {};
+        }
+
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Check if file uses named exports (GET, POST, etc.)
+        const hasNamedExports = /export\s+async\s+function\s+(GET|POST|PUT|DELETE|PATCH)/.test(fileText);
+
+        if (hasNamedExports) {
+          return {}; // Named exports are good
+        }
+
+        let hasMethodCheck = false;
+
+        return {
+          MemberExpression(node) {
+            // Look for request.method checks
+            if (
+              node.object.name === 'request' &&
+              node.property.name === 'method'
+            ) {
+              hasMethodCheck = true;
+            }
+          },
+          'Program:exit'() {
+            if (!hasMethodCheck && !hasNamedExports) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                messageId: 'missingMethodValidation',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'require-request-validation-in-api-routes': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require request body validation in API routes',
+          category: 'Security',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingRequestValidation:
+            'API route should validate request body with Zod schema before processing.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check API route files
+        if (!filename.includes('/api/') || !filename.endsWith('route.ts')) {
+          return {};
+        }
+
+        let hasRequestParsing = false;
+        let hasZodValidation = false;
+
+        return {
+          CallExpression(node) {
+            // Check for request.json() or request.formData()
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.object.name === 'request' &&
+              (node.callee.property.name === 'json' || node.callee.property.name === 'formData')
+            ) {
+              hasRequestParsing = true;
+            }
+
+            // Check for Zod parse/safeParse
+            if (
+              node.callee.type === 'MemberExpression' &&
+              (node.callee.property.name === 'parse' || node.callee.property.name === 'safeParse')
+            ) {
+              hasZodValidation = true;
+            }
+          },
+          'Program:exit'() {
+            if (hasRequestParsing && !hasZodValidation) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                messageId: 'missingRequestValidation',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'require-cors-headers-for-public-apis': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest CORS headers for public API routes',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingCorsHeaders:
+            'Public API route should include CORS headers. Add Access-Control-Allow-Origin to Response headers.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check public API routes
+        if (!filename.includes('/api/public/')) {
+          return {};
+        }
+
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        const hasCorsHeaders = fileText.includes('Access-Control-Allow-Origin');
+
+        return {
+          'Program:exit'() {
+            if (!hasCorsHeaders) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                messageId: 'missingCorsHeaders',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'no-long-running-operations-in-edge-functions': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Warn about potentially long-running operations in edge functions',
+          category: 'Performance',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          longRunningOperation:
+            'Edge functions have strict timeout limits. Consider moving long-running operations to background job or serverless function.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check edge function files
+        if (!filename.includes('/functions/') && !filename.includes('/edge/')) {
+          return {};
+        }
+
+        return {
+          CallExpression(node) {
+            // Check for operations that might be slow
+            if (node.callee.type === 'Identifier') {
+              const name = node.callee.name;
+              // File operations, heavy computation
+              if (
+                name === 'readFile' ||
+                name === 'writeFile' ||
+                name === 'setTimeout' && node.arguments[1]?.value > 30000
+              ) {
+                context.report({
+                  node,
+                  messageId: 'longRunningOperation',
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // TESTING & QUALITY RULES
+    // ============================================================================
+
+    'require-test-file-for-complex-functions': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest test files for complex functions',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingTestFile:
+            'Complex function should have corresponding test file. Create {{testFile}} to test this functionality.',
+        },
+      },
+      create(context) {
+        // This rule would need file system access to check for test files
+        // Skipping implementation for now
+        return {};
+      },
+    },
+
+    'require-error-test-cases': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest error test cases in test files',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingErrorTests:
+            'Test file should include error/edge case tests. Add tests for validation errors, network failures, and auth failures.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check test files
+        if (!filename.includes('.test.') && !filename.includes('.spec.')) {
+          return {};
+        }
+
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Check for error-related test descriptions
+        const hasErrorTests = /it\(.*error|should fail|should throw|invalid|edge case/i.test(fileText);
+
+        return {
+          'Program:exit'() {
+            if (!hasErrorTests) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                messageId: 'missingErrorTests',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'no-focused-tests-in-ci': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent .only() in test files',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          focusedTest:
+            'Focused test (.only) should not be committed. Remove .only() to run all tests in CI.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check test files
+        if (!filename.includes('.test.') && !filename.includes('.spec.')) {
+          return {};
+        }
+
+        return {
+          CallExpression(node) {
+            // Check for test.only(), describe.only(), it.only()
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property.name === 'only'
+            ) {
+              const object = node.callee.object;
+              if (
+                object.type === 'Identifier' &&
+                (object.name === 'test' || object.name === 'describe' || object.name === 'it')
+              ) {
+                context.report({
+                  node,
+                  messageId: 'focusedTest',
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // PERFORMANCE & BUNDLE SIZE RULES
+    // ============================================================================
+
+    'no-large-dependencies-in-client-bundles': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest lighter alternatives for heavy dependencies',
+          category: 'Performance',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          heavyDependency:
+            'Heavy dependency "{{package}}" detected in client bundle. Consider using lighter alternative: {{alternative}}.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        const hasUseClient = fileText.includes("'use client'") || fileText.includes('"use client"');
+
+        if (!hasUseClient) {
+          return {};
+        }
+
+        const heavyPackages = {
+          'moment': 'date-fns or dayjs',
+          'lodash': 'lodash-es with tree-shaking or native methods',
+          'axios': 'native fetch API',
+        };
+
+        return {
+          ImportDeclaration(node) {
+            const packageName = node.source.value;
+            for (const [heavy, alternative] of Object.entries(heavyPackages)) {
+              if (packageName === heavy || packageName.startsWith(`${heavy}/`)) {
+                context.report({
+                  node,
+                  messageId: 'heavyDependency',
+                  data: { package: heavy, alternative },
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'require-dynamic-import-for-heavy-components': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest dynamic imports for heavy components',
+          category: 'Performance',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          heavyComponentNeedsDynamic:
+            'Large component should use dynamic import. Use next/dynamic for below-the-fold or conditional components.',
+        },
+      },
+      create(context) {
+        // This would require analyzing component size which is complex
+        // Skipping implementation for now
+        return {};
+      },
+    },
+
+    'no-blocking-third-party-scripts': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest async loading for third-party scripts',
+          category: 'Performance',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          blockingScript:
+            'Third-party script should use async loading. Add strategy="afterInteractive" or strategy="lazyOnload" to <Script>.',
+        },
+      },
+      create(context) {
+        return {
+          JSXOpeningElement(node) {
+            if (node.name.name === 'Script') {
+              const hasStrategy = node.attributes.some(
+                (attr) => attr.name?.name === 'strategy'
+              );
+
+              if (!hasStrategy) {
+                context.report({
+                  node,
+                  messageId: 'blockingScript',
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // ACCESSIBILITY & UX RULES
+    // ============================================================================
+
+    'require-loading-states-for-async-operations': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest loading states for async operations',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingLoadingState:
+            'Async operation should have loading state. Use useTransition, isPending, or loading boolean.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        const hasUseClient = fileText.includes("'use client'") || fileText.includes('"use client"');
+
+        if (!hasUseClient) {
+          return {};
+        }
+
+        let hasAsyncOperation = false;
+        let hasLoadingState = false;
+
+        return {
+          CallExpression(node) {
+            // Check for useTransition, or variables with "loading" or "pending"
+            if (node.callee.type === 'Identifier') {
+              if (node.callee.name === 'useTransition' || node.callee.name === 'useState') {
+                hasLoadingState = true;
+              }
+              if (node.callee.name === 'fetch' || node.callee.name.includes('async')) {
+                hasAsyncOperation = true;
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'require-error-messages-for-forms': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest error messages for form components',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingErrorMessages:
+            'Form component should display error messages. Add error message UI for validation failures.',
+        },
+      },
+      create(context) {
+        // This would require complex form detection
+        // Skipping implementation for now
+        return {};
+      },
+    },
+
+    'no-missing-alt-text-on-dynamic-images': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require fallback alt text for dynamic images',
+          category: 'Accessibility',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingAltFallback:
+            'Dynamic image should have fallback alt text. Use alt={variable || "fallback description"}.',
+        },
+      },
+      create(context) {
+        return {
+          JSXOpeningElement(node) {
+            if (node.name.name === 'img' || node.name.name === 'Image') {
+              const altAttr = node.attributes.find(
+                (attr) => attr.name?.name === 'alt'
+              );
+
+              if (altAttr && altAttr.value?.type === 'JSXExpressionContainer') {
+                const expr = altAttr.value.expression;
+                // Check if alt value is just a variable without fallback
+                if (expr.type === 'Identifier') {
+                  context.report({
+                    node: altAttr,
+                    messageId: 'missingAltFallback',
+                  });
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // CODE ORGANIZATION & ARCHITECTURE RULES
+    // ============================================================================
+
+    'enforce-barrel-export-pattern': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest barrel exports for directory organization',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          useBarrelExport:
+            'Consider using barrel export (index.ts) for this directory to simplify imports.',
+        },
+      },
+      create(context) {
+        // This would require file system access
+        // Skipping implementation for now
+        return {};
+      },
+    },
+
+    'no-circular-dependencies-advanced': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Detect circular dependencies across package boundaries',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          circularDependency:
+            'Circular dependency detected. Refactor to remove circular import.',
+        },
+      },
+      create(context) {
+        // Biome already has noImportCycles, so we defer to that
+        return {};
+      },
+    },
+
+    'enforce-package-boundaries-enhanced': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Enforce architectural boundaries between packages',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          boundaryViolation:
+            'Package boundary violation. {{sourcePackage}} should not import from {{targetPackage}}.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Determine source package
+        let sourcePackage = '';
+        if (filename.includes('/packages/data-layer/')) sourcePackage = 'data-layer';
+        if (filename.includes('/packages/shared-runtime/')) sourcePackage = 'shared-runtime';
+        if (filename.includes('/packages/edge-runtime/')) sourcePackage = 'edge-runtime';
+        if (filename.includes('/packages/web-runtime/')) sourcePackage = 'web-runtime';
+        if (filename.includes('/apps/web/')) sourcePackage = 'web-app';
+        if (filename.includes('/apps/edge/')) sourcePackage = 'edge-functions';
+
+        return {
+          ImportDeclaration(node) {
+            const importPath = node.source.value;
+
+            // Check violations
+            if (sourcePackage === 'data-layer' && importPath.includes('@heyclaude/web-runtime')) {
+              context.report({
+                node,
+                messageId: 'boundaryViolation',
+                data: { sourcePackage: 'data-layer', targetPackage: 'web-runtime' },
+              });
+            }
+
+            if (sourcePackage === 'shared-runtime' && importPath.includes('@heyclaude/web-runtime')) {
+              context.report({
+                node,
+                messageId: 'boundaryViolation',
+                data: { sourcePackage: 'shared-runtime', targetPackage: 'web-runtime' },
+              });
+            }
+
+            // Edge functions should not import Node.js-only modules
+            if (sourcePackage === 'edge-functions' && (
+              importPath.startsWith('node:') ||
+              importPath === 'fs' ||
+              importPath === 'path' ||
+              importPath === 'os'
+            )) {
+              context.report({
+                node,
+                messageId: 'boundaryViolation',
+                data: { sourcePackage: 'edge-functions', targetPackage: 'node-modules' },
+              });
+            }
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // ADDITIONAL HIGH-VALUE RULES
+    // ============================================================================
+
+    'require-metadata-for-generatemetadata': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require complete metadata in generateMetadata functions (recognizes database-driven patterns)',
+          category: 'SEO',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingDescription:
+            'generateMetadata should return description for SEO. Add description field to metadata object.',
+          missingOpenGraphImage:
+            'generateMetadata should return openGraph.images for social sharing. Add openGraph.images array to metadata.',
+          incompleteMetadata:
+            'generateMetadata should return complete metadata including title, description, and openGraph.images for optimal SEO.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+
+        // Only check page files with generateMetadata
+        if (!filename.includes('/app/') || !filename.endsWith('.tsx')) {
+          return {};
+        }
+
+        return {
+          FunctionDeclaration(node) {
+            // Look for generateMetadata function
+            if (node.id?.name === 'generateMetadata') {
+              // Check if function body returns metadata object
+              const sourceCode = context.getSourceCode();
+              const funcText = sourceCode.getText(node);
+
+              // Whitelist: If using database-driven metadata helpers, skip validation
+              // These helpers (generatePageMetadata, getSEOMetadata, getCachedHomeMetadata, etc.) ensure complete metadata
+              const usesMetadataHelper = 
+                /generatePageMetadata\s*\(/.test(funcText) ||
+                /getSEOMetadata\s*\(/.test(funcText) ||
+                /getSEOMetadataWithSchemas\s*\(/.test(funcText) ||
+                /getCachedHomeMetadata\s*\(/.test(funcText) ||
+                /getHomeMetadata\s*\(/.test(funcText);
+
+              if (usesMetadataHelper) {
+                // Skip validation - metadata helpers ensure completeness
+                return;
+              }
+
+              // For manually constructed metadata, check for required fields
+              const hasDescription = /description\s*:/.test(funcText);
+              const hasOpenGraphImages = /openGraph\s*:[\s\S]*?images\s*:/.test(funcText);
+
+              if (!hasDescription) {
+                context.report({
+                  node,
+                  messageId: 'missingDescription',
+                });
+              }
+
+              if (!hasOpenGraphImages) {
+                context.report({
+                  node,
+                  messageId: 'missingOpenGraphImage',
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'require-error-boundary-in-route-groups': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest error.tsx files for route groups',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingErrorBoundary:
+            'Route group should have error.tsx file for proper error handling. Create {{errorFile}} for better UX.',
+        },
+      },
+      create(context) {
+        // This would require file system access to check for error.tsx
+        // Skipping implementation - too complex for benefit
+        return {};
+      },
+    },
+
+    'no-localstorage-for-auth-data': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent storing authentication data in localStorage',
+          category: 'Security',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          authDataInLocalStorage:
+            'SECURITY: Never store authentication data in localStorage (vulnerable to XSS). Use secure HttpOnly cookies or server-side sessions. Detected key: "{{key}}"',
+        },
+      },
+      create(context) {
+        const sensitiveKeyPatterns = [
+          /token/i,
+          /jwt/i,
+          /auth/i,
+          /session/i,
+          /password/i,
+          /secret/i,
+          /key/i,
+          /credential/i,
+          /refresh/i,
+          /access/i,
+        ];
+
+        function isSensitiveKey(key) {
+          if (typeof key !== 'string') return false;
+          return sensitiveKeyPatterns.some((pattern) => pattern.test(key));
+        }
+
+        return {
+          CallExpression(node) {
+            // Check for localStorage.setItem
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.object.type === 'Identifier' &&
+              node.callee.object.name === 'localStorage' &&
+              node.callee.property.name === 'setItem'
+            ) {
+              const keyArg = node.arguments[0];
+              if (keyArg && keyArg.type === 'Literal' && typeof keyArg.value === 'string') {
+                if (isSensitiveKey(keyArg.value)) {
+                  context.report({
+                    node,
+                    messageId: 'authDataInLocalStorage',
+                    data: { key: keyArg.value },
+                  });
+                }
+              }
+            }
+
+            // Check for useLocalStorage hook with sensitive keys
+            if (
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'useLocalStorage'
+            ) {
+              const keyArg = node.arguments[0];
+              if (keyArg && keyArg.type === 'Literal' && typeof keyArg.value === 'string') {
+                if (isSensitiveKey(keyArg.value)) {
+                  context.report({
+                    node,
+                    messageId: 'authDataInLocalStorage',
+                    data: { key: keyArg.value },
+                  });
+                }
+              }
+            }
+          },
+        };
+      },
+    },
+
+    'require-child-logger-in-async-functions': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require child logger with requestId in async page/layout functions',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingChildLogger:
+            'Async server component should create child logger with requestId for log correlation. Use: const reqLogger = logger.child({ requestId, operation, route, module });',
+          missingRequestId:
+            'Child logger should include requestId for log correlation. Add: const requestId = generateRequestId();',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Only check page.tsx and layout.tsx in app directory
+        if (!filename.includes('/app/') || (!filename.endsWith('page.tsx') && !filename.endsWith('layout.tsx'))) {
+          return {};
+        }
+
+        // Skip client components
+        if (fileText.includes("'use client'") || fileText.includes('"use client"')) {
+          return {};
+        }
+
+        let hasAsyncExport = false;
+        let hasChildLogger = false;
+        let hasRequestId = false;
+
+        return {
+          ExportDefaultDeclaration(node) {
+            // Check if default export is async function
+            if (node.declaration.type === 'FunctionDeclaration' && node.declaration.async) {
+              hasAsyncExport = true;
+            }
+          },
+          VariableDeclarator(node) {
+            // Check for logger.child() call
+            if (
+              node.init?.type === 'CallExpression' &&
+              node.init.callee.type === 'MemberExpression' &&
+              node.init.callee.object.name === 'logger' &&
+              node.init.callee.property.name === 'child'
+            ) {
+              hasChildLogger = true;
+
+              // Check if child logger includes requestId
+              const childCallText = sourceCode.getText(node.init);
+              if (childCallText.includes('requestId')) {
+                hasRequestId = true;
+              }
+            }
+
+            // Check for generateRequestId call
+            if (
+              node.init?.type === 'CallExpression' &&
+              node.init.callee.type === 'Identifier' &&
+              node.init.callee.name === 'generateRequestId'
+            ) {
+              hasRequestId = true;
+            }
+          },
+          'Program:exit'() {
+            if (hasAsyncExport && !hasChildLogger) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                messageId: 'missingChildLogger',
+              });
+            }
+
+            if (hasAsyncExport && hasChildLogger && !hasRequestId) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                messageId: 'missingRequestId',
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'require-loading-tsx-for-async-pages': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest loading.tsx for async pages',
+          category: 'UX',
+          recommended: false,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingLoadingFile:
+            'Async page should have loading.tsx sibling for better UX during data fetching. Create loading.tsx in same directory.',
+        },
+      },
+      create(context) {
+        // This would require file system access to check for loading.tsx
+        // Skipping implementation for now
+        return {};
+      },
+    },
+    
+    /**
+     * WARN-PII-FIELD-LOGGING
+     * 
+     * Warns when PII fields (IP, phone, email, geolocation) are detected in log contexts.
+     * This is informational - redaction handles these fields automatically, but developers
+     * should be aware they're logging PII.
+     * 
+     * Related: prevent-raw-userid-logging (for user ID hashing)
+     * Related: SENSITIVE_PATTERNS in shared-runtime/logger/config.ts (automatic redaction)
+     */
+    'warn-pii-field-logging': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Warn when PII fields (IP, phone, email, geolocation) are logged. Redaction handles these automatically, but developers should be aware.',
+          category: 'Security',
+          recommended: true,
+        },
+        fixable: null, // No auto-fix - just awareness
+        schema: [],
+        messages: {
+          ipFieldLogged:
+            'IP address field "{{field}}" detected in log context. This is automatically redacted by the logger, but consider if this data is necessary for debugging.',
+          phoneFieldLogged:
+            'Phone number field "{{field}}" detected in log context. This is automatically redacted by the logger, but consider if this data is necessary for debugging.',
+          emailFieldLogged:
+            'Email field "{{field}}" detected in log context. This is automatically redacted by the logger. For user identification, prefer userIdHash instead.',
+          geoFieldLogged:
+            'Geolocation field "{{field}}" detected in log context. This is automatically redacted by the logger, but consider if this data is necessary for debugging.',
+          genericPiiFieldLogged:
+            'PII field "{{field}}" detected in log context. This is automatically redacted by the logger, but consider if this data is necessary.',
+        },
+      },
+      create(context) {
+        // PII field patterns to detect
+        const IP_FIELDS = ['ip', 'ipAddress', 'ip_address', 'clientIp', 'client_ip', 'remoteAddress', 'remote_address', 'xForwardedFor', 'x_forwarded_for'];
+        const PHONE_FIELDS = ['phone', 'phoneNumber', 'phone_number', 'mobile', 'mobileNumber', 'mobile_number', 'telephone', 'tel', 'cell', 'cellPhone', 'cell_phone'];
+        const EMAIL_FIELDS = ['email', 'userEmail', 'user_email', 'emailAddress', 'email_address'];
+        const GEO_FIELDS = ['latitude', 'longitude', 'lat', 'lng', 'geo', 'geolocation', 'coordinates', 'location'];
+        
+        // Combine all PII fields for quick lookup
+        const ALL_PII_FIELDS = new Set([...IP_FIELDS, ...PHONE_FIELDS, ...EMAIL_FIELDS, ...GEO_FIELDS]);
+        
+        /**
+         * Get the message ID for a PII field
+         */
+        function getMessageId(fieldName) {
+          const lowerField = fieldName.toLowerCase();
+          if (IP_FIELDS.some(f => f.toLowerCase() === lowerField)) return 'ipFieldLogged';
+          if (PHONE_FIELDS.some(f => f.toLowerCase() === lowerField)) return 'phoneFieldLogged';
+          if (EMAIL_FIELDS.some(f => f.toLowerCase() === lowerField)) return 'emailFieldLogged';
+          if (GEO_FIELDS.some(f => f.toLowerCase() === lowerField)) return 'geoFieldLogged';
+          return 'genericPiiFieldLogged';
+        }
+        
+        /**
+         * Check if we're inside a logger call context
+         */
+        function isInLoggerContext(node) {
+          let parent = node.parent;
+          while (parent) {
+            if (
+              parent.type === 'CallExpression' &&
+              parent.callee.type === 'MemberExpression' &&
+              parent.callee.object.type === 'Identifier' &&
+              (parent.callee.object.name === 'logger' || 
+               parent.callee.object.name.endsWith('Logger') ||
+               parent.callee.object.name === 'pinoLogger') &&
+              parent.callee.property.type === 'Identifier' &&
+              ['info', 'error', 'warn', 'debug', 'trace', 'fatal', 'audit', 'security', 'child', 'setBindings'].includes(parent.callee.property.name)
+            ) {
+              return true;
+            }
+            // Also check for logError, logInfo, logWarn helper functions
+            if (
+              parent.type === 'CallExpression' &&
+              parent.callee.type === 'Identifier' &&
+              ['logError', 'logInfo', 'logWarn', 'logDebug', 'logTrace'].includes(parent.callee.name)
+            ) {
+              return true;
+            }
+            parent = parent.parent;
+          }
+          return false;
+        }
+        
+        return {
+          Property(node) {
+            // Only check properties with identifier keys
+            if (node.key.type !== 'Identifier') return;
+            
+            const fieldName = node.key.name;
+            
+            // Check if this is a PII field (case-insensitive match)
+            const isPiiField = Array.from(ALL_PII_FIELDS).some(
+              piiField => piiField.toLowerCase() === fieldName.toLowerCase()
+            );
+            
+            if (!isPiiField) return;
+            
+            // Only warn if we're in a logger context
+            if (!isInLoggerContext(node)) return;
+            
+            // Report the warning
+            context.report({
+              node: node.key,
+              messageId: getMessageId(fieldName),
+              data: { field: fieldName },
+            });
+          },
+        };
+      },
+    },
+    
+    /**
+     * REQUIRE-AUDIT-LEVEL-FOR-MUTATIONS
+     * 
+     * Suggests adding audit/security structured tags for database mutations and sensitive operations.
+     * This helps with compliance logging and audit trails.
+     * 
+     * NOTE: No autofix - use structured tags like { audit: true } or { securityEvent: true }
+     * instead of custom log levels (which require TypeScript type augmentation).
+     * 
+     * Level: warn (suggestion, not error)
+     */
+    'require-audit-level-for-mutations': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest adding audit/security tags for database mutations and sensitive operations to maintain audit trails.',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        // NOTE: No autofix - custom log levels require TypeScript augmentation
+        // Use structured tags instead: logger.info('msg', { audit: true })
+        schema: [],
+        messages: {
+          useAuditLevel:
+            'Database mutation detected. Consider adding { audit: true } to the log context for compliance audit trails. Example: logger.info("User updated", { audit: true, userId, action: "update" })',
+          useSecurityLevel:
+            'Security-sensitive operation detected. Consider adding { securityEvent: true } to the log context. Example: logger.warn("Auth failed", { securityEvent: true, reason })',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+        
+        // Patterns that indicate mutations
+        const MUTATION_PATTERNS = [
+          /\.insert\s*\(/,
+          /\.update\s*\(/,
+          /\.delete\s*\(/,
+          /\.upsert\s*\(/,
+          /\.rpc\s*\(\s*['"](?:create|update|delete|insert|upsert|remove|add|modify|set|save)/i,
+          /isMutation\s*:\s*true/,
+        ];
+        
+        // Patterns that indicate security operations
+        const SECURITY_PATTERNS = [
+          /auth\.signIn/,
+          /auth\.signOut/,
+          /auth\.signUp/,
+          /verifyPassword/,
+          /checkPermission/,
+          /validateToken/,
+          /revokeToken/,
+          /unauthorized/i,
+          /forbidden/i,
+          /permission.*denied/i,
+        ];
+        
+        /**
+         * Check if the current function contains mutation patterns
+         */
+        function containsMutationPattern(node) {
+          // Get the containing function
+          let funcNode = node;
+          while (funcNode && !['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'].includes(funcNode.type)) {
+            funcNode = funcNode.parent;
+          }
+          
+          if (!funcNode) return false;
+          
+          const funcText = sourceCode.getText(funcNode);
+          return MUTATION_PATTERNS.some(pattern => pattern.test(funcText));
+        }
+        
+        /**
+         * Check if the current function contains security patterns
+         */
+        function containsSecurityPattern(node) {
+          let funcNode = node;
+          while (funcNode && !['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'].includes(funcNode.type)) {
+            funcNode = funcNode.parent;
+          }
+          
+          if (!funcNode) return false;
+          
+          const funcText = sourceCode.getText(funcNode);
+          return SECURITY_PATTERNS.some(pattern => pattern.test(funcText));
+        }
+        
+        /**
+         * Check if the log call already includes audit/security tags
+         */
+        function hasAuditOrSecurityTag(node) {
+          // Check if second argument (log context) exists
+          if (node.arguments.length < 2) return false;
+          
+          const contextArg = node.arguments[1];
+          
+          // Handle ObjectExpression: { audit: true } or { securityEvent: true }
+          if (contextArg.type === 'ObjectExpression') {
+            return contextArg.properties.some(prop => {
+              if (prop.type !== 'Property') return false;
+              const keyName = prop.key.type === 'Identifier' ? prop.key.name : 
+                             prop.key.type === 'Literal' ? prop.key.value : null;
+              return keyName === 'audit' || keyName === 'securityEvent';
+            });
+          }
+          
+          return false;
+        }
+        
+        return {
+          CallExpression(node) {
+            // Check for logger.info() calls
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.object.type === 'Identifier' &&
+              (node.callee.object.name === 'logger' || node.callee.object.name.endsWith('Logger')) &&
+              node.callee.property.type === 'Identifier' &&
+              node.callee.property.name === 'info'
+            ) {
+              // Skip if already has audit/security tags
+              if (hasAuditOrSecurityTag(node)) {
+                return;
+              }
+              
+              // Check if this is in a mutation context
+              if (containsMutationPattern(node)) {
+                context.report({
+                  node: node.callee.property,
+                  messageId: 'useAuditLevel',
+                  // No autofix - let developer add structured tag manually
+                });
+              }
+              // Check if this is in a security context
+              else if (containsSecurityPattern(node)) {
+                context.report({
+                  node: node.callee.property,
+                  messageId: 'useSecurityLevel',
+                  // No autofix - let developer add structured tag manually
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+    
+    /**
+     * suggest-warn-for-recoverable-errors
+     * 
+     * Suggests using logger.warn() instead of logger.error() for recoverable failures.
+     * 
+     * Patterns detected:
+     * - Animation/config loading failures (has fallbacks)
+     * - DOMPurify loading failures (has fallbacks)
+     * - Clipboard/copy failures (user can retry)
+     * - Share/screenshot failures (user can retry)
+     * - Confetti/cosmetic failures (non-critical)
+     * - localStorage failures (optional feature)
+     * - Rendering fallback errors (has UI fallbacks)
+     * 
+     * Level: warn (suggestion, not error)
+     */
+    'suggest-warn-for-recoverable-errors': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Suggest using logger.warn() instead of logger.error() for recoverable failures that have fallbacks or can be retried.',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null, // No auto-fix - requires manual verification
+        schema: [],
+        messages: {
+          animationConfigShouldWarn:
+            'Animation config loading failures are non-critical (has fallbacks). Consider using logger.warn() instead of logger.error().',
+          domPurifyShouldWarn:
+            'DOMPurify loading failures have fallbacks. Consider using logger.warn() instead of logger.error().',
+          clipboardShouldWarn:
+            'Clipboard operations can be retried by the user. Consider using logger.warn() instead of logger.error().',
+          shareShouldWarn:
+            'Share/screenshot operations can be retried. Consider using logger.warn() instead of logger.error().',
+          confettiShouldWarn:
+            'Confetti/animation failures are cosmetic only. Consider using logger.warn() instead of logger.error().',
+          localStorageShouldWarn:
+            'localStorage failures are recoverable (optional feature). Consider using logger.warn() instead of logger.error().',
+          renderingFallbackShouldWarn:
+            'Rendering failures with UI fallbacks are recoverable. Consider using logger.warn() instead of logger.error().',
+          genericRecoverableShouldWarn:
+            'This error appears to be recoverable. Consider using logger.warn() instead of logger.error() if the operation has a fallback or can be retried.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+        
+        // Patterns that indicate recoverable errors (should be warn, not error)
+        const RECOVERABLE_PATTERNS = {
+          animationConfig: [
+            /failed to load animation config/i,
+            /animation config/i,
+            /load.*animation/i,
+          ],
+          domPurify: [
+            /failed to load dompurify/i,
+            /dompurify/i,
+            /sanitize.*html/i,
+            /Failed to sanitize HTML/i,
+          ],
+          clipboard: [
+            /clipboard/i,
+            /copy.*fail/i,
+            /failed to copy/i,
+            /copy failed/i,
+          ],
+          share: [
+            /share.*fail/i,
+            /screenshot.*fail/i,
+            /failed to share/i,
+            /download.*fail/i,
+            /Share failed/i,
+            /Download failed/i,
+            /Screenshot.*fail/i,
+          ],
+          confetti: [
+            /confetti/i,
+            /celebrate/i,
+          ],
+          localStorage: [
+            /localStorage/i,
+            /local storage/i,
+            /storage event/i,
+          ],
+          renderingFallback: [
+            /rendering failed/i,
+            /render.*fail/i,
+            /failed to render/i,
+            /Rendering failed/i,
+          ],
+        };
+        
+        /**
+         * Get the message string from a logger call
+         */
+        function getLogMessage(node) {
+          if (!node.arguments || node.arguments.length === 0) return '';
+          
+          const firstArg = node.arguments[0];
+          if (firstArg.type === 'Literal' && typeof firstArg.value === 'string') {
+            return firstArg.value;
+          }
+          if (firstArg.type === 'TemplateLiteral') {
+            // Get the static parts of the template literal
+            return firstArg.quasis.map(q => q.value.raw).join('');
+          }
+          return '';
+        }
+        
+        /**
+         * Determine which category of recoverable error this is
+         */
+        function getRecoverableCategory(message) {
+          const lowerMessage = message.toLowerCase();
+          
+          for (const [category, patterns] of Object.entries(RECOVERABLE_PATTERNS)) {
+            if (patterns.some(pattern => pattern.test(lowerMessage))) {
+              return category;
+            }
+          }
+          return null;
+        }
+        
+        /**
+         * Get the appropriate message ID for a category
+         */
+        function getMessageId(category) {
+          switch (category) {
+            case 'animationConfig': return 'animationConfigShouldWarn';
+            case 'domPurify': return 'domPurifyShouldWarn';
+            case 'clipboard': return 'clipboardShouldWarn';
+            case 'share': return 'shareShouldWarn';
+            case 'confetti': return 'confettiShouldWarn';
+            case 'localStorage': return 'localStorageShouldWarn';
+            case 'renderingFallback': return 'renderingFallbackShouldWarn';
+            default: return 'genericRecoverableShouldWarn';
+          }
+        }
+        
+        return {
+          CallExpression(node) {
+            // Check if this is a logger.error() call
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property.type === 'Identifier' &&
+              node.callee.property.name === 'error'
+            ) {
+              // Check if the object is a logger (logger, reqLogger, childLogger, etc.)
+              const objectName = node.callee.object.type === 'Identifier' 
+                ? node.callee.object.name 
+                : '';
+              
+              if (
+                objectName === 'logger' ||
+                objectName.endsWith('Logger') ||
+                objectName === 'log'
+              ) {
+                const message = getLogMessage(node);
+                const category = getRecoverableCategory(message);
+                
+                if (category) {
+                  context.report({
+                    node: node.callee.property,
+                    messageId: getMessageId(category),
+                  });
+                }
+              }
             }
           },
         };

@@ -3,7 +3,7 @@
  * Single RPC call to get_user_profile() replaces 6+ separate queries
  */
 
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import {
@@ -19,7 +19,7 @@ import { UI_CLASSES, NavLink, UnifiedBadge,
   CardDescription,
   CardHeader,
   CardTitle   } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
@@ -51,7 +51,7 @@ function isValidSlug(slug: string): boolean {
  * Returns null if either is invalid
  * Uses centralized CONTENT_CATEGORY_VALUES to ensure consistency
  */
-function getSafeContentUrl(type: string, slug: string): string | null {
+function getSafeContentUrl(type: string, slug: string): null | string {
   // Validate content type using centralized constant
   if (!isContentCategory(type)) return null;
   // Sanitize slug first, then validate the sanitized result
@@ -65,7 +65,7 @@ function getSafeContentUrl(type: string, slug: string): string | null {
  * Get safe collection URL from user slug and collection slug
  * Returns null if either is invalid
  */
-function getSafeCollectionUrl(userSlug: string, collectionSlug: string): string | null {
+function getSafeCollectionUrl(userSlug: string, collectionSlug: string): null | string {
   // Sanitize slugs first, then validate the sanitized results
   // sanitizeSlug preserves already-valid slugs, so this catches any issues
   const sanitizedUserSlug = sanitizeSlug(userSlug);
@@ -78,7 +78,7 @@ function getSafeCollectionUrl(userSlug: string, collectionSlug: string): string 
  * Sanitize display text for safe use in text content
  * Removes HTML tags, script content, and dangerous characters
  */
-function sanitizeDisplayText(text: string | null | undefined, fallback: string): string {
+function sanitizeDisplayText(text: null | string | undefined, fallback: string): string {
   if (!text || typeof text !== 'string') return fallback;
   // Remove all angle brackets to prevent HTML/script injection (safest for plain text display)
   // This completely eliminates any possibility of HTML tag injection
@@ -191,10 +191,10 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
   const { follower_count, following_count } = stats ?? {};
 
   return (
-    <div className={'min-h-screen bg-background'}>
+    <div className="min-h-screen bg-background">
       {/* Hero/Profile Header */}
       <section className="relative">
-        <div className={'container mx-auto px-4'}>
+        <div className="container mx-auto px-4">
           <div className="flex items-start justify-between pt-12">
             <div className="flex items-start gap-4">
               {profile?.image ? (
@@ -204,7 +204,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                   width={96}
                   height={96}
                   className="h-24 w-24 rounded-full border-4 border-background object-cover"
-                  priority={true}
+                  priority
                 />
               ) : (
                 <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-background bg-accent font-bold text-2xl">
@@ -219,11 +219,11 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                 {(() => {
                   const sanitizedBio = profile?.bio ? sanitizeDisplayText(profile.bio, '') : '';
                   return sanitizedBio ? (
-                    <p className={'mt-2 max-w-2xl text-sm'}>{sanitizedBio}</p>
+                    <p className="mt-2 max-w-2xl text-sm">{sanitizedBio}</p>
                   ) : null;
                 })()}
 
-                <div className={'mt-3 flex items-center gap-4 text-sm'}>
+                <div className="mt-3 flex items-center gap-4 text-sm">
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                     <Users className="h-4 w-4" />
                     {follower_count ?? 0} followers
@@ -231,36 +231,32 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                   <span>•</span>
                   <div>{following_count ?? 0} following</div>
 
-                  {profile?.website && (
-                    <>
+                  {profile?.website ? <>
                       <span>•</span>
                       <NavLink
                         href={profile.website}
-                        external={true}
+                        external
                         className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}
                       >
                         <Globe className="h-4 w-4" />
                         Website
                       </NavLink>
-                    </>
-                  )}
+                    </> : null}
                 </div>
               </div>
             </div>
 
-            {currentUser && profile && currentUser.id !== profile.id && profile.id && profile.slug && (
-              <FollowButton
+            {currentUser && profile && currentUser.id !== profile.id && profile.id && profile.slug ? <FollowButton
                 userId={profile.id}
                 userSlug={profile.slug}
                 initialIsFollowing={is_following ?? false}
-              />
-            )}
+              /> : null}
           </div>
         </div>
       </section>
 
       {/* Content */}
-      <section className={'container mx-auto px-4 py-12'}>
+      <section className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Stats sidebar */}
           <div className="space-y-4">
@@ -305,7 +301,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
 
               {!collections || collections.length === 0 ? (
                 <Card>
-                  <CardContent className={'flex flex-col items-center py-12'}>
+                  <CardContent className="flex flex-col items-center py-12">
                     <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
                     <p className="text-muted-foreground">No public collections yet</p>
                   </CardContent>
@@ -318,8 +314,8 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         collection
                       ): collection is typeof collection & {
                         id: string;
+                        name: null | string;
                         slug: string;
-                        name: string | null;
                       } =>
                         collection.id !== null &&
                         collection.slug !== null &&
@@ -340,11 +336,9 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                           <NavLink href={safeCollectionUrl}>
                             <CardHeader>
                               <CardTitle className="text-lg">{collection.name}</CardTitle>
-                              {collection.description && (
-                                <CardDescription className="line-clamp-2">
+                              {collection.description ? <CardDescription className="line-clamp-2">
                                   {collection.description}
-                                </CardDescription>
-                              )}
+                                </CardDescription> : null}
                             </CardHeader>
                             <CardContent>
                               <div
@@ -368,8 +362,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
             </div>
 
             {/* Content Contributions */}
-            {contributions && contributions.length > 0 && (
-              <div>
+            {contributions && contributions.length > 0 ? <div>
                 <h2 className="mb-4 font-bold text-2xl">Contributions</h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {contributions
@@ -377,10 +370,10 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                       (
                         item
                       ): item is typeof item & {
-                        id: string;
                         content_type: Database['public']['Enums']['content_category'];
+                        id: string;
+                        name: null | string;
                         slug: string;
-                        name: string | null;
                       } =>
                         item.id !== null &&
                         item.content_type !== null &&
@@ -401,15 +394,13 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
                           <NavLink href={safeContentUrl}>
                             <CardHeader>
-                              <div className={'mb-2 flex items-center justify-between'}>
+                              <div className="mb-2 flex items-center justify-between">
                                 <UnifiedBadge variant="base" style="secondary" className="text-xs">
                                   {item.content_type}
                                 </UnifiedBadge>
-                                {item.featured && (
-                                  <UnifiedBadge variant="base" style="default" className="text-xs">
+                                {item.featured ? <UnifiedBadge variant="base" style="default" className="text-xs">
                                     Featured
-                                  </UnifiedBadge>
-                                )}
+                                  </UnifiedBadge> : null}
                               </div>
                               <CardTitle className="text-base">{item.name}</CardTitle>
                               <CardDescription className="line-clamp-2 text-xs">
@@ -418,7 +409,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                             </CardHeader>
                             <CardContent>
                               <div
-                                className={'flex items-center gap-2 text-muted-foreground text-xs'}
+                                className="flex items-center gap-2 text-muted-foreground text-xs"
                               >
                                 <span>{item.view_count ?? 0} views</span>
                                 <span>•</span>
@@ -430,8 +421,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                       );
                     })}
                 </div>
-              </div>
-            )}
+              </div> : null}
           </div>
         </div>
       </section>

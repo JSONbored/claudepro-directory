@@ -6,7 +6,7 @@ export interface DatabaseWebhookPayload<T = Record<string, unknown>> {
   schema: string;
 }
 
-import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { createUtilityContext } from '@heyclaude/shared-runtime/logging.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 export function validateWebhookUrl(

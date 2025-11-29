@@ -4,28 +4,8 @@
     "signature": true
   },
   "tasks": {
-    "generate:config": {
-      "outputs": [
-        "packages/web-runtime/src/config/generated-config.ts"
-      ],
-      "inputs": [
-        "packages/generators/src/**/*"
-      ],
-      "cache": false,
-      "passThroughEnv": ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"]
-    },
-    "generate:categories:exec": {
-      "outputs": [
-        "packages/web-runtime/src/data/config/category/category-config.generated.ts"
-      ],
-      "inputs": [
-        "packages/generators/src/**/*",
-        ".build-cache/cache.json"
-      ],
-      "cache": true,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
-    },
     "build:skills:exec": {
+      "dependsOn": ["generators:build"],
       "outputs": [
         "content/skills/*.zip",
         "apps/web/public/downloads/skills/*.zip"
@@ -42,15 +22,14 @@
       "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
     },
     "generate:service-worker:exec": {
-      "dependsOn": ["generate:categories:exec"],
+      "dependsOn": ["generators:build"],
       "outputs": ["apps/web/public/service-worker.js"],
       "inputs": [
         "packages/generators/src/**/*",
-        "packages/web-runtime/src/data/config/category/category-config.generated.ts",
+        "packages/web-runtime/src/data/config/category/category-config.ts",
         "apps/web/src/lib/data/config/constants.ts",
         "apps/web/src/lib/data/config/constants.server.ts",
-        "package.json",
-        ".build-cache/cache.json"
+        "package.json"
       ],
       "cache": true
     },
@@ -67,42 +46,38 @@
       ],
       "dependsOn": [
         "^build",
-        "generate:categories:exec",
-        "generate:service-worker:exec"
+        "generate:service-worker:exec",
+        "^type-check",
+        "lint:build"
       ]
     },
+    "lint:build": {
+      "outputs": [],
+      "inputs": [
+        "packages/web-runtime/src/data/**/*",
+        "!packages/web-runtime/src/data/**/*.test.ts",
+        "!packages/web-runtime/src/data/**/*.test.tsx",
+        "apps/web/src/app/**/*",
+        "!apps/web/src/app/**/*.test.ts",
+        "!apps/web/src/app/**/*.test.tsx"
+      ],
+      "cache": true
+    },
     "type-check": {
+      "dependsOn": ["^build"],
       "outputs": ["**/*.tsbuildinfo"],
       "cache": true
     },
-      "type-check:web": {
-        "outputs": [],
-        "inputs": [
-          "apps/web/**/*",
-          "packages/**/src/**/*",
-          "tsconfig.json"
-        ],
-        "cache": true,
-        "dependsOn": ["^generate:categories:exec"]
-      },
-      "type-check:packages": {
-        "outputs": [],
-        "inputs": [
-          "packages/**/src/**/*",
-          "packages/**/tsconfig.json"
-        ],
-        "cache": true
-      },
-      "type-check:edge": {
-        "outputs": [],
-        "inputs": [
-          "apps/edge/functions/**/*",
-          "apps/edge/functions/tsconfig.json",
-          "apps/edge/functions/deno.json"
-        ],
-        "cache": true
-      },
+    "type-check:edge": {
+      "outputs": [],
+      "inputs": [
+        "apps/edge/functions/**/*",
+        "apps/edge/supabase/deno.json"
+      ],
+      "cache": true
+    },
     "lint": {
+      "dependsOn": ["^build"],
       "outputs": [],
       "cache": true
     },
@@ -118,7 +93,126 @@
       "cache": true
     },
     "generators:build": {
+      "outputs": ["dist/**"],
+      "inputs": [
+        "packages/generators/src/**/*",
+        "packages/generators/tsconfig.json",
+        "package.json"
+      ],
+      "cache": true,
       "dependsOn": ["^build"]
+    },
+    "@heyclaude/web-runtime#build": {
+      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
+      "inputs": ["src/**/*", "tsconfig.json"],
+      "cache": true,
+      "dependsOn": ["^build"]
+    },
+    "@heyclaude/data-layer#build": {
+      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
+      "inputs": ["src/**/*", "tsconfig.json"],
+      "cache": true,
+      "dependsOn": ["^build"]
+    },
+    "@heyclaude/shared-runtime#build": {
+      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
+      "inputs": ["src/**/*", "tsconfig.json"],
+      "cache": true,
+      "dependsOn": ["^build"]
+    },
+    "@heyclaude/database-types#build": {
+      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
+      "inputs": ["src/**/*", "tsconfig.json"],
+      "cache": true
+    },
+    "dev:exec": {
+      "dependsOn": ["generate:service-worker:exec"],
+      "cache": false
+    },
+    "build:mcpb:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false,
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
+    },
+    "verify:mcpb:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false,
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
+    },
+    "generate:readme:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false
+    },
+    "sync:db:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false,
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_PROJECT_REF"]
+    },
+    "sync:db:full:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false,
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_PROJECT_REF"]
+    },
+    "sync:db:types:exec": {
+      "dependsOn": ["generators:build"],
+      "outputs": ["packages/database-types/src/**/*"],
+      "cache": true,
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_PROJECT_REF"]
+    },
+    "backup:db:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false,
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
+    },
+    "cache:info:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false
+    },
+    "cache:clear:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false
+    },
+    "webhooks:backlog:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false,
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
+    },
+    "webhooks:replay:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false,
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
+    },
+    "changelog:generate:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false,
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
+    },
+    "changelog:generate:dry:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false,
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
+    },
+    "changelog:generate:branch:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false,
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
+    },
+    "type-check:unused:filtered:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false
+    },
+    "verify:routes:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false
+    },
+    "email:upload:exec": {
+      "dependsOn": ["generators:build"],
+      "cache": false,
+      "passThroughEnv": ["RESEND_API_KEY"]
+    },
+    "deploy:edge:exec": {
+      "cache": false,
+      "passThroughEnv": ["SUPABASE_PROJECT_REF", "NEXT_PUBLIC_SUPABASE_URL"]
     }
   },
   "globalDependencies": ["package.json", "pnpm-lock.yaml"],

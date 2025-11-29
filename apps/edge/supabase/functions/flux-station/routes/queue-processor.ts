@@ -11,16 +11,13 @@
  * Called by pg_cron job every 2 minutes to process all queues automatically.
  */
 
-import { edgeEnv, initRequestLogging, pgmqMetrics, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
-import {
-  createUtilityContext,
-  errorToString,
-  getProperty,
-  logError,
-  logInfo,
-  TIMEOUT_PRESETS,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { pgmqMetrics } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { createUtilityContext, logError, logInfo } from '@heyclaude/shared-runtime/logging.ts';
+import { getProperty } from '@heyclaude/shared-runtime/object-utils.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 import { handleChangelogNotify } from './changelog/notify.ts';
 import { handleChangelogProcess } from './changelog/process.ts';
 import { handleDiscordJobs } from './discord/jobs.ts';
@@ -197,7 +194,7 @@ async function processInternalQueue(
       queue: config.name,
       success: false,
       queueLength,
-      error: errorToString(error),
+      error: normalizeError(error, 'Queue processing failed').message,
     };
   }
 }
@@ -286,7 +283,7 @@ async function processExternalQueue(
       queue: config.name,
       success: false,
       queueLength,
-      error: errorToString(error),
+      error: normalizeError(error, 'Queue processing failed').message,
     };
   }
 }
@@ -397,18 +394,18 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
       }
     } catch (error) {
       // Unexpected error - log and continue
-      const errorMsg = errorToString(error);
+      const errorObj = normalizeError(error, `Unexpected error processing queue '${config.name}'`);
       const errorLogContext = {
         ...batchLogContext,
         queue_name: config.name,
         queue_length: queueLength,
       };
-      await logError(`Unexpected error processing queue '${config.name}'`, errorLogContext, error);
+      await logError(`Unexpected error processing queue '${config.name}'`, errorLogContext, errorObj);
       result = {
         queue: config.name,
         success: false,
         queueLength,
-        error: errorMsg,
+        error: errorObj.message,
       };
     }
 

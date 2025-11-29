@@ -5,8 +5,8 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 export class CompaniesService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,7 +17,7 @@ export class CompaniesService {
   async getCompanyAdminProfile(args: Database['public']['Functions']['get_company_admin_profile']['Args']) {
     const { data, error } = await this.supabase.rpc('get_company_admin_profile', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_company_admin_profile']['Returns'];
+    return data;
   }
 
   /**
@@ -26,7 +26,7 @@ export class CompaniesService {
   async getCompanyProfile(args: Database['public']['Functions']['get_company_profile']['Args']) {
     const { data, error } = await this.supabase.rpc('get_company_profile', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_company_profile']['Returns'];
+    return data;
   }
 
   /**
@@ -35,6 +35,6 @@ export class CompaniesService {
   async getCompaniesList(args: Database['public']['Functions']['get_companies_list']['Args']) {
     const { data, error } = await this.supabase.rpc('get_companies_list', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_companies_list']['Returns'];
+    return data;
   }
 }

@@ -2,21 +2,15 @@
  * Public API - Main entry point for public API edge function
  */
 
-import {
-  analytics,
-  buildStandardContext,
-  chain,
-  type HttpMethod,
-  jsonResponse,
-  rateLimit,
-  type StandardContext,
-  serveEdgeApp,
-} from '@heyclaude/edge-runtime';
-import {
-  checkRateLimit,
-  createDataApiContext,
-  RATE_LIMIT_PRESETS,
-} from '@heyclaude/shared-runtime';
+import { analytics } from '@heyclaude/edge-runtime/middleware/analytics.ts';
+import { buildStandardContext, type StandardContext } from '@heyclaude/edge-runtime/utils/context.ts';
+import { chain } from '@heyclaude/edge-runtime/middleware/chain.ts';
+import type { HttpMethod } from '@heyclaude/edge-runtime/utils/router.ts';
+import { jsonResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { rateLimit } from '@heyclaude/edge-runtime/middleware/rate-limit.ts';
+import { serveEdgeApp } from '@heyclaude/edge-runtime/app.ts';
+import { checkRateLimit, RATE_LIMIT_PRESETS } from '@heyclaude/shared-runtime/rate-limit.ts';
+import { createDataApiContext } from '@heyclaude/shared-runtime/logging.ts';
 import { handleGeneratePackage } from './routes/content-generate/index.ts';
 import { handlePackageGenerationQueue } from './routes/content-generate/queue-worker.ts';
 import { handleUploadPackage } from './routes/content-generate/upload.ts';
@@ -96,11 +90,11 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
       method: ctx.method,
       segments: ctx.segments,
     }),
-  'content-generate': async (ctx) => {
+  'content-generate': (ctx) => {
     // segments[0] = 'content', segments[1] = 'generate-package', segments[2] = sub-route
     const subRoute = ctx.segments[2];
     if (subRoute === 'upload') {
-      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, () => {
         const logContext = createPublicApiContext('content-generate-upload', {
           path: ctx.pathname,
         });
@@ -108,14 +102,14 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
       });
     }
     if (subRoute === 'process') {
-      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, () => {
         const logContext = createPublicApiContext('content-generate-process', {
           path: ctx.pathname,
         });
         return handlePackageGenerationQueue(ctx.request, logContext);
       });
     }
-    return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+    return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, () => {
       const logContext = createPublicApiContext('content-generate', {
         path: ctx.pathname,
         method: ctx.method,

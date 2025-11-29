@@ -1,7 +1,9 @@
 import { performance } from 'node:perf_hooks';
-import type { Database } from '@heyclaude/database-types';
+
+import  { type Database } from '@heyclaude/database-types';
 import { transformSkillToMarkdown } from '@heyclaude/web-runtime/transformers/skill-to-md';
 import archiver from 'archiver';
+
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
 import { ensureEnvVars } from '../toolkit/env.js';
 import { logger } from '../toolkit/logger.js';
@@ -37,7 +39,7 @@ export async function runGenerateSkillPackages(): Promise<void> {
   logger.info(`✅ Found ${skills.length} skills in database\n`, { skillCount: skills.length });
 
   logger.info('🔍 Computing content hashes and filtering changed skills...');
-  const skillsToRebuild: Array<{ skill: SkillRow; skillMd: string; hash: string }> = [];
+  const skillsToRebuild: Array<{ hash: string; skill: SkillRow; skillMd: string; }> = [];
 
   for (const skill of skills) {
     const skillMd = transformSkillToMarkdown(skill);
@@ -63,7 +65,7 @@ export async function runGenerateSkillPackages(): Promise<void> {
   });
   logger.info('═'.repeat(80));
 
-  const allResults: Array<{ slug: string; status: 'success' | 'error'; message: string }> = [];
+  const allResults: Array<{ message: string; slug: string; status: 'error' | 'success'; }> = [];
 
   for (let i = 0; i < skillsToRebuild.length; i += CONCURRENCY) {
     const batch = skillsToRebuild.slice(i, i + CONCURRENCY);
@@ -146,7 +148,7 @@ async function generateZipBuffer(slug: string, skillMdContent: string): Promise<
       mode: 0o644,
     });
 
-    archive.finalize();
+    void archive.finalize();
   });
 }
 
@@ -200,9 +202,9 @@ async function uploadToStorage(
 }
 
 async function processBatch(
-  skills: Array<{ skill: SkillRow; skillMd: string; hash: string }>,
+  skills: Array<{ hash: string; skill: SkillRow; skillMd: string; }>,
   supabase: ReturnType<typeof createServiceRoleClient>
-): Promise<Array<{ slug: string; status: 'success' | 'error'; message: string }>> {
+): Promise<Array<{ message: string; slug: string; status: 'error' | 'success'; }>> {
   const results = await Promise.allSettled(
     skills.map(async ({ skill, skillMd, hash }) => {
       const buildStartTime = performance.now();

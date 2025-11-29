@@ -6,8 +6,8 @@
 import type { Resend } from 'npm:resend@6.5.2';
 import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { createEmailHandlerContext, logError } from '@heyclaude/shared-runtime';
-import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
+import { createEmailHandlerContext, logError } from '@heyclaude/shared-runtime/logging.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 import { renderEmailTemplate } from '@heyclaude/edge-runtime/utils/email/base-template.tsx';
 import { HELLO_FROM } from '@heyclaude/edge-runtime/utils/email/templates/manifest.ts';
 import { WeeklyDigest } from '@heyclaude/edge-runtime/utils/email/templates/weekly-digest.tsx';

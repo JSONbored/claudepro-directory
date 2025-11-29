@@ -1,21 +1,21 @@
 type EnvRecord = Record<string, string | undefined>;
 
 interface GlobalEnv {
-  process?: {
-    env?: EnvRecord;
-  };
   Deno?: {
     env?: {
       get?(key: string): string | undefined;
       toObject?(): Record<string, string>;
     };
   };
+  process?: {
+    env?: EnvRecord;
+  };
 }
 
 const globalEnv = globalThis as GlobalEnv;
 const envCache = new Map<string, string | undefined>();
 
-function normalizeValue(value: string | undefined | null): string | undefined {
+function normalizeValue(value: null | string | undefined): string | undefined {
   if (value === undefined || value === null || value === '') {
     return undefined;
   }

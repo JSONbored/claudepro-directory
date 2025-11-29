@@ -3,11 +3,8 @@
 	"imports": {
 		"@heyclaude/database-types": "../../../packages/database-types/src/index.ts",
 		"@heyclaude/shared-runtime/": "../../../packages/shared-runtime/src/",
-		"@heyclaude/shared-runtime": "../../../packages/shared-runtime/src/index.ts",
 		"@heyclaude/edge-runtime/": "../../../packages/edge-runtime/src/",
-		"@heyclaude/edge-runtime": "../../../packages/edge-runtime/src/index.ts",
 		"@heyclaude/data-layer/": "../../../packages/data-layer/src/",
-		"@heyclaude/data-layer": "../../../packages/data-layer/src/index.ts",
 		"@supabase/supabase-js": "npm:@supabase/supabase-js@2.84.0",
 		"@supabase/supabase-js/": "npm:@supabase/supabase-js@2.84.0/",
 		"zod": "npm:zod@3.24.1",

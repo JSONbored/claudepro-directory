@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { runCacheCli, showCacheCliHelp } from '../commands/cache-cli.js';
 import { logger } from '../toolkit/logger.js';
 
@@ -12,13 +14,13 @@ if (!command || command === 'help' || command === '--help' || command === '-h') 
 }
 
 try {
-  const options: Parameters<typeof runCacheCli>[0] = { command: command as 'info' | 'clear' };
+  const options: Parameters<typeof runCacheCli>[0] = { command: command as 'clear' | 'info' };
   if (pattern) {
     options.pattern = pattern;
   }
   runCacheCli(options);
 } catch (error) {
-  const errorObj = error instanceof Error ? error : new Error(String(error));
+  const errorObj = normalizeError(error, 'Cache CLI error');
   logger.error('Cache CLI error', errorObj, { command, pattern });
   process.exit(1);
 }

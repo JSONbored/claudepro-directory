@@ -1,7 +1,7 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
@@ -19,13 +19,13 @@ function isValidContentCategory(
 }
 
 export interface RelatedContentInput {
-  currentPath: string;
   currentCategory: string;
-  currentTags?: string[];
   currentKeywords?: string[];
+  currentPath: string;
+  currentTags?: string[];
+  exclude?: string[];
   featured?: boolean;
   limit?: number;
-  exclude?: string[];
 }
 
 export interface RelatedContentResult {

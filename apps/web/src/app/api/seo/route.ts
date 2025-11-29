@@ -6,7 +6,7 @@
 import 'server-only';
 
 import { SeoService } from '@heyclaude/data-layer';
-import type { Json } from '@heyclaude/database-types';
+import  { type Json } from '@heyclaude/database-types';
 import { buildSecurityHeaders, sanitizeRoute, serializeJsonLd } from '@heyclaude/shared-runtime';
 import {
   generateRequestId,

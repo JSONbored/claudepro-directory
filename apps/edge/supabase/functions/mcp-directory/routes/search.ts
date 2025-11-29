@@ -3,7 +3,7 @@
  * Uses ContentService.getContentPaginated for consistent search behavior with web app
  */
 
-import { ContentService } from '@heyclaude/data-layer';
+import { ContentService } from '@heyclaude/data-layer/services/content.ts';
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { SearchContentInput } from '../lib/types.ts';

@@ -14,7 +14,6 @@
 
 'use client';
 
-import { logger } from '@heyclaude/web-runtime/core';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { POSITION_PATTERNS } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
@@ -35,19 +34,12 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
   });
 
   useEffect(() => {
-    getAnimationConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setSpringBouncy({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.bouncy.stiffness'],
-          damping: config['animation.spring.bouncy.damping'],
-        });
-      })
-      .catch((error) => {
-        logger.error('NotificationBadge: failed to load animation config', error);
-      });
+    const config = getAnimationConfig();
+    setSpringBouncy({
+      type: 'spring' as const,
+      stiffness: config['animation.spring.bouncy.stiffness'],
+      damping: config['animation.spring.bouncy.damping'],
+    });
   }, []);
 
   if (!flags.enableNotifications) return null;

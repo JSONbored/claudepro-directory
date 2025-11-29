@@ -14,7 +14,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@heyclaude/web-runtime/ui';
-import { useNewsletter } from '@/src/hooks/use-newsletter';
+import { useNewsletter } from '@heyclaude/web-runtime/hooks';
 
 export interface NewsletterModalProps {
   source: Database['public']['Enums']['newsletter_source'];

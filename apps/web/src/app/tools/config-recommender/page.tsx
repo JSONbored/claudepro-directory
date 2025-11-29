@@ -30,7 +30,7 @@ import { UI_CLASSES, UnifiedBadge,
   CardDescription,
   CardHeader,
   CardTitle  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
 import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
@@ -73,15 +73,15 @@ export default function ConfigRecommenderPage() {
 
   try {
     return (
-      <div className={'min-h-screen bg-background'}>
+      <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className={'relative overflow-hidden px-4 py-16'}>
-          <div className={'container mx-auto max-w-4xl text-center'}>
+        <section className="relative overflow-hidden px-4 py-16">
+          <div className="container mx-auto max-w-4xl text-center">
             {/* Badge */}
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={'mb-6 border-primary/20 bg-accent/5 text-primary'}
+              className="mb-6 border-primary/20 bg-accent/5 text-primary"
             >
               <Sparkles className="mr-1 h-3 w-3" aria-hidden="true" />
               AI-Powered Recommendations
@@ -93,13 +93,13 @@ export default function ConfigRecommenderPage() {
             </h1>
 
             {/* Description */}
-            <p className={'mx-auto mb-8 max-w-3xl text-lg text-muted-foreground md:text-xl'}>
+            <p className="mx-auto mb-8 max-w-3xl text-lg text-muted-foreground md:text-xl">
               Answer 7 quick questions and get personalized recommendations from our catalog of 147+
               configurations. Instant results, zero cost, tailored to your needs.
             </p>
 
             {/* Stats */}
-            <div className={'flex flex-wrap justify-center gap-3'}>
+            <div className="flex flex-wrap justify-center gap-3">
               <UnifiedBadge variant="base" style="secondary" className="text-sm">
                 <Clock className="mr-1 h-3 w-3" aria-hidden="true" />2 minutes
               </UnifiedBadge>
@@ -116,15 +116,15 @@ export default function ConfigRecommenderPage() {
         </section>
 
         {/* Quiz Section */}
-        <section className={'container mx-auto px-4 pb-16'}>
-          <div className={'mx-auto max-w-4xl'}>
+        <section className="container mx-auto px-4 pb-16">
+          <div className="mx-auto max-w-4xl">
             <QuizForm />
           </div>
         </section>
 
         {/* Benefits Section */}
-        <section className={'container mx-auto px-4 pb-16'}>
-          <div className={'mx-auto max-w-4xl'}>
+        <section className="container mx-auto px-4 pb-16">
+          <div className="mx-auto max-w-4xl">
             <h2 className="mb-8 text-center font-bold text-2xl">How It Works</h2>
 
             <div className="grid gap-6 md:grid-cols-3">
@@ -132,9 +132,7 @@ export default function ConfigRecommenderPage() {
                 <CardHeader>
                   <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
                     <span
-                      className={
-                        'flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm'
-                      }
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm"
                     >
                       1
                     </span>
@@ -153,9 +151,7 @@ export default function ConfigRecommenderPage() {
                 <CardHeader>
                   <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
                     <span
-                      className={
-                        'flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm'
-                      }
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm"
                     >
                       2
                     </span>
@@ -174,9 +170,7 @@ export default function ConfigRecommenderPage() {
                 <CardHeader>
                   <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
                     <span
-                      className={
-                        'flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm'
-                      }
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm"
                     >
                       3
                     </span>
@@ -195,8 +189,8 @@ export default function ConfigRecommenderPage() {
         </section>
 
         {/* Features Section */}
-        <section className={'container mx-auto px-4 pb-16'}>
-          <div className={'mx-auto max-w-4xl'}>
+        <section className="container mx-auto px-4 pb-16">
+          <div className="mx-auto max-w-4xl">
             <Card className="border-accent/20 bg-accent/5">
               <CardHeader>
                 <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -251,14 +245,18 @@ export default function ConfigRecommenderPage() {
         </section>
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
-        <section className={'container mx-auto px-4 py-12'}>
+        <section className="container mx-auto px-4 py-12">
           <NewsletterCTAVariant source="content_page" variant="hero" />
         </section>
       </div>
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Config Recommender page render failed');
-    reqLogger.error('ConfigRecommenderPage: render failed', normalized);
+    reqLogger.warn('ConfigRecommenderPage: render failed - will be handled by error boundary', {
+      err: normalized,
+      recoverable: true,
+      category: 'rendering',
+    });
     throw normalized;
   }
 }

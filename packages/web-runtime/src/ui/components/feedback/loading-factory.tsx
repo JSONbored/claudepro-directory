@@ -383,3 +383,98 @@ export const LoadingPresets = {
   changelog: ChangelogListLoading,
   default: DefaultLoading,
 } as const;
+
+// =============================================================================
+// Loading Factory - Create customized loading components
+// =============================================================================
+
+/**
+ * Configuration options for createCategoryLoading factory
+ */
+export interface CategoryLoadingConfig {
+  /** Category name for display name (used in React DevTools) */
+  category?: string;
+  /** Grid variant: 'grid3' (3-col), 'grid2' (2-col), 'list' */
+  variant?: keyof typeof SKELETON_CONFIGS;
+  /** Whether to show search bar skeleton */
+  showSearch?: boolean;
+  /** Whether to show filter bar skeleton */
+  showFilters?: boolean;
+  /** Total number of skeleton cards to display */
+  totalCards?: number;
+}
+
+/**
+ * Factory function to create customized CategoryLoading components.
+ *
+ * Use this when you need a pre-configured loading component for specific categories
+ * with consistent settings that can be used as a default export in loading.tsx files.
+ *
+ * @example
+ * ```tsx
+ * // In loading.tsx - Creates a loading component with filters for jobs
+ * export default createCategoryLoading({
+ *   category: 'jobs',
+ *   variant: 'grid2',
+ *   showFilters: true,
+ *   totalCards: 6,
+ * });
+ *
+ * // Simple re-export for standard category pages
+ * export { CategoryLoading as default } from '@heyclaude/web-runtime/ui';
+ * ```
+ *
+ * @param config - Configuration for the loading component
+ * @returns A React component for loading state
+ */
+export function createCategoryLoading(config: CategoryLoadingConfig = {}) {
+  const {
+    category = 'category',
+    variant = 'grid3',
+    showSearch = true,
+    showFilters = false,
+    totalCards,
+  } = config;
+
+  const selectedConfig = SKELETON_CONFIGS[variant] as SkeletonConfig;
+  const cardCount = totalCards ?? selectedConfig.totalCards;
+  const keys = getSkeletonKeys(cardCount);
+
+  function CustomCategoryLoading() {
+    return (
+      <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
+        {/* Header */}
+        <PageHeaderSkeleton />
+
+        {/* Search bar (optional) */}
+        {showSearch && (
+          <div className={UI_CLASSES.MARGIN_RELAXED}>
+            <Skeleton size="lg" width="3xl" className="h-12" />
+          </div>
+        )}
+
+        {/* Filter bar (optional) */}
+        {showFilters && (
+          <div className={`${UI_CLASSES.MARGIN_COMFORTABLE} flex flex-wrap gap-2`}>
+            <Skeleton size="sm" width="xs" rounded="full" />
+            <Skeleton size="sm" width="sm" rounded="full" />
+            <Skeleton size="sm" width="xs" rounded="full" />
+            <Skeleton size="sm" width="sm" rounded="full" />
+          </div>
+        )}
+
+        {/* Content grid */}
+        <div className={selectedConfig.gridClass}>
+          {Array.from({ length: cardCount }).map((_, i) => (
+            <ConfigCardSkeleton key={keys[i]} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Set display name for React DevTools
+  CustomCategoryLoading.displayName = `${category.charAt(0).toUpperCase() + category.slice(1)}Loading`;
+
+  return CustomCategoryLoading;
+}

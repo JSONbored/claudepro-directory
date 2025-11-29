@@ -1,4 +1,4 @@
-import type { Json } from '@heyclaude/database-types';
+import  { type Json } from '@heyclaude/database-types';
 
 function validateJsonLdSafe(data: unknown): unknown {
   const jsonString = JSON.stringify(data);
@@ -16,7 +16,9 @@ function validateJsonLdSafe(data: unknown): unknown {
 
 export function serializeJsonLd(data: Json): string {
   const validated = validateJsonLdSafe(data);
-  return JSON.stringify(validated).replace(/</g, '\\u003c');
+  return JSON.stringify(validated).replaceAll('<', String.raw`\u003c`);
 }
 
-export type { Json };
+
+
+export {type Json} from '@heyclaude/database-types';

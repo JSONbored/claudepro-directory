@@ -1,16 +1,18 @@
 import { writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import ora from 'ora';
+
 import { ensureEnvVars } from '../toolkit/env.js';
 import { getDatabaseMeta } from '../toolkit/introspection.js';
 import { logger } from '../toolkit/logger.js';
 import { mapPostgresTypeToZod } from '../toolkit/zod-mapper.js';
 
 const __filename = fileURLToPath(import.meta.url);
-const SCRIPT_DIR = join(__filename, '..');
-const PROJECT_ROOT = join(SCRIPT_DIR, '../../../../');
-const OUTPUT_FILE = join(PROJECT_ROOT, 'packages/shared-runtime/src/schemas/database.generated.ts');
+const SCRIPT_DIR = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(SCRIPT_DIR, '../../../../');
+const OUTPUT_FILE = path.join(PROJECT_ROOT, 'packages/shared-runtime/src/schemas/database.generated.ts');
 
 export async function runGenerateZodSchemas(targetTables?: string[]) {
   const spinner = ora('Generating Zod Schemas...').start();
@@ -52,9 +54,7 @@ export async function runGenerateZodSchemas(targetTables?: string[]) {
         lines.push(`  ${col.name}: ${zodDef},`);
       }
 
-      lines.push('});');
-      lines.push(`export type ${tableName}Row = z.infer<typeof ${tableName}Schema>;`);
-      lines.push('');
+      lines.push('});', `export type ${tableName}Row = z.infer<typeof ${tableName}Schema>;`, '');
     }
 
     writeFileSync(OUTPUT_FILE, lines.join('\n'));

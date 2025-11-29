@@ -1,3 +1,4 @@
+import { isProduction } from '@heyclaude/shared-runtime/schemas/env';
 import { headers } from 'next/headers';
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { z } from 'zod';
@@ -20,7 +21,7 @@ export const actionClient = createSafeActionClient({
     logger.error('Server action error', normalized, {
       errorType: normalized.constructor?.name || 'Unknown',
     });
-    if (process.env['NODE_ENV'] === 'production') {
+    if (isProduction) {
       return DEFAULT_SERVER_ERROR_MESSAGE;
     }
     return normalized.message || DEFAULT_SERVER_ERROR_MESSAGE;
@@ -84,6 +85,7 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
     const referer = headersList.get('referer') || 'unknown';
 
     logger.warn('Auth failure - Unauthorized action attempt', {
+      securityEvent: true, // Structured tag for security event filtering
       clientIP,
       path: referer,
       actionName: metadata?.actionName || 'unknown',

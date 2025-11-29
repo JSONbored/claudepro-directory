@@ -4,29 +4,17 @@
  */
 
 import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import {
-  edgeEnv,
-  errorResponse,
-  initRequestLogging,
-  invalidateCacheTags,
-  pgmqDelete,
-  pgmqRead,
-  publicCorsHeaders,
-  runWithRetry,
-  successResponse,
-  traceRequestComplete,
-  traceStep,
-} from '@heyclaude/edge-runtime';
-import {
-  createUtilityContext,
-  errorToString,
-  getProperty,
-  logError,
-  logWarn,
-  TIMEOUT_PRESETS,
-  timingSafeEqual,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
+import { errorResponse, publicCorsHeaders, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { invalidateCacheTags } from '@heyclaude/edge-runtime/utils/cache.ts';
+import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { runWithRetry } from '@heyclaude/edge-runtime/utils/integrations/http-client.ts';
+import { createUtilityContext, logError, logWarn } from '@heyclaude/shared-runtime/logging.ts';
+import { getProperty } from '@heyclaude/shared-runtime/object-utils.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
+import { timingSafeEqual } from '@heyclaude/shared-runtime/crypto-utils.ts';
 
 const CONTENT_REVALIDATION_QUEUE = 'revalidation';
 const QUEUE_BATCH_SIZE = 10;
@@ -222,13 +210,13 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
           msg_id: msg.msg_id.toString(),
           operation: 'process-message',
         };
-        const errorMsg = errorToString(error);
-        await logError('Content revalidation failed', errorLogContext, error);
+        const errorObj = normalizeError(error, 'Content revalidation failed');
+        await logError('Content revalidation failed', errorLogContext, errorObj);
         // Leave in queue for retry
         results.push({
           msg_id: msg.msg_id.toString(),
           status: 'failed',
-          errors: [errorMsg],
+          errors: [errorObj.message],
           will_retry: true,
         });
       }

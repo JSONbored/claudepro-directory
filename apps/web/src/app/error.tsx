@@ -1,5 +1,6 @@
 'use client';
 
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
@@ -45,14 +46,10 @@ export default function ErrorBoundary({
           </p>
         </div>
 
-        {process.env.NODE_ENV === 'development' && error.message && (
-          <div className="mb-6 rounded-md bg-muted p-4 text-left">
+        {isDevelopment && error.message ? <div className="mb-6 rounded-md bg-muted p-4 text-left">
             <p className="font-mono text-destructive text-xs">{error.message}</p>
-            {error.digest && (
-              <p className="mt-2 font-mono text-muted-foreground text-xs">Digest: {error.digest}</p>
-            )}
-          </div>
-        )}
+            {error.digest ? <p className="mt-2 font-mono text-muted-foreground text-xs">Digest: {error.digest}</p> : null}
+          </div> : null}
 
         <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
           <Button onClick={reset} size="lg">

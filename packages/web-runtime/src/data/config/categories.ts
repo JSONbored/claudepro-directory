@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
 import { isBuildTime } from '../../build-time.ts';
 import { getHomepageConfigBundle } from '../../config/static-configs.ts';

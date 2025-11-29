@@ -5,8 +5,8 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 export class ChangelogService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,7 +17,7 @@ export class ChangelogService {
   async getChangelogOverview(args: Database['public']['Functions']['get_changelog_overview']['Args']) {
     const { data, error } = await this.supabase.rpc('get_changelog_overview', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_changelog_overview']['Returns'];
+    return data;
   }
 
   /**
@@ -26,7 +26,7 @@ export class ChangelogService {
   async getChangelogDetail(args: Database['public']['Functions']['get_changelog_detail']['Args']) {
     const { data, error } = await this.supabase.rpc('get_changelog_detail', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_changelog_detail']['Returns'];
+    return data;
   }
 
   /**
@@ -35,6 +35,6 @@ export class ChangelogService {
   async getChangelogWithCategoryStats(args: Database['public']['Functions']['get_changelog_with_category_stats']['Args']) {
     const { data, error } = await this.supabase.rpc('get_changelog_with_category_stats', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_changelog_with_category_stats']['Returns'];
+    return data;
   }
 }

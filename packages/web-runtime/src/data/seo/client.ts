@@ -1,35 +1,36 @@
 import 'server-only';
 
 import { SeoService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
 
 function shouldSkipRpcCall(): boolean {
   const hasEnvironmentVariables =
-    (process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? process.env['SUPABASE_URL']) &&
-    (process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? process.env['SUPABASE_ANON_KEY']);
+    Boolean(env.NEXT_PUBLIC_SUPABASE_URL) &&
+    Boolean(env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   return !hasEnvironmentVariables;
 }
 
-export async function getSEOMetadata(route: string): Promise<{
-  title: string;
+export async function getSEOMetadata(route: string): Promise<null | {
+  _debug?: {
+    category?: string;
+    error?: string;
+    pattern: string;
+    route: string;
+    slug?: string;
+  };
   description: string;
   keywords: string[];
   openGraphType: 'profile' | 'website';
-  twitterCard: 'summary_large_image';
   robots: {
-    index: boolean;
     follow: boolean;
+    index: boolean;
   };
-  _debug?: {
-    pattern: string;
-    route: string;
-    category?: string;
-    slug?: string;
-    error?: string;
-  };
-} | null> {
+  title: string;
+  twitterCard: 'summary_large_image';
+}> {
   if (shouldSkipRpcCall()) {
     return null;
   }
@@ -52,11 +53,11 @@ export async function getSEOMetadata(route: string): Promise<{
   const metadata = result.metadata;
 
   const debugObject: {
+    category?: string;
+    error?: string;
     pattern: string;
     route: string;
-    category?: string;
     slug?: string;
-    error?: string;
   } = {
     pattern: metadata.debug?.pattern ?? '',
     route: metadata.debug?.route ?? '',
@@ -86,27 +87,27 @@ export async function getSEOMetadata(route: string): Promise<{
   };
 }
 
-export async function getSEOMetadataWithSchemas(route: string): Promise<{
+export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
   metadata: {
-    title: string;
+    _debug?: {
+      category?: string;
+      error?: string;
+      pattern: string;
+      route: string;
+      slug?: string;
+    };
     description: string;
     keywords: string[];
     openGraphType: 'profile' | 'website';
-    twitterCard: 'summary_large_image';
     robots: {
-      index: boolean;
       follow: boolean;
+      index: boolean;
     };
-    _debug?: {
-      pattern: string;
-      route: string;
-      category?: string;
-      slug?: string;
-      error?: string;
-    };
+    title: string;
+    twitterCard: 'summary_large_image';
   };
   schemas: Database['public']['Functions']['generate_metadata_complete']['Returns']['schemas'];
-} | null> {
+}> {
   if (shouldSkipRpcCall()) {
     return null;
   }
@@ -129,11 +130,11 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<{
   const metadata = result.metadata;
 
   const debugObject: {
+    category?: string;
+    error?: string;
     pattern: string;
     route: string;
-    category?: string;
     slug?: string;
-    error?: string;
   } = {
     pattern: metadata.debug?.pattern ?? '',
     route: metadata.debug?.route ?? '',

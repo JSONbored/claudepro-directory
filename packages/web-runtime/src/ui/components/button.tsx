@@ -14,15 +14,14 @@
  * - Works with all variants (default, destructive, outline, secondary, ghost, link)
  */
 
-import { logger, normalizeError } from '../../entries/core.ts';
-import { getAnimationConfig } from '../../config/client-defaults.ts';
+import { UI_ANIMATION } from '../../config/unified-config.ts';
 import { cn } from '../../ui/utils.ts';
 import { STATE_PATTERNS, UI_CLASSES } from '../../ui/constants.ts';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'motion/react';
 import type * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 interface RippleType {
   x: number;
@@ -63,6 +62,13 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
+/** Spring animation config from unified config */
+const springDefault = {
+  type: 'spring' as const,
+  stiffness: UI_ANIMATION['spring.default.stiffness'],
+  damping: UI_ANIMATION['spring.default.damping'],
+};
+
 const Button = ({
   className,
   variant,
@@ -74,29 +80,6 @@ const Button = ({
   ...props
 }: ButtonProps & { ref?: React.RefObject<HTMLButtonElement | null> }) => {
   const [ripples, setRipples] = useState<RippleType[]>([]);
-  const [springDefault, setSpringDefault] = useState({
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 17,
-  });
-
-  useEffect(() => {
-    getAnimationConfig()
-      .then((config) => {
-        if (!config) return;
-        setSpringDefault({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.default.stiffness'],
-          damping: config['animation.spring.default.damping'],
-        });
-      })
-      .catch((error) => {
-        const normalized = normalizeError(error, 'Button: failed to load animation config');
-        logger.error('Button: failed to load animation config', normalized, {
-          component: 'Button',
-        });
-      });
-  }, []);
 
   const addRipple = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;

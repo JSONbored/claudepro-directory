@@ -12,6 +12,13 @@
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./schemas/env": {
+      "development": "./src/schemas/env.ts",
+      "types": "./dist/schemas/env.d.ts",
+      "import": "./dist/schemas/env.js",
+      "require": "./dist/schemas/env.js",
+      "default": "./dist/schemas/env.js"
+    },
     "./privacy.ts": {
       "development": "./src/privacy.ts",
       "types": "./dist/privacy.d.ts",
@@ -25,17 +32,35 @@
       "import": "./dist/logger/config.js",
       "require": "./dist/logger/config.js",
       "default": "./dist/logger/config.js"
+    },
+    "./logger/index.ts": {
+      "development": "./src/logger/index.ts",
+      "types": "./dist/logger/index.d.ts",
+      "import": "./dist/logger/index.js",
+      "require": "./dist/logger/index.js",
+      "default": "./dist/logger/index.js"
+    },
+    "./error-handling.ts": {
+      "development": "./src/error-handling.ts",
+      "types": "./dist/error-handling.d.ts",
+      "import": "./dist/error-handling.js",
+      "require": "./dist/error-handling.js",
+      "default": "./dist/error-handling.js"
     }
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc --build && node scripts/build-js-simple.js"
+    "build": "tsc --build",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --config eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.test.ts' --ignore-pattern '**/*.spec.ts'",
+    "lint:fix": "eslint --config eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.test.ts' --ignore-pattern '**/*.spec.ts' --fix"
   },
   "devDependencies": {
     "@types/sanitize-html": "^2.16.0",
-    "esbuild": "^0.27.0"
+    "esbuild": "^0.27.0",
+    "pino-pretty": "^13.1.2"
   },
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",

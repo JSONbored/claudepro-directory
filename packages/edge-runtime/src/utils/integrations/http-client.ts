@@ -1,4 +1,5 @@
-import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { createUtilityContext } from '@heyclaude/shared-runtime/logging.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 export interface FetchWithRetryOptions {
@@ -88,7 +89,7 @@ export async function fetchWithRetry({
 
       lastError = new Error(`HTTP ${response.status}: ${await response.text()}`);
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown fetch error');
+      lastError = normalizeError(error, 'Unknown fetch error');
     }
 
     if (attempt < attempts) {
@@ -123,7 +124,7 @@ export async function runWithRetry<T>(
     try {
       return await fn();
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown retry error');
+      lastError = normalizeError(error, 'Unknown retry error');
     }
 
     if (attempt < attempts) {

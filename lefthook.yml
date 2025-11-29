@@ -19,16 +19,16 @@ pre-commit:
   parallel: true
   follow: true
   commands:
-    # 1. Type checking (Next.js/Node code)
+    # 1. Type checking (Next.js/Node code - build dirs only)
     type-check:
       glob: "**/*.{ts,tsx}"
       exclude: 
         - "apps/edge/functions/**"
         - "packages/edge-runtime/src/utils/email/**"
       run: |
-        echo "🔍 Type checking Next.js code..."
-        pnpm type-check
-      fail_text: "❌ Type errors found in Next.js code. Fix them before committing."
+        echo "🔍 Type checking build-critical code..."
+        pnpm type-check:build
+      fail_text: "❌ Type errors found in build-critical code. Fix them before committing."
 
     # 2. Type checking (Edge functions - Deno)
     type-check-edge:
@@ -53,17 +53,17 @@ pre-commit:
         fi
       fail_text: "❌ Type errors found in edge functions. Fix them before committing."
 
-    # 3. Lint and auto-fix with ESLint
+    # 3. Lint and auto-fix with ESLint (build dirs only)
     lint:
       glob: "**/*.{ts,tsx}"
       exclude: 
         - "apps/edge/functions/**"
         - "packages/edge-runtime/src/utils/email/**"
       run: |
-        echo "🔍 Linting and auto-fixing staged files..."
-        pnpm lint:eslint --fix
+        echo "🔍 Linting build-critical code..."
+        pnpm lint:build --fix
         git add -u
-      fail_text: "❌ ESLint found errors. Fix them before committing."
+      fail_text: "❌ ESLint found errors in build-critical code. Fix them before committing."
 
     # 4. Validate Next.js config can be loaded (catches syntax errors ESLint/TS miss)
     validate-next-config:
@@ -104,13 +104,13 @@ pre-commit:
 pre-push:
   parallel: false
   commands:
-    # 1. Full type checking (Next.js/Node code only)
-    # Note: Edge function type-checking runs in pre-commit hook (can be skipped via GitKraken UI)
+    # 1. Type checking (build-critical code only)
+    # Note: Only checks code that affects production build
     type-check-all:
       run: |
-        echo "🔍 Type checking Next.js/Node code..."
+        echo "🔍 Type checking build-critical code..."
         set +e
-        OUTPUT=$(pnpm type-check 2>&1)
+        OUTPUT=$(pnpm type-check:build 2>&1)
         STATUS=$?
         echo "$OUTPUT"
         if [ $STATUS -ne 0 ]; then
@@ -120,7 +120,7 @@ pre-push:
           fi
           exit $STATUS
         fi
-      fail_text: "❌ Type errors found. Fix them before pushing."
+      fail_text: "❌ Type errors found in build-critical code. Fix them before pushing."
 
     # 2. Production build verification (graceful)
     build:

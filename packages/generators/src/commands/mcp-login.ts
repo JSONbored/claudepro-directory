@@ -7,27 +7,35 @@
  * 2. OAuth browser flow (opens browser, captures token automatically)
  */
 
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { createServer } from 'node:http';
+import { homedir } from 'node:os';
+import path from 'node:path';
+import * as readline from 'node:readline';
+import { URL } from 'node:url';
+
+import { type Database } from '@heyclaude/database-types';
 import { createClient } from '@supabase/supabase-js';
 import escapeHtml from 'escape-html';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { createServer } from 'http';
-import { homedir } from 'os';
-import { join, resolve } from 'path';
-import * as readline from 'readline';
-import { parse } from 'url';
+
 import { logger } from '../toolkit/logger.js';
 import { getTokenFilePath, loadToken, type TokenData } from '../toolkit/mcp-token.js';
 
-const CONFIG_DIR = join(homedir(), '.heyclaude-mcp');
+const CONFIG_DIR = path.join(homedir(), '.heyclaude-mcp');
 const TOKEN_FILE = getTokenFilePath();
+
+// Default app URL for OAuth flow
+// eslint-disable-next-line architectural-rules/no-hardcoded-urls
+const DEFAULT_APP_URL = 'http://localhost:3000';
 
 /**
  * Load environment variables from .env.local if it exists
  */
 function loadEnvFile(): void {
-  const envPath = resolve(process.cwd(), '.env.local');
+  const cwd = process.cwd();
+  const envPath = path.resolve(cwd, '.env.local');
   if (existsSync(envPath)) {
-    const envContent = readFileSync(envPath, 'utf-8');
+    const envContent = readFileSync(envPath, 'utf8');
     for (const line of envContent.split('\n')) {
       const trimmed = line.trim();
       if (trimmed && !trimmed.startsWith('#')) {
@@ -42,9 +50,7 @@ function loadEnvFile(): void {
           ) {
             value = value.slice(1, -1);
           }
-          if (!process.env[key]) {
-            process.env[key] = value;
-          }
+          process.env[key] ??= value;
         }
       }
     }
@@ -55,12 +61,12 @@ function loadEnvFile(): void {
 loadEnvFile();
 
 const SUPABASE_URL =
-  process.env['NEXT_PUBLIC_SUPABASE_URL'] ||
-  process.env['SUPABASE_URL'] ||
+  process.env['NEXT_PUBLIC_SUPABASE_URL'] ??
+  process.env['SUPABASE_URL'] ??
   'https://hgtjdifxfapoltfflowc.supabase.co';
 
 const SUPABASE_ANON_KEY =
-  process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] || process.env['SUPABASE_ANON_KEY'] || '';
+  process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? process.env['SUPABASE_ANON_KEY'] ?? '';
 
 if (!SUPABASE_ANON_KEY) {
   throw new Error(
@@ -72,8 +78,8 @@ if (!SUPABASE_ANON_KEY) {
  * Save token to disk
  */
 function saveToken(
-  session: { access_token: string; refresh_token: string; expires_at: number },
-  user: { id: string; email?: string }
+  session: { access_token: string; expires_at: number; refresh_token: string; },
+  user: { email?: string; id: string; }
 ): void {
   try {
     mkdirSync(CONFIG_DIR, { recursive: true });
@@ -83,11 +89,11 @@ function saveToken(
       refresh_token: session.refresh_token,
       expires_at: session.expires_at,
       user_id: user.id,
-      user_email: user.email || '',
+      user_email: user.email ?? '',
       saved_at: new Date().toISOString(),
     };
 
-    writeFileSync(TOKEN_FILE, JSON.stringify(tokenData, null, 2), 'utf-8');
+    writeFileSync(TOKEN_FILE, JSON.stringify(tokenData, null, 2), 'utf8');
     logger.info(`Token saved to: ${TOKEN_FILE}`);
   } catch (error) {
     logger.error('Failed to save token', error as Error);
@@ -116,10 +122,10 @@ function prompt(question: string): Promise<string> {
  * Email/password login (interactive)
  */
 async function loginWithPassword(): Promise<void> {
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  console.log('🔐 Email/Password Login');
-  console.log('─'.repeat(60));
+  logger.log('🔐 Email/Password Login');
+  logger.log('─'.repeat(60));
 
   const email = await prompt('Email: ');
   const password = await prompt('Password: ');
@@ -128,14 +134,14 @@ async function loginWithPassword(): Promise<void> {
     throw new Error('Email and password are required');
   }
 
-  logger.info('Signing in...');
+  logger.info('Signing in...', { securityEvent: true });
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email.trim(),
     password: password.trim(),
   });
 
-  if (error || !data.session) {
-    throw new Error(error?.message || 'No session returned');
+  if (error !== null) {
+    throw new Error(error.message);
   }
 
   if (!data.session.expires_at) {
@@ -163,7 +169,7 @@ async function loginWithPassword(): Promise<void> {
  * OAuth browser login flow
  */
 async function loginWithOAuth(): Promise<void> {
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
       flowType: 'pkce',
       autoRefreshToken: true,
@@ -172,25 +178,26 @@ async function loginWithOAuth(): Promise<void> {
     },
   });
 
-  const PORT = 48421;
+  const PORT = 48_421;
   const callbackUrl = `http://localhost:${PORT}/callback`;
 
-  console.log('🚀 Starting OAuth login flow...');
-  console.log(`   Callback URL: ${callbackUrl}`);
-  console.log('   Opening browser...\n');
+  logger.log('🚀 Starting OAuth login flow...');
+  logger.log(`   Callback URL: ${callbackUrl}`);
+  logger.log('   Opening browser...\n');
 
   // Create promise to wait for callback
   const callbackPromise = new Promise<{ code: string }>((resolve, reject) => {
     const server = createServer((req, res) => {
-      const parsedUrl = parse(req.url || '', true);
+      const urlString = req.url ?? '';
+      const parsedUrl = new URL(urlString, `http://localhost:${PORT}`);
 
       if (parsedUrl.pathname === '/callback') {
-        const code = parsedUrl.query['code'] as string;
-        const error = parsedUrl.query['error'] as string | undefined;
+        const code = parsedUrl.searchParams.get('code');
+        const error = parsedUrl.searchParams.get('error');
 
-        if (error) {
+        if (error !== null) {
           // Sanitize error to prevent log injection (remove newlines and other problematic characters)
-          const sanitizedError = error.replace(/[\r\n]+/g, ' ');
+          const sanitizedError = error.replaceAll(/[\r\n]+/g, ' ');
           // Escape HTML to prevent XSS attacks
           const escapedError = escapeHtml(sanitizedError);
 
@@ -209,20 +216,7 @@ async function loginWithOAuth(): Promise<void> {
           return;
         }
 
-        if (code) {
-          res.writeHead(200, { 'Content-Type': 'text/html' });
-          res.end(`
-            <html>
-              <body style="font-family: system-ui; padding: 2rem; text-align: center;">
-                <h1>✅ Authentication Successful!</h1>
-                <p>You can close this window and return to the terminal.</p>
-                <script>setTimeout(() => window.close(), 2000);</script>
-              </body>
-            </html>
-          `);
-          resolve({ code });
-          server.close();
-        } else {
+        if (code === null) {
           res.writeHead(400, { 'Content-Type': 'text/html' });
           res.end(`
             <html>
@@ -233,6 +227,19 @@ async function loginWithOAuth(): Promise<void> {
             </html>
           `);
           reject(new Error('No authorization code in callback'));
+          server.close();
+        } else {
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end(`
+            <html>
+              <body style="font-family: system-ui; padding: 2rem; text-align: center;">
+                <h1>✅ Authentication Successful!</h1>
+                <p>You can close this window and return to the terminal.</p>
+                <script>setTimeout(() => window.close(), 2000);</script>
+              </body>
+            </html>
+          `);
+          resolve({ code: code });
           server.close();
         }
       } else {
@@ -269,15 +276,15 @@ async function loginWithOAuth(): Promise<void> {
 
   try {
     // Use web app's login page with special callback parameter
-    const webAppUrl = process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000';
+    const webAppUrl = process.env['NEXT_PUBLIC_APP_URL'] ?? DEFAULT_APP_URL;
     const loginUrl = `${webAppUrl}/auth/signin?redirect=${encodeURIComponent(callbackUrl)}&mcp_login=true`;
 
     // Open browser
     const { default: open } = await import('open');
     await open(loginUrl);
 
-    console.log('   Browser opened! Please complete the login in your browser.');
-    console.log('   Waiting for callback...\n');
+    logger.log('   Browser opened! Please complete the login in your browser.');
+    logger.log('   Waiting for callback...\n');
 
     // Wait for callback
     const { code } = await callbackPromise;
@@ -286,8 +293,8 @@ async function loginWithOAuth(): Promise<void> {
     logger.info('Exchanging authorization code for session...');
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (error || !data.session) {
-      throw new Error(error?.message || 'Failed to exchange code for session');
+    if (error !== null) {
+      throw new Error(error.message);
     }
 
     if (!data.session.expires_at) {
@@ -327,19 +334,19 @@ async function loginWithOAuth(): Promise<void> {
  */
 function displaySuccess(
   session: { access_token: string; expires_at: number },
-  user: { id: string; email?: string }
+  user: { email?: string; id: string; }
 ): void {
-  console.log('\n✅ Login successful!');
-  console.log('\n📋 Token Information:');
-  console.log('─'.repeat(60));
-  console.log('User ID:', user.id);
-  console.log('User Email:', user.email || 'N/A');
-  console.log('Token Expires:', new Date(session.expires_at * 1000).toISOString());
-  console.log('─'.repeat(60));
-  console.log(`\n💾 Token saved to: ${TOKEN_FILE}`);
-  console.log('\n💡 The token will be automatically used by MCP tools.');
-  console.log('   You can also set it manually:');
-  console.log(`   export MCP_TOKEN="${session.access_token}"`);
+  logger.log('\n✅ Login successful!');
+  logger.log('\n📋 Token Information:');
+  logger.log('─'.repeat(60));
+  logger.log('User ID:', user.id);
+  logger.log('User Email:', user.email ?? 'N/A');
+  logger.log('Token Expires:', new Date(session.expires_at * 1000).toISOString());
+  logger.log('─'.repeat(60));
+  logger.log(`\n💾 Token saved to: ${TOKEN_FILE}`);
+  logger.log('\n💡 The token will be automatically used by MCP tools.');
+  logger.log('   You can also set it manually:');
+  logger.log(`   export MCP_TOKEN="${session.access_token}"`);
 }
 
 /**
@@ -349,26 +356,22 @@ export async function mcpLogin(): Promise<void> {
   // Check for existing valid token
   const existingToken = loadToken();
   if (existingToken) {
-    console.log('✅ Found valid saved token!');
-    console.log(`   User: ${existingToken.user_email || existingToken.user_id}`);
-    console.log(`   Expires: ${new Date(existingToken.expires_at * 1000).toISOString()}`);
-    console.log(`\n💡 Token location: ${TOKEN_FILE}`);
-    console.log(`\n💡 To use this token, set: export MCP_TOKEN="${existingToken.access_token}"`);
-    console.log('   Or it will be automatically loaded by MCP tools.');
+    logger.log('✅ Found valid saved token!');
+    logger.log(`   User: ${existingToken.user_email || existingToken.user_id}`);
+    logger.log(`   Expires: ${new Date(existingToken.expires_at * 1000).toISOString()}`);
+    logger.log(`\n💡 Token location: ${TOKEN_FILE}`);
+    logger.log(`\n💡 To use this token, set: export MCP_TOKEN="${existingToken.access_token}"`);
+    logger.log('   Or it will be automatically loaded by MCP tools.');
 
     const args = process.argv.slice(2);
     if (!args.includes('--force')) {
       return;
     }
-    console.log('\n🔄 Forcing new login...\n');
+    logger.log('\n🔄 Forcing new login...\n');
   }
 
   const args = process.argv.slice(2);
   const useOAuth = args.includes('--oauth');
 
-  if (useOAuth) {
-    await loginWithOAuth();
-  } else {
-    await loginWithPassword();
-  }
+  await (useOAuth ? loginWithOAuth() : loginWithPassword());
 }

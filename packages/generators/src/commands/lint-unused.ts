@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+
 import { logger } from '../toolkit/logger.js';
 
 const EXCLUDE_PATTERNS = [
@@ -34,22 +35,22 @@ const INCLUDE_PATTERNS = [
 export function runLintUnusedTypes() {
   let output: string;
   try {
-    output = execSync('pnpm type-check:unused', { encoding: 'utf-8' });
+    output = execSync('pnpm type-check:unused', { encoding: 'utf8' });
   } catch (error) {
     // ts-prune may exit with non-zero status but still produce useful output
     const execError = error as {
-      stdout?: string | Buffer;
-      stderr?: string | Buffer;
       message?: string;
+      stderr?: Buffer | string;
+      stdout?: Buffer | string;
     };
 
-    if (execError.stdout) {
+    if (execError.stdout === undefined) {
+      output = execError.message ?? String(error);
+    } else {
       output =
         typeof execError.stdout === 'string'
           ? execError.stdout
-          : execError.stdout.toString('utf-8');
-    } else {
-      output = execError.message || String(error);
+          : execError.stdout.toString('utf8');
     }
   }
 

@@ -3,14 +3,14 @@ import './view-transitions.css';
 import './micro-interactions.css';
 import './sugar-high.css';
 
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
 import dynamicImport from 'next/dynamic';
 import localFont from 'next/font/local';
@@ -90,6 +90,9 @@ async function getHomeMetadata() {
 
 // Generate homepage metadata from centralized registry
 export async function generateMetadata(): Promise<Metadata> {
+  // Note: This metadata fetch is intentional in layout for site-wide SEO
+  // The data is cached and shared across all pages
+  // eslint-disable-next-line architectural-rules/no-blocking-operations-in-layouts -- Site-wide metadata, cached and necessary for SEO
   const homeMetadata = await getHomeMetadata();
 
   return {
@@ -205,7 +208,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      suppressHydrationWarning={true}
+      suppressHydrationWarning
       className={`${inter.variable} ${geist.variable} ${geistMono.variable} font-sans`}
     >
       <head>
@@ -244,7 +247,7 @@ export default async function RootLayout({
           <ThemeProvider
             attribute="data-theme"
             defaultTheme="dark"
-            enableSystem={true}
+            enableSystem
             storageKey="claudepro-theme"
             disableTransitionOnChange={false}
             enableColorScheme={false}
@@ -273,7 +276,7 @@ export default async function RootLayout({
         <Pulse variant="pwa-install" />
         <Pulse variant="pwa-launch" />
         {/* Service Worker Registration for PWA Support */}
-        <script src="/scripts/service-worker-init.js" defer={true} />
+        <script src="/scripts/service-worker-init.js" defer />
       </body>
     </html>
   );

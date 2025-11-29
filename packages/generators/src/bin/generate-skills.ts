@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { runGenerateSkillPackages } from '../commands/generate-skill-packages.js';
 import { logger } from '../toolkit/logger.js';
 
@@ -13,7 +15,7 @@ runGenerateSkillPackages()
   .catch((error: unknown) => {
     logger.error(
       '💥 Skills generation failed',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'Skills generation failed'),
       {
         script: 'generate-skills',
       }

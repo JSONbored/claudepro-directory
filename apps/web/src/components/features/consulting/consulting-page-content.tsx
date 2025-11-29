@@ -5,7 +5,7 @@
  */
 
 import Cal, { getCalApi } from '@calcom/embed-react';
-import { logger } from '@heyclaude/web-runtime/core';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -20,10 +20,10 @@ export function ConsultingClient() {
         hideEventTypeDetails: false,
         layout: 'month_view',
       });
-    })().catch((error: Error) => {
+    })().catch((error: unknown) => {
       logger.error(
         'Failed to initialize Cal.com',
-        error instanceof Error ? error : new Error(String(error)),
+        normalizeError(error, 'Failed to initialize Cal.com'),
         { namespace: 'consulting-call' }
       );
     });

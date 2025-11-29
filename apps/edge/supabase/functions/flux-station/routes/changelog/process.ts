@@ -4,46 +4,32 @@
  */
 
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import type { GitHubCommit } from '@heyclaude/edge-runtime';
+import type { GitHubCommit } from '@heyclaude/edge-runtime/utils/discord/embeds.ts';
+import { errorResponse, publicCorsHeaders, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { fetchWithRetry } from '@heyclaude/edge-runtime/utils/integrations/http-client.ts';
+import { pgmqDelete, pgmqRead, pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { supabaseServiceRole, SITE_URL } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { getCacheConfigNumber } from '@heyclaude/edge-runtime/config/static-cache-config.ts';
+import { startWebhookEventRun, finishWebhookEventRun } from '@heyclaude/edge-runtime/utils/webhook/run-logger.ts';
+import { initRequestLogging, traceStep, traceRequestComplete } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
 import {
   buildChangelogMetadata,
   type ChangelogInsert,
   type ChangelogRow,
   deriveChangelogKeywords,
-  errorResponse,
-  fetchWithRetry,
   filterConventionalCommits,
-  finishWebhookEventRun,
   generateMarkdownContent,
   generateTldr,
-  getCacheConfigNumber,
   groupCommitsByType,
   inferTitle,
-  pgmqDelete,
-  pgmqRead,
-  pgmqSend,
-  publicCorsHeaders,
-  SITE_URL,
-  startWebhookEventRun,
-  successResponse,
-  supabaseServiceRole,
   transformSectionsToChanges,
   type VercelWebhookPayload,
-} from '@heyclaude/edge-runtime';
-import {
-  CIRCUIT_BREAKER_CONFIGS,
-  createNotificationRouterContext,
-  createUtilityContext,
-  errorToString,
-  getProperty,
-  logError,
-  logInfo,
-  TIMEOUT_PRESETS,
-  withCircuitBreaker,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
-import { initRequestLogging, traceStep, traceRequestComplete } from '@heyclaude/edge-runtime';
-import { logger } from '@heyclaude/shared-runtime';
+} from '@heyclaude/edge-runtime/changelog/service.ts';
+import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '@heyclaude/shared-runtime/circuit-breaker.ts';
+import { createNotificationRouterContext, createUtilityContext, logError, logInfo, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { getProperty } from '@heyclaude/shared-runtime/object-utils.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 
 const CHANGELOG_PROCESSING_QUEUE = 'changelog_process';
 const CHANGELOG_PROCESSING_BATCH_SIZE = 5;
@@ -249,7 +235,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
       .single<DatabaseGenerated['public']['Tables']['webhook_events']['Row']>();
 
     if (webhookError || !webhookEvent) {
-      const errorMsg = errorToString(webhookError);
+      const errorObj = normalizeError(webhookError, "Webhook fetch failed"); const errorMsg = errorObj.message;
       errors.push(`Webhook fetch: ${errorMsg}`);
       await logError('Failed to fetch webhook event', logContext, webhookError);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
@@ -379,7 +365,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
         'GitHub API call timed out'
       );
     } catch (error) {
-      const errorMsg = errorToString(error);
+      const errorObj = normalizeError(error, "Operation failed"); const errorMsg = errorObj.message;
       errors.push(`GitHub fetch: ${errorMsg}`);
       await logError('Failed to fetch commits from GitHub', logContext, error);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
@@ -459,7 +445,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
       .single<ChangelogRow>();
 
     if (insertError || !changelogData) {
-      const errorMsg = errorToString(insertError);
+      const errorObj = normalizeError(insertError, "Changelog insert failed"); const errorMsg = errorObj.message;
       errors.push(`Changelog insert: ${errorMsg}`);
       await logError('Failed to insert changelog entry', logContext, insertError);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
@@ -520,7 +506,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
       }
     );
   } catch (error) {
-    const errorMsg = errorToString(error);
+    const errorObj = normalizeError(error, "Operation failed"); const errorMsg = errorObj.message;
     await logError('Unexpected error processing changelog webhook', logContext, error);
     return exitWithResult({ success: false, errors: [errorMsg] }, { errorMessage: errorMsg });
   }
@@ -637,7 +623,7 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
           });
         }
       } catch (error) {
-        const errorMsg = errorToString(error);
+        const errorObj = normalizeError(error, "Operation failed"); const errorMsg = errorObj.message;
         const logContext = {
           ...batchLogContext,
           msg_id: message.msg_id.toString(),

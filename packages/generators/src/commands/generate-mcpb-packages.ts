@@ -3,7 +3,9 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { performance } from 'node:perf_hooks';
-import type { Database, Json } from '@heyclaude/database-types';
+
+import  { type Database, type Json } from '@heyclaude/database-types';
+
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
 import { callEdgeFunction } from '../toolkit/edge.js';
 import { ensureEnvVars } from '../toolkit/env.js';
@@ -12,31 +14,31 @@ import { createServiceRoleClient, DEFAULT_SUPABASE_URL } from '../toolkit/supaba
 
 type McpRow = Database['public']['Tables']['content']['Row'] & { category: 'mcp' };
 
-type McpMetadata = {
-  requires_auth?: boolean;
+interface McpMetadata {
+  [key: string]: Json | undefined;
   configuration?: {
+    [key: string]: Json | undefined;
     claudeDesktop?: {
+      [key: string]: Json | undefined;
       mcp?: Record<
         string,
         {
-          url?: string;
           [key: string]: Json | undefined;
+          url?: string;
         }
       >;
-      [key: string]: Json | undefined;
     };
-    [key: string]: Json | undefined;
   };
-  [key: string]: Json | undefined;
-};
+  requires_auth?: boolean;
+}
 
-type UserConfigEntry = {
-  type: string;
-  title: string;
+interface UserConfigEntry {
   description: string;
   required: boolean;
   sensitive: boolean;
-};
+  title: string;
+  type: string;
+}
 
 const CONCURRENCY = 5;
 
@@ -65,7 +67,7 @@ export async function runGenerateMcpbPackages(): Promise<void> {
   logger.info(`✅ Found ${mcps.length} MCP servers in database\n`, { mcpCount: mcps.length });
 
   logger.info('🔍 Computing content hashes and filtering changed MCP servers...');
-  const mcpsToRebuild: Array<{ mcp: McpRow; packageContent: string; hash: string }> = [];
+  const mcpsToRebuild: Array<{ hash: string; mcp: McpRow; packageContent: string; }> = [];
 
   for (const mcp of mcps) {
     const packageContent = JSON.stringify({
@@ -96,7 +98,7 @@ export async function runGenerateMcpbPackages(): Promise<void> {
   });
   logger.info('═'.repeat(80));
 
-  const allResults: Array<{ slug: string; status: 'success' | 'error'; message: string }> = [];
+  const allResults: Array<{ message: string; slug: string; status: 'error' | 'success'; }> = [];
 
   for (let i = 0; i < mcpsToRebuild.length; i += CONCURRENCY) {
     const batch = mcpsToRebuild.slice(i, i + CONCURRENCY);
@@ -210,7 +212,7 @@ function generateManifest(mcp: McpRow): string {
   const config = metadata?.configuration?.claudeDesktop?.mcp;
   const serverName = Object.keys(config || {})[0] || mcp.slug;
   const serverConfig = config?.[serverName];
-  const httpUrl = serverConfig?.url as string | undefined;
+  const httpUrl = serverConfig?.url;
 
   const userConfig = extractUserConfig(mcp);
   const serverType = 'node';
@@ -263,9 +265,9 @@ function generateManifest(mcp: McpRow): string {
  */
 function escapeForTemplateLiteral(input: string): string {
   return input
-    .replace(/\\/g, '\\\\') // Escape backslash first
-    .replace(/\$/g, '\\$') // Escape dollar sign
-    .replace(/`/g, '\\`'); // Escape backtick
+    .replaceAll('\\', '\\\\') // Escape backslash first
+    .replaceAll('$', String.raw`\$`) // Escape dollar sign
+    .replaceAll('`', '\\`'); // Escape backtick
 }
 
 function generateServerIndex(mcp: McpRow): string {
@@ -273,7 +275,7 @@ function generateServerIndex(mcp: McpRow): string {
   const config = metadata?.configuration?.claudeDesktop?.mcp;
   const serverName = Object.keys(config || {})[0] || mcp.slug;
   const serverConfig = config?.[serverName];
-  const httpUrl = serverConfig?.url as string | undefined;
+  const httpUrl = serverConfig?.url;
 
   const title = escapeForTemplateLiteral(mcp.title || mcp.slug);
   const description = escapeForTemplateLiteral(mcp.description || '');
@@ -486,17 +488,17 @@ async function createTempBundleDirectory(mcp: McpRow): Promise<string> {
   const tempDir = await mkdtemp(join(tmpdir(), `mcpb-${mcp.slug}-`));
   const serverDir = join(tempDir, 'server');
   await mkdir(serverDir, { recursive: true });
-  await writeFile(join(tempDir, 'manifest.json'), generateManifest(mcp), 'utf-8');
-  await writeFile(join(serverDir, 'index.js'), generateServerIndex(mcp), 'utf-8');
-  await writeFile(join(tempDir, 'package.json'), generatePackageJson(mcp), 'utf-8');
-  await writeFile(join(tempDir, 'README.md'), generateReadme(mcp), 'utf-8');
+  await writeFile(join(tempDir, 'manifest.json'), generateManifest(mcp), 'utf8');
+  await writeFile(join(serverDir, 'index.js'), generateServerIndex(mcp), 'utf8');
+  await writeFile(join(tempDir, 'package.json'), generatePackageJson(mcp), 'utf8');
+  await writeFile(join(tempDir, 'README.md'), generateReadme(mcp), 'utf8');
   return tempDir;
 }
 
 async function packMcpbBundle(tempDir: string, outputPath: string): Promise<void> {
   const result = spawnSync('npx', ['mcpb', 'pack', tempDir, outputPath], {
     cwd: tempDir,
-    encoding: 'utf-8',
+    encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'inherit'],
   });
 
@@ -529,10 +531,10 @@ async function uploadToStorage(
 
   try {
     const result = await callEdgeFunction<{
-      success: boolean;
-      storage_url: string;
-      message?: string;
       error?: string;
+      message?: string;
+      storage_url: string;
+      success: boolean;
     }>('/data-api/content/generate-package/upload', {
       method: 'POST',
       headers: {
@@ -566,12 +568,12 @@ async function uploadToStorage(
 }
 
 async function processBatch(
-  mcps: Array<{ mcp: McpRow; packageContent: string; hash: string }>
-): Promise<Array<{ slug: string; status: 'success' | 'error'; message: string }>> {
+  mcps: Array<{ hash: string; mcp: McpRow; packageContent: string; }>
+): Promise<Array<{ message: string; slug: string; status: 'error' | 'success'; }>> {
   const results = await Promise.allSettled(
     mcps.map(async ({ mcp, packageContent: _packageContent, hash }) => {
       const buildStartTime = performance.now();
-      let tempDir: string | null = null;
+      let tempDir: null | string = null;
 
       try {
         tempDir = await createTempBundleDirectory(mcp);
@@ -601,7 +603,7 @@ async function processBatch(
         };
       } catch (error) {
         if (tempDir) {
-          await rm(tempDir, { recursive: true, force: true }).catch(() => undefined);
+          await rm(tempDir, { recursive: true, force: true }).catch(() => {});
         }
         throw error;
       }

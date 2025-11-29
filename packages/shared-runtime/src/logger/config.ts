@@ -31,6 +31,7 @@
  */
 
 import pino from 'pino';
+
 import { hashUserId, hashEmail } from '../privacy.ts';
 
 /**
@@ -41,13 +42,15 @@ import { hashUserId, hashEmail } from '../privacy.ts';
  * Redaction uses explicit paths (not wildcards) for optimal performance.
  * Wildcard redaction has ~50% overhead, so we use explicit paths instead.
  * 
- * **PII Protection:**
- * User ID fields are automatically hashed (not just redacted) to comply with GDPR/CCPA
- * while maintaining traceability. The custom censor function handles hashing.
+ * **PII Protection (GDPR/CCPA Compliant):**
+ * - User ID fields are automatically hashed (not just redacted) to maintain traceability
+ * - IP addresses, phone numbers, and geolocation data are redacted
+ * - The custom censor function handles hashing for user IDs
  * 
  * @see {@link https://getpino.io/#/docs/redaction | Pino Redaction Docs}
  */
 export const SENSITIVE_PATTERNS = [
+  // Authentication & Security
   'password',
   'token',
   'secret',
@@ -59,27 +62,84 @@ export const SENSITIVE_PATTERNS = [
   'bearer',
   'cookie',
   'session',
+  
+  // Financial PII
   'ssn',
   'creditCard',
   'credit_card',
   'cvv',
   'pin',
+  'accountNumber',
+  'account_number',
+  'routingNumber',
+  'routing_number',
+  
   // User ID fields (PII) - will be hashed, not just redacted
   'userId',
   'user_id',
   'user.id',
   'user.userId',
   'user.user_id',
-  // Nested paths
+  
+  // IP Address fields (PII under GDPR)
+  'ip',
+  'ipAddress',
+  'ip_address',
+  'clientIp',
+  'client_ip',
+  'remoteAddress',
+  'remote_address',
+  'x-forwarded-for',
+  'xForwardedFor',
+  'req.ip',
+  'request.ip',
+  
+  // Phone number fields (PII)
+  'phone',
+  'phoneNumber',
+  'phone_number',
+  'mobile',
+  'mobileNumber',
+  'mobile_number',
+  'telephone',
+  'tel',
+  'cell',
+  'cellPhone',
+  'cell_phone',
+  
+  // Geolocation fields (PII under GDPR)
+  'latitude',
+  'longitude',
+  'lat',
+  'lng',
+  'geo',
+  'geolocation',
+  'location.lat',
+  'location.lng',
+  'location.latitude',
+  'location.longitude',
+  'coordinates',
+  
+  // Nested paths for common objects
   'user.password',
   'user.token',
   'user.ssn',
+  'user.phone',
+  'user.email',
+  'user.ip',
   'args.password',
   'args.token',
   'args.secret',
   'args.key',
   'args.api_key',
   'args.auth',
+  'args.phone',
+  'args.ip',
+  
+  // Request/Response headers that may contain PII
+  'headers.authorization',
+  'headers.cookie',
+  'headers.x-forwarded-for',
 ] as const;
 
 /**
@@ -134,7 +194,8 @@ function hashUserIdCensor(value: unknown, path: string[]): string {
  * The `env` field is automatically set from `NODE_ENV`
  */
 export const BASE_CONTEXT = {
-  env: typeof process !== 'undefined' && process.env?.['NODE_ENV'] || 'development',
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- Runtime check for Edge compatibility
+  env: (typeof process !== 'undefined' && process.env ? process.env['NODE_ENV'] : undefined) ?? 'development',
   // Service name will be overridden by each package
   // version: process.env?.npm_package_version || '0.0.0',
 } as const;
@@ -165,47 +226,6 @@ export const BASE_CONTEXT = {
  */
 export interface PinoConfigOptions {
   /**
-   * Minimum log level to output
-   * 
-   * @default 'info' (or 'debug' if NEXT_PUBLIC_LOGGER_VERBOSE=true)
-   * 
-   * @remarks
-   * Valid levels: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
-   * Logs at or above this level will be output.
-   * 
-   * **Performance:** Lower levels (trace/debug) are sampled in production (10%) to reduce volume.
-   * 
-   * @example
-   * ```typescript
-   * const logger = createLogger({ level: 'debug' });
-   * logger.debug('This will be logged');
-   * logger.trace('This will NOT be logged');
-   * ```
-   * 
-   * @see {@link https://getpino.io/#/docs/api#level | Pino Level Documentation}
-   */
-  level?: string;
-  
-  /**
-   * Logger name/identifier
-   * 
-   * @default undefined (service name is used instead)
-   * 
-   * @remarks
-   * Pino's native `name` option. If provided, adds `name` field to base context.
-   * Typically, use `service` option instead for better semantic meaning.
-   * 
-   * @example
-   * ```typescript
-   * const logger = createLogger({ name: 'my-app' });
-   * // Logs will include: { "name": "my-app", ... }
-   * ```
-   * 
-   * @see {@link https://getpino.io/#/docs/api#name | Pino Name Documentation}
-   */
-  name?: string;
-  
-  /**
    * Base context object added to all logs
    * 
    * @default { env: process.env.NODE_ENV || 'development' }
@@ -229,127 +249,162 @@ export interface PinoConfigOptions {
   base?: Record<string, unknown>;
   
   /**
-   * Timestamp formatter function
+   * Browser-specific configuration
    * 
-   * @default pino.stdTimeFunctions.isoTime (ISO 8601 format)
+   * @default { disabled: !NEXT_PUBLIC_LOGGER_CONSOLE, serialize: true }
    * 
    * @remarks
-   * Set to `false` to disable timestamps entirely.
-   * Use `pino.stdTimeFunctions.epochTime` for Unix epoch (milliseconds).
-   * Use `pino.stdTimeFunctions.isoTime` for ISO 8601 (recommended for external services).
-   * Use `pino.stdTimeFunctions.isoTimeNano` for nanosecond precision (overkill for most cases).
+   * Only applies in browser environments. In Node.js, this is ignored.
    * 
-   * **Performance:** Timestamp generation is very fast (minimal overhead).
+   * **Options:**
+   * - `disabled`: Disable browser logging entirely
+   * - `serialize`: Enable serializers (true) or specific ones (string[])
+   * - `write`: Custom write function per log level
+   * - `asObject`: Output as object instead of JSON string
+   * - `asObjectBindingsOnly`: Output only bindings as object
+   * - `transmit`: Send logs to server (for centralized logging)
    * 
    * @example
    * ```typescript
-   * import { stdTimeFunctions } from 'pino';
    * const logger = createLogger({
-   *   timestamp: stdTimeFunctions.epochTime // Unix timestamp
-   * });
-   * ```
-   * 
-   * @see {@link https://getpino.io/#/docs/api#timestamp | Pino Timestamp Documentation}
-   * @see {@link https://getpino.io/#/docs/api#pino-stdtimefunctions | Pino Time Functions}
-   */
-  timestamp?: pino.TimeFn | false;
-  
-  /**
-   * Redaction configuration for sensitive data
-   * 
-   * @default { paths: SENSITIVE_PATTERNS, censor: '[REDACTED]', remove: false }
-   * 
-   * @remarks
-   * **Performance:** Explicit paths (what we use) have minimal overhead.
-   * Wildcard paths have ~50% overhead - avoid them.
-   * 
-   * **Redaction Modes:**
-   * - `censor`: Replace value with string (default: '[REDACTED]')
-   * - `remove: true`: Remove the key entirely from logs
-   * - Custom function: Transform the value (e.g., show last 4 digits)
-   * 
-   * **Nested Paths:** Use dot notation (e.g., 'user.password', 'args.token')
-   * 
-   * @example
-   * ```typescript
-   * // Array format (simple)
-   * const logger = createLogger({
-   *   redact: ['password', 'token', 'user.email']
-   * });
-   * 
-   * // Object format (advanced)
-   * const logger = createLogger({
-   *   redact: {
-   *     paths: ['password', 'token'],
-   *     censor: '***', // Custom censor string
-   *     remove: false
-   *   }
-   * });
-   * 
-   * // Custom censor function
-   * const logger = createLogger({
-   *   redact: {
-   *     paths: ['creditCard'],
-   *     censor: (value, path) => {
-   *       const str = String(value);
-   *       return str.slice(-4).padStart(str.length, '*'); // Show last 4 digits
+   *   browser: {
+   *     disabled: false,
+   *     serialize: ['err', 'req'], // Only serialize errors and requests
+   *     transmit: {
+   *       level: 'error',
+   *       send: (level, logEvent) => {
+   *         fetch('/api/logs', {
+   *           method: 'POST',
+   *           body: JSON.stringify(logEvent)
+   *         });
+   *       }
    *     }
    *   }
    * });
    * ```
    * 
-   * @see {@link https://getpino.io/#/docs/redaction | Pino Redaction Documentation}
+   * @see {@link https://getpino.io/#/docs/browser | Pino Browser Documentation}
    */
-  redact?: string[] | {
-    paths: string[];
-    censor?: string | ((value: unknown, path: string[]) => unknown);
-    remove?: boolean;
+  browser?: {
+    asObject?: boolean;
+    asObjectBindingsOnly?: boolean;
+    disabled?: boolean;
+    serialize?: boolean | string[];
+    transmit?: {
+      level?: pino.LevelOrString;
+      send: (level: pino.Level, logEvent: pino.LogEvent) => void;
+    };
+    write?: pino.WriteFn | (Record<string, pino.WriteFn> & {
+      debug?: pino.WriteFn;
+      error?: pino.WriteFn;
+      fatal?: pino.WriteFn;
+      info?: pino.WriteFn;
+      trace?: pino.WriteFn;
+      warn?: pino.WriteFn;
+    });
   };
   
   /**
-   * Custom serializers for specific object types
+   * Custom log levels beyond Pino's defaults
    * 
-   * @default Includes standard serializers (err, req, res) and custom ones (user, request, response, dbQuery, args)
+   * @default undefined (uses Pino's default levels)
    * 
    * @remarks
-   * Serializers transform objects before logging. They're called automatically when you log an object with a matching key.
+   * Define additional log levels beyond trace/debug/info/warn/error/fatal.
+   * Level values must be numbers (higher = more severe).
    * 
-   * **Standard Serializers (always included):**
-   * - `err`: Error objects (via `pino.stdSerializers.err`)
-   * - `req`: HTTP requests (via `pino.stdSerializers.req`)
-   * - `res`: HTTP responses (via `pino.stdSerializers.res`)
+   * **Default Levels:**
+   * - trace: 10
+   * - debug: 20
+   * - info: 30
+   * - warn: 40
+   * - error: 50
+   * - fatal: 60
    * 
-   * **Custom Serializers (always included):**
-   * - `user`: User objects (automatically hashes id/user_id/userId → userIdHash, extracts email, role, created_at)
-   * - `request`: HTTP requests (sanitized, extracts method, url, path, headers)
-   * - `response`: HTTP responses (sanitized, extracts status, headers)
-   * - `dbQuery`: Database queries (extracts function, rpcName, table, args, duration_ms)
-   * - `args`: Function arguments (passes through, redaction applies)
+   * **Recommendation:** Prefer structured tags over custom levels for audit/security:
+   * ```typescript
+   * // Instead of custom levels, use standard levels with structured tags:
+   * logger.info('User action', { audit: true, action: 'login' });
+   * logger.error('Security event', { securityEvent: true, severity: 'high' });
+   * ```
    * 
-   * **Performance:** Serializers are only called when the matching key is present (efficient).
+   * This approach:
+   * - Works with standard Pino TypeScript types
+   * - Is portable across log aggregators
+   * - Enables easy filtering (e.g., `audit:true` or `securityEvent:true`)
+   * 
+   * **Warning:** Custom levels require TypeScript type augmentation to avoid errors.
+   * 
+   * @example
+   * ```typescript
+   * // Only use custom levels if you have proper type augmentation
+   * const logger = createLogger({
+   *   customLevels: { verbose: 15 },
+   *   level: 'verbose'
+   * });
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/api#customlevels-object | Pino CustomLevels Documentation}
+   */
+  customLevels?: Record<string, number>;
+  
+  /**
+   * Maximum depth for nested objects in logs
+   * 
+   * @default 10
+   * 
+   * @remarks
+   * Limits how deeply nested objects are serialized. Objects beyond this depth
+   * are truncated with `[Object]` or `[Array]`. This protects against:
+   * - Excessive memory usage from deeply nested objects
+   * - Denial-of-service from malicious deeply nested payloads
+   * - Unreadable logs from overly verbose output
+   * 
+   * **Performance:** Shallow limits improve serialization speed.
    * 
    * @example
    * ```typescript
    * const logger = createLogger({
-   *   serializers: {
-   *     // Override user serializer
-   *     user: (user) => ({ id: user.id, name: user.name }),
-   *     // Add custom serializer
-   *     payment: (payment) => ({
-   *       id: payment.id,
-   *       amount: payment.amount,
-   *       // Exclude sensitive card data
-   *     })
-   *   }
+   *   depthLimit: 5  // Only serialize 5 levels deep
    * });
    * 
-   * logger.info({ user: userObj }, 'User logged in'); // user serializer called
-   * logger.info({ payment: paymentObj }, 'Payment processed'); // payment serializer called
+   * // Deeply nested object:
+   * logger.info({ a: { b: { c: { d: { e: { f: 'deep' } } } } } }, 'test');
+   * // Output: { a: { b: { c: { d: { e: "[Object]" } } } } }
    * ```
    * 
-   * @see {@link https://getpino.io/#/docs/api#serializers-object | Pino Serializers Documentation}
+   * @see {@link https://getpino.io/#/docs/api#depthlimit-number | Pino DepthLimit Documentation}
    */
-  serializers?: Record<string, pino.SerializerFn>;
+  depthLimit?: number;
+  
+  /**
+   * Maximum number of elements in arrays/objects
+   * 
+   * @default 100
+   * 
+   * @remarks
+   * Limits how many elements are serialized in arrays and object properties.
+   * Elements beyond this limit are truncated. This protects against:
+   * - Excessive memory usage from large arrays
+   * - Denial-of-service from malicious large payloads
+   * - Unreadable logs from overly verbose output
+   * 
+   * **Performance:** Lower limits improve serialization speed for large arrays.
+   * 
+   * @example
+   * ```typescript
+   * const logger = createLogger({
+   *   edgeLimit: 50  // Only serialize first 50 elements
+   * });
+   * 
+   * // Large array:
+   * logger.info({ items: new Array(1000).fill('item') }, 'test');
+   * // Output: { items: ['item', 'item', ... (50 items), '...'] }
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/api#edgelimit-number | Pino EdgeLimit Documentation}
+   */
+  edgeLimit?: number;
   
   /**
    * Custom key name for error objects
@@ -413,8 +468,8 @@ export interface PinoConfigOptions {
    * @see {@link https://getpino.io/#/docs/api#formatters-object | Pino Formatters Documentation}
    */
   formatters?: {
-    level?: (label: string, number: number) => object;
     bindings?: (bindings: pino.Bindings) => object;
+    level?: (label: string, number: number) => object;
     log?: (object: Record<string, unknown>) => Record<string, unknown>;
   };
   
@@ -460,33 +515,78 @@ export interface PinoConfigOptions {
   };
   
   /**
-   * Hook called when a child logger is created
+   * Minimum log level to output
    * 
-   * @default No-op function
+   * @default 'info' (or 'debug' if NEXT_PUBLIC_LOGGER_VERBOSE=true)
    * 
    * @remarks
-   * Called once when `logger.child()` is invoked.
-   * Useful for tracking child logger creation, validation, or audit logging.
+   * Valid levels: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
+   * Logs at or above this level will be output.
    * 
-   * **Performance:** Called only when child loggers are created (infrequent).
+   * **Performance:** Lower levels (trace/debug) are sampled in production (10%) to reduce volume.
+   * 
+   * @example
+   * ```typescript
+   * const logger = createLogger({ level: 'debug' });
+   * logger.debug('This will be logged');
+   * logger.trace('This will NOT be logged');
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/api#level | Pino Level Documentation}
+   */
+  level?: string;
+  
+  /**
+   * Custom level comparison function or direction
+   * 
+   * @default 'ASC' (ascending - higher numbers = more severe)
+   * 
+   * @remarks
+   * Controls how log levels are compared. Default is ascending (higher = more severe).
+   * 
+   * **Options:**
+   * - 'ASC': Higher numbers = more severe (default)
+   * - 'DESC': Lower numbers = more severe
+   * - Custom function: (current, expected) => boolean
+   * 
+   * **Performance:** Called frequently - keep it fast.
    * 
    * @example
    * ```typescript
    * const logger = createLogger({
-   *   onChild: (child) => {
-   *     // Track child logger creation
-   *     console.log('Child logger created with bindings:', child.bindings());
-   *     // Validate child logger context
-   *     if (!child.bindings().requestId) {
-   *       console.warn('Child logger missing requestId');
-   *     }
-   *   }
+   *   levelComparison: 'DESC' // Lower numbers = more severe
    * });
    * ```
    * 
-   * @see {@link https://getpino.io/#/docs/api#onchild-function | Pino OnChild Documentation}
+   * @see {@link https://getpino.io/#/docs/api#levelcomparison-string--function | Pino LevelComparison Documentation}
    */
-  onChild?: (child: pino.Logger) => void;
+  levelComparison?: 'ASC' | 'DESC' | ((current: number, expected: number) => boolean);
+  
+  /**
+   * Custom key name for log messages
+   * 
+   * @default 'msg' (Pino standard)
+   * 
+   * @remarks
+   * By default, Pino uses 'msg' as the key for log messages.
+   * Some log aggregation services prefer different keys (e.g., 'message').
+   * 
+   * **Common values:**
+   * - 'msg': Pino default, compact
+   * - 'message': Standard for many log aggregators (DataDog, Elastic, etc.)
+   * 
+   * @example
+   * ```typescript
+   * const logger = createLogger({
+   *   messageKey: 'message'  // Use 'message' instead of 'msg'
+   * });
+   * logger.info('Hello world');
+   * // Output: { "message": "Hello world", ... }
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/api#messagekey-string | Pino MessageKey Documentation}
+   */
+  messageKey?: string;
   
   /**
    * Mixin function to add dynamic context to every log
@@ -581,6 +681,25 @@ export interface PinoConfigOptions {
   msgPrefix?: string;
   
   /**
+   * Logger name/identifier
+   * 
+   * @default undefined (service name is used instead)
+   * 
+   * @remarks
+   * Pino's native `name` option. If provided, adds `name` field to base context.
+   * Typically, use `service` option instead for better semantic meaning.
+   * 
+   * @example
+   * ```typescript
+   * const logger = createLogger({ name: 'my-app' });
+   * // Logs will include: { "name": "my-app", ... }
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/api#name | Pino Name Documentation}
+   */
+  name?: string;
+  
+  /**
    * Key to nest mixin output under
    * 
    * @default undefined (mixin output merged at root level)
@@ -606,151 +725,163 @@ export interface PinoConfigOptions {
   nestedKey?: string;
   
   /**
-   * Custom log levels beyond Pino's defaults
+   * Hook called when a child logger is created
    * 
-   * @default undefined (uses Pino's default levels)
+   * @default No-op function
    * 
    * @remarks
-   * Define additional log levels beyond trace/debug/info/warn/error/fatal.
-   * Level values must be numbers (higher = more severe).
+   * Called once when `logger.child()` is invoked.
+   * Useful for tracking child logger creation, validation, or audit logging.
    * 
-   * **Default Levels:**
-   * - trace: 10
-   * - debug: 20
-   * - info: 30
-   * - warn: 40
-   * - error: 50
-   * - fatal: 60
-   * 
-   * **Common Custom Levels:**
-   * - audit: 35 (between info and warn)
-   * - security: 55 (between error and fatal)
-   * 
-   * **Warning:** `useOnlyCustomLevels` may not be supported by all transports.
+   * **Performance:** Called only when child loggers are created (infrequent).
    * 
    * @example
    * ```typescript
    * const logger = createLogger({
-   *   customLevels: {
-   *     audit: 35,
-   *     security: 55
-   *   },
-   *   level: 'audit'
-   * });
-   * logger.audit('User action logged');
-   * logger.security('Security violation detected');
-   * ```
-   * 
-   * @see {@link https://getpino.io/#/docs/api#customlevels-object | Pino CustomLevels Documentation}
-   */
-  customLevels?: Record<string, number>;
-  
-  /**
-   * Use only custom levels (exclude Pino's default levels)
-   * 
-   * @default false
-   * 
-   * @remarks
-   * If true, only custom levels are available. Default Pino levels are disabled.
-   * Logger's default `level` must be set to a custom level value.
-   * 
-   * **Warning:** May not be supported by all transports. Use with caution.
-   * 
-   * @example
-   * ```typescript
-   * const logger = createLogger({
-   *   customLevels: { audit: 35, security: 55 },
-   *   useOnlyCustomLevels: true,
-   *   level: 'audit'
-   * });
-   * // logger.info() will throw - only audit() and security() are available
-   * ```
-   * 
-   * @see {@link https://getpino.io/#/docs/api#useonlycustomlevels-boolean | Pino UseOnlyCustomLevels Documentation}
-   */
-  useOnlyCustomLevels?: boolean;
-  
-  /**
-   * Custom level comparison function or direction
-   * 
-   * @default 'ASC' (ascending - higher numbers = more severe)
-   * 
-   * @remarks
-   * Controls how log levels are compared. Default is ascending (higher = more severe).
-   * 
-   * **Options:**
-   * - 'ASC': Higher numbers = more severe (default)
-   * - 'DESC': Lower numbers = more severe
-   * - Custom function: (current, expected) => boolean
-   * 
-   * **Performance:** Called frequently - keep it fast.
-   * 
-   * @example
-   * ```typescript
-   * const logger = createLogger({
-   *   levelComparison: 'DESC' // Lower numbers = more severe
-   * });
-   * ```
-   * 
-   * @see {@link https://getpino.io/#/docs/api#levelcomparison-string--function | Pino LevelComparison Documentation}
-   */
-  levelComparison?: 'ASC' | 'DESC' | ((current: number, expected: number) => boolean);
-  
-  /**
-   * Browser-specific configuration
-   * 
-   * @default { disabled: !NEXT_PUBLIC_LOGGER_CONSOLE, serialize: true }
-   * 
-   * @remarks
-   * Only applies in browser environments. In Node.js, this is ignored.
-   * 
-   * **Options:**
-   * - `disabled`: Disable browser logging entirely
-   * - `serialize`: Enable serializers (true) or specific ones (string[])
-   * - `write`: Custom write function per log level
-   * - `asObject`: Output as object instead of JSON string
-   * - `asObjectBindingsOnly`: Output only bindings as object
-   * - `transmit`: Send logs to server (for centralized logging)
-   * 
-   * @example
-   * ```typescript
-   * const logger = createLogger({
-   *   browser: {
-   *     disabled: false,
-   *     serialize: ['err', 'req'], // Only serialize errors and requests
-   *     transmit: {
-   *       level: 'error',
-   *       send: (level, logEvent) => {
-   *         fetch('/api/logs', {
-   *           method: 'POST',
-   *           body: JSON.stringify(logEvent)
-   *         });
-   *       }
+   *   onChild: (child) => {
+   *     // Track child logger creation
+   *     console.log('Child logger created with bindings:', child.bindings());
+   *     // Validate child logger context
+   *     if (!child.bindings().requestId) {
+   *       console.warn('Child logger missing requestId');
    *     }
    *   }
    * });
    * ```
    * 
-   * @see {@link https://getpino.io/#/docs/browser | Pino Browser Documentation}
+   * @see {@link https://getpino.io/#/docs/api#onchild-function | Pino OnChild Documentation}
    */
-  browser?: {
-    disabled?: boolean;
-    serialize?: boolean | string[];
-    write?: pino.WriteFn | ({
-      fatal?: pino.WriteFn;
-      error?: pino.WriteFn;
-      warn?: pino.WriteFn;
-      info?: pino.WriteFn;
-      debug?: pino.WriteFn;
-      trace?: pino.WriteFn;
-    } & { [logLevel: string]: pino.WriteFn });
-    asObject?: boolean;
-    asObjectBindingsOnly?: boolean;
-    transmit?: {
-      level?: pino.LevelOrString;
-      send: (level: pino.Level, logEvent: pino.LogEvent) => void;
-    };
+  onChild?: (child: pino.Logger) => void;
+  
+  /**
+   * Enable pretty printing for local development
+   * 
+   * @default 'auto' - Enabled when NODE_ENV !== 'production' and no custom transport is set
+   * 
+   * @remarks
+   * Uses `pino-pretty` to format JSON logs into human-readable, colorized output.
+   * **Only for development** - production should use JSON logs for log aggregators.
+   * 
+   * **Behavior:**
+   * - `true`: Always enable pino-pretty (overrides transport)
+   * - `false`: Never enable pino-pretty
+   * - `'auto'` (default): Enable only in development (NODE_ENV !== 'production')
+   * 
+   * **Performance:** pino-pretty runs in a worker thread, minimal main thread impact.
+   * Still, avoid in production for maximum throughput.
+   * 
+   * @example
+   * ```typescript
+   * // Auto-detect based on NODE_ENV (default)
+   * const logger = createLogger({ prettyPrint: 'auto' });
+   * 
+   * // Force pretty printing (e.g., for debugging in staging)
+   * const logger = createLogger({ prettyPrint: true });
+   * 
+   * // Disable pretty printing (use JSON even in development)
+   * const logger = createLogger({ prettyPrint: false });
+   * ```
+   * 
+   * @see {@link https://github.com/pinojs/pino-pretty | pino-pretty Documentation}
+   */
+  prettyPrint?: 'auto' | boolean;
+  
+  /**
+   * Redaction configuration for sensitive data
+   * 
+   * @default { paths: SENSITIVE_PATTERNS, censor: '[REDACTED]', remove: false }
+   * 
+   * @remarks
+   * **Performance:** Explicit paths (what we use) have minimal overhead.
+   * Wildcard paths have ~50% overhead - avoid them.
+   * 
+   * **Redaction Modes:**
+   * - `censor`: Replace value with string (default: '[REDACTED]')
+   * - `remove: true`: Remove the key entirely from logs
+   * - Custom function: Transform the value (e.g., show last 4 digits)
+   * 
+   * **Nested Paths:** Use dot notation (e.g., 'user.password', 'args.token')
+   * 
+   * @example
+   * ```typescript
+   * // Array format (simple)
+   * const logger = createLogger({
+   *   redact: ['password', 'token', 'user.email']
+   * });
+   * 
+   * // Object format (advanced)
+   * const logger = createLogger({
+   *   redact: {
+   *     paths: ['password', 'token'],
+   *     censor: '***', // Custom censor string
+   *     remove: false
+   *   }
+   * });
+   * 
+   * // Custom censor function
+   * const logger = createLogger({
+   *   redact: {
+   *     paths: ['creditCard'],
+   *     censor: (value, path) => {
+   *       const str = String(value);
+   *       return str.slice(-4).padStart(str.length, '*'); // Show last 4 digits
+   *     }
+   *   }
+   * });
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/redaction | Pino Redaction Documentation}
+   */
+  redact?: string[] | {
+    censor?: ((value: unknown, path: string[]) => unknown) | string;
+    paths: string[];
+    remove?: boolean;
   };
+  
+  /**
+   * Custom serializers for specific object types
+   * 
+   * @default Includes standard serializers (err, req, res) and custom ones (user, request, response, dbQuery, args)
+   * 
+   * @remarks
+   * Serializers transform objects before logging. They're called automatically when you log an object with a matching key.
+   * 
+   * **Standard Serializers (always included):**
+   * - `err`: Error objects (via `pino.stdSerializers.err`)
+   * - `req`: HTTP requests (via `pino.stdSerializers.req`)
+   * - `res`: HTTP responses (via `pino.stdSerializers.res`)
+   * 
+   * **Custom Serializers (always included):**
+   * - `user`: User objects (automatically hashes id/user_id/userId → userIdHash, extracts email, role, created_at)
+   * - `request`: HTTP requests (sanitized, extracts method, url, path, headers)
+   * - `response`: HTTP responses (sanitized, extracts status, headers)
+   * - `dbQuery`: Database queries (extracts function, rpcName, table, args, duration_ms)
+   * - `args`: Function arguments (passes through, redaction applies)
+   * 
+   * **Performance:** Serializers are only called when the matching key is present (efficient).
+   * 
+   * @example
+   * ```typescript
+   * const logger = createLogger({
+   *   serializers: {
+   *     // Override user serializer
+   *     user: (user) => ({ id: user.id, name: user.name }),
+   *     // Add custom serializer
+   *     payment: (payment) => ({
+   *       id: payment.id,
+   *       amount: payment.amount,
+   *       // Exclude sensitive card data
+   *     })
+   *   }
+   * });
+   * 
+   * logger.info({ user: userObj }, 'User logged in'); // user serializer called
+   * logger.info({ payment: paymentObj }, 'Payment processed'); // payment serializer called
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/api#serializers-object | Pino Serializers Documentation}
+   */
+  serializers?: Record<string, pino.SerializerFn>;
   
   /**
    * Service identifier (custom option, not part of Pino core)
@@ -773,6 +904,32 @@ export interface PinoConfigOptions {
    * ```
    */
   service?: string;
+  
+  /**
+   * Timestamp formatter function
+   * 
+   * @default pino.stdTimeFunctions.isoTime (ISO 8601 format)
+   * 
+   * @remarks
+   * Set to `false` to disable timestamps entirely.
+   * Use `pino.stdTimeFunctions.epochTime` for Unix epoch (milliseconds).
+   * Use `pino.stdTimeFunctions.isoTime` for ISO 8601 (recommended for external services).
+   * Use `pino.stdTimeFunctions.isoTimeNano` for nanosecond precision (overkill for most cases).
+   * 
+   * **Performance:** Timestamp generation is very fast (minimal overhead).
+   * 
+   * @example
+   * ```typescript
+   * import { stdTimeFunctions } from 'pino';
+   * const logger = createLogger({
+   *   timestamp: stdTimeFunctions.epochTime // Unix timestamp
+   * });
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/api#timestamp | Pino Timestamp Documentation}
+   * @see {@link https://getpino.io/#/docs/api#pino-stdtimefunctions | Pino Time Functions}
+   */
+  timestamp?: false | pino.TimeFn;
   
   /**
    * Transport configuration for external log processing
@@ -855,7 +1012,32 @@ export interface PinoConfigOptions {
    * @see {@link https://getpino.io/#/docs/transports | Pino Transports Documentation}
    * @see {@link https://github.com/pinojs/pino/blob/main/docs/transports.md | Pino Transports Guide}
    */
-  transport?: pino.TransportSingleOptions | pino.TransportMultiOptions | pino.TransportPipelineOptions;
+  transport?: pino.TransportMultiOptions | pino.TransportPipelineOptions | pino.TransportSingleOptions;
+  
+  /**
+   * Use only custom levels (exclude Pino's default levels)
+   * 
+   * @default false
+   * 
+   * @remarks
+   * If true, only custom levels are available. Default Pino levels are disabled.
+   * Logger's default `level` must be set to a custom level value.
+   * 
+   * **Warning:** May not be supported by all transports. Use with caution.
+   * 
+   * @example
+   * ```typescript
+   * const logger = createLogger({
+   *   customLevels: { verbose: 15 },
+   *   useOnlyCustomLevels: true,
+   *   level: 'verbose'
+   * });
+   * // logger.info() will throw - only verbose() is available
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/api#useonlycustomlevels-boolean | Pino UseOnlyCustomLevels Documentation}
+   */
+  useOnlyCustomLevels?: boolean;
 }
 
 /**
@@ -914,33 +1096,97 @@ export interface PinoConfigOptions {
  * @see {@link https://getpino.io/ | Pino Documentation}
  * @see {@link https://getpino.io/#/docs/transports | Pino Transports}
  */
+
+/**
+ * Default streamWrite hook for defense-in-depth sanitization
+ * 
+ * This hook processes the final JSON string before it's written to the output stream.
+ * It acts as a last line of defense to catch any sensitive data that may have slipped
+ * through the redaction configuration.
+ * 
+ * **Patterns Sanitized:**
+ * - JWT tokens (Bearer eyJ...)
+ * - Stripe API keys (sk_live_..., pk_live_..., sk_test_..., pk_test_...)
+ * - AWS credentials (AKIA...)
+ * - Generic API keys that look like secrets
+ * - Base64-encoded data that looks like credentials
+ * 
+ * @param s - The stringified JSON log entry
+ * @returns The sanitized log string
+ */
+function defaultStreamWrite(s: string): string {
+  // JWT Bearer tokens - replace entire token with redacted placeholder
+  // Pattern: Bearer followed by base64-like JWT (3 parts separated by dots)
+  let result = s.replaceAll(
+    /Bearer\s+eyJ[A-Za-z0-9_-]*\.eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*/gi,
+    'Bearer [JWT_REDACTED]'
+  );
+  
+  // Stripe API keys (live and test)
+  result = result.replaceAll(
+    /sk_live_[A-Za-z0-9]{24,}/g,
+    'sk_live_[REDACTED]'
+  );
+  result = result.replaceAll(
+    /pk_live_[A-Za-z0-9]{24,}/g,
+    'pk_live_[REDACTED]'
+  );
+  result = result.replaceAll(
+    /sk_test_[A-Za-z0-9]{24,}/g,
+    'sk_test_[REDACTED]'
+  );
+  result = result.replaceAll(
+    /pk_test_[A-Za-z0-9]{24,}/g,
+    'pk_test_[REDACTED]'
+  );
+  
+  // AWS Access Key IDs (start with AKIA, ABIA, ACCA, AGPA, AIDA, AIPA, AKIA, ANPA, ANVA, APKA, AROA, ASCA, ASIA)
+  result = result.replaceAll(
+    /A[BCGIKPS][A-Z]{2}[A-Z0-9]{16}/g,
+    '[AWS_KEY_REDACTED]'
+  );
+  
+  // Generic long API keys/secrets (40+ hex or alphanumeric characters)
+  // Be conservative - only match obvious patterns to avoid false positives
+  result = result.replaceAll(
+    /"(?:api[_-]?key|secret[_-]?key|access[_-]?token|private[_-]?key)"\s*:\s*"[A-Za-z0-9_-]{40,}"/gi,
+    (match) => {
+      const colonIndex = match.indexOf(':');
+      const keyPart = match.slice(0, colonIndex + 1);
+      return `${keyPart} "[LONG_SECRET_REDACTED]"`;
+    }
+  );
+  
+  return result;
+}
+
 export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOptions {
-  const loggerConsoleEnabled = typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
-  const loggerVerbose = typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_VERBOSE'] === 'true';
+  const loggerConsoleEnabled = typeof process !== 'undefined' && process.env['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
+  const loggerVerbose = typeof process !== 'undefined' && process.env['NEXT_PUBLIC_LOGGER_VERBOSE'] === 'true';
 
   // Handle redaction - support both array and object formats
   // Use custom censor function that hashes user IDs instead of just redacting them
   const redactConfig = options?.redact
-    ? typeof options.redact === 'object' && !Array.isArray(options.redact)
+    ? (typeof options.redact === 'object' && !Array.isArray(options.redact)
       ? {
           paths: [
             ...SENSITIVE_PATTERNS,
-            ...(options.redact.paths || []),
+            ...options.redact.paths,
           ],
           // Use custom censor function if provided, otherwise use our hashUserIdCensor
           // This allows user IDs to be hashed while other sensitive data is redacted
-          censor: options.redact.censor || hashUserIdCensor,
+          censor: options.redact.censor ?? hashUserIdCensor,
           remove: options.redact.remove ?? false,
         }
       : {
           paths: [
             ...SENSITIVE_PATTERNS,
-            ...(options.redact as string[]),
+            ...(options.redact),
           ],
           // Use custom censor function to hash user IDs
           censor: hashUserIdCensor,
           remove: false,
-        }
+        })
     : {
         paths: [...SENSITIVE_PATTERNS],
         // Use custom censor function to hash user IDs automatically
@@ -961,11 +1207,11 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
 
   // Build formatters - include all formatter options
   const formatters: {
-    level?: (label: string, number: number) => object;
     bindings?: (bindings: pino.Bindings) => object;
+    level?: (label: string, number: number) => object;
     log?: (object: Record<string, unknown>) => Record<string, unknown>;
   } = {
-    level: options?.formatters?.level || ((label: string, number: number) => {
+    level: options?.formatters?.level ?? ((label: string, number: number) => {
       // Default: Include both label and numeric value for filtering/querying
       return { level: label, levelValue: number };
     }),
@@ -981,11 +1227,11 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   // Custom logMethod hook for log sampling and conditional logging
   const defaultLogMethod = function(this: pino.Logger, inputArgs: Parameters<pino.LogFn>, method: pino.LogFn, level: number): void {
     // Get log level name for conditional logic
-    const levelName = this.levels.labels[level] || 'unknown';
+    const levelName = this.levels.labels[level] ?? 'unknown';
     
     // Log sampling: Sample high-volume debug/trace logs in production
     // Only sample if level is debug or trace and we're in production
-    const isProduction = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production';
+    const isProduction = typeof process !== 'undefined' && process.env['NODE_ENV'] === 'production';
     const isHighVolumeLevel = levelName === 'debug' || levelName === 'trace';
     
     if (isProduction && isHighVolumeLevel) {
@@ -1000,7 +1246,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
       // Simple hash for sampling (consistent for same input)
       let hash = 0;
       for (let i = 0; i < sampleKey.length; i++) {
-        const char = sampleKey.charCodeAt(i);
+        const char = sampleKey.codePointAt(i) ?? 0;
         hash = ((hash << 5) - hash) + char;
         hash = hash & hash; // Convert to 32-bit integer
       }
@@ -1019,10 +1265,9 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     logMethod?: (this: pino.Logger, args: Parameters<pino.LogFn>, method: pino.LogFn, level: number) => void;
     streamWrite?: (s: string) => string;
   } = {
-    logMethod: options?.hooks?.logMethod || defaultLogMethod,
-    ...(options?.hooks?.streamWrite && {
-      streamWrite: options.hooks.streamWrite,
-    }),
+    logMethod: options?.hooks?.logMethod ?? defaultLogMethod,
+    // Use provided streamWrite hook, or default defense-in-depth sanitizer
+    streamWrite: options?.hooks?.streamWrite ?? defaultStreamWrite,
   };
 
   // Build mixin function - automatically inject context from logger bindings
@@ -1056,74 +1301,76 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     // Build dynamic context from bindings
     // Only include bindings that are commonly used for correlation and context
     // Use bracket notation for index signature access (TypeScript requirement)
-    const dynamicContext: Record<string, unknown> = {};
+    const levelNameMap: Record<number, string> = {
+      0: 'trace',
+      10: 'debug',
+      20: 'info',
+      30: 'warn',
+      40: 'error',
+      50: 'fatal',
+    };
+    const dynamicContext: Record<string, unknown> = {
+      ['logLevel']: level,
+      ['logLevelName']: levelNameMap[level] ?? 'unknown',
+    };
     
     // Include log level in context for filtering/analysis (properly using the level parameter)
     // This enables filtering logs by severity level in observability tools
-    dynamicContext['logLevel'] = level;
-    dynamicContext['logLevelName'] = 
-      level === 0 ? 'trace' :
-      level === 10 ? 'debug' :
-      level === 20 ? 'info' :
-      level === 30 ? 'warn' :
-      level === 40 ? 'error' :
-      level === 50 ? 'fatal' :
-      'unknown';
     
     // Request correlation context
     // Only add if not already present in mergeObject (avoid duplication, mergeObject takes priority)
-    if (bindings['requestId'] && mergeObj['requestId'] === undefined) {
+    if (bindings['requestId'] !== undefined && mergeObj['requestId'] === undefined) {
       dynamicContext['requestId'] = bindings['requestId'];
     }
-    if (bindings['operation'] && mergeObj['operation'] === undefined) {
+    if (bindings['operation'] !== undefined && mergeObj['operation'] === undefined) {
       dynamicContext['operation'] = bindings['operation'];
     }
-    if (bindings['function'] && mergeObj['function'] === undefined) {
+    if (bindings['function'] !== undefined && mergeObj['function'] === undefined) {
       dynamicContext['function'] = bindings['function'];
     }
     
     // User context
     // Only add if not already present in mergeObject
-    if (bindings['userId'] && mergeObj['userId'] === undefined && mergeObj['user_id'] === undefined) {
+    if (bindings['userId'] !== undefined && mergeObj['userId'] === undefined && mergeObj['user_id'] === undefined) {
       dynamicContext['userId'] = bindings['userId'];
     }
     
     // Request metadata (HTTP/website routes)
     // Only add if not already present in mergeObject
-    if (bindings['method'] && mergeObj['method'] === undefined) {
+    if (bindings['method'] !== undefined && mergeObj['method'] === undefined) {
       dynamicContext['method'] = bindings['method'];
     }
-    if (bindings['route'] && mergeObj['route'] === undefined) {
+    if (bindings['route'] !== undefined && mergeObj['route'] === undefined) {
       dynamicContext['route'] = bindings['route'];
     }
-    if (bindings['path'] && mergeObj['path'] === undefined) {
+    if (bindings['path'] !== undefined && mergeObj['path'] === undefined) {
       dynamicContext['path'] = bindings['path'];
     }
     
     // Codebase module identifier (for data layer functions, utilities, etc.)
     // Only add if not already present in mergeObject
-    if (bindings['module'] && mergeObj['module'] === undefined) {
+    if (bindings['module'] !== undefined && mergeObj['module'] === undefined) {
       dynamicContext['module'] = bindings['module'];
     }
     
     // Additional context (category, slug, etc.)
     // Only add if not already present in mergeObject
-    if (bindings['category'] && mergeObj['category'] === undefined) {
+    if (bindings['category'] !== undefined && mergeObj['category'] === undefined) {
       dynamicContext['category'] = bindings['category'];
     }
-    if (bindings['slug'] && mergeObj['slug'] === undefined) {
+    if (bindings['slug'] !== undefined && mergeObj['slug'] === undefined) {
       dynamicContext['slug'] = bindings['slug'];
     }
     
     // Correlation ID if available
     // Only add if not already present in mergeObject
-    if (bindings['correlationId'] && mergeObj['correlationId'] === undefined) {
+    if (bindings['correlationId'] !== undefined && mergeObj['correlationId'] === undefined) {
       dynamicContext['correlationId'] = bindings['correlationId'];
     }
     
     // Enhanced observability: Detect if dbQuery is present in mergeObject
     // If so, ensure it has proper structure for the dbQuery serializer
-    if (mergeObj['dbQuery'] && typeof mergeObj['dbQuery'] === 'object') {
+    if (mergeObj['dbQuery'] !== undefined && mergeObj['dbQuery'] !== null && typeof mergeObj['dbQuery'] === 'object') {
       // dbQuery is already present - no need to add it, but we can enhance it
       // The serializer will handle formatting, so we just ensure it's properly structured
       dynamicContext['hasDbQuery'] = true;
@@ -1131,7 +1378,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     
     // Enhanced observability: Detect if user object is present in mergeObject
     // If so, ensure it has proper structure for the user serializer
-    if (mergeObj['user'] && typeof mergeObj['user'] === 'object') {
+    if (mergeObj['user'] !== undefined && mergeObj['user'] !== null && typeof mergeObj['user'] === 'object') {
       // user is already present - no need to add it, but we can enhance it
       // The serializer will handle formatting, so we just ensure it's properly structured
       dynamicContext['hasUser'] = true;
@@ -1139,7 +1386,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     
     // Enhanced observability: Detect if error is present in mergeObject
     // Add error context for better error tracking
-    if (mergeObj['err'] || mergeObj['error']) {
+    if (mergeObj['err'] !== undefined || mergeObj['error'] !== undefined) {
       dynamicContext['hasError'] = true;
       // Add error level indicator for observability tools
       if (level >= 40) {
@@ -1152,52 +1399,71 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     return dynamicContext;
   };
   
-  const mixinFn = options?.mixin || defaultMixin;
+  const mixinFn = options?.mixin ?? defaultMixin;
 
   // Build mixinMergeStrategy - use provided or default (mergeObject takes priority)
   // This ensures that explicitly passed context in log calls overrides automatic mixin context
-  const mixinMergeStrategyFn = options?.mixinMergeStrategy || ((mergeObject: object, mixinObject: object): object => {
+  const mixinMergeStrategyFn = options?.mixinMergeStrategy ?? ((mergeObject: object, mixinObject: object): object => {
     // Default: mergeObject (explicitly passed) takes priority over mixinObject (automatic)
     // This allows log calls to override automatic context when needed
     return { ...mixinObject, ...mergeObject };
   });
   
   // Build onChild hook - track child logger creation for debugging and monitoring
-  const defaultOnChild = options?.onChild || ((child: pino.Logger): void => {
-    // Default: No-op, but can be used for:
-    // - Tracking child logger creation
-    // - Validating child logger context
-    // - Performance monitoring
-    // - Audit logging
-    void child;
+  // In development mode, warn if child logger is missing recommended context (requestId)
+  const defaultOnChild = options?.onChild ?? ((child: pino.Logger): void => {
+    // Only validate in development mode to avoid noise in production
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for Edge compatibility
+    const isDevelopment = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'development';
+    
+    if (isDevelopment) {
+      const bindings = child.bindings();
+      
+      // Warn if child logger is missing requestId (important for request correlation)
+      // This helps developers catch cases where request context is not properly propagated
+      if (bindings['requestId'] === undefined && bindings['correlationId'] === undefined) {
+        // Use console.warn since this is the logger config file - using logger here
+        // would create a circular dependency. This is development-time validation only.
+        // eslint-disable-next-line architectural-rules/no-console-in-production-enhanced
+        console.warn(
+          '[Logger] Child logger created without requestId or correlationId. ' +
+          'Consider adding request context for better log correlation. ' +
+          'Current bindings:', Object.keys(bindings).join(', ') || '(none)'
+        );
+      }
+    }
   });
 
   // Build browser configuration - include ALL browser options
   const browserConfig: {
-    disabled?: boolean;
-    serialize?: boolean | string[];
-    write?: pino.WriteFn | ({
-      fatal?: pino.WriteFn;
-      error?: pino.WriteFn;
-      warn?: pino.WriteFn;
-      info?: pino.WriteFn;
-      debug?: pino.WriteFn;
-      trace?: pino.WriteFn;
-    } & { [logLevel: string]: pino.WriteFn });
     asObject?: boolean;
     asObjectBindingsOnly?: boolean;
+    disabled?: boolean;
+    serialize?: boolean | string[];
     transmit?: {
       level?: pino.LevelOrString;
       send: (level: pino.Level, logEvent: pino.LogEvent) => void;
     };
+    write?: pino.WriteFn | (Record<string, pino.WriteFn> & {
+      debug?: pino.WriteFn;
+      error?: pino.WriteFn;
+      fatal?: pino.WriteFn;
+      info?: pino.WriteFn;
+      trace?: pino.WriteFn;
+      warn?: pino.WriteFn;
+    });
   } = {
-    disabled: options?.browser?.disabled !== undefined ? options.browser.disabled : !loggerConsoleEnabled,
-    serialize: options?.browser?.serialize !== undefined ? options.browser.serialize : true,
+    disabled: options?.browser?.disabled ?? !loggerConsoleEnabled,
+    serialize: options?.browser?.serialize ?? true,
     ...(options?.browser?.asObject !== undefined && { asObject: options.browser.asObject }),
     ...(options?.browser?.asObjectBindingsOnly !== undefined && { asObjectBindingsOnly: options.browser.asObjectBindingsOnly }),
     ...(options?.browser?.write && { write: options.browser.write }),
     ...(options?.browser?.transmit && { transmit: options.browser.transmit }),
     // Fallback: If msgPrefix is set and no custom write, use prefix write
+    // Browser write functions MUST use console - this is the pino browser config
+    // which provides fallback logging when structured logging isn't available.
+    // We cannot use our logger here because this file CREATES the logger config.
+    /* eslint-disable architectural-rules/no-console-in-production-enhanced */
     ...(!options?.browser?.write && options?.msgPrefix && {
       write: {
         info: (o: object) => console.info(options.msgPrefix, o),
@@ -1208,6 +1474,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
         trace: (o: object) => console.trace(options.msgPrefix, o),
       },
     }),
+    /* eslint-enable architectural-rules/no-console-in-production-enhanced */
   };
 
   /**
@@ -1245,7 +1512,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
    * ```
    */
   const userSerializer: pino.SerializerFn = (user: unknown): Record<string, unknown> | undefined => {
-    if (!user || typeof user !== 'object') {
+    if (user === null || user === undefined || typeof user !== 'object') {
       return undefined;
     }
     
@@ -1259,7 +1526,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     
     for (const field of userIdFields) {
       if (typeof userObj[field] === 'string' && userObj[field]) {
-        userIdHash = hashUserId(userObj[field] as string);
+        userIdHash = hashUserId(userObj[field]);
         break; // Use first found userId field
       }
     }
@@ -1275,7 +1542,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
       // Default: hash local part, redact domain (maximum privacy)
       // Set preserveDomain=true in options if domain needed for debugging
       const preserveDomain = false; // Config flag: set to true to preserve domain for debugging
-      result['emailHash'] = hashEmail(userObj['email'] as string, preserveDomain);
+      result['emailHash'] = hashEmail(userObj['email'], preserveDomain);
     }
     
     // Extract safe metadata fields (not PII)
@@ -1294,7 +1561,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
    * Formats database query/RPC call information for logging
    */
   const dbQuerySerializer: pino.SerializerFn = (query: unknown): Record<string, unknown> | undefined => {
-    if (!query || typeof query !== 'object') {
+    if (query === null || query === undefined || typeof query !== 'object') {
       return undefined;
     }
     
@@ -1374,7 +1641,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
    * Note: We keep stdSerializers.req as 'req', but this custom one can be used as 'request'
    */
   const requestSerializer: pino.SerializerFn = (request: unknown): Record<string, unknown> | undefined => {
-    if (!request || typeof request !== 'object') {
+    if (request === null || request === undefined || typeof request !== 'object') {
       return undefined;
     }
     
@@ -1400,7 +1667,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     }
     
     // Extract headers (sanitized - sensitive headers already redacted by Pino)
-    if (req['headers'] && typeof req['headers'] === 'object') {
+    if (req['headers'] !== undefined && req['headers'] !== null && typeof req['headers'] === 'object') {
       const headers = req['headers'] as Record<string, unknown>;
       const safeHeaders: Record<string, unknown> = {};
       // Only include non-sensitive headers
@@ -1424,7 +1691,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
    * Note: We keep stdSerializers.res as 'res', but this custom one can be used as 'response'
    */
   const responseSerializer: pino.SerializerFn = (response: unknown): Record<string, unknown> | undefined => {
-    if (!response || typeof response !== 'object') {
+    if (response === null || response === undefined || typeof response !== 'object') {
       return undefined;
     }
     
@@ -1444,7 +1711,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     }
     
     // Extract headers (sanitized - sensitive headers already redacted by Pino)
-    if (res['headers'] && typeof res['headers'] === 'object') {
+    if (res['headers'] !== undefined && res['headers'] !== null && typeof res['headers'] === 'object') {
       const headers = res['headers'] as Record<string, unknown>;
       const safeHeaders: Record<string, unknown> = {};
       // Only include non-sensitive headers
@@ -1477,16 +1744,16 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     args: argsSerializer,
     
     // Allow custom serializers to override defaults
-    ...(options?.serializers || {}),
+    ...options?.serializers,
   };
 
   // Build complete config with ALL Pino features
   // Using explicit property assignment to satisfy exactOptionalPropertyTypes
   const config: pino.LoggerOptions = {
     // Core Configuration
-    level: options?.level || (loggerVerbose ? 'debug' : 'info'),
+    level: options?.level ?? (loggerVerbose ? 'debug' : 'info'),
     base: baseContext,
-    timestamp: options?.timestamp !== undefined ? options.timestamp : pino.stdTimeFunctions.isoTime,
+    timestamp: options?.timestamp ?? pino.stdTimeFunctions.isoTime,
 
     // Redaction
     redact: redactConfig,
@@ -1505,6 +1772,12 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
 
     // Browser Configuration
     browser: browserConfig,
+    
+    // Security/Performance limits (protect against DoS and excessive memory usage)
+    // depthLimit: Limits nested object depth (default: 10, Pino default is unlimited)
+    // edgeLimit: Limits array/object elements (default: 100, Pino default is unlimited)
+    depthLimit: options?.depthLimit ?? 10,
+    edgeLimit: options?.edgeLimit ?? 100,
   };
 
   // Add optional properties conditionally to satisfy exactOptionalPropertyTypes
@@ -1513,6 +1786,9 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   }
   if (options?.errorKey) {
     config.errorKey = options.errorKey;
+  }
+  if (options?.messageKey) {
+    config.messageKey = options.messageKey;
   }
   // Always set onChild (either custom or default)
   config.onChild = defaultOnChild;
@@ -1525,17 +1801,51 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   if (options?.nestedKey) {
     config.nestedKey = options.nestedKey;
   }
+  // Custom levels support (user-provided only)
+  // Note: Custom levels require TypeScript type augmentation to work properly.
+  // For most use cases, prefer standard levels (trace/debug/info/warn/error/fatal) 
+  // with structured context tags for filtering:
+  //   logger.info('User action', { audit: true, ... });
+  //   logger.error('Security event', { securityEvent: true, ... });
   if (options?.customLevels) {
     config.customLevels = options.customLevels;
   }
   if (options?.useOnlyCustomLevels !== undefined) {
     config.useOnlyCustomLevels = options.useOnlyCustomLevels;
   }
-  if (options?.levelComparison) {
+  if (options?.levelComparison !== undefined) {
     config.levelComparison = options.levelComparison;
   }
+  // Handle transport configuration
+  // If prettyPrint is enabled and no custom transport provided, use pino-pretty
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for Edge compatibility
+  const isDevelopment = typeof process !== 'undefined' && process.env?.['NODE_ENV'] !== 'production';
+  const prettyPrintSetting = options?.prettyPrint ?? 'auto';
+  const shouldPrettyPrint = 
+    prettyPrintSetting === true || 
+    (prettyPrintSetting === 'auto' && isDevelopment && !options?.transport);
+  
   if (options?.transport) {
+    // Custom transport takes precedence
     config.transport = options.transport;
+  } else if (shouldPrettyPrint) {
+    // Enable pino-pretty for development
+    // Note: pino-pretty must be installed as a dependency
+    config.transport = {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'SYS:standard', // Use system locale time format
+        ignore: 'pid,hostname', // Hide noisy fields
+        messageFormat: '{msg}', // Clean message format
+        // Show these fields inline for quick debugging
+        singleLine: false,
+        // Error objects get special treatment
+        errorLikeObjectKeys: ['err', 'error'],
+        // Custom colors for our structured tags
+        customColors: 'audit:cyan,securityEvent:red',
+      },
+    };
   }
 
   return config;

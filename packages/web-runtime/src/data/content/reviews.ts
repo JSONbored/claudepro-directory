@@ -1,16 +1,16 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
 
 interface ReviewsWithStatsParameters {
-  contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
-  sortBy?: string;
+  contentType: Database['public']['Enums']['content_category'];
   limit?: number;
   offset?: number;
+  sortBy?: string;
   userId?: string;
 }
 

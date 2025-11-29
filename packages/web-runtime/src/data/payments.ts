@@ -1,6 +1,6 @@
 'use server';
 
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { cache } from 'react';
 
 import { logger, normalizeError } from '../index.ts';
@@ -12,30 +12,30 @@ type JobBillingSummaryRow = Database['public']['Views']['job_billing_summary']['
 
 type PaymentPlanCatalogRowSubset = Pick<
   PaymentPlanRow,
-  'plan' | 'tier' | 'price_cents' | 'is_subscription' | 'billing_cycle_days' | 'job_expiry_days' | 'description' | 'benefits' | 'product_type'
+  'benefits' | 'billing_cycle_days' | 'description' | 'is_subscription' | 'job_expiry_days' | 'plan' | 'price_cents' | 'product_type' | 'tier'
 >;
 
 export type PaymentPlanCatalogEntry = Omit<PaymentPlanCatalogRowSubset, 'benefits'> & {
-  benefits: string[] | null;
+  benefits: null | string[];
 };
 
 export type JobBillingSummaryEntry = Pick<
   JobBillingSummaryRow,
-  | 'job_id'
-  | 'plan'
-  | 'tier'
-  | 'price_cents'
-  | 'is_subscription'
   | 'billing_cycle_days'
+  | 'is_subscription'
   | 'job_expiry_days'
+  | 'job_id'
   | 'last_payment_amount'
   | 'last_payment_at'
   | 'last_payment_status'
-  | 'subscription_status'
+  | 'plan'
+  | 'price_cents'
   | 'subscription_renews_at'
+  | 'subscription_status'
+  | 'tier'
 >;
 
-function sanitizeBenefits(benefits: PaymentPlanRow['benefits']): string[] | null {
+function sanitizeBenefits(benefits: PaymentPlanRow['benefits']): null | string[] {
   if (!Array.isArray(benefits)) {
     return null;
   }

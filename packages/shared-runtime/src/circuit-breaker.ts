@@ -1,22 +1,23 @@
-import { createUtilityContext, logInfo, logWarn } from './logging.ts';
 /**
  * Circuit breaker pattern for resilient database calls
  * Prevents cascading failures by opening circuit after threshold failures
  */
 
+import { createUtilityContext, logInfo, logWarn } from './logging.ts';
+
 export interface CircuitBreakerConfig {
   failureThreshold: number; // Number of failures before opening circuit
-  resetTimeoutMs: number; // Time to wait before attempting reset
   halfOpenMaxAttempts?: number; // Max attempts in half-open state
+  resetTimeoutMs: number; // Time to wait before attempting reset
 }
 
-export type CircuitState = 'closed' | 'open' | 'half-open';
+export type CircuitState = 'closed' | 'half-open' | 'open';
 
 interface CircuitBreakerState {
-  state: CircuitState;
   failures: number;
-  lastFailureTime: number;
   halfOpenAttempts: number;
+  lastFailureTime: number;
+  state: CircuitState;
 }
 
 class CircuitBreaker {
@@ -40,7 +41,7 @@ class CircuitBreaker {
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
-    await this.updateState();
+    this.updateState();
 
     if (this.state.state === 'open') {
       throw new Error('Circuit breaker is open - service unavailable');
@@ -48,32 +49,31 @@ class CircuitBreaker {
 
     try {
       const result = await fn();
-      await this.onSuccess();
+      this.onSuccess();
       return result;
     } catch (error) {
-      await this.onFailure();
+      this.onFailure();
       throw error;
     }
   }
 
-  private async updateState(): Promise<void> {
+  private updateState(): void {
     const now = Date.now();
 
-    if (this.state.state === 'open') {
-      if (now - this.state.lastFailureTime >= this.config.resetTimeoutMs) {
-        this.state.state = 'half-open';
-        this.state.halfOpenAttempts = 0;
-        const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
-          key: this.key,
-          state: 'half-open',
-          resetTimeoutMs: this.config.resetTimeoutMs,
-        });
-        logInfo('Circuit half-open (testing recovery)', logContext);
-      }
+    // Only check for state transition if circuit is open
+    if (this.state.state === 'open' && now - this.state.lastFailureTime >= this.config.resetTimeoutMs) {
+      this.state.state = 'half-open';
+      this.state.halfOpenAttempts = 0;
+      const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
+        key: this.key,
+        resetTimeoutMs: this.config.resetTimeoutMs,
+        state: 'half-open',
+      });
+      logInfo('Circuit half-open (testing recovery)', logContext);
     }
   }
 
-  private async onSuccess(): Promise<void> {
+  private onSuccess(): void {
     if (this.state.state === 'half-open') {
       this.state.state = 'closed';
       this.state.failures = 0;
@@ -88,7 +88,7 @@ class CircuitBreaker {
     }
   }
 
-  private async onFailure(): Promise<void> {
+  private onFailure(): void {
     this.state.failures++;
     this.state.lastFailureTime = Date.now();
 
@@ -116,17 +116,17 @@ class CircuitBreaker {
     }
   }
 
-  async getState(): Promise<CircuitState> {
-    await this.updateState();
+  getState(): CircuitState {
+    this.updateState();
     return this.state.state;
   }
 
   reset(): void {
     this.state = {
-      state: 'closed',
       failures: 0,
-      lastFailureTime: 0,
       halfOpenAttempts: 0,
+      lastFailureTime: 0,
+      state: 'closed',
     };
   }
 }
@@ -151,13 +151,13 @@ function getCircuitBreaker(key: string, config: CircuitBreakerConfig): CircuitBr
 export const CIRCUIT_BREAKER_CONFIGS = {
   rpc: {
     failureThreshold: 5,
-    resetTimeoutMs: 30000, // 30 seconds
     halfOpenMaxAttempts: 2,
+    resetTimeoutMs: 30_000, // 30 seconds
   },
   external: {
     failureThreshold: 3,
-    resetTimeoutMs: 60000, // 1 minute
     halfOpenMaxAttempts: 1,
+    resetTimeoutMs: 60_000, // 1 minute
   },
 } as const;
 

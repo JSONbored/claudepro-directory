@@ -10,6 +10,7 @@
  * - Context-aware messaging
  */
 
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import { useCallback, useEffect, useState } from 'react';
@@ -74,8 +75,8 @@ export function useOnboardingToasts({
 
     const fetchNotifications = async () => {
       try {
-        const fluxStationUrl = process.env['NEXT_PUBLIC_SUPABASE_URL']
-          ? `${process.env['NEXT_PUBLIC_SUPABASE_URL']}/functions/v1/flux-station/active-notifications`
+        const fluxStationUrl = env.NEXT_PUBLIC_SUPABASE_URL
+          ? `${env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/active-notifications`
           : null;
         if (!fluxStationUrl) {
           logger.warn('NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification fetch');
@@ -109,7 +110,7 @@ export function useOnboardingToasts({
       }
     };
 
-    fetchNotifications().catch((error) => {
+    fetchNotifications().catch((error: unknown) => {
       const normalized = normalizeError(error, 'Failed to fetch notifications');
       logger.warn('Failed to fetch notifications', { error: normalized.message });
     });
@@ -144,8 +145,8 @@ export function useOnboardingToasts({
 
       try {
         // Create notifications in database via edge function
-        const fluxStationUrl = process.env['NEXT_PUBLIC_SUPABASE_URL']
-          ? `${process.env['NEXT_PUBLIC_SUPABASE_URL']}/functions/v1/flux-station/notifications/create`
+        const fluxStationUrl = env.NEXT_PUBLIC_SUPABASE_URL
+          ? `${env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/notifications/create`
           : null;
         if (!fluxStationUrl) {
           logger.warn('NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification creation');
@@ -185,7 +186,7 @@ export function useOnboardingToasts({
       }
     };
 
-    createNotifications().catch((error) => {
+    createNotifications().catch((error: unknown) => {
       const normalized = normalizeError(error, 'Failed to create onboarding notifications');
       logger.warn('Failed to create onboarding notifications', { error: normalized.message });
     });

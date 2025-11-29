@@ -3,15 +3,11 @@
  * POST /discord - Handle direct Discord notifications (not queue-based)
  */
 
-import {
-  badRequestResponse,
-  discordCorsHeaders,
-  handleDiscordNotification,
-  initRequestLogging,
-  traceRequestComplete,
-  traceStep,
-} from '@heyclaude/edge-runtime';
-import { createUtilityContext, logger, MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime';
+import { badRequestResponse, discordCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { handleDiscordNotification } from '@heyclaude/edge-runtime/handlers/discord/handler.ts';
+import { createUtilityContext, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime/input-validation.ts';
 
 /**
  * Handle a direct (non-queued) Discord notification POST and forward it to the notification processor.

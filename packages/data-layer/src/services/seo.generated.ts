@@ -5,8 +5,8 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 export class SeoService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,6 +17,6 @@ export class SeoService {
   async generateMetadata(args: Database['public']['Functions']['generate_metadata_complete']['Args']) {
     const { data, error } = await this.supabase.rpc('generate_metadata_complete', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['generate_metadata_complete']['Returns'];
+    return data;
   }
 }

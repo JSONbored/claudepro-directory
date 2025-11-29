@@ -43,15 +43,14 @@ import {
   Copy,
   Download,
   FileText,
-  Share2,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
 import type { ContentItem, CopyType } from '@heyclaude/web-runtime/types/component.types';
 import { STATE_PATTERNS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
+import { ShareMenu } from '@/src/components/core/buttons/social/share-menu';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
@@ -189,7 +188,6 @@ export function DetailHeaderActions({
   onCopyContent,
 }: DetailHeaderActionsProps) {
   const router = useRouter();
-  const [isSharing, setIsSharing] = useState(false);
   const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copy: copyToClipboard } = useCopyToClipboard();
   const { showModal } = usePostCopyEmail();
@@ -228,47 +226,10 @@ export function DetailHeaderActions({
       ? `${window.location.origin}/${category}/${contentItem.slug}`
       : '';
 
-  const handleShare = async () => {
-    if (!shareUrl) {
-      toasts.raw.error('Unable to share', {
-        description: 'Share link is not available in this environment.',
-      });
-      return;
-    }
-    setIsSharing(true);
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: displayTitle,
-          url: shareUrl,
-          text: contentItem.description ?? undefined,
-        });
-        toasts.raw.success('Shared!', {
-          description: 'Link sent via the native share sheet.',
-        });
-      } else {
-        await copyToClipboard(shareUrl);
-        toasts.raw.success('Link copied', {
-          description: 'Paste anywhere to share.',
-        });
-      }
-    } catch (error) {
-      const aborted =
-        typeof DOMException !== 'undefined' &&
-        error instanceof DOMException &&
-        error.name === 'AbortError';
-      if (!aborted) {
-        await copyToClipboard(shareUrl);
-        toasts.raw.info('Link copied', {
-          description: 'Native share unavailable, copied instead.',
-        });
-      }
-    } finally {
-      setIsSharing(false);
-    }
-  };
-
   const handleTogglePin = () => {
+    // Capture state BEFORE toggling to show correct toast
+    const wasPinned = pinned;
+
     const tags = Array.isArray((contentItem as { tags?: string[] }).tags)
       ? ((contentItem as { tags?: string[] }).tags ?? []).filter(
           (tag): tag is string => typeof tag === 'string'
@@ -287,11 +248,20 @@ export function DetailHeaderActions({
           ? contentItem.thumbnail_url
           : null,
     });
-    toasts.raw.success(pinned ? 'Removed from pinboard' : 'Pinned for later', {
-      description: pinned
-        ? 'This item was removed from your local pinboard.'
-        : 'Saved locally—open the pinboard to revisit it anytime.',
-    });
+
+    if (wasPinned) {
+      toasts.raw.success('Removed from pinboard', {
+        description: 'This item was removed from your local pinboard.',
+      });
+    } else {
+      toasts.raw.success('Pinned for later', {
+        description: 'Saved locally—open the pinboard to revisit it anytime.',
+        action: {
+          label: 'View Pinboard',
+          onClick: openPinboardDrawer,
+        },
+      });
+    }
   };
 
   const handleCopyContent = async () => {
@@ -414,14 +384,20 @@ export function DetailHeaderActions({
     <>
       {/* Back navigation */}
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className={`text-muted-foreground ${STATE_PATTERNS.HOVER_TEXT_FOREGROUND}`}
+        <motion.div
+          whileHover={{ x: -2 }}
+          whileTap={{ scale: 0.97 }}
+          className="inline-block"
         >
-          <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
-          Back
-        </Button>
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className={`text-muted-foreground ${STATE_PATTERNS.HOVER_TEXT_FOREGROUND}`}
+          >
+            <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
+            Back
+          </Button>
+        </motion.div>
       </div>
 
       {/* Main content header */}
@@ -451,71 +427,94 @@ export function DetailHeaderActions({
 
         {/* Action buttons */}
         <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
-          <Button variant="outline" onClick={handleShare} className="min-w-0" disabled={isSharing}>
-            <Share2 className={UI_CLASSES.ICON_SM_LEADING} />
-            {isSharing ? 'Sharing...' : 'Share'}
-          </Button>
+          {/* Share Menu - multiple platform options */}
+          <ShareMenu
+            url={shareUrl}
+            title={displayTitle}
+            description={contentItem.description ?? undefined}
+            utmCampaign={category}
+            onShare={(platform) => {
+              pulse.share({ platform, category, slug: contentItem.slug, url: shareUrl }).catch(() => {
+                // Silent fail for analytics
+              });
+            }}
+          />
 
-          <Button
-            variant={pinned ? 'secondary' : 'outline'}
-            onClick={handleTogglePin}
-            className="min-w-0"
-          >
-            {pinned ? (
-              <>
-                <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
-                Pinned
-              </>
-            ) : (
-              <>
-                <BookmarkPlus className={UI_CLASSES.ICON_SM_LEADING} />
-                Pin for later
-              </>
-            )}
-          </Button>
+          <motion.div whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.02 }}>
+            <Button
+              variant={pinned ? 'secondary' : 'outline'}
+              onClick={handleTogglePin}
+              className="min-w-0"
+            >
+              {pinned ? (
+                <>
+                  <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
+                  Pinned
+                </>
+              ) : (
+                <>
+                  <BookmarkPlus className={UI_CLASSES.ICON_SM_LEADING} />
+                  Pin for later
+                </>
+              )}
+            </Button>
+          </motion.div>
 
-          <Button
-            variant="ghost"
-            className="min-w-0 justify-start border border-border/50 border-dashed"
-            onClick={openPinboardDrawer}
-          >
-            <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
-            View pinboard ({pinnedItems.length})
-          </Button>
+          <motion.div whileTap={{ scale: 0.97 }}>
+            <Button
+              variant="ghost"
+              className="min-w-0 justify-start border border-border/50 border-dashed"
+              onClick={openPinboardDrawer}
+            >
+              <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
+              View pinboard ({pinnedItems.length})
+            </Button>
+          </motion.div>
 
           {/* Primary action button - only show if not a download action, or if download is available */}
           {(!(primaryAction.type === 'download') || hasDownloadAvailable) && (
-            <Button onClick={() => handleActionClick(primaryAction)} className="min-w-0">
-              {primaryAction.label}
-            </Button>
+            <motion.div whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.02 }}>
+              <Button onClick={() => handleActionClick(primaryAction)} className="min-w-0">
+                {primaryAction.label}
+              </Button>
+            </motion.div>
           )}
 
           {/* Conditional download button - show when download is available but primaryAction is not download */}
           {hasDownloadAvailable && primaryAction.type !== 'download' && (
-            <Button
-              onClick={() => {
-                if (hasMcpbDownload) {
-                  handleDownload('mcpb', contentItem, category, pulse);
-                } else if (hasStorageDownload) {
-                  handleDownload('zip', contentItem, category, pulse);
-                }
-              }}
-              className="min-w-0"
-            >
-              <Download className={UI_CLASSES.ICON_SM_LEADING} />
-              {category === Constants.public.Enums.content_category[1] ? 'Download .mcpb' : 'Download'} // 'mcp'
-            </Button>
+            <motion.div whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.02 }}>
+              <Button
+                onClick={() => {
+                  if (hasMcpbDownload) {
+                    handleDownload('mcpb', contentItem, category, pulse);
+                  } else if (hasStorageDownload) {
+                    handleDownload('zip', contentItem, category, pulse);
+                  }
+                }}
+                className="min-w-0"
+              >
+                <Download className={UI_CLASSES.ICON_SM_LEADING} />
+                {category === Constants.public.Enums.content_category[1] ? 'Download .mcpb' : 'Download'} {/* mcp */}
+              </Button>
+            </motion.div>
           )}
 
           {hasContent && (
             <motion.div
+              whileTap={{ scale: 0.97 }}
               animate={copied ? { scale: [1, 1.05, 1] } : {}}
               transition={{ duration: 0.3 }}
             >
               <Button variant="outline" onClick={handleCopyContent} className="min-w-0">
                 {copied ? (
                   <>
-                    <Check className="mr-2 h-4 w-4 text-green-500" />
+                    <motion.span
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    >
+                      <Check className="mr-2 h-4 w-4 text-green-500" />
+                    </motion.span>
                     Copied!
                   </>
                 ) : (

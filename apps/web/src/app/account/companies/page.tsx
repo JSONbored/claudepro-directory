@@ -3,7 +3,7 @@
  * Manages user's companies with CRUD operations via companies-handler
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { formatRelativeDate } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -31,7 +31,7 @@ import { UI_CLASSES, UnifiedBadge, Button ,
   CardDescription,
   CardHeader,
   CardTitle  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -48,7 +48,7 @@ export const runtime = 'nodejs';
  * Only allows absolute URLs with http:// or https:// protocol
  * Strictly validates to prevent XSS and protocol-relative URLs
  */
-function isAllowedHttpUrl(url: string | null | undefined): boolean {
+function isAllowedHttpUrl(url: null | string | undefined): boolean {
   if (!url || typeof url !== 'string') return false;
   // Reject any leading whitespace or suspicious chars
   if (!/^(https?:\/\/)/i.test(url.trim())) return false;
@@ -94,7 +94,7 @@ export default async function CompaniesPage() {
             <CardDescription>Please sign in to manage your companies.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -152,7 +152,7 @@ export default async function CompaniesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true} variant="outline">
+            <Button asChild variant="outline">
               <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
             </Button>
           </CardContent>
@@ -182,7 +182,7 @@ export default async function CompaniesPage() {
             {companies.length} {companies.length === 1 ? 'company' : 'companies'}
           </p>
         </div>
-        <Button asChild={true}>
+        <Button asChild>
           <Link href={`${ROUTES.ACCOUNT_COMPANIES}/new`}>
             <Plus className="mr-2 h-4 w-4" />
             Add Company
@@ -192,13 +192,13 @@ export default async function CompaniesPage() {
 
       {companies.length === 0 ? (
         <Card>
-          <CardContent className={'flex flex-col items-center py-12'}>
+          <CardContent className="flex flex-col items-center py-12">
             <Building2 className="mb-4 h-12 w-12 text-muted-foreground" />
             <h3 className="mb-2 font-semibold text-xl">No companies yet</h3>
-            <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
+            <p className="mb-4 max-w-md text-center text-muted-foreground">
               Create a company profile to showcase your organization and post job listings
             </p>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={`${ROUTES.ACCOUNT_COMPANIES}/new`}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Company
@@ -273,11 +273,9 @@ export default async function CompaniesPage() {
                         <div className="flex-1">
                           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                             <CardTitle>{company.name}</CardTitle>
-                            {company.featured && (
-                              <UnifiedBadge variant="base" style="default">
+                            {company.featured ? <UnifiedBadge variant="base" style="default">
                                 Featured
-                              </UnifiedBadge>
-                            )}
+                              </UnifiedBadge> : null}
                           </div>
                           <CardDescription className="mt-1">
                             {company.description ?? 'No description provided'}
@@ -339,7 +337,7 @@ export default async function CompaniesPage() {
                   </CardHeader>
 
                   <CardContent>
-                    <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
+                    <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                         <Briefcase className="h-4 w-4" />
                         {company.stats?.active_jobs ?? 0} active job
@@ -349,23 +347,21 @@ export default async function CompaniesPage() {
                         <Eye className="h-4 w-4" />
                         {(company.stats?.total_views ?? 0).toLocaleString()} views
                       </div>
-                      {company.stats?.latest_job_posted_at && (
-                        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                      {company.stats?.latest_job_posted_at ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                           <Calendar className="h-4 w-4" />
                           Last job posted {formatRelativeDate(company.stats.latest_job_posted_at)}
-                        </div>
-                      )}
+                        </div> : null}
                     </div>
 
                     <div className={UI_CLASSES.FLEX_GAP_2}>
-                      <Button variant="outline" size="sm" asChild={true}>
+                      <Button variant="outline" size="sm" asChild>
                         <Link href={`${ROUTES.ACCOUNT_COMPANIES}/${company.id}/edit`}>
                           <Edit className="mr-1 h-3 w-3" />
                           Edit
                         </Link>
                       </Button>
 
-                      <Button variant="ghost" size="sm" asChild={true}>
+                      <Button variant="ghost" size="sm" asChild>
                         <Link href={`/companies/${company.slug}`}>
                           <ExternalLink className="mr-1 h-3 w-3" />
                           View Profile

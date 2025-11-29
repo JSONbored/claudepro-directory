@@ -1,5 +1,6 @@
 'use client';
 
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -34,8 +35,6 @@ export function SegmentErrorFallback({
   links = [],
   error,
 }: SegmentErrorFallbackProps) {
-  const isDev = process.env.NODE_ENV === 'development';
-
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-12">
       <Card className="w-full max-w-2xl">
@@ -63,7 +62,7 @@ export function SegmentErrorFallback({
               ))}
             </div>
           )}
-          {isDev && error && (
+          {isDevelopment && error && (
             <div className="rounded-lg border border-muted-foreground/30 border-dashed bg-muted/30 p-4">
               <p className="mb-2 font-semibold text-muted-foreground text-sm">Error details</p>
               <pre className="wrap-break-word whitespace-pre-wrap text-destructive text-xs">

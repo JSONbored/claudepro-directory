@@ -5,7 +5,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { getContentItemUrl, isValidCategory, logger } from '@heyclaude/web-runtime/core';
+import { getContentItemUrl, isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
@@ -131,7 +131,7 @@ export function RelatedContentClient({
       } catch (error) {
         logger.error(
           'Failed to fetch related content',
-          error instanceof Error ? error : new Error(String(error)),
+          normalizeError(error, 'Failed to fetch related content'),
           { source: 'RelatedContentClient' }
         );
         setItems([]);
@@ -143,7 +143,7 @@ export function RelatedContentClient({
     fetchRelatedContent().catch((error) => {
       logger.error(
         'Related content fetch promise rejected',
-        error instanceof Error ? error : new Error(String(error)),
+        normalizeError(error, 'Related content fetch promise rejected'),
         { source: 'RelatedContentClient' }
       );
     });
