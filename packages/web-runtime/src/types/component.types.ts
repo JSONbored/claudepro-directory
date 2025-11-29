@@ -827,7 +827,21 @@ export type CodeProps = BaseProps & {
   html: string;
   code: string;
   language: string;
-  filename: string;
+  filename?: string;
+  icon?: LucideIcon;
+};
+
+export type CodeGroupProps = BaseProps & {
+  variant: 'code-group';
+  title: string;
+  description?: string;
+  codeBlocks: Array<{
+    html: string;
+    code: string;
+    language: string;
+    filename?: string;
+    label: string;
+  }>;
   icon?: LucideIcon;
 };
 
@@ -907,6 +921,7 @@ export type UnifiedSectionProps =
   | ListProps
   | EnhancedListProps
   | CodeProps
+  | CodeGroupProps
   | ExamplesProps
   | ConfigProps
   | InstallProps;

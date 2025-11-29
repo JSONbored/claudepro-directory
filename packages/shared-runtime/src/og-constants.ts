@@ -4,9 +4,11 @@
  * Used by both web (Next.js) and edge (Supabase Functions) OG image generators
  */
 
+/** Default OG image values - 'agents' is used as fallback type for unrecognized routes */
 export const OG_DEFAULTS = {
   title: 'Claude Pro Directory',
   description: 'Community-curated agents, MCPs, and rules',
+  // eslint-disable-next-line architectural-rules/no-hardcoded-enum-values -- Static fallback for OG images, not a DB category
   type: 'agents',
 } as const;
 
@@ -63,14 +65,13 @@ export const OG_LAYOUT = {
  * Converts slug format (e.g., "code-reviewer") to title format (e.g., "Code Reviewer")
  */
 export function deriveTitleFromRoute(route: string): string {
-  const slug = route.split('/').pop() || '';
+  const slug = route.split('/').pop() ?? '';
   if (!slug) {
     return OG_DEFAULTS.title;
   }
-  return (
-    slug
-      .split('-')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ') || OG_DEFAULTS.title
-  );
+  const title = slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+  return title || OG_DEFAULTS.title;
 }

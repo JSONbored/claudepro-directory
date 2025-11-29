@@ -1,5 +1,5 @@
 import type { HttpMethod, RouterContext } from '@heyclaude/edge-runtime/utils/router.ts';
-import { validatePathSegments, validateQueryString } from '@heyclaude/shared-runtime';
+import { validatePathSegments, validateQueryString } from '@heyclaude/shared-runtime/input-validation.ts';
 
 export interface StandardContext extends RouterContext {
   pathname: string;

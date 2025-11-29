@@ -1,20 +1,30 @@
 'use client';
 
-/** Unified floating action bar with scroll-aware speed dial menu */
+/**
+ * Enhanced Floating Action Bar with Speed Dial Menu
+ *
+ * Features:
+ * - Always visible (no scroll-to-hide)
+ * - Backdrop overlay when expanded
+ * - Close on outside click
+ * - Keyboard shortcut (F key to toggle)
+ * - Pulse animation on first visit
+ * - Mobile bottom bar layout
+ * - Context-aware actions (detail pages)
+ */
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
+import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
-import { createMainFABConfig, createSpeedDialActions } from './fab-config';
+import { createDetailPageActions, createMainFABConfig, createSpeedDialActions } from './fab-config';
 import { SpeedDialItem } from './speed-dial-item';
-import { useScrollDirection } from './use-scroll-direction';
 
 interface FloatingActionBarProps {
-  /** Scroll threshold to show/hide FAB (px) */
-  threshold?: number;
   /** Feature flags controlling which FAB actions to show */
   fabFlags: {
     showSubmit: boolean;
@@ -25,21 +35,100 @@ interface FloatingActionBarProps {
   };
 }
 
-export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionBarProps) {
-  const router = useRouter();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
+const FIRST_VISIT_KEY = 'fab_seen';
 
-  // Scroll state for visibility control
-  const scrollState = useScrollDirection({ threshold });
+export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showPulse, setShowPulse] = useState(false);
+  const fabRef = useRef<HTMLDivElement>(null);
+  const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
 
   // Notification state
   const { unreadCount, openSheet: openNotificationSheet, flags } = useNotificationsContext();
 
+  // Copy to clipboard hook for context actions
+  const { copy: copyToClipboard } = useCopyToClipboard();
+
+  // Check if on a detail page (for context-aware actions)
+  // Pattern: /category/slug (e.g., /mcp/heyclaude-mcp)
+  const isDetailPage = /^\/[^/]+\/[^/]+$/.test(pathname) && !pathname.startsWith('/api/');
+
+  // Check for first visit to show pulse animation
+  useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+    try {
+      const hasSeen = localStorage.getItem(FIRST_VISIT_KEY);
+      if (!hasSeen) {
+        setShowPulse(true);
+        // Stop pulse after 5 seconds
+        timer = setTimeout(() => {
+          setShowPulse(false);
+          localStorage.setItem(FIRST_VISIT_KEY, 'true');
+        }, 5000);
+      }
+    } catch {
+      // localStorage not available
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!isExpanded) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (fabRef.current && !fabRef.current.contains(event.target as Node)) {
+        setIsExpanded(false);
+      }
+    };
+
+    // Small delay to prevent immediate close on the click that opened it
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isExpanded]);
+
+  // Keyboard shortcut (F key to toggle)
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Don't trigger if typing in an input
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        (event.target as HTMLElement).isContentEditable
+      ) {
+        return;
+      }
+
+      // F key or ? key to toggle FAB
+      if (event.key === 'f' || event.key === 'F' || event.key === '?') {
+        event.preventDefault();
+        setIsExpanded((prev) => !prev);
+      }
+
+      // Escape to close
+      if (event.key === 'Escape' && isExpanded) {
+        setIsExpanded(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isExpanded]);
+
   // Main FAB config (Create button)
   const mainFAB = createMainFABConfig(() => {
     try {
-      setIsExpanded(false); // Close speed dial on navigate
+      setIsExpanded(false);
       router.push('/submit');
     } catch (error) {
       const normalized = normalizeError(error, '[FloatingActionBar] Error navigating to /submit');
@@ -52,7 +141,7 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
     unreadCount,
     () => {
       try {
-        setIsExpanded(false); // Close speed dial when opening notifications
+        setIsExpanded(false);
         openNotificationSheet();
       } catch (error) {
         const normalized = normalizeError(
@@ -64,7 +153,7 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
     },
     () => {
       try {
-        setIsExpanded(false); // Close speed dial on navigate
+        setIsExpanded(false);
         router.push('/submit');
       } catch (error) {
         const normalized = normalizeError(error, '[FloatingActionBar] Error navigating to /submit');
@@ -89,62 +178,166 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
     }
   );
 
+  // Context-aware actions for detail pages
+  const detailPageActions = isDetailPage
+    ? createDetailPageActions(
+        // Copy link handler
+        async () => {
+          try {
+            const url = window.location.href;
+            await copyToClipboard(url);
+            toasts.raw.success('Link copied!', {
+              description: 'Paste anywhere to share this page.',
+            });
+            setIsExpanded(false);
+          } catch (error) {
+            const normalized = normalizeError(error, '[FAB] Error copying link');
+            logger.warn('[Clipboard] Copy link failed', {
+              err: normalized,
+              category: 'clipboard',
+              component: 'FloatingActionBar',
+              recoverable: true,
+              userRetryable: true,
+            });
+          }
+        },
+        // Share handler
+        async () => {
+          try {
+            const url = window.location.href;
+            const title = document.title;
+            
+            if (navigator.share) {
+              await navigator.share({ title, url });
+              toasts.raw.success('Shared!', {
+                description: 'Link sent via the share sheet.',
+              });
+            } else {
+              await copyToClipboard(url);
+              toasts.raw.success('Link copied!', {
+                description: 'Native share unavailable, link copied instead.',
+              });
+            }
+            setIsExpanded(false);
+          } catch (error) {
+            // User cancelled share - not an error
+            if (error instanceof DOMException && error.name === 'AbortError') {
+              return;
+            }
+            const normalized = normalizeError(error, '[FAB] Error sharing');
+            logger.error('[FAB] Error sharing', normalized);
+          }
+        }
+      )
+    : [];
+
+  // Combine context-aware actions with standard actions
+  const allActions = [...detailPageActions, ...speedDialActions];
+
   // Filter speed dial actions based on `show` property
-  const visibleActions = speedDialActions.filter((action) => action.show !== false);
+  const visibleActions = allActions.filter((action) => action.show !== false);
 
   // Toggle speed dial expansion
-  const toggleExpanded = () => {
+  const toggleExpanded = useCallback(() => {
     try {
       setIsExpanded((prev) => !prev);
+      // Stop pulse on first interaction
+      if (showPulse) {
+        setShowPulse(false);
+        try {
+          localStorage.setItem(FIRST_VISIT_KEY, 'true');
+        } catch {
+          // localStorage not available
+        }
+      }
     } catch (error) {
       const normalized = normalizeError(error, '[FloatingActionBar] Error toggling expansion');
       logger.error('[FloatingActionBar] Error toggling expansion', normalized);
     }
-  };
+  }, [showPulse]);
 
   // Main FAB icon component
   const MainIcon = mainFAB.icon;
 
   return (
-    <div className="fixed right-6 bottom-6 z-60">
-      {/* Speed Dial Items (expand upward) */}
+    <>
+      {/* Backdrop overlay when expanded */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="mb-3 flex flex-col gap-3"
-          >
-            {visibleActions.map((action, index) => (
-              <SpeedDialItem
-                key={action.id}
-                {...action}
-                delay={index * 0.05} // Stagger animation
-              />
-            ))}
-          </motion.div>
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
+            aria-hidden="true"
+          />
         )}
       </AnimatePresence>
 
-      {/* Main FAB Button */}
-      <AnimatePresence mode="wait">
-        {scrollState.isVisible && (
+      {/* FAB Container */}
+      <div
+        ref={fabRef}
+        className={cn(
+          'fixed z-50',
+          // Desktop: Bottom right corner
+          'right-6 bottom-6',
+          // Mobile: Full-width bottom bar when expanded
+          'max-md:right-0 max-md:bottom-0 max-md:left-0',
+          isExpanded && 'max-md:px-4 max-md:pb-4'
+        )}
+      >
+        {/* Speed Dial Items (expand upward on desktop) */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
+              className={cn(
+                'mb-3 flex flex-col gap-2',
+                // Mobile: Horizontal row above main button
+                'max-md:mb-2 max-md:flex-row max-md:flex-wrap max-md:justify-center max-md:gap-2',
+                // Mobile expanded: card background
+                'max-md:rounded-2xl max-md:bg-card/95 max-md:p-3 max-md:shadow-lg max-md:backdrop-blur-md'
+              )}
+            >
+              {visibleActions.map((action, index) => (
+                <SpeedDialItem
+                  key={action.id}
+                  {...action}
+                  delay={index * 0.05}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Main FAB Button */}
+        <div className="flex justify-end max-md:justify-center">
           <motion.button
             onClick={toggleExpanded}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             transition={{
               type: 'spring',
               stiffness: 400,
               damping: 17,
             }}
-            className="relative flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-black/20 shadow-lg backdrop-blur-md will-change-transform hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background dark:shadow-black/40"
-            aria-label={isExpanded ? 'Close speed dial menu' : mainFAB.label}
+            className={cn(
+              'relative flex h-14 w-14 items-center justify-center rounded-full',
+              'bg-accent text-accent-foreground',
+              'shadow-accent/20 shadow-lg',
+              'backdrop-blur-md will-change-transform',
+              'hover:bg-accent/90',
+              'focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background',
+              // Pulse animation for first visit
+              showPulse && 'animate-pulse'
+            )}
+            aria-label={isExpanded ? 'Close quick actions (press F or Escape)' : 'Open quick actions (press F)'}
             aria-expanded={isExpanded}
             type="button"
           >
@@ -160,8 +353,8 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
               <MainIcon className="h-6 w-6" aria-hidden="true" />
             </motion.div>
 
-            {/* Badge for main FAB (if needed in future) */}
-            {mainFAB.badge !== undefined && mainFAB.badge > 0 && (
+            {/* Notification badge */}
+            {unreadCount > 0 && !isExpanded && (
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -170,14 +363,34 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
                   stiffness: 500,
                   damping: 20,
                 }}
-                className="-right-1 -top-1 absolute flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 font-bold text-[10px] text-white shadow-md"
+                className="-right-1 -top-1 absolute flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 font-bold text-[10px] text-destructive-foreground shadow-md"
               >
-                {mainFAB.badge > 99 ? '99+' : mainFAB.badge}
+                {unreadCount > 99 ? '99+' : unreadCount}
               </motion.span>
             )}
+
+            {/* Pulse ring animation */}
+            {showPulse && (
+              <span className="absolute inset-0 animate-ping rounded-full bg-accent/40" />
+            )}
           </motion.button>
-        )}
-      </AnimatePresence>
-    </div>
+        </div>
+
+        {/* Keyboard hint (desktop only, when expanded) */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="mt-2 text-center text-muted-foreground text-xs max-md:hidden"
+            >
+              Press <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">F</kbd> or{' '}
+              <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">Esc</kbd> to close
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
   );
 }

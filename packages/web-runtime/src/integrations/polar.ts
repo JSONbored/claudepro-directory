@@ -11,6 +11,7 @@
  * - POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED
  */
 
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import type { Database } from '@heyclaude/database-types';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
@@ -42,8 +43,8 @@ interface PolarCheckoutResponse {
 export async function createPolarCheckout(
   params: CreateCheckoutParams
 ): Promise<{ url: string; sessionId: string } | { error: string }> {
-  const polarAccessToken = process.env['POLAR_ACCESS_TOKEN'];
-  const polarEnvironment = process.env['POLAR_ENVIRONMENT'] || 'production';
+  const polarAccessToken = env.POLAR_ACCESS_TOKEN;
+  const polarEnvironment = env.POLAR_ENVIRONMENT || 'production';
 
   if (!polarAccessToken) {
     logger.error('Polar: POLAR_ACCESS_TOKEN not configured');
@@ -122,11 +123,11 @@ export function getPolarProductPriceId(
 ): string | null {
   const productPriceIds = {
     // One-time payments
-    'one-time_standard': process.env['POLAR_PRODUCT_PRICE_ONETIME_STANDARD'],
-    'one-time_featured': process.env['POLAR_PRODUCT_PRICE_ONETIME_FEATURED'],
+    'one-time_standard': (env as Record<string, unknown>)['POLAR_PRODUCT_PRICE_ONETIME_STANDARD'] as string | undefined,
+    'one-time_featured': (env as Record<string, unknown>)['POLAR_PRODUCT_PRICE_ONETIME_FEATURED'] as string | undefined,
     // Subscription payments
-    subscription_standard: process.env['POLAR_PRODUCT_PRICE_SUBSCRIPTION_STANDARD'],
-    subscription_featured: process.env['POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED'],
+    subscription_standard: (env as Record<string, unknown>)['POLAR_PRODUCT_PRICE_SUBSCRIPTION_STANDARD'] as string | undefined,
+    subscription_featured: (env as Record<string, unknown>)['POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED'] as string | undefined,
   };
 
   const key = `${plan}_${tier}` as keyof typeof productPriceIds;
@@ -155,7 +156,7 @@ export function validatePolarConfig(): { configured: boolean; missing?: string[]
     'POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED',
   ];
 
-  const missing = requiredVars.filter((varName) => !process.env[varName]);
+  const missing = requiredVars.filter((varName) => !(env as Record<string, unknown>)[varName]);
 
   if (missing.length > 0) {
     logger.warn('Polar configuration incomplete', { missing: missing.join(', ') });

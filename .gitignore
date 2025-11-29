@@ -112,3 +112,8 @@ packages/edge-runtime/src/utils/email/templates/template-map.json
 apps/web/src/lib/data/README.md
 config/tools/ESLINT_RULES.md
 packages/shared-runtime/src/privacy.ts
+config/tools/LINT-QUICK-REFERENCE.md
+config/tools/LINTING.md
+config/tools/TYPE-CHECK-QUICK-REFERENCE.md
+config/tools/TYPE-CHECKING.md
+config/tools/NEW-ESLINT-RULES.md

@@ -5,8 +5,12 @@
  * Do not add 'use server' directive - these are used in route handlers.
  */
 
-import { NextResponse } from 'next/server';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+
+import { generateRequestId, logger } from '../logging/server.ts';
 
 export const publicCorsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -57,6 +61,25 @@ const DEFAULT_CACHE_PRESETS = {
 
 export type CachePresetKey = keyof typeof DEFAULT_CACHE_PRESETS;
 
+/**
+ * Build cache headers for API responses with preset configurations.
+ *
+ * In development mode, adds `X-Cache-Debug` header showing the applied
+ * cache configuration for easier debugging.
+ *
+ * @param key - Cache preset key from DEFAULT_CACHE_PRESETS
+ * @param overrides - Optional TTL/stale overrides
+ * @returns Headers object with cache directives
+ *
+ * @example
+ * ```ts
+ * // Use preset
+ * const headers = buildCacheHeaders('search');
+ *
+ * // With overrides
+ * const headers = buildCacheHeaders('search', { ttl: 60 });
+ * ```
+ */
 export function buildCacheHeaders(
   key: CachePresetKey,
   overrides?: Partial<{ ttl: number; stale: number }>
@@ -66,11 +89,23 @@ export function buildCacheHeaders(
   const stale = Math.max(ttl, overrides?.stale ?? preset.stale);
   const value = `public, s-maxage=${ttl}, stale-while-revalidate=${stale}`;
 
-  return {
+  const headers: Record<string, string> = {
     'Cache-Control': value,
     'CDN-Cache-Control': value,
     'Vercel-CDN-Cache-Control': value,
   };
+
+  // Add debug header in development for cache configuration visibility
+  if (process.env.NODE_ENV === 'development') {
+    headers['X-Cache-Debug'] = JSON.stringify({
+      preset: key,
+      ttl,
+      stale,
+      hasOverrides: !!overrides,
+    });
+  }
+
+  return headers;
 }
 
 export function jsonResponse(
@@ -125,4 +160,151 @@ export function handleOptionsRequest(
       ...corsHeaders,
     },
   });
+}
+
+// =============================================================================
+// API Route Handler Factory
+// =============================================================================
+
+/**
+ * Context object provided to API route handlers
+ */
+export interface ApiRouteContext {
+  /** Unique request identifier for logging correlation */
+  requestId: string;
+  /** Scoped logger with request context */
+  logger: ReturnType<typeof logger.child>;
+  /** The original Next.js request */
+  request: NextRequest;
+  /** URL parsed from the request */
+  url: URL;
+  /** HTTP method (GET, POST, etc.) */
+  method: string;
+  /** Create an error response with proper logging */
+  errorResponse: (error: unknown, additionalContext?: Record<string, unknown>) => NextResponse;
+}
+
+/**
+ * Configuration for creating an API route handler
+ */
+export interface ApiRouteConfig {
+  /** Operation name for logging (e.g., 'SearchAPI', 'FacetsAPI') */
+  operation: string;
+  /** Route path for logging (e.g., '/api/search') */
+  route: string;
+  /** CORS headers to use (default: getOnlyCorsHeaders) */
+  cors?: Record<string, string>;
+}
+
+/**
+ * Handler function signature for API routes
+ */
+export type ApiRouteHandler = (ctx: ApiRouteContext) => Promise<NextResponse>;
+
+/**
+ * Creates a standardized API route handler with automatic:
+ * - Request ID generation
+ * - Scoped logging
+ * - Error handling and response formatting
+ * - CORS headers
+ *
+ * This factory eliminates ~15-20 lines of boilerplate per route handler.
+ *
+ * @param config - Route configuration
+ * @param handler - The route handler function
+ * @returns A Next.js route handler function
+ *
+ * @example
+ * ```ts
+ * // Before (verbose)
+ * export async function GET(request: NextRequest) {
+ *   const requestId = generateRequestId();
+ *   const reqLogger = logger.child({
+ *     requestId,
+ *     operation: 'SearchAPI',
+ *     route: '/api/search',
+ *     method: 'GET',
+ *   });
+ *   try {
+ *     // ... handler logic ...
+ *   } catch (error) {
+ *     return createErrorResponse(error, { ... });
+ *   }
+ * }
+ *
+ * // After (concise)
+ * export const GET = createApiHandler(
+ *   { operation: 'SearchAPI', route: '/api/search' },
+ *   async (ctx) => {
+ *     ctx.logger.info('Search request received');
+ *     // ... handler logic ...
+ *     return jsonResponse(data, 200, ctx.cors);
+ *   }
+ * );
+ * ```
+ */
+export function createApiHandler(
+  config: ApiRouteConfig,
+  handler: ApiRouteHandler
+): (request: NextRequest) => Promise<NextResponse> {
+  const { operation, route } = config;
+
+  return async (request: NextRequest): Promise<NextResponse> => {
+    const requestId = generateRequestId();
+    const method = request.method;
+    
+    const reqLogger = logger.child({
+      requestId,
+      operation,
+      route,
+      method,
+    });
+
+    const errorResponse = (
+      error: unknown,
+      additionalContext?: Record<string, unknown>
+    ): NextResponse => {
+      const normalized = normalizeError(error, `${operation} failed`);
+      reqLogger.error(`${operation} failed`, normalized, {
+        requestId,
+        ...additionalContext,
+      });
+      return NextResponse.json(
+        { error: normalized.message, requestId },
+        { status: 500, headers: buildSecurityHeaders() }
+      );
+    };
+
+    const ctx: ApiRouteContext = {
+      requestId,
+      logger: reqLogger,
+      request,
+      url: request.nextUrl,
+      method,
+      errorResponse,
+    };
+
+    try {
+      return await handler(ctx);
+    } catch (error) {
+      return errorResponse(error);
+    }
+  };
+}
+
+/**
+ * Creates a standardized OPTIONS handler for CORS preflight requests
+ *
+ * @param cors - CORS headers to use
+ * @returns A Next.js OPTIONS handler
+ *
+ * @example
+ * ```ts
+ * export const OPTIONS = createOptionsHandler(getWithAuthCorsHeaders);
+ * ```
+ */
+export function createOptionsHandler(
+  cors: Record<string, string> = getOnlyCorsHeaders
+): () => NextResponse {
+  return () => handleOptionsRequest(cors);
 }

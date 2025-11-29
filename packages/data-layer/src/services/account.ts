@@ -5,8 +5,9 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
+
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class AccountService {
@@ -26,7 +27,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_account_dashboard']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -47,7 +48,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_user_library']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -68,7 +69,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_user_dashboard']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -89,7 +90,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_collection_detail_with_items']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -110,7 +111,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_user_settings']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -131,7 +132,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -152,7 +153,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_user_companies']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -173,7 +174,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_user_sponsorships']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -194,7 +195,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_submission_dashboard']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -215,7 +216,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['is_bookmarked']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -236,7 +237,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['is_bookmarked_batch']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -257,7 +258,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['is_following']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -278,7 +279,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['is_following_batch']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -299,7 +300,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_user_activity_summary']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -320,7 +321,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_user_activity_timeline']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -341,7 +342,7 @@ export class AccountService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_user_identities']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;

@@ -1,7 +1,11 @@
 /** Runtime environment variable validation schema */
 
-import { getEnvObject, logger, normalizeError, nonEmptyString, urlString } from '@heyclaude/shared-runtime';
 import { z } from 'zod';
+
+import { getEnvObject } from '../env.ts';
+import { logError, logWarn } from '../logging.ts';
+
+import { nonEmptyString, urlString } from './primitives.ts';
 
 /**
  * Server-side environment variables schema
@@ -13,6 +17,16 @@ const serverEnvSchema = z
       .enum(['development', 'production', 'test'])
       .default('development')
       .describe('Application runtime environment mode'),
+
+    // Next.js framework variables
+    NEXT_PHASE: z
+      .string()
+      .optional()
+      .describe('Next.js build phase (e.g., "phase-production-build", "phase-development-server")'),
+    NEXT_RUNTIME: z
+      .enum(['nodejs', 'edge'])
+      .optional()
+      .describe('Next.js runtime environment (nodejs or edge)'),
 
     VERCEL: z.enum(['1']).optional().describe('Flag indicating if running on Vercel platform'),
     VERCEL_ENV: z
@@ -231,14 +245,14 @@ function validateEnv(): Env {
 
   if (!parsed.success) {
     const errorDetails = JSON.stringify(parsed.error.flatten().fieldErrors, null, 2);
-    const normalized = normalizeError(
-      new Error(`Invalid environment variables: ${errorDetails}`),
-      'Invalid environment variables detected'
-    );
-    logger.error('Invalid environment variables detected', normalized, {
+    const validationError = new Error(`Invalid environment variables: ${errorDetails}`);
+    // Fire-and-forget: validation must remain synchronous
+    void logError('Invalid environment variables detected', {
+      module: 'shared-runtime',
+      operation: 'validateEnv',
       errorDetails,
       phase: 'validation',
-    });
+    }, validationError);
 
     // In production, we should fail fast on invalid env vars
     if ((rawEnv['NODE_ENV'] ?? 'development') === 'production') {
@@ -246,7 +260,10 @@ function validateEnv(): Env {
     }
 
     // In development, warn but continue with defaults
-    logger.warn('Using default values for missing environment variables');
+    logWarn('Using default values for missing environment variables', {
+      module: 'shared-runtime',
+      operation: 'validateEnv',
+    });
     cachedEnv = envSchema.parse({
       ...rawEnv,
       NODE_ENV: rawEnv['NODE_ENV'] ?? 'development',
@@ -254,8 +271,9 @@ function validateEnv(): Env {
     return cachedEnv;
   }
 
-  // Production validation - server-side only for security
-  const isServer = typeof window === 'undefined';
+  // Production validation - server-side only for security  
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for SSR detection
+  const isServer = globalThis.window === undefined;
   const isBuildPhase =
     rawEnv['NEXT_PHASE'] === 'phase-production-build' ||
     rawEnv['NEXT_PHASE'] === 'phase-production-server';
@@ -267,8 +285,14 @@ function validateEnv(): Env {
 
     if (missingRequiredEnvs.length > 0) {
       const missingVars = missingRequiredEnvs.join(', ');
-
-      logger.error('Missing required production environment variables for security features');
+      const missingEnvError = new Error(`Missing required production environment variables: ${missingVars}`);
+      
+      // Fire-and-forget: log the error before throwing
+      void logError('Missing required production environment variables for security features', {
+        module: 'shared-runtime',
+        operation: 'validateEnv',
+        missingVars,
+      }, missingEnvError);
       throw new Error(
         `Missing required production environment variables: ${missingVars}. These are required for security and functionality in production.`
       );
@@ -319,7 +343,7 @@ function validateEnv(): Env {
  * Note: Not frozen to allow Next.js segment configuration exports to work
  * Nested config objects (securityConfig, buildConfig) are frozen for security
  */
-export const env = Object.freeze(validateEnv());
+export const env = validateEnv();
 
 export const isDevelopment = env.NODE_ENV === 'development';
 export const isProduction = env.NODE_ENV === 'production';
@@ -339,6 +363,6 @@ export const securityConfig = Object.freeze({
  * Production Security: Frozen to prevent runtime mutations
  */
 export const buildConfig = Object.freeze({
-  version: env.npm_package_version,
-  packageName: env.npm_package_name,
+  version: env['npm_package_version'],
+  packageName: env['npm_package_name'],
 } as const);

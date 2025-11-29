@@ -22,8 +22,8 @@ import { Button } from '@heyclaude/web-runtime/ui';
 import { Card } from '@heyclaude/web-runtime/ui';
 import { Label } from '@heyclaude/web-runtime/ui';
 
+import { StarDisplay } from '@heyclaude/web-runtime/ui';
 import { ReviewRatingHistogram } from './review-rating-histogram';
-import { StarDisplay } from './shared/star-display';
 
 /**
  * Complete review section with list, pagination, and sorting

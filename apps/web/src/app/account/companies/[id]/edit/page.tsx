@@ -2,7 +2,7 @@
  * Edit Company Page - Update existing company via edge function
  */
 
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -20,7 +20,7 @@ import { Button,
   CardDescription,
   CardHeader,
   CardTitle } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -111,7 +111,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true} variant="outline">
+            <Button asChild variant="outline">
               <Link href={ROUTES.ACCOUNT_COMPANIES}>Back to companies</Link>
             </Button>
           </CardContent>

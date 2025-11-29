@@ -7,7 +7,7 @@ import {
 } from '../toolkit/cache.js';
 import { logger } from '../toolkit/logger.js';
 
-export type CacheCommand = 'info' | 'clear' | 'help';
+export type CacheCommand = 'clear' | 'help' | 'info';
 
 export interface CacheCliOptions {
   command?: CacheCommand;
@@ -33,7 +33,7 @@ Examples:
   heyclaude-cache clear "skill:*"
   heyclaude-cache clear "db-*"
 `,
-    { script: 'build-cache-cli' }
+    { command: 'build-cache-cli' }
   );
 }
 
@@ -52,21 +52,21 @@ export function runCacheCli(options: CacheCliOptions = {}): void {
       const stats = getCacheStats();
 
       if (stats.totalEntries > 0) {
-        logger.info('📊 Statistics:', { script: 'build-cache-cli' });
+        logger.info('📊 Statistics:', { command: 'build-cache-cli' });
         logger.info(`   Total Entries: ${stats.totalEntries}`, {
-          script: 'build-cache-cli',
+          command: 'build-cache-cli',
           totalEntries: stats.totalEntries,
         });
-        logger.info(`   Oldest: ${stats.oldestEntry || 'N/A'}`, {
-          script: 'build-cache-cli',
-          oldestEntry: stats.oldestEntry || 'N/A',
+        logger.info(`   Oldest: ${stats.oldestEntry ?? 'N/A'}`, {
+          command: 'build-cache-cli',
+          oldestEntry: stats.oldestEntry ?? 'N/A',
         });
-        logger.info(`   Newest: ${stats.newestEntry || 'N/A'}`, {
-          script: 'build-cache-cli',
-          newestEntry: stats.newestEntry || 'N/A',
+        logger.info(`   Newest: ${stats.newestEntry ?? 'N/A'}`, {
+          command: 'build-cache-cli',
+          newestEntry: stats.newestEntry ?? 'N/A',
         });
         logger.info(`   Total Build Time Saved: ${(stats.totalDuration / 1000).toFixed(1)}s`, {
-          script: 'build-cache-cli',
+          command: 'build-cache-cli',
           totalDuration: `${(stats.totalDuration / 1000).toFixed(1)}s`,
         });
       }
@@ -77,10 +77,10 @@ export function runCacheCli(options: CacheCliOptions = {}): void {
       if (arg) {
         const WILDCARD_PLACEHOLDER = '___WILDCARD___';
         const escapeForRegex = (value: string) =>
-          value.replace(/[\\^$.*+?()[\]{}|]/g, (match) =>
+          value.replaceAll(/[\\^$.*+?()[\]{}|]/g, (match) =>
             match === '*' ? WILDCARD_PLACEHOLDER : `\\${match}`
           );
-        const patternSource = escapeForRegex(arg).replace(
+        const patternSource = escapeForRegex(arg).replaceAll(
           new RegExp(WILDCARD_PLACEHOLDER, 'g'),
           '.*'
         );
@@ -90,46 +90,35 @@ export function runCacheCli(options: CacheCliOptions = {}): void {
 
         if (matchingKeys.length === 0) {
           logger.info(`ℹ️  No caches matching pattern: ${arg}`, {
-            script: 'build-cache-cli',
+            command: 'build-cache-cli',
             pattern: arg,
           });
           return;
         }
 
         logger.info(`🗑️  Clearing ${matchingKeys.length} cache(s) matching: ${arg}`, {
-          script: 'build-cache-cli',
+          command: 'build-cache-cli',
           pattern: arg,
           count: matchingKeys.length,
         });
         for (const key of matchingKeys) {
           clearHash(key);
-          logger.info(`   ✓ Cleared: ${key}`, { script: 'build-cache-cli', clearedKey: key });
+          logger.info(`   ✓ Cleared: ${key}`, { command: 'build-cache-cli', clearedKey: key });
         }
       } else {
         const stats = getCacheStats();
         if (stats.totalEntries === 0) {
-          logger.info('ℹ️  Cache already empty\n', { script: 'build-cache-cli' });
+          logger.info('ℹ️  Cache already empty\n', { command: 'build-cache-cli' });
           return;
         }
 
         clearAllHashes();
         logger.info(`✅ Cleared all ${stats.totalEntries} cache(s)\n`, {
-          script: 'build-cache-cli',
+          command: 'build-cache-cli',
           clearedCount: stats.totalEntries,
         });
       }
       break;
-    }
-
-    default: {
-      logger.error(`❌ Unknown command: ${command}`, undefined, {
-        script: 'build-cache-cli',
-        command,
-      });
-      logger.error('   Run with --help to see available commands\n', undefined, {
-        script: 'build-cache-cli',
-      });
-      throw new Error(`Unknown cache CLI command: ${command}`);
     }
   }
 }

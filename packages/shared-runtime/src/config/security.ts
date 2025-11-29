@@ -1,4 +1,4 @@
-import { APP_CONFIG } from '@heyclaude/shared-runtime';
+import { APP_CONFIG } from './app.ts';
 
 export const SECURITY_CONFIG = {
   headers: {

@@ -5,14 +5,16 @@
 
 import 'server-only';
 
+import { env } from '@heyclaude/shared-runtime/schemas/env';
+
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@heyclaude/database-types';
 
 type SupabaseAnonClient = ReturnType<typeof createSupabaseClient<Database>>;
 
 export function createSupabaseAnonClient(): SupabaseAnonClient {
-  const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'] || process.env['SUPABASE_URL'];
-  const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] || process.env['SUPABASE_ANON_KEY'];
+  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl) {
     throw new Error(

@@ -9,14 +9,14 @@
 # Read-only, high-traffic, synchronous endpoints.
 [functions.public-api]
 verify_jwt = false
-import_map = "./deno.json"
+import_map = "./functions/public-api/deno.json"
 
 # 2. FLUX STATION MONOLITH
 # Write-heavy, async processing, webhooks, email, queues.
 [functions.flux-station]
 verify_jwt = false
-import_map = "./deno.json"
+import_map = "./functions/flux-station/deno.json"
 
 [functions.mcp-directory]
 verify_jwt = true
-import_map = "./deno.json"
+import_map = "./functions/mcp-directory/deno.json"

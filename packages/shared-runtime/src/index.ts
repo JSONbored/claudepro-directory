@@ -1,3 +1,37 @@
+/**
+ * @heyclaude/shared-runtime - Environment-Agnostic Utilities
+ *
+ * This package provides pure TypeScript utilities that work across all
+ * JavaScript runtimes (Node.js, Deno, browser, edge). It has NO React,
+ * Next.js, or other framework dependencies.
+ *
+ * ## What Belongs Here
+ *
+ * - Configuration constants (APP_CONFIG, ROUTES, etc.)
+ * - Pure utility functions (validation, sanitization, formatting)
+ * - Error handling and normalization
+ * - Logging infrastructure (pino-based)
+ * - Security utilities (headers, crypto)
+ * - Schema definitions (zod schemas)
+ *
+ * ## What Does NOT Belong Here
+ *
+ * - React hooks or components → @heyclaude/web-runtime
+ * - Next.js specific utilities → @heyclaude/web-runtime/server
+ * - Database operations → @heyclaude/data-layer
+ * - Server actions → @heyclaude/web-runtime/actions
+ *
+ * ## Key Exports
+ *
+ * - `normalizeError(error, fallback)` - Normalize any error to Error object
+ * - `logger` - Structured pino logger instance
+ * - `APP_CONFIG` - Application configuration constants
+ * - `ROUTES` - Application route definitions
+ * - `buildSecurityHeaders()` - HTTP security headers
+ *
+ * @packageDocumentation
+ */
+
 export * from './jsonld.ts';
 export * from './security-headers.ts';
 export * from './input-validation.ts';

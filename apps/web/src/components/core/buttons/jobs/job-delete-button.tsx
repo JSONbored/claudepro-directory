@@ -5,6 +5,7 @@
  * Uses deleteJob server action (calls delete_job RPC)
  */
 
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { deleteJob } from '@heyclaude/web-runtime/actions';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Trash } from '@heyclaude/web-runtime/icons';
@@ -63,7 +64,7 @@ export function JobDeleteButton({
       } catch (error) {
         // Error already logged by useLoggedAsync
         toasts.error.fromError(
-          error instanceof Error ? error : new Error('Failed to delete job'),
+          normalizeError(error, 'Failed to delete job'),
           'Failed to delete job'
         );
         setIsDeleting(false);

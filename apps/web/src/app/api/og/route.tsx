@@ -1,6 +1,6 @@
 import { OG_DEFAULTS, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
 import { ImageResponse } from 'next/og';
-import type { NextRequest } from 'next/server';
+import  { type NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
@@ -67,8 +67,7 @@ export function GET(request: NextRequest) {
           {title}
         </h1>
 
-        {description && (
-          <p
+        {description ? <p
             style={{
               fontSize: '32px',
               color: '#9ca3af',
@@ -78,8 +77,7 @@ export function GET(request: NextRequest) {
             }}
           >
             {description}
-          </p>
-        )}
+          </p> : null}
       </div>
 
       <div

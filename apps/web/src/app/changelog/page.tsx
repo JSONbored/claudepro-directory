@@ -23,14 +23,17 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, NavLink  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
+
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
@@ -41,9 +44,6 @@ const NewsletterCTAVariant = dynamicImport(
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
-
-import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
 
 /**
  * ISR: 1 hour (3600s) - Changelog list updates periodically
@@ -162,7 +162,7 @@ export default async function ChangelogPage() {
 
     // Get category counts from metadata (database-calculated, not client-side)
     // Cast category_counts from Json to Record<string, number>
-    const categoryCountsJson = overview.metadata?.category_counts as Record<string, number> | null;
+    const categoryCountsJson = overview.metadata?.category_counts as null | Record<string, number>;
     const categoryCounts: Record<string, number> = {
       All: overview.metadata?.total_entries ?? 0,
       Added: categoryCountsJson?.['Added'] ?? 0,
@@ -205,8 +205,7 @@ export default async function ChangelogPage() {
                 total updates
               </div>
               {publishedEntries.length > 0 &&
-                publishedEntries[0]?.release_date && (
-                  <div>
+                publishedEntries[0]?.release_date ? <div>
                     Latest:{' '}
                     <time
                       dateTime={publishedEntries[0].release_date}
@@ -218,8 +217,7 @@ export default async function ChangelogPage() {
                         day: 'numeric',
                       })}
                     </time>
-                  </div>
-                )}
+                  </div> : null}
             </div>
           </div>
 
@@ -228,7 +226,7 @@ export default async function ChangelogPage() {
         </div>
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
-        <section className={'mx-auto px-4 py-12'}>
+        <section className="mx-auto px-4 py-12">
           <NewsletterCTAVariant
             source="content_page"
             variant="hero"

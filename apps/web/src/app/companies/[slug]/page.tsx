@@ -4,7 +4,7 @@
  * Leverages get_company_profile() RPC + company_job_stats materialized view
  */
 
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -22,7 +22,7 @@ import { UI_CLASSES, UnifiedBadge,
   CardDescription,
   CardHeader,
   CardTitle  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -40,9 +40,9 @@ function SafeWebsiteLink({
   children,
   className,
 }: {
-  url: string | null | undefined;
   children: React.ReactNode;
   className?: string;
+  url: null | string | undefined;
 }) {
   const safeUrl = getSafeWebsiteUrl(url);
   if (!safeUrl) return null;
@@ -59,7 +59,7 @@ function SafeWebsiteLink({
  * Only allows HTTPS URLs (or HTTP for localhost in development)
  * Returns canonicalized URL or null if invalid
  */
-function getSafeWebsiteUrl(url: string | null | undefined): string | null {
+function getSafeWebsiteUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
 
   try {
@@ -168,10 +168,10 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
     <>
       <StructuredData route={`/companies/${slug}`} />
 
-      <div className={'min-h-screen bg-background'}>
+      <div className="min-h-screen bg-background">
         {/* Company Header */}
         <section className="relative border-border border-b">
-          <div className={'container mx-auto px-4 py-12'}>
+          <div className="container mx-auto px-4 py-12">
             <div className="flex items-start gap-6">
               {company.logo ? (
                 <Image
@@ -180,7 +180,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   width={96}
                   height={96}
                   className="h-24 w-24 rounded-lg border-4 border-background object-cover"
-                  priority={true}
+                  priority
                 />
               ) : (
                 <div className="flex h-24 w-24 items-center justify-center rounded-lg border-4 border-background bg-accent font-bold text-2xl">
@@ -191,18 +191,14 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
               <div className="flex-1">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
                   <h1 className="font-bold text-3xl">{company.name}</h1>
-                  {company.featured && (
-                    <UnifiedBadge variant="base" style="default">
+                  {company.featured ? <UnifiedBadge variant="base" style="default">
                       Featured
-                    </UnifiedBadge>
-                  )}
+                    </UnifiedBadge> : null}
                 </div>
 
-                {company.description && (
-                  <p className={'mt-2 max-w-3xl text-muted-foreground'}>{company.description}</p>
-                )}
+                {company.description ? <p className="mt-2 max-w-3xl text-muted-foreground">{company.description}</p> : null}
 
-                <div className={'mt-4 flex flex-wrap items-center gap-4 text-sm'}>
+                <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
                   <SafeWebsiteLink
                     url={company.website}
                     className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.LINK_ACCENT}`}
@@ -211,31 +207,25 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                     Website
                   </SafeWebsiteLink>
 
-                  {company.industry && (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.industry ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <TrendingUp className="h-4 w-4" />
                       {company.industry}
-                    </div>
-                  )}
+                    </div> : null}
 
                   {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
-                  {company.size && (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.size ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Users className="h-4 w-4" />
                       {company.size}
-                    </div>
-                  )}
+                    </div> : null}
 
-                  {company.using_cursor_since && (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.using_cursor_since ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Calendar className="h-4 w-4" />
                       Using Claude since{' '}
                       {new Date(company.using_cursor_since).toLocaleDateString('en-US', {
                         month: 'short',
                         year: 'numeric',
                       })}
-                    </div>
-                  )}
+                    </div> : null}
                 </div>
               </div>
             </div>
@@ -243,7 +233,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
         </section>
 
         {/* Content */}
-        <section className={'container mx-auto px-4 py-12'}>
+        <section className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
             {/* Main content - Active jobs */}
             <div className="space-y-6">
@@ -255,10 +245,10 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
               {!active_jobs || active_jobs.length === 0 ? (
                 <Card>
-                  <CardContent className={'flex flex-col items-center py-16'}>
+                  <CardContent className="flex flex-col items-center py-16">
                     <Briefcase className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <h3 className={'mb-2 font-semibold text-xl'}>No Active Positions</h3>
-                    <p className={'mb-6 max-w-md text-center text-muted-foreground'}>
+                    <h3 className="mb-2 font-semibold text-xl">No Active Positions</h3>
+                    <p className="mb-6 max-w-md text-center text-muted-foreground">
                       This company doesn't have any job openings at the moment. Check back later!
                     </p>
                     <Link href={ROUTES.JOBS}>
@@ -272,17 +262,17 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   {active_jobs
                     .filter((job): job is typeof job & {
-                      id: string;
-                      slug: string;
-                      title: string;
+                      click_count: number;
                       company: string;
-                      workplace: Database['public']['Enums']['workplace_type'];
                       experience: Database['public']['Enums']['experience_level'];
+                      expires_at: string;
+                      id: string;
                       plan: Database['public']['Enums']['job_plan'];
                       posted_at: string;
-                      expires_at: string;
+                      slug: string;
+                      title: string;
                       view_count: number;
-                      click_count: number;
+                      workplace: Database['public']['Enums']['workplace_type'];
                     } => {
                       return Boolean(
                         job.id &&
@@ -350,21 +340,17 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                     <span className="font-semibold text-green-600">{stats?.active_jobs ?? 0}</span>
                   </div>
 
-                  {stats && (stats.remote_jobs ?? 0) > 0 && (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  {stats && (stats.remote_jobs ?? 0) > 0 ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Remote Positions</span>
                       <span className="font-semibold">{stats.remote_jobs ?? 0}</span>
-                    </div>
-                  )}
+                    </div> : null}
 
-                  {stats?.avg_salary_min && (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  {stats?.avg_salary_min ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
                       <span className="font-semibold">
                         ${(stats.avg_salary_min / 1000).toFixed(0)}k+
                       </span>
-                    </div>
-                  )}
+                    </div> : null}
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Views</span>
@@ -373,8 +359,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                     </span>
                   </div>
 
-                  {stats?.latest_job_posted_at && (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  {stats?.latest_job_posted_at ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
                       <span className="font-semibold text-sm">
                         {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
@@ -383,8 +368,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                           year: 'numeric',
                         })}
                       </span>
-                    </div>
-                  )}
+                    </div> : null}
                 </CardContent>
               </Card>
 

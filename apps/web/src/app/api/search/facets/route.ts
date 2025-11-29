@@ -9,7 +9,7 @@ import {
   buildCacheHeaders,
   handleOptionsRequest,
 } from '@heyclaude/web-runtime/server';
-import type { NextRequest } from 'next/server';
+import  { type NextRequest } from 'next/server';
 
 const CORS = getWithAuthCorsHeaders;
 
@@ -43,10 +43,10 @@ export async function GET(_request: NextRequest) {
     }
 
     interface FacetRow {
-      category: string | null;
-      content_count: number | null;
-      all_tags?: readonly string[] | null;
-      authors?: readonly string[] | null;
+      all_tags?: null | readonly string[];
+      authors?: null | readonly string[];
+      category: null | string;
+      content_count: null | number;
     }
     const rows: FacetRow[] = Array.isArray(data) ? (data as FacetRow[]) : [];
     const facets = rows.map((item) => ({

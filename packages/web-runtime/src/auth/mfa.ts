@@ -142,6 +142,13 @@ export async function enrollTOTPFactor(
       };
     }
 
+    // Log successful MFA enrollment (audit trail)
+    logger.info('MFA: TOTP factor enrolled', {
+      audit: true, // Structured tag for audit trail filtering
+      factorId: data.id,
+      operation: 'mfa_enroll',
+    });
+
     return {
       data: {
         id: data.id,
@@ -213,9 +220,23 @@ export async function verifyMFAChallenge(
 
     if (error) {
       const normalized = normalizeError(error, 'Failed to verify MFA challenge');
-      logger.error('MFA: verify failed', normalized);
+      logger.warn('MFA: verification failed', {
+        securityEvent: true, // Structured tag for security event filtering
+        factorId,
+        challengeId,
+        operation: 'mfa_verify_failed',
+        error: normalized.message,
+      });
       return { success: false, error: normalized };
     }
+
+    // Log successful MFA verification (audit trail)
+    logger.info('MFA: verification successful', {
+      audit: true, // Structured tag for audit trail filtering
+      factorId,
+      challengeId,
+      operation: 'mfa_verify_success',
+    });
 
     return { success: true, error: null };
   } catch (error) {
@@ -240,6 +261,14 @@ export async function unenrollMFAFactor(
       logger.error('MFA: unenroll failed', normalized);
       return { success: false, error: normalized };
     }
+
+    // Log successful MFA unenrollment (audit trail - security-relevant change)
+    logger.info('MFA: factor unenrolled', {
+      audit: true, // Structured tag for audit trail filtering
+      securityEvent: true, // Also a security event (reducing security level)
+      factorId,
+      operation: 'mfa_unenroll',
+    });
 
     return { success: true, error: null };
   } catch (error) {

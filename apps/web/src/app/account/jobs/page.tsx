@@ -1,7 +1,7 @@
-import type { Database } from '@heyclaude/database-types';
-import type { JobStatus } from '@heyclaude/web-runtime';
+import { type Database } from '@heyclaude/database-types';
+import { type JobStatus } from '@heyclaude/web-runtime';
 import { formatRelativeDate } from '@heyclaude/web-runtime/core';
-import type { JobBillingSummaryEntry } from '@heyclaude/web-runtime/data';
+import { type JobBillingSummaryEntry } from '@heyclaude/web-runtime/data';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -25,7 +25,7 @@ import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
   CardDescription,
   CardHeader,
   CardTitle, Alert, AlertDescription, AlertTitle   } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
@@ -65,7 +65,7 @@ function toTitleCase(value: string): string {
     .join(' ');
 }
 
-function humanizeStatus(value?: string | null): string {
+function humanizeStatus(value?: null | string): string {
   if (!value) return 'Unknown';
   return toTitleCase(value);
 }
@@ -97,7 +97,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface MyJobsPageProperties {
-  searchParams?: Promise<{ payment?: string; job_id?: string }>;
+  searchParams?: Promise<{ job_id?: string; payment?: string; }>;
 }
 
 export default async function MyJobsPage({ searchParams }: MyJobsPageProperties) {
@@ -132,7 +132,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
             <CardDescription>Please sign in to manage your job listings.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -186,7 +186,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true} variant="outline">
+            <Button asChild variant="outline">
               <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
             </Button>
           </CardContent>
@@ -199,7 +199,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   // The RPC returns jobs as Json | null, so we need runtime validation
   const jobs: Array<Database['public']['Tables']['jobs']['Row']> = (() => {
     const jobsData = data?.jobs;
-    if (!(jobsData && Array.isArray(jobsData))) {
+    if (jobsData === undefined || jobsData === null || !Array.isArray(jobsData)) {
       return [];
     }
 
@@ -336,7 +336,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
             {jobs.length} {jobs.length === 1 ? 'listing' : 'listings'}
           </p>
         </div>
-        <Button asChild={true}>
+        <Button asChild>
           <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
             <Plus className="mr-2 h-4 w-4" />
             Post a Job
@@ -346,13 +346,13 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
 
       {jobs.length === 0 ? (
         <Card>
-          <CardContent className={'flex flex-col items-center py-12'}>
+          <CardContent className="flex flex-col items-center py-12">
             <Briefcase className="mb-4 h-12 w-12 text-muted-foreground" />
             <h3 className="mb-2 font-semibold text-xl">No job listings yet</h3>
-            <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
+            <p className="mb-4 max-w-md text-center text-muted-foreground">
               Post your first job listing to reach talented developers in the Claude community
             </p>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
                 <Plus className="mr-2 h-4 w-4" />
                 Post Your First Job
@@ -419,16 +419,15 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                 </CardHeader>
 
                 <CardContent>
-                  <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
+                  <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Eye className="h-4 w-4" />
                       {job.view_count ?? 0} views
                     </div>
-                    {job.posted_at && <div>Posted {formatRelativeDate(job.posted_at)}</div>}
-                    {job.expires_at && <div>Expires {formatRelativeDate(job.expires_at)}</div>}
+                    {job.posted_at ? <div>Posted {formatRelativeDate(job.posted_at)}</div> : null}
+                    {job.expires_at ? <div>Expires {formatRelativeDate(job.expires_at)}</div> : null}
                   </div>
-                  {showBillingCard && (
-                    <div className="mb-4 rounded-lg border border-muted border-dashed bg-muted/20 p-3 text-xs sm:text-sm">
+                  {showBillingCard ? <div className="mb-4 rounded-lg border border-muted border-dashed bg-muted/20 p-3 text-xs sm:text-sm">
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                         <span className="font-semibold text-foreground">Billing</span>
                         <UnifiedBadge variant="base" style="outline" className="capitalize">
@@ -436,36 +435,33 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                         </UnifiedBadge>
                       </div>
                       <div className="mt-2 space-y-1 text-muted-foreground">
-                        {planPriceLabel && <p>Price: {planPriceLabel}</p>}
-                        {renewalCopy && <p>{renewalCopy}</p>}
-                        {paymentCopy && <p>{paymentCopy}</p>}
+                        {planPriceLabel ? <p>Price: {planPriceLabel}</p> : null}
+                        {renewalCopy ? <p>{renewalCopy}</p> : null}
+                        {paymentCopy ? <p>{paymentCopy}</p> : null}
                       </div>
-                    </div>
-                  )}
+                    </div> : null}
 
                   <div className={UI_CLASSES.FLEX_GAP_2}>
-                    <Button variant="outline" size="sm" asChild={true}>
+                    <Button variant="outline" size="sm" asChild>
                       <Link href={`/account/jobs/${job.id}/edit`}>
                         <Edit className="mr-1 h-3 w-3" />
                         Edit
                       </Link>
                     </Button>
 
-                    <Button variant="outline" size="sm" asChild={true}>
+                    <Button variant="outline" size="sm" asChild>
                       <Link href={`/account/jobs/${job.id}/analytics`}>
                         <BarChart className="mr-1 h-3 w-3" />
                         Analytics
                       </Link>
                     </Button>
 
-                    {job.slug && (
-                      <Button variant="ghost" size="sm" asChild={true}>
+                    {job.slug ? <Button variant="ghost" size="sm" asChild>
                         <Link href={`/jobs/${job.slug}`}>
                           <ExternalLink className="mr-1 h-3 w-3" />
                           View
                         </Link>
-                      </Button>
-                    )}
+                      </Button> : null}
 
                     {(() => {
                       const status = job.status;

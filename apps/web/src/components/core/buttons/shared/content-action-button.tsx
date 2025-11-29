@@ -1,14 +1,14 @@
 'use client';
 
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { logClientWarning } from '@heyclaude/web-runtime/core';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useLoggedAsync, useButtonSuccess } from '@heyclaude/web-runtime/hooks';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { Check, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
-import { useButtonSuccess } from '@/src/hooks/use-button-success';
 
 interface ContentActionButtonProps extends ButtonStyleProps {
   url: string;
@@ -106,7 +106,7 @@ export function ContentActionButton({
       );
     } catch (error) {
       // Error already logged by useLoggedAsync, just show user-friendly message
-      toasts.raw.error(error instanceof Error ? error.message : 'Action failed');
+      toasts.raw.error(normalizeError(error, 'Action failed').message);
     } finally {
       setIsLoading(false);
     }

@@ -1,9 +1,12 @@
 #!/usr/bin/env node
+import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { verifyRoutes } from '../commands/verify-routes.js';
 import { logger } from '../toolkit/logger.js';
 
-verifyRoutes().catch((err: unknown) => {
-  const errorObj = err instanceof Error ? err : new Error(String(err));
-  logger.error('Verify routes error', errorObj);
+try {
+  verifyRoutes();
+} catch (error) {
+  logger.error('Verify routes error', normalizeError(error, 'Verify routes failed'), { command: 'verify-routes' });
   process.exit(1);
-});
+}

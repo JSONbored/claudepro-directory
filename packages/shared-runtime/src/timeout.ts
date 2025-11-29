@@ -26,11 +26,9 @@ export async function withTimeout<T>(
 ): Promise<T> {
   // Handle zero or negative timeouts - reject immediately
   if (timeoutMs <= 0) {
-    return Promise.reject(
-      new TimeoutError(
-        errorMessage ?? `Operation timed out after ${timeoutMs}ms`,
-        timeoutMs
-      )
+    throw new TimeoutError(
+      errorMessage ?? `Operation timed out after ${timeoutMs}ms`,
+      timeoutMs
     );
   }
 
@@ -50,7 +48,7 @@ export async function withTimeout<T>(
  * Default timeout presets
  */
 export const TIMEOUT_PRESETS = Object.freeze({
-  rpc: 30000, // 30 seconds for database RPC calls
-  external: 10000, // 10 seconds for external API calls
-  storage: 15000, // 15 seconds for storage operations
+  rpc: 30_000, // 30 seconds for database RPC calls
+  external: 10_000, // 10 seconds for external API calls
+  storage: 15_000, // 15 seconds for storage operations
 } as const);

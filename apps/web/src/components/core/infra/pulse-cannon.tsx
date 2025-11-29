@@ -5,11 +5,10 @@
  * Zero initial bundle impact - all services lazy-loaded
  */
 
+import { isProduction } from '@heyclaude/shared-runtime/schemas/env';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-
-const isProduction = process.env.NODE_ENV === 'production';
 
 const VercelPulse = dynamic(
   () =>

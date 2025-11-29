@@ -6,7 +6,7 @@
 
 'use client';
 
-import { getContactChannels, logger } from '@heyclaude/web-runtime/core';
+import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
 import {
@@ -28,7 +28,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@heyclaude/web-runtime/ui';
-import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
+import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
 
 interface NavLinkProps {
   href: string;
@@ -85,19 +85,12 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
   });
 
   useEffect(() => {
-    getAnimationConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setSpringDefault({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.default.stiffness'],
-          damping: config['animation.spring.default.damping'],
-        });
-      })
-      .catch((error) => {
-        logger.error('NavigationMobile: failed to load animation config', error);
-      });
+    const config = getAnimationConfig();
+    setSpringDefault({
+      type: 'spring' as const,
+      stiffness: config['animation.spring.default.stiffness'],
+      damping: config['animation.spring.default.damping'],
+    });
   }, []);
 
   return (

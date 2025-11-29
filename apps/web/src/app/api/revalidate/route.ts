@@ -14,11 +14,21 @@
  *
  * Runtime: Node.js (required for revalidatePath/revalidateTag)
  */
-export const runtime = 'nodejs';
-
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { generateRequestId, logger, normalizeError, handleApiError } from '@heyclaude/web-runtime/logging/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+
+export const runtime = 'nodejs';
+
+// Zod schema for revalidate request
+const RevalidateRequestSchema = z.object({
+  secret: z.string(),
+  category: z.string().optional(),
+  slug: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
 
 export async function POST(request: NextRequest) {
   // Generate single requestId for this API request
@@ -33,19 +43,35 @@ export async function POST(request: NextRequest) {
   });
 
   try {
-    const body = (await request.json()) as {
-      secret?: unknown;
-      category?: unknown;
-      slug?: unknown;
-      tags?: unknown;
-    };
-    const { secret, category, slug, tags } = body;
+    // Validate request body immediately with Zod (no intermediate unsafe variable)
+    const parseResult = RevalidateRequestSchema.safeParse(await request.json());
+    
+    if (!parseResult.success) {
+      // Serialize Zod errors for logging (convert to JSON-serializable format)
+      const zodErrors = parseResult.error.issues.map(issue => ({
+        code: issue.code,
+        path: issue.path.join('.'),
+        message: issue.message,
+      }));
+      
+      reqLogger.warn('Revalidate webhook invalid payload', {
+        zodErrors,
+      });
+      return NextResponse.json(
+        { error: 'Invalid request payload', details: parseResult.error.issues },
+        { status: 400 }
+      );
+    }
+    
+    const { secret, category, slug, tags } = parseResult.data;
 
     // Verify secret from body (PostgreSQL trigger sends in payload)
-    if (!secret || secret !== process.env['REVALIDATE_SECRET']) {
+    if (!secret || secret !== env.REVALIDATE_SECRET) {
       reqLogger.warn('Revalidate webhook unauthorized', {
-        hasSecret: !!secret,
+        hasSecret: Boolean(secret),
+        // eslint-disable-next-line architectural-rules/warn-pii-field-logging -- IP address necessary for security audit trail
         ip: request.headers.get('x-forwarded-for') ?? 'unknown',
+        securityEvent: true,
       });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -54,12 +80,12 @@ export async function POST(request: NextRequest) {
     const invalidatedTags: string[] = [];
 
     // Path revalidation (existing logic)
-    if (category && typeof category === 'string') {
+    if (category) {
       // Always revalidate homepage (shows recent content)
       paths.push('/', `/${category}`);
 
       // Revalidate detail page if slug provided
-      if (slug && typeof slug === 'string') {
+      if (slug) {
         paths.push(`/${category}/${slug}`);
       }
 
@@ -70,35 +96,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Tag invalidation (new logic)
-    if (tags && Array.isArray(tags)) {
-      // Validate all tags are strings
-      const invalidTags = tags.filter((tag) => typeof tag !== 'string');
-      if (invalidTags.length > 0) {
-        reqLogger.warn('Revalidate webhook: invalid tags', {
-          invalidTags,
-        });
-        return NextResponse.json(
-          { error: 'All tags must be strings', invalidTags },
-          { status: 400 }
-        );
-      }
-
-      // Invalidate each tag (tags are validated as strings above)
+    if (tags && tags.length > 0) {
+      // Invalidate each tag (already validated as strings by Zod)
+      // Using 'max' profile for stale-while-revalidate semantics (recommended in Next.js 16)
       for (const tag of tags) {
-        if (typeof tag === 'string') {
-          revalidateTag(tag, 'default');
-          invalidatedTags.push(tag);
-        }
+        revalidateTag(tag, 'max');
+        invalidatedTags.push(tag);
       }
     }
 
     // If neither category nor tags provided, return error
-    const tagsArray = Array.isArray(tags) ? tags : [];
-    if (!category && tagsArray.length === 0) {
+    if (!category && (!tags || tags.length === 0)) {
       reqLogger.warn('Revalidate webhook invalid payload', {
-        hasCategory: !!category,
-        hasTags: Array.isArray(tags),
-        bodyKeys: Object.keys(body),
+        hasCategory: Boolean(category),
+        hasTags: Boolean(tags),
+        securityEvent: true,
       });
       return NextResponse.json(
         { error: 'Missing category or tags in webhook payload' },
@@ -108,8 +120,10 @@ export async function POST(request: NextRequest) {
 
     // Structured logging with revalidation targets and cache tags
     reqLogger.info('Revalidated successfully', {
-      ...(typeof category === 'string' ? { category } : {}),
-      ...(typeof slug === 'string' ? { slug } : {}),
+      operation: 'cache_revalidation',
+      securityEvent: true,
+      ...(category ? { category } : {}),
+      ...(slug ? { slug } : {}),
       paths, // Array of revalidated paths - better for querying
       pathCount: paths.length,
       tags: invalidatedTags.length > 0 ? invalidatedTags : undefined, // Array support enables better log querying

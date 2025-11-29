@@ -3,7 +3,7 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import type { SearchFilters } from '@heyclaude/web-runtime/core';
+import { type SearchFilters } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getHomepageData,
@@ -11,7 +11,7 @@ import {
   searchContent, getHomepageCategoryIds 
 } from '@heyclaude/web-runtime/data';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import type { Metadata } from 'next';
+import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { ContentSearchClient } from '@/src/components/content/content-search';
@@ -49,11 +49,11 @@ export const dynamic = 'force-dynamic';
 
 interface SearchPageProperties {
   searchParams: Promise<{
-    q?: string;
-    category?: string;
-    tags?: string;
     author?: string;
+    category?: string;
+    q?: string;
     sort?: string;
+    tags?: string;
   }>;
 }
 
@@ -82,18 +82,18 @@ async function SearchResultsSection({
   quickCategories,
   requestId,
 }: {
-  query: string;
-  filters: SearchFilters;
-  hasUserFilters: boolean;
   facetOptions: {
-    tags: string[];
     authors: string[];
     categories: ContentCategory[];
+    tags: string[];
   };
   fallbackSuggestions: Awaited<ReturnType<typeof searchContent>>;
-  quickTags: string[];
+  filters: SearchFilters;
+  hasUserFilters: boolean;
+  query: string;
   quickAuthors: string[];
   quickCategories: ContentCategory[];
+  quickTags: string[];
   requestId: string;
 }) {
   // Create request-scoped child logger using parent requestId for correlation
@@ -189,7 +189,7 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
   const hasQueryOrFilters = query.length > 0 || hasUserFilters;
 
   // Section: Search Facets
-  let facetAggregate: SearchFacetAggregate | null = null;
+  let facetAggregate: null | SearchFacetAggregate = null;
   let facetOptions = {
     tags: [] as string[],
     authors: [] as string[],
@@ -364,7 +364,7 @@ function deriveQuickCategories(
     .slice(0, limit);
 }
 
-function dedupeSuggestions<T extends { slug?: string | null }>(items: T[], limit: number): T[] {
+function dedupeSuggestions<T extends { slug?: null | string }>(items: T[], limit: number): T[] {
   if (!Array.isArray(items) || items.length === 0) {
     return [];
   }
@@ -373,7 +373,7 @@ function dedupeSuggestions<T extends { slug?: string | null }>(items: T[], limit
   const result: T[] = [];
 
   for (const item of items) {
-    const slug = (item as { slug?: string | null }).slug;
+    const slug = (item as { slug?: null | string }).slug;
     if (typeof slug === 'string' && slug.length > 0) {
       if (seen.has(slug)) {
         continue;

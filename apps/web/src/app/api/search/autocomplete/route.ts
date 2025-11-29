@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError, validateLimit, validateQueryString } from '@heyclaude/shared-runtime';
 import { generateRequestId, logger, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseAnonClient,
@@ -9,7 +9,7 @@ import { createSupabaseAnonClient,
   getWithAuthCorsHeaders,
   buildCacheHeaders,
   handleOptionsRequest } from '@heyclaude/web-runtime/server';
-import type { NextRequest } from 'next/server';
+import  { type NextRequest } from 'next/server';
 
 const CORS = getWithAuthCorsHeaders;
 
@@ -65,8 +65,8 @@ export async function GET(request: NextRequest) {
     }
 
     interface SuggestionRow {
-      suggestion: string | null;
-      search_count: number | null;
+      search_count: null | number;
+      suggestion: null | string;
     }
     const rows: SuggestionRow[] = Array.isArray(data) ? (data as SuggestionRow[]) : [];
     const suggestions = rows

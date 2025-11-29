@@ -4,7 +4,7 @@ import {
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/server';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { AuthBrandPanel } from '@/src/components/core/auth/auth-brand-panel';

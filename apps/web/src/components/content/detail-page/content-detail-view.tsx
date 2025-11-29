@@ -40,7 +40,7 @@ import { RecentlyViewedSidebar } from '@/src/components/features/navigation/rece
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailQuickActionsBar } from './detail-quick-actions-bar';
-import { DetailToc } from './detail-toc';
+import { SidebarToc } from './sidebar-toc';
 import { DetailSidebar } from './sidebar/navigation-sidebar';
 
 /**
@@ -162,6 +162,30 @@ async function SidebarWithRelated({
   return <DetailSidebar item={item} relatedItems={relatedItems} config={config} />;
 }
 
+/**
+ * Renders the unified detail page for a content item, including header, metadata, content/code sections,
+ * configuration, installation, examples, sidebars, and optional tabbed layout.
+ *
+ * This server-rendered component performs server-side preprocessing (syntax highlighting, language detection,
+ * filename generation, markdown heading extraction, and config formatting) in parallel before streaming the UI.
+ * It also suspends to stream view-count and related-items data when promises are provided.
+ *
+ * @param props.item - The content item row or expanded content detail used to build the page.
+ * @param props.relatedItems - Eagerly provided related items for the sidebar (optional).
+ * @param props.viewCount - Pre-fetched view count to render immediately (optional).
+ * @param props.copyCount - Pre-fetched copy count to render immediately (optional).
+ * @param props.relatedItemsPromise - Promise that resolves to related items; used to stream sidebar content (optional).
+ * @param props.viewCountPromise - Promise that resolves to the view count; used to stream metadata (optional).
+ * @param props.copyCountPromise - Promise that resolves to the copy count; used to stream metadata (optional).
+ * @param props.collectionSections - React node containing collection-specific sections to include in the main content (optional).
+ * @param props.tabsEnabled - When true and the category config defines tabs, the page renders a tabbed layout instead of the default single-column layout.
+ *
+ * @returns The fully rendered detail page JSX for the provided content item.
+ *
+ * @see getCategoryConfig
+ * @see highlightCode
+ * @see extractCodeBlocksFromMarkdown
+ */
 export async function UnifiedDetailPage({
   item,
   relatedItems = [],
@@ -715,7 +739,7 @@ export async function UnifiedDetailPage({
   const guideSectionsPromise = (async (): Promise<Array<
     Record<string, unknown> & { html?: string }
   > | null> => {
-    if (item.category !== Constants.public.Enums.content_category[7]) return null; // 'guides'
+    if (item.category !== Constants.public.Enums.content_category[8]) return null; // 'guides'
 
     const itemMetadata = getMetadata(item);
     if (!(itemMetadata?.['sections'] && Array.isArray(itemMetadata['sections']))) {
@@ -901,13 +925,69 @@ export async function UnifiedDetailPage({
           <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />
         )}
 
-        <TabbedDetailLayout
-          item={item}
-          config={serializableConfig as typeof config}
-          tabs={configuredTabs}
-          sectionData={sectionData}
-          relatedItems={relatedItems}
-        />
+        {/* Main content with sidebar */}
+        <div
+          className="container mx-auto px-4 py-8"
+          style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
+        >
+          <div id="detail-main-content" className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            {/* Primary content */}
+            <div className="lg:col-span-2">
+              <TabbedDetailLayout
+                item={item}
+                config={serializableConfig as typeof config}
+                tabs={configuredTabs}
+                sectionData={sectionData}
+                relatedItems={relatedItems}
+              />
+            </div>
+
+            {/* Sidebars - TOC + Related content + Recently Viewed */}
+            <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+              {/* On This Page - Supabase-style minimal TOC */}
+              {headingMetadata && headingMetadata.length >= 2 && (
+                <SidebarToc headings={headingMetadata} />
+              )}
+
+              {/* Detail Sidebar - Related content */}
+              {relatedItemsPromise && config ? (
+                <Suspense
+                  fallback={
+                    <DetailSidebar
+                      item={item}
+                      relatedItems={[]}
+                      config={{
+                        typeName: config.typeName,
+                        metadata: config.metadata,
+                      }}
+                    />
+                  }
+                >
+                  <SidebarWithRelated
+                    item={item}
+                    relatedItemsPromise={relatedItemsPromise}
+                    config={{
+                      typeName: config.typeName,
+                      metadata: config.metadata,
+                    }}
+                  />
+                </Suspense>
+              ) : config ? (
+                <DetailSidebar
+                  item={item}
+                  relatedItems={relatedItems}
+                  config={{
+                    typeName: config.typeName,
+                    metadata: config.metadata,
+                  }}
+                />
+              ) : null}
+
+              {/* Recently Viewed Sidebar */}
+              <RecentlyViewedSidebar />
+            </aside>
+          </div>
+        </div>
 
         <div className="container mx-auto px-4 pb-8">
           <NewsletterScrollTrigger
@@ -969,7 +1049,6 @@ export async function UnifiedDetailPage({
         <div id="detail-main-content" className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Primary content */}
           <div className="space-y-8 lg:col-span-2">
-            {shouldRenderDetailToc && <DetailToc headings={headingMetadata} />}
             {/* COLLECTIONS: Render collection-specific sections */}
             {collectionSections}
 
@@ -982,27 +1061,105 @@ export async function UnifiedDetailPage({
             {contentData && config && (
               <>
                 {Array.isArray(contentData) ? (
-                  // Render multiple code blocks from markdown
-                  contentData.map((block, index) => (
-                    <UnifiedSection
-                      key={`content-block-${index}`}
-                      variant="code"
-                      title={
-                        index === 0
-                          ? `${config.typeName} Content`
-                          : `${config.typeName} Content (${index + 1})`
+                  // Smart grouping: Merge adjacent code blocks into code_group sections
+                  (() => {
+                    // Type for grouped sections with explicit optional handling
+                    type GroupedSection = {
+                      type: 'single' | 'group';
+                      blocks: typeof contentData;
+                      markdownBefore: string | null;
+                    };
+                    
+                    const groupedSections: GroupedSection[] = [];
+                    let currentGroup: typeof contentData = [];
+                    let groupMarkdownBefore: string | null = null;
+                    
+                    for (let i = 0; i < contentData.length; i++) {
+                      const block = contentData[i];
+                      if (!block) continue;
+                      
+                      // Check if this block has substantial markdown before it (>50 chars of actual content)
+                      const hasSubstantialMarkdownBefore = block.markdownBefore && 
+                        block.markdownBefore.replace(/\s+/g, ' ').trim().length > 50;
+                      
+                      if (hasSubstantialMarkdownBefore && currentGroup.length > 0) {
+                        // End current group and start new one
+                        groupedSections.push({
+                          type: currentGroup.length > 1 ? 'group' : 'single',
+                          blocks: [...currentGroup],
+                          markdownBefore: groupMarkdownBefore,
+                        });
+                        currentGroup = [block];
+                        groupMarkdownBefore = block.markdownBefore ?? null;
+                      } else {
+                        // Add to current group
+                        if (currentGroup.length === 0 && block.markdownBefore) {
+                          groupMarkdownBefore = block.markdownBefore;
+                        }
+                        currentGroup.push(block);
                       }
-                      description={
-                        index === 0
-                          ? `The main content for this ${config.typeName.toLowerCase()}.`
-                          : `Additional code example for this ${config.typeName.toLowerCase()}.`
-                      }
-                      html={block.html}
-                      code={block.code}
-                      language={block.language}
-                      filename={block.filename}
-                    />
-                  ))
+                    }
+                    
+                    // Don't forget the last group
+                    if (currentGroup.length > 0) {
+                      groupedSections.push({
+                        type: currentGroup.length > 1 ? 'group' : 'single',
+                        blocks: currentGroup,
+                        markdownBefore: groupMarkdownBefore,
+                      });
+                    }
+                    
+                    // Render grouped sections
+                    return groupedSections.map((section, sectionIndex) => (
+                      <div key={`content-section-${sectionIndex}`} className="space-y-4">
+                        {/* Render markdown context before the section */}
+                        {section.markdownBefore && (
+                          <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                            <p>{section.markdownBefore}</p>
+                          </div>
+                        )}
+                        
+                        {section.type === 'group' ? (
+                          // Render as tabbed code group
+                          <UnifiedSection
+                            variant="code-group"
+                            title={
+                              sectionIndex === 0
+                                ? `${config.typeName} Content`
+                                : `${config.typeName} Examples`
+                            }
+                            description={`Code examples for this ${config.typeName.toLowerCase()}.`}
+                            codeBlocks={section.blocks.map((block, blockIndex) => ({
+                              html: block.html,
+                              code: block.code,
+                              language: block.language,
+                              ...(block.filename ? { filename: block.filename } : {}),
+                              label: block.filename || `Example ${blockIndex + 1}`,
+                            }))}
+                          />
+                        ) : (
+                          // Render as single code block
+                          <UnifiedSection
+                            variant="code"
+                            title={
+                              sectionIndex === 0
+                                ? `${config.typeName} Content`
+                                : `${config.typeName} Example`
+                            }
+                            description={
+                              sectionIndex === 0
+                                ? `The main content for this ${config.typeName.toLowerCase()}.`
+                                : `Code example for this ${config.typeName.toLowerCase()}.`
+                            }
+                            html={section.blocks[0]?.html ?? ''}
+                            code={section.blocks[0]?.code ?? ''}
+                            language={section.blocks[0]?.language ?? 'text'}
+                            {...(section.blocks[0]?.filename ? { filename: section.blocks[0].filename } : {})}
+                          />
+                        )}
+                      </div>
+                    ));
+                  })()
                 ) : (
                   // Render single code block
                   <UnifiedSection
@@ -1126,8 +1283,13 @@ export async function UnifiedDetailPage({
             />
           </div>
 
-          {/* Sidebars - Related content + Recently Viewed */}
+          {/* Sidebars - TOC + Related content + Recently Viewed */}
           <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+            {/* On This Page - Supabase-style minimal TOC */}
+            {shouldRenderDetailToc && headingMetadata && headingMetadata.length >= 2 && (
+              <SidebarToc headings={headingMetadata} />
+            )}
+
             {/* Detail Sidebar - Related content */}
             {relatedItemsPromise && config ? (
               <Suspense

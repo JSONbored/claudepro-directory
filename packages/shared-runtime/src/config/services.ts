@@ -1,5 +1,13 @@
 import { z } from 'zod';
 
+import { getEnvVar } from '../env.ts';
+
+/**
+ * Default site URL fallback
+ */
+// eslint-disable-next-line architectural-rules/no-hardcoded-urls
+const DEFAULT_SITE_URL = 'https://claudepro.directory';
+
 /**
  * External Services & CDN URLs
  * Centralized external service URLs for CSP, middleware, and integrations
@@ -69,8 +77,27 @@ export const EXTERNAL_SERVICES = externalServicesSchema.parse({
   },
 
   // Main Domain
-  app: {
-    main: 'https://claudepro.directory',
-    www: 'https://www.claudepro.directory',
-  },
+  app: (() => {
+    const siteUrl = getEnvVar('NEXT_PUBLIC_SITE_URL') ?? DEFAULT_SITE_URL;
+    const wwwUrl = (() => {
+      if (siteUrl.startsWith('http://www.') || siteUrl.startsWith('https://www.')) {
+        return siteUrl;
+      }
+      // Only add www. if there's no subdomain (naked domain)
+      const match = siteUrl.match(/^(https?:\/\/)([^/]+)/);
+      if (match?.[1] && match[2]) {
+        const protocol = match[1];
+        const domain = match[2];
+        // Check if domain has subdomain by counting dots (simple heuristic)
+        // If 2+ dots, likely has subdomain; if 1 dot, naked domain
+        const dotCount = domain.split('.').length - 1;
+        return dotCount === 1 ? `${protocol}www.${domain}` : siteUrl;
+      }
+      return siteUrl;
+    })();
+    return {
+      main: siteUrl,
+      www: wwwUrl,
+    };
+  })(),
 });

@@ -11,14 +11,12 @@
  * - Production-optimized: Radix handles state, Motion handles visuals
  */
 
-import { logger } from '../../entries/core.ts';
-import { getAnimationConfig } from '../../config/client-defaults.ts';
+import { UI_ANIMATION } from '../../config/unified-config.ts';
 import { POSITION_PATTERNS, STATE_PATTERNS } from '../constants.ts';
 import { cn } from '../utils.ts';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { motion } from 'motion/react';
 import type * as React from 'react';
-import { useEffect, useState } from 'react';
 
 const Tabs = TabsPrimitive.Root;
 
@@ -40,6 +38,13 @@ const TabsList = ({
 );
 TabsList.displayName = TabsPrimitive.List.displayName;
 
+/** Spring animation config from unified config */
+const springBouncy = {
+  type: 'spring' as const,
+  stiffness: UI_ANIMATION['spring.bouncy.stiffness'],
+  damping: UI_ANIMATION['spring.bouncy.damping'],
+};
+
 const TabsTrigger = ({
   className,
   ref,
@@ -47,28 +52,6 @@ const TabsTrigger = ({
 }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & {
   ref?: React.RefObject<React.ElementRef<typeof TabsPrimitive.Trigger> | null>;
 }) => {
-  const [springBouncy, setSpringBouncy] = useState({
-    type: 'spring' as const,
-    stiffness: 500,
-    damping: 20,
-  });
-
-  useEffect(() => {
-    getAnimationConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setSpringBouncy({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.bouncy.stiffness'],
-          damping: config['animation.spring.bouncy.damping'],
-        });
-      })
-      .catch((error) => {
-        logger.error('TabsTrigger: failed to load animation config', error);
-      });
-  }, []);
-
   return (
     <TabsPrimitive.Trigger
       ref={ref}

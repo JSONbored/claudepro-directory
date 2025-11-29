@@ -128,7 +128,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                         item={cardItem}
                         variant="default"
                         showCategory={true}
-                        showActions={false}
+                        showActions={true}
                       />
                     </div>
                   );

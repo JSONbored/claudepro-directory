@@ -13,8 +13,8 @@
  * @module generators/toolkit/logger
  */
 
+import { createPinoConfig, normalizeError } from '@heyclaude/shared-runtime';
 import pino from 'pino';
-import { createPinoConfig } from '@heyclaude/shared-runtime';
 
 // Create Pino logger instance with centralized configuration
 // For CLI tools, we use a pretty-printed format for better readability
@@ -33,28 +33,51 @@ type LogMeta = Record<string, unknown> | undefined;
  * Compatible with previous logger interface, now using Pino
  */
 export const logger = {
+  /**
+   * Log a message at info level
+   */
   info(message: string, meta?: LogMeta) {
     // Pino handles redaction automatically via config
-    pinoLogger.info(meta || {}, message);
+    pinoLogger.info(meta ?? {}, message);
   },
 
+  /**
+   * Log a message at warn level
+   */
   warn(message: string, meta?: LogMeta) {
     // Pino handles redaction automatically via config
-    pinoLogger.warn(meta || {}, message);
+    pinoLogger.warn(meta ?? {}, message);
   },
 
+  /**
+   * Log an error message with optional error object
+   */
   error(message: string, error?: unknown, meta?: LogMeta) {
     // Pino's stdSerializers.err automatically handles error serialization
-    const logData: Record<string, unknown> = { ...(meta || {}) };
-    if (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+    const logData: Record<string, unknown> = { ...meta };
+    if (error !== undefined && error !== null) {
+      const errorObj = normalizeError(error, message);
       logData['err'] = errorObj;
     }
     pinoLogger.error(logData, message);
   },
 
+  /**
+   * Log a message at debug level
+   */
   debug(message: string, meta?: LogMeta) {
     // Pino handles level filtering automatically
-    pinoLogger.debug(meta || {}, message);
+    pinoLogger.debug(meta ?? {}, message);
+  },
+
+  /**
+   * Log plain output for CLI tools (console.log equivalent)
+   * Used for help text, prompts, and unstructured CLI output
+   */
+  log(...args: unknown[]) {
+    // For CLI output, use console.log directly for plain text
+    // This is intentional for CLI tools that need unstructured output
+    // biome-ignore lint/suspicious/noConsole: CLI tools need plain console output
+    console.log(...args);
   },
 };

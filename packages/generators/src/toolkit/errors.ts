@@ -1,13 +1,5 @@
-export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'): Error {
-  if (error instanceof Error) {
-    return error;
-  }
-  if (typeof error === 'string') {
-    return new Error(error);
-  }
-  try {
-    return new Error(JSON.stringify(error));
-  } catch {
-    return new Error(fallbackMessage);
-  }
-}
+/**
+ * Re-export normalizeError from shared-runtime for consistency
+ * This ensures all error normalization uses the same standardized implementation
+ */
+export { normalizeError } from '@heyclaude/shared-runtime';

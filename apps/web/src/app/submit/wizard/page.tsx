@@ -22,11 +22,11 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import { getEnvVar } from '@heyclaude/shared-runtime';
+import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useFieldHighlight, useFormTracking, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   Code,
@@ -38,7 +38,7 @@ import {
   X,
 } from '@heyclaude/web-runtime/icons';
 import { useClientLogger } from '@heyclaude/web-runtime/logging/client';
-import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import  { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import {
   Badge,
   Button,
@@ -61,7 +61,7 @@ import {
   type ValidationState,
 } from '@/src/components/core/forms/wizard/animated-form-field';
 import { InlinePreview } from '@/src/components/core/forms/wizard/inline-preview';
-import type { WizardStep } from '@/src/components/core/forms/wizard/progress-indicator';
+import  { type WizardStep } from '@/src/components/core/forms/wizard/progress-indicator';
 import {
   SocialProofBar,
   StepSocialProof,
@@ -73,8 +73,6 @@ import {
 import { TypeSelectionCards } from '@/src/components/core/forms/wizard/type-selection-cards';
 import { WizardLayout } from '@/src/components/core/forms/wizard/wizard-layout';
 import { StepReviewSubmit } from '@/src/components/core/forms/wizard/wizard-steps';
-import { useFieldHighlight } from '@/src/hooks/use-field-highlight';
-import { useFormTracking } from '@/src/hooks/use-form-tracking';
 import { useOnboardingToasts } from '@/src/hooks/use-onboarding-toasts';
 import { useTemplateApplication } from '@/src/hooks/use-template-application';
 
@@ -89,24 +87,25 @@ type ContentTemplatesResult = Database['public']['Functions']['get_content_templ
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
 // Type representing the merged structure (matches what getContentTemplates returns)
-type MergedTemplateItem = ContentTemplateItem & {
-  templateData: ContentTemplateItem['template_data'];
-} & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+type MergedTemplateItem = ContentTemplateItem &
+  (ContentTemplateItem['template_data'] extends Record<string, unknown>
     ? ContentTemplateItem['template_data']
-    : Record<string, unknown>);
+    : Record<string, unknown>) & {
+    templateData: ContentTemplateItem['template_data'];
+  };
 
 interface FormData {
-  submission_type: SubmissionContentType;
-  name: string;
-  description: string;
   author: string;
   author_profile_url?: string;
-  github_url?: string;
-  type_specific: Record<string, unknown>;
-  tags: string[];
-  examples: string[];
   category: Database['public']['Enums']['content_category'];
+  description: string;
+  examples: string[];
+  github_url?: string;
+  name: string;
+  submission_type: SubmissionContentType;
+  tags: string[];
   thumbnail_url?: string; // Generated thumbnail URL from uploaded image
+  type_specific: Record<string, unknown>;
 }
 
 // Use Constants for default enum values
@@ -142,7 +141,7 @@ export default function WizardSubmissionPage() {
     subscribe: false,
   });
   const formTracking = useFormTracking();
-  
+
   // Client-side logging with automatic component context
   const log = useClientLogger({
     component: 'WizardSubmissionPage',
@@ -156,10 +155,10 @@ export default function WizardSubmissionPage() {
   }) as <T>(
     operation: () => Promise<T>,
     options?: {
-      message?: string;
-      level?: 'error' | 'warn';
-      rethrow?: boolean;
       context?: Record<string, unknown>;
+      level?: 'error' | 'warn';
+      message?: string;
+      rethrow?: boolean;
     }
   ) => Promise<T | undefined>;
 
@@ -179,7 +178,7 @@ export default function WizardSubmissionPage() {
 
   // Thumbnail upload state
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<null | string>(null);
 
   // Field highlighting for template application feedback
   const { highlightFields, getHighlightClasses } = useFieldHighlight();
@@ -248,10 +247,10 @@ export default function WizardSubmissionPage() {
           const response = await fetch(`/api/templates?category=${formData.submission_type}`);
           if (response.ok) {
             const data = (await response.json()) as {
-              success: boolean;
-              templates: MergedTemplateItem[];
               category: string;
               count: number;
+              success: boolean;
+              templates: MergedTemplateItem[];
             };
             setTemplates(data.templates);
           }
@@ -276,13 +275,13 @@ export default function WizardSubmissionPage() {
           const response = await fetch('/api/stats/social-proof');
           if (response.ok) {
             const data = (await response.json()) as {
-              success: boolean;
               stats: {
                 contributors?: { count: number; names: string[] };
                 submissions?: number;
                 successRate?: number;
                 totalUsers?: number;
               };
+              success: boolean;
               timestamp: string;
             };
             setSocialProofStats(data.stats);
@@ -380,10 +379,10 @@ export default function WizardSubmissionPage() {
         await runLoggedAsync(
           async () => {
             // Get Supabase session for authentication
+            // eslint-disable-next-line architectural-rules/no-client-component-data-fetching -- Event handler context (user interaction), not render-time fetch
             const supabase = createSupabaseBrowserClient();
-            const {
-              data: { session },
-            } = await supabase.auth.getSession();
+            const sessionResult = await supabase.auth.getSession();
+            const session = sessionResult.data.session;
 
             if (!session?.access_token) {
               throw new Error('Authentication required');
@@ -401,6 +400,8 @@ export default function WizardSubmissionPage() {
             formData.append('userId', user.id);
 
             // Call edge function directly with FormData
+            // Note: Event handler context (user interaction), not render-time data fetching
+            // eslint-disable-next-line architectural-rules/no-client-component-data-fetching -- Event handler context
             const response = await fetch(
               `${supabaseUrl}/functions/v1/public-api/transform/image/thumbnail`,
               {
@@ -425,10 +426,10 @@ export default function WizardSubmissionPage() {
             }
 
             const result = (await response.json()) as {
-              success: boolean;
-              publicUrl?: string;
-              path?: string;
               error?: string;
+              path?: string;
+              publicUrl?: string;
+              success: boolean;
             };
 
             if (!(result.success && result.publicUrl)) {
@@ -480,7 +481,7 @@ export default function WizardSubmissionPage() {
           return newData;
         });
         toasts.error.fromError(
-          error instanceof Error ? error : new Error('Failed to generate thumbnail'),
+          normalizeError(error, 'Failed to generate thumbnail'),
           'Failed to generate thumbnail'
         );
       } finally {
@@ -882,8 +883,8 @@ function StepTypeSelection({
   selected,
   onSelect,
 }: {
-  selected: SubmissionContentType;
   onSelect: (type: SubmissionContentType) => void;
+  selected: SubmissionContentType;
 }) {
   return (
     <div className="space-y-8">
@@ -927,11 +928,11 @@ function StepBasicInfo({
   onRemoveThumbnail,
 }: {
   data: FormData;
+  isUploadingThumbnail: boolean;
   onChange: (updates: Partial<FormData>) => void;
   onImageUpload: (file: File) => Promise<void>;
-  isUploadingThumbnail: boolean;
-  thumbnailPreview: string | null;
   onRemoveThumbnail: () => void;
+  thumbnailPreview: null | string;
 }) {
   const [nameValidation, setNameValidation] = useState<ValidationState>('idle');
   const [descValidation, setDescValidation] = useState<ValidationState>('idle');
@@ -996,14 +997,14 @@ function StepBasicInfo({
             <AnimatedFormField
               label="Name"
               id="wizard-name"
-              required={true}
+              required
               validationState={nameValidation}
               helpText="A clear, descriptive name"
               {...(nameValidation === 'invalid'
                 ? { errorMessage: 'Name must be at least 3 characters' }
                 : {})}
               {...(nameValidation === 'valid' ? { successMessage: 'Great name!' } : {})}
-              showCharCount={true}
+              showCharCount
               currentLength={data.name.length}
               maxLength={100}
             >
@@ -1020,7 +1021,7 @@ function StepBasicInfo({
             <AnimatedFormField
               label="Description"
               id="wizard-description"
-              required={true}
+              required
               validationState={descValidation}
               helpText="Explain what your configuration does and how to use it"
               {...(descValidation === 'warning'
@@ -1031,7 +1032,7 @@ function StepBasicInfo({
               {...(descValidation === 'valid' && data.description.length >= 50
                 ? { successMessage: 'Excellent description!' }
                 : {})}
-              showCharCount={true}
+              showCharCount
               currentLength={data.description.length}
               maxLength={500}
             >
@@ -1048,7 +1049,7 @@ function StepBasicInfo({
             <AnimatedFormField
               label="Author Name"
               id="wizard-author"
-              required={true}
+              required
               helpText="Your name or username"
             >
               <Input
@@ -1114,7 +1115,7 @@ function StepBasicInfo({
 
                 {/* Thumbnail Preview */}
                 <AnimatePresence mode="wait">
-                  {thumbnailPreview && (
+                  {thumbnailPreview ? (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -1129,7 +1130,7 @@ function StepBasicInfo({
                         <Image
                           src={thumbnailPreview}
                           alt="Thumbnail preview"
-                          fill={true}
+                          fill
                           className="object-cover"
                           unoptimized={thumbnailPreview.startsWith('blob:')}
                         />
@@ -1145,7 +1146,7 @@ function StepBasicInfo({
                         <X className="h-4 w-4" />
                       </motion.button>
                     </motion.div>
-                  )}
+                  ) : null}
                 </AnimatePresence>
               </div>
             </AnimatedFormField>
@@ -1168,13 +1169,13 @@ function StepConfiguration({
   onApplyTemplate,
   getHighlightClasses,
 }: {
-  submissionType: SubmissionContentType;
   data: Record<string, unknown>;
+  getHighlightClasses?: (field: string) => string;
+  onApplyTemplate?: (template: MergedTemplateItem) => void;
   onChange: (data: Record<string, unknown>) => void;
+  submissionType: SubmissionContentType;
   templates?: MergedTemplateItem[];
   templatesLoading?: boolean;
-  onApplyTemplate?: (template: MergedTemplateItem) => void;
-  getHighlightClasses?: (field: string) => string;
 }) {
   const hasTemplates = templates && templates.length > 0;
   return (
@@ -1203,7 +1204,7 @@ function StepConfiguration({
       </motion.div>
 
       {/* Template Quick Select - Show at top of configuration step */}
-      {templatesLoading && (
+      {templatesLoading ? (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1211,9 +1212,9 @@ function StepConfiguration({
         >
           <TemplateQuickSelectSkeleton />
         </motion.div>
-      )}
+      ) : null}
 
-      {hasTemplates && onApplyTemplate && !templatesLoading && (
+      {hasTemplates && onApplyTemplate && !templatesLoading ? (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1226,7 +1227,7 @@ function StepConfiguration({
             maxVisible={3}
           />
         </motion.div>
-      )}
+      ) : null}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -1245,9 +1246,9 @@ function StepConfiguration({
                 <AnimatedFormField
                   label="System Prompt"
                   id="wizard-system-prompt"
-                  required={true}
+                  required
                   helpText="The main prompt that defines the agent's behavior"
-                  showCharCount={true}
+                  showCharCount
                   currentLength={((data['systemPrompt'] as string) || '').length}
                   maxLength={2000}
                 >
@@ -1317,7 +1318,7 @@ function StepConfiguration({
                 <AnimatedFormField
                   label="NPM Package"
                   id="wizard-npm-package"
-                  required={true}
+                  required
                   helpText="The npm package name"
                 >
                   <Input
@@ -1366,9 +1367,9 @@ function StepConfiguration({
               <AnimatedFormField
                 label="Rules Content"
                 id="wizard-rules-content"
-                required={true}
+                required
                 helpText="The expertise rules or guidelines"
-                showCharCount={true}
+                showCharCount
                 currentLength={((data['rulesContent'] as string) || '').length}
                 maxLength={3000}
               >
@@ -1387,9 +1388,9 @@ function StepConfiguration({
               <AnimatedFormField
                 label="Command Content"
                 id="wizard-command-content"
-                required={true}
+                required
                 helpText="The shell command or script"
-                showCharCount={true}
+                showCharCount
                 currentLength={((data['commandContent'] as string) || '').length}
                 maxLength={1000}
               >

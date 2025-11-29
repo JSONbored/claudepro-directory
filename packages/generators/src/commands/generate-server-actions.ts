@@ -1,8 +1,10 @@
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { createJiti } from 'jiti';
 import ora from 'ora';
+
 import { ensureEnvVars } from '../toolkit/env.js';
 import {
   type CompositeTypeAttribute,
@@ -20,18 +22,18 @@ const WEB_RUNTIME_ROOT = join(PROJECT_ROOT, 'packages/web-runtime/src');
 const jiti = createJiti(import.meta.url);
 
 interface ActionConfig {
-  rpc: string;
-  auth?: boolean;
-  revalidatePaths?: string[];
-  revalidateTags?: string[];
-  invalidateCacheConfigKeys?: string[];
-  category?: string;
-  inputSchema?: string;
   args?: Record<string, unknown>; // Allow overriding/hardcoding RPC args
+  auth?: boolean;
+  category?: string;
   hooks?: {
     onSuccess?: string;
   };
+  inputSchema?: string;
+  invalidateCacheConfigKeys?: string[];
   returnStyle?: 'first_row';
+  revalidatePaths?: string[];
+  revalidateTags?: string[];
+  rpc: string;
 }
 
 export async function runGenerateServerActions(targetAction?: string) {
@@ -47,7 +49,7 @@ export async function runGenerateServerActions(targetAction?: string) {
     // Load Config
     spinner.text = 'Loading action configuration...';
     const configPath = join(WEB_RUNTIME_ROOT, 'config/actions.config.ts');
-    const mod = (await jiti.import(configPath)) as { ACTIONS: Record<string, ActionConfig> };
+    const mod = (await jiti.import(configPath));
     const actionsConfig = mod.ACTIONS;
 
     if (!actionsConfig) {
@@ -93,7 +95,7 @@ export async function runGenerateServerActions(targetAction?: string) {
 }
 
 function toKebabCase(str: string) {
-  return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+  return str.replaceAll(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
 function toPascalCase(str: string) {
@@ -143,7 +145,7 @@ async function generateActionFile(
     }
 
     // Strip p_ prefix
-    const inputName = arg.name.startsWith('p_') ? arg.name.substring(2) : arg.name;
+    const inputName = arg.name.startsWith('p_') ? arg.name.slice(2) : arg.name;
 
     // Check if it's a composite type
     const compositeType = compositeTypes[arg.udtName];
@@ -197,13 +199,13 @@ async function generateActionFile(
     // Replace {result.prop} with ${result?.prop} (assuming result exists)
     // We use deep optional chaining via global replace of . with ?. inside the capture
     let out = str;
-    out = out.replace(/\{result\.(\w+(\.\w+)*)\}/g, (_, p1) => {
-      const chained = p1.replace(/\./g, '?.');
+    out = out.replaceAll(/\{result\.(\w+(\.\w+)*)\}/g, (_, p1) => {
+      const chained = p1.replaceAll('.', '?.');
       return `\${result?.${chained}}`;
     });
     // Replace {userId} with ctx.userId specially, otherwise fallback to parsedInput
-    out = out.replace(/\{userId\}/g, '$' + '{ctx.userId}');
-    out = out.replace(/\{(\w+)\}/g, '$' + '{parsedInput.$1}');
+    out = out.replaceAll('{userId}', '$' + '{ctx.userId}');
+    out = out.replaceAll(/\{(\w+)\}/g, '$' + '{parsedInput.$1}');
     return out;
   };
 

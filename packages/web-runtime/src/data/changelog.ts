@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { ChangelogService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
@@ -43,10 +43,10 @@ function createEmptyOverview(
 export async function getChangelogOverview(
   options: {
     category?: Database['public']['Enums']['changelog_category'];
-    publishedOnly?: boolean;
     featuredOnly?: boolean;
     limit?: number;
     offset?: number;
+    publishedOnly?: boolean;
   } = {}
 ): Promise<Database['public']['Functions']['get_changelog_overview']['Returns']> {
   const { category, publishedOnly = true, featuredOnly = false, limit = 50, offset = 0 } = options;
@@ -126,10 +126,10 @@ export async function getChangelogEntryBySlug(
 
 export async function getChangelog(): Promise<{
   entries: Database['public']['Functions']['get_changelog_overview']['Returns']['entries'];
-  total: number;
+  hasMore: boolean;
   limit: number;
   offset: number;
-  hasMore: boolean;
+  total: number;
 }> {
   // OPTIMIZATION: Use configurable limit instead of hardcoded 1000
   const limit = QUERY_LIMITS.changelog.default;
@@ -150,8 +150,8 @@ export async function getChangelog(): Promise<{
 
 function normalizeChangelogEntry(
   entry:
-    | Database['public']['Tables']['changelog']['Row']
     | Database['public']['CompositeTypes']['changelog_overview_entry']
+    | Database['public']['Tables']['changelog']['Row']
 ): Omit<Database['public']['Tables']['changelog']['Row'], 'contributors' | 'keywords'> & {
   contributors: string[];
   keywords: string[];

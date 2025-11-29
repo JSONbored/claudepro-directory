@@ -5,6 +5,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@heyclaude/database-types';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { getAuthenticatorAssuranceLevel, type AuthenticatorAssuranceLevel } from './mfa.ts';
 
 /**
@@ -37,7 +38,7 @@ export async function hasAAL2(
   } catch (error) {
     return {
       hasAAL2: false,
-      error: error instanceof Error ? error : new Error('Unknown error'),
+      error: normalizeError(error, 'Unknown AAL check error'),
     };
   }
 }

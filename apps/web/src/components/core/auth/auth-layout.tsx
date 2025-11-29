@@ -14,11 +14,24 @@ interface SplitAuthLayoutProps {
   mobileHeader: ReactNode;
 }
 
+/**
+ * Responsive split layout for authentication pages that displays a brand panel and an auth card.
+ *
+ * Renders a two-column, animated side-by-side layout on large screens and a stacked layout on smaller screens.
+ *
+ * @param brandPanel - Content displayed on the left (brand) column for large screens.
+ * @param authPanel - Authentication card content rendered in the right column on large screens and inside the centered card on mobile.
+ * @param mobileHeader - Header content shown above the stacked mobile layout.
+ * @returns The rendered React element composing the split authentication layout.
+ *
+ * @see DIMENSIONS from @heyclaude/web-runtime/ui
+ * @see motion from 'motion/react'
+ */
 export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAuthLayoutProps) {
   return (
     <div className={`relative ${DIMENSIONS.FULL_VIEWPORT} overflow-hidden bg-background`}>
       {/* Desktop: Side-by-side layout */}
-      <div className="hidden h-full lg:grid lg:grid-cols-2">
+      <div className="hidden h-full lg:grid lg:grid-cols-2 lg:items-center">
         {/* Left: Brand content */}
         <motion.div
           className="flex items-center justify-center px-16"

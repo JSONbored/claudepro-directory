@@ -16,10 +16,10 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/server';
-import type { PageProps } from '@heyclaude/web-runtime/types/app.schema';
+import  { type PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
 import { UI_CLASSES, UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -36,7 +36,7 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
  */
 export const revalidate = 7200;
 
-function getSafeWebsiteUrl(url: string | null | undefined): string | null {
+function getSafeWebsiteUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
 
   try {
@@ -77,7 +77,7 @@ function getSafeWebsiteUrl(url: string | null | undefined): string | null {
  * Validate and sanitize email address for safe use in mailto links
  * Returns safe mailto URL or null if email is invalid
  */
-function getSafeMailtoUrl(email: string | null | undefined): string | null {
+function getSafeMailtoUrl(email: null | string | undefined): null | string {
   if (!email || typeof email !== 'string') return null;
 
   // Trim and normalize
@@ -242,24 +242,24 @@ export default async function JobPage({ params }: PageProps) {
       />
       <StructuredData route={`/jobs/${slug}`} />
 
-      <div className={'min-h-screen bg-background'}>
-        <div className={'border-border/50 border-b bg-card/30'}>
+      <div className="min-h-screen bg-background">
+        <div className="border-border/50 border-b bg-card/30">
           <div className="container mx-auto px-4 py-8">
-            <Button variant="ghost" asChild={true} className="mb-6">
+            <Button variant="ghost" asChild className="mb-6">
               <Link href={ROUTES.JOBS}>
-                <ArrowLeft className={'mr-2 h-4 w-4'} />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Jobs
               </Link>
             </Button>
 
             <div className="max-w-4xl">
               <div className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} mb-6 gap-4`}>
-                <div className={'rounded-lg bg-accent/10 p-3'}>
+                <div className="rounded-lg bg-accent/10 p-3">
                   <Building2 className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1">
                   <h1 className="mb-2 font-bold text-3xl">{job.title}</h1>
-                  <p className={'text-muted-foreground text-xl'}>{job.company}</p>
+                  <p className="text-muted-foreground text-xl">{job.company}</p>
                 </div>
               </div>
 
@@ -299,7 +299,7 @@ export default async function JobPage({ params }: PageProps) {
 
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className={'space-y-8 lg:col-span-2'}>
+            <div className="space-y-8 lg:col-span-2">
               <Card>
                 <CardHeader>
                   <CardTitle>About this role</CardTitle>
@@ -360,9 +360,9 @@ export default async function JobPage({ params }: PageProps) {
                     // At this point, safeJobLink is validated and safe for use in external links
                     const validatedUrl: string = safeJobLink;
                     return (
-                      <Button className="w-full" asChild={true}>
+                      <Button className="w-full" asChild>
                         <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className={'mr-2 h-4 w-4'} />
+                          <ExternalLink className="mr-2 h-4 w-4" />
                           Apply Now
                         </a>
                       </Button>
@@ -372,9 +372,9 @@ export default async function JobPage({ params }: PageProps) {
                     const safeMailtoUrl = getSafeMailtoUrl(job.contact_email);
                     if (!safeMailtoUrl) return null;
                     return (
-                      <Button variant="outline" className="w-full" asChild={true}>
+                      <Button variant="outline" className="w-full" asChild>
                         <a href={safeMailtoUrl}>
-                          <Building2 className={'mr-2 h-4 w-4'} />
+                          <Building2 className="mr-2 h-4 w-4" />
                           Contact Company
                         </a>
                       </Button>
@@ -390,18 +390,18 @@ export default async function JobPage({ params }: PageProps) {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
-                    <Clock className={'h-4 w-4 text-muted-foreground'} />
+                    <Clock className="h-4 w-4 text-muted-foreground" />
                     <span>
                       {(job.type ?? 'Unknown').charAt(0).toUpperCase() +
                         (job.type ?? 'Unknown').slice(1)}
                     </span>
                   </div>
                   <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
-                    <MapPin className={'h-4 w-4 text-muted-foreground'} />
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
                     <span>{job.remote ? 'Remote Available' : 'On-site'}</span>
                   </div>
                   <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
-                    <Users className={'h-4 w-4 text-muted-foreground'} />
+                    <Users className="h-4 w-4 text-muted-foreground" />
                     <span>
                       {(job.category ?? 'General').charAt(0).toUpperCase() +
                         (job.category ?? 'General').slice(1)}

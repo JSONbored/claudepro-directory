@@ -5,8 +5,8 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 export class CommunityService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,7 +17,7 @@ export class CommunityService {
   async getCommunityDirectory(args: Database['public']['Functions']['get_community_directory']['Args']) {
     const { data, error } = await this.supabase.rpc('get_community_directory', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_community_directory']['Returns'];
+    return data;
   }
 
   /**
@@ -26,7 +26,7 @@ export class CommunityService {
   async getUserProfile(args: Database['public']['Functions']['get_user_profile']['Args']) {
     const { data, error } = await this.supabase.rpc('get_user_profile', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_user_profile']['Returns'];
+    return data;
   }
 
   /**
@@ -35,6 +35,6 @@ export class CommunityService {
   async getUserCollectionDetail(args: Database['public']['Functions']['get_user_collection_detail']['Args']) {
     const { data, error } = await this.supabase.rpc('get_user_collection_detail', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_user_collection_detail']['Returns'];
+    return data;
   }
 }

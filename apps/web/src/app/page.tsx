@@ -1,15 +1,16 @@
 /** Homepage consuming homepageConfigs for runtime-tunable categories */
 
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { trackRPCFailure } from '@heyclaude/web-runtime/core';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getHomepageCategoryIds,
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
-import type { SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import  { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
 import { HomePageLoading } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 
@@ -61,13 +62,13 @@ async function TopContributorsServer() {
   });
 
   interface TopContributor {
+    bio: null | string;
     id: string;
-    slug: string;
+    image: null | string;
     name: string;
-    image: string | null;
-    bio: string | null;
-    work: string | null;
+    slug: string;
     tier: Database['public']['Enums']['user_tier'] | null;
+    work: null | string;
   }
 
   const topContributors = (homepageResult?.top_contributors ?? [])
@@ -101,7 +102,20 @@ async function TopContributorsServer() {
  * the hero section to render immediately while other data loads.
  */
 export default async function HomePage({ searchParams }: HomePageProperties) {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  
+  // Create request-scoped child logger
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'HomePage',
+    route: '/',
+    module: 'apps/web/src/app',
+  });
+
   await searchParams;
+
+  reqLogger.info('HomePage: rendering homepage');
 
   // Fetch member count for hero (lightweight, can be done in parallel with other data)
   // We'll use a default value for the hero and update it when content loads
@@ -123,7 +137,7 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
   const searchFiltersPromise = HomepageSearchFacetsServer();
 
   return (
-    <div className={'min-h-screen bg-background'}>
+    <div className="min-h-screen bg-background">
       <div className="relative overflow-hidden">
         {/* Hero section - streams immediately (no data fetching) */}
         <HomepageHeroServer memberCount={memberCount} />
@@ -133,7 +147,7 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
         </LazySection>
 
         {/* Homepage content - streams when ready (non-blocking) */}
-        <div className={'relative'}>
+        <div className="relative">
           <Suspense fallback={<HomePageLoading />}>
             <HomepageContentServerWrapper searchFiltersPromise={searchFiltersPromise} />
           </Suspense>

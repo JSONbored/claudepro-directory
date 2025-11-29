@@ -13,7 +13,7 @@ import { UI_CLASSES, UnifiedBadge, SimpleCopyButton,
   CardDescription,
   CardHeader,
   CardTitle   } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -97,7 +97,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true} variant="outline">
+            <Button asChild variant="outline">
               <Link href={ROUTES.ACCOUNT_LIBRARY}>Back to library</Link>
             </Button>
           </CardContent>
@@ -144,24 +144,19 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
           <div className="flex-1">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
               <h1 className="font-bold text-3xl">{collection.name}</h1>
-              {collection.is_public && (
-                <UnifiedBadge variant="base" style="outline" className="text-xs">
+              {collection.is_public ? <UnifiedBadge variant="base" style="outline" className="text-xs">
                   Public
-                </UnifiedBadge>
-              )}
+                </UnifiedBadge> : null}
             </div>
-            {collection.description && (
-              <p className="text-muted-foreground">{collection.description}</p>
-            )}
-            <div className={'mt-2 text-muted-foreground text-sm'}>
+            {collection.description ? <p className="text-muted-foreground">{collection.description}</p> : null}
+            <div className="mt-2 text-muted-foreground text-sm">
               {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
               {collection.view_count} views
             </div>
           </div>
 
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            {shareUrl && (
-              <SimpleCopyButton
+            {shareUrl ? <SimpleCopyButton
                 content={shareUrl}
                 label="Share"
                 successMessage="Link copied to clipboard!"
@@ -169,8 +164,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
                 size="sm"
                 className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
                 iconClassName="h-4 w-4"
-              />
-            )}
+              /> : null}
             <Link href={`/account/library/${slug}/edit`}>
               <Button variant="outline" size="sm" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Edit className="h-4 w-4" />

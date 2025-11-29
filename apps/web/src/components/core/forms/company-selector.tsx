@@ -71,7 +71,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
       .catch((error) => {
         logger.error(
           'CompanySelector: failed to load selected company',
-          error instanceof Error ? error : new Error(String(error)),
+          normalizeError(error, 'Failed to load company'),
           { companyId: value }
         );
       });
@@ -187,7 +187,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
       } catch (error) {
         logger.error(
           'CompanySelector: failed to create company',
-          error instanceof Error ? error : new Error(String(error)),
+          normalizeError(error, 'Failed to create company'),
           { name }
         );
       }

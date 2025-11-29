@@ -1,5 +1,7 @@
 'use client';
 
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
+
 import {
   generateRequestId,
   logger,
@@ -70,7 +72,7 @@ export function createErrorBoundaryFallback(
       code: generateErrorCode(errorType),
       timestamp: new Date().toISOString(),
       requestId,
-      ...(process.env['NODE_ENV'] === 'development' && error.stack && { stack: error.stack }),
+      ...(isDevelopment && error.stack && { stack: error.stack }),
     };
   } catch (fallbackError) {
     // Fallback error handling - still try to log
@@ -130,7 +132,7 @@ export function formatErrorForDisplay(error: Error | unknown): string {
 export function shouldReportError(error: Error | unknown): boolean {
   if (!(error instanceof Error)) return false;
   if (error.message.includes('hydration') || error.message.includes('HMR')) {
-    return process.env['NODE_ENV'] !== 'development';
+    return !isDevelopment;
   }
   if (error.message.includes('umami') || error.message.includes('analytics')) {
     return false;

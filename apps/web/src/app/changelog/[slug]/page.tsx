@@ -24,8 +24,6 @@
 /**
  * ISR: 2 hours (7200s) - Changelog entries are stable after publication
  */
-export const revalidate = 7200;
-
 import { Constants } from '@heyclaude/database-types';
 import {
   generatePageMetadata,
@@ -37,13 +35,15 @@ import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, NavLink, Separator   } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
+
+export const revalidate = 7200;
 
 /**
  * Generate static params for all changelog entries

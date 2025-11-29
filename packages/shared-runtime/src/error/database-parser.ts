@@ -4,7 +4,7 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import type { PostgrestError } from '@supabase/supabase-js';
+import  { type PostgrestError } from '@supabase/supabase-js';
 
 /**
  * Constraint name → user-friendly error message mapping

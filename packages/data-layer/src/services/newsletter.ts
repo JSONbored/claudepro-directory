@@ -1,5 +1,6 @@
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
+
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export type SubscriberResult = Database['public']['Functions']['subscribe_newsletter']['Returns'];
@@ -22,7 +23,7 @@ export class NewsletterService {
         throw error;
       }
       
-      return data as SubscriberResult;
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;

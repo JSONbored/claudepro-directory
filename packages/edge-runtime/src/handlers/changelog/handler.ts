@@ -6,7 +6,7 @@ import {
   errorResponse,
   successResponse,
 } from '@heyclaude/edge-runtime/utils/http.ts';
-import { createChangelogHandlerContext, withContext } from '@heyclaude/shared-runtime';
+import { createChangelogHandlerContext, withContext } from '@heyclaude/shared-runtime/logging.ts';
 import { pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 import {

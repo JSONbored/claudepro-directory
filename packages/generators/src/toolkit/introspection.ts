@@ -1,41 +1,41 @@
 import { execFileSync } from 'node:child_process';
 
 export interface ColumnMeta {
+  default: null | string;
+  maxLength: null | number;
   name: string;
+  nullable: boolean;
   type: string;
   udtName: string;
-  nullable: boolean;
-  maxLength: number | null;
-  default: string | null;
 }
 
 export interface FunctionArg {
-  name: string;
+  hasDefault: boolean;
   mode: string; // IN, OUT, INOUT
+  name: string;
+  ordinal: number;
   type: string;
   udtName: string;
-  ordinal: number;
-  hasDefault: boolean;
 }
 
 export interface FunctionMeta {
-  name: string;
   args: FunctionArg[];
+  name: string;
   returnType: string;
 }
 
 export interface CompositeTypeAttribute {
   name: string;
-  udtName: string;
   nullable: boolean;
   ordinal: number;
+  udtName: string;
 }
 
 export interface SchemaMeta {
-  enums: Record<string, string[]>;
-  tables: Record<string, ColumnMeta[]>;
-  functions: Record<string, FunctionMeta>;
   compositeTypes: Record<string, CompositeTypeAttribute[]>;
+  enums: Record<string, string[]>;
+  functions: Record<string, FunctionMeta>;
+  tables: Record<string, ColumnMeta[]>;
 }
 
 export function getDatabaseMeta(dbUrl: string): SchemaMeta {
@@ -127,13 +127,13 @@ SELECT
   try {
     const result = execFileSync(
       'psql',
-      ['-d', dbUrl, '-t', '-A', '-c', query.replace(/\n/g, ' ')],
+      ['-d', dbUrl, '-t', '-A', '-c', query.replaceAll('\n', ' ')],
       {
-        encoding: 'utf-8',
+        encoding: 'utf8',
         stdio: 'pipe',
       }
     );
-    return JSON.parse(result.trim());
+    return JSON.parse(result.trim()) as SchemaMeta;
   } catch (error) {
     throw new Error(`Failed to query database: ${(error as Error).message}`);
   }

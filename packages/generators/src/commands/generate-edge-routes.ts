@@ -1,8 +1,10 @@
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { createJiti } from 'jiti';
 import ora from 'ora';
+
 import { logger } from '../toolkit/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,15 +15,15 @@ const EDGE_ROOT = join(PROJECT_ROOT, 'apps/edge/functions/public-api');
 const jiti = createJiti(import.meta.url);
 
 interface RouteConfig {
+  analytics?: string;
+  handler: {
+    function: string;
+    import: string;
+  };
+  methods: string[];
   name: string;
   path: string;
-  methods: string[];
-  handler: {
-    import: string;
-    function: string;
-  };
-  analytics?: string;
-  rateLimit?: 'public' | 'heavy' | 'indexnow';
+  rateLimit?: 'heavy' | 'indexnow' | 'public';
 }
 
 export async function runGenerateEdgeRoutes() {
@@ -30,12 +32,41 @@ export async function runGenerateEdgeRoutes() {
   try {
     // Load Config
     const configPath = join(EDGE_ROOT, 'routes.config.ts');
-    const mod = (await jiti.import(configPath)) as { ROUTES: RouteConfig[] };
-    const routes = mod.ROUTES;
-
-    if (!routes) {
+    const mod = (await jiti.import(configPath)) as { ROUTES?: RouteConfig[] };
+    
+    // Runtime validation
+    if (!mod.ROUTES) {
       throw new Error('ROUTES export not found in config');
     }
+    if (!Array.isArray(mod.ROUTES)) {
+      throw new Error('ROUTES export must be an array');
+    }
+    // Validate each route has required properties
+    for (const route of mod.ROUTES) {
+      if (!route || typeof route !== 'object') {
+        throw new Error('Invalid route configuration: route must be an object');
+      }
+      if (!route.name || typeof route.name !== 'string') {
+        throw new Error('Invalid route configuration: route.name is required and must be a string');
+      }
+      if (!route.path || typeof route.path !== 'string') {
+        throw new Error('Invalid route configuration: route.path is required and must be a string');
+      }
+      if (!route.methods || !Array.isArray(route.methods)) {
+        throw new Error('Invalid route configuration: route.methods is required and must be an array');
+      }
+      if (!route.handler || typeof route.handler !== 'object') {
+        throw new Error('Invalid route configuration: route.handler is required and must be an object');
+      }
+      if (!route.handler.function || typeof route.handler.function !== 'string') {
+        throw new Error('Invalid route configuration: route.handler.function is required and must be a string');
+      }
+      if (!route.handler.import || typeof route.handler.import !== 'string') {
+        throw new Error('Invalid route configuration: route.handler.import is required and must be a string');
+      }
+    }
+    
+    const routes = mod.ROUTES;
 
     await generateRouterFile(routes);
 
@@ -122,7 +153,8 @@ async function generateRouterFile(routes: RouteConfig[]) {
 
     // Special handling for content-generate handler which is complex
     let handlerLogic = '';
-    if (route.name === 'content-generate') {
+    switch (route.name) {
+    case 'content-generate': {
       // Inlining the complex handler logic from original file
       // This is "cheating" the generator but necessary for 1:1 migration without refactoring the sub-handlers
       handlerLogic = `async (ctx) => {
@@ -164,29 +196,57 @@ async function generateRouterFile(routes: RouteConfig[]) {
         headers.set('X-RateLimit-Reset', String(rateLimit.resetAt));
         return new Response(response.body, { status: response.status, headers });
       }`;
-    } else if (route.name === 'search-main') {
+    
+    break;
+    }
+    case 'search-main': {
       handlerLogic = `(ctx) => ${route.handler.function}(ctx.request, performance.now())`;
-    } else if (route.name === 'search-autocomplete') {
+    
+    break;
+    }
+    case 'search-autocomplete': {
       handlerLogic = `(ctx) => ${route.handler.function}(ctx.request, performance.now())`;
-    } else if (route.name === 'search-facets') {
+    
+    break;
+    }
+    case 'search-facets': {
       handlerLogic = `() => ${route.handler.function}(performance.now())`;
-    } else if (route.name === 'og-image') {
+    
+    break;
+    }
+    case 'og-image': {
       handlerLogic = `(ctx) => ${route.handler.function}(ctx.request, performance.now())`;
-    } else if (route.name === 'root') {
+    
+    break;
+    }
+    case 'root': {
       handlerLogic = `(ctx) => ${route.handler.function}(ctx)`;
-    } else if (route.name === 'transform-highlight' || route.name === 'transform-process') {
+    
+    break;
+    }
+    case 'transform-highlight': 
+    case 'transform-process': {
       handlerLogic = `(ctx) => ${route.handler.function}(ctx.request)`;
-    } else if (route.name === 'seo') {
+    
+    break;
+    }
+    case 'seo': {
       handlerLogic = `(ctx) => {
         const logContext = createPublicApiContext('seo', { path: ctx.pathname, method: ctx.method });
         return ${route.handler.function}(ctx.segments.slice(1), ctx.url, ctx.method, logContext);
       }`;
-    } else if (route.name === 'sitemap') {
+    
+    break;
+    }
+    case 'sitemap': {
       handlerLogic = `(ctx) => {
         const logContext = createPublicApiContext('sitemap', { path: ctx.pathname, method: ctx.method });
         return ${route.handler.function}(ctx.segments.slice(1), ctx.url, ctx.method, ctx.request, logContext);
       }`;
-    } else if (route.name === 'content') {
+    
+    break;
+    }
+    case 'content': {
       handlerLogic = `(ctx) => {
         const logContext = createPublicApiContext('content', {
           path: ctx.pathname,
@@ -195,9 +255,13 @@ async function generateRouterFile(routes: RouteConfig[]) {
         });
         return ${route.handler.function}(ctx.segments.slice(1), ctx.url, ctx.method, ctx.request, logContext);
       }`;
-    } else {
+    
+    break;
+    }
+    default: {
       // Default for standard route handlers
       handlerLogic = `(ctx) => ${route.handler.function}(ctx.segments.slice(1), ctx.url, ctx.method)`;
+    }
     }
 
     // Override match for search-main to exclude sub-routes
@@ -227,7 +291,7 @@ async function generateRouterFile(routes: RouteConfig[]) {
 
   const fileContent = `/// <reference path="@heyclaude/edge-runtime/deno-globals.d.ts" />
 
-${Array.from(imports).join('\n')}
+${[...imports].join('\n')}
 
 const BASE_CORS = getOnlyCorsHeaders;
 const PUBLIC_API_APP_LABEL = 'public-api';

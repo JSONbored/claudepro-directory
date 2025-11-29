@@ -6,7 +6,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { logError } from '@heyclaude/shared-runtime';
+import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import type { GetContentByTagInput } from '../lib/types.ts';
 
 type ContentPaginatedItem = Database['public']['CompositeTypes']['content_paginated_item'];

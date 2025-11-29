@@ -1,4 +1,4 @@
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
 import { ensureEnvVars } from '../toolkit/env.js';
 import { logger } from '../toolkit/logger.js';
@@ -8,22 +8,22 @@ type WebhookEventRow = Database['public']['Tables']['webhook_events']['Row'];
 type WebhookSource = Database['public']['Tables']['webhook_events']['Row']['source'];
 type WebhookEventType = Database['public']['Tables']['webhook_events']['Row']['type'];
 
-type BacklogEntry = {
-  id: string;
-  source: WebhookSource;
-  type: WebhookEventType;
-  created_at: string;
+interface BacklogEntry {
+  age_ms: number;
   attempt_count: number;
   attempted: boolean;
-  age_ms: number;
-  last_error: string | null;
-};
+  created_at: string;
+  id: string;
+  last_error: null | string;
+  source: WebhookSource;
+  type: WebhookEventType;
+}
 
 interface Options {
+  json?: boolean;
   limit: number;
   source?: string;
   type?: string;
-  json?: boolean;
 }
 
 function parseArgs(): Options {
@@ -41,7 +41,7 @@ function parseArgs(): Options {
     const value = next && !next.startsWith('--') ? next : undefined;
 
     switch (key) {
-      case 'limit':
+      case 'limit': {
         options.limit = value ? Number.parseInt(value, 10) : options.limit;
         if (Number.isNaN(options.limit) || options.limit <= 0) {
           throw new Error('--limit must be a positive integer.');
@@ -50,23 +50,28 @@ function parseArgs(): Options {
           i += 1;
         }
         break;
-      case 'source':
+      }
+      case 'source': {
         if (value) {
           options.source = value;
           i += 1;
         }
         break;
-      case 'type':
+      }
+      case 'type': {
         if (value) {
           options.type = value;
           i += 1;
         }
         break;
-      case 'json':
+      }
+      case 'json': {
         options.json = true;
         break;
-      default:
+      }
+      default: {
         logger.warn(`Ignoring unknown flag "${arg}"`, { script: 'webhooks:list' });
+      }
     }
   }
 
@@ -114,21 +119,21 @@ export async function runListBacklog(): Promise<void> {
     process.exit(1);
   }
 
-  if (!data || data.length === 0) {
+  if (data.length === 0) {
     logger.info('🎉 No pending webhook events found', { script: 'webhooks:list' });
     return;
   }
 
-  const records = (data ?? []) as WebhookEventRow[];
+  const records = data as WebhookEventRow[];
   const backlogEntries: BacklogEntry[] = records.map((row) => {
-    const attemptCount = row.attempt_count ?? 0;
-    const createdAt = row.created_at ?? new Date().toISOString();
+    const attemptCount = row.attempt_count;
+    const createdAt = row.created_at;
     const age = Date.now() - new Date(createdAt).getTime();
 
     return {
       id: row.id,
-      source: row.source as WebhookSource,
-      type: row.type as WebhookEventType,
+      source: row.source,
+      type: row.type,
       created_at: createdAt,
       attempt_count: attemptCount,
       attempted: attemptCount > 0,
@@ -145,7 +150,7 @@ export async function runListBacklog(): Promise<void> {
     return;
   }
 
-  backlogEntries.forEach((entry, index) => {
+  for (const [index, entry] of backlogEntries.entries()) {
     logger.info(
       `${index + 1}. [${entry.source}] ${entry.type} – created ${new Date(entry.created_at).toISOString()}`,
       {
@@ -157,5 +162,5 @@ export async function runListBacklog(): Promise<void> {
         last_error: entry.last_error,
       }
     );
-  });
+  }
 }

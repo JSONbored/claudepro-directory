@@ -83,17 +83,16 @@ export async function invalidateCacheTags(
 
     return { success: true, tags };
   } catch (error) {
-    const { errorToString } = await import('@heyclaude/shared-runtime');
-    const errorMsg = errorToString(error);
+    const { normalizeError } = await import('@heyclaude/shared-runtime');
+    const errorObj = normalizeError(error, 'Cache invalidation failed');
     if (options?.logContext) {
-      const errorObj = error instanceof Error ? error : new Error(errorMsg);
       logger.warn('Invalidation error', {
         ...options.logContext,
         err: errorObj,
         tags,
       });
     }
-    return { success: false, error: errorMsg, tags };
+    return { success: false, error: errorObj.message, tags };
   }
 }
 

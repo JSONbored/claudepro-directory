@@ -2,7 +2,7 @@ const MAX_QUERY_STRING_LENGTH = 2048;
 const MAX_PATH_SEGMENT_LENGTH = 255;
 const MAX_ROUTE_LENGTH = 2048;
 
-export function validateQueryString(url: URL): { valid: boolean; error?: string } {
+export function validateQueryString(url: URL): { error?: string; valid: boolean; } {
   const queryString = url.search;
   if (queryString.length > MAX_QUERY_STRING_LENGTH) {
     return {
@@ -21,7 +21,7 @@ export function validateQueryString(url: URL): { valid: boolean; error?: string 
   return { valid: true };
 }
 
-export function validatePathSegments(segments: string[]): { valid: boolean; error?: string } {
+export function validatePathSegments(segments: string[]): { error?: string; valid: boolean; } {
   for (const segment of segments) {
     if (segment.length > MAX_PATH_SEGMENT_LENGTH) {
       return {
@@ -49,9 +49,9 @@ export function validatePathSegments(segments: string[]): { valid: boolean; erro
 }
 
 export function sanitizeRoute(route: string): string {
-  let sanitized = route.replace(/\0/g, '');
-  sanitized = sanitized.replace(/\.\./g, '');
-  sanitized = sanitized.replace(/\/\/+/g, '/');
+  let sanitized = route.replaceAll('\0', '');
+  sanitized = sanitized.replaceAll('..', '');
+  sanitized = sanitized.replaceAll(/\/\/+/g, '/');
 
   if (!sanitized.startsWith('/')) {
     sanitized = `/${sanitized}`;
@@ -65,9 +65,9 @@ export function sanitizeRoute(route: string): string {
 }
 
 export function validateCategory(
-  category: string | null,
+  category: null | string,
   validCategories: readonly string[]
-): { valid: boolean; error?: string; category?: string } {
+): { category?: string; error?: string; valid: boolean; } {
   if (!category) {
     return { valid: true };
   }
@@ -84,11 +84,11 @@ export function validateCategory(
 }
 
 export function validateLimit(
-  limit: string | null,
+  limit: null | string,
   min = 1,
   max = 100,
   defaultValue = 10
-): { valid: boolean; error?: string; limit?: number } {
+): { error?: string; limit?: number; valid: boolean; } {
   if (!limit) {
     return { valid: true, limit: defaultValue };
   }
@@ -119,9 +119,9 @@ export const MAX_BODY_SIZE = {
 } as const;
 
 export function validateBodySize(
-  contentLength: string | null,
+  contentLength: null | string,
   maxSize: number = MAX_BODY_SIZE.default
-): { valid: boolean; error?: string } {
+): { error?: string; valid: boolean; } {
   if (!contentLength) {
     return { valid: true };
   }
@@ -144,7 +144,7 @@ export function validateBodySize(
   return { valid: true };
 }
 
-export function validateSlug(slug: string): { valid: boolean; error?: string } {
+export function validateSlug(slug: string): { error?: string; valid: boolean; } {
   if (!/^[a-z0-9-]+$/.test(slug)) {
     return {
       valid: false,

@@ -1,7 +1,7 @@
 'use server';
 
 import { AccountService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { z } from 'zod';
 
@@ -74,12 +74,12 @@ export async function getUserBookmarksForCollections(
       (
         b
       ): b is typeof b & {
-        id: string;
-        user_id: string;
-        content_type: string;
         content_slug: string;
+        content_type: string;
         created_at: string;
+        id: string;
         updated_at: string;
+        user_id: string;
       } =>
         b.id !== null &&
         b.user_id !== null &&
@@ -248,8 +248,8 @@ export async function getSubmissionDashboard(
  */
 export interface AccountDashboardBundle {
   dashboard: Awaited<ReturnType<typeof getAccountDashboard>>;
-  library: Awaited<ReturnType<typeof getUserLibrary>>;
   homepage: Awaited<ReturnType<typeof import('./content/homepage.ts').getHomepageData>>;
+  library: Awaited<ReturnType<typeof getUserLibrary>>;
 }
 
 export async function getAccountDashboardBundle(

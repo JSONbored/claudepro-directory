@@ -7,12 +7,33 @@
  * - Server actions that call feature flags
  * - Functions that import 'server-only' packages
  * - Functions that use Node.js APIs
- * 
- * For dynamic configs, use client-safe defaults from config/client-defaults.ts
  */
 
-// Client-Safe Config Defaults (no server actions)
-export * from '../config/client-defaults.ts';
+// Static Config Getters (sync, client-safe)
+export {
+  getTimeoutConfig,
+  getPollingConfig,
+  getNewsletterConfig,
+  getNewsletterConfigValue,
+  getAppSettings,
+  getRecentlyViewedConfig,
+  getAnimationConfig,
+  getHomepageConfigBundle,
+} from '../config/static-configs.ts';
+
+// Direct config exports from unified config (client-safe)
+export {
+  UI_ANIMATION,
+  UI_TIMEOUTS,
+  API_TIMEOUTS,
+  CONFETTI_CONFIG,
+  POLLING_CONFIG,
+  NEWSLETTER_CTA,
+  NEWSLETTER_BEHAVIOR,
+  RECENTLY_VIEWED_CONFIG,
+  HOMEPAGE_CONFIG,
+  INFINITE_SCROLL_CONFIG,
+} from '../config/unified-config.ts';
 
 // Safe Utils
 export * from '../storage/image-utils.ts';

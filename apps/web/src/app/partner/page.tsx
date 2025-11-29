@@ -79,9 +79,9 @@ export default async function PartnerPage() {
   const partnerCtas = getPartnerCtas();
 
   return (
-    <div className={'container mx-auto px-4 py-12'}>
+    <div className="container mx-auto px-4 py-12">
       {/* Hero Section */}
-      <div className={'mx-auto mb-12 max-w-5xl text-center'}>
+      <div className="mx-auto mb-12 max-w-5xl text-center">
         <h1
           className={`mb-4 ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL} ${UI_CLASSES.HEADING_H1.split(' ')[1]}`}
         >
@@ -93,7 +93,7 @@ export default async function PartnerPage() {
         </p>
 
         {/* Real-Time Stats */}
-        <div className={'mx-auto mb-8 grid max-w-3xl grid-cols-3 gap-4'}>
+        <div className="mx-auto mb-8 grid max-w-3xl grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6 pb-6">
               <p
@@ -129,22 +129,18 @@ export default async function PartnerPage() {
 
       {/* Launch Pricing Banner */}
       <Card
-        className={
-          'mx-auto mb-12 max-w-4xl border-primary/20 bg-linear-to-r from-primary/10 to-primary/5'
-        }
+        className="mx-auto mb-12 max-w-4xl border-primary/20 bg-linear-to-r from-primary/10 to-primary/5"
       >
         <CardContent className="pt-6 pb-6">
           <div
-            className={
-              'flex flex-col items-center gap-3 text-center md:flex-row md:justify-between md:text-left'
-            }
+            className="flex flex-col items-center gap-3 text-center md:flex-row md:justify-between md:text-left"
           >
-            <div className={'flex items-start gap-3'}>
-              <div className={'rounded-full bg-primary/10 p-2'}>
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-primary/10 p-2">
                 <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className={'font-semibold text-lg'}>
+                <p className="font-semibold text-lg">
                   Launch Pricing: {pricing.launch.discountPercent}% Off Everything
                 </p>
                 <p className="text-muted-foreground text-sm">
@@ -161,14 +157,14 @@ export default async function PartnerPage() {
       </Card>
 
       {/* Pricing Options */}
-      <div className={'mx-auto mb-16 max-w-5xl'}>
-        <h2 className={'mb-8 text-center font-bold text-3xl'}>Simple, Transparent Pricing</h2>
-        <div className={'grid gap-8 md:grid-cols-2'}>
+      <div className="mx-auto mb-16 max-w-5xl">
+        <h2 className="mb-8 text-center font-bold text-3xl">Simple, Transparent Pricing</h2>
+        <div className="grid gap-8 md:grid-cols-2">
           {/* Job Listings */}
           <HoverCard variant="strong">
-            <Card className={'relative overflow-hidden border-2'}>
+            <Card className="relative overflow-hidden border-2">
               <CardHeader>
-                <div className={'mb-4 flex items-start justify-between'}>
+                <div className="mb-4 flex items-start justify-between">
                   <div className="rounded-lg bg-blue-500/10 p-3">
                     <Briefcase className={`${UI_CLASSES.ICON_LG} ${UI_CLASSES.ICON_INFO}`} />
                   </div>
@@ -187,12 +183,12 @@ export default async function PartnerPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Pricing */}
-                <div className={'rounded-lg border bg-muted/30 p-4'}>
-                  <div className={'mb-2 flex items-baseline gap-2'}>
-                    <span className={'font-bold text-muted-foreground text-xl line-through'}>
+                <div className="rounded-lg border bg-muted/30 p-4">
+                  <div className="mb-2 flex items-baseline gap-2">
+                    <span className="font-bold text-muted-foreground text-xl line-through">
                       ${pricing.jobs.regular}
                     </span>
-                    <span className={'font-bold text-3xl text-primary'}>
+                    <span className="font-bold text-3xl text-primary">
                       ${pricing.jobs.discounted}
                     </span>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
@@ -204,32 +200,32 @@ export default async function PartnerPage() {
 
                 {/* Features */}
                 <div className="space-y-3">
-                  <div className={'flex items-start gap-2'}>
+                  <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
                     <p className={UI_CLASSES.TEXT_SM}>Featured in /jobs section</p>
                   </div>
-                  <div className={'flex items-start gap-2'}>
+                  <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
                     <p className={UI_CLASSES.TEXT_SM}>Company logo & branding</p>
                   </div>
-                  <div className={'flex items-start gap-2'}>
+                  <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
                     <p className={UI_CLASSES.TEXT_SM}>Apply button to your ATS</p>
                   </div>
-                  <div className={'flex items-start gap-2'}>
+                  <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
                     <p className={UI_CLASSES.TEXT_SM}>{pricing.jobs.durationDays}-day visibility</p>
                   </div>
-                  <div className={'flex items-start gap-2'}>
+                  <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
                     <p className={UI_CLASSES.TEXT_SM}>Analytics dashboard</p>
                   </div>
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" asChild={true}>
+                <Button className="w-full" size="lg" asChild>
                   <a href={partnerCtas.jobListing.href}>
-                    <Mail className={'mr-2 h-4 w-4'} />
+                    <Mail className="mr-2 h-4 w-4" />
                     Post a Job
                   </a>
                 </Button>
@@ -239,9 +235,9 @@ export default async function PartnerPage() {
 
           {/* Sponsored Listings */}
           <HoverCard variant="strong">
-            <Card className={'relative overflow-hidden border-2'}>
+            <Card className="relative overflow-hidden border-2">
               <CardHeader>
-                <div className={'mb-4 flex items-start justify-between'}>
+                <div className="mb-4 flex items-start justify-between">
                   <div className="rounded-lg bg-purple-500/10 p-3">
                     <Megaphone className={`${UI_CLASSES.ICON_LG} text-purple-500`} />
                   </div>
@@ -260,12 +256,12 @@ export default async function PartnerPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Pricing */}
-                <div className={'rounded-lg border bg-muted/30 p-4'}>
-                  <div className={'mb-2 flex items-baseline gap-2'}>
-                    <span className={'font-bold text-muted-foreground text-xl line-through'}>
+                <div className="rounded-lg border bg-muted/30 p-4">
+                  <div className="mb-2 flex items-baseline gap-2">
+                    <span className="font-bold text-muted-foreground text-xl line-through">
                       ${pricing.sponsored.regular}
                     </span>
-                    <span className={'font-bold text-3xl text-primary'}>
+                    <span className="font-bold text-3xl text-primary">
                       ${pricing.sponsored.discounted}
                     </span>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
@@ -275,32 +271,32 @@ export default async function PartnerPage() {
 
                 {/* Features */}
                 <div className="space-y-3">
-                  <div className={'flex items-start gap-2'}>
+                  <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
                     <p className={UI_CLASSES.TEXT_SM}>Top placement in category</p>
                   </div>
-                  <div className={'flex items-start gap-2'}>
+                  <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
                     <p className={UI_CLASSES.TEXT_SM}>"Sponsored" badge</p>
                   </div>
-                  <div className={'flex items-start gap-2'}>
+                  <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
                     <p className={UI_CLASSES.TEXT_SM}>Homepage feature rotation</p>
                   </div>
-                  <div className={'flex items-start gap-2'}>
+                  <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
                     <p className={UI_CLASSES.TEXT_SM}>Analytics dashboard</p>
                   </div>
-                  <div className={'flex items-start gap-2'}>
+                  <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
                     <p className={UI_CLASSES.TEXT_SM}>Custom call-to-action</p>
                   </div>
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" variant="default" asChild={true}>
+                <Button className="w-full" size="lg" variant="default" asChild>
                   <a href={partnerCtas.sponsoredListing.href}>
-                    <Mail className={'mr-2 h-4 w-4'} />
+                    <Mail className="mr-2 h-4 w-4" />
                     Get Featured
                   </a>
                 </Button>
@@ -311,13 +307,13 @@ export default async function PartnerPage() {
       </div>
 
       {/* Why Advertise Here */}
-      <div className={'mx-auto mb-16 max-w-4xl'}>
-        <h2 className={'mb-8 text-center font-bold text-2xl'}>Why Claude Pro Directory?</h2>
-        <div className={'grid gap-6 md:grid-cols-3'}>
+      <div className="mx-auto mb-16 max-w-4xl">
+        <h2 className="mb-8 text-center font-bold text-2xl">Why Claude Pro Directory?</h2>
+        <div className="grid gap-6 md:grid-cols-3">
           <Card>
             <CardContent className="pt-6">
               <Eye className="mb-3 h-8 w-8 text-primary" />
-              <p className={'mb-2 font-semibold'}>Highly Engaged Audience</p>
+              <p className="mb-2 font-semibold">Highly Engaged Audience</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
                 5.3 pages/visit average • Engineers actively building with Claude AI
               </p>
@@ -326,7 +322,7 @@ export default async function PartnerPage() {
           <Card>
             <CardContent className="pt-6">
               <MousePointer className="mb-3 h-8 w-8 text-primary" />
-              <p className={'mb-2 font-semibold'}>Quality Over Quantity</p>
+              <p className="mb-2 font-semibold">Quality Over Quantity</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
                 Focused community of AI engineers, not random traffic
               </p>
@@ -335,7 +331,7 @@ export default async function PartnerPage() {
           <Card>
             <CardContent className="pt-6">
               <BarChart className="mb-3 h-8 w-8 text-primary" />
-              <p className={'mb-2 font-semibold'}>Transparent Analytics</p>
+              <p className="mb-2 font-semibold">Transparent Analytics</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
                 Real-time dashboard with views, clicks, and engagement metrics
               </p>
@@ -345,12 +341,12 @@ export default async function PartnerPage() {
       </div>
 
       {/* FAQ / Common Questions */}
-      <div className={'mx-auto mb-16 max-w-3xl'}>
-        <h2 className={'mb-8 text-center font-bold text-2xl'}>Frequently Asked Questions</h2>
-        <div className={'space-y-4'}>
+      <div className="mx-auto mb-16 max-w-3xl">
+        <h2 className="mb-8 text-center font-bold text-2xl">Frequently Asked Questions</h2>
+        <div className="space-y-4">
           <Card>
             <CardContent className="pt-6">
-              <p className={'mb-2 font-semibold'}>How quickly can I get started?</p>
+              <p className="mb-2 font-semibold">How quickly can I get started?</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
                 Email us today, and we'll have your listing live within 24 hours. No lengthy
                 onboarding process.
@@ -359,7 +355,7 @@ export default async function PartnerPage() {
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <p className={'mb-2 font-semibold'}>Can I cancel anytime?</p>
+              <p className="mb-2 font-semibold">Can I cancel anytime?</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
                 Yes, absolutely. No contracts, no commitments. Just email us and we'll process your
                 cancellation immediately.
@@ -368,7 +364,7 @@ export default async function PartnerPage() {
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <p className={'mb-2 font-semibold'}>Do you offer bulk pricing?</p>
+              <p className="mb-2 font-semibold">Do you offer bulk pricing?</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
                 Yes! Email us for custom pricing if you need multiple job listings or sponsored
                 placements.
@@ -379,19 +375,19 @@ export default async function PartnerPage() {
       </div>
 
       {/* Final CTA */}
-      <div className={'mx-auto max-w-2xl text-center'}>
+      <div className="mx-auto max-w-2xl text-center">
         <Card className="border-primary/20 bg-linear-to-r from-primary/10 to-primary/5">
           <CardContent className="pt-8 pb-8">
-            <h2 className={'mb-4 font-bold text-2xl'}>
+            <h2 className="mb-4 font-bold text-2xl">
               Ready to Reach {heroStats.monthlyVisitors.toLocaleString()}+ AI Engineers?
             </h2>
-            <p className={'mb-6 text-muted-foreground'}>
+            <p className="mb-6 text-muted-foreground">
               Get started with launch pricing ({pricing.launch.discountPercent}% off) before{' '}
               {pricing.launch.endDate}
             </p>
-            <Button size="lg" asChild={true}>
+            <Button size="lg" asChild>
               <a href={partnerCtas.partnershipInquiry.href}>
-                <Mail className={'mr-2 h-4 w-4'} />
+                <Mail className="mr-2 h-4 w-4" />
                 Email: {partnerContacts.partnerEmail}
               </a>
             </Button>

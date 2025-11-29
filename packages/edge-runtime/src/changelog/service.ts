@@ -259,8 +259,8 @@ export async function revalidateChangelogPages(
         slug,
       },
     }).catch(async (error) => {
-      const { errorToString } = await import('@heyclaude/shared-runtime');
-      const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+      const { normalizeError } = await import('@heyclaude/shared-runtime');
+      const errorObj = normalizeError(error, 'Cache invalidation failed');
       logger.warn('Cache tag invalidation failed', {
         function: 'changelog-service',
         action: 'revalidate',
@@ -298,8 +298,8 @@ export async function revalidateChangelogPages(
           });
         }
       } catch (error) {
-        const { errorToString } = await import('@heyclaude/shared-runtime');
-        const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+        const { normalizeError } = await import('@heyclaude/shared-runtime');
+        const errorObj = normalizeError(error, 'Revalidate failed');
         logger.error('Revalidate error', {
           function: 'changelog-service',
           action: 'revalidate',

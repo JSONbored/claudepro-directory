@@ -42,7 +42,7 @@ import {
   normalizeError,
 } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { ContentListServer } from '@/src/components/content/content-grid-list';

@@ -5,8 +5,8 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 export class JobsService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,7 +17,7 @@ export class JobsService {
   async getJobs(args: Database['public']['Functions']['get_jobs_list']['Args']) {
     const { data, error } = await this.supabase.rpc('get_jobs_list', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_jobs_list']['Returns'];
+    return data;
   }
 
   /**
@@ -26,7 +26,7 @@ export class JobsService {
   async getJobBySlug(args: Database['public']['Functions']['get_job_detail']['Args']) {
     const { data, error } = await this.supabase.rpc('get_job_detail', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_job_detail']['Returns'];
+    return data;
   }
 
   /**
@@ -35,7 +35,7 @@ export class JobsService {
   async getFeaturedJobs(args: Database['public']['Functions']['get_featured_jobs']['Args']) {
     const { data, error } = await this.supabase.rpc('get_featured_jobs', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_featured_jobs']['Returns'];
+    return data;
   }
 
   /**
@@ -44,7 +44,7 @@ export class JobsService {
   async getJobsByCategory(args: Database['public']['Functions']['get_jobs_by_category']['Args']) {
     const { data, error } = await this.supabase.rpc('get_jobs_by_category', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_jobs_by_category']['Returns'];
+    return data;
   }
 
   /**
@@ -53,6 +53,6 @@ export class JobsService {
   async getJobsCount(args: Database['public']['Functions']['get_jobs_count']['Args']) {
     const { data, error } = await this.supabase.rpc('get_jobs_count', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_jobs_count']['Returns'];
+    return data;
   }
 }

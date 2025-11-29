@@ -1,11 +1,14 @@
 import { writeFileSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
-import { callEdgeFunction } from '../toolkit/edge.js';
+
+import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+
 import { ensureEnvVars } from '../toolkit/env.js';
 import { normalizeError } from '../toolkit/errors.js';
 import { logger } from '../toolkit/logger.js';
 import { DEFAULT_SUPABASE_URL } from '../toolkit/supabase.js';
 import { resolveRepoPath } from '../utils/paths.js';
+import { buildReadmeMarkdown } from '../utils/readme-builder.js';
 
 export interface GenerateReadmeOptions {
   outputPath?: string;
@@ -18,7 +21,7 @@ export interface GenerateReadmeOptions {
 function validateReadmeContent(content: unknown, outputPath: string): string {
   // Ensure content is a string
   if (typeof content !== 'string') {
-    throw new Error('README content must be a string');
+    throw new TypeError('README content must be a string');
   }
 
   // Check for reasonable size limits (README should not exceed 1MB)
@@ -42,7 +45,7 @@ function validateReadmeContent(content: unknown, outputPath: string): string {
   if (!markdownPatterns.test(content)) {
     logger.warn('README content does not appear to be valid markdown', {
       script: 'generate-readme',
-      preview: content.substring(0, 100),
+      preview: content.slice(0, 100),
     });
     // Don't throw - allow through but log warning for security monitoring
   }
@@ -81,6 +84,33 @@ function validateReadmeContent(content: unknown, outputPath: string): string {
   return content;
 }
 
+/**
+ * Generate a repository README.md by fetching site-wide content from the Next.js API, validating the generated markdown, and writing it to disk.
+ *
+ * This function requests formatted site data from the Next.js API route `/api/content/sitewide?format=readme`, converts the response into Markdown, validates the content and target path for safety (size, format, malicious patterns, and path confinement to the repository), and atomically writes the validated README to the filesystem. It logs progress and summary information and will propagate errors encountered during fetching, validation, or file I/O.
+ *
+ * @param options - Configuration options for README generation.
+ * @param options.outputPath - Optional path to write the generated README. When omitted, writes to the repository root `README.md`.
+ * @returns A promise that resolves when the README has been written; rejects if fetching, validation, or writing fails.
+ *
+ * @example
+ * // Generate README to the default repository README.md
+ * await runGenerateReadme();
+ *
+ * @example
+ * // Generate README to a custom path
+ * await runGenerateReadme({ outputPath: './docs/README.md' });
+ *
+ * Side effects:
+ * - Performs an HTTP GET request to the Next.js API.
+ * - Writes a file to the filesystem at `options.outputPath` or the repository README.md.
+ * - Emits informational, warning, and error logs.
+ *
+ * Error behavior:
+ * - Throws if the API response is unsuccessful or returns invalid data.
+ * - Throws if content validation fails (type, size, format, malicious content, or path outside repository).
+ * - Throws if writing the file fails.
+ */
 export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Promise<void> {
   const README_PATH = options.outputPath ?? join(resolveRepoPath(), 'README.md');
 
@@ -98,24 +128,55 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
     }
 
     logger.info('📝 Generating README.md via Next.js API...\n', { script: 'generate-readme' });
-    logger.info('   Endpoint: /api/content/sitewide?format=readme', {
-      script: 'generate-readme',
+
+    // Call Next.js API route (not edge functions)
+    // Use same fallback as readme-builder.ts for consistency
+    const siteUrl = process.env['NEXT_PUBLIC_SITE_URL'] || 'https://claudepro.directory';
+    const apiUrl = `${siteUrl}/api/content/sitewide?format=readme`;
+
+    logger.info(`   Endpoint: ${apiUrl}`, { script: 'generate-readme' });
+
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
-    const readme = await callEdgeFunction<string>(
-      '/api/content/sitewide?format=readme',
-      {},
-      { responseType: 'text', requireAuth: false, timeoutMs: 15_000 }
-    );
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '');
+      throw new Error(
+        `API request failed (${response.status} ${response.statusText}): ${errorText}`
+      );
+    }
 
-    // CRITICAL SECURITY: Validate HTTP-sourced content before writing to file system
-    // This prevents arbitrary file upload attacks. The validateReadmeContent function
+    const data = (await response.json()) as DatabaseGenerated['public']['Functions']['generate_readme_data']['Returns'];
+
+    if (!data || typeof data !== 'object') {
+      throw new Error('API returned null or invalid data');
+    }
+
+    if (!Array.isArray(data.categories)) {
+      throw new TypeError('API response missing categories array');
+    }
+
+    logger.info(`✅ Fetched data: ${data.total_count ?? 0} total items, ${data.categories?.length ?? 0} categories`, {
+      script: 'generate-readme',
+      totalCount: data.total_count ?? 0,
+      categoriesCount: data.categories?.length ?? 0,
+    });
+
+    // Format the data into markdown using the CLI utility
+    const formattedMarkdown = buildReadmeMarkdown(data);
+
+    // CRITICAL SECURITY: Validate content before writing to file system
+    // This prevents arbitrary file writes. The validateReadmeContent function
     // performs comprehensive checks: type validation, size limits, path safety,
     // markdown format validation, and malicious pattern detection.
-    const validatedReadme = validateReadmeContent(readme, README_PATH);
+    const validatedReadme = validateReadmeContent(formattedMarkdown, README_PATH);
 
     // Safe to write: content has passed all security validations
-    writeFileSync(README_PATH, validatedReadme, 'utf-8');
+    writeFileSync(README_PATH, validatedReadme, 'utf8');
 
     logger.info('✅ README.md generated successfully!', { script: 'generate-readme' });
     logger.info(`   Bytes: ${validatedReadme.length}`, {
@@ -129,6 +190,6 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
     logger.error('❌ Failed to generate README', normalizeError(error), {
       script: 'generate-readme',
     });
-    throw error instanceof Error ? error : new Error(String(error));
+    throw normalizeError(error, 'README generation failed');
   }
 }

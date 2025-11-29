@@ -7,7 +7,7 @@ import { Constants, type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import type { Metadata } from 'next';
+import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
@@ -20,19 +20,19 @@ export const dynamic = 'force-dynamic';
 
 type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
   answers: DecodedQuizAnswers;
-  id: string;
   generatedAt: string;
+  id: string;
 };
 
 // Type matching QuizAnswers from quiz-form.tsx
 interface DecodedQuizAnswers {
-  useCase: Database['public']['Enums']['use_case_type'];
   experienceLevel: Database['public']['Enums']['experience_level'];
-  toolPreferences: string[];
-  p_integrations?: Database['public']['Enums']['integration_type'][];
   p_focus_areas?: Database['public']['Enums']['focus_area_type'][];
+  p_integrations?: Database['public']['Enums']['integration_type'][];
   teamSize?: string;
   timestamp?: string;
+  toolPreferences: string[];
+  useCase: Database['public']['Enums']['use_case_type'];
 }
 
 function decodeQuizAnswers(
@@ -64,10 +64,10 @@ function decodeQuizAnswers(
     const data = parsed as Record<string, unknown>;
 
     // Validate required fields
-    if (!data['useCase'] || typeof data['useCase'] !== 'string') {
+    if (typeof data['useCase'] !== 'string' || data['useCase'] === '') {
       throw new Error('Missing or invalid useCase field in quiz answers');
     }
-    if (!data['experienceLevel'] || typeof data['experienceLevel'] !== 'string') {
+    if (typeof data['experienceLevel'] !== 'string' || data['experienceLevel'] === '') {
       throw new Error('Missing or invalid experienceLevel field in quiz answers');
     }
     if (!Array.isArray(data['toolPreferences'])) {
@@ -130,14 +130,14 @@ function decodeQuizAnswers(
       useCase: data['useCase'] as Database['public']['Enums']['use_case_type'],
       experienceLevel: data['experienceLevel'] as Database['public']['Enums']['experience_level'],
       toolPreferences: data['toolPreferences'] as string[],
-      ...(data['p_integrations'] && {
+      ...(Array.isArray(data['p_integrations']) && data['p_integrations'].length > 0 && {
         p_integrations: data['p_integrations'] as Database['public']['Enums']['integration_type'][],
       }),
-      ...(data['p_focus_areas'] && {
+      ...(Array.isArray(data['p_focus_areas']) && data['p_focus_areas'].length > 0 && {
         p_focus_areas: data['p_focus_areas'] as Database['public']['Enums']['focus_area_type'][],
       }),
-      ...(data['teamSize'] && typeof data['teamSize'] === 'string' ? { teamSize: data['teamSize'] } : {}),
-      ...(data['timestamp'] && typeof data['timestamp'] === 'string' ? { timestamp: data['timestamp'] } : {}),
+      ...(typeof data['teamSize'] === 'string' && data['teamSize'] !== '' ? { teamSize: data['teamSize'] } : {}),
+      ...(typeof data['timestamp'] === 'string' && data['timestamp'] !== '' ? { timestamp: data['timestamp'] } : {}),
     } as DecodedQuizAnswers;
   } catch (error) {
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
@@ -155,9 +155,9 @@ function normalizeRecommendationResults(
   parentLogger?: ReturnType<typeof logger.child>
 ): Array<
   Database['public']['CompositeTypes']['recommendation_item'] & {
+    category: Database['public']['Enums']['content_category'];
     slug: string;
     title: string;
-    category: Database['public']['Enums']['content_category'];
   }
 > {
   // Use parent logger if provided, otherwise create a child logger with generated requestId
@@ -177,9 +177,9 @@ function normalizeRecommendationResults(
     (
       item
     ): item is typeof item & {
+      category: Database['public']['Enums']['content_category'];
       slug: string;
       title: string;
-      category: Database['public']['Enums']['content_category'];
     } => Boolean(item.slug && item.title && item.category)
   );
 

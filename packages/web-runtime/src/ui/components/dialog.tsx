@@ -13,15 +13,13 @@
  * - Automatic prefers-reduced-motion support
  */
 
-import { logger } from '../../entries/core.ts';
-import { getAnimationConfig } from '../../config/client-defaults.ts';
+import { UI_ANIMATION } from '../../config/unified-config.ts';
 import { X } from '../../icons.tsx';
 import { POSITION_PATTERNS, STATE_PATTERNS, UI_CLASSES } from '../constants.ts';
 import { cn } from '../utils.ts';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { motion } from 'motion/react';
 import type * as React from 'react';
-import { useEffect, useState } from 'react';
 
 const Dialog = DialogPrimitive.Root;
 
@@ -53,6 +51,13 @@ const DialogOverlay = ({
 );
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
+/** Spring animation config from unified config */
+const springSmooth = {
+  type: 'spring' as const,
+  stiffness: UI_ANIMATION['spring.smooth.stiffness'],
+  damping: UI_ANIMATION['spring.smooth.damping'],
+};
+
 const DialogContent = ({
   className,
   children,
@@ -61,28 +66,6 @@ const DialogContent = ({
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
   ref?: React.RefObject<React.ElementRef<typeof DialogPrimitive.Content> | null>;
 }) => {
-  const [springSmooth, setSpringSmooth] = useState({
-    type: 'spring' as const,
-    stiffness: 300,
-    damping: 25,
-  });
-
-  useEffect(() => {
-    getAnimationConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setSpringSmooth({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.smooth.stiffness'],
-          damping: config['animation.spring.smooth.damping'],
-        });
-      })
-      .catch((error) => {
-        logger.error('DialogContent: failed to load animation config', error);
-      });
-  }, []);
-
   return (
     <DialogPortal>
       <DialogOverlay />

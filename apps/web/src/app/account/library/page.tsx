@@ -24,7 +24,7 @@ import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
   CardDescription,
   CardHeader,
   CardTitle, Tabs, TabsContent, TabsList, TabsTrigger    } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 
 
@@ -66,7 +66,7 @@ export default async function LibraryPage() {
             <CardDescription>Please sign in to view your library.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -96,7 +96,7 @@ export default async function LibraryPage() {
     } else {
       userLogger.info('LibraryPage: library data loaded', {
         section: 'library-data-fetch',
-        hasData: !!data,
+        hasData: Boolean(data),
       });
     }
   } catch (error) {
@@ -117,7 +117,7 @@ export default async function LibraryPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true} variant="outline">
+            <Button asChild variant="outline">
               <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
             </Button>
           </CardContent>
@@ -185,10 +185,10 @@ export default async function LibraryPage() {
         <TabsContent value="bookmarks" className="space-y-4">
           {bookmarks.length === 0 ? (
             <Card>
-              <CardContent className={'flex flex-col items-center py-12'}>
+              <CardContent className="flex flex-col items-center py-12">
                 <BookmarkIcon className="mb-4 h-12 w-12 text-muted-foreground" />
                 <h3 className="mb-2 font-semibold text-xl">No bookmarks yet</h3>
-                <p className={'max-w-md text-center text-muted-foreground'}>
+                <p className="max-w-md text-center text-muted-foreground">
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
@@ -210,9 +210,7 @@ export default async function LibraryPage() {
                           </UnifiedBadge>
                           <CardTitle className="text-lg">{bookmark.content_slug}</CardTitle>
                         </div>
-                        {bookmark.notes && (
-                          <CardDescription className="mt-2">{bookmark.notes}</CardDescription>
-                        )}
+                        {bookmark.notes ? <CardDescription className="mt-2">{bookmark.notes}</CardDescription> : null}
                       </div>
                       <NavLink
                         href={`/${bookmark.content_type}/${bookmark.content_slug}`}
@@ -223,7 +221,7 @@ export default async function LibraryPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className={'text-muted-foreground text-xs'}>
+                    <p className="text-muted-foreground text-xs">
                       Saved{' '}
                       {bookmark.created_at
                         ? new Date(bookmark.created_at).toLocaleDateString()
@@ -242,10 +240,10 @@ export default async function LibraryPage() {
         >
           {collections.length === 0 ? (
             <Card>
-              <CardContent className={'flex flex-col items-center py-12'}>
+              <CardContent className="flex flex-col items-center py-12">
                 <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
                 <h3 className="mb-2 font-semibold text-xl">No collections yet</h3>
-                <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
+                <p className="mb-4 max-w-md text-center text-muted-foreground">
                   Organize your bookmarks into custom collections! Group related configurations
                   together and share them with others.
                 </p>
@@ -267,27 +265,23 @@ export default async function LibraryPage() {
                         <div className="flex-1">
                           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
                             <Layers className="h-4 w-4 text-primary" />
-                            {collection.is_public && (
-                              <UnifiedBadge variant="base" style="outline" className="text-xs">
+                            {collection.is_public ? <UnifiedBadge variant="base" style="outline" className="text-xs">
                                 Public
-                              </UnifiedBadge>
-                            )}
+                              </UnifiedBadge> : null}
                           </div>
                           <CardTitle className="text-lg">{collection.name}</CardTitle>
-                          {collection.description && (
-                            <CardDescription className="mt-2 line-clamp-2">
+                          {collection.description ? <CardDescription className="mt-2 line-clamp-2">
                               {collection.description}
-                            </CardDescription>
-                          )}
+                            </CardDescription> : null}
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                        <p className={'text-muted-foreground text-xs'}>
+                        <p className="text-muted-foreground text-xs">
                           {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'}
                         </p>
-                        <p className={'text-muted-foreground text-xs'}>
+                        <p className="text-muted-foreground text-xs">
                           {collection.view_count} views
                         </p>
                       </div>

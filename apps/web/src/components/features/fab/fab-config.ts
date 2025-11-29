@@ -1,9 +1,16 @@
 'use client';
 
-/** FAB configuration for main button and speed dial actions */
+/**
+ * FAB configuration for main button and speed dial actions
+ *
+ * Supports:
+ * - Standard navigation actions (Submit, Search, Pinboard, Scroll to Top)
+ * - Context-aware actions for detail pages (Copy Link, Share)
+ * - Notification badge (mobile only)
+ */
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { ArrowUp, Bell, Bookmark, FileText, Plus, Search } from '@heyclaude/web-runtime/icons';
+import { ArrowUp, Bell, Bookmark, Copy, FileText, Plus, Search, Share2 } from '@heyclaude/web-runtime/icons';
 import type { MainFABConfig, SpeedDialAction } from '@heyclaude/web-runtime/types/component.types';
 
 export const handleScrollToTop = (): void => {
@@ -107,5 +114,29 @@ export const createSpeedDialActions = (
     badge: unreadCount,
     mobileOnly: true,
     show: flags.showNotifications && unreadCount > 0,
+  },
+];
+
+/**
+ * Context-aware actions for detail pages
+ * These appear at the top of the speed dial when on a content detail page
+ */
+export const createDetailPageActions = (
+  onCopyLink: () => void,
+  onShare: () => void
+): SpeedDialAction[] => [
+  {
+    id: 'copy-link',
+    icon: Copy,
+    label: 'Copy link',
+    onClick: onCopyLink,
+    show: true,
+  },
+  {
+    id: 'share',
+    icon: Share2,
+    label: 'Share',
+    onClick: onShare,
+    show: true,
   },
 ];

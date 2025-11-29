@@ -4,7 +4,7 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import type { CreateJobInput } from '@heyclaude/web-runtime';
+import  { type CreateJobInput } from '@heyclaude/web-runtime';
 import { updateJob } from '@heyclaude/web-runtime/actions';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -14,7 +14,7 @@ import {
   getUserJobById,
 } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
@@ -202,13 +202,11 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
         <h1 className={`mb-2 ${UI_CLASSES.HEADING_H2}`}>Edit Job Listing</h1>
         <p className="text-muted-foreground">Update your job posting details</p>
       </div>
-      {hasInvalidData && (
-        <div className="rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">
+      {hasInvalidData ? <div className="rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">
           <p className="text-sm text-yellow-800 dark:text-yellow-200">
             Some fields contain invalid data and couldn't be loaded. Please review and update.
           </p>
-        </div>
-      )}
+        </div> : null}
       <JobForm
         initialData={{
           title: job.title,

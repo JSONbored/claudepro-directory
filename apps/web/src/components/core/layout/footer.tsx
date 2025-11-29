@@ -8,7 +8,7 @@
 
 'use client';
 
-import { getContactChannels, logger } from '@heyclaude/web-runtime/core';
+import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import {
   APP_CONFIG,
@@ -24,7 +24,7 @@ import { useTheme } from 'next-themes';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
-import { ThemeToggle } from '@/src/components/core/layout/theme-toggle';
+import { ThemeToggle } from '@heyclaude/web-runtime/ui';
 
 /**
  * Footer Component
@@ -72,19 +72,12 @@ function FooterComponent() {
   }, []);
 
   useEffect(() => {
-    getAnimationConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setSpringDefault({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.default.stiffness'],
-          damping: config['animation.spring.default.damping'],
-        });
-      })
-      .catch((error) => {
-        logger.error('Footer: failed to load animation config', error);
-      });
+    const config = getAnimationConfig();
+    setSpringDefault({
+      type: 'spring' as const,
+      stiffness: config['animation.spring.default.stiffness'],
+      damping: config['animation.spring.default.damping'],
+    });
   }, []);
 
   return (

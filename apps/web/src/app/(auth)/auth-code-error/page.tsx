@@ -1,4 +1,4 @@
-import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
+import  { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
@@ -12,7 +12,7 @@ import { UI_CLASSES, Button ,
   CardDescription,
   CardHeader,
   CardTitle } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 
 const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
@@ -84,9 +84,7 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <div
-          className={
-            'mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10'
-          }
+          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
         >
           <AlertCircle className="h-6 w-6 text-destructive" />
         </div>
@@ -96,10 +94,10 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
         </CardDescription>
       </CardHeader>
       <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
-        <Button asChild={true}>
+        <Button asChild>
           <Link href={ROUTES.LOGIN}>Try Again</Link>
         </Button>
-        <Button variant="outline" asChild={true}>
+        <Button variant="outline" asChild>
           <Link href={ROUTES.HOME}>Return Home</Link>
         </Button>
       </CardContent>

@@ -12,7 +12,7 @@ import { Button,
   CardDescription,
   CardHeader,
   CardTitle } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';

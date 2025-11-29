@@ -1,10 +1,10 @@
 export function mapPostgresTypeToZod(
   col: {
-    udtName: string;
-    maxLength?: number | null;
+    hasDefault?: boolean;
+    maxLength?: null | number;
     nullable?: boolean;
     type?: string;
-    hasDefault?: boolean;
+    udtName: string;
   },
   enums: Record<string, string[]>
 ): string {
@@ -16,49 +16,58 @@ export function mapPostgresTypeToZod(
     zodType = `z.enum(['${enumValues.join("', '")}'])`;
   } else {
     switch (col.udtName) {
-      case 'uuid':
+      case 'uuid': {
         zodType = 'z.string().uuid()';
         break;
+      }
       case 'text':
       case 'varchar':
-      case 'bpchar':
+      case 'bpchar': {
         zodType = 'z.string()';
         if (col.maxLength) {
           zodType += `.max(${col.maxLength})`;
         }
         break;
+      }
       case 'int2':
       case 'int4':
       case 'int8':
       case 'float4':
       case 'float8':
-      case 'numeric':
+      case 'numeric': {
         zodType = 'z.number()';
         break;
-      case 'bool':
+      }
+      case 'bool': {
         zodType = 'z.boolean()';
         break;
+      }
       case 'json':
-      case 'jsonb':
+      case 'jsonb': {
         zodType = 'z.any()';
         break;
+      }
       case 'timestamptz':
       case 'timestamp':
-      case 'date':
+      case 'date': {
         zodType = 'z.string()';
         break;
+      }
       case '_text':
-      case '_varchar':
+      case '_varchar': {
         zodType = 'z.array(z.string())';
         break;
-      case '_uuid':
+      }
+      case '_uuid': {
         zodType = 'z.array(z.string().uuid())';
         break;
-      default:
+      }
+      default: {
         if (col.type === 'ARRAY') {
           zodType = 'z.array(z.any())';
         }
         break;
+      }
     }
   }
 

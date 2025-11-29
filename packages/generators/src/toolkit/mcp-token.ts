@@ -5,29 +5,29 @@
  * Used by MCP login command and other tools that need authentication.
  */
 
-import { existsSync, readFileSync } from 'fs';
-import { homedir } from 'os';
-import { join } from 'path';
+import { existsSync, readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import path from 'node:path';
 
-const CONFIG_DIR = join(homedir(), '.heyclaude-mcp');
-const TOKEN_FILE = join(CONFIG_DIR, 'token.json');
+const CONFIG_DIR = path.join(homedir(), '.heyclaude-mcp');
+const TOKEN_FILE = path.join(CONFIG_DIR, 'token.json');
 
 export interface TokenData {
   access_token: string;
-  refresh_token: string;
   expires_at: number;
-  user_id: string;
-  user_email: string;
+  refresh_token: string;
   saved_at: string;
+  user_email: string;
+  user_id: string;
 }
 
 /**
  * Load saved token from disk
  */
-export function loadToken(): TokenData | null {
+export function loadToken(): null | TokenData {
   try {
     if (existsSync(TOKEN_FILE)) {
-      const data = JSON.parse(readFileSync(TOKEN_FILE, 'utf-8')) as TokenData;
+      const data = JSON.parse(readFileSync(TOKEN_FILE, 'utf8')) as TokenData;
 
       // Check if token is expired (with 5 minute buffer)
       const expiresAt = data.expires_at * 1000; // Convert to milliseconds
@@ -48,7 +48,7 @@ export function loadToken(): TokenData | null {
  * Get token string (for use in scripts)
  * Checks environment variable first, then saved token file
  */
-export function getMcpToken(): string | null {
+export function getMcpToken(): null | string {
   // Check environment variable first
   if (process.env['MCP_TOKEN']) {
     return process.env['MCP_TOKEN'];

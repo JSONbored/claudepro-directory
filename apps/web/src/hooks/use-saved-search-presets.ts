@@ -10,7 +10,7 @@
  * - Guards against SSR/localStorage absence to avoid hydration issues.
  */
 
-import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
+import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import type { FilterState, SavedSearchPreset } from '@heyclaude/web-runtime/types/component.types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -264,7 +264,7 @@ function loadFromStorage(key: string): SavedSearchPreset[] {
   } catch (error) {
     logger.error(
       'useSavedSearchPresets: failed to parse stored presets',
-      error instanceof Error ? error : new Error(String(error))
+      normalizeError(error, 'Failed to parse stored presets')
     );
     return [];
   }
@@ -313,10 +313,10 @@ function sanitizeFilters(filters: FilterState = {}): FilterState {
     const normalizedTags = Array.from(
       new Set(
         filters.tags
-          .map((tag) => (typeof tag === 'string' ? tag.trim() : ''))
-          .filter((tag): tag is string => tag.length > 0)
+          .map((tag: string) => (typeof tag === 'string' ? tag.trim() : ''))
+          .filter((tag: string): tag is string => tag.length > 0)
       )
-    ).sort((a, b) => a.localeCompare(b));
+    ).sort((a: string, b: string) => a.localeCompare(b));
     if (normalizedTags.length > 0) {
       sanitized.tags = normalizedTags;
     }

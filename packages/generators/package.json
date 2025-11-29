@@ -27,6 +27,10 @@
     "heyclaude-mcp-login": "./dist/bin/mcp-login.js"
   },
   "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
     "./toolkit/logger": "./src/toolkit/logger.ts",
     "./toolkit/env": "./src/toolkit/env.ts",
     "./toolkit/cache": "./src/toolkit/cache.ts",
@@ -37,6 +41,8 @@
   },
   "scripts": {
     "build": "tsc -b",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --config eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.test.ts' --ignore-pattern '**/*.spec.ts'",
     "clean": "rm -rf dist"
   },
   "dependencies": {
@@ -45,6 +51,7 @@
     "@heyclaude/shared-runtime": "workspace:*",
     "@heyclaude/web-runtime": "workspace:*",
     "@supabase/supabase-js": "^2.86.0",
+    "@iarna/toml": "^2.2.5",
     "archiver": "^7.0.1",
     "escape-html": "^1.0.3",
     "jiti": "^2.6.1",

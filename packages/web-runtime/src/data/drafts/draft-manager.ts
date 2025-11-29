@@ -23,46 +23,46 @@ import { Constants } from '@heyclaude/database-types';
 
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
-import type { SubmissionContentType } from '../../types/component.types.ts';
+import  { type SubmissionContentType } from '../../types/component.types.ts';
 
 /**
  * Form data structure for drafts
  */
 export interface DraftFormData {
-  // Step 1: Type selection
-  submission_type: SubmissionContentType;
-
-  // Step 2: Basic info
-  name: string;
   description: string;
-
-  // Step 3: Type-specific (stored as generic object)
-  type_specific: Record<string, unknown>;
 
   // Step 4: Examples & tags
   examples: Array<{
-    id: string;
-    title: string;
     code: string;
-    language: string;
     description?: string;
+    id: string;
+    language: string;
+    title: string;
   }>;
-  tags: string[];
+  last_step: number;
 
+  // Step 2: Basic info
+  name: string;
+
+  quality_score: number;
+  // Step 1: Type selection
+  submission_type: SubmissionContentType;
+
+  tags: string[];
   // Meta
   template_used?: string;
-  last_step: number;
-  quality_score: number;
+  // Step 3: Type-specific (stored as generic object)
+  type_specific: Record<string, unknown>;
 }
 
 /**
  * Stored draft metadata
  */
 interface StoredDraft {
-  data: DraftFormData;
   created_at: string;
-  updated_at: string;
+  data: DraftFormData;
   expires_at: string;
+  updated_at: string;
   version: number;
 }
 
@@ -154,7 +154,7 @@ export class DraftManager {
   /**
    * Load raw draft (with metadata)
    */
-  private loadRaw(): StoredDraft | null {
+  private loadRaw(): null | StoredDraft {
     try {
       const stored = localStorage.getItem(this.key);
       if (!stored) return null;
@@ -219,7 +219,7 @@ export class DraftManager {
   /**
    * Get draft age in milliseconds
    */
-  getAge(): number | null {
+  getAge(): null | number {
     const draft = this.loadRaw();
     if (!draft) return null;
 
@@ -231,7 +231,7 @@ export class DraftManager {
   /**
    * Get time until expiration in milliseconds
    */
-  getTimeUntilExpiration(): number | null {
+  getTimeUntilExpiration(): null | number {
     const draft = this.loadRaw();
     if (!draft) return null;
 
@@ -281,7 +281,7 @@ export class DraftManager {
   /**
    * Get quality level based on score
    */
-  getQualityLevel(score: number): 'low' | 'medium' | 'high' | 'perfect' {
+  getQualityLevel(score: number): 'high' | 'low' | 'medium' | 'perfect' {
     if (score >= 90) return 'perfect';
     if (score >= 70) return 'high';
     if (score >= 40) return 'medium';
@@ -292,17 +292,17 @@ export class DraftManager {
    * List all drafts (across all submission types)
    */
   static listAll(): Array<{
+    created_at: string;
+    data: DraftFormData;
     key: string;
     submission_type: SubmissionContentType;
-    data: DraftFormData;
-    created_at: string;
     updated_at: string;
   }> {
     const drafts: Array<{
+      created_at: string;
+      data: DraftFormData;
       key: string;
       submission_type: SubmissionContentType;
-      data: DraftFormData;
-      created_at: string;
       updated_at: string;
     }> = [];
 

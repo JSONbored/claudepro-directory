@@ -6,36 +6,19 @@
  */
 
 import { ImageResponse } from 'https://deno.land/x/og_edge@0.0.4/mod.ts';
-import React from 'npm:react@18.3.1';
+import React from 'react';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import {
-  badRequestResponse,
-  buildCacheHeaders,
-  errorResponse,
-  getOnlyCorsHeaders,
-  initRequestLogging,
-  SITE_URL,
-  supabaseAnon,
-  traceRequestComplete,
-  traceStep,
-} from '@heyclaude/edge-runtime';
-import {
-  buildSecurityHeaders,
-  CIRCUIT_BREAKER_CONFIGS,
-  deriveTitleFromRoute,
-  errorToString,
-  logError,
-  logInfo,
-  logWarn,
-  logger,
-  OG_DEFAULTS,
-  sanitizeRoute,
-  TIMEOUT_PRESETS,
-  validateQueryString,
-  withCircuitBreaker,
-  withTimeout,
-} from '@heyclaude/shared-runtime';
+import { badRequestResponse, buildCacheHeaders, errorResponse, getOnlyCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { SITE_URL, supabaseAnon } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { buildSecurityHeaders } from '@heyclaude/shared-runtime/security-headers.ts';
+import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '@heyclaude/shared-runtime/circuit-breaker.ts';
+import { deriveTitleFromRoute, OG_DEFAULTS } from '@heyclaude/shared-runtime/og-constants.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { logError, logInfo, logWarn, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { sanitizeRoute, validateQueryString } from '@heyclaude/shared-runtime/input-validation.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 import { getSeoMetadata } from '../../lib/seo.ts';
 
 const CORS = getOnlyCorsHeaders;
@@ -180,7 +163,7 @@ async function fetchMetadataFromRoute(
   } catch (error) {
     logWarn('Direct SEO metadata call failed, attempting HTTP fallback', {
       ...logContext,
-      error: errorToString(error),
+      error: normalizeError(error, "Operation failed").message,
     });
 
     // Fallback to HTTP call (with loopback detection guard)
@@ -236,7 +219,7 @@ async function fetchMetadataFromRoute(
     } catch (httpError) {
       logWarn('HTTP fallback also failed, attempting direct database fallback', {
         ...logContext,
-        error: errorToString(httpError),
+        error: normalizeError(httpError, 'HTTP fallback failed').message,
         seoUrl,
       });
 

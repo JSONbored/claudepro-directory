@@ -1,4 +1,4 @@
-import { errorToString } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import type { WebhookIngestResult } from '@heyclaude/edge-runtime/utils/webhook/ingest.ts';
 import { finishWebhookEventRun, startWebhookEventRun } from '@heyclaude/edge-runtime/utils/webhook/run-logger.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
@@ -53,15 +53,14 @@ export async function processResendWebhook(event: WebhookIngestResult): Promise<
       });
     }
   } catch (error) {
-    const errorMsg = errorToString(error);
-    const errorObj = error instanceof Error ? error : new Error(errorMsg);
+    const errorObj = normalizeError(error, 'Failed to process Resend webhook');
     logger.error('Failed to process event', {
       ...logContext,
       err: errorObj,
     });
     if (run) {
       await finishWebhookEventRun(run.id, 'failed', {
-        errorMessage: errorMsg,
+        errorMessage: errorObj.message,
         metadata: {
           provider: 'resend',
         },

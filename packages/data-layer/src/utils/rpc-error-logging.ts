@@ -19,8 +19,9 @@
  * @module data-layer/utils/rpc-error-logging
  */
 
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
+import { createPinoConfig } from '@heyclaude/shared-runtime/logger/index.ts';
 import pino from 'pino';
-import { createPinoConfig } from '@heyclaude/shared-runtime';
 
 // Create Pino logger instance with centralized configuration
 // Pino automatically handles error serialization and redaction
@@ -38,10 +39,11 @@ export const logger = {
     pinoLogger.warn(context || {}, message);
   },
   error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
-    const logData: Record<string, unknown> = { ...(context || {}) };
+    const logData: Record<string, unknown> = { ...context };
     if (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      logData['err'] = errorObj;
+      // Use normalizeError() for consistent error normalization across codebase
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     pinoLogger.error(logData, message);
   },
@@ -52,10 +54,11 @@ export const logger = {
     pinoLogger.trace(context || {}, message);
   },
   fatal: (message: string, error?: unknown, context?: Record<string, unknown>) => {
-    const logData: Record<string, unknown> = { ...(context || {}) };
+    const logData: Record<string, unknown> = { ...context };
     if (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      logData['err'] = errorObj;
+      // Use normalizeError() for consistent error normalization across codebase
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     pinoLogger.fatal(logData, message);
   },
@@ -86,10 +89,11 @@ export const logger = {
         pinoInstance.warn(context || {}, message);
       },
       error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
-        const logData: Record<string, unknown> = { ...(context || {}) };
+        const logData: Record<string, unknown> = { ...context };
         if (error) {
-          const errorObj = error instanceof Error ? error : new Error(String(error));
-          logData['err'] = errorObj;
+          // Use normalizeError() for consistent error normalization across codebase
+          const normalized = normalizeError(error, message);
+          logData['err'] = normalized;
         }
         pinoInstance.error(logData, message);
       },
@@ -100,10 +104,11 @@ export const logger = {
         pinoInstance.trace(context || {}, message);
       },
       fatal: (message: string, error?: unknown, context?: Record<string, unknown>) => {
-        const logData: Record<string, unknown> = { ...(context || {}) };
+        const logData: Record<string, unknown> = { ...context };
         if (error) {
-          const errorObj = error instanceof Error ? error : new Error(String(error));
-          logData['err'] = errorObj;
+          // Use normalizeError() for consistent error normalization across codebase
+          const normalized = normalizeError(error, message);
+          logData['err'] = normalized;
         }
         pinoInstance.fatal(logData, message);
       },
@@ -119,7 +124,7 @@ export const logger = {
       flush: (callback?: (err?: Error) => void): void => {
         pinoInstance.flush(callback);
       },
-      isLevelEnabled: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'): boolean => {
+      isLevelEnabled: (level: 'debug' | 'error' | 'fatal' | 'info' | 'trace' | 'warn'): boolean => {
         return pinoInstance.isLevelEnabled(level);
       },
     });
@@ -134,7 +139,7 @@ export const logger = {
   /**
    * Check if a log level is enabled
    */
-  isLevelEnabled: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'): boolean => {
+  isLevelEnabled: (level: 'debug' | 'error' | 'fatal' | 'info' | 'trace' | 'warn'): boolean => {
     return pinoLogger.isLevelEnabled(level);
   },
 };
@@ -143,12 +148,12 @@ export const logger = {
  * Context for RPC error logging
  */
 export interface RpcErrorLogContext {
-  rpcName: string;
-  requestId?: string;
-  userId?: string;
-  operation?: string;
   args?: Record<string, unknown>;
   isMutation?: boolean;
+  operation?: string;
+  requestId?: string;
+  rpcName: string;
+  userId?: string;
 }
 
 /**

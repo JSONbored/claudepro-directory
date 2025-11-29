@@ -5,6 +5,7 @@
  * Signs user out and redirects to homepage
  */
 
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { LogOut } from '@heyclaude/web-runtime/icons';
@@ -64,7 +65,7 @@ export function AuthSignOutButton({
       );
     } catch (error) {
       // Error already logged by useLoggedAsync
-      toasts.error.authFailed(error instanceof Error ? error.message : 'Sign out failed');
+      toasts.error.authFailed(normalizeError(error, 'Sign out failed').message);
     } finally {
       setLoading(false);
     }

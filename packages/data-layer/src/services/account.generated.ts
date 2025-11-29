@@ -5,8 +5,8 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 export class AccountService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,7 +17,7 @@ export class AccountService {
   async getAccountDashboard(args: Database['public']['Functions']['get_account_dashboard']['Args']) {
     const { data, error } = await this.supabase.rpc('get_account_dashboard', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_account_dashboard']['Returns'];
+    return data;
   }
 
   /**
@@ -26,7 +26,7 @@ export class AccountService {
   async getUserLibrary(args: Database['public']['Functions']['get_user_library']['Args']) {
     const { data, error } = await this.supabase.rpc('get_user_library', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_user_library']['Returns'];
+    return data;
   }
 
   /**
@@ -35,7 +35,7 @@ export class AccountService {
   async getUserDashboard(args: Database['public']['Functions']['get_user_dashboard']['Args']) {
     const { data, error } = await this.supabase.rpc('get_user_dashboard', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_user_dashboard']['Returns'];
+    return data;
   }
 
   /**
@@ -44,7 +44,7 @@ export class AccountService {
   async getCollectionDetailWithItems(args: Database['public']['Functions']['get_collection_detail_with_items']['Args']) {
     const { data, error } = await this.supabase.rpc('get_collection_detail_with_items', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_collection_detail_with_items']['Returns'];
+    return data;
   }
 
   /**
@@ -53,7 +53,7 @@ export class AccountService {
   async getUserSettings(args: Database['public']['Functions']['get_user_settings']['Args']) {
     const { data, error } = await this.supabase.rpc('get_user_settings', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_user_settings']['Returns'];
+    return data;
   }
 
   /**
@@ -62,7 +62,7 @@ export class AccountService {
   async getSponsorshipAnalytics(args: Database['public']['Functions']['get_sponsorship_analytics']['Args']) {
     const { data, error } = await this.supabase.rpc('get_sponsorship_analytics', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
+    return data;
   }
 
   /**
@@ -71,7 +71,7 @@ export class AccountService {
   async getUserCompanies(args: Database['public']['Functions']['get_user_companies']['Args']) {
     const { data, error } = await this.supabase.rpc('get_user_companies', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_user_companies']['Returns'];
+    return data;
   }
 
   /**
@@ -80,7 +80,7 @@ export class AccountService {
   async getUserSponsorships(args: Database['public']['Functions']['get_user_sponsorships']['Args']) {
     const { data, error } = await this.supabase.rpc('get_user_sponsorships', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_user_sponsorships']['Returns'];
+    return data;
   }
 
   /**
@@ -89,7 +89,7 @@ export class AccountService {
   async getSubmissionDashboard(args: Database['public']['Functions']['get_submission_dashboard']['Args']) {
     const { data, error } = await this.supabase.rpc('get_submission_dashboard', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_submission_dashboard']['Returns'];
+    return data;
   }
 
   /**
@@ -98,7 +98,7 @@ export class AccountService {
   async isBookmarked(args: Database['public']['Functions']['is_bookmarked']['Args']) {
     const { data, error } = await this.supabase.rpc('is_bookmarked', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['is_bookmarked']['Returns'];
+    return data;
   }
 
   /**
@@ -107,7 +107,7 @@ export class AccountService {
   async isBookmarkedBatch(args: Database['public']['Functions']['is_bookmarked_batch']['Args']) {
     const { data, error } = await this.supabase.rpc('is_bookmarked_batch', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['is_bookmarked_batch']['Returns'];
+    return data;
   }
 
   /**
@@ -116,7 +116,7 @@ export class AccountService {
   async isFollowing(args: Database['public']['Functions']['is_following']['Args']) {
     const { data, error } = await this.supabase.rpc('is_following', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['is_following']['Returns'];
+    return data;
   }
 
   /**
@@ -125,7 +125,7 @@ export class AccountService {
   async isFollowingBatch(args: Database['public']['Functions']['is_following_batch']['Args']) {
     const { data, error } = await this.supabase.rpc('is_following_batch', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['is_following_batch']['Returns'];
+    return data;
   }
 
   /**
@@ -134,7 +134,7 @@ export class AccountService {
   async getUserActivitySummary(args: Database['public']['Functions']['get_user_activity_summary']['Args']) {
     const { data, error } = await this.supabase.rpc('get_user_activity_summary', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_user_activity_summary']['Returns'];
+    return data;
   }
 
   /**
@@ -143,7 +143,7 @@ export class AccountService {
   async getUserActivityTimeline(args: Database['public']['Functions']['get_user_activity_timeline']['Args']) {
     const { data, error } = await this.supabase.rpc('get_user_activity_timeline', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_user_activity_timeline']['Returns'];
+    return data;
   }
 
   /**
@@ -152,6 +152,6 @@ export class AccountService {
   async getUserIdentities(args: Database['public']['Functions']['get_user_identities']['Args']) {
     const { data, error } = await this.supabase.rpc('get_user_identities', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_user_identities']['Returns'];
+    return data;
   }
 }

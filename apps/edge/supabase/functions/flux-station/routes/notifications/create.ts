@@ -8,27 +8,13 @@
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import {
-  badRequestResponse,
-  createNotificationTrace,
-  errorResponse,
-  getAuthUserFromHeader,
-  initRequestLogging,
-  insertNotification,
-  type NotificationInsertPayload,
-  notificationCorsHeaders,
-  successResponse,
-  traceRequestComplete,
-  traceStep,
-  unauthorizedResponse,
-} from '@heyclaude/edge-runtime';
-import {
-  createNotificationRouterContext,
-  errorToString,
-  logger,
-  MAX_BODY_SIZE,
-  validateBodySize,
-} from '@heyclaude/shared-runtime';
+import { badRequestResponse, errorResponse, notificationCorsHeaders, successResponse, unauthorizedResponse } from '@heyclaude/edge-runtime/utils/http.ts';
+import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
+import { getAuthUserFromHeader } from '@heyclaude/edge-runtime/utils/auth.ts';
+import { createNotificationTrace, insertNotification, type NotificationInsertPayload } from '@heyclaude/edge-runtime/notifications/service.ts';
+import { createNotificationRouterContext, logger } from '@heyclaude/shared-runtime/logging.ts';
+import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime/input-validation.ts';
+import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 
 // Type guards for enum validation (module scope - don't depend on handler-scoped variables)
 type NotificationType = DatabaseGenerated['public']['Enums']['notification_type'];
@@ -129,7 +115,7 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
     payload = JSON.parse(bodyText);
   } catch (error) {
     return badRequestResponse(
-      `Invalid JSON payload: ${errorToString(error)}`,
+      `Invalid JSON payload: ${normalizeError(error, 'Invalid JSON').message}`,
       notificationCorsHeaders
     );
   }

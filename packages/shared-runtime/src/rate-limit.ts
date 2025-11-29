@@ -5,9 +5,9 @@
  */
 
 export interface RateLimitConfig {
+  identifier?: string; // Optional custom identifier (defaults to IP)
   maxRequests: number;
   windowMs: number;
-  identifier?: string; // Optional custom identifier (defaults to IP)
 }
 
 export interface RateLimitResult {
@@ -22,7 +22,7 @@ export interface RateLimitResult {
 const requestCounts = new Map<string, { count: number; resetAt: number }>();
 
 // Maximum entries to prevent unbounded memory growth
-const MAX_RATE_LIMITER_ENTRIES = 10000;
+const MAX_RATE_LIMITER_ENTRIES = 10_000;
 
 // Cleanup old entries every 5 minutes
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
@@ -41,7 +41,7 @@ function cleanupOldEntries(): void {
     }
     // If still at capacity, remove oldest 10% of entries
     if (requestCounts.size >= MAX_RATE_LIMITER_ENTRIES) {
-      const entries = Array.from(requestCounts.entries()).sort(
+      const entries = [...requestCounts.entries()].toSorted(
         (a, b) => a[1].resetAt - b[1].resetAt
       );
       const toRemove = Math.floor(entries.length * 0.1);

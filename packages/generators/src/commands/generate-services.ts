@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { logger } from '../toolkit/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -9,13 +10,13 @@ const SCRIPT_DIR = path.dirname(__filename);
 const DATA_LAYER_ROOT = path.resolve(SCRIPT_DIR, '../../../../packages/data-layer/src');
 
 interface ServiceMethod {
-  rpcName: string;
   description?: string;
+  rpcName: string;
 }
 
 interface ServiceConfig {
   description: string;
-  methods: Record<string, string | ServiceMethod>;
+  methods: Record<string, ServiceMethod | string>;
 }
 
 // Definition of services to generate
@@ -159,13 +160,13 @@ export async function runGenerateServices(targetService?: string) {
 
   for (const [className, config] of Object.entries(servicesToGenerate)) {
     if (!config) continue;
-    await generateServiceFile(className, config);
+    generateServiceFile(className, config);
   }
 
   logger.info('✨ Service generation complete.');
 }
 
-async function generateServiceFile(className: string, config: ServiceConfig) {
+function generateServiceFile(className: string, config: ServiceConfig) {
   const fileName = `${className.replace('Service', '').toLowerCase()}.generated.ts`;
   const outputPath = path.join(DATA_LAYER_ROOT, 'services', fileName);
 
@@ -220,6 +221,6 @@ ${methodStrings.join('\n')}
     mkdirSync(dir, { recursive: true });
   }
 
-  writeFileSync(outputPath, fileContent, 'utf-8');
+  writeFileSync(outputPath, fileContent, 'utf8');
   logger.info(`Created ${outputPath}`);
 }

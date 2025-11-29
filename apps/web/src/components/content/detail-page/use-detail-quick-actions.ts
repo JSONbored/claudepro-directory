@@ -1,7 +1,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { isValidCategory, logger, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { isValidCategory, logger, logUnhandledPromise, normalizeError } from '@heyclaude/web-runtime/core';
 import { useCopyToClipboard, usePulse } from '@heyclaude/web-runtime/hooks';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
@@ -94,7 +94,14 @@ export function useDetailQuickActions({
             });
             trackCopyPulse({ action: 'copy_install', manager: 'pnpm' });
           } catch (error) {
-            logger.error('DetailQuickActions: failed to copy pnpm command', error as Error);
+            const normalized = normalizeError(error, 'Copy pnpm command failed');
+            logger.warn('[Clipboard] Copy pnpm command failed', {
+              err: normalized,
+              category: 'clipboard',
+              component: 'useDetailQuickActions',
+              recoverable: true,
+              userRetryable: true,
+            });
             toasts.raw.error('Copy failed', {
               description: 'Unable to copy pnpm command.',
             });
@@ -116,7 +123,14 @@ export function useDetailQuickActions({
             });
             trackCopyPulse({ action: 'copy_mcp_config' });
           } catch (error) {
-            logger.error('DetailQuickActions: failed to copy MCP config', error as Error);
+            const normalized = normalizeError(error, 'Copy MCP config failed');
+            logger.warn('[Clipboard] Copy MCP config failed', {
+              err: normalized,
+              category: 'clipboard',
+              component: 'useDetailQuickActions',
+              recoverable: true,
+              userRetryable: true,
+            });
             toasts.raw.error('Copy failed', {
               description: 'Unable to copy Claude Desktop configuration.',
             });
@@ -138,7 +152,14 @@ export function useDetailQuickActions({
             });
             trackCopyPulse({ action: 'copy_configuration' });
           } catch (error) {
-            logger.error('DetailQuickActions: failed to copy configuration JSON', error as Error);
+            const normalized = normalizeError(error, 'Copy configuration failed');
+            logger.warn('[Clipboard] Copy configuration failed', {
+              err: normalized,
+              category: 'clipboard',
+              component: 'useDetailQuickActions',
+              recoverable: true,
+              userRetryable: true,
+            });
             toasts.raw.error('Copy failed', {
               description: 'Unable to copy configuration JSON.',
             });

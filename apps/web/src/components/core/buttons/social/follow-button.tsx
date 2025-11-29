@@ -12,6 +12,7 @@
  * @module components/features/social/follow-button
  */
 
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { toggleFollow } from '@heyclaude/web-runtime/actions';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useOptimistic, useTransition } from 'react';
@@ -83,7 +84,7 @@ export function FollowButton({
       } catch (error) {
         // Rollback on exception (error already logged by useLoggedAsync)
         setOptimisticIsFollowing(!newState);
-        toast.error(error instanceof Error ? error.message : 'An unexpected error occurred');
+        toast.error(normalizeError(error, 'An unexpected error occurred').message);
       }
     });
   };

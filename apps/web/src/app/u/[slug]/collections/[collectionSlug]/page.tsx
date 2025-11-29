@@ -4,7 +4,7 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import type { CollectionDetailData } from '@heyclaude/web-runtime/core';
+import  { type CollectionDetailData } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -18,7 +18,7 @@ import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
   CardDescription,
   CardHeader,
   CardTitle, Separator    } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -40,7 +40,7 @@ function isValidSlug(slug: string): boolean {
   return /^[a-zA-Z0-9-_]+$/.test(slug);
 }
 
-function getSafeContentLink(item: { content_type: string; content_slug: string }): string | null {
+function getSafeContentLink(item: { content_slug: string; content_type: string; }): null | string {
   if (isValidContentType(item.content_type) && isValidSlug(item.content_slug)) {
     return `/${item.content_type}/${item.content_slug}`;
   }
@@ -48,7 +48,7 @@ function getSafeContentLink(item: { content_type: string; content_slug: string }
 }
 
 interface PublicCollectionPageProperties {
-  params: Promise<{ slug: string; collectionSlug: string }>;
+  params: Promise<{ collectionSlug: string; slug: string; }>;
 }
 
 export async function generateMetadata({ params }: PublicCollectionPageProperties): Promise<Metadata> {
@@ -141,7 +141,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   const { user: profileUser, collection, items, is_owner } = collectionData;
 
   return (
-    <div className={'min-h-screen bg-background'}>
+    <div className="min-h-screen bg-background">
       {/* Track view - non-blocking */}
       <Pulse
         variant="view"
@@ -152,7 +152,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           collection_slug: collectionSlug,
         }}
       />
-      <div className={'container mx-auto px-4 py-12'}>
+      <div className="container mx-auto px-4 py-12">
         <div className="space-y-6">
           {/* Navigation */}
           <Link href={`/u/${slug}`}>
@@ -171,20 +171,16 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                   Public
                 </UnifiedBadge>
               </div>
-              {is_owner && (
-                <Link href={`/account/library/${collection?.slug}`}>
+              {is_owner ? <Link href={`/account/library/${collection?.slug}`}>
                   <Button variant="outline" size="sm">
                     Manage Collection
                   </Button>
-                </Link>
-              )}
+                </Link> : null}
             </div>
 
-            {collection?.description && (
-              <p className={'max-w-3xl text-muted-foreground'}>{collection.description}</p>
-            )}
+            {collection?.description ? <p className="max-w-3xl text-muted-foreground">{collection.description}</p> : null}
 
-            <div className={'mt-2 text-muted-foreground text-sm'}>
+            <div className="mt-2 text-muted-foreground text-sm">
               Created by <NavLink href={`/u/${slug}`}>{profileUser?.name ?? slug}</NavLink> •{' '}
               {collection?.item_count ?? 0} {(collection?.item_count ?? 0) === 1 ? 'item' : 'items'}{' '}
               • {collection?.view_count ?? 0} views
@@ -197,7 +193,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
             {!items || items.length === 0 ? (
               <Card>
-                <CardContent className={'flex flex-col items-center py-12'}>
+                <CardContent className="flex flex-col items-center py-12">
                   <p className="text-muted-foreground">This collection is empty</p>
                 </CardContent>
               </Card>
@@ -208,9 +204,9 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                     (
                       item
                     ): item is typeof item & {
-                      id: string;
-                      content_type: string;
                       content_slug: string;
+                      content_type: string;
+                      id: string;
                     } =>
                       item.id !== null &&
                       item.content_type !== null &&
@@ -230,9 +226,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                               </UnifiedBadge>
                               <CardTitle className="text-lg">{item.content_slug}</CardTitle>
                             </div>
-                            {item.notes && (
-                              <CardDescription className="mt-2">{item.notes}</CardDescription>
-                            )}
+                            {item.notes ? <CardDescription className="mt-2">{item.notes}</CardDescription> : null}
                           </div>
                           {(() => {
                             const safeLink = getSafeContentLink({
@@ -255,7 +249,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                                 variant="ghost"
                                 size="sm"
                                 className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
-                                disabled={true}
+                                disabled
                               >
                                 <ExternalLink className="h-4 w-4" />
                                 View

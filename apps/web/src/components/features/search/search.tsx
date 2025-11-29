@@ -7,7 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { logClientWarning, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@heyclaude/web-runtime/ui';
-import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
+import { useUnifiedSearch } from '@heyclaude/web-runtime/hooks';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -166,15 +166,8 @@ function UnifiedSearchComponent({
   );
 
   useEffect(() => {
-    getTimeoutConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setDebounceMs(config['timeout.ui.debounce_ms']);
-      })
-      .catch((error) => {
-        logClientWarning('UnifiedSearchComponent: failed to load debounce config', error);
-      });
+    const config = getTimeoutConfig();
+    setDebounceMs(config['timeout.ui.debounce_ms']);
   }, []);
 
   useEffect(() => {

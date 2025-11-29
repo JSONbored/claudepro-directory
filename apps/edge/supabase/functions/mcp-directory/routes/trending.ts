@@ -5,7 +5,7 @@
  * Uses TrendingService.getTrendingContent for consistent behavior with web app.
  */
 
-import { TrendingService } from '@heyclaude/data-layer';
+import { TrendingService } from '@heyclaude/data-layer/services/trending.ts';
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { GetTrendingInput } from '../lib/types.ts';

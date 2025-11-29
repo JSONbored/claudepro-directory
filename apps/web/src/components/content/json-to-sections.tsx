@@ -333,7 +333,12 @@ function TrustedHTML({ html, className, id }: { html: string; className?: string
         });
         setSafeHtml(sanitized);
       }).catch((error) => {
-        logger.error('TrustedHTML: Failed to load DOMPurify', error);
+        logger.warn('[Sanitize] Failed to load DOMPurify', {
+          err: error,
+          category: 'sanitize',
+          component: 'TrustedHTML',
+          recoverable: true,
+        });
         // Fallback to original HTML if DOMPurify fails to load
         setSafeHtml(html);
       });

@@ -12,8 +12,31 @@ export * from '../edge/search-client.ts';
 export * from '../seo/og.ts';
 export * from '../auth/get-authenticated-user.ts';
 
-// Client-Safe Config Defaults (for server components that need default configs)
-export * from '../config/client-defaults.ts';
+// Static Config Getters (sync)
+export {
+  getTimeoutConfig,
+  getPollingConfig,
+  getNewsletterConfig,
+  getNewsletterConfigValue,
+  getAppSettings,
+  getRecentlyViewedConfig,
+  getAnimationConfig,
+  getHomepageConfigBundle,
+} from '../config/static-configs.ts';
+
+// Direct config exports from unified config
+export {
+  UI_ANIMATION,
+  UI_TIMEOUTS,
+  API_TIMEOUTS,
+  CONFETTI_CONFIG,
+  POLLING_CONFIG,
+  NEWSLETTER_CTA,
+  NEWSLETTER_BEHAVIOR,
+  RECENTLY_VIEWED_CONFIG,
+  HOMEPAGE_CONFIG,
+  INFINITE_SCROLL_CONFIG,
+} from '../config/unified-config.ts';
 
 // Data Services (Server-Side)
 export * from '../data/content-helpers.ts';

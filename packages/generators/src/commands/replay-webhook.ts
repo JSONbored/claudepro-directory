@@ -1,4 +1,4 @@
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
 import { ensureEnvVars } from '../toolkit/env.js';
 import { logger } from '../toolkit/logger.js';
@@ -52,7 +52,7 @@ export async function runReplayWebhook(): Promise<void> {
         fn: string,
         params: Record<string, unknown>
       ) => Promise<{
-        data: T | null;
+        data: null | T;
         error: unknown;
       }>;
     }
@@ -60,7 +60,7 @@ export async function runReplayWebhook(): Promise<void> {
     p_webhook_event_id: options.id,
   });
 
-  if (error) {
+  if (error !== undefined && error !== null) {
     logger.error('Failed to replay webhook event', error, {
       script: 'webhooks:replay',
       id: options.id,

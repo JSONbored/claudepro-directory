@@ -5,8 +5,8 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 export class MiscService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,7 +17,7 @@ export class MiscService {
   async getActiveNotifications(args: Database['public']['Functions']['get_active_notifications']['Args']) {
     const { data, error } = await this.supabase.rpc('get_active_notifications', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_active_notifications']['Returns'];
+    return data;
   }
 
   /**
@@ -26,7 +26,7 @@ export class MiscService {
   async getActiveAnnouncement(args: Database['public']['Functions']['get_active_announcement']['Args']) {
     const { data, error } = await this.supabase.rpc('get_active_announcement', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_active_announcement']['Returns'];
+    return data;
   }
 
   /**
@@ -35,7 +35,7 @@ export class MiscService {
   async getNavigationMenu(args: Database['public']['Functions']['get_navigation_menu']['Args']) {
     const { data, error } = await this.supabase.rpc('get_navigation_menu', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_navigation_menu']['Returns'];
+    return data;
   }
 
   /**
@@ -44,7 +44,7 @@ export class MiscService {
   async getContactCommands(args: Database['public']['Functions']['get_contact_commands']['Args']) {
     const { data, error } = await this.supabase.rpc('get_contact_commands', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_contact_commands']['Returns'];
+    return data;
   }
 
   /**
@@ -53,6 +53,6 @@ export class MiscService {
   async getFormFieldConfig(args: Database['public']['Functions']['get_form_field_config']['Args']) {
     const { data, error } = await this.supabase.rpc('get_form_field_config', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_form_field_config']['Returns'];
+    return data;
   }
 }

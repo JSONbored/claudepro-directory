@@ -1,4 +1,4 @@
-![ClaudePro.directory](public/og-images/og-image.webp)
+![ClaudePro.directory](apps/web/public/og-images/og-image.webp)
 
 <div align="center">
 

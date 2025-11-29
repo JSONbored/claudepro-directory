@@ -1,6 +1,6 @@
 'use server';
 
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { logger, normalizeError } from '../../index.ts';
@@ -10,17 +10,17 @@ type SearchFacetsRow =
   Database['public']['Functions']['get_search_facets']['Returns'][number];
 
 export interface SearchFacetSummary {
+  authors: string[];
   category: Database['public']['Enums']['content_category'];
   contentCount: number;
   tags: string[];
-  authors: string[];
 }
 
 export interface SearchFacetAggregate {
-  facets: SearchFacetSummary[];
-  tags: string[];
   authors: string[];
   categories: Database['public']['Enums']['content_category'][];
+  facets: SearchFacetSummary[];
+  tags: string[];
 }
 
 function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {

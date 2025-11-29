@@ -5,8 +5,9 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
+
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class SeoService {
@@ -26,7 +27,7 @@ export class SeoService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['generate_metadata_complete']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;

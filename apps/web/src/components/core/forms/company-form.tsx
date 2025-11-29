@@ -1,26 +1,35 @@
 'use client';
 
 /**
- * Company Form Component - Uses server actions for CRUD operations
+ * Company Form Component
+ *
+ * Form for creating and editing company profiles.
+ * Features logo upload with client-side validation and server action integration.
+ *
+ * @example
+ * ```tsx
+ * <CompanyForm mode="create" />
+ * <CompanyForm mode="edit" initialData={existingCompany} />
+ * ```
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { getFormConfig } from '@heyclaude/web-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
+import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import {
   createCompany,
   updateCompany,
   uploadCompanyLogoAction,
 } from '@heyclaude/web-runtime/actions';
-import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
+import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useFormSubmit, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
-import { useEffect, useId, useState, useTransition } from 'react';
-import { FormField } from '@/src/components/core/forms/form-field-wrapper';
+import { useEffect, useId, useState } from 'react';
+import { FormField } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Card,
@@ -37,7 +46,9 @@ type CompanyCompositeType = Database['public']['CompositeTypes']['user_companies
 type AllowedImageMimeType = 'image/jpeg' | 'image/png' | 'image/webp';
 
 interface CompanyFormProps {
+  /** Existing company data for edit mode */
   initialData?: Partial<CompanyCompositeType>;
+  /** Form mode - 'create' for new companies, 'edit' for existing */
   mode: 'create' | 'edit';
 }
 
@@ -57,10 +68,12 @@ async function fileToBase64(file: File) {
   return btoa(binary);
 }
 
+/**
+ * Form component for creating and editing company profiles.
+ * Includes logo upload with validation, company details, and metadata.
+ */
 export function CompanyForm({ initialData, mode }: CompanyFormProps) {
-  const router = useRouter();
   const logoUploadId = useId();
-  const [isPending, startTransition] = useTransition();
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(initialData?.logo || null);
   const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo || null);
@@ -68,25 +81,34 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const [maxFileSize, setMaxFileSize] = useState(DEFAULT_MAX_FILE_SIZE);
   const [maxDimension, setMaxDimension] = useState(DEFAULT_MAX_DIMENSION);
   const { executeAsync: uploadLogo } = useAction(uploadCompanyLogoAction);
-  const runLoggedAsync = useLoggedAsync({
+
+  // Use standardized form submission hook
+  const { isPending, handleSubmit, router } = useFormSubmit({
     scope: 'CompanyForm',
-    defaultMessage: 'Company form operation failed',
+    mode,
+    successRedirect: ROUTES.ACCOUNT_COMPANIES,
+    refreshOnSuccess: true,
+    messages: {
+      createSuccess: 'Company created successfully!',
+      editSuccess: 'Company updated successfully!',
+      errorTitle: 'Failed to save company',
+    },
+    logContext: {
+      companyId: initialData?.id ?? undefined,
+    },
+  });
+
+  // Logged async for logo upload (separate from main form submit)
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'CompanyForm.LogoUpload',
+    defaultMessage: 'Logo upload failed',
     defaultRethrow: false,
   });
 
-  // Load form validation config from static defaults on mount
+  // Load form validation config from static config on mount
   useEffect(() => {
-    getFormConfig({})
-      .then((result) => {
-        if (!result?.data) return;
-        const config = result.data;
-        const maxMB = config['form.max_file_size_mb'];
-        setMaxFileSize(maxMB * 1024 * 1024);
-        setMaxDimension(config['form.max_image_dimension_px']);
-      })
-      .catch((error) => {
-        logClientWarn('CompanyForm: failed to load form config', error, 'CompanyForm.loadConfig');
-      });
+    setMaxFileSize(FORM_CONFIG.max_file_size_mb * 1024 * 1024);
+    setMaxDimension(FORM_CONFIG.max_image_dimension_px);
   }, []);
 
   const handleLogoUpload = async (file: File) => {
@@ -102,7 +124,6 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     }
 
     // Verify actual file content matches MIME type (magic bytes check)
-    // This prevents any potential XSS via malformed file uploads
     try {
       const buffer = await file.slice(0, 12).arrayBuffer();
       const bytes = new Uint8Array(buffer);
@@ -132,11 +153,11 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
       return;
     }
 
-    // Check dimensions using createImageBitmap (safer than URL.createObjectURL for CodeQL)
+    // Check dimensions using createImageBitmap
     try {
       const bitmap = await createImageBitmap(file);
       const { width, height } = bitmap;
-      bitmap.close(); // Release memory
+      bitmap.close();
 
       if (width > maxDimension || height > maxDimension) {
         toasts.error.actionFailed(
@@ -190,9 +211,8 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         }
       );
     } catch (error) {
-      // Error already logged by useLoggedAsync
       toasts.error.fromError(
-        error instanceof Error ? error : new Error('Failed to upload logo'),
+        normalizeError(error, 'Failed to upload logo'),
         'Failed to upload logo'
       );
     } finally {
@@ -200,18 +220,16 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
 
-    // Type the form data to match Zod schema expectations
-    // Zod will validate the size field to ensure it's a valid company_size ENUM value
     const sizeValue = (formData.get('size') as string) || null;
     const data = {
       name: formData.get('name') as string,
       website: (formData.get('website') as string) || null,
-      logo: logoUrl, // Use uploaded logo URL from state
+      logo: logoUrl,
       description: (formData.get('description') as string) || null,
       size: sizeValue as Database['public']['Enums']['company_size'] | null,
       industry: (formData.get('industry') as string) || null,
@@ -220,61 +238,37 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         : null,
     };
 
-    startTransition(async () => {
-      try {
-        await runLoggedAsync(
-          async () => {
-            if (mode === 'create') {
-              // Create company via server action
-              const result = await createCompany(data);
+    await handleSubmit(async () => {
+      if (mode === 'create') {
+        const result = await createCompany(data);
 
-              if (result?.serverError || result?.validationErrors) {
-                throw new Error(result.serverError || 'Validation failed');
-              }
+        if (result?.serverError || result?.validationErrors) {
+          throw new Error(result.serverError || 'Validation failed');
+        }
 
-              toasts.success.actionCompleted('Company created successfully!');
-            } else {
-              // Update company via server action
-              const companyId = initialData?.id;
-              if (!companyId) {
-                throw new Error('Company ID is required for updates');
-              }
+        return result;
+      } else {
+        const companyId = initialData?.id;
+        if (!companyId) {
+          throw new Error('Company ID is required for updates');
+        }
 
-              const result = await updateCompany({
-                id: companyId,
-                ...data,
-              });
+        const result = await updateCompany({
+          id: companyId,
+          ...data,
+        });
 
-              if (result?.serverError || result?.validationErrors) {
-                throw new Error(result.serverError || 'Validation failed');
-              }
+        if (result?.serverError || result?.validationErrors) {
+          throw new Error(result.serverError || 'Validation failed');
+        }
 
-              toasts.success.actionCompleted('Company updated successfully!');
-            }
-
-            router.push(ROUTES.ACCOUNT_COMPANIES);
-            router.refresh();
-          },
-          {
-            message: mode === 'create' ? 'Company creation failed' : 'Company update failed',
-            context: {
-              mode,
-              companyId: initialData?.id ?? undefined,
-            },
-          }
-        );
-      } catch (error) {
-        // Error already logged by useLoggedAsync
-        toasts.error.fromError(
-          error instanceof Error ? error : new Error('Failed to save company'),
-          'Failed to save company'
-        );
+        return result;
       }
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={onSubmit} className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Company Information</CardTitle>
@@ -369,10 +363,10 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  handleLogoUpload(file).catch((error) => {
+                  handleLogoUpload(file).catch((error: unknown) => {
                     logClientError(
                       'Logo upload failed',
-                      error instanceof Error ? error : new Error(String(error)),
+                      normalizeError(error, 'Logo upload failed'),
                       'CompanyForm.handleLogoUpload',
                       {
                         component: 'CompanyForm',
@@ -381,7 +375,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                     );
                     toasts.error.fromError(error, 'Failed to upload logo');
                   });
-                  e.target.value = ''; // Reset input
+                  e.target.value = '';
                 }
               }}
             />

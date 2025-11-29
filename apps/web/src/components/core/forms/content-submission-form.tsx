@@ -55,17 +55,40 @@ type MergedTemplateItem = ContentTemplateItem & {
     ? ContentTemplateItem['template_data']
     : Record<string, unknown>);
 
+import { FormSectionCard } from '@heyclaude/web-runtime/ui';
 import { DuplicateWarning } from './duplicate-warning';
 import { ContentTypeFieldRenderer } from './dynamic-form-field';
 import { ExamplesArrayInput } from './examples-array-input';
-import { FormSectionCard } from './form-section-card';
 import { TemplateSelector } from './template-selector';
+
+/**
+ * Usage example schema (Zod)
+ * Validates structured examples from ExamplesArrayInput component
+ * Must match the output format of ExamplesArrayInput and expectations of content-detail-view.tsx
+ */
+const usageExampleSchema = z.object({
+  title: z.string().min(1).max(100),
+  code: z.string().min(1).max(10000),
+  language: z.enum([
+    'typescript',
+    'javascript',
+    'json',
+    'bash',
+    'shell',
+    'python',
+    'yaml',
+    'markdown',
+    'plaintext',
+  ]),
+  description: z.string().max(500).optional(),
+});
 
 /**
  * Examples array schema (Zod)
  * Production-grade runtime validation for form examples field
+ * Expects structured objects with title, code, language, and optional description
  */
-const examplesArraySchema = z.array(z.string());
+const examplesArraySchema = z.array(usageExampleSchema);
 
 const DEFAULT_CONTENT_TYPE: SubmissionContentType = Constants.public.Enums.submission_type[0]; // 'agents'
 
@@ -182,24 +205,17 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   });
 
   useEffect(() => {
-    getAnimationConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setSpringSmooth({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.smooth.stiffness'],
-          damping: config['animation.spring.smooth.damping'],
-        });
-        setSpringBouncy({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.bouncy.stiffness'],
-          damping: config['animation.spring.bouncy.damping'],
-        });
-      })
-      .catch((error) => {
-        logger.error('SubmitFormClient: failed to load animation config', error);
-      });
+    const config = getAnimationConfig();
+    setSpringSmooth({
+      type: 'spring' as const,
+      stiffness: config['animation.spring.smooth.stiffness'],
+      damping: config['animation.spring.smooth.damping'],
+    });
+    setSpringBouncy({
+      type: 'spring' as const,
+      stiffness: config['animation.spring.bouncy.stiffness'],
+      damping: config['animation.spring.bouncy.damping'],
+    });
   }, []);
 
   /**
@@ -441,9 +457,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         );
       } catch (error) {
         // Error already logged by useLoggedAsync
-        toasts.error.submissionFailed(
-          error instanceof Error ? error.message : 'Failed to submit content'
-        );
+        toasts.error.submissionFailed(normalizeError(error, 'Failed to submit content').message);
       }
     });
   };

@@ -10,13 +10,13 @@
  * Runtime: Node.js (required for Supabase client)
  * ISR: 5 minutes (300s) - Social proof updates frequently
  */
-export const runtime = 'nodejs';
-export const revalidate = 300;
-
 import { Constants } from '@heyclaude/database-types';
 import { generateRequestId, logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseAnonClient } from '@heyclaude/web-runtime/server';
 import { NextResponse } from 'next/server';
+
+export const runtime = 'nodejs';
+export const revalidate = 300;
 
 export async function GET() {
   // Generate single requestId for this API request
@@ -55,60 +55,60 @@ export async function GET() {
 
     // Extract results and handle errors
     interface SubmissionRow {
+      author: null | string;
+      created_at: string;
       id: string;
       status: string;
-      created_at: string;
-      author: string | null;
     }
     interface StatusRow {
       status: string;
     }
 
-    let recentSubmissions: SubmissionRow[] | null = null;
+    let recentSubmissions: null | SubmissionRow[] = null;
     let submissionsError: unknown = null;
     if (recentResult.status === 'fulfilled') {
-      const response = recentResult.value as { data: SubmissionRow[] | null; error: unknown };
+      const response = recentResult.value as { data: null | SubmissionRow[]; error: unknown };
       recentSubmissions = response.data;
       submissionsError = response.error ?? null;
     } else {
       submissionsError = recentResult.reason;
     }
 
-    if (submissionsError) {
+    if (submissionsError !== null && submissionsError !== undefined) {
       const normalized = normalizeError(submissionsError, 'Failed to fetch recent submissions');
       reqLogger.warn('Failed to fetch recent submissions', {
         err: normalized,
       });
     }
 
-    let monthSubmissions: StatusRow[] | null = null;
+    let monthSubmissions: null | StatusRow[] = null;
     let monthError: unknown = null;
     if (monthResult.status === 'fulfilled') {
-      const response = monthResult.value as { data: StatusRow[] | null; error: unknown };
+      const response = monthResult.value as { data: null | StatusRow[]; error: unknown };
       monthSubmissions = response.data;
       monthError = response.error ?? null;
     } else {
       monthError = monthResult.reason;
     }
 
-    if (monthError) {
+    if (monthError !== null && monthError !== undefined) {
       const normalized = normalizeError(monthError, 'Failed to fetch month submissions');
       reqLogger.warn('Failed to fetch month submissions', {
         err: normalized,
       });
     }
 
-    let contentCount: number | null = null;
+    let contentCount: null | number = null;
     let contentError: unknown = null;
     if (contentResult.status === 'fulfilled') {
-      const response = contentResult.value as { count: number | null; error: unknown };
+      const response = contentResult.value as { count: null | number; error: unknown };
       contentCount = response.count;
       contentError = response.error ?? null;
     } else {
       contentError = contentResult.reason;
     }
 
-    if (contentError) {
+    if (contentError !== null && contentError !== undefined) {
       const normalized = normalizeError(contentError, 'Failed to fetch content count');
       reqLogger.warn('Failed to fetch content count', {
         err: normalized,
