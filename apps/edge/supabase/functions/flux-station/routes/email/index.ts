@@ -2,7 +2,7 @@
  * Consolidated Email Handler - Routes all email operations via action parameter
  */
 
-import { Resend } from 'npm:resend@6.5.2';
+import { Resend } from 'resend';
 import { NewsletterService } from '@heyclaude/data-layer/services/newsletter.ts';
 import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
 // edge-runtime imports

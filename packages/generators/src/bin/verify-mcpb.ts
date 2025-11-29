@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
+import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { runVerifyMcpbPackages } from '../commands/verify-mcpb-packages.js';
 import { logger } from '../toolkit/logger.js';
-import { normalizeError } from '@heyclaude/shared-runtime';
 
 runVerifyMcpbPackages()
   .then((result: unknown) => {

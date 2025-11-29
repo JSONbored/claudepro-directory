@@ -13,7 +13,7 @@
  *   - Direct: https://hgtjdifxfapoltfflowc.supabase.co/functions/v1/mcp-directory/mcp
  */
 
-import { zodToJsonSchema } from 'npm:zod-to-json-schema@3';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { Database } from '@heyclaude/database-types';
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';

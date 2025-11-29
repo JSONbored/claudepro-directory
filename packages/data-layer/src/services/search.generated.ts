@@ -5,8 +5,8 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 export class SearchService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,7 +17,7 @@ export class SearchService {
   async searchUnified(args: Database['public']['Functions']['search_unified']['Args']) {
     const { data, error } = await this.supabase.rpc('search_unified', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['search_unified']['Returns'];
+    return data;
   }
 
   /**
@@ -26,7 +26,7 @@ export class SearchService {
   async searchContent(args: Database['public']['Functions']['search_content_optimized']['Args']) {
     const { data, error } = await this.supabase.rpc('search_content_optimized', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['search_content_optimized']['Returns'];
+    return data;
   }
 
   /**
@@ -35,6 +35,6 @@ export class SearchService {
   async filterJobs(args: Database['public']['Functions']['filter_jobs']['Args']) {
     const { data, error } = await this.supabase.rpc('filter_jobs', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['filter_jobs']['Returns'];
+    return data;
   }
 }

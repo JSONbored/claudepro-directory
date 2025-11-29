@@ -5,8 +5,9 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
+
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class ChangelogService {
@@ -26,7 +27,7 @@ export class ChangelogService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_changelog_overview']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -47,7 +48,7 @@ export class ChangelogService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_changelog_detail']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -68,7 +69,7 @@ export class ChangelogService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_changelog_with_category_stats']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;

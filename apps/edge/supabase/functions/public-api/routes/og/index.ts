@@ -6,7 +6,7 @@
  */
 
 import { ImageResponse } from 'https://deno.land/x/og_edge@0.0.4/mod.ts';
-import React from 'npm:react@18.3.1';
+import React from 'react';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { badRequestResponse, buildCacheHeaders, errorResponse, getOnlyCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';

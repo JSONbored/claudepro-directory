@@ -5,7 +5,7 @@
  * Default: 100 events per batch
  */
 
-import { Resend } from 'npm:resend@6.5.2';
+import { Resend } from 'resend';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { errorResponse, publicCorsHeaders, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';

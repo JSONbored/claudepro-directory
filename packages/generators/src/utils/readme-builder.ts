@@ -1,4 +1,4 @@
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 
 const SITE_URL = process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://claudepro.directory';
 
@@ -41,7 +41,7 @@ export function buildReadmeMarkdown(
       // Handle nullable fields from composite type
       if (!cat.title) return '';
 
-      const emoji = ICON_EMOJI_MAP[cat.icon_name ?? ''] || '📄';
+      const emoji = ICON_EMOJI_MAP[cat.icon_name ?? ''] ?? '📄';
       // Pluralize category name (handles consonant+y -> ies, but not vowel+y)
       const categoryName = cat.title.endsWith('y') && !/[aeiou]y$/i.test(cat.title)
         ? `${cat.title.slice(0, -1)}ies`

@@ -3,21 +3,21 @@ import { logger } from '../toolkit/logger.js';
 import { createServiceRoleClient, DEFAULT_SUPABASE_URL } from '../toolkit/supabase.js';
 
 interface VerificationResult {
-  total_mcp_content: number;
-  with_packages: number;
   missing_packages: number;
   missing_packages_list: Array<{
     id: string;
     slug: string;
-    title: string | null;
+    title: null | string;
   }>;
   storage_mismatches: number;
   storage_mismatches_list: Array<{
-    id: string;
-    slug: string;
     has_db_url: boolean;
     has_storage_file: boolean;
+    id: string;
+    slug: string;
   }>;
+  total_mcp_content: number;
+  with_packages: number;
 }
 
 export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
@@ -49,7 +49,7 @@ export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
     throw new Error(`Failed to fetch MCP content: ${fetchError.message}`);
   }
 
-  if (!mcpContent || mcpContent.length === 0) {
+  if (mcpContent.length === 0) {
     logger.info('✅ No MCP content found in database', {
       script: 'verify-mcpb-packages',
     });
@@ -73,7 +73,7 @@ export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
   );
 
   const withPackages = mcpContent.filter(
-    (mcp) => mcp.mcpb_storage_url && mcp.mcpb_storage_url.trim().length > 0
+    (mcp) => Boolean(mcp.mcpb_storage_url) && mcp.mcpb_storage_url.trim().length > 0
   );
 
   const storageMismatches: VerificationResult['storage_mismatches_list'] = [];
@@ -86,7 +86,7 @@ export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
       });
 
     const hasStorageFile =
-      !fileError && fileData && fileData.some((file) => file.name === `${mcp.slug}.mcpb`);
+      !fileError && Boolean(fileData) && fileData.some((file) => file.name === `${mcp.slug}.mcpb`);
 
     if (!hasStorageFile) {
       storageMismatches.push({
@@ -136,14 +136,15 @@ export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
       missing_count: result.missing_packages,
       missingPackages: result.missing_packages_list.map((mcp) => ({
         slug: mcp.slug,
-        title: mcp.title || 'No title',
+        title: (mcp.title && mcp.title.trim()) ? mcp.title.trim() : 'No title',
       })),
     });
     logger.info('\nMissing packages list:', {
       script: 'verify-mcpb-packages',
     });
     for (const mcp of result.missing_packages_list) {
-      logger.info(`  - ${mcp.slug} (${mcp.title || 'No title'})`, {
+      const title = (mcp.title && mcp.title.trim()) ? mcp.title.trim() : 'No title';
+      logger.info(`  - ${mcp.slug} (${title})`, {
         script: 'verify-mcpb-packages',
       });
     }

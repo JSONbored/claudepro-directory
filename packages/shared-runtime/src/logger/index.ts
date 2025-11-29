@@ -16,6 +16,7 @@
  */
 
 import pino from 'pino';
+
 import { createPinoConfig } from './config.ts';
 
 /**
@@ -136,6 +137,7 @@ export function createLogger(
   destination?: pino.DestinationStream
 ): pino.Logger {
   const config = createPinoConfig(options);
+  // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
   return destination ? pino(config, destination) : pino(config);
 }
 
@@ -225,6 +227,32 @@ export {
 let shutdownHandlersRegistered = false;
 
 /**
+ * Flush logs synchronously before exit
+ * Uses a callback-based approach for maximum compatibility
+ */
+function flushAndExit(signal: string): void {
+  // Log the shutdown signal (this log will be flushed)
+  // Pino API is object-first, but we structure it to emphasize the message
+  // eslint-disable-next-line architectural-rules/enforce-message-first-logger-api -- Pino's native API is object-first
+  logger.info({ signal }, 'Process shutting down, flushing logs...');
+  
+  // Flush all buffered logs
+  logger.flush((err?: Error) => {
+    if (err) {
+      // Use console.error as a last resort since logger may not work
+      // This is inside a flush callback, so the rule allows it (checks for 'flush' in surrounding text)
+      console.error('Failed to flush logs on shutdown:', err);
+    }
+    
+    // Exit process after flush completes (only for termination signals, not beforeExit)
+    if (signal === 'SIGTERM' || signal === 'SIGINT') {
+      // eslint-disable-next-line unicorn/no-process-exit, n/no-process-exit -- Intentional process termination after signal
+      process.exit(err ? 1 : 0);
+    }
+  });
+}
+
+/**
  * Register graceful shutdown handlers for the logger
  * 
  * This ensures all buffered logs are flushed before the process exits.
@@ -251,29 +279,6 @@ function registerShutdownHandlers(): void {
     return;
   }
   shutdownHandlersRegistered = true;
-
-  /**
-   * Flush logs synchronously before exit
-   * Uses a callback-based approach for maximum compatibility
-   */
-  const flushAndExit = (signal: string) => {
-    // Log the shutdown signal (this log will be flushed)
-    logger.info({ signal }, 'Process shutting down, flushing logs...');
-    
-    // Flush all buffered logs
-    logger.flush((err?: Error) => {
-      if (err) {
-        // Use console.error as a last resort since logger may not work
-        console.error('Failed to flush logs on shutdown:', err);
-      }
-      
-      // Exit process after flush completes (only for termination signals, not beforeExit)
-      if (signal === 'SIGTERM' || signal === 'SIGINT') {
-        // eslint-disable-next-line unicorn/no-process-exit -- Intentional process termination after signal
-        process.exit(err ? 1 : 0);
-      }
-    });
-  };
 
   // Register handlers
   // beforeExit: Fired when Node.js empties the event loop and has no additional work to schedule

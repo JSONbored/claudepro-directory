@@ -1,12 +1,12 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+
+import * as TOML from '@iarna/toml';
+
 import { logger } from '../toolkit/logger.js';
 
-// Use global supabase CLI if available, otherwise fall back to npx
-const USE_GLOBAL_CLI = true;
 const IGNORED_DIRECTORIES = new Set(['_shared', 'node_modules']);
 
 /**
@@ -19,18 +19,19 @@ function loadEnvFiles(repoRoot: string): void {
     const filePath = path.join(repoRoot, file);
     if (existsSync(filePath)) {
       try {
-        const content = readFileSync(filePath, 'utf-8');
+        const content = readFileSync(filePath, 'utf8');
         for (const line of content.split('\n')) {
           if (!line || line.startsWith('#')) continue;
           const [key, ...values] = line.split('=');
-          if (key && !process.env[key]) {
-            // Remove surrounding quotes if present
-            const value = values.join('=').replace(/^["']|["']$/g, '');
-            process.env[key] = value;
+          if (key) {
+            // Remove surrounding quotes if present, only set if not already set
+            const value = values.join('=').replaceAll(/^["']|["']$/g, '');
+            process.env[key] ??= value;
           }
         }
       } catch {
-        // Ignore errors reading env files
+        // Silently ignore errors reading env files - they're optional
+        // The env variables may be provided through other means (CI, shell)
       }
     }
   }
@@ -44,29 +45,91 @@ const SCRIPT_DIR = path.dirname(__filename);
 const REPO_ROOT = path.resolve(SCRIPT_DIR, '../../../../');
 const EDGE_ROOT = path.join(REPO_ROOT, 'apps', 'edge');
 const FUNCTIONS_DIR = path.join(EDGE_ROOT, 'supabase', 'functions');
-const IMPORT_MAP_PATH = path.posix.join('supabase', 'deno.json');
+const CONFIG_TOML_PATH = path.join(EDGE_ROOT, 'supabase', 'config.toml');
+const DEFAULT_IMPORT_MAP_PATH = path.posix.join('supabase', 'deno.json');
 
-function ensurePaths() {
+/**
+ * Parse config.toml to extract import_map for each function.
+ * Returns a map of function name -> import_map path (relative to supabase directory).
+ */
+function parseConfigToml(): Map<string, string> {
+  const importMaps = new Map<string, string>();
+  
+  if (!existsSync(CONFIG_TOML_PATH)) {
+    logger.warn(`config.toml not found at ${CONFIG_TOML_PATH}, using default import map.`, {
+      command: 'deploy-functions',
+    });
+    return importMaps;
+  }
+
+  try {
+    const content = readFileSync(CONFIG_TOML_PATH, 'utf8');
+    const config = TOML.parse(content) as {
+      functions?: Record<string, { import_map?: string }>;
+    };
+    
+    if (config.functions && typeof config.functions === 'object') {
+      for (const [functionName, functionConfig] of Object.entries(config.functions)) {
+        if (functionConfig && typeof functionConfig === 'object' && functionConfig.import_map) {
+          const importMapPath = functionConfig.import_map;
+          if (typeof importMapPath === 'string') {
+            // Paths in config.toml are relative to supabase directory
+            importMaps.set(functionName, importMapPath);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn(`Failed to parse config.toml: ${error instanceof Error ? error.message : String(error)}. Using default import map.`, {
+      command: 'deploy-functions',
+    });
+  }
+  
+  return importMaps;
+}
+
+/**
+ * Get the import_map path for a function, falling back to default if not found in config.toml.
+ */
+function getImportMapPath(functionName: string, configImportMaps: Map<string, string>): string {
+  const customPath = configImportMaps.get(functionName);
+  if (customPath) {
+    // Prevent path traversal - ensure the path doesn't escape supabase directory
+    const normalizedPath = path.normalize(customPath);
+    if (normalizedPath.startsWith('..') || path.isAbsolute(normalizedPath)) {
+      logger.warn(
+        `Invalid import map path in config.toml for "${functionName}": path must be relative and within supabase directory.`,
+        { command: 'deploy-functions', fnName: functionName, customPath }
+      );
+      return DEFAULT_IMPORT_MAP_PATH;
+    }
+
+    // Verify the import map file exists
+    const absolutePath = path.join(EDGE_ROOT, 'supabase', normalizedPath);
+    if (existsSync(absolutePath)) {
+      return path.posix.join('supabase', normalizedPath);
+    }
+    logger.warn(
+      `Import map specified in config.toml for "${functionName}" not found at ${absolutePath}, using default.`,
+      { command: 'deploy-functions', fnName: functionName, customPath: normalizedPath }
+    );
+  }
+  return DEFAULT_IMPORT_MAP_PATH;
+}
+
+function ensurePaths(): void {
   if (!existsSync(EDGE_ROOT)) {
     logger.error('apps/edge directory is missing. Run this from the repository root.', undefined, {
-      script: 'deploy-functions',
+      command: 'deploy-functions',
     });
-    process.exit(1);
+    throw new Error('apps/edge directory is missing');
   }
 
   if (!existsSync(FUNCTIONS_DIR)) {
     logger.error('apps/edge/functions directory is missing.', undefined, {
-      script: 'deploy-functions',
+      command: 'deploy-functions',
     });
-    process.exit(1);
-  }
-
-  const importMapAbsolute = path.join(EDGE_ROOT, IMPORT_MAP_PATH);
-  if (!existsSync(importMapAbsolute)) {
-    logger.error(`Import map not found at ${importMapAbsolute}.`, undefined, {
-      script: 'deploy-functions',
-    });
-    process.exit(1);
+    throw new Error('apps/edge/functions directory is missing');
   }
 }
 
@@ -77,7 +140,7 @@ function discoverFunctions(): string[] {
         entry.isDirectory() && !IGNORED_DIRECTORIES.has(entry.name) && !entry.name.startsWith('.')
     )
     .map((entry) => entry.name)
-    .sort();
+    .toSorted();
 }
 
 function validateRequestedFunctions(allFunctions: string[], requested: string[]): string[] {
@@ -89,13 +152,15 @@ function validateRequestedFunctions(allFunctions: string[], requested: string[])
       `Unknown function${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}`,
       undefined,
       {
-        script: 'deploy-functions',
+        command: 'deploy-functions',
+        missing,
+        available: allFunctions,
       }
     );
     logger.error(`Available functions: ${allFunctions.join(', ')}`, undefined, {
-      script: 'deploy-functions',
+      command: 'deploy-functions',
     });
-    process.exit(1);
+    throw new Error(`Unknown functions: ${missing.join(', ')}`);
   }
 
   return [...new Set(requested)];
@@ -116,7 +181,7 @@ function resolveProjectRef(): string | undefined {
   return match?.[1];
 }
 
-function verifySupabaseCli() {
+function verifySupabaseCli(): void {
   const result = spawnSync('supabase', ['--version'], {
     stdio: 'ignore',
   });
@@ -125,14 +190,14 @@ function verifySupabaseCli() {
     logger.error(
       'Supabase CLI is required. Install via "brew install supabase/tap/supabase" or "npm install -g supabase".',
       undefined,
-      { script: 'deploy-functions' }
+      { command: 'deploy-functions' }
     );
-    process.exit(result.status ?? 1);
+    throw new Error('Supabase CLI not found');
   }
 }
 
-function printHelp() {
-  console.log(`Usage:
+function printHelp(): void {
+  logger.log(`Usage:
   pnpm exec heyclaude-deploy-edge              # Deploy all edge functions
   pnpm exec heyclaude-deploy-edge data-api og-image   # Deploy selected functions
 
@@ -145,13 +210,17 @@ Notes:
   - Provide function names to deploy a subset.`);
 }
 
-export function runDeployFunctions() {
+/**
+ * Deploy edge functions to Supabase.
+ * This is a CLI entry point - throws errors on failure.
+ */
+export function runDeployFunctions(): void {
   ensurePaths();
 
-  const [, , ...rawArgs] = process.argv;
+  const rawArgs = process.argv.slice(2);
   if (rawArgs.includes('--help')) {
     printHelp();
-    process.exit(0);
+    return;
   }
 
   // Load environment variables from .env.local
@@ -160,9 +229,9 @@ export function runDeployFunctions() {
   const allFunctions = discoverFunctions();
   if (allFunctions.length === 0) {
     logger.error('No edge functions found under apps/edge/supabase/functions.', undefined, {
-      script: 'deploy-functions',
+      command: 'deploy-functions',
     });
-    process.exit(1);
+    throw new Error('No edge functions found');
   }
 
   const requestedFunctions = rawArgs.filter((arg) => !arg.startsWith('--'));
@@ -176,15 +245,25 @@ export function runDeployFunctions() {
     logger.error(
       'Supabase project ref is required. Set SUPABASE_PROJECT_REF or NEXT_PUBLIC_SUPABASE_URL.',
       undefined,
-      { script: 'deploy-functions' }
+      { command: 'deploy-functions' }
     );
-    process.exit(1);
+    throw new Error('Supabase project ref is required');
   }
+
+  // Parse config.toml to get function-specific import maps
+  const configImportMaps = parseConfigToml();
 
   verifySupabaseCli();
 
   for (const fnName of functionsToDeploy) {
-    logger.info(`🚀 Deploying edge function "${fnName}"...`, { script: 'deploy-functions' });
+    const importMapPath = getImportMapPath(fnName, configImportMaps);
+    
+    logger.info(`🚀 Deploying edge function "${fnName}" with import map: ${importMapPath}...`, {
+      command: 'deploy-functions',
+      fnName,
+      importMapPath,
+    });
+    
     const result = spawnSync(
       'supabase',
       [
@@ -194,7 +273,7 @@ export function runDeployFunctions() {
         '--project-ref',
         projectRef,
         '--import-map',
-        IMPORT_MAP_PATH,
+        importMapPath,
       ],
       {
         cwd: EDGE_ROOT,
@@ -205,13 +284,15 @@ export function runDeployFunctions() {
 
     if (result.status !== 0) {
       logger.error(`❌ Deployment failed for "${fnName}".`, undefined, {
-        script: 'deploy-functions',
+        command: 'deploy-functions',
+        fnName,
+        exitCode: result.status,
       });
-      process.exit(result.status ?? 1);
+      throw new Error(`Deployment failed for "${fnName}"`);
     }
 
-    logger.info(`✅ "${fnName}" deployed successfully.`, { script: 'deploy-functions' });
+    logger.info(`✅ "${fnName}" deployed successfully.`, { command: 'deploy-functions', fnName });
   }
 
-  logger.info('\n✨ All requested edge functions deployed.', { script: 'deploy-functions' });
+  logger.info('✨ All requested edge functions deployed.', { command: 'deploy-functions', count: functionsToDeploy.length });
 }

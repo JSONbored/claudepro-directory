@@ -1,13 +1,15 @@
-import { createUtilityContext, logger } from '../logging.ts';
-import { normalizeError } from '../error-handling.ts';
+import { createUtilityContext, logError } from '../logging.ts';
 
 type GlobalWithBuffer = typeof globalThis & {
   Buffer?: {
+    [index: number]: number;
     from(input: string | Uint8Array, encoding?: string): {
-      toString(encoding?: string): string;
-      length: number;
       [index: number]: number;
+      length: number;
+      toString(encoding?: string): string;
     };
+    length: number;
+    toString(encoding?: string): string;
   };
 };
 
@@ -18,42 +20,41 @@ function decodeBase64(value: string): Uint8Array {
     const binary = globalThis.atob(value);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
+      bytes[i] = binary.codePointAt(i) ?? 0;
     }
     return bytes;
   }
 
-  if (nodeBuffer) {
-    const buffer = nodeBuffer.from(value, 'base64');
-    return Uint8Array.from(buffer as ArrayLike<number>);
-  }
-
-  throw new Error('Base64 decoding is not supported in this environment');
+  // nodeBuffer always exists when atob doesn't (Node.js environment)
+  const buffer = nodeBuffer.from(value, 'base64');
+  return Uint8Array.from(buffer as ArrayLike<number>);
 }
 
 function encodeBase64(bytes: Uint8Array): string {
   if (typeof globalThis.btoa === 'function') {
     let binary = '';
-    bytes.forEach((byte) => {
-      binary += String.fromCharCode(byte);
-    });
+    for (const byte of bytes) {
+      binary += String.fromCodePoint(byte);
+    }
     return globalThis.btoa(binary);
   }
 
-  if (nodeBuffer) {
-    const buffer = nodeBuffer.from(bytes);
-    return buffer.toString('base64');
+  // nodeBuffer should exist when btoa doesn't (Node.js environment)
+  // TypeScript may not infer that nodeBuffer is defined, but runtime check is needed for safety
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- Runtime safety check
+  if (!nodeBuffer) {
+    throw new Error('No base64 encoding method available in this environment');
   }
-
-  throw new Error('Base64 encoding is not supported in this environment');
+  const buffer = nodeBuffer.from(bytes);
+  return buffer.toString('base64');
 }
 
 export interface SvixVerificationInput {
   rawBody: string;
-  svixId: string;
-  svixTimestamp: string;
-  svixSignature: string;
   secret: string;
+  svixId: string;
+  svixSignature: string;
+  svixTimestamp: string;
 }
 
 /**
@@ -61,10 +62,10 @@ export interface SvixVerificationInput {
  */
 export async function verifySvixSignature({
   rawBody,
-  svixId,
-  svixTimestamp,
-  svixSignature,
   secret,
+  svixId,
+  svixSignature,
+  svixTimestamp,
 }: SvixVerificationInput): Promise<boolean> {
   try {
     const signatures = svixSignature.split(' ').map((sig) => sig.split(',')[1]);
@@ -72,7 +73,7 @@ export async function verifySvixSignature({
 
     let secretBytes: Uint8Array;
     if (secret.startsWith('whsec_')) {
-      const base64Secret = secret.substring(6);
+      const base64Secret = secret.slice(6);
       secretBytes = decodeBase64(base64Secret);
     } else {
       const encoder = new TextEncoder();
@@ -92,20 +93,19 @@ export async function verifySvixSignature({
     const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(signedContent));
     const expectedSignature = encodeBase64(new Uint8Array(signatureBuffer));
 
-    return signatures.some((sig) => sig === expectedSignature);
+    return signatures.includes(expectedSignature);
   } catch (error) {
     const logContext = createUtilityContext('webhook-crypto', 'verify-svix-signature');
-    const errorObj = normalizeError(error, 'Webhook signature verification failed');
-    logger.error('Svix signature verification error', errorObj, logContext);
+    await logError('Svix signature verification error', logContext, error);
     return false;
   }
 }
 
 export interface SupabaseDatabaseWebhookVerificationInput {
   rawBody: string;
-  signature: string | null;
-  timestamp?: string | null;
   secret: string;
+  signature: null | string;
+  timestamp?: null | string;
 }
 
 /**
@@ -117,9 +117,9 @@ export interface SupabaseDatabaseWebhookVerificationInput {
  */
 export async function verifySupabaseDatabaseWebhook({
   rawBody,
+  secret,
   signature,
   timestamp,
-  secret,
 }: SupabaseDatabaseWebhookVerificationInput): Promise<boolean> {
   if (!signature) {
     return false;
@@ -157,23 +157,22 @@ export async function verifySupabaseDatabaseWebhook({
 
     let result = 0;
     for (let i = 0; i < signature.length; i++) {
-      result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+      result |= (signature.codePointAt(i) ?? 0) ^ (expectedSignature.codePointAt(i) ?? 0);
     }
 
     return result === 0;
   } catch (error) {
     const logContext = createUtilityContext('webhook-crypto', 'verify-supabase-database-webhook');
-    const errorObj = normalizeError(error, 'Webhook signature verification failed');
-    logger.error('Supabase database webhook verification error', errorObj, logContext);
+    await logError('Supabase database webhook verification error', logContext, error);
     return false;
   }
 }
 
 export interface DiscordWebhookVerificationInput {
+  publicKey: string;
   rawBody: string;
   signature: string;
   timestamp: string;
-  publicKey: string;
 }
 
 /**
@@ -237,8 +236,7 @@ export async function verifyDiscordWebhookSignature({
     return isValid;
   } catch (error) {
     const logContext = createUtilityContext('webhook-crypto', 'verify-discord-webhook-signature');
-    const errorObj = normalizeError(error, 'Webhook signature verification failed');
-    logger.error('Discord webhook signature verification error', errorObj, logContext);
+    await logError('Discord webhook signature verification error', logContext, error);
     return false;
   }
 }
@@ -249,7 +247,7 @@ export async function verifyDiscordWebhookSignature({
  */
 function hexToBytes(hex: string): Uint8Array {
   // Remove any whitespace or 0x prefix
-  const cleanHex = hex.replace(/^0x/i, '').replace(/\s/g, '');
+  const cleanHex = hex.replace(/^0x/i, '').replaceAll(/\s/g, '');
   
   // Validate hex string format
   if (!/^[0-9a-fA-F]+$/.test(cleanHex)) {

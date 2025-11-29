@@ -1,12 +1,14 @@
 import { writeFileSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+
+import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+
 import { ensureEnvVars } from '../toolkit/env.js';
 import { normalizeError } from '../toolkit/errors.js';
 import { logger } from '../toolkit/logger.js';
 import { DEFAULT_SUPABASE_URL } from '../toolkit/supabase.js';
-import { buildReadmeMarkdown } from '../utils/readme-builder.js';
 import { resolveRepoPath } from '../utils/paths.js';
+import { buildReadmeMarkdown } from '../utils/readme-builder.js';
 
 export interface GenerateReadmeOptions {
   outputPath?: string;
@@ -19,7 +21,7 @@ export interface GenerateReadmeOptions {
 function validateReadmeContent(content: unknown, outputPath: string): string {
   // Ensure content is a string
   if (typeof content !== 'string') {
-    throw new Error('README content must be a string');
+    throw new TypeError('README content must be a string');
   }
 
   // Check for reasonable size limits (README should not exceed 1MB)
@@ -43,7 +45,7 @@ function validateReadmeContent(content: unknown, outputPath: string): string {
   if (!markdownPatterns.test(content)) {
     logger.warn('README content does not appear to be valid markdown', {
       script: 'generate-readme',
-      preview: content.substring(0, 100),
+      preview: content.slice(0, 100),
     });
     // Don't throw - allow through but log warning for security monitoring
   }
@@ -155,7 +157,7 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
     }
 
     if (!Array.isArray(data.categories)) {
-      throw new Error('API response missing categories array');
+      throw new TypeError('API response missing categories array');
     }
 
     logger.info(`✅ Fetched data: ${data.total_count ?? 0} total items, ${data.categories?.length ?? 0} categories`, {
@@ -174,7 +176,7 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
     const validatedReadme = validateReadmeContent(formattedMarkdown, README_PATH);
 
     // Safe to write: content has passed all security validations
-    writeFileSync(README_PATH, validatedReadme, 'utf-8');
+    writeFileSync(README_PATH, validatedReadme, 'utf8');
 
     logger.info('✅ README.md generated successfully!', { script: 'generate-readme' });
     logger.info(`   Bytes: ${validatedReadme.length}`, {

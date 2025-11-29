@@ -6,12 +6,27 @@
  * The mixin function automatically injects context from logger.bindings(), so explicit
  * BaseLogContext typing is no longer needed. All context creators now return Record<string, unknown>.
  */
+/**
+ * Logging functions - use these instead of console.log/error/warn directly
+ * All logging should use logContext for consistent structured logging
+ * 
+ * Now uses Pino logger with centralized configuration for consistent logging
+ * across the codebase. Pino automatically handles:
+ * - Error serialization (via stdSerializers.err)
+ * - Sensitive data redaction (via redact option in config)
+ */
+
+import pino from 'pino';
+
+import { normalizeError } from './error-handling.ts';
+import { createPinoConfig } from './logger/config.ts';
+
 export interface BaseLogContext {
-  function: string;
+  [key: string]: unknown; // Allow additional fields
   action?: string;
+  function: string;
   request_id?: string;
   started_at: string;
-  [key: string]: unknown; // Allow additional fields
 }
 
 /**
@@ -26,9 +41,9 @@ export interface BaseLogContext {
  */
 export function createEmailHandlerContext(
   action: string,
-  options?: { email?: string; requestId?: string; subscriptionId?: string; [key: string]: unknown }
+  options?: { [key: string]: unknown; email?: string; requestId?: string; subscriptionId?: string; }
 ): Record<string, unknown> {
-  const { email, requestId, subscriptionId, ...rest } = options || {};
+  const { email, requestId, subscriptionId, ...rest } = options ?? {};
   return {
     function: 'email-handler',
     action,
@@ -55,9 +70,9 @@ export function createEmailHandlerContext(
  */
 export function createDataApiContext(
   route: string,
-  options?: { path?: string; method?: string; resource?: string; app?: string; requestId?: string; [key: string]: unknown }
+  options?: { [key: string]: unknown; app?: string; method?: string; path?: string; requestId?: string; resource?: string; }
 ): Record<string, unknown> {
-  const { path, method, resource, app, requestId, ...rest } = options || {};
+  const { path, method, resource, app, requestId, ...rest } = options ?? {};
   return {
     function: app ?? 'data-api',
     action: route,
@@ -81,18 +96,18 @@ export function createDataApiContext(
  * @returns A log context object containing `function`, `action`, `request_id`, `started_at`, and any provided `query` or `filters`.
  */
 export function createSearchContext(options?: {
+  app?: string;
+  filters?: Record<string, unknown>;
   query?: string;
   searchType?: string;
-  filters?: Record<string, unknown>;
-  app?: string;
 }): Record<string, unknown> {
   return {
     function: options?.app ?? 'public-api',
     action: options?.searchType ?? 'search',
     request_id: crypto.randomUUID(),
     started_at: new Date().toISOString(),
-    ...(options?.query !== undefined ? { query: options.query } : {}),
-    ...(options?.filters !== undefined ? { filters: options.filters } : {}),
+    ...(options?.query === undefined ? {} : { query: options.query }),
+    ...(options?.filters === undefined ? {} : { filters: options.filters }),
   };
 }
 
@@ -112,12 +127,12 @@ export function createSearchContext(options?: {
 export function createNotificationRouterContext(
   action: string,
   options?: {
-    jobId?: string;
-    entryId?: string;
-    slug?: string;
     attempt?: number;
-    userId?: string;
+    entryId?: string;
+    jobId?: string;
+    slug?: string;
     source?: string;
+    userId?: string;
   }
 ): Record<string, unknown> {
   return {
@@ -150,9 +165,9 @@ export function createNotificationRouterContext(
  *          generated `request_id` and `started_at`, plus any provided optional fields.
  */
 export function createChangelogHandlerContext(options?: {
-  deploymentId?: string;
   branch?: string;
   changelogId?: string;
+  deploymentId?: string;
   slug?: string;
 }): Record<string, unknown> {
   return {
@@ -182,10 +197,10 @@ export function createChangelogHandlerContext(options?: {
 export function createDiscordHandlerContext(
   notificationType: string,
   options?: {
+    category?: string;
+    changelogId?: string;
     contentId?: string;
     jobId?: string;
-    changelogId?: string;
-    category?: string;
     slug?: string;
   }
 ): Record<string, unknown> {
@@ -275,7 +290,7 @@ export function createUtilityContext(
  */
 export function createTransformApiContext(
   route: string,
-  options?: { path?: string; method?: string }
+  options?: { method?: string; path?: string; }
 ): Record<string, unknown> {
   return {
     function: 'transform-api',
@@ -286,20 +301,6 @@ export function createTransformApiContext(
     ...(options?.method && { method: options.method }),
   };
 }
-
-/**
- * Logging functions - use these instead of console.log/error/warn directly
- * All logging should use logContext for consistent structured logging
- * 
- * Now uses Pino logger with centralized configuration for consistent logging
- * across the codebase. Pino automatically handles:
- * - Error serialization (via stdSerializers.err)
- * - Sensitive data redaction (via redact option in config)
- */
-
-import pino from 'pino';
-import { createPinoConfig } from './logger/config.ts';
-import { normalizeError } from './error-handling.ts';
 
 // Create Pino logger instance with centralized configuration
 // Pino automatically handles error serialization and redaction
@@ -353,7 +354,7 @@ export async function logError(message: string, logContext: Record<string, unkno
     ...logContext,
   };
   
-  if (error) {
+  if (error !== null && error !== undefined) {
     // Use normalizeError() for consistent error normalization across codebase
     // Pino's stdSerializers.err will automatically serialize the Error object
     const normalized = normalizeError(error, message);
@@ -377,17 +378,20 @@ export async function logError(message: string, logContext: Record<string, unkno
         // Fallback to console.error for Edge Runtime environments
         const errorMessage = `Failed to flush logs: ${err instanceof Error ? err.message : String(err)}\n`;
         // Check for Node.js environment (not Edge Runtime)
-        if (typeof process !== 'undefined' && typeof process.stderr !== 'undefined' && process.stderr && typeof process.stderr.write === 'function') {
+        // process.stderr.write is available in Node.js when process exists
+        // TypeScript types say process.stderr always exists when process exists, but Edge Runtime may not have it
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- Runtime check for Edge compatibility
+        if (typeof process !== 'undefined' && process.stderr && typeof process.stderr.write === 'function') {
           try {
             process.stderr.write(errorMessage);
           } catch {
-            // If write fails, fall back to console
-            if (typeof console !== 'undefined' && console.error) {
-              console.error(errorMessage);
-            }
+            // If write fails, fall back to console (inside flush callback - rule allows this)
+            // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- Last resort in flush callback
+            console.error(errorMessage);
           }
-        } else if (typeof console !== 'undefined' && console.error) {
-          // Fallback for Edge Runtime environments where process.stderr is not available
+        } else {
+          // Fallback for Edge Runtime environments where process.stderr is not available (inside flush callback)
+          // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- Last resort in flush callback
           console.error(errorMessage);
         }
         reject(err);
@@ -411,7 +415,7 @@ export function logWarn(message: string, logContext: Record<string, unknown>, er
     ...logContext,
   };
   
-  if (error) {
+  if (error !== null && error !== undefined) {
     // Use normalizeError() for consistent error normalization across codebase
     // Pino's stdSerializers.err will automatically serialize the Error object
     const normalized = normalizeError(error, message);
@@ -430,14 +434,14 @@ export function logWarn(message: string, logContext: Record<string, unknown>, er
  */
 export const logger = {
   info: (message: string, context?: Record<string, unknown>) => {
-    pinoLogger.info(context || {}, message);
+    pinoLogger.info(context ?? {}, message);
   },
   warn: (message: string, context?: Record<string, unknown>) => {
-    pinoLogger.warn(context || {}, message);
+    pinoLogger.warn(context ?? {}, message);
   },
   error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
-    const logData: Record<string, unknown> = { ...(context || {}) };
-    if (error) {
+    const logData: Record<string, unknown> = { ...context };
+    if (error !== null && error !== undefined) {
       // Use normalizeError() for consistent error normalization across codebase
       // Pino's stdSerializers.err will automatically serialize the Error object
       const normalized = normalizeError(error, message);
@@ -446,14 +450,14 @@ export const logger = {
     pinoLogger.error(logData, message);
   },
   debug: (message: string, context?: Record<string, unknown>) => {
-    pinoLogger.debug(context || {}, message);
+    pinoLogger.debug(context ?? {}, message);
   },
   trace: (message: string, context?: Record<string, unknown>) => {
-    pinoLogger.trace(context || {}, message);
+    pinoLogger.trace(context ?? {}, message);
   },
   fatal: (message: string, error?: unknown, context?: Record<string, unknown>) => {
-    const logData: Record<string, unknown> = { ...(context || {}) };
-    if (error) {
+    const logData: Record<string, unknown> = { ...context };
+    if (error !== null && error !== undefined) {
       // Use normalizeError() for consistent error normalization across codebase
       // Pino's stdSerializers.err will automatically serialize the Error object
       const normalized = normalizeError(error, message);
@@ -482,7 +486,7 @@ export const logger = {
   /**
    * Check if a log level is enabled
    */
-  isLevelEnabled: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'): boolean => {
+  isLevelEnabled: (level: 'debug' | 'error' | 'fatal' | 'info' | 'trace' | 'warn'): boolean => {
     return pinoLogger.isLevelEnabled(level);
   },
 };

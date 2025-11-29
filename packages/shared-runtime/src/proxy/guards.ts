@@ -33,18 +33,18 @@ export function detectSuspiciousHeaders(
 
 export function sanitizePathForLogging(path: string): string {
   return path
-    .replace(UUID_REGEX, '/api/*/[UUID]')
-    .replace(NUMERIC_ID_REGEX, '/api/*/[ID]')
+    .replaceAll(UUID_REGEX, '/api/*/[UUID]')
+    .replaceAll(NUMERIC_ID_REGEX, '/api/*/[ID]')
     .replace(QUERY_STRING_REGEX, '')
     .slice(0, 200);
 }
 
 export function getClientInfo(request: Request): { ip: string; userAgent: string } {
   const ip =
-    request.headers.get('x-forwarded-for') ||
-    request.headers.get('x-real-ip') ||
+    request.headers.get('x-forwarded-for') ??
+    request.headers.get('x-real-ip') ??
     'unknown';
-  const userAgent = request.headers.get('user-agent') || 'unknown';
+  const userAgent = request.headers.get('user-agent') ?? 'unknown';
   return {
     ip,
     userAgent: userAgent.slice(0, 100),

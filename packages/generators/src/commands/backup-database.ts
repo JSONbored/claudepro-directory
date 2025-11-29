@@ -9,9 +9,11 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { join } from 'node:path';
+
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
 import { ensureEnvVars } from '../toolkit/env.js';
 import { logger } from '../toolkit/logger.js';
@@ -51,7 +53,7 @@ export async function runBackupDatabase(options: BackupDatabaseOptions = {}): Pr
   const r2Bucket = process.env['R2_BUCKET_NAME'];
   const heartbeatUrl = process.env['BETTERSTACK_HEARTBEAT_DB_BACKUP'];
 
-  let r2Client: S3Client | null = null;
+  let r2Client: null | S3Client = null;
   if (r2AccessKey && r2SecretKey && r2Endpoint && r2Bucket) {
     r2Client = new S3Client({
       region: 'auto',
@@ -118,7 +120,7 @@ export async function runBackupDatabase(options: BackupDatabaseOptions = {}): Pr
 
   logger.info('   → Database changed - creating backup...', { script: 'backup-database' });
 
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+  const timestamp = new Date().toISOString().replaceAll(/[:.]/g, '-').slice(0, -5);
   const BACKUP_DIR = join(ROOT, 'backups', timestamp);
 
   mkdirSync(BACKUP_DIR, { recursive: true });
@@ -138,7 +140,7 @@ export async function runBackupDatabase(options: BackupDatabaseOptions = {}): Pr
     }
 
     try {
-      const pathPgDump = execSync('which pg_dump', { encoding: 'utf-8' }).trim();
+      const pathPgDump = execSync('which pg_dump', { encoding: 'utf8' }).trim();
       logger.warn(`   ⚠️  Using pg_dump from PATH: ${pathPgDump} (may not match server version)`, {
         script: 'backup-database',
         pgDumpPath: pathPgDump,
@@ -178,19 +180,19 @@ export async function runBackupDatabase(options: BackupDatabaseOptions = {}): Pr
       cwd: ROOT,
       stdio: ['ignore', 'pipe', 'pipe'],
       maxBuffer: 200 * 1024 * 1024,
-      encoding: 'utf-8',
+      encoding: 'utf8',
     });
 
     // Check for warnings/errors in output
     if (dumpOutput && (dumpOutput.includes('error') || dumpOutput.includes('ERROR'))) {
       logger.warn('   ⚠️  supabase db dump warnings', {
         script: 'backup-database',
-        warnings: dumpOutput.substring(0, 500), // Limit warning log size
+        warnings: dumpOutput.slice(0, 500), // Limit warning log size
       });
     }
 
     // Write raw dump to temp file
-    writeFileSync(rawDumpPath, dumpOutput, 'utf-8');
+    writeFileSync(rawDumpPath, dumpOutput, 'utf8');
 
     // Step 2: Compress with gzip (no shell interpolation)
     const compressedDump = execFileSync('gzip', ['-9', '-c', rawDumpPath], {
@@ -252,9 +254,9 @@ Notes:
 - Use --force to bypass change detection
 `;
 
-  writeFileSync(join(BACKUP_DIR, 'README.txt'), readme, 'utf-8');
+  writeFileSync(join(BACKUP_DIR, 'README.txt'), readme, 'utf8');
 
-  const duOutput = execSync(`du -sk "${BACKUP_DIR}"`, { encoding: 'utf-8' });
+  const duOutput = execSync(`du -sk "${BACKUP_DIR}"`, { encoding: 'utf8' });
   const sizeKB = duOutput.split('\t')[0]?.trim();
   if (!sizeKB) {
     throw new Error('Failed to get backup directory size');
@@ -262,7 +264,7 @@ Notes:
   const sizeMB = (Number.parseInt(sizeKB, 10) / 1024).toFixed(2);
 
   const uncompressedSize = execSync(`gunzip -l "${outputPath}" | tail -1 | awk '{print $2}'`, {
-    encoding: 'utf-8',
+    encoding: 'utf8',
   }).trim();
   const compressedSize = String(statSync(outputPath).size);
   const compressionRatio = (

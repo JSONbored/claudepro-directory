@@ -5,8 +5,9 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
+
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class JobsService {
@@ -25,7 +26,7 @@ export class JobsService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_jobs_list']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -46,7 +47,7 @@ export class JobsService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_job_detail']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -66,7 +67,7 @@ export class JobsService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_featured_jobs']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -87,7 +88,7 @@ export class JobsService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_jobs_by_category']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -107,7 +108,7 @@ export class JobsService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_jobs_count']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;

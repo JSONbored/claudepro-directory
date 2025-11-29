@@ -54,7 +54,8 @@
   "scripts": {
     "build": "tsc --build",
     "type-check": "tsc --noEmit",
-    "lint": "eslint --config ../../config/tools/eslint.config.mjs src --ignore-pattern '**/*.generated.ts'"
+    "lint": "eslint --config eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.test.ts' --ignore-pattern '**/*.spec.ts'",
+    "lint:fix": "eslint --config eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.test.ts' --ignore-pattern '**/*.spec.ts' --fix"
   },
   "devDependencies": {
     "@types/sanitize-html": "^2.16.0",

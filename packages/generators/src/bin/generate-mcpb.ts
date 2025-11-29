@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
+import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { runGenerateMcpbPackages } from '../commands/generate-mcpb-packages.js';
 import { logger } from '../toolkit/logger.js';
-import { normalizeError } from '@heyclaude/shared-runtime';
 
 runGenerateMcpbPackages().catch((error: unknown) => {
   logger.error(

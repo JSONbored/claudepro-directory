@@ -1,9 +1,12 @@
+import { normalizeError } from '@heyclaude/shared-runtime';
+
+import { logger } from './logger.js';
 import { getServiceRoleConfig, getSupabaseUrl } from './supabase.js';
 
 export interface EdgeFetchOptions {
-  timeoutMs?: number;
-  responseType?: 'json' | 'text';
   requireAuth?: boolean;
+  responseType?: 'json' | 'text';
+  timeoutMs?: number;
 }
 
 export async function callEdgeFunction<T = unknown>(
@@ -53,22 +56,19 @@ export async function callEdgeFunction<T = unknown>(
 
     return (await response.json()) as T;
   } catch (error) {
-    // Import logger and normalizeError dynamically to avoid circular dependencies
-    const { logger } = await import('./logger.js');
-    const { normalizeError } = await import('@heyclaude/shared-runtime');
     const errorObj = normalizeError(error, 'Edge function call failed');
     
     if (errorObj.name === 'AbortError') {
       const timeoutError = new Error(`Edge function request timed out after ${timeoutMs}ms`);
-      // Use Pino logger for consistent structured logging
       logger.error('Edge function timeout', timeoutError, {
+        command: 'edge',
         path,
         timeoutMs,
       });
       throw timeoutError;
     }
-    // Log other errors using Pino
     logger.error('Edge function request failed', errorObj, {
+      command: 'edge',
       path,
     });
     throw error;

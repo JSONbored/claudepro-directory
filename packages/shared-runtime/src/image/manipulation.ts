@@ -11,20 +11,20 @@
  * for this file since it's only used in Edge Functions (Deno runtime).
  */
 
-/// <reference path="./magick-wasm.d.ts" />
-
+// Type definitions are in ./magick-wasm.d.ts (declare module '@imagemagick/magick-wasm')
 // Deno global type (only available in Deno runtime)
-declare namespace Deno {
-  function readFile(path: string | URL): Promise<Uint8Array>;
-}
-
-// @ts-ignore - @imagemagick/magick-wasm is a Deno-only package, not available during type checking
 import {
   ImageMagick,
   initializeImageMagick,
   MagickFormat,
   type IMagickImage,
 } from '@imagemagick/magick-wasm';
+
+// Deno namespace declaration for type checking
+// eslint-disable-next-line @typescript-eslint/no-namespace -- Deno global namespace is required for Deno runtime types
+declare namespace Deno {
+  function readFile(path: string | URL): Promise<Uint8Array>;
+}
 
 // Initialize ImageMagick on module load (singleton pattern)
 let initialized = false;
@@ -40,11 +40,10 @@ export async function ensureImageMagickInitialized(): Promise<void> {
 
   try {
     // Load WASM bytes from the package (following Supabase example pattern)
-    // @ts-ignore - Deno.readFile and import.meta.resolve are Deno-only APIs
+    // Deno.readFile is available via the Deno namespace declaration above
     const wasmBytes = await Deno.readFile(
       new URL(
         'magick.wasm',
-        // @ts-ignore - import.meta.resolve is Deno-only
         import.meta.resolve('@imagemagick/magick-wasm'),
       ),
     );
@@ -62,14 +61,14 @@ export async function ensureImageMagickInitialized(): Promise<void> {
  * Image processing options
  */
 export interface ImageProcessOptions {
-  /** Resize dimensions (width, height). If only one provided, maintains aspect ratio. */
-  resize?: { width?: number; height?: number };
   /** Blur settings (radius, sigma) */
   blur?: { radius: number; sigma: number };
   /** Output format (default: PNG) */
   format?: MagickFormat;
   /** Quality for JPEG/WebP (1-100, default: 85) */
   quality?: number;
+  /** Resize dimensions (width, height). If only one provided, maintains aspect ratio. */
+  resize?: { height?: number; width?: number; };
   /** Strip metadata (default: true) */
   stripMetadata?: boolean;
 }
@@ -92,8 +91,11 @@ export async function processImage(
     blur,
     // Note: format, quality, and stripMetadata are accepted in options but not yet implemented
     // They're kept for future use when we add format conversion support
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Reserved for future implementation
     format: _format = MagickFormat.Png,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Reserved for future implementation
     quality: _quality = 85,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Reserved for future implementation
     stripMetadata: _stripMetadata = true,
   } = options;
 
@@ -137,7 +139,7 @@ export async function optimizeImage(
   imageData: Uint8Array,
   maxDimension: number,
   format: MagickFormat = MagickFormat.Png,
-  quality: number = 85
+  quality = 85
 ): Promise<Uint8Array> {
   return processImage(imageData, {
     resize: { width: maxDimension, height: maxDimension },
@@ -177,21 +179,23 @@ export async function resizeImage(
  */
 export async function getImageDimensions(
   imageData: Uint8Array
-): Promise<{ width: number; height: number }> {
+): Promise<{ height: number; width: number; }> {
   await ensureImageMagickInitialized();
 
-  let dimensions: { width: number; height: number } | null = null;
+  let dimensions: null | { height: number; width: number; } = null;
 
   ImageMagick.read(imageData, (img: IMagickImage) => {
     dimensions = {
-      width: img.width,
       height: img.height,
+      width: img.width,
     };
     // Don't write, just read dimensions
     return new Uint8Array(0);
   });
 
-  if (!dimensions) {
+  // ImageMagick.read callback always executes synchronously, so dimensions will be set
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Type guard for TypeScript
+  if (dimensions === null) {
     throw new Error('Failed to read image dimensions');
   }
 
@@ -209,7 +213,7 @@ export async function getImageDimensions(
 export async function convertImageFormat(
   imageData: Uint8Array,
   targetFormat: MagickFormat,
-  quality: number = 85
+  quality = 85
 ): Promise<Uint8Array> {
   return processImage(imageData, {
     format: targetFormat,

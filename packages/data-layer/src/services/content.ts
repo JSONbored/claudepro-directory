@@ -5,41 +5,42 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
+
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export interface ContentFilterOptions {
-  categories?: Database['public']['Enums']['content_category'][] | undefined;
-  tags?: string[] | undefined;
-  search?: string;
   author?: string;
-  orderBy?: 'slug' | 'created_at' | 'updated_at' | 'title';
-  orderDirection?: 'asc' | 'desc';
+  categories?: Database['public']['Enums']['content_category'][] | undefined;
   limit?: number;
   offset?: number;
+  orderBy?: 'created_at' | 'slug' | 'title' | 'updated_at';
+  orderDirection?: 'asc' | 'desc';
+  search?: string;
+  tags?: string[] | undefined;
 }
 
 export interface ReviewsFilterOptions {
-  contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
-  sortBy?: string;
+  contentType: Database['public']['Enums']['content_category'];
   limit?: number;
   offset?: number;
+  sortBy?: string;
   userId?: string;
 }
 
 export interface RelatedContentOptions {
   category: Database['public']['Enums']['content_category'];
+  excludeSlugs?: string[];
+  limit?: number;
   slug: string;
   tags?: string[] | undefined;
-  limit?: number;
-  excludeSlugs?: string[];
 }
 
 export interface SimilarContentOptions {
-  contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
+  contentType: Database['public']['Enums']['content_category'];
   limit?: number;
 }
 
@@ -59,7 +60,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['generate_readme_data']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -79,7 +80,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['generate_sitewide_llms_txt']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -99,7 +100,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['generate_changelog_llms_txt']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -120,7 +121,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['generate_category_llms_txt']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -141,7 +142,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['generate_changelog_entry_llms_txt']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -162,7 +163,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['generate_tool_llms_txt']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -182,7 +183,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_category_configs_with_features']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -203,7 +204,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_api_content_full']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -224,7 +225,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_content_detail_complete']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -245,7 +246,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_enriched_content_list']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -266,7 +267,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_content_paginated']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -287,7 +288,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_homepage_complete']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -308,7 +309,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_reviews_with_stats']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -329,7 +330,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_related_content']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -350,7 +351,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_similar_content']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -371,7 +372,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_content_templates']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -392,7 +393,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_content_paginated_slim']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -413,7 +414,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_content_detail_core']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -434,7 +435,7 @@ export class ContentService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_content_analytics']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -495,6 +496,6 @@ export class ContentService {
       throw typeError;
     }
     
-    return data as Database['public']['Functions']['get_homepage_optimized']['Returns'];
+    return data;
   }
 }

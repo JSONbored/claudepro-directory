@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-cycle -- This file is the main entry point for the library
 export {
   clearAllHashes,
   clearHash,

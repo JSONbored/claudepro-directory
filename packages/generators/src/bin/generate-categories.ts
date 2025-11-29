@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
+import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { runGenerateCategoryConfig } from '../commands/generate-category-config.js';
 import { logger } from '../toolkit/logger.js';
-import { normalizeError } from '@heyclaude/shared-runtime';
 
 runGenerateCategoryConfig().catch((error) => {
   logger.error(

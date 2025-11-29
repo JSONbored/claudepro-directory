@@ -5,8 +5,8 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 export class QuizService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,7 +17,7 @@ export class QuizService {
   async getQuizConfiguration(args: Database['public']['Functions']['get_quiz_configuration']['Args']) {
     const { data, error } = await this.supabase.rpc('get_quiz_configuration', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_quiz_configuration']['Returns'];
+    return data;
   }
 
   /**
@@ -26,6 +26,6 @@ export class QuizService {
   async getRecommendations(args: Database['public']['Functions']['get_recommendations']['Args']) {
     const { data, error } = await this.supabase.rpc('get_recommendations', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['get_recommendations']['Returns'];
+    return data;
   }
 }

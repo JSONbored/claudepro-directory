@@ -410,6 +410,9 @@ importers:
       '@heyclaude/web-runtime':
         specifier: workspace:*
         version: link:../web-runtime
+      '@iarna/toml':
+        specifier: ^2.2.5
+        version: 2.2.5
       '@supabase/supabase-js':
         specifier: ^2.84.0
         version: 2.84.0

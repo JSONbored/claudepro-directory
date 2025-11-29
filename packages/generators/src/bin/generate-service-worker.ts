@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
+import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { runGenerateServiceWorker } from '../commands/generate-service-worker.js';
 import { logger } from '../toolkit/logger.js';
-import { normalizeError } from '@heyclaude/shared-runtime';
 
 runGenerateServiceWorker().catch((error) => {
   logger.error(

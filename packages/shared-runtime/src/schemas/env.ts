@@ -1,10 +1,11 @@
 /** Runtime environment variable validation schema */
 
-import { getEnvObject } from '../env.ts';
-import { logger } from '../logging.ts';
-import { normalizeError } from '../error-handling.ts';
-import { nonEmptyString, urlString } from './primitives.ts';
 import { z } from 'zod';
+
+import { getEnvObject } from '../env.ts';
+import { logError, logWarn } from '../logging.ts';
+
+import { nonEmptyString, urlString } from './primitives.ts';
 
 /**
  * Server-side environment variables schema
@@ -244,14 +245,14 @@ function validateEnv(): Env {
 
   if (!parsed.success) {
     const errorDetails = JSON.stringify(parsed.error.flatten().fieldErrors, null, 2);
-    const normalized = normalizeError(
-      new Error(`Invalid environment variables: ${errorDetails}`),
-      'Invalid environment variables detected'
-    );
-    logger.error('Invalid environment variables detected', normalized, {
+    const validationError = new Error(`Invalid environment variables: ${errorDetails}`);
+    // Fire-and-forget: validation must remain synchronous
+    void logError('Invalid environment variables detected', {
+      module: 'shared-runtime',
+      operation: 'validateEnv',
       errorDetails,
       phase: 'validation',
-    });
+    }, validationError);
 
     // In production, we should fail fast on invalid env vars
     if ((rawEnv['NODE_ENV'] ?? 'development') === 'production') {
@@ -259,7 +260,10 @@ function validateEnv(): Env {
     }
 
     // In development, warn but continue with defaults
-    logger.warn('Using default values for missing environment variables');
+    logWarn('Using default values for missing environment variables', {
+      module: 'shared-runtime',
+      operation: 'validateEnv',
+    });
     cachedEnv = envSchema.parse({
       ...rawEnv,
       NODE_ENV: rawEnv['NODE_ENV'] ?? 'development',
@@ -267,8 +271,9 @@ function validateEnv(): Env {
     return cachedEnv;
   }
 
-  // Production validation - server-side only for security
-  const isServer = typeof window === 'undefined';
+  // Production validation - server-side only for security  
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for SSR detection
+  const isServer = globalThis.window === undefined;
   const isBuildPhase =
     rawEnv['NEXT_PHASE'] === 'phase-production-build' ||
     rawEnv['NEXT_PHASE'] === 'phase-production-server';
@@ -280,8 +285,14 @@ function validateEnv(): Env {
 
     if (missingRequiredEnvs.length > 0) {
       const missingVars = missingRequiredEnvs.join(', ');
-
-      logger.error('Missing required production environment variables for security features');
+      const missingEnvError = new Error(`Missing required production environment variables: ${missingVars}`);
+      
+      // Fire-and-forget: log the error before throwing
+      void logError('Missing required production environment variables for security features', {
+        module: 'shared-runtime',
+        operation: 'validateEnv',
+        missingVars,
+      }, missingEnvError);
       throw new Error(
         `Missing required production environment variables: ${missingVars}. These are required for security and functionality in production.`
       );
@@ -352,6 +363,6 @@ export const securityConfig = Object.freeze({
  * Production Security: Frozen to prevent runtime mutations
  */
 export const buildConfig = Object.freeze({
-  version: env.npm_package_version,
-  packageName: env.npm_package_name,
+  version: env['npm_package_version'],
+  packageName: env['npm_package_name'],
 } as const);

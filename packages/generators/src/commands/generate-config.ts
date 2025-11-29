@@ -1,10 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs';
 import fs from 'node:fs/promises';
-import path from 'node:path';
+import path, { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { resolve } from 'path';
-import { createServiceRoleClient } from '../toolkit/supabase.js';
+
 import { logger } from '../toolkit/logger.js';
+import { createServiceRoleClient } from '../toolkit/supabase.js';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, '../../../..');
@@ -24,7 +24,7 @@ function loadEnvFile(): void {
   }
 
   try {
-    const envContent = readFileSync(envPath, 'utf-8');
+    const envContent = readFileSync(envPath, 'utf8');
     const lines = envContent.split('\n');
 
     for (const line of lines) {
@@ -35,7 +35,7 @@ function loadEnvFile(): void {
       if (match) {
         const [, key, value] = match;
         if (key && value !== undefined) {
-          const cleanValue = value.replace(/^["']|["']$/g, ''); // Remove quotes
+          const cleanValue = value.replaceAll(/^["']|["']$/g, ''); // Remove quotes
           if (!process.env[key]) {
             process.env[key] = cleanValue;
           }
@@ -81,15 +81,15 @@ export const GENERATED_CONFIG = ${JSON.stringify(data, null, 2)} as const;
 export type GeneratedConfig = typeof GENERATED_CONFIG;
 `;
 
-    await fs.writeFile(TARGET_CONFIG_PATH, configContent, 'utf-8');
+    await fs.writeFile(TARGET_CONFIG_PATH, configContent, 'utf8');
     logger.info('Configuration generated successfully', { path: TARGET_CONFIG_PATH });
-  } catch (err) {
-    logger.error('Error generating config', err, { path: TARGET_CONFIG_PATH });
+  } catch (error) {
+    logger.error('Error generating config', error, { path: TARGET_CONFIG_PATH });
     process.exit(1);
   }
 }
 
-generateConfig().catch((err) => {
-  logger.error('Unhandled error in generateConfig', err);
+generateConfig().catch((error) => {
+  logger.error('Unhandled error in generateConfig', error);
   process.exit(1);
 });

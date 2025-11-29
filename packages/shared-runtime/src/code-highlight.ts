@@ -4,12 +4,13 @@
  */
 
 import { highlight } from 'sugar-high';
-import { createUtilityContext, logger } from './logging.ts';
+
 import { normalizeError } from './error-handling.ts';
+import { createUtilityContext, logger } from './logging.ts';
 
 export interface HighlightCodeOptions {
-  showLineNumbers?: boolean;
   maxVisibleLines?: number;
+  showLineNumbers?: boolean;
 }
 
 /**
@@ -27,8 +28,10 @@ export function highlightCode(
   const { showLineNumbers = true, maxVisibleLines = 20 } = options;
 
   try {
-    const highlighted = highlight(code);
-    const lines = highlighted.split('\n');
+    // sugar-high's highlight function returns string, but types may be incomplete
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call -- sugar-high types may be incomplete
+    const highlighted = highlight(code) as string;
+    const lines: string[] = highlighted.split('\n');
     const hasMultipleLines = lines.length > 1;
     const totalLines = lines.length;
     const visibleLines = Math.min(totalLines, maxVisibleLines);
@@ -54,11 +57,11 @@ export function highlightCode(
 
     // Fallback: escape code
     const escapedCode = code
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll('\'', '&#039;');
 
     return `<pre class="code-block-pre code-block-fallback"><code>${escapedCode}</code></pre>`;
   }
@@ -77,7 +80,7 @@ export function generateHighlightCacheKey(
   // Simple hash function (good enough for cache keys)
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
-    const char = input.charCodeAt(i);
+    const char = input.codePointAt(i) ?? 0;
     hash = (hash << 5) - hash + char;
     hash &= hash; // Convert to 32-bit integer
   }

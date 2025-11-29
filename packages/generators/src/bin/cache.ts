@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
+import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { runCacheCli, showCacheCliHelp } from '../commands/cache-cli.js';
 import { logger } from '../toolkit/logger.js';
-import { normalizeError } from '@heyclaude/shared-runtime';
 
 const args = process.argv.slice(2).filter((arg) => arg !== '--');
 const [command, pattern] = args;
@@ -13,7 +14,7 @@ if (!command || command === 'help' || command === '--help' || command === '-h') 
 }
 
 try {
-  const options: Parameters<typeof runCacheCli>[0] = { command: command as 'info' | 'clear' };
+  const options: Parameters<typeof runCacheCli>[0] = { command: command as 'clear' | 'info' };
   if (pattern) {
     options.pattern = pattern;
   }

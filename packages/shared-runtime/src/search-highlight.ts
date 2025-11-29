@@ -16,13 +16,13 @@
  * Escape special regex characters to prevent injection attacks
  */
 function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 /**
  * Get regex pattern for search terms
  */
-function getHighlightPattern(query: string, wholeWordsOnly = true): RegExp | null {
+function getHighlightPattern(query: string, wholeWordsOnly = true): null | RegExp {
   const trimmed = query.trim();
   if (!trimmed) return null;
 
@@ -30,12 +30,12 @@ function getHighlightPattern(query: string, wholeWordsOnly = true): RegExp | nul
   const terms = trimmed
     .split(/\s+/)
     .filter((term) => term.length > 0)
-    .map(escapeRegex);
+    .map((term) => escapeRegex(term));
 
   if (terms.length === 0) return null;
 
   // Create regex pattern
-  const boundary = wholeWordsOnly ? '\\b' : '';
+  const boundary = wholeWordsOnly ? String.raw`\b` : '';
   const pattern = new RegExp(
     `(${boundary}${terms.join(`${boundary}|${boundary}`)}${boundary})`,
     'gi'
@@ -47,10 +47,10 @@ function getHighlightPattern(query: string, wholeWordsOnly = true): RegExp | nul
 export interface HighlightOptions {
   /** CSS class for highlighted text (default: Tailwind classes) */
   className?: string;
-  /** Match whole words only (default: true) */
-  wholeWordsOnly?: boolean;
   /** Maximum length of text to highlight (safety limit, default: 10000) */
   maxLength?: number;
+  /** Match whole words only (default: true) */
+  wholeWordsOnly?: boolean;
 }
 
 /**
@@ -74,7 +74,7 @@ export function highlightSearchTerms(
   const {
     className = 'bg-yellow-200/30 dark:bg-yellow-600/40 font-medium px-0.5 py-0 rounded',
     wholeWordsOnly = true,
-    maxLength = 10000,
+    maxLength = 10_000,
   } = options;
 
   // Early returns for performance
@@ -100,20 +100,18 @@ export function highlightSearchTerms(
   pattern.lastIndex = 0;
 
   // Use matchAll to find all matches with their positions
-  const matches: Array<{ text: string; index: number }> = [];
-  let match: RegExpExecArray | null = null;
+  const matches: Array<{ index: number; text: string }> = [];
+  let match: null | RegExpExecArray = pattern.exec(safeText);
 
   // Find all matches
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    match = pattern.exec(safeText);
-    if (match === null) break;
+  while (match !== null) {
     matches.push({
-      text: match[0],
       index: match.index,
+      text: match[0],
     });
     // Prevent infinite loop if regex has no global flag
     if (!pattern.global) break;
+    match = pattern.exec(safeText);
   }
 
   // Reset pattern for reuse
@@ -125,7 +123,7 @@ export function highlightSearchTerms(
   }
 
   // Build array of text segments (alternating between non-match and match)
-  const segments: Array<{ text: string; isMatch: boolean }> = [];
+  const segments: Array<{ isMatch: boolean; text: string }> = [];
   let lastIndex = 0;
 
   for (const match of matches) {
@@ -172,11 +170,11 @@ export function highlightSearchTerms(
  */
 function escapeHtml(text: string): string {
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
 
 /**

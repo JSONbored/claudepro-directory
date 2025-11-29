@@ -19,7 +19,14 @@ export function timingSafeEqual(a: string, b: string): boolean {
 
   let result = 0;
   for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    // Use charCodeAt for timing-safe comparison: JavaScript strings are UTF-16
+    // code units, and charCodeAt provides consistent execution time for constant-time comparison
+    // We compare UTF-16 code units (not code points) to maintain constant-time execution
+    // eslint-disable-next-line unicorn/prefer-code-point
+    const codeUnitA = a.charCodeAt(i);
+    // eslint-disable-next-line unicorn/prefer-code-point
+    const codeUnitB = b.charCodeAt(i);
+    result |= codeUnitA ^ codeUnitB;
   }
 
   return result === 0;

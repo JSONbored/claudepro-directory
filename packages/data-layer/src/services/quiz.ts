@@ -5,8 +5,9 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
+
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class QuizService {
@@ -25,7 +26,7 @@ export class QuizService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_quiz_configuration']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -46,7 +47,7 @@ export class QuizService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['get_recommendations']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;

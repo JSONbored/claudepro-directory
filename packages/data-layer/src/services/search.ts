@@ -5,8 +5,9 @@
  * To update this service, update the database schema and re-run the generator.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type Database } from '@heyclaude/database-types';
+import  { type SupabaseClient } from '@supabase/supabase-js';
+
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class SearchService {
@@ -26,7 +27,7 @@ export class SearchService {
         });
         throw error;
       }
-      const rows = data as Database['public']['Functions']['search_unified']['Returns'];
+      const rows = data;
       return { data: rows, total_count: rows?.length ?? 0 };
     } catch (error) {
       // Error already logged above
@@ -48,7 +49,7 @@ export class SearchService {
         });
         throw error;
       }
-      const rows = data as Database['public']['Functions']['search_content_optimized']['Returns'];
+      const rows = data;
       return { data: rows, total_count: rows?.length ?? 0 };
     } catch (error) {
       // Error already logged above
@@ -70,7 +71,7 @@ export class SearchService {
         });
         throw error;
       }
-      return data as Database['public']['Functions']['filter_jobs']['Returns'];
+      return data;
     } catch (error) {
       // Error already logged above
       throw error;

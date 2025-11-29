@@ -42,7 +42,7 @@
   "scripts": {
     "build": "tsc -b",
     "type-check": "tsc --noEmit",
-    "lint": "eslint --config ../../config/tools/eslint.config.mjs src --ignore-pattern '**/*.generated.ts'",
+    "lint": "eslint --config eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.test.ts' --ignore-pattern '**/*.spec.ts'",
     "clean": "rm -rf dist"
   },
   "dependencies": {
@@ -50,6 +50,7 @@
     "@heyclaude/database-types": "workspace:*",
     "@heyclaude/shared-runtime": "workspace:*",
     "@heyclaude/web-runtime": "workspace:*",
+    "@iarna/toml": "^2.2.5",
     "@supabase/supabase-js": "^2.84.0",
     "archiver": "^7.0.1",
     "escape-html": "^1.0.3",

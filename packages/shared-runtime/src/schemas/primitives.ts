@@ -4,7 +4,9 @@
  */
 
 import { z } from 'zod';
+
 import { SECURITY_CONFIG } from '../config/security.ts';
+
 
 export const nonEmptyString = z.string().min(1);
 export const shortString = z.string().min(1).max(100);
@@ -44,7 +46,7 @@ export const positiveInt = z.number().int().positive();
 export const nonNegativeInt = z.number().int().min(0);
 export const percentage = z.number().min(0).max(100);
 export const aiTemperature = z.number().min(0).max(2);
-export const timeoutMs = z.number().int().min(100).max(300000);
+export const timeoutMs = z.number().int().min(100).max(300_000);
 export const imageDimension = z.number().int().min(200).max(2000);
 export const viewCount = z.number().int().min(0);
 export const optionalPositiveInt = z.number().int().positive().optional();
@@ -55,8 +57,11 @@ export const requiredTagArray = z.array(nonEmptyString).min(1);
 
 export const MAX_STACK_TRACE_LENGTH = 5000;
 
-const errorType = nonEmptyString.max(100).transform((val: string) => val.replace(/[^\w\s-]/g, ''));
-const errorSeverity = z.enum(['low', 'medium', 'high', 'critical']).default('medium');
+/** Schema for error type strings - sanitizes special characters */
+export const errorTypeSchema = nonEmptyString.max(100).transform((val: string) => val.replaceAll(/[^\w\s-]/g, ''));
 
-export type ErrorType = z.infer<typeof errorType>;
-export type ErrorSeverity = z.infer<typeof errorSeverity>;
+/** Schema for error severity levels */
+export const errorSeveritySchema = z.enum(['low', 'medium', 'high', 'critical']).default('medium');
+
+export type ErrorType = z.infer<typeof errorTypeSchema>;
+export type ErrorSeverity = z.infer<typeof errorSeveritySchema>;

@@ -1,9 +1,11 @@
 import { execFileSync, execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import ora from 'ora';
+
 import { normalizeError } from '@heyclaude/shared-runtime';
+import ora from 'ora';
+
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
 import { ensureEnvVars } from '../toolkit/env.js';
 import { logger } from '../toolkit/logger.js';
@@ -15,15 +17,15 @@ import { logger } from '../toolkit/logger.js';
 const ROOT = fileURLToPath(new URL('../../../../', import.meta.url));
 
 // Output files
-const SCHEMA_FILE = join(ROOT, 'apps/edge/schema.sql');
-const TYPES_FILE = join(ROOT, 'packages/database-types/src/index.ts');
+const SCHEMA_FILE = path.join(ROOT, 'apps/edge/schema.sql');
+const TYPES_FILE = path.join(ROOT, 'packages/database-types/src/index.ts');
 
 const DEFAULT_SCHEMA = 'public';
 
 interface PackageBuildConfig {
+  description: string;
   name: string;
   tsconfigPath: string;
-  description: string;
 }
 
 const PACKAGE_BUILDS: readonly PackageBuildConfig[] = [
@@ -48,7 +50,7 @@ const PACKAGE_BUILDS: readonly PackageBuildConfig[] = [
  * Comprehensive schema query covering all database objects
  */
 function buildSchemaQuery(schema: string): string {
-  const safeSchema = schema.replace(/'/g, "''");
+  const safeSchema = schema.replaceAll('\'', "''");
   return `
     -- Table columns
     SELECT 'table_column' as object_type, table_name, column_name, data_type, is_nullable, column_default, NULL as definition
@@ -101,25 +103,25 @@ function buildSchemaQuery(schema: string): string {
 // ============================================================================
 
 interface StepResult {
-  step: string;
-  success: boolean;
-  skipped: boolean;
   duration_ms: number;
   reason?: string;
+  skipped: boolean;
+  step: string;
+  success: boolean;
 }
 
 interface EnvConfig {
-  projectId: string | null;
-  dbUrl: string | null;
+  dbUrl: null | string;
+  projectId: null | string;
 }
 
-const schemaHashCache = new Map<string, string | null>();
+const schemaHashCache = new Map<string, null | string>();
 
 // ============================================================================
 // Shared Utilities
 // ============================================================================
 
-function requireEnvVar(value: string | null, name: string): string {
+function requireEnvVar(value: null | string, name: string): string {
   if (!value) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
@@ -144,7 +146,7 @@ function formatDuration(ms: number): string {
 
 function writeReport(reportPath: string, data: unknown): void {
   try {
-    writeFileSync(reportPath, JSON.stringify(data, null, 2), 'utf-8');
+    writeFileSync(reportPath, JSON.stringify(data, null, 2), 'utf8');
     logger.info(`📝 Report written to ${reportPath}`);
   } catch (error) {
     logger.warn(`Failed to write report to ${reportPath}: ${(error as Error).message}`, {
@@ -153,7 +155,7 @@ function writeReport(reportPath: string, data: unknown): void {
   }
 }
 
-function getOptionValue(args: string[], flag: string): string | null {
+function getOptionValue(args: string[], flag: string): null | string {
   const index = args.indexOf(flag);
   if (index === -1) return null;
   const value = args[index + 1];
@@ -163,11 +165,11 @@ function getOptionValue(args: string[], flag: string): string | null {
   return value;
 }
 
-function calculateSchemaHash(dbUrl: string, schema: string): string | null {
+function calculateSchemaHash(dbUrl: string, schema: string): null | string {
   try {
-    const query = buildSchemaQuery(schema).replace(/\n/g, ' ');
+    const query = buildSchemaQuery(schema).replaceAll('\n', ' ');
     const result = execFileSync('psql', ['-d', dbUrl, '-c', query, '-t', '-A'], {
-      encoding: 'utf-8',
+      encoding: 'utf8',
       stdio: 'pipe',
     });
 
@@ -182,7 +184,7 @@ function calculateSchemaHash(dbUrl: string, schema: string): string | null {
 }
 
 // Cache schema hash to avoid redundant queries
-function getSchemaHash(schema: string, envConfig: EnvConfig, forceRefresh = false): string | null {
+function getSchemaHash(schema: string, envConfig: EnvConfig, forceRefresh = false): null | string {
   if (!forceRefresh && schemaHashCache.has(schema)) {
     return schemaHashCache.get(schema) ?? null;
   }
@@ -203,12 +205,12 @@ function getSchemaHash(schema: string, envConfig: EnvConfig, forceRefresh = fals
 // ============================================================================
 
 function generateSchemaDump(params: {
-  isForce: boolean;
-  cachedHash?: string | null | undefined;
-  schema: string;
+  cachedHash?: null | string | undefined;
   dbUrl: string;
   dryRun: boolean;
   envConfig: EnvConfig;
+  isForce: boolean;
+  schema: string;
 }): StepResult {
   const { isForce, cachedHash, schema, dbUrl, dryRun, envConfig } = params;
   const startTime = performance.now();
@@ -225,7 +227,7 @@ function generateSchemaDump(params: {
     if (!isForce) {
       spinner.start('Checking for schema changes...');
       // OPTIMIZATION: Use cached hash if provided (avoids redundant database query)
-      const currentHash = cachedHash !== undefined ? cachedHash : getSchemaHash(schema, envConfig);
+      const currentHash = cachedHash === undefined ? getSchemaHash(schema, envConfig) : cachedHash;
 
       if (currentHash && !hasHashChanged(`schema-dump:${schema}`, currentHash)) {
         spinner.info('Schema unchanged - skipping dump');
@@ -250,11 +252,11 @@ function generateSchemaDump(params: {
     } else {
       const output = execFileSync('npx', dumpArgs, {
         cwd: ROOT,
-        encoding: 'utf-8',
+        encoding: 'utf8',
         stdio: 'pipe',
       });
 
-      writeFileSync(SCHEMA_FILE, output, 'utf-8');
+      writeFileSync(SCHEMA_FILE, output, 'utf8');
 
       // Validate
       if (!(output.includes('CREATE TABLE') || output.includes('CREATE MATERIALIZED VIEW'))) {
@@ -310,12 +312,12 @@ function generateSchemaDump(params: {
 // ============================================================================
 
 function generateTypes(params: {
-  isForce: boolean;
-  cachedHash?: string | null | undefined;
-  schema: string;
-  projectId: string;
+  cachedHash?: null | string | undefined;
   dryRun: boolean;
   envConfig: EnvConfig;
+  isForce: boolean;
+  projectId: string;
+  schema: string;
 }): StepResult {
   const { isForce, cachedHash, schema, projectId, dryRun, envConfig } = params;
   const startTime = performance.now();
@@ -332,7 +334,7 @@ function generateTypes(params: {
     if (!isForce) {
       spinner.start('Checking for schema changes...');
       // OPTIMIZATION: Use cached hash if provided (avoids redundant database query)
-      const currentHash = cachedHash !== undefined ? cachedHash : getSchemaHash(schema, envConfig);
+      const currentHash = cachedHash === undefined ? getSchemaHash(schema, envConfig) : cachedHash;
 
       if (currentHash && !hasHashChanged(`db-schema:${schema}`, currentHash)) {
         spinner.info('Schema unchanged - skipping type generation');
@@ -367,11 +369,11 @@ function generateTypes(params: {
       logger.info(`Would run: ${typeCommandStr}`);
     } else {
       output = execFileSync('npx', typeCommandArgs, {
-        encoding: 'utf-8',
+        encoding: 'utf8',
         stdio: 'pipe',
       });
 
-      writeFileSync(TYPES_FILE, output, 'utf-8');
+      writeFileSync(TYPES_FILE, output, 'utf8');
 
       logger.info('🛠️  Emitting declaration artifacts (packages/database-types/dist)...', {
         script: 'sync-database-schema',
@@ -432,8 +434,8 @@ function generateTypes(params: {
 }
 
 function runPackageBuilds(params: {
-  packages: readonly PackageBuildConfig[];
   dryRun: boolean;
+  packages: readonly PackageBuildConfig[];
 }): StepResult {
   const { packages, dryRun } = params;
   const startTime = performance.now();
@@ -561,8 +563,8 @@ export async function runSyncDb() {
   await ensureEnvVars(['SUPABASE_PROJECT_ID', 'POSTGRES_URL_NON_POOLING']);
 
   const envConfig: EnvConfig = {
-    projectId: process.env['SUPABASE_PROJECT_ID'] || null,
-    dbUrl: process.env['POSTGRES_URL_NON_POOLING'] || null,
+    projectId: process.env['SUPABASE_PROJECT_ID'] ?? null,
+    dbUrl: process.env['POSTGRES_URL_NON_POOLING'] ?? null,
   };
 
   const projectId =
@@ -615,7 +617,7 @@ export async function runSyncDb() {
     }
 
     // OPTIMIZATION: Single schema hash query for all checks
-    let cachedSchemaHashForRun: string | null | undefined;
+    let cachedSchemaHashForRun: null | string | undefined;
 
     if (!isForce && effectiveEnvConfig.dbUrl) {
       if (runDump && runTypes) {
@@ -655,7 +657,7 @@ export async function runSyncDb() {
           envConfig: effectiveEnvConfig,
         })
       );
-      const dumpResult = results[results.length - 1];
+      const dumpResult = results.at(-1);
       if (!dumpResult?.success) {
         throw new Error('Schema dump failed - aborting');
       }
@@ -672,7 +674,7 @@ export async function runSyncDb() {
           envConfig: effectiveEnvConfig,
         })
       );
-      const typesResult = results[results.length - 1];
+      const typesResult = results.at(-1);
       if (!typesResult?.success) {
         throw new Error('Type generation failed - aborting');
       }
@@ -685,7 +687,7 @@ export async function runSyncDb() {
           dryRun,
         })
       );
-      const packageBuildResult = results[results.length - 1];
+      const packageBuildResult = results.at(-1);
       if (!packageBuildResult?.success) {
         throw new Error('Package builds failed - aborting');
       }
@@ -711,7 +713,7 @@ export async function runSyncDb() {
 
     const summaryRows = results.map((result) => ({
       step: result.step,
-      status: result.skipped ? 'SKIPPED' : result.success ? 'SUCCESS' : 'FAILED',
+      status: result.skipped ? 'SKIPPED' : (result.success ? 'SUCCESS' : 'FAILED'),
       duration: result.duration_ms > 0 ? `${result.duration_ms}ms` : '—',
       notes: result.reason ?? '',
     }));
@@ -736,12 +738,11 @@ export async function runSyncDb() {
         })
         .join('  |  ');
 
-    const headerLine = formatRow(
-      summaryColumns.reduce<Record<string, string>>((acc, col) => {
-        acc[col.key] = col.label;
-        return acc;
-      }, {})
-    );
+    const headerRecord: Record<string, string> = {};
+    for (const col of summaryColumns) {
+      headerRecord[col.key] = col.label;
+    }
+    const headerLine = formatRow(headerRecord);
     const separatorLine = summaryColumns
       .map((_, idx) => ''.padEnd(colWidths[idx] ?? 0, '-'))
       .join('--+--');

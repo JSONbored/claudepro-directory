@@ -6,7 +6,7 @@
  */
 
 import { ImageResponse } from 'https://deno.land/x/og_edge@0.0.4/mod.ts';
-import React from 'npm:react@18.3.1';
+import React from 'react';
 import { publicCorsHeaders, jsonResponse } from '@heyclaude/edge-runtime/utils/http.ts';
 import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
 import { uploadObject } from '@heyclaude/edge-runtime/utils/storage/upload.ts';

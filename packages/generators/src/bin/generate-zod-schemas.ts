@@ -7,8 +7,8 @@ const args = process.argv.slice(2);
 // Usage: heyclaude-generate-zod table1 table2 ...
 const targetTables = args.length > 0 ? args : undefined;
 
-runGenerateZodSchemas(targetTables).catch((err) => {
-  const errorObj = err instanceof Error ? err : new Error(String(err));
+runGenerateZodSchemas(targetTables).catch((error) => {
+  const errorObj = error instanceof Error ? error : new Error(String(error));
   logger.error('Generate Zod schemas error', errorObj, { targetTables });
   process.exit(1);
 });

@@ -7,18 +7,18 @@ import { createUtilityContext, logError, logInfo, logWarn } from './logging.ts';
 
 export interface BatchProcessOptions<T> {
   concurrency?: number;
+  onError?: (item: T, error: unknown, attempt: number) => void;
+  onProgress?: (processed: number, total: number, failed: number) => void;
   retries?: number;
   retryDelayMs?: number;
-  onProgress?: (processed: number, total: number, failed: number) => void;
-  onError?: (item: T, error: unknown, attempt: number) => void;
 }
 
 export interface BatchProcessResult<T> {
-  success: T[];
-  failed: Array<{ item: T; error: unknown }>;
-  total: number;
-  successCount: number;
+  failed: Array<{ error: unknown; item: T }>;
   failedCount: number;
+  success: T[];
+  successCount: number;
+  total: number;
 }
 
 /**
@@ -44,7 +44,7 @@ export async function batchProcess<T, R>(
   logInfo('Starting batch processing', logContext);
 
   const success: T[] = [];
-  const failed: Array<{ item: T; error: unknown }> = [];
+  const failed: Array<{ error: unknown; item: T }> = [];
   let processed = 0;
 
   // Process items with concurrency limit
@@ -70,12 +70,13 @@ export async function batchProcess<T, R>(
           onError(item, error, attempt);
         }
 
-        const logContext = createUtilityContext('batch-processor', 'item-error', {
+        logWarn('Item processing failed, retrying', {
+          ...logContext,
+          operation: 'item-error',
           attempt,
-          total_retries: retries,
           item_index: items.indexOf(item),
+          total_retries: retries,
         });
-        logWarn('Item processing failed, retrying', logContext);
 
         // Wait before retry (exponential backoff)
         if (attempt <= retries) {
@@ -86,12 +87,13 @@ export async function batchProcess<T, R>(
     }
 
     // All retries failed
-    const logContext = createUtilityContext('batch-processor', 'item-failed', {
+    await logError('Item processing failed after all retries', {
+      ...logContext,
+      operation: 'item-failed',
       item_index: items.indexOf(item),
       total_retries: retries,
-    });
-    await logError('Item processing failed after all retries', logContext, lastError);
-    failed.push({ item, error: lastError });
+    }, lastError);
+    failed.push({ error: lastError, item });
     processed++;
     if (onProgress) {
       onProgress(processed, items.length, failed.length);
@@ -105,7 +107,7 @@ export async function batchProcess<T, R>(
   }
 
   for (const batch of batches) {
-    await Promise.all(batch.map(processItem));
+    await Promise.all(batch.map((item) => processItem(item)));
   }
 
   const result = {
