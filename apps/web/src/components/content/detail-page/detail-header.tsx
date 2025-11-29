@@ -8,7 +8,7 @@ import type {
   ContentItem,
   UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
-import { Breadcrumbs } from '@/src/components/core/navigation/breadcrumbs';
+import { Breadcrumbs } from '@heyclaude/web-runtime/ui';
 import { DetailHeaderActions, type SerializableAction } from './detail-header-actions';
 
 export interface DetailHeaderProps {

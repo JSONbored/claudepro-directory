@@ -11,9 +11,13 @@
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { z } from 'zod';
 
-import { GENERATED_CONFIG } from '../../config/app-config.ts';
 import { SOCIAL_LINKS } from '../../config/social-links.ts';
 import  { type SocialLinkKey } from '../../config/social-links.ts';
+import {
+  
+  PAGINATION_CONFIG,
+  UI_ANIMATION,
+} from '../../config/unified-config.ts';
 
 /**
  * Application Information
@@ -110,13 +114,19 @@ export const GUIDE_CATEGORIES = {
  * UI Constants
  * Note: Breakpoints are in ui-constants.ts for consistency
  */
-export const UI_CONFIG = GENERATED_CONFIG.ui_config;
+export const UI_CONFIG = {
+  animation: {
+    easing: UI_ANIMATION.easing,
+    duration: UI_ANIMATION.duration,
+  },
+  pagination: PAGINATION_CONFIG,
+} as const;
 
 /**
- * Date & Version Configuration - Database-First
- * Loads from app_settings table with hardcoded fallbacks
+ * Date & Version Configuration
+ * From unified-config.ts (single source of truth)
  */
-export const DATE_CONFIG = GENERATED_CONFIG.date_config;
+
 
 /**
  * Analytics Configuration
@@ -233,3 +243,4 @@ export {SOCIAL_LINKS} from '../../config/social-links.ts';
 export function getSocialLink(key: SocialLinkKey): string | undefined {
   return SOCIAL_LINKS[key];
 }
+export {DATE_CONFIG} from '../../config/unified-config.ts';

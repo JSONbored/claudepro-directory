@@ -1,7 +1,6 @@
 import 'server-only';
 
-// Use static pricing config
-import { PRICING_CONFIG_DEFAULTS } from '../feature-flags/defaults.ts';
+import { PRICING_CONFIG } from '../config/unified-config.ts';
 
 export interface PartnerPricing {
   jobs: {
@@ -20,24 +19,25 @@ export interface PartnerPricing {
   };
 }
 
+/**
+ * Get partner pricing configuration
+ * From unified-config.ts (single source of truth)
+ */
 export function getPartnerPricing(): PartnerPricing {
-  // Get pricing config from static defaults
-  const config = PRICING_CONFIG_DEFAULTS;
-
   return {
     jobs: {
-      regular: config['pricing.jobs.regular'],
-      discounted: config['pricing.jobs.discounted'],
-      durationDays: config['pricing.jobs.duration_days'],
+      regular: PRICING_CONFIG['jobs.regular'],
+      discounted: PRICING_CONFIG['jobs.discounted'],
+      durationDays: PRICING_CONFIG['jobs.duration_days'],
     },
     sponsored: {
-      regular: config['pricing.sponsored.regular'],
-      discounted: config['pricing.sponsored.discounted'],
+      regular: PRICING_CONFIG['sponsored.regular'],
+      discounted: PRICING_CONFIG['sponsored.discounted'],
     },
     launch: {
-      discountPercent: config['pricing.launch_discount_percent'],
-      enabled: config['pricing.launch_discount_enabled'],
-      endDate: config['pricing.launch_discount_end_date'],
+      discountPercent: PRICING_CONFIG.launch_discount_percent,
+      enabled: PRICING_CONFIG.launch_discount_enabled,
+      endDate: PRICING_CONFIG.launch_discount_end_date,
     },
   };
 }

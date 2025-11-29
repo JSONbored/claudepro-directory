@@ -4,43 +4,87 @@
  * Wraps usePulse() for form-specific event tracking.
  * Tracks all form interactions for analytics and funnel optimization.
  *
- * Usage:
+ * @example
  * ```tsx
- * const formTracking = useFormTracking();
- * formTracking.trackStart('agents');
- * formTracking.trackStepCompleted(2, 'basic_info');
+ * function SubmissionWizard() {
+ *   const formTracking = useFormTracking();
+ *
+ *   useEffect(() => {
+ *     formTracking.trackStart('agents');
+ *   }, []);
+ *
+ *   const handleStepComplete = async (step: number) => {
+ *     await formTracking.trackStepCompleted(step, 'basic_info');
+ *   };
+ *
+ *   return <form>...</form>;
+ * }
  * ```
+ *
+ * @module web-runtime/hooks/use-form-tracking
  */
 
-import { usePulse } from '@heyclaude/web-runtime/hooks';
-import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import { usePulse } from './use-pulse.ts';
+import type { SubmissionContentType } from '../types/component.types.ts';
 import { useCallback, useMemo } from 'react';
 
 /**
- * Form tracking event metadata
+ * Metadata for form tracking events
  */
 export interface FormTrackingMetadata {
+  /** Type of submission being tracked */
   submission_type?: SubmissionContentType;
+  /** Current step number */
   step?: number;
+  /** Name of the current step */
   step_name?: string;
+  /** Name of the field being interacted with */
   field_name?: string;
+  /** ID of applied template */
   template_id?: string;
+  /** Name of applied template */
   template_name?: string;
+  /** Quality score of submission */
   quality_score?: number;
+  /** List of validation errors */
   validation_errors?: string[];
+  /** Time spent on current step in ms */
   time_spent?: number;
+  /** Additional custom metadata */
   [key: string]: unknown;
 }
 
 /**
- * Form tracking hook
+ * Return type for useFormTracking hook
  */
-export function useFormTracking() {
+export interface UseFormTrackingReturn {
+  /** Track when form is started */
+  trackStart: (submissionType: SubmissionContentType) => Promise<void>;
+  /** Track when a step is completed */
+  trackStepCompleted: (step: number, stepName: string, metadata?: FormTrackingMetadata) => Promise<void>;
+  /** Track when a field receives focus */
+  trackFieldFocused: (fieldName: string, metadata?: FormTrackingMetadata) => Promise<void>;
+  /** Track when a template is selected */
+  trackTemplateSelected: (templateId: string, templateName: string, submissionType: SubmissionContentType) => Promise<void>;
+  /** Track when form is abandoned */
+  trackAbandoned: (step: number, stepName: string, metadata?: FormTrackingMetadata) => Promise<void>;
+  /** Track when form is submitted */
+  trackSubmitted: (submissionType: SubmissionContentType, metadata?: FormTrackingMetadata) => Promise<void>;
+  /** Track validation errors */
+  trackValidationError: (fieldName: string, errorMessage: string, metadata?: FormTrackingMetadata) => Promise<void>;
+  /** Track when draft is saved */
+  trackDraftSaved: (metadata?: FormTrackingMetadata) => Promise<void>;
+  /** Track when draft is loaded */
+  trackDraftLoaded: (metadata?: FormTrackingMetadata) => Promise<void>;
+}
+
+/**
+ * Hook for tracking form interactions
+ * @returns Object with tracking functions for various form events
+ */
+export function useFormTracking(): UseFormTrackingReturn {
   const pulse = usePulse();
 
-  /**
-   * Track form started
-   */
   const trackStart = useCallback(
     async (submissionType: SubmissionContentType) => {
       await pulse.click({
@@ -56,9 +100,6 @@ export function useFormTracking() {
     [pulse]
   );
 
-  /**
-   * Track step completed
-   */
   const trackStepCompleted = useCallback(
     async (step: number, stepName: string, metadata?: FormTrackingMetadata) => {
       await pulse.click({
@@ -76,9 +117,6 @@ export function useFormTracking() {
     [pulse]
   );
 
-  /**
-   * Track field focused
-   */
   const trackFieldFocused = useCallback(
     async (fieldName: string, metadata?: FormTrackingMetadata) => {
       await pulse.click({
@@ -95,9 +133,6 @@ export function useFormTracking() {
     [pulse]
   );
 
-  /**
-   * Track template selected
-   */
   const trackTemplateSelected = useCallback(
     async (templateId: string, templateName: string, submissionType: SubmissionContentType) => {
       await pulse.click({
@@ -115,9 +150,6 @@ export function useFormTracking() {
     [pulse]
   );
 
-  /**
-   * Track form abandoned
-   */
   const trackAbandoned = useCallback(
     async (step: number, stepName: string, metadata?: FormTrackingMetadata) => {
       await pulse.click({
@@ -135,9 +167,6 @@ export function useFormTracking() {
     [pulse]
   );
 
-  /**
-   * Track form submitted
-   */
   const trackSubmitted = useCallback(
     async (submissionType: SubmissionContentType, metadata?: FormTrackingMetadata) => {
       await pulse.click({
@@ -154,9 +183,6 @@ export function useFormTracking() {
     [pulse]
   );
 
-  /**
-   * Track validation error
-   */
   const trackValidationError = useCallback(
     async (fieldName: string, errorMessage: string, metadata?: FormTrackingMetadata) => {
       await pulse.click({
@@ -174,9 +200,6 @@ export function useFormTracking() {
     [pulse]
   );
 
-  /**
-   * Track draft saved
-   */
   const trackDraftSaved = useCallback(
     async (metadata?: FormTrackingMetadata) => {
       await pulse.click({
@@ -192,9 +215,6 @@ export function useFormTracking() {
     [pulse]
   );
 
-  /**
-   * Track draft loaded
-   */
   const trackDraftLoaded = useCallback(
     async (metadata?: FormTrackingMetadata) => {
       await pulse.click({
@@ -237,7 +257,22 @@ export function useFormTracking() {
 }
 
 /**
- * Track time spent on a step
+ * Hook for tracking time spent on form steps
+ *
+ * @example
+ * ```tsx
+ * function WizardStep() {
+ *   const timer = useStepTimer();
+ *   const formTracking = useFormTracking();
+ *
+ *   const handleNext = async () => {
+ *     await formTracking.trackStepCompleted(1, 'basic_info', {
+ *       time_spent: timer.getElapsed(),
+ *     });
+ *     timer.reset();
+ *   };
+ * }
+ * ```
  */
 export function useStepTimer() {
   const startTimeRef = useMemo(() => ({ current: Date.now() }), []);

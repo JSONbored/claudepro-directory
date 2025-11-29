@@ -15,13 +15,13 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { getFormConfig } from '@heyclaude/web-runtime';
+import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import {
   createCompany,
   updateCompany,
   uploadCompanyLogoAction,
 } from '@heyclaude/web-runtime/actions';
-import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
+import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useFormSubmit, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
@@ -29,7 +29,7 @@ import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useId, useState } from 'react';
-import { FormField } from '@/src/components/core/forms/form-field-wrapper';
+import { FormField } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Card,
@@ -105,19 +105,10 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     defaultRethrow: false,
   });
 
-  // Load form validation config from static defaults on mount
+  // Load form validation config from static config on mount
   useEffect(() => {
-    getFormConfig({})
-      .then((result) => {
-        if (!result?.data) return;
-        const config = result.data;
-        const maxMB = config['form.max_file_size_mb'];
-        setMaxFileSize(maxMB * 1024 * 1024);
-        setMaxDimension(config['form.max_image_dimension_px']);
-      })
-      .catch((error: unknown) => {
-        logClientWarn('CompanyForm: failed to load form config', error, 'CompanyForm.loadConfig');
-      });
+    setMaxFileSize(FORM_CONFIG.max_file_size_mb * 1024 * 1024);
+    setMaxDimension(FORM_CONFIG.max_image_dimension_px);
   }, []);
 
   const handleLogoUpload = async (file: File) => {

@@ -10,7 +10,7 @@ import { InlineSpinner } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 import { Input } from '@heyclaude/web-runtime/ui';
 import { useConfetti } from '@heyclaude/web-runtime/hooks';
-import { useNewsletter } from '@/src/hooks/use-newsletter';
+import { useNewsletter } from '@heyclaude/web-runtime/hooks';
 
 export interface NewsletterFormProps {
   source: Database['public']['Enums']['newsletter_source'];

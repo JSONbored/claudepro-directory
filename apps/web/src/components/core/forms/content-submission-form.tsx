@@ -55,10 +55,10 @@ type MergedTemplateItem = ContentTemplateItem & {
     ? ContentTemplateItem['template_data']
     : Record<string, unknown>);
 
+import { FormSectionCard } from '@heyclaude/web-runtime/ui';
 import { DuplicateWarning } from './duplicate-warning';
 import { ContentTypeFieldRenderer } from './dynamic-form-field';
 import { ExamplesArrayInput } from './examples-array-input';
-import { FormSectionCard } from './form-section-card';
 import { TemplateSelector } from './template-selector';
 
 /**

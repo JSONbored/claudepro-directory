@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@heyclaude/web-runtime/ui';
-import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
+import { useUnifiedSearch } from '@heyclaude/web-runtime/hooks';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;

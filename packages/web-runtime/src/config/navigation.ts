@@ -1,5 +1,31 @@
 /**
- * Type-safe navigation configuration for all site navigation links
+ * Navigation Configuration
+ *
+ * Type-safe navigation configuration for all site navigation links.
+ * Provides primary navigation, secondary navigation groups, and action links.
+ *
+ * @example
+ * ```tsx
+ * import { PRIMARY_NAVIGATION, isActivePath } from '@heyclaude/web-runtime/config/navigation';
+ *
+ * function Nav({ currentPath }: { currentPath: string }) {
+ *   return (
+ *     <nav>
+ *       {PRIMARY_NAVIGATION.map((link) => (
+ *         <a
+ *           key={link.href}
+ *           href={link.href}
+ *           className={isActivePath(link.href, currentPath) ? 'active' : ''}
+ *         >
+ *           {link.label}
+ *         </a>
+ *       ))}
+ *     </nav>
+ *   );
+ * }
+ * ```
+ *
+ * @module web-runtime/config/navigation
  */
 
 import {
@@ -18,22 +44,35 @@ import {
   TrendingUp,
   Users,
   Zap,
-} from '@heyclaude/web-runtime/icons';
+} from '../icons.tsx';
 
+/** A single navigation link with optional icon and children */
 export interface NavigationLink {
+  /** Display label for the link */
   label: string;
+  /** URL path or href */
   href: string;
+  /** Optional Lucide icon component */
   icon?: LucideIcon;
+  /** Optional description for tooltips/dropdowns */
   description?: string;
+  /** Whether to show a "new" badge */
   isNew?: boolean;
+  /** Whether link opens in new tab */
   external?: boolean;
+  /** Nested navigation links (for dropdowns) */
   children?: NavigationLink[];
 }
 
+/** A group of navigation links with a heading */
 export interface NavigationGroup {
+  /** Section heading */
   heading: string;
+  /** Links in this group */
   links: NavigationLink[];
 }
+
+/** Primary navigation links shown in main nav */
 export const PRIMARY_NAVIGATION: NavigationLink[] = [
   {
     label: 'Configs',
@@ -118,6 +157,7 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
   },
 ];
 
+/** Secondary navigation groups shown in footer/sidebar */
 export const SECONDARY_NAVIGATION: NavigationGroup[] = [
   {
     heading: 'Discover',
@@ -160,6 +200,7 @@ export const SECONDARY_NAVIGATION: NavigationGroup[] = [
   },
 ];
 
+/** Action links (CTAs) */
 export const ACTION_LINKS: NavigationLink[] = [
   {
     label: 'Create',
@@ -169,21 +210,41 @@ export const ACTION_LINKS: NavigationLink[] = [
   },
 ];
 
+/**
+ * Get all navigation links flattened into a single array
+ * @returns All primary, secondary, and action links
+ */
 export function getAllNavigationLinks(): NavigationLink[] {
   const secondaryLinks = SECONDARY_NAVIGATION.flatMap((group) => group.links);
   return [...PRIMARY_NAVIGATION, ...secondaryLinks, ...ACTION_LINKS];
 }
 
+/**
+ * Find a navigation link by its path
+ * @param path - The URL path to search for
+ * @returns The matching NavigationLink or undefined
+ */
 export function getNavigationLinkByPath(path: string): NavigationLink | undefined {
   return getAllNavigationLinks().find((link) => link.href === path);
 }
 
+/**
+ * Check if a link path matches the current path
+ * @param linkPath - The navigation link's path
+ * @param currentPath - The current URL path
+ * @returns True if the link should be marked as active
+ */
 export function isActivePath(linkPath: string, currentPath: string): boolean {
   if (linkPath === '/' && currentPath === '/') return true;
   if (linkPath !== '/' && currentPath.startsWith(linkPath)) return true;
   return false;
 }
 
+/**
+ * Generate breadcrumb trail for a given pathname
+ * @param pathname - The current URL pathname
+ * @returns Array of NavigationLinks representing the breadcrumb trail
+ */
 export function getBreadcrumbTrail(pathname: string): NavigationLink[] {
   const breadcrumbs: NavigationLink[] = [{ label: 'Home', href: '/' }];
   if (pathname === '/') return breadcrumbs;

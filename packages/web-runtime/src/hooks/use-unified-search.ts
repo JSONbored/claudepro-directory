@@ -1,50 +1,89 @@
 'use client';
 
 /**
- * Unified Search Hook (SHA-2087)
+ * Unified Search Hook
  *
- * Consolidates search and filter logic shared across:
- * - UnifiedSearch component
- * - FloatingSearchSidebar component
- * - ContentSearchClient component
+ * Consolidates search and filter logic shared across search interfaces.
+ * Provides consistent search/filter state management with localStorage persistence.
  *
- * Benefits:
+ * Features:
  * - Single source of truth for search/filter state management
- * - ~120 lines of duplicated code eliminated
- * - Consistent behavior across all search interfaces
- * - Easier to maintain and test
- * - User preferences persisted via localStorage
+ * - User sort preferences persisted via localStorage
+ * - Cross-tab synchronization
+ * - Active filter counting
+ * - Tag toggle functionality
+ *
+ * @example
+ * ```tsx
+ * function SearchPage() {
+ *   const {
+ *     searchQuery,
+ *     filters,
+ *     handleSearch,
+ *     handleFiltersChange,
+ *     toggleTag,
+ *     activeFilterCount,
+ *   } = useUnifiedSearch({
+ *     initialSort: 'trending',
+ *     onSearchChange: (query) => console.log('Search:', query),
+ *   });
+ *
+ *   return (
+ *     <div>
+ *       <input value={searchQuery} onChange={(e) => handleSearch(e.target.value)} />
+ *       <span>Active filters: {activeFilterCount}</span>
+ *     </div>
+ *   );
+ * }
+ * ```
+ *
+ * @module web-runtime/hooks/use-unified-search
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { useLocalStorage } from '@heyclaude/web-runtime/hooks';
-import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
+import { useLocalStorage } from './use-local-storage.ts';
+import type { FilterState } from '../types/component.types.ts';
 import { useCallback, useState } from 'react';
 
+/** Options for useUnifiedSearch hook */
 export interface UseUnifiedSearchOptions {
+  /** Initial sort option */
   initialSort?: FilterState['sort'];
+  /** Callback when search query changes */
   onSearchChange?: (query: string) => void;
+  /** Callback when filters change */
   onFiltersChange?: (filters: FilterState) => void;
 }
 
+/** Return type for useUnifiedSearch hook */
 export interface UseUnifiedSearchReturn {
-  // Search state
+  /** Current search query */
   searchQuery: string;
+  /** Current filter state */
   filters: FilterState;
+  /** Whether filter panel is open */
   isFilterOpen: boolean;
-
-  // Filter state helpers
+  /** Number of active filters (excluding sort) */
   activeFilterCount: number;
-
-  // Handlers
+  /** Handle search query change */
   handleSearch: (query: string) => void;
+  /** Handle full filter state change */
   handleFiltersChange: (newFilters: FilterState) => void;
+  /** Handle individual filter field change */
   handleFilterChange: (key: keyof FilterState, value: FilterState[keyof FilterState]) => void;
+  /** Toggle a tag in the filters */
   toggleTag: (tag: string) => void;
+  /** Clear all filters (keeps sort preference) */
   clearFilters: () => void;
+  /** Set filter panel open state */
   setIsFilterOpen: (open: boolean) => void;
 }
 
+/**
+ * Hook for managing unified search and filter state
+ * @param options - Configuration options
+ * @returns Object with search/filter state and handlers
+ */
 export function useUnifiedSearch({
   initialSort = 'trending' as Database['public']['Enums']['sort_option'],
   onSearchChange,
@@ -78,7 +117,6 @@ export function useUnifiedSearch({
     return count;
   })();
 
-  // Handle search query change
   const handleSearch = useCallback(
     (query: string) => {
       setSearchQuery(query);
@@ -87,11 +125,9 @@ export function useUnifiedSearch({
     [onSearchChange]
   );
 
-  // Handle full filter state change
   const handleFiltersChange = useCallback(
     (newFilters: FilterState) => {
       setFilters(newFilters);
-      // Persist sort preference
       if (newFilters.sort) {
         setSavedSort(newFilters.sort);
       }
@@ -100,12 +136,10 @@ export function useUnifiedSearch({
     [onFiltersChange, setSavedSort]
   );
 
-  // Handle individual filter field change
   const handleFilterChange = useCallback(
     (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
       const newFilters = { ...filters, [key]: value };
       setFilters(newFilters);
-      // Persist sort preference
       if (key === 'sort' && value) {
         setSavedSort(value as Database['public']['Enums']['sort_option']);
       }
@@ -114,7 +148,6 @@ export function useUnifiedSearch({
     [filters, onFiltersChange, setSavedSort]
   );
 
-  // Toggle tag selection
   const toggleTag = useCallback(
     (tag: string) => {
       setFilters((prev: FilterState) => {
@@ -133,7 +166,6 @@ export function useUnifiedSearch({
     [onFiltersChange]
   );
 
-  // Clear all filters (keep sort)
   const clearFilters = useCallback(() => {
     const clearedFilters: FilterState = {
       sort: filters.sort || ('trending' as Database['public']['Enums']['sort_option']),

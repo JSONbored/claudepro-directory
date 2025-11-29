@@ -18,7 +18,7 @@ import {
   AnnouncementTag,
   AnnouncementTitle,
 } from '@heyclaude/web-runtime/ui';
-import { useAnnouncementDismissal } from '@/src/hooks/use-announcement-dismissal';
+import { useAnnouncementDismissal } from '@heyclaude/web-runtime/hooks';
 
 /**
  * Icon mapping for announcements

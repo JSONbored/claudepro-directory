@@ -13,7 +13,7 @@ import { authedAction } from './safe-action.ts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
-import type { CacheConfig, CacheInvalidateKey } from '../cache-config.ts';
+import type { CacheConfig, CacheInvalidateKey, CacheInvalidateKeyLegacy } from '../cache-config.ts';
 import { logger } from '../logger.ts';
 
 // Use enum values directly from @heyclaude/database-types Constants
@@ -62,7 +62,7 @@ async function invalidateUserCaches({
   userIds,
 }: {
   cacheConfig?: CacheConfig;
-  invalidateKeys?: CacheInvalidateKey[];
+  invalidateKeys?: (CacheInvalidateKey | CacheInvalidateKeyLegacy)[];
   extraTags?: string[];
   userIds?: Array<string | null | undefined>;
 }): Promise<void> {

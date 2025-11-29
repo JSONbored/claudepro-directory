@@ -21,7 +21,7 @@ import { useFormSubmit } from '@heyclaude/web-runtime/hooks';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { FormField } from '@/src/components/core/forms/form-field-wrapper';
+import { FormField } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 import { Checkbox } from '@heyclaude/web-runtime/ui';
 import { Label } from '@heyclaude/web-runtime/ui';

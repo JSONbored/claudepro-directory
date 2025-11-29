@@ -28,7 +28,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@heyclaude/web-runtime/ui';
-import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
+import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
 
 interface NavLinkProps {
   href: string;

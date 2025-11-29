@@ -6,13 +6,35 @@
  * Unified toggle/switch field component that consolidates Label + Switch + description patterns.
  * Reduces boilerplate code across forms and settings pages.
  *
- * Production Standards:
- * - Type-safe with comprehensive props interface
- * - Accessible with proper ARIA labels and ID binding
- * - Supports both controlled and uncontrolled states
- * - Consistent spacing and layout
- * - Optional description text for context
- * - Disabled state support
+ * @module web-runtime/ui/components/forms/toggle-field
+ *
+ * @example Basic usage
+ * ```tsx
+ * function SettingsForm() {
+ *   const [isPublic, setIsPublic] = useState(false);
+ *
+ *   return (
+ *     <ToggleField
+ *       label="Public profile"
+ *       description="Allow others to view your profile"
+ *       checked={isPublic}
+ *       onCheckedChange={setIsPublic}
+ *     />
+ *   );
+ * }
+ * ```
+ *
+ * @example With custom styling
+ * ```tsx
+ * <ToggleField
+ *   label="Email notifications"
+ *   description="Send me an email when someone follows me"
+ *   checked={followEmail}
+ *   onCheckedChange={setFollowEmail}
+ *   className="p-4 border rounded-lg"
+ *   labelClassName="font-semibold"
+ * />
+ * ```
  *
  * Pattern Consolidated:
  * Before (14 lines):
@@ -46,22 +68,14 @@
  *   }}
  * />
  * ```
- *
- * @module components/forms/utilities/toggle-field
  */
 
-import { cn } from '@heyclaude/web-runtime/ui';
 import { useId } from 'react';
-import { Label } from '@heyclaude/web-runtime/ui';
-import { Switch } from '@heyclaude/web-runtime/ui';
+import { cn } from '../../utils.ts';
+import { Label } from '../label.tsx';
+import { Switch } from '../switch.tsx';
 
-// =============================================================================
-// TYPES
-// =============================================================================
-
-/**
- * ToggleField component props
- */
+/** Props for ToggleField component */
 export interface ToggleFieldProps {
   /** Field label text */
   label: string;
@@ -85,43 +99,11 @@ export interface ToggleFieldProps {
   ariaLabel?: string;
 }
 
-// =============================================================================
-// COMPONENT
-// =============================================================================
-
 /**
- * ToggleField - Label + Switch + Description Pattern
+ * ToggleField Component
  *
- * Consolidates the common pattern of a toggle/switch with label and description text.
+ * Label + Switch + Description pattern consolidated into a single component.
  * Used for boolean settings, preferences, and form options.
- *
- * @example
- * ```tsx
- * function SettingsForm() {
- *   const [isPublic, setIsPublic] = useState(false);
- *
- *   return (
- *     <ToggleField
- *       label="Public profile"
- *       description="Allow others to view your profile"
- *       checked={isPublic}
- *       onCheckedChange={setIsPublic}
- *     />
- *   );
- * }
- * ```
- *
- * @example With custom styling
- * ```tsx
- * <ToggleField
- *   label="Email notifications"
- *   description="Send me an email when someone follows me"
- *   checked={followEmail}
- *   onCheckedChange={setFollowEmail}
- *   className="p-4 border rounded-lg"
- *   labelClassName="font-semibold"
- * />
- * ```
  */
 export function ToggleField({
   label,

@@ -1,15 +1,59 @@
 /**
- * useFieldHighlight Hook
+ * Field Highlight Hook
  *
- * Provides visual feedback when fields are auto-filled by templates.
+ * Provides visual feedback when fields are auto-filled or need attention.
  * Shows a subtle pulse/glow animation on affected fields.
+ *
+ * @example
+ * ```tsx
+ * function MyForm() {
+ *   const { highlightField, isHighlighted, getHighlightClasses } = useFieldHighlight();
+ *
+ *   const handleAutoFill = (fieldName: string) => {
+ *     // Auto-fill logic...
+ *     highlightField(fieldName);
+ *   };
+ *
+ *   return (
+ *     <input
+ *       name="email"
+ *       className={getHighlightClasses('email')}
+ *     />
+ *   );
+ * }
+ * ```
+ *
+ * @module web-runtime/hooks/use-field-highlight
  */
 
 import { useCallback, useState } from 'react';
 
-const HIGHLIGHT_DURATION = 2000; // 2 seconds
+/** Default duration for highlight animation in milliseconds */
+const HIGHLIGHT_DURATION = 2000;
 
-export function useFieldHighlight() {
+/** Return type for useFieldHighlight hook */
+export interface UseFieldHighlightReturn {
+  /** Highlight a single field */
+  highlightField: (fieldName: string) => void;
+  /** Highlight multiple fields at once */
+  highlightFields: (fieldNames: string[]) => void;
+  /** Check if a field is currently highlighted */
+  isHighlighted: (fieldName: string) => boolean;
+  /** Clear all highlights immediately */
+  clearHighlights: () => void;
+  /** Get Tailwind CSS classes for a highlighted field */
+  getHighlightClasses: (fieldName: string) => string;
+  /** Get inline styles for a highlighted field */
+  getHighlightStyles: (fieldName: string) => React.CSSProperties;
+  /** Number of currently highlighted fields */
+  highlightedFieldsCount: number;
+}
+
+/**
+ * Hook for managing field highlight animations
+ * @returns Object with highlight state and control functions
+ */
+export function useFieldHighlight(): UseFieldHighlightReturn {
   const [highlightedFields, setHighlightedFields] = useState<Map<string, number>>(new Map());
 
   /**
@@ -126,6 +170,7 @@ export function useFieldHighlight() {
 
 /**
  * Animation variants for motion components
+ * Use with framer-motion/motion for animated highlights
  */
 export const highlightAnimationVariants = {
   initial: { scale: 1, opacity: 1 },
@@ -145,7 +190,8 @@ export const highlightAnimationVariants = {
 };
 
 /**
- * Keyframes for CSS animation (if not using motion)
+ * CSS keyframes for field highlight animation
+ * Can be injected into a style tag or CSS file
  */
 export const highlightKeyframes = `
   @keyframes field-highlight {

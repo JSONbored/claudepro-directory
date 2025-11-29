@@ -1,52 +1,7 @@
 'use client';
 
-import { logger, normalizeError, ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
-import { useLocalStorage } from '@heyclaude/web-runtime/hooks';
-import { z } from 'zod';
-
 /**
- * Dismissal State Interface
- *
- * Stores dismissal information for each announcement by ID.
- * Includes timestamp for analytics and potential expiry logic.
- */
-interface DismissalState {
-  [announcementId: string]: {
-    /** Whether this announcement has been dismissed */
-    dismissed: boolean;
-    /** ISO timestamp when dismissal occurred */
-    timestamp: string;
-  };
-}
-
-/**
- * Dismissal State Schema (Zod)
- * Production-grade runtime validation for localStorage data
- */
-const dismissalStateSchema = z.record(
-  z.string(),
-  z.object({
-    dismissed: z.boolean(),
-    timestamp: z.string(),
-  })
-);
-
-/**
- * Return type for useAnnouncementDismissal hook
- */
-export interface UseAnnouncementDismissalReturn {
-  /** Whether this announcement has been dismissed */
-  isDismissed: boolean;
-  /** Function to dismiss this announcement */
-  dismiss: () => void;
-  /** Function to reset dismissal (for testing/debugging) */
-  reset: () => void;
-  /** Get the timestamp when this announcement was dismissed (null if not dismissed) */
-  getDismissalTime: () => string | null;
-}
-
-/**
- * useAnnouncementDismissal Hook
+ * Announcement Dismissal Hook
  *
  * Manages per-announcement dismissal state using localStorage.
  * Provides type-safe, persistent dismissal tracking with cross-tab synchronization.
@@ -58,9 +13,6 @@ export interface UseAnnouncementDismissalReturn {
  * - Timestamp tracking for analytics
  * - Reset capability for testing
  * - SSR-safe
- *
- * @param announcementId - Unique identifier for the announcement
- * @returns Object with dismissal state and control functions
  *
  * @example
  * ```tsx
@@ -78,7 +30,53 @@ export interface UseAnnouncementDismissalReturn {
  * }
  * ```
  *
- * @see Research Report: "shadcn Announcement Component Integration - Section 4.3"
+ * @module web-runtime/hooks/use-announcement-dismissal
+ */
+
+import { logger } from '../logger.ts';
+import { normalizeError } from '../errors.ts';
+import { ParseStrategy, safeParse } from '../data.ts';
+import { useLocalStorage } from './use-local-storage.ts';
+import { z } from 'zod';
+
+/**
+ * Dismissal state for all announcements
+ * Maps announcement IDs to their dismissal information
+ */
+interface DismissalState {
+  [announcementId: string]: {
+    /** Whether this announcement has been dismissed */
+    dismissed: boolean;
+    /** ISO timestamp when dismissal occurred */
+    timestamp: string;
+  };
+}
+
+/** Zod schema for validating dismissal state from localStorage */
+const dismissalStateSchema = z.record(
+  z.string(),
+  z.object({
+    dismissed: z.boolean(),
+    timestamp: z.string(),
+  })
+);
+
+/** Return type for useAnnouncementDismissal hook */
+export interface UseAnnouncementDismissalReturn {
+  /** Whether this announcement has been dismissed */
+  isDismissed: boolean;
+  /** Function to dismiss this announcement */
+  dismiss: () => void;
+  /** Function to reset dismissal (for testing/debugging) */
+  reset: () => void;
+  /** Get the timestamp when this announcement was dismissed (null if not dismissed) */
+  getDismissalTime: () => string | null;
+}
+
+/**
+ * Hook for managing announcement dismissal state
+ * @param announcementId - Unique identifier for the announcement
+ * @returns Object with dismissal state and control functions
  */
 export function useAnnouncementDismissal(announcementId: string): UseAnnouncementDismissalReturn {
   const { value, setValue } = useLocalStorage<DismissalState>('announcement-dismissals', {
@@ -86,15 +84,8 @@ export function useAnnouncementDismissal(announcementId: string): UseAnnouncemen
     syncAcrossTabs: true,
   });
 
-  /**
-   * Check if this specific announcement has been dismissed
-   */
   const isDismissed = value[announcementId]?.dismissed ?? false;
 
-  /**
-   * Dismiss this announcement
-   * Stores dismissal state with current timestamp
-   */
   const dismiss = () => {
     setValue({
       ...value,
@@ -105,20 +96,12 @@ export function useAnnouncementDismissal(announcementId: string): UseAnnouncemen
     });
   };
 
-  /**
-   * Reset dismissal for this announcement
-   * Useful for testing or allowing users to "unblock" announcements
-   */
   const reset = () => {
     const newValue = { ...value };
     delete newValue[announcementId];
     setValue(newValue);
   };
 
-  /**
-   * Get the timestamp when this announcement was dismissed
-   * @returns ISO timestamp string or null if not dismissed
-   */
   const getDismissalTime = (): string | null => {
     return value[announcementId]?.timestamp || null;
   };
@@ -132,10 +115,8 @@ export function useAnnouncementDismissal(announcementId: string): UseAnnouncemen
 }
 
 /**
- * Clear All Dismissals
- *
- * Utility function to clear all announcement dismissals.
- * Useful for testing or admin functions.
+ * Clear all announcement dismissals from localStorage
+ * Useful for testing or admin functions
  *
  * @example
  * ```tsx
@@ -163,10 +144,8 @@ export function clearAllAnnouncementDismissals(): void {
 }
 
 /**
- * Get Dismissal Analytics
- *
- * Retrieves all dismissal data for analytics purposes.
- * Returns map of announcement IDs to dismissal timestamps.
+ * Get dismissal analytics data from localStorage
+ * Returns map of announcement IDs to dismissal timestamps
  *
  * @returns Map of announcement IDs to dismissal information
  *
@@ -195,7 +174,6 @@ export function getAnnouncementDismissalAnalytics(): DismissalState {
     const stored = window.localStorage.getItem('announcement-dismissals');
     if (!stored) return {};
 
-    // Production-grade: safeParse with Zod validation
     return safeParse<DismissalState>(stored, dismissalStateSchema, {
       strategy: ParseStrategy.VALIDATED_JSON,
     });

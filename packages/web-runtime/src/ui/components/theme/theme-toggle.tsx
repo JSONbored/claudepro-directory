@@ -1,22 +1,5 @@
 'use client';
 
-import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
-import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
-import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
-import { useViewTransition } from '@heyclaude/web-runtime/hooks';
-import { Moon, Sun } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useEffect, useRef, useState } from 'react';
-import { Switch } from '@heyclaude/web-runtime/ui';
-
-/**
- * Type guard for theme validation
- * Replaces Zod schema for bundle size optimization
- */
-function isValidTheme(value: unknown): value is 'light' | 'dark' {
-  return value === 'light' || value === 'dark';
-}
-
 /**
  * Theme Toggle Component with Circle Blur Animation
  *
@@ -30,6 +13,48 @@ function isValidTheme(value: unknown): value is 'light' | 'dark' {
  * Animation:
  * - Chrome/Edge 111+: Circular blur expansion from click position
  * - Firefox/Safari: Instant theme change (no animation)
+ *
+ * @module web-runtime/ui/components/theme/theme-toggle
+ *
+ * @example Basic usage
+ * ```tsx
+ * <ThemeToggle />
+ * ```
+ *
+ * CSS Requirements:
+ * The consuming app should include view-transitions.css for animations:
+ * ```css
+ * ::view-transition-old(root),
+ * ::view-transition-new(root) {
+ *   animation: none;
+ *   mix-blend-mode: normal;
+ * }
+ * ```
+ */
+
+import { useEffect, useRef, useState } from 'react';
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
+import { logClientWarning } from '../../../errors.ts';
+import { logger } from '../../../logger.ts';
+import { getTimeoutConfig } from '../../../config/static-configs.ts';
+import { useViewTransition } from '../../../hooks/use-view-transition.ts';
+import { Moon, Sun } from '../../../icons.tsx';
+import { UI_CLASSES } from '../../constants.ts';
+import { Switch } from '../switch.tsx';
+
+/**
+ * Type guard for theme validation
+ * Replaces Zod schema for bundle size optimization
+ */
+function isValidTheme(value: unknown): value is 'light' | 'dark' {
+  return value === 'light' || value === 'dark';
+}
+
+/**
+ * ThemeToggle Component
+ *
+ * Sun/Moon toggle with View Transitions API support for
+ * smooth circular reveal animations when switching themes.
  */
 export function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
@@ -39,15 +64,12 @@ export function ThemeToggle() {
 
   // Load transition duration from config
   useEffect(() => {
-    getTimeoutConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
-        setTransitionMs(config['timeout.ui.transition_ms']);
-      })
-      .catch((error) => {
-        logClientWarning('ThemeToggle: failed to load transition config', error);
-      });
+    try {
+      const config = getTimeoutConfig();
+      setTransitionMs(config['timeout.ui.transition_ms']);
+    } catch (error) {
+      logClientWarning('ThemeToggle: failed to load transition config', error);
+    }
   }, []);
 
   useEffect(() => {

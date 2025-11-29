@@ -16,7 +16,7 @@ import { Star } from '@heyclaude/web-runtime/icons';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useId, useMemo, useState, useTransition } from 'react';
 import { CompanySelector } from '@/src/components/core/forms/company-selector';
-import { FormField } from '@/src/components/core/forms/form-field-wrapper';
+import { FormField } from '@heyclaude/web-runtime/ui';
 import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {

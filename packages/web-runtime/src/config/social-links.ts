@@ -1,6 +1,13 @@
-import { z } from 'zod';
+/**
+ * Social Links Configuration
+ *
+ * Re-exports social links from unified config with Zod validation.
+ *
+ * @module web-runtime/config/social-links
+ */
 
-import { GENERATED_CONFIG } from './app-config.ts';
+import { z } from 'zod';
+import { SOCIAL_LINKS as SOCIAL_LINKS_RAW } from './unified-config.ts';
 
 const socialLinksSchema = z.object({
   github: z.string().url(),
@@ -14,11 +21,8 @@ const socialLinksSchema = z.object({
   securityEmail: z.string().email(),
 });
 
-// Parse and validate social links from generated config
-// GENERATED_CONFIG.social_links is always defined in app-config.ts
-export const SOCIAL_LINKS = socialLinksSchema.parse(
-  GENERATED_CONFIG.social_links
-);
+/** Validated social links */
+export const SOCIAL_LINKS = socialLinksSchema.parse(SOCIAL_LINKS_RAW);
 
 export const SOCIAL_LINK_KEYS = [
   'github',

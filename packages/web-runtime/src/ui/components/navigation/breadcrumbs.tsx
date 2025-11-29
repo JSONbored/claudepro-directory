@@ -9,22 +9,53 @@
  * - Last item is non-interactive (current page)
  * - Supports truncation for long paths
  *
+ * @module web-runtime/ui/components/navigation/breadcrumbs
+ *
+ * @example Auto-generated from pathname
+ * ```tsx
+ * <Breadcrumbs />
+ * ```
+ *
+ * @example Custom items
+ * ```tsx
+ * <Breadcrumbs
+ *   items={[
+ *     { label: 'Home', href: '/' },
+ *     { label: 'Agents', href: '/agents' },
+ *     { label: 'My Agent', href: '/agents/my-agent' },
+ *   ]}
+ * />
+ * ```
+ *
+ * @example With category and current title
+ * ```tsx
+ * <Breadcrumbs
+ *   categoryLabel="MCP Servers"
+ *   currentTitle="Claude Desktop Config"
+ * />
+ * ```
+ *
  * Note: JSON-LD breadcrumb schema is handled separately by StructuredData component
  * using the database's build_breadcrumb_json_ld RPC function
  */
 
-import { ChevronRight, Home } from '@heyclaude/web-runtime/icons';
-import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
+import { ChevronRight, Home } from '../../../icons.tsx';
+import { cn } from '../../utils.ts';
+import { STATE_PATTERNS } from '../../constants.ts';
 
+/** Single breadcrumb item */
 export interface BreadcrumbItem {
+  /** Display label */
   label: string;
+  /** Link destination */
   href: string;
 }
 
-interface BreadcrumbsProps {
+/** Props for Breadcrumbs component */
+export interface BreadcrumbsProps {
   /** Custom breadcrumb items (overrides auto-generation) */
   items?: BreadcrumbItem[];
   /** Category label for content detail pages */
@@ -85,6 +116,12 @@ function generateBreadcrumbs(
   return items;
 }
 
+/**
+ * Breadcrumbs Component
+ *
+ * Renders navigation breadcrumbs with automatic path generation
+ * or custom items. Supports truncation for long paths.
+ */
 export function Breadcrumbs({
   items: customItems,
   categoryLabel,
@@ -105,7 +142,7 @@ export function Breadcrumbs({
   // Truncate if too many items
   const displayItems = useMemo(() => {
     if (items.length <= maxItems) return items;
-    
+
     // Guard against edge cases where maxItems < 3
     if (maxItems < 3) {
       // For maxItems=1, show only last item; for maxItems=2, show first and last

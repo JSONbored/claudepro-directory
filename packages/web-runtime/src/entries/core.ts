@@ -1,5 +1,45 @@
 export * from '../config/social-links.ts';
-export * from '../config/generated-config.ts';
+// Export from unified-config except SOCIAL_LINKS (already exported from social-links.ts with validation)
+export {
+  APP_CONFIG as UNIFIED_APP_CONFIG,
+  EXTERNAL_SERVICES as UNIFIED_EXTERNAL_SERVICES,
+  DATE_CONFIG,
+  CLAUDE_DESKTOP_PATHS,
+  UI_ANIMATION,
+  CONFETTI_CONFIG,
+  PAGINATION_CONFIG,
+  NAVIGATION_CONFIG,
+  BREAKPOINTS,
+  INFINITE_SCROLL_CONFIG,
+  COMPONENT_FLAGS,
+  FEATURE_FLAGS,
+  SECURITY_CONFIG as UNIFIED_SECURITY_CONFIG,
+  RATE_LIMIT_CONFIG,
+  ANALYTICS_CONFIG,
+  LOGGER_CONFIG,
+  UI_TIMEOUTS,
+  API_TIMEOUTS,
+  TEST_TIMEOUTS,
+  RETRY_CONFIG,
+  CACHE_TTL,
+  CACHE_BEHAVIOR,
+  CACHE_INVALIDATION,
+  QUEUE_CONFIG,
+  TOAST_MESSAGES,
+  EMAIL_SUBJECTS,
+  NEWSLETTER_CTA,
+  NEWSLETTER_BEHAVIOR,
+  PRICING_CONFIG,
+  FORM_CONFIG,
+  RECENTLY_VIEWED_CONFIG,
+  SEARCH_CONFIG,
+  HOMEPAGE_CONFIG,
+  SITEMAP_CONFIG,
+  LOCAL_STORAGE_PROHIBITED,
+  POLLING_CONFIG,
+  GENERATED_CONFIG,
+  type GeneratedConfig,
+} from '../config/unified-config.ts';
 export { APP_CONFIG, type AppConfig, SECURITY_CONFIG, type SecurityConfig, ROUTES, EXTERNAL_SERVICES, TIME_CONSTANTS } from '@heyclaude/shared-runtime';
 export * from '../logger.ts';
 export * from '../errors.ts';

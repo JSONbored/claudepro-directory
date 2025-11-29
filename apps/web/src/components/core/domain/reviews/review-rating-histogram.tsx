@@ -9,8 +9,8 @@ import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import {
   ChartContainer,
   HorizontalBarChart,
-} from '@/src/components/core/domain/charts/horizontal-bar-chart';
-import { StarDisplay } from '@/src/components/core/domain/reviews/shared/star-display';
+  StarDisplay,
+} from '@heyclaude/web-runtime/ui';
 import { Card } from '@heyclaude/web-runtime/ui';
 
 export function ReviewRatingHistogram({

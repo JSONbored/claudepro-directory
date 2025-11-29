@@ -4,7 +4,7 @@ import { unstable_cache } from 'next/cache';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@heyclaude/database-types';
 import { createSupabaseAnonClient } from '../supabase/server-anon.ts';
-import { getCacheTtl, type CacheTtlKey } from '../cache-config.ts';
+import { getCacheTtl, type CacheTtlKey, type CacheTtlKeyLegacy } from '../cache-config.ts';
 import { logger, toLogContextValue, type LogContext } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 import { withTimeout, TimeoutError } from '@heyclaude/shared-runtime';
@@ -17,7 +17,7 @@ export interface FetchCachedOptions<TResult> {
    */
   keyParts: (string | number | boolean | null | undefined)[];
   tags: string[];
-  ttlKey: CacheTtlKey;
+  ttlKey: CacheTtlKey | CacheTtlKeyLegacy;
   useAuth?: boolean;
   fallback: TResult;
   logMeta?: Record<string, unknown>;

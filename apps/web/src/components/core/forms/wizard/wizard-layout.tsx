@@ -24,7 +24,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
-import { useFormTracking } from '@/src/hooks/use-form-tracking';
+import { useFormTracking } from '@heyclaude/web-runtime/hooks';
 import { ProgressIndicator, type WizardStep } from './progress-indicator';
 
 interface WizardLayoutProps {

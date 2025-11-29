@@ -12,31 +12,55 @@
  * - Helper text and character counters
  * - Consistent spacing and accessibility
  *
- * Production Standards:
- * - Type-safe with discriminated union variants
- * - Accessible with ARIA labels and error handling
- * - Supports both controlled and uncontrolled fields
- * - Integrates with existing primitives (Input, Textarea, Select)
- * - Character count display for maxLength fields
+ * @module web-runtime/ui/components/forms/form-field
  *
- * @module components/forms/utilities/form-field
+ * @example Input variant
+ * ```tsx
+ * <FormField
+ *   variant="input"
+ *   label="Email"
+ *   type="email"
+ *   name="email"
+ *   value={email}
+ *   onChange={(e) => setEmail(e.target.value)}
+ *   required
+ * />
+ * ```
+ *
+ * @example Textarea variant with character count
+ * ```tsx
+ * <FormField
+ *   variant="textarea"
+ *   label="Bio"
+ *   name="bio"
+ *   value={bio}
+ *   onChange={(e) => setBio(e.target.value)}
+ *   maxLength={500}
+ *   showCharCount
+ *   rows={4}
+ * />
+ * ```
+ *
+ * @example Select variant
+ * ```tsx
+ * <FormField
+ *   variant="select"
+ *   label="Type"
+ *   name="type"
+ *   defaultValue="full-time"
+ * >
+ *   <SelectItem value="full-time">Full Time</SelectItem>
+ *   <SelectItem value="part-time">Part Time</SelectItem>
+ * </FormField>
+ * ```
  */
 
-import { cn } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
-import { Input } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
-import {
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from '@heyclaude/web-runtime/ui';
-import { Textarea } from '@heyclaude/web-runtime/ui';
-
-// =============================================================================
-// TYPES
-// =============================================================================
+import { cn } from '../../utils.ts';
+import { Input } from '../input.tsx';
+import { Label } from '../label.tsx';
+import { Select, SelectContent, SelectTrigger, SelectValue } from '../select.tsx';
+import { Textarea } from '../textarea.tsx';
 
 /**
  * Base props shared across all field variants
@@ -130,51 +154,11 @@ export interface FormFieldSelectProps extends FormFieldBaseProps {
  */
 export type FormFieldProps = FormFieldInputProps | FormFieldTextareaProps | FormFieldSelectProps;
 
-// =============================================================================
-// FORM FIELD COMPONENT
-// =============================================================================
-
 /**
  * FormField Component
  *
  * Unified form field that handles Input, Textarea, and Select variants.
- *
- * @example
- * ```tsx
- * // Input variant
- * <FormField
- *   variant="input"
- *   label="Email"
- *   type="email"
- *   name="email"
- *   value={email}
- *   onChange={(e) => setEmail(e.target.value)}
- *   required
- * />
- *
- * // Textarea variant with character count
- * <FormField
- *   variant="textarea"
- *   label="Bio"
- *   name="bio"
- *   value={bio}
- *   onChange={(e) => setBio(e.target.value)}
- *   maxLength={500}
- *   showCharCount
- *   rows={4}
- * />
- *
- * // Select variant
- * <FormField
- *   variant="select"
- *   label="Type"
- *   name="type"
- *   defaultValue="full-time"
- * >
- *   <SelectItem value="full-time">Full Time</SelectItem>
- *   <SelectItem value="part-time">Part Time</SelectItem>
- * </FormField>
- * ```
+ * Type-safe with discriminated union for variant-specific props.
  */
 export function FormField(props: FormFieldProps) {
   const {

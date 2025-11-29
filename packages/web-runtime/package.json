@@ -17,10 +17,6 @@
       "types": "./src/entries/actions.ts",
       "default": "./src/entries/actions.ts"
     },
-    "./actions/feature-flags": {
-      "types": "./src/actions/feature-flags.ts",
-      "default": "./src/actions/feature-flags.ts"
-    },
     "./actions/add-bookmark": {
       "types": "./src/actions/add-bookmark.generated.ts",
       "default": "./src/actions/add-bookmark.generated.ts"
@@ -130,13 +126,17 @@
       "types": "./src/types/component.types.ts",
       "default": "./src/types/component.types.ts"
     },
-    "./feature-flags/defaults": {
-      "types": "./src/feature-flags/defaults.ts",
-      "default": "./src/feature-flags/defaults.ts"
-    },
     "./transformers/skill-to-md": {
       "types": "./src/transformers/skill-to-md.ts",
       "default": "./src/transformers/skill-to-md.ts"
+    },
+    "./config/navigation": {
+      "types": "./src/config/navigation.ts",
+      "default": "./src/config/navigation.ts"
+    },
+    "./config/unified-config": {
+      "types": "./src/config/unified-config.ts",
+      "default": "./src/config/unified-config.ts"
     }
   },
   "dependencies": {

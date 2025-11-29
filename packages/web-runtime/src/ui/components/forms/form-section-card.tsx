@@ -1,28 +1,69 @@
-/**
- * Form Section Card
- * Wraps form sections with visual hierarchy and animations
- * Color-coded sections guide users through the form
- */
-
 'use client';
 
-import type { LucideIcon } from '@heyclaude/web-runtime/icons';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+/**
+ * Form Section Card
+ *
+ * Wraps form sections with visual hierarchy and animations.
+ * Color-coded sections guide users through multi-step forms.
+ *
+ * @module web-runtime/ui/components/forms/form-section-card
+ *
+ * @example Basic usage
+ * ```tsx
+ * <FormSectionCard
+ *   step={1}
+ *   title="Basic Information"
+ *   description="Enter your profile details"
+ *   icon={User}
+ *   theme="primary"
+ * >
+ *   <FormField variant="input" label="Name" ... />
+ * </FormSectionCard>
+ * ```
+ *
+ * @example With border beam for active section
+ * ```tsx
+ * <FormSectionCard
+ *   step={2}
+ *   title="Configuration"
+ *   description="Set up your preferences"
+ *   icon={Settings}
+ *   theme="blue"
+ *   showBorderBeam={isActive}
+ * >
+ *   {children}
+ * </FormSectionCard>
+ * ```
+ */
+
+import type { LucideIcon } from '../../../icons.tsx';
+import { cn } from '../../utils.ts';
+import { UI_CLASSES } from '../../constants.ts';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
-import { BorderBeam } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { BorderBeam } from '../animation/border-beam.tsx';
+import { Card, CardContent, CardHeader, CardTitle } from '../card.tsx';
 
-type SectionTheme = 'primary' | 'blue' | 'green' | 'purple';
+/** Available color themes for form sections */
+export type SectionTheme = 'primary' | 'blue' | 'green' | 'purple';
 
-interface FormSectionCardProps {
+/** Props for FormSectionCard component */
+export interface FormSectionCardProps {
+  /** Step number displayed with the icon */
   step: number;
+  /** Section title */
   title: string;
+  /** Section description */
   description: string;
+  /** Lucide icon component */
   icon: LucideIcon;
+  /** Color theme for the section */
   theme?: SectionTheme;
+  /** Section content */
   children: ReactNode;
+  /** Show animated border beam (for active sections) */
   showBorderBeam?: boolean;
+  /** Additional CSS classes */
   className?: string;
 }
 
@@ -66,9 +107,7 @@ const THEME_CONFIG: Record<
   },
 };
 
-/**
- * Section entrance animation
- */
+/** Section entrance animation variants */
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -81,6 +120,12 @@ const sectionVariants = {
   },
 };
 
+/**
+ * FormSectionCard Component
+ *
+ * Animated card wrapper for form sections with color-coded themes.
+ * Includes optional BorderBeam animation for highlighting active sections.
+ */
 export function FormSectionCard({
   step,
   title,

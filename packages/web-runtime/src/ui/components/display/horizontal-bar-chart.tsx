@@ -1,8 +1,8 @@
 /**
  * Lightweight Horizontal Bar Chart
  *
- * Custom SVG-based horizontal bar chart implementation
- * Replaces Recharts for simple bar chart use cases
+ * Custom SVG-based horizontal bar chart implementation.
+ * Replaces Recharts for simple bar chart use cases.
  *
  * Benefits:
  * - Zero dependencies (~70KB bundle size reduction from removing Recharts)
@@ -11,18 +11,32 @@
  * - Type-safe with TypeScript
  * - Optimized for performance (pure SVG, no heavy library)
  *
- * Production Standards (October 2025):
- * - Semantic SVG with proper accessibility
- * - CSS variables for theming
- * - Smooth transitions
- * - Responsive design
+ * @module web-runtime/ui/components/display/horizontal-bar-chart
  *
- * @module components/ui/horizontal-bar-chart
+ * @example Basic usage
+ * ```tsx
+ * <HorizontalBarChart
+ *   data={[
+ *     { label: "5 ★", value: 45, formattedLabel: "45%" },
+ *     { label: "4 ★", value: 30, formattedLabel: "30%" },
+ *   ]}
+ *   height={200}
+ *   ariaLabel="Rating distribution"
+ * />
+ * ```
+ *
+ * @example With ChartContainer wrapper
+ * ```tsx
+ * <ChartContainer height={250}>
+ *   <HorizontalBarChart data={chartData} />
+ * </ChartContainer>
+ * ```
  */
 
-import { cn } from '@heyclaude/web-runtime/ui';
 import type { ReactNode } from 'react';
+import { cn } from '../../utils.ts';
 
+/** Data point for horizontal bar chart */
 export interface HorizontalBarChartDataPoint {
   /** Category label (e.g., "5 ★") */
   label: string;
@@ -34,6 +48,7 @@ export interface HorizontalBarChartDataPoint {
   formattedLabel?: string;
 }
 
+/** Props for HorizontalBarChart component */
 export interface HorizontalBarChartProps {
   /** Chart data points */
   data: HorizontalBarChartDataPoint[];
@@ -54,22 +69,10 @@ export interface HorizontalBarChartProps {
 }
 
 /**
- * Lightweight Horizontal Bar Chart Component
+ * HorizontalBarChart Component
  *
- * Renders horizontal bar chart using pure SVG
- * Optimized replacement for Recharts BarChart with layout="vertical"
- *
- * @example
- * ```tsx
- * <HorizontalBarChart
- *   data={[
- *     { label: "5 ★", value: 45, formattedLabel: "45%" },
- *     { label: "4 ★", value: 30, formattedLabel: "30%" },
- *   ]}
- *   height={200}
- *   ariaLabel="Rating distribution"
- * />
- * ```
+ * Renders horizontal bar chart using pure SVG.
+ * Optimized replacement for Recharts BarChart with layout="vertical".
  */
 export function HorizontalBarChart({
   data,
@@ -125,7 +128,7 @@ export function HorizontalBarChart({
                 rx={borderRadius}
               />
 
-              {/* Actual bar - ARIA attributes removed (not valid on SVG rect elements) */}
+              {/* Actual bar */}
               <rect
                 x={labelWidth}
                 y={yPosition}
@@ -156,10 +159,7 @@ export function HorizontalBarChart({
   );
 }
 
-/**
- * Chart container with responsive wrapper
- * Provides aspect ratio and responsive behavior
- */
+/** Props for ChartContainer component */
 export interface ChartContainerProps {
   /** Chart content */
   children: ReactNode;
@@ -169,6 +169,11 @@ export interface ChartContainerProps {
   className?: string;
 }
 
+/**
+ * ChartContainer Component
+ *
+ * Responsive wrapper for charts with consistent height handling.
+ */
 export function ChartContainer({ children, height = '200px', className }: ChartContainerProps) {
   const heightStyle = typeof height === 'number' ? `${height}px` : height;
 

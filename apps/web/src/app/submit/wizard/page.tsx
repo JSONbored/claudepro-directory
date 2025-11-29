@@ -26,7 +26,7 @@ import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useFieldHighlight, useFormTracking, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   Code,
@@ -73,8 +73,6 @@ import {
 import { TypeSelectionCards } from '@/src/components/core/forms/wizard/type-selection-cards';
 import { WizardLayout } from '@/src/components/core/forms/wizard/wizard-layout';
 import { StepReviewSubmit } from '@/src/components/core/forms/wizard/wizard-steps';
-import { useFieldHighlight } from '@/src/hooks/use-field-highlight';
-import { useFormTracking } from '@/src/hooks/use-form-tracking';
 import { useOnboardingToasts } from '@/src/hooks/use-onboarding-toasts';
 import { useTemplateApplication } from '@/src/hooks/use-template-application';
 
@@ -89,11 +87,12 @@ type ContentTemplatesResult = Database['public']['Functions']['get_content_templ
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
 // Type representing the merged structure (matches what getContentTemplates returns)
-type MergedTemplateItem = ContentTemplateItem & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+type MergedTemplateItem = ContentTemplateItem &
+  (ContentTemplateItem['template_data'] extends Record<string, unknown>
     ? ContentTemplateItem['template_data']
     : Record<string, unknown>) & {
-  templateData: ContentTemplateItem['template_data'];
-};
+    templateData: ContentTemplateItem['template_data'];
+  };
 
 interface FormData {
   author: string;
@@ -142,7 +141,7 @@ export default function WizardSubmissionPage() {
     subscribe: false,
   });
   const formTracking = useFormTracking();
-  
+
   // Client-side logging with automatic component context
   const log = useClientLogger({
     component: 'WizardSubmissionPage',
@@ -1116,7 +1115,8 @@ function StepBasicInfo({
 
                 {/* Thumbnail Preview */}
                 <AnimatePresence mode="wait">
-                  {thumbnailPreview ? <motion.div
+                  {thumbnailPreview ? (
+                    <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
@@ -1145,7 +1145,8 @@ function StepBasicInfo({
                       >
                         <X className="h-4 w-4" />
                       </motion.button>
-                    </motion.div> : null}
+                    </motion.div>
+                  ) : null}
                 </AnimatePresence>
               </div>
             </AnimatedFormField>
@@ -1203,15 +1204,18 @@ function StepConfiguration({
       </motion.div>
 
       {/* Template Quick Select - Show at top of configuration step */}
-      {templatesLoading ? <motion.div
+      {templatesLoading ? (
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...TOKENS.animations.spring.smooth, delay: 0.15 }}
         >
           <TemplateQuickSelectSkeleton />
-        </motion.div> : null}
+        </motion.div>
+      ) : null}
 
-      {hasTemplates && onApplyTemplate && !templatesLoading ? <motion.div
+      {hasTemplates && onApplyTemplate && !templatesLoading ? (
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...TOKENS.animations.spring.smooth, delay: 0.15 }}
@@ -1222,7 +1226,8 @@ function StepConfiguration({
             onApplyTemplate={onApplyTemplate}
             maxVisible={3}
           />
-        </motion.div> : null}
+        </motion.div>
+      ) : null}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
