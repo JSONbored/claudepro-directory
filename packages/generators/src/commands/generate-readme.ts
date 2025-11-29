@@ -128,7 +128,8 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
     logger.info('📝 Generating README.md via Next.js API...\n', { script: 'generate-readme' });
 
     // Call Next.js API route (not edge functions)
-    const siteUrl = process.env['NEXT_PUBLIC_SITE_URL'] || 'http://localhost:3000';
+    // Use same fallback as readme-builder.ts for consistency
+    const siteUrl = process.env['NEXT_PUBLIC_SITE_URL'] || 'https://claudepro.directory';
     const apiUrl = `${siteUrl}/api/content/sitewide?format=readme`;
 
     logger.info(`   Endpoint: ${apiUrl}`, { script: 'generate-readme' });
@@ -149,8 +150,12 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
 
     const data = (await response.json()) as DatabaseGenerated['public']['Functions']['generate_readme_data']['Returns'];
 
-    if (!data) {
+    if (!data || typeof data !== 'object') {
       throw new Error('API returned null or invalid data');
+    }
+
+    if (!Array.isArray(data.categories)) {
+      throw new Error('API response missing categories array');
     }
 
     logger.info(`✅ Fetched data: ${data.total_count ?? 0} total items, ${data.categories?.length ?? 0} categories`, {
@@ -183,6 +188,6 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
     logger.error('❌ Failed to generate README', normalizeError(error), {
       script: 'generate-readme',
     });
-    throw error instanceof Error ? error : new Error(String(error));
+    throw normalizeError(error, 'README generation failed');
   }
 }

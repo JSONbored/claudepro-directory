@@ -8,6 +8,30 @@
  * from Server Components to Client Components.
  */
 
+import { Constants } from '@heyclaude/database-types';
+
+const CATEGORY_ENUM = Constants.public.Enums.content_category;
+
+/**
+ * Named category lookup to decouple from enum array ordering
+ * Returns the category if found, otherwise falls back to the literal
+ */
+const getCategoryByName = (name: string) =>
+  CATEGORY_ENUM.find((c) => c === name) ?? name;
+
+// Named category constants for type-safe access
+const CATEGORIES = {
+  agents: getCategoryByName('agents'),
+  mcp: getCategoryByName('mcp'),
+  rules: getCategoryByName('rules'),
+  commands: getCategoryByName('commands'),
+  hooks: getCategoryByName('hooks'),
+  statuslines: getCategoryByName('statuslines'),
+  skills: getCategoryByName('skills'),
+  collections: getCategoryByName('collections'),
+  guides: getCategoryByName('guides'),
+} as const;
+
 // Animation Config Defaults - Safe for client import
 export const ANIMATION_CONFIG_CLIENT_DEFAULTS = {
   'animation.ticker.default_ms': 1500,
@@ -16,7 +40,7 @@ export const ANIMATION_CONFIG_CLIENT_DEFAULTS = {
   'animation.stagger.fast_ms': 100,
   'animation.stagger.medium_ms': 200,
   'animation.stagger.slow_ms': 300,
-  'animation.beam.default_ms': 15000,
+  'animation.beam.default_ms': 15_000,
   'animation.card.stagger_ms': 100,
   'animation.spring.default.stiffness': 400,
   'animation.spring.default.damping': 17,
@@ -42,25 +66,25 @@ export const ANIMATION_CONFIG_CLIENT_DEFAULTS = {
 // Homepage Config Defaults - Safe for client import
 export const HOMEPAGE_CONFIG_CLIENT_DEFAULTS = {
   'homepage.featured_categories': [
-    'agents',
-    'mcp',
-    'commands',
-    'rules',
-    'skills',
-    'collections',
-    'hooks',
-    'statuslines',
+    CATEGORIES.agents,
+    CATEGORIES.mcp,
+    CATEGORIES.commands,
+    CATEGORIES.rules,
+    CATEGORIES.skills,
+    CATEGORIES.collections,
+    CATEGORIES.hooks,
+    CATEGORIES.statuslines,
   ] as const,
   'homepage.tab_categories': [
     'all',
-    'agents',
-    'mcp',
-    'commands',
-    'rules',
-    'hooks',
-    'statuslines',
-    'collections',
-    'guides',
+    CATEGORIES.agents,
+    CATEGORIES.mcp,
+    CATEGORIES.commands,
+    CATEGORIES.rules,
+    CATEGORIES.hooks,
+    CATEGORIES.statuslines,
+    CATEGORIES.collections,
+    CATEGORIES.guides,
     'community',
   ] as const,
 } as const;
@@ -68,13 +92,13 @@ export const HOMEPAGE_CONFIG_CLIENT_DEFAULTS = {
 // Polling Config Defaults - Safe for client import
 export const POLLING_CONFIG_CLIENT_DEFAULTS = {
   'polling.realtime_ms': 1000,
-  'polling.badges_ms': 30000,
-  'polling.status.health_ms': 60000,
-  'polling.status.api_ms': 30000,
-  'polling.status.database_ms': 120000,
-  'polling.analytics.views_ms': 60000,
-  'polling.analytics.stats_ms': 300000,
-  'polling.newsletter_count_ms': 300000,
+  'polling.badges_ms': 30_000,
+  'polling.status.health_ms': 60_000,
+  'polling.status.api_ms': 30_000,
+  'polling.status.database_ms': 120_000,
+  'polling.analytics.views_ms': 60_000,
+  'polling.analytics.stats_ms': 300_000,
+  'polling.newsletter_count_ms': 300_000,
 } as const;
 
 // Timeout Config Defaults - Safe for client import
@@ -93,14 +117,14 @@ export const TIMEOUT_CONFIG_CLIENT_DEFAULTS = {
   'timeout.ui.scroll_hysteresis_px': 10,
   'timeout.ui.form_debounce_ms': 300,
   'timeout.api.default_ms': 5000,
-  'timeout.api.long_ms': 10000,
+  'timeout.api.long_ms': 10_000,
   'timeout.api.short_ms': 2000,
   'timeout.test.default_ms': 5000,
-  'timeout.test.long_ms': 10000,
+  'timeout.test.long_ms': 10_000,
   'timeout.test.network_ms': 5000,
   'retry.api.initial_delay_ms': 1000,
   'retry.api.exponential_delay_ms': 2000,
-  'retry.api.max_delay_ms': 10000,
+  'retry.api.max_delay_ms': 10_000,
   'retry.email.send_delay_ms': 1000,
   'retry.email.retry_delay_ms': 2000,
   'retry.github.delay_ms': 1000,
@@ -142,7 +166,7 @@ export const NEWSLETTER_CONFIG_CLIENT_DEFAULTS = {
     'Get in-depth guides, best practices, and expert tips for mastering Claude delivered weekly.',
   'newsletter.footer_text': 'Free weekly newsletter • Unsubscribe anytime',
   'newsletter.show_subscriber_count': true,
-  'newsletter.footer_bar.show_after_delay_ms': 30000,
+  'newsletter.footer_bar.show_after_delay_ms': 30_000,
   'newsletter.scroll_trigger.min_scroll_height_px': 500,
   'newsletter.max_retries': 3,
   'newsletter.initial_retry_delay_ms': 1000,

@@ -66,8 +66,11 @@ export function useConfetti() {
         confetti(variantConfig);
       } catch (error) {
         const normalized = normalizeError(error, `useConfetti: fireConfetti failed for variant ${variant}`);
-        logger.error('useConfetti: fireConfetti failed', normalized, {
-          hook: 'useConfetti',
+        logger.warn('[Animation] Confetti failed', {
+          err: normalized,
+          category: 'animation',
+          component: 'useConfetti',
+          nonCritical: true,
           variant,
         });
       }
@@ -80,32 +83,44 @@ export function useConfetti() {
     fireConfetti('success').catch((error) => {
       // Error handling is done inside fireConfetti, but we need to catch to prevent floating promise
       const normalized = normalizeError(error, 'useConfetti: celebrateBookmark failed');
-      logger.error('useConfetti: celebrateBookmark failed', normalized, {
-        hook: 'useConfetti',
+      logger.warn('[Animation] Confetti bookmark failed', {
+        err: normalized,
+        category: 'animation',
+        component: 'useConfetti',
+        nonCritical: true,
       });
     });
   }, [fireConfetti]);
   const celebrateSubmission = useCallback(() => {
     fireConfetti('celebration').catch((error) => {
       const normalized = normalizeError(error, 'useConfetti: celebrateSubmission failed');
-      logger.error('useConfetti: celebrateSubmission failed', normalized, {
-        hook: 'useConfetti',
+      logger.warn('[Animation] Confetti submission failed', {
+        err: normalized,
+        category: 'animation',
+        component: 'useConfetti',
+        nonCritical: true,
       });
     });
   }, [fireConfetti]);
   const celebrateMilestone = useCallback(() => {
     fireConfetti('milestone').catch((error) => {
       const normalized = normalizeError(error, 'useConfetti: celebrateMilestone failed');
-      logger.error('useConfetti: celebrateMilestone failed', normalized, {
-        hook: 'useConfetti',
+      logger.warn('[Animation] Confetti milestone failed', {
+        err: normalized,
+        category: 'animation',
+        component: 'useConfetti',
+        nonCritical: true,
       });
     });
   }, [fireConfetti]);
   const celebrateSignup = useCallback(() => {
     fireConfetti('subtle').catch((error) => {
       const normalized = normalizeError(error, 'useConfetti: celebrateSignup failed');
-      logger.error('useConfetti: celebrateSignup failed', normalized, {
-        hook: 'useConfetti',
+      logger.warn('[Animation] Confetti signup failed', {
+        err: normalized,
+        category: 'animation',
+        component: 'useConfetti',
+        nonCritical: true,
       });
     });
   }, [fireConfetti]);

@@ -19,10 +19,10 @@ import {
 } from '@heyclaude/edge-runtime';
 import {
   createUtilityContext,
-  errorToString,
   getProperty,
   logError,
   logWarn,
+  normalizeError,
   TIMEOUT_PRESETS,
   timingSafeEqual,
   withTimeout,
@@ -222,13 +222,13 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
           msg_id: msg.msg_id.toString(),
           operation: 'process-message',
         };
-        const errorMsg = errorToString(error);
-        await logError('Content revalidation failed', errorLogContext, error);
+        const errorObj = normalizeError(error, 'Content revalidation failed');
+        await logError('Content revalidation failed', errorLogContext, errorObj);
         // Leave in queue for retry
         results.push({
           msg_id: msg.msg_id.toString(),
           status: 'failed',
-          errors: [errorMsg],
+          errors: [errorObj.message],
           will_retry: true,
         });
       }

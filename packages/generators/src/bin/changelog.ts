@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 import { runGenerateChangelog } from '../commands/changelog.js';
 import { logger } from '../toolkit/logger.js';
+import { normalizeError } from '@heyclaude/shared-runtime';
 
 runGenerateChangelog().catch((error) => {
   logger.error(
     '❌ Unhandled error in main',
-    error instanceof Error ? error : new Error(String(error)),
+    normalizeError(error, 'Changelog generation failed'),
     {
       script: 'changelog-generate-entry',
     }

@@ -53,9 +53,10 @@ export async function callEdgeFunction<T = unknown>(
 
     return (await response.json()) as T;
   } catch (error) {
-    // Import logger dynamically to avoid circular dependencies
+    // Import logger and normalizeError dynamically to avoid circular dependencies
     const { logger } = await import('./logger.js');
-    const errorObj = error instanceof Error ? error : new Error(String(error));
+    const { normalizeError } = await import('@heyclaude/shared-runtime');
+    const errorObj = normalizeError(error, 'Edge function call failed');
     
     if (errorObj.name === 'AbortError') {
       const timeoutError = new Error(`Edge function request timed out after ${timeoutMs}ms`);

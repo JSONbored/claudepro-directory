@@ -79,7 +79,12 @@ const DialogContent = ({
         });
       })
       .catch((error) => {
-        logger.error('DialogContent: failed to load animation config', error);
+        logger.warn('[Animation] Failed to load config', {
+          err: error,
+          category: 'animation',
+          component: 'DialogContent',
+          recoverable: true,
+        });
       });
   }, []);
 

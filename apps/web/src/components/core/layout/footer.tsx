@@ -83,7 +83,12 @@ function FooterComponent() {
         });
       })
       .catch((error) => {
-        logger.error('Footer: failed to load animation config', error);
+        logger.warn('[Animation] Failed to load config', {
+          err: error,
+          category: 'animation',
+          component: 'Footer',
+          recoverable: true,
+        });
       });
   }, []);
 

@@ -164,12 +164,12 @@
   --color-discord-hover: oklch(58% 0.185 272 / 0.1);
   --color-discord-border: oklch(58% 0.185 272 / 0.3);
 
-  /* Syntax Highlighting Colors */
-  --color-syntax-keyword: oklch(65% 0.17 45); /* #ff8c00 - Orange */
-  --color-syntax-function: oklch(68% 0.14 220); /* #00bcd4 - Cyan */
-  --color-syntax-number: oklch(64% 0.15 140); /* #4caf50 - Green */
-  --color-syntax-string: oklch(74% 0.2 35); /* Claude orange - matches logo */
-  --color-syntax-comment: oklch(62% 0.01 60); /* Muted gray */
+  /* Syntax Highlighting Colors - Polar-style muted palette */
+  --color-syntax-keyword: #7dd3fc; /* Light blue */
+  --color-syntax-function: #93c5fd; /* Soft blue */
+  --color-syntax-number: #fcd34d; /* Soft yellow */
+  --color-syntax-string: #86efac; /* Soft green */
+  --color-syntax-comment: #64748b; /* Slate gray */
 
   /* ========================================
      CATEGORY COLOR SYSTEM - OKLCH

@@ -34,10 +34,10 @@ import {
   CIRCUIT_BREAKER_CONFIGS,
   createNotificationRouterContext,
   createUtilityContext,
-  errorToString,
   getProperty,
   logError,
   logInfo,
+  normalizeError,
   TIMEOUT_PRESETS,
   withCircuitBreaker,
   withTimeout,
@@ -249,7 +249,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
       .single<DatabaseGenerated['public']['Tables']['webhook_events']['Row']>();
 
     if (webhookError || !webhookEvent) {
-      const errorMsg = errorToString(webhookError);
+      const errorObj = normalizeError(webhookError, "Webhook fetch failed"); const errorMsg = errorObj.message;
       errors.push(`Webhook fetch: ${errorMsg}`);
       await logError('Failed to fetch webhook event', logContext, webhookError);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
@@ -379,7 +379,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
         'GitHub API call timed out'
       );
     } catch (error) {
-      const errorMsg = errorToString(error);
+      const errorObj = normalizeError(error, "Operation failed"); const errorMsg = errorObj.message;
       errors.push(`GitHub fetch: ${errorMsg}`);
       await logError('Failed to fetch commits from GitHub', logContext, error);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
@@ -459,7 +459,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
       .single<ChangelogRow>();
 
     if (insertError || !changelogData) {
-      const errorMsg = errorToString(insertError);
+      const errorObj = normalizeError(insertError, "Changelog insert failed"); const errorMsg = errorObj.message;
       errors.push(`Changelog insert: ${errorMsg}`);
       await logError('Failed to insert changelog entry', logContext, insertError);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
@@ -520,7 +520,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
       }
     );
   } catch (error) {
-    const errorMsg = errorToString(error);
+    const errorObj = normalizeError(error, "Operation failed"); const errorMsg = errorObj.message;
     await logError('Unexpected error processing changelog webhook', logContext, error);
     return exitWithResult({ success: false, errors: [errorMsg] }, { errorMessage: errorMsg });
   }
@@ -637,7 +637,7 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
           });
         }
       } catch (error) {
-        const errorMsg = errorToString(error);
+        const errorObj = normalizeError(error, "Operation failed"); const errorMsg = errorObj.message;
         const logContext = {
           ...batchLogContext,
           msg_id: message.msg_id.toString(),

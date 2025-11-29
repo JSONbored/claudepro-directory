@@ -91,9 +91,12 @@ const Button = ({
         });
       })
       .catch((error) => {
-        const normalized = normalizeError(error, 'Button: failed to load animation config');
-        logger.error('Button: failed to load animation config', normalized, {
+        const normalized = normalizeError(error, 'Failed to load animation config');
+        logger.warn('[Animation] Failed to load config', {
+          err: normalized,
+          category: 'animation',
           component: 'Button',
+          recoverable: true,
         });
       });
   }, []);

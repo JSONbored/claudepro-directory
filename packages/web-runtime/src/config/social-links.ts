@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import { GENERATED_CONFIG } from './app-config.ts';
 
 const socialLinksSchema = z.object({
@@ -13,21 +14,10 @@ const socialLinksSchema = z.object({
   securityEmail: z.string().email(),
 });
 
-// Fallback for build time if generation hasn't run or failed silently
-const FALLBACK_SOCIAL_LINKS = {
-  github: 'https://github.com/JSONbored/claudepro-directory',
-  authorProfile: 'https://github.com/JSONbored',
-  discord: 'https://discord.gg/Ax3Py4YDrq',
-  twitter: 'https://x.com/JSONbored',
-  email: 'contact@claudepro.directory',
-  hiEmail: 'hi@claudepro.directory',
-  partnerEmail: 'partner@claudepro.directory',
-  supportEmail: 'support@claudepro.directory',
-  securityEmail: 'security@claudepro.directory',
-};
-
+// Parse and validate social links from generated config
+// GENERATED_CONFIG.social_links is always defined in app-config.ts
 export const SOCIAL_LINKS = socialLinksSchema.parse(
-  GENERATED_CONFIG.social_links || FALLBACK_SOCIAL_LINKS
+  GENERATED_CONFIG.social_links
 );
 
 export const SOCIAL_LINK_KEYS = [

@@ -4,6 +4,7 @@
  */
 
 import { Shield } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES,
   Card,
@@ -11,7 +12,7 @@ import { UI_CLASSES,
   CardDescription,
   CardHeader,
   CardTitle } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 
@@ -22,15 +23,34 @@ export const metadata: Metadata = {
   description: 'Manage your two-factor authentication settings',
 };
 
+// Force dynamic rendering for auth-protected pages
+export const dynamic = 'force-dynamic';
+
 export default async function MFASettingsPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  
+  // Create request-scoped child logger
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'MFASettingsPage',
+    route: '/account/settings/mfa',
+    module: 'apps/web/src/app/account/settings/mfa',
+  });
+
   const { user } = await getAuthenticatedUser({
     requireUser: true,
     context: 'MFASettingsPage',
   });
 
   if (!user) {
+    reqLogger.info('MFASettingsPage: user not authenticated, redirecting to login');
     redirect('/login');
   }
+
+  reqLogger.info('MFASettingsPage: rendered for authenticated user', {
+    userIdHash: user.id, // userId is automatically hashed by redaction
+  });
 
   return (
     <div className="space-y-6">

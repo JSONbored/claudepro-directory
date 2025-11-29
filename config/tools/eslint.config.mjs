@@ -2,13 +2,34 @@
  * ESLint configuration for architectural rules and code quality
  * Primary linting and formatting tool for the codebase
  *
+ * Plugins:
+ * - @eslint/js: Core ESLint rules
+ * - typescript-eslint: TypeScript support with type-checked rules
+ * - eslint-plugin-unicorn: Modern JavaScript/TypeScript patterns
+ * - eslint-plugin-boundaries: Monorepo architecture enforcement
+ * - eslint-plugin-jsdoc: JSDoc documentation linting
+ * - eslint-plugin-import-x: Import ordering and cycle detection
+ * - eslint-plugin-jsx-a11y: Accessibility rules for JSX
+ * - eslint-plugin-react-hooks: React hooks rules
+ * - eslint-plugin-react: React-specific linting rules
+ * - eslint-plugin-vitest: Vitest testing best practices
+ * - eslint-plugin-n: Node.js-specific rules
+ * - eslint-plugin-better-tailwindcss: Tailwind CSS linting
+ * - eslint-plugin-perfectionist: Sorting and consistency
+ * - architectural-rules: Custom rules for logging, security, architecture
+ *
  * Located in config/tools/ to match codebase organization pattern
  */
 
 import eslint from '@eslint/js';
+import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import eslintPluginBoundaries from 'eslint-plugin-boundaries';
 import eslintPluginJSDoc from 'eslint-plugin-jsdoc';
+import eslintPluginN from 'eslint-plugin-n';
+import eslintPluginPerfectionist from 'eslint-plugin-perfectionist';
+import eslintPluginReact from 'eslint-plugin-react';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import eslintPluginVitest from 'eslint-plugin-vitest';
 import importPlugin from 'eslint-plugin-import-x';
 import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
@@ -36,6 +57,9 @@ export default tseslint.config(
           allowDefaultProject: ['*.ts', '*.tsx'],
         },
         tsconfigRootDir: import.meta.dirname,
+        ecmaFeatures: {
+          jsx: true,
+        },
       },
     },
     plugins: {
@@ -45,9 +69,17 @@ export default tseslint.config(
       'import-x': importPlugin,
       'jsx-a11y': jsxA11yPlugin,
       'react-hooks': reactHooksPlugin,
+      react: eslintPluginReact,
+      n: eslintPluginN,
+      'better-tailwindcss': eslintPluginBetterTailwindcss,
+      perfectionist: eslintPluginPerfectionist,
       // Note: unicorn plugin is already included via eslintPluginUnicorn.configs.recommended
     },
     settings: {
+      // React plugin settings
+      react: {
+        version: 'detect',
+      },
       // Phase 3: Boundaries plugin configuration
       boundaries: [
         {
@@ -86,19 +118,102 @@ export default tseslint.config(
         typescript: true,
         node: true,
       },
+      // Better Tailwind CSS settings (disabled due to monorepo Tailwind setup)
+      // 'better-tailwindcss': {
+      //   entryPoint: 'apps/web/src/app/globals.css',
+      // },
     },
     rules: {
-      // TypeScript ESLint overrides (less strict for gradual adoption)
+      // ============================================
+      // TypeScript ESLint Rules (Enhanced)
+      // ============================================
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      // Disable some strict rules that might be too opinionated initially
-      '@typescript-eslint/strict-boolean-expressions': 'off', // Can enable later
-      '@typescript-eslint/no-floating-promises': 'warn', // Warn instead of error
+      '@typescript-eslint/strict-boolean-expressions': [
+        'warn',
+        {
+          allowNullableBoolean: true,
+          allowNullableString: true,
+          allowNullableNumber: true,
+          allowNullableObject: true,
+        },
+      ],
+      '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-assignment': 'error',
       '@typescript-eslint/no-unsafe-call': 'error',
       '@typescript-eslint/no-unsafe-member-access': 'error',
       '@typescript-eslint/no-unsafe-return': 'error',
-      // Logger & Error Instrumentation Rules - Comprehensive Pino Enforcement
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/array-type': 'off', // Allow both Array<T> and T[]
+      '@typescript-eslint/no-redundant-type-constituents': 'error',
+      '@typescript-eslint/await-thenable': 'error',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      '@typescript-eslint/require-await': 'error',
+      '@typescript-eslint/no-unnecessary-condition': 'error',
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      '@typescript-eslint/prefer-optional-chain': 'error',
+      '@typescript-eslint/restrict-template-expressions': 'error',
+      // Enhanced TypeScript rules
+      '@typescript-eslint/no-misused-promises': 'error',
+      '@typescript-eslint/no-for-in-array': 'error',
+      '@typescript-eslint/unbound-method': 'error',
+      '@typescript-eslint/switch-exhaustiveness-check': 'warn',
+
+      // ============================================
+      // React Plugin Rules (NEW)
+      // ============================================
+      'react/jsx-no-leaked-render': 'error',
+      'react/no-unstable-nested-components': 'error',
+      'react/jsx-key': 'error',
+      'react/no-array-index-key': 'warn',
+      'react/hook-use-state': 'warn',
+      'react/jsx-no-useless-fragment': 'warn',
+      'react/no-danger': 'warn',
+      'react/self-closing-comp': 'warn',
+      'react/jsx-curly-brace-presence': ['warn', { props: 'never', children: 'never' }],
+      'react/jsx-boolean-value': ['warn', 'never'],
+      'react/no-unknown-property': 'error',
+      'react/prop-types': 'off', // TypeScript handles this
+      'react/react-in-jsx-scope': 'off', // Not needed in Next.js
+      'react/display-name': 'off', // Too strict for HOCs
+
+      // ============================================
+      // Node.js Plugin Rules (NEW)
+      // ============================================
+      'n/no-deprecated-api': 'error',
+      'n/no-unsupported-features/node-builtins': 'off', // Let TypeScript handle this
+      'n/prefer-global/buffer': ['error', 'always'],
+      'n/prefer-global/process': ['error', 'always'],
+      'n/no-process-exit': 'warn',
+      'n/no-sync': 'off', // Sometimes sync is appropriate
+      'n/no-missing-import': 'off', // TypeScript handles this
+      'n/no-missing-require': 'off', // TypeScript handles this
+      'n/no-unpublished-import': 'off', // Monorepo setup
+      'n/no-unpublished-require': 'off', // Monorepo setup
+      'n/no-extraneous-import': 'off', // Monorepo handles this
+
+      // ============================================
+      // Better Tailwind CSS Rules (NEW)
+      // ============================================
+      'better-tailwindcss/no-duplicate-classes': 'warn',
+      'better-tailwindcss/no-unnecessary-whitespace': 'warn',
+      'better-tailwindcss/enforce-consistent-class-order': 'off', // Can be noisy
+      'better-tailwindcss/no-unregistered-classes': 'off', // Too strict for custom utilities
+
+      // ============================================
+      // Perfectionist Rules (NEW - Sorting)
+      // All auto-fixable with --fix
+      // ============================================
+      'perfectionist/sort-imports': 'off', // Using import-x/order instead
+      'perfectionist/sort-interfaces': ['warn', { type: 'natural', order: 'asc' }],
+      'perfectionist/sort-object-types': ['warn', { type: 'natural', order: 'asc' }],
+      'perfectionist/sort-union-types': ['warn', { type: 'natural', order: 'asc' }],
+      'perfectionist/sort-intersection-types': ['warn', { type: 'natural', order: 'asc' }],
+      'perfectionist/sort-enums': ['warn', { type: 'natural', order: 'asc' }],
+
+      // ============================================
+      // Logger & Error Instrumentation Rules
+      // ============================================
       'architectural-rules/enforce-message-first-logger-api': 'error',
       'architectural-rules/require-await-log-error': 'error',
       'architectural-rules/enforce-log-context-naming': 'error',
@@ -111,7 +226,12 @@ export default tseslint.config(
       'architectural-rules/prefer-barrel-exports-for-logging': 'error',
       'architectural-rules/prevent-raw-userid-logging': 'error',
       'architectural-rules/prefer-child-logger-over-setbindings': 'error',
-      // Modernization Rules - BaseLogContext & Record<string, unknown>
+      // PII & Audit Rules (added for enhanced logging instrumentation)
+      'architectural-rules/warn-pii-field-logging': 'warn', // Informational - redaction handles it
+      'architectural-rules/require-audit-level-for-mutations': 'warn', // Suggest audit/security levels
+      // Log Level Usage Rules
+      'architectural-rules/suggest-warn-for-recoverable-errors': 'warn', // Suggest warn instead of error for recoverable failures
+      // Modernization Rules
       'architectural-rules/require-record-string-unknown-for-log-context': 'error',
       'architectural-rules/enforce-bracket-notation-for-log-context-access': 'error',
       'architectural-rules/prevent-base-log-context-usage': 'error',
@@ -124,19 +244,10 @@ export default tseslint.config(
       'architectural-rules/detect-incomplete-log-context': 'error',
       'architectural-rules/detect-outdated-logging-patterns': 'error',
       'architectural-rules/detect-missing-logging-in-api-routes': 'error',
-      '@typescript-eslint/no-unsafe-argument': 'error',
-      '@typescript-eslint/array-type': 'off', // Allow both Array<T> and T[]
-      '@typescript-eslint/no-redundant-type-constituents': 'error',
-      '@typescript-eslint/await-thenable': 'error',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-      '@typescript-eslint/require-await': 'error',
-      // Enhanced TypeScript rules
-      '@typescript-eslint/no-unnecessary-condition': 'error',
-      '@typescript-eslint/prefer-nullish-coalescing': 'error',
-      '@typescript-eslint/prefer-optional-chain': 'error',
-      '@typescript-eslint/restrict-template-expressions': 'error',
 
-      // Phase 2: Unicorn plugin rules (selected from recommended)
+      // ============================================
+      // Unicorn Plugin Rules (Enhanced)
+      // ============================================
       'unicorn/consistent-function-scoping': 'error',
       'unicorn/catch-error-name': 'error',
       'unicorn/filename-case': ['warn', { case: 'kebabCase' }],
@@ -152,14 +263,21 @@ export default tseslint.config(
       'unicorn/no-nested-ternary': 'error',
       'unicorn/prefer-native-coercion-functions': 'warn',
       'unicorn/explicit-length-check': 'warn',
-      // Enhanced Unicorn rules
       'unicorn/no-array-method-this-argument': 'error',
       'unicorn/prefer-array-find': 'error',
       'unicorn/prefer-module': 'error',
       'unicorn/prefer-top-level-await': 'error',
       'unicorn/no-useless-undefined': 'error',
+      // Enhanced Unicorn rules
+      'unicorn/prefer-string-replace-all': 'warn',
+      'unicorn/prefer-at': 'warn',
+      'unicorn/prefer-object-from-entries': 'warn',
+      'unicorn/no-negated-condition': 'warn',
+      'unicorn/throw-new-error': 'error',
 
-      // Phase 3: Boundaries plugin rules
+      // ============================================
+      // Boundaries Plugin Rules
+      // ============================================
       'boundaries/element-types': [
         'error',
         {
@@ -181,13 +299,17 @@ export default tseslint.config(
         },
       ],
 
-      // Phase 4: JSDoc plugin rules (for public APIs)
-      'jsdoc/require-param': 'off', // Too strict for all files
+      // ============================================
+      // JSDoc Plugin Rules
+      // ============================================
+      'jsdoc/require-param': 'off',
       'jsdoc/require-returns': 'off',
       'jsdoc/require-description': 'off',
-      'jsdoc/check-types': 'warn', // Warn on incorrect JSDoc types
+      'jsdoc/check-types': 'warn',
 
-      // Import plugin rules
+      // ============================================
+      // Import-X Plugin Rules (Enhanced)
+      // ============================================
       'import-x/order': [
         'error',
         {
@@ -199,23 +321,32 @@ export default tseslint.config(
       'import-x/no-cycle': ['error', { maxDepth: 3 }],
       'import-x/no-duplicates': 'error',
       'import-x/no-unresolved': 'off', // TypeScript handles this
+      // Enhanced Import-X rules
+      'import-x/no-self-import': 'error',
+      'import-x/no-useless-path-segments': 'warn',
+      'import-x/first': 'error',
+      'import-x/newline-after-import': 'error',
+      'import-x/no-named-as-default': 'warn',
+      'import-x/consistent-type-specifier-style': ['error', 'prefer-inline'],
 
-      // JSX A11y rules (accessibility) - only for TSX files
+      // ============================================
+      // JSX A11y Rules (Enhanced)
+      // ============================================
       'jsx-a11y/alt-text': 'off', // Will be enabled for TSX files only
       'jsx-a11y/anchor-is-valid': 'off',
       'jsx-a11y/aria-props': 'off',
       'jsx-a11y/click-events-have-key-events': 'off',
 
-      // Custom architectural rules
+      // ============================================
+      // Custom Architectural Rules
+      // ============================================
       'architectural-rules/require-request-id-in-logger': 'error',
       'architectural-rules/require-error-handler': 'error',
       'architectural-rules/require-error-logging-in-catch': 'error',
       'architectural-rules/no-server-imports-in-client': 'error',
       'architectural-rules/no-direct-auth-getuser': 'error',
       'architectural-rules/no-data-layer-violations': 'error',
-      // Import Map Rules - Prevent relative imports in Deno import map packages
       'architectural-rules/no-relative-imports-in-import-map-packages': 'error',
-      // New custom rules
       'architectural-rules/require-database-types-for-enums': 'error',
       'architectural-rules/no-hardcoded-enum-values': 'error',
       'architectural-rules/require-section-logging': 'error',
@@ -223,8 +354,141 @@ export default tseslint.config(
       'architectural-rules/require-safe-action-middleware': 'error',
       'architectural-rules/no-direct-database-access-in-actions': 'error',
       'architectural-rules/require-edge-logging': 'error',
+
+      // Next.js & React Server Components Rules
+      'architectural-rules/require-proper-dynamic-exports': 'warn',
+      'architectural-rules/no-mixed-server-client-patterns': 'error',
+      'architectural-rules/require-suspense-for-async-components': 'off',
+      'architectural-rules/no-client-component-data-fetching': 'warn',
+
+      // Supabase & Database Rules
+      'architectural-rules/require-supabase-client-context': 'error',
+      'architectural-rules/require-rpc-error-handling': 'error',
+      'architectural-rules/no-direct-database-queries-in-components': 'error',
+      'architectural-rules/require-generated-types-for-database-queries': 'warn',
+
+      // Cache & Performance Rules
+      'architectural-rules/require-cache-tags-for-mutations': 'warn',
+      'architectural-rules/no-uncached-database-calls': 'off',
+      'architectural-rules/require-parallel-fetching': 'off',
+      'architectural-rules/no-blocking-operations-in-layouts': 'warn',
+
+      // Environment Variables & Configuration Rules
+      'architectural-rules/require-env-validation-schema': 'warn',
+      'architectural-rules/no-hardcoded-urls': 'warn',
+      'architectural-rules/require-feature-flag-validation': 'off',
+
+      // Server Actions & Form Handling Rules
+      'architectural-rules/require-zod-schema-for-server-actions': 'error',
+      'architectural-rules/require-database-enum-types-in-schemas': 'error',
+      'architectural-rules/require-rate-limiting-for-public-actions': 'warn',
+      'architectural-rules/no-sensitive-data-in-action-metadata': 'error',
+
+      // TypeScript & Type Safety Rules
+      'architectural-rules/require-explicit-return-types-for-data-functions': 'off',
+      'architectural-rules/no-type-assertions-without-comment': 'off',
+      'architectural-rules/require-props-interface-for-components': 'off',
+      'architectural-rules/no-any-in-public-api': 'warn',
+
+      // Security & Data Validation Rules
+      'architectural-rules/require-input-sanitization-before-database': 'off',
+      'architectural-rules/no-admin-client-in-non-admin-context': 'error',
+      'architectural-rules/require-auth-check-before-sensitive-operations': 'warn',
+      'architectural-rules/no-exposed-secrets-in-client-code': 'error',
+
+      // API Routes & Edge Functions Rules
+      'architectural-rules/require-http-method-validation': 'warn',
+      'architectural-rules/require-request-validation-in-api-routes': 'error',
+      'architectural-rules/require-cors-headers-for-public-apis': 'off',
+      'architectural-rules/no-long-running-operations-in-edge-functions': 'off',
+
+      // Testing & Quality Rules
+      'architectural-rules/require-test-file-for-complex-functions': 'off',
+      'architectural-rules/require-error-test-cases': 'off',
+      'architectural-rules/no-focused-tests-in-ci': 'error',
+
+      // Performance & Bundle Size Rules
+      'architectural-rules/no-large-dependencies-in-client-bundles': 'off',
+      'architectural-rules/require-dynamic-import-for-heavy-components': 'off',
+      'architectural-rules/no-blocking-third-party-scripts': 'warn',
+
+      // Accessibility & UX Rules
+      'architectural-rules/require-loading-states-for-async-operations': 'off',
+      'architectural-rules/require-error-messages-for-forms': 'off',
+      'architectural-rules/no-missing-alt-text-on-dynamic-images': 'warn',
+
+      // Code Organization & Architecture Rules
+      'architectural-rules/enforce-barrel-export-pattern': 'off',
+      'architectural-rules/no-circular-dependencies-advanced': 'off',
+      'architectural-rules/enforce-package-boundaries-enhanced': 'error',
+
+      // Additional High-Value Rules
+      'architectural-rules/require-metadata-for-generatemetadata': 'warn',
+      'architectural-rules/require-error-boundary-in-route-groups': 'off',
+      'architectural-rules/no-localstorage-for-auth-data': 'error',
+      'architectural-rules/require-child-logger-in-async-functions': 'warn',
+      'architectural-rules/require-loading-tsx-for-async-pages': 'off',
     },
   },
+  // ============================================
+  // TSX Files - React & A11y Rules
+  // ============================================
+  {
+    files: ['**/*.tsx'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      // JSX A11y rules (accessibility)
+      'jsx-a11y/alt-text': 'error',
+      'jsx-a11y/anchor-is-valid': 'error',
+      'jsx-a11y/aria-props': 'error',
+      'jsx-a11y/click-events-have-key-events': 'warn',
+      // Enhanced A11y rules
+      'jsx-a11y/no-autofocus': 'warn',
+      'jsx-a11y/no-noninteractive-element-interactions': 'warn',
+      'jsx-a11y/no-noninteractive-tabindex': 'warn',
+      'jsx-a11y/role-has-required-aria-props': 'error',
+      'jsx-a11y/role-supports-aria-props': 'error',
+    },
+  },
+  // ============================================
+  // Vitest Test Files Configuration (NEW)
+  // ============================================
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
+    plugins: {
+      vitest: eslintPluginVitest,
+    },
+    rules: {
+      // Vitest best practices
+      'vitest/expect-expect': 'error',
+      'vitest/no-focused-tests': 'error',
+      'vitest/no-commented-out-tests': 'warn',
+      'vitest/valid-expect': 'error',
+      'vitest/no-conditional-expect': 'error',
+      'vitest/no-identical-title': 'error',
+      'vitest/prefer-to-be': 'warn',
+      'vitest/require-top-level-describe': 'warn',
+      'vitest/no-disabled-tests': 'warn',
+      'vitest/no-duplicate-hooks': 'error',
+      'vitest/valid-title': 'error',
+      'vitest/prefer-to-have-length': 'warn',
+      'vitest/prefer-to-be-truthy': 'warn',
+      'vitest/prefer-to-be-falsy': 'warn',
+      'vitest/no-standalone-expect': 'error',
+      // Relax some rules for test files
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
+  // ============================================
+  // Package-specific Logging Rules
+  // ============================================
   {
     files: [
       '../../packages/web-runtime/src/data/**/*.ts',
@@ -322,20 +586,6 @@ export default tseslint.config(
       'architectural-rules/require-use-logged-async-in-client': 'error',
       'architectural-rules/prefer-barrel-exports-for-logging': 'error',
       'architectural-rules/detect-outdated-logging-patterns': 'error',
-    },
-  },
-  {
-    // React and JSX A11y rules only for TSX files
-    files: ['**/*.tsx'],
-    rules: {
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-      'jsx-a11y/alt-text': 'error',
-      'jsx-a11y/anchor-is-valid': 'error',
-      'jsx-a11y/aria-props': 'error',
-      // Note: jsx-a11y/no-dangerously-set-innerhtml rule not available in this version
-      // Using eslint-disable comments in code where needed
-      'jsx-a11y/click-events-have-key-events': 'warn', // Warn for now, can be error later
     },
   },
   {

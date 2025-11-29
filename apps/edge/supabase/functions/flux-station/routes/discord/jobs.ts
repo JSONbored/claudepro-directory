@@ -18,7 +18,7 @@ import {
 } from '@heyclaude/edge-runtime';
 import {
   createUtilityContext,
-  errorToString,
+  normalizeError,
   getProperty,
   logError,
   TIMEOUT_PRESETS,
@@ -270,7 +270,7 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
         await pgmqDelete(JOB_DISCORD_QUEUE, msg.msg_id);
         results.push({ msg_id: msg.msg_id.toString(), status: 'success' });
       } catch (error) {
-        const errorMsg = errorToString(error);
+        const errorMsg = normalizeError(error, "Operation failed").message;
         const errorLogContext = createUtilityContext('flux-station', 'discord-jobs-notify', {
           msg_id: msg.msg_id.toString(),
         });

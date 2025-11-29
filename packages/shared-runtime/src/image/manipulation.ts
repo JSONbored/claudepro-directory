@@ -51,7 +51,9 @@ export async function ensureImageMagickInitialized(): Promise<void> {
     await initializeImageMagick(wasmBytes);
     initialized = true;
   } catch (error) {
-    initError = error instanceof Error ? error : new Error(String(error));
+    // Import normalizeError dynamically to avoid circular dependency
+    const { normalizeError } = await import('@heyclaude/shared-runtime');
+    initError = normalizeError(error, 'ImageMagick initialization failed');
     throw new Error(`Failed to initialize ImageMagick: ${initError.message}`);
   }
 }

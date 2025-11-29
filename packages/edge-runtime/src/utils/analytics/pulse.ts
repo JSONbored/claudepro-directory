@@ -54,8 +54,8 @@ export async function enqueueSearchAnalytics({
       },
     });
   } catch (error) {
-    const { errorToString } = await import('@heyclaude/shared-runtime');
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const { normalizeError } = await import('@heyclaude/shared-runtime');
+    const errorObj = normalizeError(error, 'Failed to enqueue search analytics');
     logger.warn('Failed to enqueue search analytics', {
       err: errorObj,
       query: query.substring(0, 50),

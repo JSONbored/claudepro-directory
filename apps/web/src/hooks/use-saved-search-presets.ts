@@ -10,7 +10,7 @@
  * - Guards against SSR/localStorage absence to avoid hydration issues.
  */
 
-import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
+import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import type { FilterState, SavedSearchPreset } from '@heyclaude/web-runtime/types/component.types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -264,7 +264,7 @@ function loadFromStorage(key: string): SavedSearchPreset[] {
   } catch (error) {
     logger.error(
       'useSavedSearchPresets: failed to parse stored presets',
-      error instanceof Error ? error : new Error(String(error))
+      normalizeError(error, 'Failed to parse stored presets')
     );
     return [];
   }

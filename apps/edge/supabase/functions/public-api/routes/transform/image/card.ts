@@ -13,12 +13,15 @@ import {
   jsonResponse,
   traceRequestComplete,
   traceStep,
+  uploadObject,
+  getStorageServiceClient,
 } from '@heyclaude/edge-runtime';
 import {
   createDataApiContext,
   logError,
   logInfo,
   logger,
+  normalizeError,
 } from '@heyclaude/shared-runtime';
 import {
   ensureImageMagickInitialized,
@@ -26,10 +29,6 @@ import {
   optimizeImage,
 } from '@heyclaude/shared-runtime/image/manipulation.ts';
 import { MagickFormat } from '@imagemagick/magick-wasm';
-import {
-  uploadObject,
-  getStorageServiceClient,
-} from '@heyclaude/edge-runtime';
 
 const CORS = publicCorsHeaders;
 const CARD_WIDTH = 1200;
@@ -593,7 +592,7 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
     return jsonResponse(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: normalizeError(error, 'Unknown error occurred').message,
       } satisfies ContentCardGenerateResponse,
       500,
       CORS

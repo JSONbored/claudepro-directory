@@ -5,7 +5,7 @@
 
 import 'server-only';
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
   generateRequestId,
   logger,

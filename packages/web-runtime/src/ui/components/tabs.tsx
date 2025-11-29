@@ -65,7 +65,12 @@ const TabsTrigger = ({
         });
       })
       .catch((error) => {
-        logger.error('TabsTrigger: failed to load animation config', error);
+        logger.warn('[Animation] Failed to load config', {
+          err: error,
+          category: 'animation',
+          component: 'TabsTrigger',
+          recoverable: true,
+        });
       });
   }, []);
 

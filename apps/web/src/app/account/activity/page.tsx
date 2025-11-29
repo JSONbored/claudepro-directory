@@ -13,7 +13,7 @@ import { UI_CLASSES, Button ,
   CardDescription,
   CardHeader,
   CardTitle } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
@@ -61,7 +61,7 @@ export default async function ActivityPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -89,12 +89,12 @@ export default async function ActivityPage() {
 
   function handleActionResult<T>(
     name: string,
-    result: PromiseSettledResult<{ data?: T | null; serverError?: unknown } | null>
-  ): T | null {
+    result: PromiseSettledResult<null | { data?: null | T; serverError?: unknown }>
+  ): null | T {
     if (result.status === 'fulfilled') {
       const value = result.value;
       if (value && typeof value === 'object' && 'data' in value) {
-        return (value.data as T | null | undefined) ?? null;
+        return (value.data as null | T | undefined) ?? null;
       }
       return null;
     }
@@ -127,7 +127,7 @@ export default async function ActivityPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
             </Button>
           </CardContent>
@@ -160,8 +160,7 @@ export default async function ActivityPage() {
       </div>
 
       {/* Stats Overview - only render if summary is available */}
-      {hasSummary && (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {hasSummary ? <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Submissions</CardTitle>
@@ -173,11 +172,10 @@ export default async function ActivityPage() {
                   {summary.merged_submissions}/{summary.total_submissions}
                 </span>
               </div>
-              <p className={'mt-1 text-muted-foreground text-xs'}>Merged</p>
+              <p className="mt-1 text-muted-foreground text-xs">Merged</p>
             </CardContent>
           </Card>
-        </div>
-      )}
+        </div> : null}
 
       {/* Timeline - only render if timeline is available */}
       {hasTimeline ? (

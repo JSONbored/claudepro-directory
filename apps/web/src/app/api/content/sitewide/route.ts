@@ -17,7 +17,7 @@ import { createSupabaseAnonClient,
   badRequestResponse,
   getOnlyCorsHeaders,
   buildCacheHeaders } from '@heyclaude/web-runtime/server';
-import type { NextRequest } from 'next/server';
+import  { type NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;

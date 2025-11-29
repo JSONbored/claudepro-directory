@@ -1,106 +1,103 @@
 /**
- * Sugar High Syntax Highlighting Styles - Production Ready Design
- * WCAG AAA/AA compliant matching enhanced mockup design (Nov 2025)
- * Exact colors from comprehensive specification
+ * Sugar High Syntax Highlighting Styles - Polar.sh Inspired Design
+ * Clean, minimal, professional code blocks
  * @see https://github.com/huozhi/sugar-high
  */
 
-/* Sugar High CSS Variables - Dark Mode (WCAG AAA: 19:1+ contrast)
-   These map directly to Sugar High's inline color variables */
+/* Sugar High CSS Variables - Dark Mode
+   Polar.sh-inspired muted color palette (4-5 colors only) */
 :root {
-  /* Core Sugar High variables that the library uses */
-  --sh-class: #a78bfa; /* Purple for classes/constructors */
-  --sh-identifier: #abd5ff; /* Light blue for variables/identifiers */
-  --sh-sign: #89ddff; /* Bright cyan for operators/punctuation - make them pop */
-  --sh-string: #d4bf8f; /* Muted gold for strings */
-  --sh-keyword: #c792ea; /* Purple for keywords/booleans/numbers */
-  --sh-comment: #6b7280; /* Medium gray for comments */
-  --sh-jsxliterals: #abd5ff; /* Light blue for JSX */
-  --sh-property: #abd5ff; /* Light blue for object properties */
-  --sh-entity: #ffcb6b; /* Yellow for entities */
+  /* Core Sugar High variables - Polar-style muted palette */
+  --sh-class: #93c5fd;     /* Soft blue - classes/constructors */
+  --sh-identifier: #e2e8f0; /* Off-white - variables/identifiers */
+  --sh-sign: #94a3b8;       /* Slate - punctuation (subtle, not highlighted) */
+  --sh-string: #86efac;     /* Soft green - strings */
+  --sh-keyword: #7dd3fc;    /* Light blue - keywords/booleans */
+  --sh-comment: #64748b;    /* Slate gray - comments */
+  --sh-jsxliterals: #93c5fd; /* Soft blue - JSX */
+  --sh-property: #e2e8f0;   /* Off-white - object properties */
+  --sh-entity: #fcd34d;     /* Soft yellow - entities */
 
-  /* Code block structure colors - Dark mode */
-  --code-bg: oklch(12% 0.003 60);
-  --code-border: oklch(18% 0.004 60);
-  --code-inner-glow: oklch(14% 0.003 60);
-  --code-header-bg: rgba(255, 255, 255, 0.03);
-  --code-line-number: #6b7280; /* Much brighter gray - highly visible */
+  /* Code block structure colors - Polar-style dark mode */
+  --code-bg: #1e1e1e;
+  --code-border: #2e2e2e;
+  --code-header-bg: rgba(255, 255, 255, 0.02);
+  --code-line-number: #4b5563;
 
   /* UI colors - Dark mode */
-  --code-badge-bg: oklch(74% 0.2 35); /* #F59E0B - Claude orange */
-  --code-line-highlight-bg: oklch(22% 0.01 60); /* #1f1f1f */
-  --code-line-highlight-border: oklch(74% 0.2 35); /* #F59E0B - orange accent */
+  --code-badge-color: #64748b;
+  --code-line-highlight-bg: rgba(99, 102, 241, 0.08);
+  --code-line-highlight-border: #6366f1;
 }
 
-/* Light Theme Overrides - WCAG AA (7:1+ contrast) */
+/* Light Theme Overrides - Polar-style */
 @media (prefers-color-scheme: light) {
   :root {
-    /* Core Sugar High variables - Light Mode */
-    --sh-class: #7c3aed; /* Deep purple */
-    --sh-identifier: #0284c7; /* Deep sky blue */
-    --sh-sign: #dc2626; /* Red */
-    --sh-string: #059669; /* Forest green */
-    --sh-keyword: #d97706; /* Deep amber */
-    --sh-comment: #6b7280; /* Medium gray */
-    --sh-jsxliterals: #0284c7; /* Blue */
-    --sh-property: #0284c7; /* Deep sky blue */
-    --sh-entity: #d97706; /* Amber */
+    /* Core Sugar High variables - Light Mode (muted palette) */
+    --sh-class: #6366f1;     /* Indigo */
+    --sh-identifier: #1e293b; /* Slate 800 */
+    --sh-sign: #64748b;       /* Slate 500 */
+    --sh-string: #059669;     /* Emerald 600 */
+    --sh-keyword: #0284c7;    /* Sky 600 */
+    --sh-comment: #94a3b8;    /* Slate 400 */
+    --sh-jsxliterals: #6366f1; /* Indigo */
+    --sh-property: #1e293b;   /* Slate 800 */
+    --sh-entity: #d97706;     /* Amber 600 */
 
     /* Code block structure colors - Light mode */
-    --code-bg: oklch(98% 0.004 85); /* #FEFEFE */
-    --code-border: oklch(84% 0.005 85); /* #d0d0d0 */
-    --code-inner-glow: oklch(95% 0.004 85); /* #f0f0f0 */
-    --code-header-bg: rgba(0, 0, 0, 0.03);
-    --code-line-number: oklch(60% 0.01 260); /* #9CA3AF */
+    --code-bg: #fafafa;
+    --code-border: #e5e7eb;
+    --code-header-bg: rgba(0, 0, 0, 0.02);
+    --code-line-number: #9ca3af;
 
     /* UI colors - Light mode */
-    --code-badge-bg: oklch(58% 0.18 35); /* #D97706 - darker orange */
-    --code-line-highlight-bg: oklch(96% 0.05 55); /* #FEF3C7 - light yellow tint */
-    --code-line-highlight-border: oklch(58% 0.18 35); /* #D97706 */
+    --code-badge-color: #64748b;
+    --code-line-highlight-bg: rgba(99, 102, 241, 0.06);
+    --code-line-highlight-border: #6366f1;
   }
 }
 
-/* Forced Dark Mode */
+/* Forced Dark Mode - Polar-style */
 [data-theme="dark"] {
-  --sh-class: #a78bfa;
-  --sh-identifier: #abd5ff;
-  --sh-sign: #89ddff; /* Bright cyan for brackets/colons */
-  --sh-string: #d4bf8f; /* Muted gold - matches :root */
-  --sh-keyword: #c792ea;
-  --sh-comment: #6b7280;
-  --sh-jsxliterals: #abd5ff;
-  --sh-property: #abd5ff;
-  --sh-entity: #ffcb6b;
-  --code-bg: oklch(20% 0.005 60);
-  --code-border: oklch(25% 0.005 60);
-  --code-inner-glow: oklch(22% 0.005 60);
-  --code-line-number: oklch(32% 0.01 260);
-  --code-badge-bg: oklch(74% 0.2 35);
-  --code-line-highlight-bg: oklch(22% 0.01 60);
-  --code-line-highlight-border: oklch(74% 0.2 35);
+  --sh-class: #93c5fd;
+  --sh-identifier: #e2e8f0;
+  --sh-sign: #94a3b8;
+  --sh-string: #86efac;
+  --sh-keyword: #7dd3fc;
+  --sh-comment: #64748b;
+  --sh-jsxliterals: #93c5fd;
+  --sh-property: #e2e8f0;
+  --sh-entity: #fcd34d;
+  --code-bg: #1e1e1e;
+  --code-border: #2e2e2e;
+  --code-header-bg: rgba(255, 255, 255, 0.02);
+  --code-line-number: #4b5563;
+  --code-badge-color: #64748b;
+  --code-line-highlight-bg: rgba(99, 102, 241, 0.08);
+  --code-line-highlight-border: #6366f1;
 }
 
-/* Forced Light Mode */
+/* Forced Light Mode - Polar-style */
 [data-theme="light"] {
-  --sh-class: #7c3aed;
-  --sh-identifier: #0284c7;
-  --sh-sign: #dc2626;
+  --sh-class: #6366f1;
+  --sh-identifier: #1e293b;
+  --sh-sign: #64748b;
   --sh-string: #059669;
-  --sh-keyword: #d97706;
-  --sh-comment: #6b7280;
-  --sh-jsxliterals: #0284c7;
-  --sh-property: #0284c7;
+  --sh-keyword: #0284c7;
+  --sh-comment: #94a3b8;
+  --sh-jsxliterals: #6366f1;
+  --sh-property: #1e293b;
   --sh-entity: #d97706;
-  --code-bg: oklch(98% 0.004 85);
-  --code-border: oklch(84% 0.005 85);
-  --code-inner-glow: oklch(95% 0.004 85);
-  --code-line-number: oklch(60% 0.01 260);
-  --code-badge-bg: oklch(58% 0.18 35);
-  --code-line-highlight-bg: oklch(96% 0.05 55);
-  --code-line-highlight-border: oklch(58% 0.18 35);
+  --code-bg: #fafafa;
+  --code-border: #e5e7eb;
+  --code-header-bg: rgba(0, 0, 0, 0.02);
+  --code-line-number: #9ca3af;
+  --code-badge-color: #64748b;
+  --code-line-highlight-bg: rgba(99, 102, 241, 0.06);
+  --code-line-highlight-border: #6366f1;
 }
 
-/* Code Block Wrapper - Enhanced 4-Layer Shadow System */
+/* Code Block Wrapper - Polar-style Clean Design */
 .code-block-wrapper {
   position: relative;
   margin: 1.5rem 0;
@@ -108,47 +105,16 @@
   overflow: hidden;
   background: var(--code-bg);
   border: 1px solid var(--code-border);
-
-  /* 4-Layer Shadow System for depth (Dark Mode) */
-  box-shadow:
-    0 0 0 1px var(--code-inner-glow), /* Layer 1: Inner glow */
-    0 2px 4px rgba(0, 0, 0, 0.08), /* Layer 2: Base shadow */
-    0 4px 8px rgba(0, 0, 0, 0.06), /* Layer 3: Structure shadow */
-    0 8px 16px rgba(0, 0, 0, 0.04); /* Layer 4: Atmosphere shadow */
+  /* Clean, minimal - no heavy shadows */
 }
 
-@media (prefers-color-scheme: light) {
-  .code-block-wrapper {
-    /* Subtle shadows for light mode */
-    box-shadow:
-      0 0 0 1px var(--code-inner-glow),
-      0 1px 3px rgba(0, 0, 0, 0.06),
-      0 4px 6px rgba(0, 0, 0, 0.04);
-  }
-}
-
-[data-theme="dark"] .code-block-wrapper {
-  box-shadow:
-    0 0 0 1px var(--code-inner-glow),
-    0 2px 4px rgba(0, 0, 0, 0.08),
-    0 4px 8px rgba(0, 0, 0, 0.06),
-    0 8px 16px rgba(0, 0, 0, 0.04);
-}
-
-[data-theme="light"] .code-block-wrapper {
-  box-shadow:
-    0 0 0 1px var(--code-inner-glow),
-    0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 6px rgba(0, 0, 0, 0.04);
-}
-
-/* Code Block Header - Enhanced Design */
+/* Code Block Header - Polar-style Minimal */
 .code-block-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  min-height: 48px;
+  padding: 10px 16px;
+  min-height: 40px;
   background: var(--code-header-bg);
   border-bottom: 1px solid var(--code-border);
 }
@@ -160,125 +126,100 @@
 }
 
 .code-block-filename {
-  font-family: var(--font-geist-mono, "GeistMono"), "SF Mono", monospace;
-  font-size: 0.875rem;
+  font-family: "GeistMono", var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.8125rem;
   font-weight: 500;
-  color: oklch(60% 0.01 260);
+  color: #9ca3af;
 }
 
-/* Language Badge - Glassmorphic Design */
+/* Language Badge - Polar-style Plain Text */
 .code-block-language {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
-
-  /* Dark Mode Badge - Glassmorphic */
-  background: linear-gradient(135deg, oklch(74% 0.2 35 / 0.15), oklch(74% 0.2 35 / 0.1));
-  border: 1px solid oklch(74% 0.2 35 / 0.3);
-  color: var(--code-badge-bg);
-  backdrop-filter: blur(4px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-@media (prefers-color-scheme: light) {
-  .code-block-language {
-    background: oklch(96% 0.05 55 / 0.5); /* Light amber tint */
-    border: 1px solid oklch(58% 0.18 35 / 0.25);
-    color: var(--code-badge-bg);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-}
-
-[data-theme="dark"] .code-block-language {
-  background: linear-gradient(135deg, oklch(74% 0.2 35 / 0.15), oklch(74% 0.2 35 / 0.1));
-  border: 1px solid oklch(74% 0.2 35 / 0.3);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="light"] .code-block-language {
-  background: oklch(96% 0.05 55 / 0.5);
-  border: 1px solid oklch(58% 0.18 35 / 0.25);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  letter-spacing: 0.05em;
+  /* Plain, minimal styling */
+  background: transparent;
+  border: none;
+  color: var(--code-badge-color);
 }
 
 .code-block-header-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  /* Hide until hover */
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
-/* Action Buttons - Enhanced Hover States */
+.code-block-wrapper:hover .code-block-header-actions {
+  opacity: 1;
+}
+
+/* Action Buttons - Polar-style Minimal */
 .code-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
-  border: 1px solid transparent;
-  border-radius: 6px;
+  border: none;
+  border-radius: 4px;
   background: transparent;
-  color: oklch(60% 0.01 260); /* #9CA3AF */
+  color: #6b7280;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-/* Dark Mode Button Hover */
 .code-action-btn:hover {
-  background: oklch(22% 0.01 60 / 0.5); /* #1f1f1f */
-  border-color: oklch(28% 0.01 60); /* #2f2f2f */
-  color: oklch(90% 0.01 260); /* #E5E7EB */
+  background: rgba(255, 255, 255, 0.08);
+  color: #e5e7eb;
 }
 
-/* Light Mode Button Hover */
 @media (prefers-color-scheme: light) {
   .code-action-btn:hover {
-    background: oklch(94% 0.004 260); /* #E5E7EB */
-    border-color: oklch(84% 0.005 85); /* #d0d0d0 */
-    color: oklch(42% 0.05 260); /* #4B5563 */
+    background: rgba(0, 0, 0, 0.05);
+    color: #374151;
   }
 }
 
 [data-theme="dark"] .code-action-btn:hover {
-  background: oklch(22% 0.01 60 / 0.5);
-  border-color: oklch(28% 0.01 60);
-  color: oklch(90% 0.01 260);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e5e7eb;
 }
 
 [data-theme="light"] .code-action-btn:hover {
-  background: oklch(94% 0.004 260);
-  border-color: oklch(84% 0.005 85);
-  color: oklch(42% 0.05 260);
+  background: rgba(0, 0, 0, 0.05);
+  color: #374151;
 }
 
 /* Success State (after copy) */
-.code-action-btn:active,
 .code-action-btn.success {
-  background: oklch(45% 0.18 160 / 0.1); /* Green tint */
-  border-color: oklch(45% 0.18 160 / 0.3);
-  color: oklch(55% 0.18 160); /* #10B981 */
-  transform: scale(1.05);
+  color: #10b981;
 }
 
-/* Code Block Pre/Code - Ultra-Compact Typography */
+/* Code Block Pre/Code - Polar-style Typography */
 .code-block-pre {
   margin: 0;
   padding: 1rem 0;
   overflow-x: auto;
   background: var(--code-bg);
-  font-family: var(--font-geist-mono, "GeistMono"), "SF Mono", Consolas, Monaco, monospace;
-  font-size: 0.8125rem; /* 13px */
-  line-height: 1.5;
+  font-family: "GeistMono", var(--font-geist-mono), ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar - Dark Mode */
+/* Custom Scrollbar - Minimal */
 .code-block-pre::-webkit-scrollbar {
-  height: 10px;
+  height: 8px;
 }
 
 .code-block-pre::-webkit-scrollbar-track {
@@ -286,46 +227,44 @@
 }
 
 .code-block-pre::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, oklch(48% 0.01 260), oklch(42% 0.01 260));
-  border-radius: 5px;
+  background: #3f3f46;
+  border-radius: 4px;
 }
 
 .code-block-pre::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, oklch(55% 0.01 260), oklch(48% 0.01 260));
+  background: #52525b;
 }
 
-/* Custom Scrollbar - Light Mode */
 @media (prefers-color-scheme: light) {
   .code-block-pre::-webkit-scrollbar-thumb {
-    background: oklch(82% 0.005 260); /* #D1D5DB */
-    border-radius: 5px;
+    background: #d1d5db;
   }
 
   .code-block-pre::-webkit-scrollbar-thumb:hover {
-    background: oklch(70% 0.01 260); /* #9CA3AF */
+    background: #9ca3af;
   }
 }
 
 [data-theme="dark"] .code-block-pre::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, oklch(48% 0.01 260), oklch(42% 0.01 260));
+  background: #3f3f46;
 }
 
 [data-theme="dark"] .code-block-pre::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, oklch(55% 0.01 260), oklch(48% 0.01 260));
+  background: #52525b;
 }
 
 [data-theme="light"] .code-block-pre::-webkit-scrollbar-thumb {
-  background: oklch(82% 0.005 260);
+  background: #d1d5db;
 }
 
 [data-theme="light"] .code-block-pre::-webkit-scrollbar-thumb:hover {
-  background: oklch(70% 0.01 260);
+  background: #9ca3af;
 }
 
-/* Base Sugar High Styles */
+/* Base Sugar High Styles - Polar-style */
 .sugar-high {
   display: block;
-  color: var(--color-text-primary, hsl(var(--foreground)));
+  color: #e2e8f0;
   background-color: transparent;
   font-family: inherit;
   font-size: inherit;
@@ -333,76 +272,63 @@
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+}
+
+@media (prefers-color-scheme: light) {
+  .sugar-high {
+    color: #1e293b;
+  }
+}
+
+[data-theme="dark"] .sugar-high {
+  color: #e2e8f0;
+}
+
+[data-theme="light"] .sugar-high {
+  color: #1e293b;
 }
 
 /* Token-Specific Enhancements */
 .sh__token--keyword {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .sh__token--comment {
   font-style: italic;
-  opacity: 0.9;
 }
 
 .sh__token--class {
   font-weight: 500;
 }
 
-/* Line Numbers - Compact Spacing */
+/* Line Numbers - Polar-style with proper spacing */
 .sugar-high > .sh__line,
 code.sugar-high > .sh__line {
   display: block;
-  padding: 0 1rem;
+  padding: 0 1.25rem;
   position: relative;
 }
 
 .sh__line::before {
   content: attr(data-line);
   display: inline-block;
-  width: 2rem;
-  margin-right: 0; /* Zero gap - tight to code */
+  width: 2.5rem;
+  margin-right: 1.25rem;
+  padding-right: 0.75rem;
   text-align: right;
   color: var(--code-line-number);
-  opacity: 1; /* Full opacity - was too faint at 0.5 */
   user-select: none;
   font-size: inherit;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Line Highlighting Feature - Orange Accent Border (Key Feature from Mockup) */
+/* Line Highlighting Feature - Subtle indigo accent */
 .sh__line--highlighted,
 .sh__line[data-highlighted],
 .sh__line[data-highlighted-line] {
   background: var(--code-line-highlight-bg);
   border-left: 2px solid var(--code-line-highlight-border);
-  padding-left: calc(1rem - 2px); /* Adjust for border */
-}
-
-/* Light Mode Line Highlighting */
-@media (prefers-color-scheme: light) {
-  .sh__line--highlighted,
-  .sh__line[data-highlighted],
-  .sh__line[data-highlighted-line] {
-    background: var(--code-line-highlight-bg);
-    border-left: 2px solid var(--code-line-highlight-border);
-  }
-}
-
-[data-theme="dark"] .sh__line--highlighted,
-[data-theme="dark"] .sh__line[data-highlighted],
-[data-theme="dark"] .sh__line[data-highlighted-line] {
-  background: var(--code-line-highlight-bg);
-  border-left: 2px solid var(--code-line-highlight-border);
-  padding-left: calc(1rem - 2px);
-}
-
-[data-theme="light"] .sh__line--highlighted,
-[data-theme="light"] .sh__line[data-highlighted],
-[data-theme="light"] .sh__line[data-highlighted-line] {
-  background: var(--code-line-highlight-bg);
-  border-left: 2px solid var(--code-line-highlight-border);
-  padding-left: calc(1rem - 2px);
+  margin-left: -2px;
 }
 
 /* Selection in code blocks */
@@ -410,17 +336,11 @@ code.sugar-high > .sh__line {
   background-color: rgba(99, 102, 241, 0.25);
 }
 
-@media (prefers-color-scheme: light) {
-  .sugar-high ::selection {
-    background-color: rgba(99, 102, 241, 0.2);
-  }
-}
-
 /* Empty/Fallback state */
 .sugar-high-empty,
 .code-block-fallback {
-  padding: 1rem;
-  color: var(--color-text-muted, hsl(var(--muted-foreground)));
+  padding: 1rem 1.25rem;
+  color: #6b7280;
   font-style: italic;
   background: var(--code-bg);
 }
@@ -428,17 +348,24 @@ code.sugar-high > .sh__line {
 /* Mobile optimizations */
 @media (max-width: 640px) {
   .code-block-pre {
-    font-size: 0.75rem;
-    padding: 0.75rem;
+    font-size: 12px;
+    padding: 0.75rem 0;
   }
 
   .sh__line::before {
     width: 2rem;
     margin-right: 1rem;
+    padding-right: 0.5rem;
+  }
+
+  .sugar-high > .sh__line,
+  code.sugar-high > .sh__line {
+    padding: 0 1rem;
   }
 
   .code-block-header {
-    padding: 0.375rem 0.75rem;
+    padding: 8px 12px;
+    min-height: 36px;
   }
 
   .code-block-filename {
@@ -446,13 +373,18 @@ code.sugar-high > .sh__line {
   }
 
   .code-action-btn {
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 24px;
+    height: 24px;
   }
 
   .code-action-btn svg {
     width: 14px;
     height: 14px;
+  }
+
+  /* Always show actions on mobile (no hover) */
+  .code-block-header-actions {
+    opacity: 1;
   }
 }
 

@@ -1,10 +1,10 @@
-import type { Database } from '@heyclaude/database-types';
-import type { CreateJobInput } from '@heyclaude/web-runtime';
+import  { type Database } from '@heyclaude/database-types';
+import  { type CreateJobInput } from '@heyclaude/web-runtime';
 import { createJob } from '@heyclaude/web-runtime/actions';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
@@ -80,7 +80,7 @@ export default async function NewJobPage() {
       throw normalized;
     }
 
-    if (!result.data) {
+    if (result.data === null || result.data === undefined) {
       const normalized = normalizeError(
         'createJob returned no data',
         'NewJobPage: createJob returned no data'
@@ -91,7 +91,7 @@ export default async function NewJobPage() {
 
     // Type the result data using generated database types
     type CreateJobResult = Database['public']['CompositeTypes']['create_job_with_payment_result'] & {
-      checkoutUrl?: string | null;
+      checkoutUrl?: null | string;
     };
     const jobResult = result.data as CreateJobResult;
 

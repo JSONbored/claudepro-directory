@@ -6,13 +6,14 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { useCallback, useMemo, useState, useTransition } from 'react';
 
-const SUPABASE_URL = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
 
 // Default retry configuration (actual values loaded from static config per hook instance)
 const DEFAULT_MAX_RETRIES = 3;

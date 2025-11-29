@@ -5,7 +5,7 @@
 
 import 'server-only';
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { getStringProperty, getNumberProperty, getObjectProperty } from '@heyclaude/shared-runtime';
 import {
   generateRequestId,
@@ -29,84 +29,84 @@ const CORS = getOnlyCorsHeaders;
 function transformHealthResult(
   result: DatabaseGenerated['public']['Functions']['get_api_health']['Returns']
 ): {
-  status: string;
-  timestamp: string;
   apiVersion: string;
   checks: {
-    database: {
-      status: string;
-      latency: number;
+    categoryConfigs: {
+      count: number;
       error?: string;
+      status: string;
     };
     contentTable: {
-      status: string;
       count: number;
       error?: string;
+      status: string;
     };
-    categoryConfigs: {
-      status: string;
-      count: number;
+    database: {
       error?: string;
+      latency: number;
+      status: string;
     };
   };
+  status: string;
+  timestamp: string;
 } {
   const checks = getObjectProperty(result, 'checks');
-  const checksDb = checks ? getObjectProperty(checks, 'database') : undefined;
-  const checksContent = checks ? getObjectProperty(checks, 'content_table') : undefined;
-  const checksCategory = checks ? getObjectProperty(checks, 'category_configs') : undefined;
+  const checksDb = typeof checks === 'object' && checks !== null ? getObjectProperty(checks, 'database') : undefined;
+  const checksContent = typeof checks === 'object' && checks !== null ? getObjectProperty(checks, 'content_table') : undefined;
+  const checksCategory = typeof checks === 'object' && checks !== null ? getObjectProperty(checks, 'category_configs') : undefined;
 
   const response: {
-    status: string;
-    timestamp: string;
     apiVersion: string;
     checks: {
-      database: {
-        status: string;
-        latency: number;
+      categoryConfigs: {
+        count: number;
         error?: string;
+        status: string;
       };
       contentTable: {
-        status: string;
         count: number;
         error?: string;
+        status: string;
       };
-      categoryConfigs: {
-        status: string;
-        count: number;
+      database: {
         error?: string;
+        latency: number;
+        status: string;
       };
     };
+    status: string;
+    timestamp: string;
   } = {
     status: getStringProperty(result, 'status') ?? 'unhealthy',
     timestamp: getStringProperty(result, 'timestamp') ?? new Date().toISOString(),
     apiVersion: getStringProperty(result, 'api_version') ?? '1.0.0',
     checks: {
       database: {
-        status: checksDb ? (getStringProperty(checksDb, 'status') ?? 'error') : 'error',
-        latency: checksDb ? (getNumberProperty(checksDb, 'latency') ?? 0) : 0,
+        status: typeof checksDb === 'object' && checksDb !== null ? (getStringProperty(checksDb, 'status') ?? 'error') : 'error',
+        latency: typeof checksDb === 'object' && checksDb !== null ? (getNumberProperty(checksDb, 'latency') ?? 0) : 0,
       },
       contentTable: {
-        status: checksContent ? (getStringProperty(checksContent, 'status') ?? 'error') : 'error',
-        count: checksContent ? (getNumberProperty(checksContent, 'count') ?? 0) : 0,
+        status: typeof checksContent === 'object' && checksContent !== null ? (getStringProperty(checksContent, 'status') ?? 'error') : 'error',
+        count: typeof checksContent === 'object' && checksContent !== null ? (getNumberProperty(checksContent, 'count') ?? 0) : 0,
       },
       categoryConfigs: {
-        status: checksCategory ? (getStringProperty(checksCategory, 'status') ?? 'error') : 'error',
-        count: checksCategory ? (getNumberProperty(checksCategory, 'count') ?? 0) : 0,
+        status: typeof checksCategory === 'object' && checksCategory !== null ? (getStringProperty(checksCategory, 'status') ?? 'error') : 'error',
+        count: typeof checksCategory === 'object' && checksCategory !== null ? (getNumberProperty(checksCategory, 'count') ?? 0) : 0,
       },
     },
   };
 
   // Conditionally add error properties
-  const dbError = checksDb ? getStringProperty(checksDb, 'error') : undefined;
-  if (dbError !== undefined) {
+  const dbError = typeof checksDb === 'object' && checksDb !== null ? getStringProperty(checksDb, 'error') : undefined;
+  if (typeof dbError === 'string') {
     response.checks.database.error = dbError;
   }
-  const contentError = checksContent ? getStringProperty(checksContent, 'error') : undefined;
-  if (contentError !== undefined) {
+  const contentError = typeof checksContent === 'object' && checksContent !== null ? getStringProperty(checksContent, 'error') : undefined;
+  if (typeof contentError === 'string') {
     response.checks.contentTable.error = contentError;
   }
-  const categoryError = checksCategory ? getStringProperty(checksCategory, 'error') : undefined;
-  if (categoryError !== undefined) {
+  const categoryError = typeof checksCategory === 'object' && checksCategory !== null ? getStringProperty(checksCategory, 'error') : undefined;
+  if (typeof categoryError === 'string') {
     response.checks.categoryConfigs.error = categoryError;
   }
 

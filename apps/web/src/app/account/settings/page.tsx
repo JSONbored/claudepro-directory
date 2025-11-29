@@ -3,7 +3,7 @@
  * Settings Page - User profile and account management.
  */
 
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
 import {
   generatePageMetadata,
@@ -18,7 +18,7 @@ import { UI_CLASSES, Button ,
   CardDescription,
   CardHeader,
   CardTitle } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -66,7 +66,7 @@ export default async function SettingsPage() {
             <CardDescription>Please sign in to manage your account settings.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -108,7 +108,7 @@ export default async function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true} variant="outline">
+            <Button asChild variant="outline">
               <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
             </Button>
           </CardContent>
@@ -180,13 +180,11 @@ export default async function SettingsPage() {
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>Update your public profile details</CardDescription>
             </div>
-            {userData?.slug && (
-              <Link href={`/u/${userData.slug}`}>
+            {userData?.slug ? <Link href={`/u/${userData.slug}`}>
                 <Button variant="outline" size="sm">
                   View Profile
                 </Button>
-              </Link>
-            )}
+              </Link> : null}
           </div>
         </CardHeader>
         <CardContent>
@@ -203,11 +201,11 @@ export default async function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <p className={'font-medium text-sm'}>Email</p>
+              <p className="font-medium text-sm">Email</p>
               <p className="text-muted-foreground">{user.email}</p>
             </div>
             <div>
-              <p className={'font-medium text-sm'}>Member Since</p>
+              <p className="font-medium text-sm">Member Since</p>
               <p className="text-muted-foreground">
                 {profile.created_at
                   ? new Date(profile.created_at).toLocaleDateString('en-US', {
@@ -230,8 +228,7 @@ export default async function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {userData?.image && typeof userData.image === 'string' && (
-            <div className="flex items-center gap-4">
+          {userData?.image && typeof userData.image === 'string' ? <div className="flex items-center gap-4">
               <Image
                 src={userData.image}
                 alt={`${userData.name ?? 'User'}'s avatar`}
@@ -247,8 +244,7 @@ export default async function SettingsPage() {
                   providerLabel={user.app_metadata.provider === 'github' ? 'GitHub' : 'Google'}
                 />
               </div>
-            </div>
-          )}
+            </div> : null}
         </CardContent>
       </Card>
     </div>

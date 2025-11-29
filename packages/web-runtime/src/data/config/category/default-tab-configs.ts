@@ -1,6 +1,6 @@
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
-import type { TabConfig } from '../../../types/category.ts';
+import  { type TabConfig } from '../../../types/category.ts';
 
 const STANDARD_TABS: ReadonlyArray<TabConfig> = [
   {
@@ -110,7 +110,7 @@ const COLLECTION_TABS: ReadonlyArray<TabConfig> = [
 ] as const;
 
 export const DEFAULT_TAB_CONFIGS: Readonly<
-  Record<Database['public']['Enums']['content_category'], ReadonlyArray<TabConfig> | null>
+  Record<Database['public']['Enums']['content_category'], null | ReadonlyArray<TabConfig>>
 > = {
   agents: STANDARD_TABS,
   mcp: STANDARD_TABS,
@@ -127,7 +127,7 @@ export const DEFAULT_TAB_CONFIGS: Readonly<
 
 export function getTabConfigForCategory(
   categoryId: Database['public']['Enums']['content_category']
-): ReadonlyArray<TabConfig> | null {
+): null | ReadonlyArray<TabConfig> {
   return DEFAULT_TAB_CONFIGS[categoryId] ?? null;
 }
 

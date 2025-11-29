@@ -4,20 +4,21 @@
  */
 
 import {
+  DATE_CONFIG,
+} from '../data/config/constants.ts';
+
+import {
   getAnimationConfig,
   getAppSettings,
   getPollingConfig,
   getTimeoutConfig,
-} from '../config/static-configs.ts';
-import {
-  DATE_CONFIG,
-} from '../data/config/constants.ts';
+} from "./static-configs.ts";
 
 /**
  * Get current date configuration from database
  * Falls back to hardcoded values if database unavailable
  */
-export async function getDateConfig() {
+export function getDateConfig() {
   // Get app settings from static defaults
   const config = getAppSettings();
   return {
@@ -32,8 +33,8 @@ export async function getDateConfig() {
 /**
  * Get formatted date strings for SEO templates
  */
-export async function getDateStrings() {
-  const config = await getDateConfig();
+export function getDateStrings() {
+  const config = getDateConfig();
   return {
     current: `${config.currentMonth} ${config.currentYear}`,
     seo: `${config.currentMonth.toLowerCase()} ${config.currentYear}`,
@@ -44,7 +45,7 @@ export async function getDateStrings() {
  * Get polling intervals from static config
  * Returns values from static configuration defaults
  */
-export async function getPollingIntervals() {
+export function getPollingIntervals() {
   // Get polling config from static defaults
   const config = getPollingConfig();
   return {
@@ -66,7 +67,7 @@ export async function getPollingIntervals() {
  * Get animation durations from static config
  * Returns values from static configuration defaults
  */
-export async function getAnimationDurations() {
+export function getAnimationDurations() {
   // Get animation config from static defaults
   const config = getAnimationConfig();
   return {
@@ -90,7 +91,7 @@ export async function getAnimationDurations() {
  * Get timeout configurations from static config
  * Returns values from static configuration defaults
  */
-export async function getTimeouts() {
+export function getTimeouts() {
   // Get timeout config from static defaults
   const config = getTimeoutConfig();
   return {

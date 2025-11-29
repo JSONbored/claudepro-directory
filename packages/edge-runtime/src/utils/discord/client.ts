@@ -1,6 +1,6 @@
 import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { createUtilityContext, normalizeError } from '@heyclaude/shared-runtime';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 const MAX_RETRIES = 3;
@@ -152,7 +152,7 @@ export async function sendDiscordWebhook(
         throw lastError;
       }
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown error');
+      lastError = normalizeError(error, 'Discord webhook error');
 
       if (lastError.message.includes('4')) {
         throw lastError;
@@ -385,7 +385,7 @@ export async function updateDiscordMessage(
         throw lastError;
       }
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown error');
+      lastError = normalizeError(error, 'Discord webhook error');
 
       if (lastError.message.includes('4')) {
         throw lastError;

@@ -6,7 +6,7 @@
 import 'server-only';
 
 import { TrendingService } from '@heyclaude/data-layer';
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import {
   generateRequestId,
@@ -35,41 +35,41 @@ type RecentContentRow =
   DatabaseGenerated['public']['Functions']['get_recent_content']['Returns'][number];
 
 type LooseTrendingRow = Partial<TrendingMetricsRow> & {
-  slug: TrendingMetricsRow['slug'];
+  author?: null | string;
+  bookmarks_total?: null | number;
   category?: ContentCategory | null;
-  title?: string | null;
-  description?: string | null;
-  author?: string | null;
-  tags?: string[] | null;
-  source?: string | null;
-  views_total?: number | null;
-  copies_total?: number | null;
-  bookmarks_total?: number | null;
-  trending_score?: number | null;
-  engagement_score?: number | null;
-  freshness_score?: number | null;
+  copies_total?: null | number;
+  description?: null | string;
+  engagement_score?: null | number;
+  freshness_score?: null | number;
+  slug: TrendingMetricsRow['slug'];
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  trending_score?: null | number;
+  views_total?: null | number;
 };
 
 type LoosePopularRow = Partial<PopularContentRow> & {
-  slug: PopularContentRow['slug'];
+  author?: null | string;
   category?: ContentCategory | null;
-  title?: string | null;
-  description?: string | null;
-  author?: string | null;
-  tags?: string[] | null;
-  view_count?: number | null;
-  copy_count?: number | null;
-  popularity_score?: number | null;
+  copy_count?: null | number;
+  description?: null | string;
+  popularity_score?: null | number;
+  slug: PopularContentRow['slug'];
+  tags?: null | string[];
+  title?: null | string;
+  view_count?: null | number;
 };
 
 type LooseRecentRow = Partial<RecentContentRow> & {
-  slug: RecentContentRow['slug'];
+  author?: null | string;
   category?: ContentCategory | null;
-  title?: string | null;
-  description?: string | null;
-  author?: string | null;
-  tags?: string[] | null;
-  created_at?: string | null;
+  created_at?: null | string;
+  description?: null | string;
+  slug: RecentContentRow['slug'];
+  tags?: null | string[];
+  title?: null | string;
 };
 
 function isValidContentCategory(value: unknown): value is ContentCategory {
@@ -85,7 +85,7 @@ function isValidContentCategory(value: unknown): value is ContentCategory {
   return false;
 }
 
-function parseCategory(value: string | null): ContentCategory | null {
+function parseCategory(value: null | string): ContentCategory | null {
   if (!value || value === 'all') {
     return null;
   }
@@ -104,7 +104,7 @@ function mapTrendingRows(rows: LooseTrendingRow[], fallbackCategory: ContentCate
     category:
       (row.category as ContentCategory | null | undefined) ?? fallbackCategory ?? DEFAULT_CATEGORY,
     slug: row.slug,
-    title: (row.title as string | null | undefined) ?? row.slug,
+    title: (row.title as null | string | undefined) ?? row.slug,
     description: row.description ?? undefined,
     author: row.author ?? undefined,
     tags: Array.isArray(row.tags) ? row.tags : undefined,
@@ -123,7 +123,7 @@ function mapPopularRows(rows: LoosePopularRow[], fallbackCategory: ContentCatego
     category:
       (row.category as ContentCategory | null | undefined) ?? fallbackCategory ?? DEFAULT_CATEGORY,
     slug: row.slug,
-    title: (row.title as string | null | undefined) ?? row.slug,
+    title: (row.title as null | string | undefined) ?? row.slug,
     description: row.description ?? undefined,
     author: row.author ?? undefined,
     tags: Array.isArray(row.tags) ? row.tags : undefined,

@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { ContentService, TrendingService, type ContentFilterOptions } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { cache } from 'react';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
@@ -162,10 +162,10 @@ type PopularContentRows = Database['public']['Functions']['get_popular_content']
 type RecentContentRows = Database['public']['Functions']['get_recent_content']['Returns'];
 
 interface TrendingPageDataResult {
-  trending: TrendingMetricsRows;
   popular: PopularContentRows;
   recent: RecentContentRows;
   totalCount: number;
+  trending: TrendingMetricsRows;
 }
 
 export async function getTrendingPageData(

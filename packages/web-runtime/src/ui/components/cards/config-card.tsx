@@ -62,12 +62,13 @@ import { BorderBeam } from '../animation/border-beam.tsx';
 import { ReviewRatingCompact } from '../feedback/review-rating-compact.tsx';
 import {
   Award,
-  Bookmark,
-  BookmarkPlus,
   ExternalLink,
   Eye,
+  FileJson,
   Github,
   Layers,
+  Pin,
+  PinOff,
   Sparkles,
 } from '../../../icons.tsx';
 import type { ConfigCardProps, ContentItem } from '../../../types/component.types.ts';
@@ -205,12 +206,10 @@ export const ConfigCard = memo(
       }, [item]);
 
       const metadata = useMemo(() => getMetadata(item as ContentItem), [item]);
-      const packageName = metadata['package'] as string | undefined;
       const configurationObject =
         metadata['configuration'] && typeof metadata['configuration'] === 'object'
           ? metadata['configuration']
           : null;
-      const pnpmCommand = packageName ? `pnpm add ${packageName}` : null;
 
       // Initialize all hooks at the top level
       const pulse = usePulse();
@@ -408,18 +407,25 @@ export const ConfigCard = memo(
                 })
                 .catch((error) => {
                   const normalized = normalizeError(error, 'Failed to track copy action');
-                  logger.error('Failed to track copy action', normalized, {
+                  logger.warn('[Clipboard] Failed to track copy action', {
+                    err: normalized,
+                    category: 'clipboard',
                     component: 'ConfigCard',
+                    nonCritical: true,
                     context: 'config_card_quick_copy',
-                    category: cardCategory,
-                    slug: cardSlug,
+                    itemCategory: cardCategory,
+                    itemSlug: cardSlug,
                   });
                 });
             }
           } catch (error) {
             const normalized = normalizeError(error, 'ConfigCard: quick action copy failed');
-            logger.error('ConfigCard: quick action copy failed', normalized, {
+            logger.warn('[Clipboard] Quick action copy failed', {
+              err: normalized,
+              category: 'clipboard',
               component: 'ConfigCard',
+              recoverable: true,
+              userRetryable: true,
             });
             toasts.raw.error('Copy failed', { description: 'Unable to copy to clipboard.' });
           }
@@ -720,6 +726,9 @@ export const ConfigCard = memo(
                   const safeRepoUrl = getSafeRepositoryUrl(item.repository as string);
                   if (safeRepoUrl) {
                     window.open(safeRepoUrl, '_blank');
+                    toasts.raw.success('Opening repository', {
+                      description: 'Opening in new tab...',
+                    });
                   } else {
                     logClientWarning('ConfigCard: Unsafe repository URL blocked', {
                       url: item.repository,
@@ -729,6 +738,7 @@ export const ConfigCard = memo(
                   }
                 }}
                 aria-label={`View ${displayTitle} repository on GitHub`}
+                title="View on GitHub"
               >
                 <Github className={UI_CLASSES.ICON_XS} aria-hidden="true" />
               </Button>
@@ -764,6 +774,9 @@ export const ConfigCard = memo(
                   const safeDocUrl = isTrustedDocumentationUrl(item.documentation_url as string);
                   if (safeDocUrl) {
                     window.open(safeDocUrl, '_blank');
+                    toasts.raw.success('Opening documentation', {
+                      description: 'Opening in new tab...',
+                    });
                   } else {
                     logClientWarning('ConfigCard: Blocked untrusted documentation URL', {
                       url: item.documentation_url,
@@ -774,6 +787,7 @@ export const ConfigCard = memo(
                   }
                 }}
                 aria-label={`View ${displayTitle} documentation`}
+                title="View documentation"
               >
                 <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
               </Button>
@@ -809,45 +823,23 @@ export const ConfigCard = memo(
                 size="sm"
                 className={`${UI_CLASSES.ICON_BUTTON_SM} ${pinned ? '' : UI_CLASSES.BUTTON_GHOST_ICON}`}
                 onClick={handlePinToggle}
-                aria-label={pinned ? 'Remove from pinboard' : 'Pin for later'}
+                aria-label={pinned ? 'Unpin from pinboard' : 'Pin to pinboard'}
+                title={pinned ? 'Unpin from pinboard' : 'Pin to pinboard'}
               >
                 {pinned ? (
-                  <Bookmark className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                  <Pin className={UI_CLASSES.ICON_XS} aria-hidden="true" />
                 ) : (
-                  <BookmarkPlus className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                  <PinOff className={UI_CLASSES.ICON_XS} aria-hidden="true" />
                 )}
               </Button>
             </div>
-
-            {/* pnpm command button */}
-            {pnpmCommand && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className={UI_CLASSES.ICON_BUTTON_SM}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  copyInlineValue(pnpmCommand, pnpmCommand, {
-                    action_type: 'copy_install',
-                    manager: 'pnpm',
-                  }).catch((error) => {
-                    const normalized = normalizeError(error, 'Failed to copy pnpm command');
-                    logger.error('Failed to copy pnpm command', normalized, {
-                      component: 'ConfigCard',
-                    });
-                  });
-                }}
-              >
-                pnpm add
-              </Button>
-            )}
 
             {/* Config copy button */}
             {configurationObject && (
               <Button
                 variant="ghost"
                 size="sm"
-                className={UI_CLASSES.ICON_BUTTON_SM}
+                className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                 onClick={(event) => {
                   event.stopPropagation();
                   copyInlineValue(
@@ -858,13 +850,19 @@ export const ConfigCard = memo(
                     }
                   ).catch((error) => {
                     const normalized = normalizeError(error, 'Failed to copy configuration');
-                    logger.error('Failed to copy configuration', normalized, {
+                    logger.warn('[Clipboard] Copy configuration failed', {
+                      err: normalized,
+                      category: 'clipboard',
                       component: 'ConfigCard',
+                      recoverable: true,
+                      userRetryable: true,
                     });
                   });
                 }}
+                aria-label="Copy configuration JSON"
+                title="Copy configuration JSON"
               >
-                Copy config
+                <FileJson className={UI_CLASSES.ICON_XS} aria-hidden="true" />
               </Button>
             )}
 
@@ -928,6 +926,7 @@ export const ConfigCard = memo(
                   }
                 }}
                 aria-label={`View details for ${displayTitle}${cardConfig.showViewCount && viewCount !== undefined && typeof viewCount === 'number' ? ` - ${formatViewCount(viewCount)}` : ''}`}
+                title="View details"
               >
                 <Eye className={UI_CLASSES.ICON_XS} aria-hidden="true" />
               </Button>
@@ -972,8 +971,11 @@ export const ConfigCard = memo(
       );
     } catch (error) {
       const normalized = normalizeError(error, 'ConfigCard: Rendering failed');
-      logger.error('ConfigCard: Rendering failed', normalized, {
+      logger.warn('[Render] ConfigCard rendering failed', {
+        err: normalized,
+        category: 'render',
         component: 'ConfigCard',
+        recoverable: true,
         hasSlug: Boolean(item.slug),
         hasCategory: Boolean(item.category),
       });

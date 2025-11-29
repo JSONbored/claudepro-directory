@@ -8,11 +8,12 @@
 
 
 
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { z } from 'zod';
 
 import { GENERATED_CONFIG } from '../../config/app-config.ts';
 import { SOCIAL_LINKS } from '../../config/social-links.ts';
-import type { SocialLinkKey } from '../../config/social-links.ts';
+import  { type SocialLinkKey } from '../../config/social-links.ts';
 
 /**
  * Application Information
@@ -122,8 +123,8 @@ export const DATE_CONFIG = GENERATED_CONFIG.date_config;
  */
 export const ANALYTICS_CONFIG = {
   umami: {
-    websiteId: process.env['NEXT_PUBLIC_UMAMI_WEBSITE_ID'],
-    scriptSrc: process.env['NEXT_PUBLIC_UMAMI_SCRIPT_SRC'],
+    websiteId: env.NEXT_PUBLIC_UMAMI_WEBSITE_ID ?? undefined,
+    scriptSrc: env.NEXT_PUBLIC_UMAMI_SCRIPT_URL ?? undefined,
   },
 } as const;
 
@@ -136,7 +137,7 @@ export const DEV_CONFIG = {
     preview: 3001,
     testing: 3002,
   },
-  logLevel: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+  logLevel: env.NODE_ENV === 'development' ? ('debug' as const) : ('info' as const),
 } as const;
 
 /**

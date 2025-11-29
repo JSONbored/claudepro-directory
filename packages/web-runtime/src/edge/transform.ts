@@ -191,6 +191,6 @@ export async function processContentEdge(
   } catch (error) {
     const normalized = normalizeError(error, 'processContentEdge failed');
     logger.warn('processContentEdge error', { err: normalized });
-    throw error instanceof Error ? error : new Error(String(error));
+    throw normalized;
   }
 }

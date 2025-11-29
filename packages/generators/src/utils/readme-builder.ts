@@ -42,7 +42,8 @@ export function buildReadmeMarkdown(
       if (!cat.title) return '';
 
       const emoji = ICON_EMOJI_MAP[cat.icon_name ?? ''] || '📄';
-      const categoryName = cat.title.endsWith('y')
+      // Pluralize category name (handles consonant+y -> ies, but not vowel+y)
+      const categoryName = cat.title.endsWith('y') && !/[aeiou]y$/i.test(cat.title)
         ? `${cat.title.slice(0, -1)}ies`
         : `${cat.title}s`;
 
@@ -51,7 +52,9 @@ export function buildReadmeMarkdown(
 
       for (const item of cat.items) {
         if (!(item.slug && item.title)) continue;
-        const url = `${SITE_URL}/${cat.url_slug ?? ''}/${item.slug}`;
+        // Safely construct URL to avoid double slashes
+        const categorySlug = cat.url_slug ? `/${cat.url_slug}` : '';
+        const url = `${SITE_URL}${categorySlug}/${item.slug}`;
         const description = item.description ?? 'No description available';
         section += `- **[${item.title}](${url})** - ${description}\n`;
       }

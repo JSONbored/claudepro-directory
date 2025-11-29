@@ -28,12 +28,12 @@ import {
 import {
   createNotificationRouterContext,
   createUtilityContext,
-  errorToString,
   getProperty,
   logError,
   logInfo,
   logWarn,
   logger,
+  normalizeError,
   TIMEOUT_PRESETS,
   withTimeout,
 } from '@heyclaude/shared-runtime';
@@ -188,9 +188,9 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
         success: discordSuccess,
       });
     } catch (error) {
-      const errorMsg = errorToString(error);
-      errors.push(`Discord: ${errorMsg}`);
-      await logError('Discord webhook failed', logContext, error);
+      const errorObj = normalizeError(error, 'Discord webhook failed');
+      errors.push(`Discord: ${errorObj.message}`);
+      await logError('Discord webhook failed', logContext, errorObj);
     }
   }
 
@@ -218,9 +218,9 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
       success: notificationSuccess,
     });
   } catch (error) {
-    const errorMsg = errorToString(error);
-    errors.push(`Notification: ${errorMsg}`);
-    await logError('Notification insert failed', logContext, error);
+    const errorObj = normalizeError(error, 'Notification insert failed');
+    errors.push(`Notification: ${errorObj.message}`);
+    await logError('Notification insert failed', logContext, errorObj);
   }
 
   // 3. Invalidate cache tags (non-critical, after notification insert)
@@ -276,13 +276,13 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
           errors.push(`Cache invalidation: ${response.status} ${errorText}`);
         }
       } catch (error) {
-        const errorMsg = errorToString(error);
+        const errorObj = normalizeError(error, 'Cache invalidation error');
         logWarn('Cache invalidation error', {
           ...logContext,
-          error: errorMsg,
+          err: errorObj,
           tags: cacheTags,
         });
-        errors.push(`Cache invalidation: ${errorMsg}`);
+        errors.push(`Cache invalidation: ${errorObj.message}`);
         // Non-critical, don't fail the job
       }
     } else if (!REVALIDATE_SECRET) {
@@ -301,11 +301,11 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
       success: revalidationSuccess,
     });
   } catch (error) {
-    const errorMsg = errorToString(error);
-    errors.push(`Revalidation: ${errorMsg}`);
+    const errorObj = normalizeError(error, 'Revalidation failed');
+    errors.push(`Revalidation: ${errorObj.message}`);
     logWarn('Revalidation failed', {
       ...logContext,
-      error: errorMsg,
+      err: errorObj,
     });
   }
 
@@ -488,16 +488,16 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
           });
         }
       } catch (error) {
-        const errorMsg = errorToString(error);
+        const errorObj = normalizeError(error, 'Unexpected error processing message');
         const logContext = {
           ...batchLogContext,
           msg_id: message.msg_id.toString(),
         };
-        await logError('Unexpected error processing message', logContext, error);
+        await logError('Unexpected error processing message', logContext, errorObj);
         results.push({
           msg_id: message.msg_id.toString(),
           status: 'failed',
-          errors: [errorMsg],
+          errors: [errorObj.message],
           will_retry: true,
         });
       }

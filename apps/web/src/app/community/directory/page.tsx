@@ -1,8 +1,8 @@
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
@@ -58,11 +58,11 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
       (
         u
       ): u is typeof u & {
-        id: string;
-        slug: string;
-        name: string;
-        tier: NonNullable<typeof u.tier>;
         created_at: string;
+        id: string;
+        name: string;
+        slug: string;
+        tier: NonNullable<typeof u.tier>;
       } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
     )
     .map((u) => ({
@@ -81,11 +81,11 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
       (
         u
       ): u is typeof u & {
-        id: string;
-        slug: string;
-        name: string;
-        tier: NonNullable<typeof u.tier>;
         created_at: string;
+        id: string;
+        name: string;
+        slug: string;
+        tier: NonNullable<typeof u.tier>;
       } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
     )
     .map((u) => ({
@@ -104,11 +104,11 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
       (
         u
       ): u is typeof u & {
-        id: string;
-        slug: string;
-        name: string;
-        tier: NonNullable<typeof u.tier>;
         created_at: string;
+        id: string;
+        name: string;
+        slug: string;
+        tier: NonNullable<typeof u.tier>;
       } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
     )
     .map((u) => ({

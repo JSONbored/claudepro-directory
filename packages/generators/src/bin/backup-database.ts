@@ -2,6 +2,7 @@
 
 import { runBackupDatabase } from '../commands/backup-database.js';
 import { logger } from '../toolkit/logger.js';
+import { normalizeError } from '@heyclaude/shared-runtime';
 
 const force = process.argv.includes('--force');
 
@@ -15,7 +16,7 @@ runBackupDatabase({ force })
   .catch((error) => {
     logger.error(
       '💥 Database backup failed',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'Database backup failed'),
       {
         script: 'backup-database',
       }

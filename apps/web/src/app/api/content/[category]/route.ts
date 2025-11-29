@@ -6,7 +6,7 @@
 import 'server-only';
 
 import { ContentService } from '@heyclaude/data-layer';
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {

@@ -31,10 +31,10 @@ export async function sendBetterStackHeartbeat(
     TIMEOUT_PRESETS.external,
     'BetterStack heartbeat timed out'
   ).catch(async (error) => {
-    const { errorToString } = await import('@heyclaude/shared-runtime');
+    const { normalizeError } = await import('@heyclaude/shared-runtime');
     logWarn('BetterStack heartbeat failed', {
       ...logContext,
-      error: errorToString(error),
+      error: normalizeError(error, "Operation failed").message,
     });
   });
 }

@@ -151,7 +151,11 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
   } catch (error) {
     if (error instanceof WebhookIngestError) {
       if (error.status === 'unauthorized') {
-        logWarn('Unauthorized webhook', logContext);
+        logWarn('Unauthorized webhook attempt', {
+          ...logContext,
+          securityEvent: true, // Structured tag for security event filtering
+          reason: error.message,
+        });
         return unauthorizedResponse(error.message, webhookCorsHeaders);
       }
       logWarn('Bad webhook payload', logContext);

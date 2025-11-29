@@ -3,6 +3,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ora from 'ora';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
 import { ensureEnvVars } from '../toolkit/env.js';
 import { logger } from '../toolkit/logger.js';
@@ -285,9 +286,10 @@ function generateSchemaDump(params: {
     };
   } catch (error) {
     spinner.fail('Schema dump failed');
+    const schemaError = normalizeError(error, 'Schema dump failed');
     logger.error(
-      `   ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof Error ? error : new Error(String(error)),
+      `   ${schemaError.message}`,
+      schemaError,
       {
         script: 'sync-database-schema',
         step: 'Schema Dump',
@@ -298,7 +300,7 @@ function generateSchemaDump(params: {
       success: false,
       skipped: false,
       duration_ms: Math.round(performance.now() - startTime),
-      reason: error instanceof Error ? error.message : String(error),
+      reason: normalizeError(error, "Operation failed").message,
     };
   }
 }
@@ -410,9 +412,10 @@ function generateTypes(params: {
     };
   } catch (error) {
     spinner.fail('Type generation failed');
+    const typeGenError = normalizeError(error, 'Type generation failed');
     logger.error(
-      `   ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof Error ? error : new Error(String(error)),
+      `   ${typeGenError.message}`,
+      typeGenError,
       {
         script: 'sync-database-schema',
         step: 'TypeScript Types',
@@ -423,7 +426,7 @@ function generateTypes(params: {
       success: false,
       skipped: false,
       duration_ms: Math.round(performance.now() - startTime),
-      reason: error instanceof Error ? error.message : String(error),
+      reason: normalizeError(error, "Operation failed").message,
     };
   }
 }
@@ -480,9 +483,10 @@ function runPackageBuilds(params: {
     };
   } catch (error) {
     spinner.fail('Package builds failed');
+    const buildError = normalizeError(error, 'Package builds failed');
     logger.error(
-      `   ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof Error ? error : new Error(String(error)),
+      `   ${buildError.message}`,
+      buildError,
       {
         script: 'sync-database-schema',
         step: 'Package Builds',
@@ -493,7 +497,7 @@ function runPackageBuilds(params: {
       success: false,
       skipped: false,
       duration_ms: Math.round(performance.now() - startTime),
-      reason: error instanceof Error ? error.message : String(error),
+      reason: normalizeError(error, "Operation failed").message,
     };
   }
 }
@@ -525,7 +529,7 @@ function runTypeVerification(dryRun: boolean): StepResult {
       success: false,
       skipped: false,
       duration_ms: Math.round(performance.now() - startTime),
-      reason: error instanceof Error ? error.message : String(error),
+      reason: normalizeError(error, "Operation failed").message,
     };
   }
 }
@@ -776,7 +780,7 @@ export async function runSyncDb() {
       });
     }
   } catch (error) {
-    logger.error('\n❌ Sync failed', error instanceof Error ? error : new Error(String(error)), {
+    logger.error('\n❌ Sync failed', normalizeError(error, 'Database sync failed'), {
       script: 'sync-database-schema',
     });
     process.exit(1);

@@ -153,11 +153,9 @@ export default function HelpPage() {
               </CardHeader>
               <CardContent>
                 <p className="mb-3 text-muted-foreground">{item.answer}</p>
-                {item.link && (
-                  <NavLink href={item.link.href} className="inline-flex items-center gap-1">
+                {item.link ? <NavLink href={item.link.href} className="inline-flex items-center gap-1">
                     {item.link.label} →
-                  </NavLink>
-                )}
+                  </NavLink> : null}
               </CardContent>
             </Card>
           ))}

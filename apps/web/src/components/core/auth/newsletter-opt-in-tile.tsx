@@ -111,7 +111,7 @@ export function NewsletterOptInTile({
         )}
         aria-hidden="true"
       >
-        <div className="absolute inset-0 bg-linear-to-br from-accent/10 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-transparent" />
       </div>
     </motion.button>
   );

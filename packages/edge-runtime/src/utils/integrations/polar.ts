@@ -1,5 +1,5 @@
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
-import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { createUtilityContext, normalizeError } from '@heyclaude/shared-runtime';
 import { fetchWithRetry } from '@heyclaude/edge-runtime/utils/integrations/http-client.ts';
 import type { Database } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
@@ -95,8 +95,7 @@ export async function createPolarCheckout(
       sessionId: session.id,
     };
   } catch (error) {
-    const { errorToString } = await import('@heyclaude/shared-runtime');
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const errorObj = normalizeError(error, 'Polar checkout creation error');
     logger.error('Polar checkout creation error', {
       ...logContext,
       err: errorObj,

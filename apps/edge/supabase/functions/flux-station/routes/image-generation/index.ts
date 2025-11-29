@@ -14,7 +14,7 @@
 import { edgeEnv, initRequestLogging, pgmqDelete, pgmqRead, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
 import {
   createUtilityContext,
-  errorToString,
+  normalizeError,
   logError,
   logInfo,
   TIMEOUT_PRESETS,
@@ -171,7 +171,7 @@ async function processImageGeneration(
 
     return { success: true };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorMessage = normalizeError(error, "Operation failed").message;
     await logError(`Image generation error (${type})`, logContext, error);
     return {
       success: false,
@@ -451,7 +451,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
         results.push({
           msg_id: msg.msg_id.toString(),
           status: 'failed',
-          error: errorToString(error),
+          error: normalizeError(error, "Operation failed").message,
         });
       }
     }

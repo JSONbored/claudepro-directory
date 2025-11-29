@@ -20,7 +20,7 @@
  */
 
 import pino from 'pino';
-import { createPinoConfig } from '@heyclaude/shared-runtime';
+import { createPinoConfig, normalizeError } from '@heyclaude/shared-runtime';
 
 // Create Pino logger instance with centralized configuration
 // Pino automatically handles error serialization and redaction
@@ -40,8 +40,9 @@ export const logger = {
   error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
     const logData: Record<string, unknown> = { ...(context || {}) };
     if (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      logData['err'] = errorObj;
+      // Use normalizeError() for consistent error normalization across codebase
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     pinoLogger.error(logData, message);
   },
@@ -54,8 +55,9 @@ export const logger = {
   fatal: (message: string, error?: unknown, context?: Record<string, unknown>) => {
     const logData: Record<string, unknown> = { ...(context || {}) };
     if (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      logData['err'] = errorObj;
+      // Use normalizeError() for consistent error normalization across codebase
+      const normalized = normalizeError(error, message);
+      logData['err'] = normalized;
     }
     pinoLogger.fatal(logData, message);
   },
@@ -88,8 +90,9 @@ export const logger = {
       error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
         const logData: Record<string, unknown> = { ...(context || {}) };
         if (error) {
-          const errorObj = error instanceof Error ? error : new Error(String(error));
-          logData['err'] = errorObj;
+          // Use normalizeError() for consistent error normalization across codebase
+          const normalized = normalizeError(error, message);
+          logData['err'] = normalized;
         }
         pinoInstance.error(logData, message);
       },
@@ -102,8 +105,9 @@ export const logger = {
       fatal: (message: string, error?: unknown, context?: Record<string, unknown>) => {
         const logData: Record<string, unknown> = { ...(context || {}) };
         if (error) {
-          const errorObj = error instanceof Error ? error : new Error(String(error));
-          logData['err'] = errorObj;
+          // Use normalizeError() for consistent error normalization across codebase
+          const normalized = normalizeError(error, message);
+          logData['err'] = normalized;
         }
         pinoInstance.fatal(logData, message);
       },

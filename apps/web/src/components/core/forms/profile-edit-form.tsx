@@ -6,6 +6,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
@@ -132,9 +133,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         );
       } catch (error) {
         // Error already logged by useLoggedAsync
-        toasts.error.serverError(
-          error instanceof Error ? error.message : 'Failed to update profile'
-        );
+        toasts.error.serverError(normalizeError(error, 'Failed to update profile').message);
       }
     });
   };

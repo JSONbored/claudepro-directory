@@ -8,6 +8,7 @@ import type {
   ContentItem,
   UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
+import { Breadcrumbs } from '@/src/components/core/navigation/breadcrumbs';
 import { DetailHeaderActions, type SerializableAction } from './detail-header-actions';
 
 export interface DetailHeaderProps {
@@ -23,7 +24,7 @@ export interface DetailHeaderProps {
 /**
  * DetailHeader Component (Server Component)
  *
- * Renders the header section with back button, title, description, badges, and action buttons
+ * Renders the header section with breadcrumbs, back button, title, description, badges, and action buttons
  * Static content is server-rendered, interactive elements use client component
  * No React.memo needed - server components don't re-render
  */
@@ -43,9 +44,19 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
     | SerializableAction[]
     | undefined;
 
+  // Category label for breadcrumbs (pluralized type name)
+  const categoryLabel = config.typeName.endsWith('s') ? config.typeName : `${config.typeName}s`;
+
   return (
     <div className={'border-border border-b bg-code/50 backdrop-blur-sm'}>
       <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumbs - minimal navigation trail */}
+        <Breadcrumbs
+          categoryLabel={categoryLabel}
+          currentTitle={displayTitle}
+          className="mb-2"
+        />
+
         {/* Client component for back button and actions */}
         <DetailHeaderActions
           item={item}

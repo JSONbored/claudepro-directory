@@ -8,13 +8,13 @@ import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getTrendingPageData } from '@heyclaude/web-runtime/data';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
-import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
-import type {
-  DisplayableContent,
-  HomepageContentItem,
+import  { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
+import  {
+  type DisplayableContent,
+  type HomepageContentItem,
 } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES, UnifiedBadge  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 
@@ -96,14 +96,14 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   const pageTitleId = 'trending-page-title';
 
   return (
-    <div className={'min-h-screen bg-background'}>
-      <section className={'relative overflow-hidden px-4 py-24'} aria-labelledby={pageTitleId}>
-        <div className={'container mx-auto text-center'}>
-          <div className={'mx-auto max-w-3xl'}>
+    <div className="min-h-screen bg-background">
+      <section className="relative overflow-hidden px-4 py-24" aria-labelledby={pageTitleId}>
+        <div className="container mx-auto text-center">
+          <div className="mx-auto max-w-3xl">
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={'mb-6 border-accent/20 bg-accent/5 text-accent'}
+              className="mb-6 border-accent/20 bg-accent/5 text-accent"
             >
               <TrendingUp className="mr-1 h-3 w-3 text-accent" aria-hidden="true" />
               Trending
@@ -143,7 +143,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
       </section>
 
       <section
-        className={'container mx-auto px-4 py-16'}
+        className="container mx-auto px-4 py-16"
         aria-label="Trending configurations content"
       >
         <Suspense fallback={null}>
@@ -157,7 +157,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
         </Suspense>
       </section>
 
-      <section className={'container mx-auto px-4 py-12'}>
+      <section className="container mx-auto px-4 py-12">
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
             <NewsletterCTAVariant
@@ -247,19 +247,19 @@ function mapRecentContent(
 }
 
 function toHomepageContentItem(input: {
-  slug: string;
+  author?: null | string;
   category: Database['public']['Enums']['content_category'];
-  title?: string | null;
-  description?: string | null;
-  author?: string | null;
-  tags?: string[] | null;
-  source?: string | null;
-  created_at?: string | null;
-  date_added?: string | null;
-  viewCount?: number | null;
-  copyCount?: number | null;
-  featuredScore?: number | null;
-  featuredRank?: number | null;
+  copyCount?: null | number;
+  created_at?: null | string;
+  date_added?: null | string;
+  description?: null | string;
+  featuredRank?: null | number;
+  featuredScore?: null | number;
+  slug: string;
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  viewCount?: null | number;
 }): HomepageContentItem {
   const timestamp = input.created_at ?? input.date_added ?? new Date().toISOString();
 

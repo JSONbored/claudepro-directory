@@ -2,6 +2,7 @@
 
 import { runGenerateReadme } from '../commands/generate-readme.js';
 import { logger } from '../toolkit/logger.js';
+import { normalizeError } from '@heyclaude/shared-runtime';
 
 runGenerateReadme()
   .then(() => {
@@ -13,7 +14,7 @@ runGenerateReadme()
   .catch((error) => {
     logger.error(
       '💥 README generation failed',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'README generation failed'),
       {
         script: 'generate-readme',
       }

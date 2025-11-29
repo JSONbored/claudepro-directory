@@ -14,10 +14,10 @@
 import { edgeEnv, initRequestLogging, pgmqMetrics, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
 import {
   createUtilityContext,
-  errorToString,
   getProperty,
   logError,
   logInfo,
+  normalizeError,
   TIMEOUT_PRESETS,
   withTimeout,
 } from '@heyclaude/shared-runtime';
@@ -197,7 +197,7 @@ async function processInternalQueue(
       queue: config.name,
       success: false,
       queueLength,
-      error: errorToString(error),
+      error: normalizeError(error, 'Queue processing failed').message,
     };
   }
 }
@@ -286,7 +286,7 @@ async function processExternalQueue(
       queue: config.name,
       success: false,
       queueLength,
-      error: errorToString(error),
+      error: normalizeError(error, 'Queue processing failed').message,
     };
   }
 }
@@ -397,18 +397,18 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
       }
     } catch (error) {
       // Unexpected error - log and continue
-      const errorMsg = errorToString(error);
+      const errorObj = normalizeError(error, `Unexpected error processing queue '${config.name}'`);
       const errorLogContext = {
         ...batchLogContext,
         queue_name: config.name,
         queue_length: queueLength,
       };
-      await logError(`Unexpected error processing queue '${config.name}'`, errorLogContext, error);
+      await logError(`Unexpected error processing queue '${config.name}'`, errorLogContext, errorObj);
       result = {
         queue: config.name,
         success: false,
         queueLength,
-        error: errorMsg,
+        error: errorObj.message,
       };
     }
 

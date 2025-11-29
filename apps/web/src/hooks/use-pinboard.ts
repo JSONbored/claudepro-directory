@@ -1,7 +1,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { logger } from '@heyclaude/web-runtime/core';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
@@ -66,7 +66,7 @@ function loadPinsFromStorage(): PinboardItem[] {
   } catch (error) {
     logger.error(
       'usePinboard: failed to load pins',
-      error instanceof Error ? error : new Error(String(error))
+      normalizeError(error, 'Failed to load pins')
     );
     return [];
   }
@@ -79,7 +79,7 @@ function savePinsToStorage(pins: PinboardItem[]): void {
   } catch (error) {
     logger.error(
       'usePinboard: failed to persist pins',
-      error instanceof Error ? error : new Error(String(error))
+      normalizeError(error, 'Failed to persist pins')
     );
   }
 }
@@ -104,7 +104,7 @@ export function usePinboard(): UsePinboardReturn {
       if (!payload.slug) return;
       pulse.bookmark({ category: payload.category, slug: payload.slug, action }).catch((error) => {
         logger.warn('usePinboard: bookmark pulse failed', {
-          error: error instanceof Error ? error.message : String(error),
+          error: normalizeError(error, "Operation failed").message,
         });
       });
     },

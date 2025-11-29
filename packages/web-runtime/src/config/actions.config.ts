@@ -4,9 +4,10 @@
 
 export interface ActionConfig {
   /**
-   * The name of the database RPC function to call.
+   * Override/Hardcode specific RPC args.
+   * Useful for "Mega RPCs" where p_action needs to be fixed.
    */
-  rpc: string;
+  args?: Record<string, unknown>;
   
   /**
    * Whether the action requires authentication.
@@ -16,26 +17,16 @@ export interface ActionConfig {
   auth?: boolean;
   
   /**
-   * Static paths to revalidate after success.
-   */
-  revalidatePaths?: string[];
-  
-  /**
-   * Cache tags to revalidate after success.
-   * Supports dynamic segments via {param} (from input) or {result.param} (from output).
-   */
-  revalidateTags?: string[];
-  
-  /**
-   * Cache keys to invalidate via static config.
-   * e.g. 'cache.invalidate.job_delete'
-   */
-  invalidateCacheConfigKeys?: string[];
-
-  /**
    * Action category for logging/metadata.
    */
   category?: string;
+  
+  /**
+   * External logic hooks.
+   */
+  hooks?: {
+    onSuccess?: string; // Path to hook file#exportName
+  };
   
   /**
    * Explicit input schema name if it differs from the action name or needs a specific generated schema.
@@ -44,11 +35,11 @@ export interface ActionConfig {
   inputSchema?: string;
 
   /**
-   * Override/Hardcode specific RPC args.
-   * Useful for "Mega RPCs" where p_action needs to be fixed.
+   * Cache keys to invalidate via static config.
+   * e.g. 'cache.invalidate.job_delete'
    */
-  args?: Record<string, any>;
-
+  invalidateCacheConfigKeys?: string[];
+  
   /**
    * Return style for the RPC result.
    * 'first_row': Expects array result, takes first element.
@@ -56,11 +47,20 @@ export interface ActionConfig {
   returnStyle?: 'first_row';
 
   /**
-   * External logic hooks.
+   * Static paths to revalidate after success.
    */
-  hooks?: {
-    onSuccess?: string; // Path to hook file#exportName
-  };
+  revalidatePaths?: string[];
+
+  /**
+   * Cache tags to revalidate after success.
+   * Supports dynamic segments via {param} (from input) or {result.param} (from output).
+   */
+  revalidateTags?: string[];
+
+  /**
+   * The name of the database RPC function to call.
+   */
+  rpc: string;
 }
 
 export const ACTIONS: Record<string, ActionConfig> = {

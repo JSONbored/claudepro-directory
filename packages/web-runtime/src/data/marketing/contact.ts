@@ -50,8 +50,8 @@ export const NEWSLETTER_CTA_CONFIG = {
 } as const;
 
 export interface ContactChannels {
-  email: string;
   discord: string;
+  email: string;
   github: string;
   twitter: string;
 }
@@ -67,10 +67,10 @@ export function getContactChannels(): ContactChannels {
 }
 
 export interface PartnerContactChannels {
-  partnerEmail: string;
   hiEmail: string;
-  supportEmail: string;
+  partnerEmail: string;
   securityEmail: string;
+  supportEmail: string;
 }
 
 export function getPartnerContactChannels(): PartnerContactChannels {
@@ -92,8 +92,8 @@ const PARTNER_CTA_SUBJECTS = {
 export type PartnerCtaKey = keyof typeof PARTNER_CTA_SUBJECTS;
 
 export interface PartnerCtaLink {
-  subject: string;
   href: string;
+  subject: string;
 }
 
 export type PartnerCtas = Record<PartnerCtaKey, PartnerCtaLink>;

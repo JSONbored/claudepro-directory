@@ -1,6 +1,6 @@
 'use client';
 
-import { logger, ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
+import { logger, normalizeError, ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
 import { useLocalStorage } from '@heyclaude/web-runtime/hooks';
 import { z } from 'zod';
 
@@ -156,7 +156,7 @@ export function clearAllAnnouncementDismissals(): void {
   } catch (error) {
     logger.error(
       'Failed to clear announcement dismissals',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'Announcement dismissal operation failed'),
       { component: 'useAnnouncementDismissal', action: 'clearAll' }
     );
   }
@@ -202,7 +202,7 @@ export function getAnnouncementDismissalAnalytics(): DismissalState {
   } catch (error) {
     logger.error(
       'Failed to read dismissal analytics',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'Announcement dismissal operation failed'),
       { component: 'useAnnouncementDismissal', action: 'getAnalytics' }
     );
     return {};

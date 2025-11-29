@@ -2,7 +2,7 @@ import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/c
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { UI_CLASSES, NavLink  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -158,7 +158,7 @@ export default function TermsPage() {
           <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>11. Contact Us</h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
             If you have questions about these Terms of Service, please{' '}
-            <NavLink href={`mailto:${channels.email}`} external={true}>
+            <NavLink href={`mailto:${channels.email}`} external>
               {channels.email}
             </NavLink>{' '}
             or <NavLink href="/contact">contact us</NavLink>.

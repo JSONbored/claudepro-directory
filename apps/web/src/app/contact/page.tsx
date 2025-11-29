@@ -4,7 +4,7 @@ import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
@@ -98,8 +98,7 @@ export default function ContactPage() {
             </div>
           )}
           {/* GitHub Discussions */}
-          {channels.github && (
-            <Card>
+          {channels.github ? <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Github className="h-5 w-5" />
@@ -112,18 +111,16 @@ export default function ContactPage() {
                 </p>
                 <NavLink
                   href={`${channels.github}/discussions`}
-                  external={true}
+                  external
                   className="inline-flex items-center gap-2"
                 >
                   Visit Discussions →
                 </NavLink>
               </CardContent>
-            </Card>
-          )}
+            </Card> : null}
 
           {/* Discord Community */}
-          {channels.discord && (
-            <Card>
+          {channels.discord ? <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DiscordIcon className="h-5 w-5" />
@@ -136,18 +133,16 @@ export default function ContactPage() {
                 </p>
                 <NavLink
                   href={channels.discord}
-                  external={true}
+                  external
                   className="inline-flex items-center gap-2"
                 >
                   Join Discord →
                 </NavLink>
               </CardContent>
-            </Card>
-          )}
+            </Card> : null}
 
           {/* GitHub Issues */}
-          {channels.github && (
-            <Card>
+          {channels.github ? <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MessageSquare className="h-5 w-5" />
@@ -160,18 +155,16 @@ export default function ContactPage() {
                 </p>
                 <NavLink
                   href={`${channels.github}/issues/new`}
-                  external={true}
+                  external
                   className="inline-flex items-center gap-2"
                 >
                   Create Issue →
                 </NavLink>
               </CardContent>
-            </Card>
-          )}
+            </Card> : null}
 
           {/* Email */}
-          {channels.email && (
-            <Card>
+          {channels.email ? <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Mail className="h-5 w-5" />
@@ -184,14 +177,13 @@ export default function ContactPage() {
                 </p>
                 <NavLink
                   href={`mailto:${channels.email}`}
-                  external={true}
+                  external
                   className="inline-flex items-center gap-2"
                 >
                   {channels.email} →
                 </NavLink>
               </CardContent>
-            </Card>
-          )}
+            </Card> : null}
         </div>
       </div>
 

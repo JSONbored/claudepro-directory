@@ -1,6 +1,6 @@
 import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import { errorToString } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 type WebhookEventRunRow = DatabaseGenerated['public']['Tables']['webhook_event_runs']['Row'];
@@ -18,7 +18,7 @@ export async function startWebhookEventRun(eventId: string): Promise<WebhookEven
   const { data, error } = await supabaseServiceRole.rpc('start_webhook_event_run', payload);
 
   if (error) {
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const errorObj = normalizeError(error, 'Webhook run operation failed');
     logger.error('Failed to start webhook run', {
       webhook_id: eventId,
       err: errorObj,
@@ -49,7 +49,7 @@ export async function finishWebhookEventRun(
   const { error } = await supabaseServiceRole.rpc('finish_webhook_event_run', payload);
 
   if (error) {
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const errorObj = normalizeError(error, 'Webhook run operation failed');
     logger.error('Failed to finish webhook run', {
       run_id: runId,
       status,

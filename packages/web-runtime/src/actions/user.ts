@@ -14,6 +14,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import type { CacheConfig, CacheInvalidateKey } from '../cache-config.ts';
+import { logger } from '../logger.ts';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -160,6 +161,14 @@ export const updateProfile = authedAction
     if (profile == null) {
       throw new Error('update_user_profile returned null profile');
     }
+
+    // Log profile update for audit trail (user data modification)
+    logger.info('User profile updated', {
+      audit: true, // Structured tag for audit trail filtering
+      userId: ctx.userId,
+      operation: 'profile_update',
+      fieldsUpdated: Object.keys(parsedInput).filter(k => parsedInput[k as keyof typeof parsedInput] !== undefined),
+    });
 
     await revalidateUserSurfaces({
       slug: profile.slug ?? null,

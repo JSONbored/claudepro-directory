@@ -13,7 +13,7 @@ import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
   CardDescription,
   CardHeader,
   CardTitle  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
@@ -80,8 +80,8 @@ function formatSubmissionDate(dateString: string): string {
 }
 
 function extractPrComponents(
-  url: string | null | undefined
-): { owner: string; repo: string; prNumber: string } | null {
+  url: null | string | undefined
+): null | { owner: string; prNumber: string; repo: string; } {
   if (!url || typeof url !== 'string') return null;
 
   // Disallow control characters, invisible chars, and dangerous unicode
@@ -170,7 +170,7 @@ function isSafeType(type: string): type is Database['public']['Enums']['submissi
 function getSafeContentUrl(
   type: Database['public']['Enums']['submission_type'],
   slug: string
-): string | null {
+): null | string {
   if (!(isSafeType(type) && isValidSlug(slug))) {
     return null;
   }
@@ -205,7 +205,7 @@ export default async function SubmissionsPage() {
             <CardDescription>Please sign in to view and manage your submissions.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -342,7 +342,7 @@ export default async function SubmissionsPage() {
     type: Database['public']['Enums']['submission_type'],
     slug: string,
     status: Database['public']['Enums']['submission_status']
-  ): { href: string } | null {
+  ): null | { href: string } {
     const safeUrl = getSafeContentUrl(type, slug);
     return safeUrl && status === Constants.public.Enums.submission_status[4] ? { href: safeUrl } : null; // 'merged'
   }
@@ -365,7 +365,7 @@ export default async function SubmissionsPage() {
             {submissions.length} {submissions.length === 1 ? 'submission' : 'submissions'}
           </p>
         </div>
-        <Button asChild={true}>
+        <Button asChild>
           <Link href={ROUTES.SUBMIT}>
             <Send className={`mr-2 ${UI_CLASSES.ICON_SM}`} />
             New Submission
@@ -375,14 +375,14 @@ export default async function SubmissionsPage() {
 
       {submissions.length === 0 ? (
         <Card>
-          <CardContent className={'flex flex-col items-center py-12'}>
+          <CardContent className="flex flex-col items-center py-12">
             <Send className={`mb-4 h-12 w-12 ${UI_CLASSES.ICON_NEUTRAL}`} />
             <h3 className="mb-2 font-semibold text-xl">No submissions yet</h3>
-            <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
+            <p className="mb-4 max-w-md text-center text-muted-foreground">
               Share your Claude configurations with the community! Your contributions help everyone
               build better AI workflows.
             </p>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.SUBMIT}>
                 <Send className={`mr-2 ${UI_CLASSES.ICON_SM}`} />
                 Submit Your First Configuration
@@ -421,8 +421,8 @@ export default async function SubmissionsPage() {
               className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO} ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
             />
             <div className="flex-1">
-              <p className={'font-medium text-blue-400 text-sm'}>How it works</p>
-              <p className={'mt-1 text-muted-foreground text-sm'}>
+              <p className="font-medium text-blue-400 text-sm">How it works</p>
+              <p className="mt-1 text-muted-foreground text-sm">
                 When you submit a configuration, we automatically create a Pull Request on GitHub.
                 Our team reviews it for quality, security, and accuracy. Once approved and merged,
                 your contribution goes live for everyone to use!

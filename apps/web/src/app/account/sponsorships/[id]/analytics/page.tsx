@@ -12,7 +12,7 @@ import { POSITION_PATTERNS, UI_CLASSES, UnifiedBadge, Button ,
   CardDescription,
   CardHeader,
   CardTitle  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -65,7 +65,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             <CardDescription>Please sign in to view sponsorship analytics.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.LOGIN}>Go to sign in</Link>
             </Button>
           </CardContent>
@@ -81,7 +81,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   });
 
   // Section: Analytics Data Fetch
-  let analyticsData: SponsorshipAnalytics | null = null;
+  let analyticsData: null | SponsorshipAnalytics = null;
   try {
     analyticsData = await getSponsorshipAnalytics(user.id, id);
   } catch (error) {
@@ -162,7 +162,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
       {/* Header */}
       <div>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <UnifiedBadge variant="sponsored" tier={safeTier} showIcon={true} />
+          <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
           <h1 className="font-bold text-3xl">Sponsorship Analytics</h1>
         </div>
         <p className="text-muted-foreground">
@@ -251,7 +251,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             <div>
               <p className="font-medium text-sm">Tier</p>
               <div>
-                <UnifiedBadge variant="sponsored" tier={safeTier} showIcon={true} />
+                <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
               </div>
             </div>
           </div>

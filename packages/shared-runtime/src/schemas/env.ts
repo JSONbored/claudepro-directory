@@ -14,6 +14,16 @@ const serverEnvSchema = z
       .default('development')
       .describe('Application runtime environment mode'),
 
+    // Next.js framework variables
+    NEXT_PHASE: z
+      .string()
+      .optional()
+      .describe('Next.js build phase (e.g., "phase-production-build", "phase-development-server")'),
+    NEXT_RUNTIME: z
+      .enum(['nodejs', 'edge'])
+      .optional()
+      .describe('Next.js runtime environment (nodejs or edge)'),
+
     VERCEL: z.enum(['1']).optional().describe('Flag indicating if running on Vercel platform'),
     VERCEL_ENV: z
       .enum(['production', 'preview', 'development'])
@@ -319,7 +329,7 @@ function validateEnv(): Env {
  * Note: Not frozen to allow Next.js segment configuration exports to work
  * Nested config objects (securityConfig, buildConfig) are frozen for security
  */
-export const env = Object.freeze(validateEnv());
+export const env = validateEnv();
 
 export const isDevelopment = env.NODE_ENV === 'development';
 export const isProduction = env.NODE_ENV === 'production';

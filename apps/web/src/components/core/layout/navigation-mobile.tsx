@@ -96,7 +96,12 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
         });
       })
       .catch((error) => {
-        logger.error('NavigationMobile: failed to load animation config', error);
+        logger.warn('[Animation] Failed to load config', {
+          err: error,
+          category: 'animation',
+          component: 'NavigationMobile',
+          recoverable: true,
+        });
       });
   }, []);
 

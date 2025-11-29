@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import type { CreateJobInput } from '@heyclaude/web-runtime';
 import type { PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -318,7 +319,7 @@ export function JobForm({
       } catch (error) {
         // Error already logged by useLoggedAsync
         toasts.error.fromError(
-          error instanceof Error ? error : new Error('Failed to save job'),
+          normalizeError(error, 'Failed to save job'),
           'Failed to save job'
         );
       }

@@ -1,10 +1,11 @@
+'use client';
+
 /**
  * OAuth Account Linking Client Component
  * Handles the client-side linkIdentity() call for linking OAuth providers
  */
 
-'use client';
-
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
@@ -22,7 +23,7 @@ import { UI_CLASSES, Button ,
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 
-
+// This page is fully client-side (linkIdentity requires browser context)
 
 /**
  * Initiates the client-side OAuth account linking flow for the given provider, handling validation,
@@ -51,9 +52,9 @@ export default function OAuthLinkCallbackPage({
   const router = useRouter();
   const searchParameters = useSearchParams();
   const resolvedParameters = use(params);
-  const [status, setStatus] = useState<'loading' | 'error'>('loading');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [provider, setProvider] = useState<string | null>(null);
+  const [status, setStatus] = useState<'error' | 'loading'>('loading');
+  const [errorMessage, setErrorMessage] = useState<null | string>(null);
+  const [provider, setProvider] = useState<null | string>(null);
   const hasAttempted = useRef<boolean>(false);
   const {
     user,
@@ -64,7 +65,7 @@ export default function OAuthLinkCallbackPage({
 
   useEffect(() => {
     let mounted = true;
-    let redirectTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    let redirectTimeoutId: null | ReturnType<typeof setTimeout> = null;
 
     // Use shared validation utility to prevent open redirects
     // Matches server-side validation in route handlers
@@ -149,9 +150,7 @@ export default function OAuthLinkCallbackPage({
             provider: rawProvider,
           });
           setStatus('error');
-          setErrorMessage(
-            error instanceof Error ? error.message : 'Failed to link account. Please try again.'
-          );
+          setErrorMessage(normalizeError(error, 'Failed to link account. Please try again.').message);
           return;
         }
 
@@ -224,9 +223,7 @@ export default function OAuthLinkCallbackPage({
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div
-            className={
-              'mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10'
-            }
+            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
           >
             <AlertCircle className={`${UI_CLASSES.ICON_LG} text-destructive`} />
           </div>

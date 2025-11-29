@@ -1,8 +1,8 @@
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
-import type {
-  CategoryStatsConfig,
-  UnifiedCategoryConfig,
+import  {
+  type CategoryStatsConfig,
+  type UnifiedCategoryConfig,
 } from '../../../types/category.ts';
 
 import {
@@ -21,7 +21,7 @@ export const getCategoryConfigs = (): Record<
 
 export const getCategoryConfig = (
   slug: Database['public']['Enums']['content_category']
-): UnifiedCategoryConfig<Database['public']['Enums']['content_category']> | null => {
+): null | UnifiedCategoryConfig<Database['public']['Enums']['content_category']> => {
   const baseConfig = CATEGORY_CONFIGS[slug];
 
   const tabs = getTabConfigForCategory(slug);
@@ -68,4 +68,11 @@ export function getTotalResourceCount(stats: Record<string, number>): number {
   return Object.values(stats).reduce((sum, count) => sum + count, 0);
 }
 
-export {ALL_CATEGORY_IDS, ALL_CATEGORY_IDS as getAllCategoryIds, HOMEPAGE_CATEGORY_IDS, HOMEPAGE_CATEGORY_IDS as getHomepageCategoryIds, CACHEABLE_CATEGORY_IDS, CACHEABLE_CATEGORY_IDS as getCacheableCategoryIds} from './category-config.ts';
+export {
+  ALL_CATEGORY_IDS,
+  ALL_CATEGORY_IDS as getAllCategoryIds,
+  HOMEPAGE_CATEGORY_IDS,
+  HOMEPAGE_CATEGORY_IDS as getHomepageCategoryIds,
+  CACHEABLE_CATEGORY_IDS,
+  CACHEABLE_CATEGORY_IDS as getCacheableCategoryIds,
+} from './category-config.ts';

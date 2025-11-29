@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { createSupabaseAnonClient } from '../supabase/server-anon.ts';
 import { logger } from '../logger.ts';
 import type { LogContext } from '../logger.ts';
-import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { createUtilityContext, normalizeError } from '@heyclaude/shared-runtime';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 
 export interface StorageProxyOptions {
@@ -125,12 +125,12 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Ne
       },
     });
   } catch (error) {
-    logger.error('Proxy error', error instanceof Error ? error : new Error(String(error)), logContext);
+    logger.error('Proxy error', normalizeError(error, 'Storage proxy error'), logContext);
 
     return NextResponse.json(
       {
         error: 'proxy_failed',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: normalizeError(error, 'Storage proxy failed').message,
         bucket,
         path,
       },

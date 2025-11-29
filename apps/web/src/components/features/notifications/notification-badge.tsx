@@ -46,7 +46,12 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
         });
       })
       .catch((error) => {
-        logger.error('NotificationBadge: failed to load animation config', error);
+        logger.warn('[Animation] Failed to load config', {
+          err: error,
+          category: 'animation',
+          component: 'NotificationBadge',
+          recoverable: true,
+        });
       });
   }, []);
 

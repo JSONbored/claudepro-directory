@@ -1,5 +1,6 @@
 'use client';
 
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { useViewTransition } from '@heyclaude/web-runtime/hooks';
@@ -145,7 +146,7 @@ export function ThemeToggle() {
       });
 
       // Performance monitoring (development only)
-      if (process.env.NODE_ENV === 'development' && transition) {
+      if (isDevelopment && transition) {
         transition.finished
           .then(() => {
             const endTime = performance.now();

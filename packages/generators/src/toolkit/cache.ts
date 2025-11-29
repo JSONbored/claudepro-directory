@@ -60,7 +60,8 @@ function loadCache(): BuildCache {
 
     return cache;
   } catch (error) {
-    const errorObj = error instanceof Error ? error : new Error(String(error));
+    const { normalizeError } = await import('@heyclaude/shared-runtime');
+    const errorObj = normalizeError(error, 'Cache read error');
     logger.warn('Cache corrupted, resetting', { err: errorObj });
     return {
       version: CACHE_VERSION,

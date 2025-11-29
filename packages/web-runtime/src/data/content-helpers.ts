@@ -1,10 +1,10 @@
 import 'server-only';
 
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
 export function generateContentTags(
   category?: Database['public']['Enums']['content_category'] | null,
-  slug?: string | null,
+  slug?: null | string,
   additionalTags: string[] = []
 ): string[] {
   const tags: string[] = ['content', ...additionalTags];
@@ -21,7 +21,7 @@ export function generateContentTags(
   return tags;
 }
 
-export function normalizeRpcResult<T>(result: T | T[] | null | undefined): T | null {
+export function normalizeRpcResult<T>(result: null | T | T[] | undefined): null | T {
   if (result === null || result === undefined) {
     return null;
   }

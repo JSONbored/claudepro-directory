@@ -41,13 +41,15 @@ import { hashUserId, hashEmail } from '../privacy.ts';
  * Redaction uses explicit paths (not wildcards) for optimal performance.
  * Wildcard redaction has ~50% overhead, so we use explicit paths instead.
  * 
- * **PII Protection:**
- * User ID fields are automatically hashed (not just redacted) to comply with GDPR/CCPA
- * while maintaining traceability. The custom censor function handles hashing.
+ * **PII Protection (GDPR/CCPA Compliant):**
+ * - User ID fields are automatically hashed (not just redacted) to maintain traceability
+ * - IP addresses, phone numbers, and geolocation data are redacted
+ * - The custom censor function handles hashing for user IDs
  * 
  * @see {@link https://getpino.io/#/docs/redaction | Pino Redaction Docs}
  */
 export const SENSITIVE_PATTERNS = [
+  // Authentication & Security
   'password',
   'token',
   'secret',
@@ -59,27 +61,84 @@ export const SENSITIVE_PATTERNS = [
   'bearer',
   'cookie',
   'session',
+  
+  // Financial PII
   'ssn',
   'creditCard',
   'credit_card',
   'cvv',
   'pin',
+  'accountNumber',
+  'account_number',
+  'routingNumber',
+  'routing_number',
+  
   // User ID fields (PII) - will be hashed, not just redacted
   'userId',
   'user_id',
   'user.id',
   'user.userId',
   'user.user_id',
-  // Nested paths
+  
+  // IP Address fields (PII under GDPR)
+  'ip',
+  'ipAddress',
+  'ip_address',
+  'clientIp',
+  'client_ip',
+  'remoteAddress',
+  'remote_address',
+  'x-forwarded-for',
+  'xForwardedFor',
+  'req.ip',
+  'request.ip',
+  
+  // Phone number fields (PII)
+  'phone',
+  'phoneNumber',
+  'phone_number',
+  'mobile',
+  'mobileNumber',
+  'mobile_number',
+  'telephone',
+  'tel',
+  'cell',
+  'cellPhone',
+  'cell_phone',
+  
+  // Geolocation fields (PII under GDPR)
+  'latitude',
+  'longitude',
+  'lat',
+  'lng',
+  'geo',
+  'geolocation',
+  'location.lat',
+  'location.lng',
+  'location.latitude',
+  'location.longitude',
+  'coordinates',
+  
+  // Nested paths for common objects
   'user.password',
   'user.token',
   'user.ssn',
+  'user.phone',
+  'user.email',
+  'user.ip',
   'args.password',
   'args.token',
   'args.secret',
   'args.key',
   'args.api_key',
   'args.auth',
+  'args.phone',
+  'args.ip',
+  
+  // Request/Response headers that may contain PII
+  'headers.authorization',
+  'headers.cookie',
+  'headers.x-forwarded-for',
 ] as const;
 
 /**
@@ -622,23 +681,27 @@ export interface PinoConfigOptions {
    * - error: 50
    * - fatal: 60
    * 
-   * **Common Custom Levels:**
-   * - audit: 35 (between info and warn)
-   * - security: 55 (between error and fatal)
+   * **Recommendation:** Prefer structured tags over custom levels for audit/security:
+   * ```typescript
+   * // Instead of custom levels, use standard levels with structured tags:
+   * logger.info('User action', { audit: true, action: 'login' });
+   * logger.error('Security event', { securityEvent: true, severity: 'high' });
+   * ```
    * 
-   * **Warning:** `useOnlyCustomLevels` may not be supported by all transports.
+   * This approach:
+   * - Works with standard Pino TypeScript types
+   * - Is portable across log aggregators
+   * - Enables easy filtering (e.g., `audit:true` or `securityEvent:true`)
+   * 
+   * **Warning:** Custom levels require TypeScript type augmentation to avoid errors.
    * 
    * @example
    * ```typescript
+   * // Only use custom levels if you have proper type augmentation
    * const logger = createLogger({
-   *   customLevels: {
-   *     audit: 35,
-   *     security: 55
-   *   },
-   *   level: 'audit'
+   *   customLevels: { verbose: 15 },
+   *   level: 'verbose'
    * });
-   * logger.audit('User action logged');
-   * logger.security('Security violation detected');
    * ```
    * 
    * @see {@link https://getpino.io/#/docs/api#customlevels-object | Pino CustomLevels Documentation}
@@ -659,11 +722,11 @@ export interface PinoConfigOptions {
    * @example
    * ```typescript
    * const logger = createLogger({
-   *   customLevels: { audit: 35, security: 55 },
+   *   customLevels: { verbose: 15 },
    *   useOnlyCustomLevels: true,
-   *   level: 'audit'
+   *   level: 'verbose'
    * });
-   * // logger.info() will throw - only audit() and security() are available
+   * // logger.info() will throw - only verbose() is available
    * ```
    * 
    * @see {@link https://getpino.io/#/docs/api#useonlycustomlevels-boolean | Pino UseOnlyCustomLevels Documentation}
@@ -856,6 +919,123 @@ export interface PinoConfigOptions {
    * @see {@link https://github.com/pinojs/pino/blob/main/docs/transports.md | Pino Transports Guide}
    */
   transport?: pino.TransportSingleOptions | pino.TransportMultiOptions | pino.TransportPipelineOptions;
+  
+  /**
+   * Enable pretty printing for local development
+   * 
+   * @default 'auto' - Enabled when NODE_ENV !== 'production' and no custom transport is set
+   * 
+   * @remarks
+   * Uses `pino-pretty` to format JSON logs into human-readable, colorized output.
+   * **Only for development** - production should use JSON logs for log aggregators.
+   * 
+   * **Behavior:**
+   * - `true`: Always enable pino-pretty (overrides transport)
+   * - `false`: Never enable pino-pretty
+   * - `'auto'` (default): Enable only in development (NODE_ENV !== 'production')
+   * 
+   * **Performance:** pino-pretty runs in a worker thread, minimal main thread impact.
+   * Still, avoid in production for maximum throughput.
+   * 
+   * @example
+   * ```typescript
+   * // Auto-detect based on NODE_ENV (default)
+   * const logger = createLogger({ prettyPrint: 'auto' });
+   * 
+   * // Force pretty printing (e.g., for debugging in staging)
+   * const logger = createLogger({ prettyPrint: true });
+   * 
+   * // Disable pretty printing (use JSON even in development)
+   * const logger = createLogger({ prettyPrint: false });
+   * ```
+   * 
+   * @see {@link https://github.com/pinojs/pino-pretty | pino-pretty Documentation}
+   */
+  prettyPrint?: boolean | 'auto';
+  
+  /**
+   * Maximum depth for nested objects in logs
+   * 
+   * @default 10
+   * 
+   * @remarks
+   * Limits how deeply nested objects are serialized. Objects beyond this depth
+   * are truncated with `[Object]` or `[Array]`. This protects against:
+   * - Excessive memory usage from deeply nested objects
+   * - Denial-of-service from malicious deeply nested payloads
+   * - Unreadable logs from overly verbose output
+   * 
+   * **Performance:** Shallow limits improve serialization speed.
+   * 
+   * @example
+   * ```typescript
+   * const logger = createLogger({
+   *   depthLimit: 5  // Only serialize 5 levels deep
+   * });
+   * 
+   * // Deeply nested object:
+   * logger.info({ a: { b: { c: { d: { e: { f: 'deep' } } } } } }, 'test');
+   * // Output: { a: { b: { c: { d: { e: "[Object]" } } } } }
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/api#depthlimit-number | Pino DepthLimit Documentation}
+   */
+  depthLimit?: number;
+  
+  /**
+   * Maximum number of elements in arrays/objects
+   * 
+   * @default 100
+   * 
+   * @remarks
+   * Limits how many elements are serialized in arrays and object properties.
+   * Elements beyond this limit are truncated. This protects against:
+   * - Excessive memory usage from large arrays
+   * - Denial-of-service from malicious large payloads
+   * - Unreadable logs from overly verbose output
+   * 
+   * **Performance:** Lower limits improve serialization speed for large arrays.
+   * 
+   * @example
+   * ```typescript
+   * const logger = createLogger({
+   *   edgeLimit: 50  // Only serialize first 50 elements
+   * });
+   * 
+   * // Large array:
+   * logger.info({ items: new Array(1000).fill('item') }, 'test');
+   * // Output: { items: ['item', 'item', ... (50 items), '...'] }
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/api#edgelimit-number | Pino EdgeLimit Documentation}
+   */
+  edgeLimit?: number;
+  
+  /**
+   * Custom key name for log messages
+   * 
+   * @default 'msg' (Pino standard)
+   * 
+   * @remarks
+   * By default, Pino uses 'msg' as the key for log messages.
+   * Some log aggregation services prefer different keys (e.g., 'message').
+   * 
+   * **Common values:**
+   * - 'msg': Pino default, compact
+   * - 'message': Standard for many log aggregators (DataDog, Elastic, etc.)
+   * 
+   * @example
+   * ```typescript
+   * const logger = createLogger({
+   *   messageKey: 'message'  // Use 'message' instead of 'msg'
+   * });
+   * logger.info('Hello world');
+   * // Output: { "message": "Hello world", ... }
+   * ```
+   * 
+   * @see {@link https://getpino.io/#/docs/api#messagekey-string | Pino MessageKey Documentation}
+   */
+  messageKey?: string;
 }
 
 /**
@@ -1014,15 +1194,77 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     // Pass through to actual log method
     method.apply(this, inputArgs);
   };
+
+  /**
+   * Default streamWrite hook for defense-in-depth sanitization
+   * 
+   * This hook processes the final JSON string before it's written to the output stream.
+   * It acts as a last line of defense to catch any sensitive data that may have slipped
+   * through the redaction configuration.
+   * 
+   * **Patterns Sanitized:**
+   * - JWT tokens (Bearer eyJ...)
+   * - Stripe API keys (sk_live_..., pk_live_..., sk_test_..., pk_test_...)
+   * - AWS credentials (AKIA...)
+   * - Generic API keys that look like secrets
+   * - Base64-encoded data that looks like credentials
+   * 
+   * @param s - The stringified JSON log entry
+   * @returns The sanitized log string
+   */
+  const defaultStreamWrite = (s: string): string => {
+    // JWT Bearer tokens - replace entire token with redacted placeholder
+    // Pattern: Bearer followed by base64-like JWT (3 parts separated by dots)
+    let result = s.replace(
+      /Bearer\s+eyJ[A-Za-z0-9_-]*\.eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*/gi,
+      'Bearer [JWT_REDACTED]'
+    );
+    
+    // Stripe API keys (live and test)
+    result = result.replace(
+      /sk_live_[A-Za-z0-9]{24,}/g,
+      'sk_live_[REDACTED]'
+    );
+    result = result.replace(
+      /pk_live_[A-Za-z0-9]{24,}/g,
+      'pk_live_[REDACTED]'
+    );
+    result = result.replace(
+      /sk_test_[A-Za-z0-9]{24,}/g,
+      'sk_test_[REDACTED]'
+    );
+    result = result.replace(
+      /pk_test_[A-Za-z0-9]{24,}/g,
+      'pk_test_[REDACTED]'
+    );
+    
+    // AWS Access Key IDs (start with AKIA, ABIA, ACCA, AGPA, AIDA, AIPA, AKIA, ANPA, ANVA, APKA, AROA, ASCA, ASIA)
+    result = result.replace(
+      /A[BCGIKPS][A-Z]{2}[A-Z0-9]{16}/g,
+      '[AWS_KEY_REDACTED]'
+    );
+    
+    // Generic long API keys/secrets (40+ hex or alphanumeric characters)
+    // Be conservative - only match obvious patterns to avoid false positives
+    result = result.replace(
+      /"(?:api[_-]?key|secret[_-]?key|access[_-]?token|private[_-]?key)"\s*:\s*"[A-Za-z0-9_-]{40,}"/gi,
+      (match) => {
+        const colonIndex = match.indexOf(':');
+        const keyPart = match.slice(0, colonIndex + 1);
+        return `${keyPart} "[LONG_SECRET_REDACTED]"`;
+      }
+    );
+    
+    return result;
+  };
   
   const hooks: {
     logMethod?: (this: pino.Logger, args: Parameters<pino.LogFn>, method: pino.LogFn, level: number) => void;
     streamWrite?: (s: string) => string;
   } = {
     logMethod: options?.hooks?.logMethod || defaultLogMethod,
-    ...(options?.hooks?.streamWrite && {
-      streamWrite: options.hooks.streamWrite,
-    }),
+    // Use provided streamWrite hook, or default defense-in-depth sanitizer
+    streamWrite: options?.hooks?.streamWrite || defaultStreamWrite,
   };
 
   // Build mixin function - automatically inject context from logger bindings
@@ -1163,13 +1405,26 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   });
   
   // Build onChild hook - track child logger creation for debugging and monitoring
+  // In development mode, warn if child logger is missing recommended context (requestId)
   const defaultOnChild = options?.onChild || ((child: pino.Logger): void => {
-    // Default: No-op, but can be used for:
-    // - Tracking child logger creation
-    // - Validating child logger context
-    // - Performance monitoring
-    // - Audit logging
-    void child;
+    // Only validate in development mode to avoid noise in production
+    const isDevelopment = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'development';
+    
+    if (isDevelopment) {
+      const bindings = child.bindings();
+      
+      // Warn if child logger is missing requestId (important for request correlation)
+      // This helps developers catch cases where request context is not properly propagated
+      if (!bindings['requestId'] && !bindings['correlationId']) {
+        // Use console.warn since this is a development-time validation
+        // We don't use the logger itself to avoid potential circular issues
+        console.warn(
+          '[Logger] Child logger created without requestId or correlationId. ' +
+          'Consider adding request context for better log correlation. ' +
+          'Current bindings:', Object.keys(bindings).join(', ') || '(none)'
+        );
+      }
+    }
   });
 
   // Build browser configuration - include ALL browser options
@@ -1505,6 +1760,12 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
 
     // Browser Configuration
     browser: browserConfig,
+    
+    // Security/Performance limits (protect against DoS and excessive memory usage)
+    // depthLimit: Limits nested object depth (default: 10, Pino default is unlimited)
+    // edgeLimit: Limits array/object elements (default: 100, Pino default is unlimited)
+    depthLimit: options?.depthLimit ?? 10,
+    edgeLimit: options?.edgeLimit ?? 100,
   };
 
   // Add optional properties conditionally to satisfy exactOptionalPropertyTypes
@@ -1513,6 +1774,9 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   }
   if (options?.errorKey) {
     config.errorKey = options.errorKey;
+  }
+  if (options?.messageKey) {
+    config.messageKey = options.messageKey;
   }
   // Always set onChild (either custom or default)
   config.onChild = defaultOnChild;
@@ -1525,6 +1789,12 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   if (options?.nestedKey) {
     config.nestedKey = options.nestedKey;
   }
+  // Custom levels support (user-provided only)
+  // Note: Custom levels require TypeScript type augmentation to work properly.
+  // For most use cases, prefer standard levels (trace/debug/info/warn/error/fatal) 
+  // with structured context tags for filtering:
+  //   logger.info('User action', { audit: true, ... });
+  //   logger.error('Security event', { securityEvent: true, ... });
   if (options?.customLevels) {
     config.customLevels = options.customLevels;
   }
@@ -1534,8 +1804,35 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   if (options?.levelComparison) {
     config.levelComparison = options.levelComparison;
   }
+  // Handle transport configuration
+  // If prettyPrint is enabled and no custom transport provided, use pino-pretty
+  const isDevelopment = typeof process !== 'undefined' && process.env?.['NODE_ENV'] !== 'production';
+  const prettyPrintSetting = options?.prettyPrint ?? 'auto';
+  const shouldPrettyPrint = 
+    prettyPrintSetting === true || 
+    (prettyPrintSetting === 'auto' && isDevelopment && !options?.transport);
+  
   if (options?.transport) {
+    // Custom transport takes precedence
     config.transport = options.transport;
+  } else if (shouldPrettyPrint) {
+    // Enable pino-pretty for development
+    // Note: pino-pretty must be installed as a dependency
+    config.transport = {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'SYS:standard', // Use system locale time format
+        ignore: 'pid,hostname', // Hide noisy fields
+        messageFormat: '{msg}', // Clean message format
+        // Show these fields inline for quick debugging
+        singleLine: false,
+        // Error objects get special treatment
+        errorLikeObjectKeys: ['err', 'error'],
+        // Custom colors for our structured tags
+        customColors: 'audit:cyan,securityEvent:red',
+      },
+    };
   }
 
   return config;

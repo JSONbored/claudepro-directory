@@ -123,7 +123,7 @@ export async function callResendApi<T>({
       path: normalizedPath,
       method,
     });
-    const errorObj = error instanceof Error ? error : new Error(String(error));
+    const errorObj = normalizeError(error, 'Resend API error');
     
     if (error instanceof ResendApiError) {
       // Log Resend API errors with status and response body
@@ -142,7 +142,7 @@ export async function callResendApi<T>({
       err: errorObj,
     });
     throw new ResendApiError(
-      error instanceof Error ? error.message : 'Unknown Resend request error',
+      normalizeError(error, 'Unknown Resend request error').message,
       null
     );
   }

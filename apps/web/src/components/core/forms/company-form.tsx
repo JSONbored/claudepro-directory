@@ -5,6 +5,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { getFormConfig } from '@heyclaude/web-runtime';
 import {
   createCompany,
@@ -192,7 +193,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     } catch (error) {
       // Error already logged by useLoggedAsync
       toasts.error.fromError(
-        error instanceof Error ? error : new Error('Failed to upload logo'),
+        normalizeError(error, 'Failed to upload logo'),
         'Failed to upload logo'
       );
     } finally {
@@ -266,7 +267,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
       } catch (error) {
         // Error already logged by useLoggedAsync
         toasts.error.fromError(
-          error instanceof Error ? error : new Error('Failed to save company'),
+          normalizeError(error, 'Failed to save company'),
           'Failed to save company'
         );
       }
@@ -372,7 +373,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                   handleLogoUpload(file).catch((error) => {
                     logClientError(
                       'Logo upload failed',
-                      error instanceof Error ? error : new Error(String(error)),
+                      normalizeError(error, 'Logo upload failed'),
                       'CompanyForm.handleLogoUpload',
                       {
                         component: 'CompanyForm',

@@ -25,7 +25,7 @@ import {
   buildSecurityHeaders,
   CIRCUIT_BREAKER_CONFIGS,
   createUtilityContext,
-  errorToString,
+  normalizeError,
   logError,
   logInfo,
   logWarn,
@@ -177,7 +177,7 @@ async function storeEmbedding(
           },
         },
       }, error);
-      throw new Error(`Failed to store embedding: ${errorToString(error)}`);
+      throw new Error(`Failed to store embedding: ${normalizeError(error, "Operation failed").message}`);
     }
   };
 
@@ -218,7 +218,7 @@ function respondWithAnalytics(handler: () => Promise<Response>): Promise<Respons
   });
 
   const logEvent = async (status: number, outcome: 'success' | 'error', error?: unknown) => {
-    const errorData = error ? { error: errorToString(error) } : {};
+    const errorData = error ? { error: normalizeError(error, "Operation failed").message } : {};
     const logData = {
       ...logContext,
       status,
@@ -361,7 +361,7 @@ async function processEmbeddingGeneration(
 
     return { success: true, errors: [] };
   } catch (error) {
-    const errorMsg = errorToString(error);
+    const errorMsg = normalizeError(error, "Operation failed").message;
     errors.push(`Embedding generation failed: ${errorMsg}`);
     const logContext = createUtilityContext('generate-embedding', 'generation-error');
     await logError(
@@ -526,7 +526,7 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
           }
         }
       } catch (error) {
-        const errorMsg = errorToString(error);
+        const errorMsg = normalizeError(error, "Operation failed").message;
         await logError(
           'Unexpected error processing embedding generation',
           {

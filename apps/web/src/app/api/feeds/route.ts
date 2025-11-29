@@ -5,7 +5,7 @@
 
 import 'server-only';
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
@@ -22,10 +22,10 @@ const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 const FEED_LIMIT = 50;
 
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
-type FeedType = 'rss' | 'atom';
+type FeedType = 'atom' | 'rss';
 const SUPPORTED_TYPES = new Set<FeedType>(['rss', 'atom']);
 
-function toContentCategory(value: string | null): ContentCategory | null {
+function toContentCategory(value: null | string): ContentCategory | null {
   if (!value) return null;
   return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory)
     ? (value as ContentCategory)
@@ -34,12 +34,12 @@ function toContentCategory(value: string | null): ContentCategory | null {
 
 async function executeRpcWithLogging<T>(
   rpcName: string,
-  rpcCall: () => PromiseLike<{ data: T | null; error: unknown }>,
+  rpcCall: () => PromiseLike<{ data: null | T; error: unknown }>,
   reqLogger: ReturnType<typeof logger.child>
 ): Promise<T> {
   const { data, error } = await rpcCall();
-  if (error || data == null) {
-    if (error) {
+  if ((error !== null && error !== undefined) || data == null) {
+    if (error !== null && error !== undefined) {
       reqLogger.error('RPC call failed in generateFeedPayload', normalizeError(error), {
         rpcName,
       });
@@ -54,10 +54,10 @@ async function executeRpcWithLogging<T>(
 
 async function generateFeedPayload(
   type: FeedType,
-  category: string | null,
+  category: null | string,
   supabase: ReturnType<typeof createSupabaseAnonClient>,
   reqLogger: ReturnType<typeof logger.child>
-): Promise<{ xml: string; contentType: string; source: string }> {
+): Promise<{ contentType: string; source: string; xml: string; }> {
   if (category === 'changelog') {
     if (type === 'rss') {
       const rpcArgs = {

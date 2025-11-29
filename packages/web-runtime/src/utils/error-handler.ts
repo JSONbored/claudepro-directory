@@ -18,6 +18,8 @@
 
 import 'server-only';
 
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
+
 import { formatZodError, sanitizeError } from '../error-utils.ts';
 import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
@@ -76,15 +78,14 @@ export async function createErrorResponse(
   }
 
   // Handle generic errors
-  const isDev = process.env.NODE_ENV === 'development';
   const errorMessage = normalized.message;
 
   return NextResponse.json(
     {
       success: false,
-      error: isDev ? sanitizeError(error) : 'Internal server error',
-      message: isDev ? errorMessage : 'An unexpected error occurred',
-      ...(isDev && normalized.stack && { stack: normalized.stack }),
+      error: isDevelopment ? sanitizeError(error) : 'Internal server error',
+      message: isDevelopment ? errorMessage : 'An unexpected error occurred',
+      ...(isDevelopment && normalized.stack && { stack: normalized.stack }),
     },
     {
       status: 500,

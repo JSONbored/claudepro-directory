@@ -198,7 +198,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         });
       })
       .catch((error) => {
-        logger.error('SubmitFormClient: failed to load animation config', error);
+        logger.warn('[Animation] Failed to load config', {
+          err: error,
+          category: 'animation',
+          component: 'SubmitFormClient',
+          recoverable: true,
+        });
       });
   }, []);
 
@@ -441,9 +446,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         );
       } catch (error) {
         // Error already logged by useLoggedAsync
-        toasts.error.submissionFailed(
-          error instanceof Error ? error.message : 'Failed to submit content'
-        );
+        toasts.error.submissionFailed(normalizeError(error, 'Failed to submit content').message);
       }
     });
   };

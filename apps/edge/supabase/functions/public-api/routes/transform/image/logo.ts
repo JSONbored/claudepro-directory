@@ -31,6 +31,7 @@ import {
   logError,
   logInfo,
   logger,
+  normalizeError,
 } from '@heyclaude/shared-runtime';
 import {
   optimizeImage,
@@ -208,7 +209,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
           imageBytes[i] = binaryString.charCodeAt(i);
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage = normalizeError(error, "Operation failed").message;
         await logError('Invalid base64 image data', logContext, error);
         return badRequestResponse(`Invalid base64 image data: ${errorMessage}`, CORS);
       }
@@ -427,7 +428,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
     return jsonResponse(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: normalizeError(error, 'Unknown error occurred').message,
       } satisfies LogoOptimizeResponse,
       500,
       CORS

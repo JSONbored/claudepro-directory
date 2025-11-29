@@ -1,9 +1,9 @@
 import 'server-only';
 
 import { JobsService, SearchService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { logError } from '@heyclaude/shared-runtime';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { normalizeError } from '../errors.ts';
@@ -19,13 +19,13 @@ import {
 export type JobsFilterResult = Database['public']['Functions']['filter_jobs']['Returns'];
 
 export interface JobsFilterOptions {
-  searchQuery?: string;
   category?: string;
   employment?: string;
   experience?: string;
-  remote?: boolean;
   limit?: number;
   offset?: number;
+  remote?: boolean;
+  searchQuery?: string;
   sort?: 'newest' | 'oldest' | 'salary';
 }
 
@@ -50,7 +50,7 @@ async function getFilteredJobsDirect(
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
   const { searchQuery, category, employment, experience, remote, limit, offset, sort } = options;
   
-  const filtersLog: Record<string, string | number | boolean | null> = {
+  const filtersLog: Record<string, boolean | null | number | string> = {
     searchQuery: searchQuery ?? null,
     category: category ?? null,
     employment: employment ?? null,
@@ -151,7 +151,7 @@ export async function getFilteredJobs(
     remote !== undefined
   );
 
-  const filtersLog: Record<string, string | number | boolean | null> = {
+  const filtersLog: Record<string, boolean | null | number | string> = {
     searchQuery: searchQuery ?? null,
     category: category ?? null,
     employment: employment ?? null,

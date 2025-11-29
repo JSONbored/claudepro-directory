@@ -2,6 +2,8 @@
  * Metadata Generator - Unified SEO API Architecture
  */
 
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
+
 import { getSEOMetadata } from '../data/seo/client.ts';
 import { logger } from '../logger.ts';
 import type { Metadata } from 'next';
@@ -147,7 +149,7 @@ export async function generatePageMetadata(
 
   // Only log during development, not during production builds
   // This prevents 400+ JSON log lines cluttering the build output
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopment) {
     logger.info(`✅ Metadata generated for ${resolvedRoute}`, {
       titleLength: metadata.title ? String(metadata.title).length : 0,
       descLength: metadata.description?.length || 0,

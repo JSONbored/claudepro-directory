@@ -101,8 +101,13 @@ const SheetContent = ({
         });
       })
       .catch((error) => {
-        const normalized = normalizeError(error, 'SheetContent: failed to load animation config');
-        logger.error('SheetContent: failed to load animation config', normalized);
+        const normalized = normalizeError(error, 'Failed to load animation config');
+        logger.warn('[Animation] Failed to load config', {
+          err: normalized,
+          category: 'animation',
+          component: 'SheetContent',
+          recoverable: true,
+        });
       });
   }, []);
 

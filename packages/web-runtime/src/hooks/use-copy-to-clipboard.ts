@@ -132,9 +132,13 @@ export function useCopyToClipboard(
         setError(normalized);
         setCopied(false);
 
-        logger.error('Failed to copy to clipboard', normalized, {
-          component: context?.component || 'useCopyToClipboard',
-          action: context?.action || 'copy',
+        logger.warn('[Clipboard] Copy failed', {
+          err: normalized,
+          category: 'clipboard',
+          component: context?.component ?? 'useCopyToClipboard',
+          recoverable: true,
+          userRetryable: true,
+          action: context?.action ?? 'copy',
           textLength: text.length,
         });
 

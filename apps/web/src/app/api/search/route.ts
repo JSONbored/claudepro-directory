@@ -19,7 +19,7 @@ import {
   handleOptionsRequest,
   enqueuePulseEventServer,
 } from '@heyclaude/web-runtime/server';
-import type { NextRequest } from 'next/server';
+import  { type NextRequest } from 'next/server';
 
 const CORS = getWithAuthCorsHeaders;
 const DEFAULT_ENTITIES = ['content', 'company', 'job', 'user'] as const;
@@ -36,25 +36,25 @@ type JobCategory = DatabaseGenerated['public']['Enums']['job_category'];
 type JobEmployment = DatabaseGenerated['public']['Enums']['job_type'];
 type JobExperience = DatabaseGenerated['public']['Enums']['experience_level'];
 type HighlightedSearchResult = Record<string, unknown> & {
-  title_highlighted?: string;
-  description_highlighted?: string;
   author_highlighted?: string;
+  description_highlighted?: string;
   tags_highlighted?: string[];
+  title_highlighted?: string;
 };
 
-type SearchType = 'content' | 'unified' | 'jobs';
+type SearchType = 'content' | 'jobs' | 'unified';
 
 interface FiltersPayload {
-  categories?: string[];
-  tags?: string[];
   authors?: string[];
-  sort: SortType;
+  categories?: string[];
   entities?: string[];
+  entity?: string;
   job_category?: DatabaseGenerated['public']['Enums']['job_category'];
   job_employment?: DatabaseGenerated['public']['Enums']['job_type'];
   job_experience?: DatabaseGenerated['public']['Enums']['experience_level'];
   job_remote?: boolean;
-  entity?: string;
+  sort: SortType;
+  tags?: string[];
 }
 
 type SearchResultRow = Record<string, unknown>;
@@ -222,15 +222,15 @@ export async function GET(request: NextRequest) {
       },
       searchType,
     } satisfies {
-      results: HighlightedSearchResult[];
-      query: string;
       filters: FiltersPayload;
       pagination: {
-        total: number;
+        hasMore: boolean;
         limit: number;
         offset: number;
-        hasMore: boolean;
+        total: number;
       };
+      query: string;
+      results: HighlightedSearchResult[];
       searchType: SearchType;
     };
 
@@ -269,7 +269,7 @@ export function OPTIONS() {
   return handleOptionsRequest(CORS);
 }
 
-function parseCsvParam(value: string | null): string[] | undefined {
+function parseCsvParam(value: null | string): string[] | undefined {
   if (!value) return undefined;
   const parts = value
     .split(',')
@@ -284,20 +284,20 @@ function validateEnumValue<T extends string>(value: string | undefined, validVal
 }
 
 async function executeSearch(params: {
-  searchService: SearchService;
-  searchType: SearchType;
-  query: string;
-  categories?: string[] | undefined;
-  tags?: string[] | undefined;
   authors?: string[] | undefined;
+  categories?: string[] | undefined;
   entities?: string[] | undefined;
-  sort: SortType;
-  limit: number;
-  offset: number;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
   jobExperience?: JobExperience | undefined;
   jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
 }): Promise<{ results: SearchResultRow[]; totalCount: number }> {
   const {
     searchService,

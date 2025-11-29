@@ -24,7 +24,7 @@ import {
   buildSecurityHeaders,
   CIRCUIT_BREAKER_CONFIGS,
   deriveTitleFromRoute,
-  errorToString,
+  normalizeError,
   logError,
   logInfo,
   logWarn,
@@ -180,7 +180,7 @@ async function fetchMetadataFromRoute(
   } catch (error) {
     logWarn('Direct SEO metadata call failed, attempting HTTP fallback', {
       ...logContext,
-      error: errorToString(error),
+      error: normalizeError(error, "Operation failed").message,
     });
 
     // Fallback to HTTP call (with loopback detection guard)
@@ -236,7 +236,7 @@ async function fetchMetadataFromRoute(
     } catch (httpError) {
       logWarn('HTTP fallback also failed, attempting direct database fallback', {
         ...logContext,
-        error: errorToString(httpError),
+        error: normalizeError(httpError, 'HTTP fallback failed').message,
         seoUrl,
       });
 

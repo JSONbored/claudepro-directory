@@ -1,14 +1,14 @@
 'use server';
 
 import { QuizService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
 
 export type QuizConfigurationResult =
   Database['public']['Functions']['get_quiz_configuration']['Returns'];
 
-export async function getQuizConfiguration(): Promise<QuizConfigurationResult | null> {
+export async function getQuizConfiguration(): Promise<null | QuizConfigurationResult> {
   return fetchCached(
     (client) => new QuizService(client).getQuizConfiguration(),
     {

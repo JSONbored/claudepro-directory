@@ -76,7 +76,12 @@ export function UserMenu({ className }: UserMenuProps) {
         });
       })
       .catch((error) => {
-        logger.error('UserMenu: failed to load animation config', error);
+        logger.warn('[Animation] Failed to load config', {
+          err: error,
+          category: 'animation',
+          component: 'UserMenu',
+          recoverable: true,
+        });
       });
   }, []);
 

@@ -24,11 +24,11 @@ import {
 } from '@heyclaude/edge-runtime';
 import {
   createUtilityContext,
-  errorToString,
   logError,
   logInfo,
   logWarn,
   logger,
+  normalizeError,
   TIMEOUT_PRESETS,
   withTimeout,
 } from '@heyclaude/shared-runtime';
@@ -152,8 +152,8 @@ async function processSearchEventsBatch(messages: PulseQueueMessage[]): Promise<
     inserted = searchQueries.length;
     return { inserted, failed, errors };
   } catch (error) {
-    const errorMsg = errorToString(error);
-    errors.push(`Search events batch insert failed: ${errorMsg}`);
+    const errorObj = normalizeError(error, 'Search events batch insert failed');
+    errors.push(`Search events batch insert failed: ${errorObj.message}`);
     const logContext = createUtilityContext('flux-station', 'pulse-search-events', {
       message_count: messages.length,
     });
@@ -427,8 +427,8 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
 
     return { inserted, failed, errors };
   } catch (error) {
-    const errorMsg = errorToString(error);
-    errors.push(`Batch insert failed: ${errorMsg}`);
+    const errorObj = normalizeError(error, 'Batch insert failed');
+    errors.push(`Batch insert failed: ${errorObj.message}`);
     const logContext = createUtilityContext('flux-station', 'pulse-batch-insert', {
       message_count: messages.length,
       dbQuery: {

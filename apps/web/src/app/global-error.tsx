@@ -38,8 +38,8 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <div className={'flex min-h-screen flex-col items-center justify-center p-4 font-sans'}>
-          <div className={'max-w-md rounded-lg border border-border bg-card p-8 text-center'}>
+        <div className="flex min-h-screen flex-col items-center justify-center p-4 font-sans">
+          <div className="max-w-md rounded-lg border border-border bg-card p-8 text-center">
             <h2 className="mb-4 font-bold text-2xl text-destructive">Application Error</h2>
             <p className="mb-6 text-muted-foreground">
               A critical error occurred. Please refresh the page or try again later.

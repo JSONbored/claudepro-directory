@@ -5,6 +5,7 @@
  * Uses toggleJobStatus server action (calls toggle_job_status RPC)
  */
 
+import { normalizeError } from '@heyclaude/shared-runtime';
 import type { JobStatus } from '@heyclaude/web-runtime';
 import { toggleJobStatus } from '@heyclaude/web-runtime/actions';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
@@ -66,7 +67,7 @@ export function JobToggleButton({
       } catch (error) {
         // Error already logged by useLoggedAsync
         toasts.error.fromError(
-          error instanceof Error ? error : new Error('Failed to toggle job status'),
+          normalizeError(error, 'Failed to toggle job status'),
           'Failed to toggle job status'
         );
       }

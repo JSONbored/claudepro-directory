@@ -69,8 +69,11 @@ export const HighlightedText = memo(({ html, fallback, className = '' }: Highlig
           } catch (error) {
             // Log sanitization errors but don't crash the component
             const normalized = normalizeError(error, 'HighlightedText: DOMPurify sanitization failed');
-            logger.error('HighlightedText: Failed to sanitize HTML', normalized, {
+            logger.warn('[Sanitize] Failed to sanitize HTML', {
+              err: normalized,
+              category: 'sanitize',
               component: 'HighlightedText',
+              recoverable: true,
               htmlLength: html.length,
               hasFallback: Boolean(fallback),
             });
@@ -78,8 +81,13 @@ export const HighlightedText = memo(({ html, fallback, className = '' }: Highlig
           }
         })
         .catch((error) => {
-          const normalized = normalizeError(error, 'HighlightedText: Failed to load DOMPurify');
-          logger.error('HighlightedText: Failed to load DOMPurify', normalized);
+          const normalized = normalizeError(error, 'Failed to load DOMPurify');
+          logger.warn('[Sanitize] Failed to load DOMPurify', {
+            err: normalized,
+            category: 'sanitize',
+            component: 'HighlightedText',
+            recoverable: true,
+          });
           setSafeHtml(null); // Trigger fallback rendering
         });
     }

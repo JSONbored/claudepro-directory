@@ -2,11 +2,12 @@
 
 import { runGenerateMcpbPackages } from '../commands/generate-mcpb-packages.js';
 import { logger } from '../toolkit/logger.js';
+import { normalizeError } from '@heyclaude/shared-runtime';
 
 runGenerateMcpbPackages().catch((error: unknown) => {
   logger.error(
     '💥 MCPB package generation failed',
-    error instanceof Error ? error : new Error(String(error)),
+    normalizeError(error, 'MCPB package generation failed'),
     {
       script: 'generate-mcpb',
     }

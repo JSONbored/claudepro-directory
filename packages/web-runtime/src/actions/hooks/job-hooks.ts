@@ -1,3 +1,4 @@
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { normalizeError } from '../../errors';
 import { logger } from '../../logger';
 import { getEnvVar } from '@heyclaude/shared-runtime';
@@ -25,7 +26,17 @@ export async function onJobCreated(
       const productPriceId = getPolarProductPriceId(plan, tier);
 
       if (productPriceId) {
-        const baseUrl = getEnvVar('NEXT_PUBLIC_BASE_URL') || process.env['NEXT_PUBLIC_BASE_URL'];
+        const baseUrl = getEnvVar('NEXT_PUBLIC_BASE_URL') || (env as Record<string, unknown>)['NEXT_PUBLIC_BASE_URL'] as string | undefined;
+        
+        if (!baseUrl) {
+          const configError = new Error('NEXT_PUBLIC_BASE_URL environment variable is required for payment checkout');
+          logger.error('NEXT_PUBLIC_BASE_URL is not configured', configError, {
+            jobId,
+            userId: ctx.userId,
+          });
+          throw configError;
+        }
+        
         const checkoutResult = await createPolarCheckout({
           productPriceId,
           jobId,

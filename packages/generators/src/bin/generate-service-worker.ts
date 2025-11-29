@@ -2,11 +2,12 @@
 
 import { runGenerateServiceWorker } from '../commands/generate-service-worker.js';
 import { logger } from '../toolkit/logger.js';
+import { normalizeError } from '@heyclaude/shared-runtime';
 
 runGenerateServiceWorker().catch((error) => {
   logger.error(
     '💥 Service Worker generation failed',
-    error instanceof Error ? error : new Error(String(error)),
+    normalizeError(error, 'Service Worker generation failed'),
     {
       script: 'generate-service-worker',
     }

@@ -24,7 +24,7 @@ import {
 } from '@heyclaude/edge-runtime';
 import {
   createUtilityContext,
-  errorToString,
+  normalizeError,
   logError,
   logInfo,
   TIMEOUT_PRESETS,
@@ -127,7 +127,7 @@ async function processPackageGeneration(
 
     return { success: true, errors: [] };
   } catch (error) {
-    const errorMsg = errorToString(error);
+    const errorMsg = normalizeError(error, "Operation failed").message;
     errors.push(`Generation failed: ${errorMsg}`);
     if (logContext) {
       await logError(
@@ -299,7 +299,7 @@ export async function handlePackageGenerationQueue(
           });
         }
       } catch (error) {
-        const errorMsg = errorToString(error);
+        const errorMsg = normalizeError(error, "Operation failed").message;
         await logError(
           'Unexpected error processing package generation',
           {

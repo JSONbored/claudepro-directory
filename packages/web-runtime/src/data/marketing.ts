@@ -5,18 +5,18 @@ import { PRICING_CONFIG_DEFAULTS } from '../feature-flags/defaults.ts';
 
 export interface PartnerPricing {
   jobs: {
-    regular: number;
     discounted: number;
     durationDays: number;
-  };
-  sponsored: {
     regular: number;
-    discounted: number;
   };
   launch: {
     discountPercent: number;
     enabled: boolean;
     endDate: string;
+  };
+  sponsored: {
+    discounted: number;
+    regular: number;
   };
 }
 

@@ -22,6 +22,7 @@ import {
   logError,
   logInfo,
   logger,
+  normalizeError,
 } from '@heyclaude/shared-runtime';
 import {
   ensureImageMagickInitialized,
@@ -156,7 +157,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
             imageBytes[i] = binaryString.charCodeAt(i);
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorMessage = normalizeError(error, "Operation failed").message;
           await logError('Invalid base64 image data', logContext, error);
           return jsonResponse(
             {
@@ -240,7 +241,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
             (body.imageData as Uint8Array)[i] = binaryString.charCodeAt(i);
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorMessage = normalizeError(error, "Operation failed").message;
           await logError('Invalid base64 image data', logContext, error);
           return jsonResponse(
             {
@@ -566,7 +567,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
     return jsonResponse(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: normalizeError(error, 'Unknown error occurred').message,
       } satisfies ThumbnailGenerateResponse,
       500,
       CORS

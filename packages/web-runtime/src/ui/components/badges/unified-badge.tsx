@@ -346,16 +346,18 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     };
 
     return (
-      <div
-        className={cn(
-          'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-colors',
-          sponsoredBadgeStyles[props.tier],
-          props.className
-        )}
-      >
-        {getIcon()}
-        {getLabel()}
-      </div>
+      <BadgeWrapper springDefault={springDefault}>
+        <div
+          className={cn(
+            'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
+            sponsoredBadgeStyles[props.tier],
+            props.className
+          )}
+        >
+          {getIcon()}
+          {getLabel()}
+        </div>
+      </BadgeWrapper>
     );
   }
 
@@ -393,30 +395,32 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     }
 
     return (
-      <button
-        type="button"
-        className={cn(
-          'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
-          'cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent',
-          props.className
-        )}
-        onClick={handleClick}
-      >
-        {props.children || props.tag}
-        {props.onRemove && (
-          <button
-            type="button"
-            className="ml-1 hover:opacity-80"
-            onClick={(e) => {
-              e.stopPropagation();
-              props.onRemove?.();
-            }}
-            aria-label={`Remove ${props.tag}`}
-          >
-            ×
-          </button>
-        )}
-      </button>
+      <BadgeWrapper springDefault={springDefault}>
+        <button
+          type="button"
+          className={cn(
+            'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
+            'cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent hover:shadow-md hover:shadow-primary/20',
+            props.className
+          )}
+          onClick={handleClick}
+        >
+          {props.children || props.tag}
+          {props.onRemove && (
+            <button
+              type="button"
+              className="ml-1 hover:opacity-80"
+              onClick={(e) => {
+                e.stopPropagation();
+                props.onRemove?.();
+              }}
+              aria-label={`Remove ${props.tag}`}
+            >
+              ×
+            </button>
+          )}
+        </button>
+      </BadgeWrapper>
     );
   }
 
@@ -476,20 +480,23 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     };
 
     return (
-      <output
-        className={cn(
-          'inline-flex items-center justify-center',
-          'px-2.5 py-0.5',
-          'font-semibold text-[10px] uppercase tracking-wider',
-          'rounded-full border',
-          ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT,
-          variantStyles[badgeVariant],
-          props.className
-        )}
-        aria-label="New"
-      >
-        {children}
-      </output>
+      <BadgeWrapper springDefault={springDefault}>
+        <output
+          className={cn(
+            'inline-flex items-center justify-center',
+            'px-2.5 py-0.5',
+            'font-semibold text-[10px] uppercase tracking-wider',
+            'rounded-full border',
+            ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT,
+            'hover:shadow-md hover:shadow-primary/20',
+            variantStyles[badgeVariant],
+            props.className
+          )}
+          aria-label="New"
+        >
+          {children}
+        </output>
+      </BadgeWrapper>
     );
   }
 

@@ -5,6 +5,8 @@
 
 import 'server-only';
 
+import { env } from '@heyclaude/shared-runtime/schemas/env';
+
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { Database } from '@heyclaude/database-types';
@@ -16,8 +18,8 @@ type SupabaseServerClient = ReturnType<typeof createServerClient<Database>>;
 export async function createSupabaseServerClient(): Promise<SupabaseServerClient> {
   const cookieStore = await cookies();
 
-  const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
-  const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
+  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl) {
     throw new Error(

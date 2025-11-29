@@ -48,12 +48,13 @@ import {
 import {
   batchProcess,
   createEmailHandlerContext,
-  errorToString,
+  normalizeError,
   logError,
   logInfo,
   logger,
   logWarn,
   MAX_BODY_SIZE,
+  normalizeError,
   validateEmail,
 } from '@heyclaude/shared-runtime';
 
@@ -309,7 +310,7 @@ export async function handleSubscribe(req: Request): Promise<Response> {
     }).catch((error) => {
       logWarn('Cache invalidation failed', {
         ...logContext,
-        error: errorToString(error),
+        error: normalizeError(error, "Operation failed").message,
       });
     });
 
@@ -746,7 +747,7 @@ export async function handleDigest(): Promise<Response> {
               }
             : undefined,
         },
-        error instanceof Error ? error : new Error(String(error))
+        normalizeError(error, 'Weekly digest error')
       );
 
       // If we've exhausted retries, log the failure but don't throw
@@ -767,7 +768,7 @@ export async function handleDigest(): Promise<Response> {
             upsert_data: upsertData,
             warning: 'Digest emails were sent successfully, but timestamp update failed. This may affect rate limiting for next run.',
           },
-          error instanceof Error ? error : new Error(errorMessage)
+          normalizeError(error, errorMessage)
         );
         // Don't throw - digest was sent successfully, timestamp update is non-critical
         // Log the warning and continue to return success response

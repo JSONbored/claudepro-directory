@@ -7,6 +7,13 @@
  */
 
 import { vi } from 'vitest';
+import '@testing-library/jest-dom/vitest';
+
+// Fix for React 18/19 compatibility in tests
+// @ts-ignore - internals compatibility
+if (typeof globalThis.IS_REACT_ACT_ENVIRONMENT === 'undefined') {
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+}
 
 // ============================================================================
 // Global Module Mocks (must be hoisted before any test files)

@@ -14,7 +14,7 @@ import {
   buildErrorEmbed,
   buildSubmissionEmbed,
 } from '@heyclaude/edge-runtime/utils/discord/embeds.ts';
-import { errorToString, logError, logInfo } from '@heyclaude/shared-runtime';
+import { normalizeError, logError, logInfo } from '@heyclaude/shared-runtime';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 import {
   badRequestResponse,
@@ -395,7 +395,7 @@ export async function handleContentNotificationDirect(
   if (contentError || !content) {
     logger.error('Failed to fetch content', {
       ...logContext,
-      error: errorToString(contentError),
+      error: normalizeError(contentError, 'Failed to fetch content').message,
       approved_slug: payload.record.approved_slug,
     });
     return;
@@ -493,7 +493,7 @@ export async function handleContentNotificationDirect(
   }).catch((error) => {
     logger.warn('Cache invalidation failed', {
       ...updatedContext,
-      error: errorToString(error),
+      error: normalizeError(error, "Operation failed").message,
     });
   });
 
@@ -508,7 +508,7 @@ export async function handleContentNotificationDirect(
   ).catch((error) => {
     logger.warn('Cache invalidation failed', {
       ...updatedContext,
-      error: errorToString(error),
+      error: normalizeError(error, "Operation failed").message,
     });
   });
 }
@@ -854,7 +854,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
   }).catch((error) => {
     logger.warn('Cache invalidation failed', {
       ...updatedContext,
-      error: errorToString(error),
+      error: normalizeError(error, "Operation failed").message,
     });
   });
 
@@ -869,7 +869,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
   ).catch((error) => {
     logger.warn('Cache invalidation failed', {
       ...updatedContext,
-      error: errorToString(error),
+      error: normalizeError(error, "Operation failed").message,
     });
   });
 
@@ -1041,7 +1041,7 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
   }).catch((error) => {
     logger.warn('Cache invalidation failed', {
       ...logContext,
-      error: errorToString(error),
+      error: normalizeError(error, "Operation failed").message,
     });
   });
 
@@ -1052,7 +1052,7 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
   }).catch((error) => {
     logger.warn('Cache invalidation failed', {
       ...logContext,
-      error: errorToString(error),
+      error: normalizeError(error, "Operation failed").message,
     });
   });
 

@@ -1,6 +1,6 @@
 'use server';
 
-import { withTimeout, TIMEOUT_PRESETS } from '@heyclaude/shared-runtime';
+import { withTimeout, TIMEOUT_PRESETS, normalizeError } from '@heyclaude/shared-runtime';
 
 export interface FetchWithRetryOptions {
   url: string;
@@ -73,7 +73,7 @@ export async function fetchWithRetry({
       const text = await response.text().catch(() => '');
       lastError = new Error(`HTTP ${response.status}: ${text}`);
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown fetch error');
+      lastError = normalizeError(error, 'Unknown fetch error');
     }
 
     if (attempt < attempts) {

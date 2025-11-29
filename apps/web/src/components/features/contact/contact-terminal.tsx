@@ -400,7 +400,7 @@ export function ContactTerminal() {
       // Error already logged by useLoggedAsync
       addOutput(
         'error',
-        error instanceof Error ? error.message : 'An error occurred. Please try again.',
+        normalizeError(error, 'An error occurred. Please try again.').message,
         <X className="h-3 w-3" />
       );
       trackTerminalFormSubmissionAction({

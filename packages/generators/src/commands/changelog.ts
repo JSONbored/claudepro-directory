@@ -10,6 +10,7 @@ import {
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { logger } from '../toolkit/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -102,7 +103,7 @@ function generateChangelog(options: GenerateOptions): string {
   } catch (error) {
     logger.error(
       '❌ Failed to generate changelog',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'Changelog generation failed'),
       {
         script: 'changelog-generate-entry',
       }
@@ -151,7 +152,7 @@ function prependToChangelog(newEntry: string): void {
   } catch (error) {
     logger.error(
       'Error writing to CHANGELOG.md',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'Changelog file write failed'),
       {
         script: 'changelog-generate-entry',
       }
@@ -370,7 +371,7 @@ export async function runGenerateChangelog() {
   } catch (error) {
     logger.error(
       '❌ Generation failed',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'Changelog generation failed'),
       {
         script: 'changelog-generate-entry',
       }

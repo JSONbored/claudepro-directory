@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
   APP_CONFIG,
   buildSecurityHeaders,
@@ -31,7 +31,7 @@ const INDEXNOW_API_KEY = getEnvVar('INDEXNOW_API_KEY');
 const INDEXNOW_TRIGGER_KEY = getEnvVar('INDEXNOW_TRIGGER_KEY');
 const SITE_URL = APP_CONFIG.url;
 
-function timingSafeEqual(a?: string | null, b?: string | null): boolean {
+function timingSafeEqual(a?: null | string, b?: null | string): boolean {
   if (typeof a !== 'string' || typeof b !== 'string') {
     return false;
   }
@@ -96,10 +96,10 @@ export async function GET(request: NextRequest) {
       }
 
       const mappedUrls: Array<{
-        path: string;
-        loc: string;
-        lastmod?: string;
         changefreq?: string;
+        lastmod?: string;
+        loc: string;
+        path: string;
         priority?: number;
       }> = [];
 
@@ -111,10 +111,10 @@ export async function GET(request: NextRequest) {
         const priority = getNumberProperty(row, 'priority');
 
         const urlEntry: {
-          path: string;
-          loc: string;
-          lastmod?: string;
           changefreq?: string;
+          lastmod?: string;
+          loc: string;
+          path: string;
           priority?: number;
         } = {
           path,
@@ -217,7 +217,10 @@ export async function POST(request: NextRequest) {
     method: 'POST',
   });
 
-  reqLogger.info('IndexNow submission received');
+  reqLogger.info('IndexNow submission received', {
+    operation: 'indexnow_submission',
+    securityEvent: true,
+  });
 
   if (!INDEXNOW_TRIGGER_KEY) {
     return jsonResponse(
@@ -232,7 +235,7 @@ export async function POST(request: NextRequest) {
 
   const triggerKey = request.headers.get('x-indexnow-trigger-key');
   if (!timingSafeEqual(triggerKey, INDEXNOW_TRIGGER_KEY)) {
-    reqLogger.warn('Invalid IndexNow trigger key');
+    reqLogger.warn('Invalid IndexNow trigger key', { securityEvent: true });
     return jsonResponse(
       {
         error: 'Unauthorized',
@@ -316,6 +319,7 @@ export async function POST(request: NextRequest) {
       reqLogger.warn('IndexNow request failed', {
         status: response.status,
         body: text,
+        securityEvent: true,
       });
       return jsonResponse(
         {
@@ -329,7 +333,9 @@ export async function POST(request: NextRequest) {
     }
 
     reqLogger.info('IndexNow submission successful', {
+      operation: 'indexnow_submission',
       submitted: urlList.length,
+      securityEvent: true,
     });
 
     return jsonResponse(

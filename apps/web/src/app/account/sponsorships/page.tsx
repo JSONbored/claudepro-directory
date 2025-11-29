@@ -12,7 +12,7 @@ import { UI_CLASSES, UnifiedBadge, Button ,
   CardDescription,
   CardHeader,
   CardTitle  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 
 
@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * - Current date is between start_date and end_date (inclusive)
  */
 function isSponsorshipActive(
-  sponsorship: { active: boolean | null; start_date: string; end_date: string },
+  sponsorship: { active: boolean | null; end_date: string; start_date: string; },
   now: Date
 ): boolean {
   return (
@@ -72,7 +72,7 @@ export default async function SponsorshipsPage() {
             <CardDescription>Please sign in to manage your sponsorship campaigns.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -112,7 +112,7 @@ export default async function SponsorshipsPage() {
             <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
             <p className="text-muted-foreground">No active campaigns yet</p>
           </div>
-          <Button variant="outline" asChild={true}>
+          <Button variant="outline" asChild>
             <Link href={ROUTES.PARTNER}>
               <TrendingUp className="mr-2 h-4 w-4" />
               Become a Sponsor
@@ -145,7 +145,7 @@ export default async function SponsorshipsPage() {
             {activeCount} active {activeCount === 1 ? 'campaign' : 'campaigns'}
           </p>
         </div>
-        <Button variant="outline" asChild={true}>
+        <Button variant="outline" asChild>
           <Link href={ROUTES.PARTNER}>
             <TrendingUp className="mr-2 h-4 w-4" />
             Become a Sponsor
@@ -175,7 +175,7 @@ export default async function SponsorshipsPage() {
                 <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      <UnifiedBadge variant="sponsored" tier={safeTier} showIcon={true} />
+                      <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
                       {isActive ? (
                         <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_APPROVED}>
                           Active
@@ -185,11 +185,9 @@ export default async function SponsorshipsPage() {
                           Inactive
                         </UnifiedBadge>
                       )}
-                      {hasHitLimit && (
-                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_WARNING}>
+                      {hasHitLimit ? <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_WARNING}>
                           Limit Reached
-                        </UnifiedBadge>
-                      )}
+                        </UnifiedBadge> : null}
                     </div>
                     <CardTitle className="mt-2">
                       {sponsorship.content_type} - ID: {sponsorship.content_id}
@@ -199,7 +197,7 @@ export default async function SponsorshipsPage() {
                       {new Date(sponsorship.end_date).toLocaleDateString()}
                     </CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" asChild={true}>
+                  <Button variant="outline" size="sm" asChild>
                     <Link href={`/account/sponsorships/${sponsorship.id}/analytics`}>
                       <BarChart className="mr-1 h-3 w-3" />
                       Analytics
@@ -219,11 +217,9 @@ export default async function SponsorshipsPage() {
                       Impressions
                     </div>
                     <div className="font-bold text-2xl">{impressionCount.toLocaleString()}</div>
-                    {sponsorship.impression_limit && (
-                      <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                    {sponsorship.impression_limit ? <div className={UI_CLASSES.TEXT_XS_MUTED}>
                         of {sponsorship.impression_limit.toLocaleString()}
-                      </div>
-                    )}
+                      </div> : null}
                   </div>
 
                   <div>
@@ -248,8 +244,7 @@ export default async function SponsorshipsPage() {
                 </div>
 
                 {/* Progress bar if has limit */}
-                {sponsorship.impression_limit && (
-                  <div
+                {sponsorship.impression_limit ? <div
                     className="h-2 w-full rounded-full bg-muted"
                     role="progressbar"
                     aria-valuenow={impressionCount}
@@ -264,8 +259,7 @@ export default async function SponsorshipsPage() {
                       }}
                       aria-hidden="true"
                     />
-                  </div>
-                )}
+                  </div> : null}
               </CardContent>
             </Card>
           );

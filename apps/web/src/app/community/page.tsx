@@ -17,7 +17,7 @@ import {
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES, UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 
@@ -45,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = 86_400;
 
-function formatStatValue(value: number | null | undefined): string {
+function formatStatValue(value: null | number | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '0';
   return Intl.NumberFormat('en', {
     notation: 'compact',
@@ -132,59 +132,53 @@ export default async function CommunityPage() {
   ];
 
   return (
-    <div className={'min-h-screen bg-background'}>
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className={'relative overflow-hidden px-4 py-24'}>
-        <div className={'container mx-auto text-center'}>
-          <div className={'mx-auto max-w-3xl'}>
+      <section className="relative overflow-hidden px-4 py-24">
+        <div className="container mx-auto text-center">
+          <div className="mx-auto max-w-3xl">
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={'mb-6 border-accent/20 bg-accent/5 text-accent'}
+              className="mb-6 border-accent/20 bg-accent/5 text-accent"
             >
               <Users className="mr-1 h-3 w-3 text-accent" />
               Community
             </UnifiedBadge>
 
-            <h1 className={'mb-6 font-bold text-4xl md:text-6xl'}>Join the Claude Community</h1>
+            <h1 className="mb-6 font-bold text-4xl md:text-6xl">Join the Claude Community</h1>
 
             <p className={UI_CLASSES.TEXT_HEADING_LARGE}>
               Connect with developers and AI enthusiasts building with Claude. Share your
               configurations, learn from the community, and contribute to our open-source directory.
             </p>
 
-            <div className={'flex flex-wrap justify-center gap-4'}>
-              {channels.github && (
-                <Button size="lg" asChild={true}>
+            <div className="flex flex-wrap justify-center gap-4">
+              {channels.github ? <Button size="lg" asChild>
                   <a href={channels.github} target="_blank" rel="noopener noreferrer">
-                    <Github className={'mr-2 h-5 w-5'} />
+                    <Github className="mr-2 h-5 w-5" />
                     GitHub
                   </a>
-                </Button>
-              )}
-              {channels.discord && (
-                <Button size="lg" variant="outline" asChild={true}>
+                </Button> : null}
+              {channels.discord ? <Button size="lg" variant="outline" asChild>
                   <a href={channels.discord} target="_blank" rel="noopener noreferrer">
-                    <MessageSquare className={'mr-2 h-5 w-5'} />
+                    <MessageSquare className="mr-2 h-5 w-5" />
                     Discord
                   </a>
-                </Button>
-              )}
-              {channels.twitter && (
-                <Button size="lg" variant="outline" asChild={true}>
+                </Button> : null}
+              {channels.twitter ? <Button size="lg" variant="outline" asChild>
                   <a href={channels.twitter} target="_blank" rel="noopener noreferrer">
-                    <Twitter className={'mr-2 h-5 w-5'} />X (Twitter)
+                    <Twitter className="mr-2 h-5 w-5" />X (Twitter)
                   </a>
-                </Button>
-              )}
+                </Button> : null}
             </div>
           </div>
         </div>
       </section>
 
       {/* Community Stats */}
-      <section className={'px-4 py-16'}>
-        <div className={'container mx-auto'}>
+      <section className="px-4 py-16">
+        <div className="container mx-auto">
           <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
             {statCards.map(({ icon: Icon, title, value, description }) => (
               <Card key={title}>
@@ -195,7 +189,7 @@ export default async function CommunityPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className={'font-bold text-3xl'}>{value}</div>
+                  <div className="font-bold text-3xl">{value}</div>
                   <p className="text-muted-foreground">{description}</p>
                 </CardContent>
               </Card>
@@ -205,34 +199,34 @@ export default async function CommunityPage() {
       </section>
 
       {/* Contributing Section */}
-      <section className={'px-4 py-16'}>
-        <div className={'container mx-auto'}>
+      <section className="px-4 py-16">
+        <div className="container mx-auto">
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl">How to Contribute</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className={'mb-2 font-semibold'}>1. Fork the Repository</h3>
+                <h3 className="mb-2 font-semibold">1. Fork the Repository</h3>
                 <p className="text-muted-foreground">
                   Start by forking our GitHub repository and cloning it to your local machine.
                 </p>
               </div>
               <div>
-                <h3 className={'mb-2 font-semibold'}>2. Add Your Configuration</h3>
+                <h3 className="mb-2 font-semibold">2. Add Your Configuration</h3>
                 <p className="text-muted-foreground">
                   Create a new JSON file with your Claude configuration in the appropriate content
                   directory.
                 </p>
               </div>
               <div>
-                <h3 className={'mb-2 font-semibold'}>3. Submit a Pull Request</h3>
+                <h3 className="mb-2 font-semibold">3. Submit a Pull Request</h3>
                 <p className="text-muted-foreground">
                   Submit a pull request with your contribution. Our team will review it promptly.
                 </p>
               </div>
               <div className="pt-4">
-                <Button asChild={true}>
+                <Button asChild>
                   <Link href={ROUTES.SUBMIT}>Submit Your Configuration</Link>
                 </Button>
               </div>
@@ -242,7 +236,7 @@ export default async function CommunityPage() {
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={'container mx-auto px-4 py-12'}>
+      <section className="container mx-auto px-4 py-12">
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

@@ -25,7 +25,7 @@ import {
   Terminal,
   Webhook,
 } from '../../../icons.tsx';
-import type { UnifiedCategoryConfig } from '../../../types/category.ts';
+import  { type UnifiedCategoryConfig } from '../../../types/category.ts';
 
 type ContentCategory = Database['public']['Enums']['content_category'];
 
@@ -42,13 +42,12 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 // Import enum values
-const CATEGORIES = Constants.public.Enums.content_category;
 const CONFIG_FORMATS = Constants.public.Enums.config_format;
 const ACTION_TYPES = Constants.public.Enums.primary_action_type;
 
 export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<ContentCategory>> = {
-  [CATEGORIES[1]]: {
-    id: CATEGORIES[1],
+  "mcp": {
+    id: "mcp" as const,
     title: "MCP Server",
     pluralTitle: "MCP Servers",
     description: "Model Context Protocol servers that extend Claude's capabilities with external tools and data sources.",
@@ -72,7 +71,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     listPage: {
       searchPlaceholder: "Search MCP servers...",
-      badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
+      badges: [{ text: (count: number) => `${count} items` }],
       
     },
     detailPage: {
@@ -96,11 +95,11 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       label: "Download .mcpb",
       type: ACTION_TYPES[4],
     },
-    urlSlug: CATEGORIES[1],
-    contentLoader: CATEGORIES[1],
+    urlSlug: "mcp",
+    contentLoader: "mcp",
   },
-  [CATEGORIES[4]]: {
-    id: CATEGORIES[4],
+  "hooks": {
+    id: "hooks" as const,
     title: "Hook",
     pluralTitle: "Hooks",
     description: "Event-driven automation hooks that trigger during Claude Code operations.",
@@ -124,7 +123,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     listPage: {
       searchPlaceholder: "Search hooks...",
-      badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
+      badges: [{ text: (count: number) => `${count} items` }],
       
     },
     detailPage: {
@@ -148,11 +147,11 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       label: "View on GitHub",
       type: ACTION_TYPES[5],
     },
-    urlSlug: CATEGORIES[4],
-    contentLoader: CATEGORIES[4],
+    urlSlug: "hooks",
+    contentLoader: "hooks",
   },
-  [CATEGORIES[6]]: {
-    id: CATEGORIES[6],
+  "skills": {
+    id: "skills" as const,
     title: "Skill",
     pluralTitle: "Skills",
     description: "Task-focused capability guides for Claude (PDF, DOCX, PPTX, XLSX, and more) with requirements and runnable examples.",
@@ -176,7 +175,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     listPage: {
       searchPlaceholder: "Search skills...",
-      badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
+      badges: [{ text: (count: number) => `${count} items` }],
       
     },
     detailPage: {
@@ -200,11 +199,11 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       label: "Download Skill",
       type: ACTION_TYPES[4],
     },
-    urlSlug: CATEGORIES[6],
-    contentLoader: CATEGORIES[6],
+    urlSlug: "skills",
+    contentLoader: "skills",
   },
-  [CATEGORIES[3]]: {
-    id: CATEGORIES[3],
+  "commands": {
+    id: "commands" as const,
     title: "Command",
     pluralTitle: "Commands",
     description: "Custom slash commands to enhance your Claude Code workflow with reusable prompts and actions.",
@@ -228,7 +227,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     listPage: {
       searchPlaceholder: "Search commands...",
-      badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
+      badges: [{ text: (count: number) => `${count} items` }],
       
     },
     detailPage: {
@@ -252,11 +251,11 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       label: "Copy Command",
       type: ACTION_TYPES[1],
     },
-    urlSlug: CATEGORIES[3],
-    contentLoader: CATEGORIES[3],
+    urlSlug: "commands",
+    contentLoader: "commands",
   },
-  [CATEGORIES[10]]: {
-    id: CATEGORIES[10],
+  "changelog": {
+    id: "changelog" as const,
     title: "Changelog Entry",
     pluralTitle: "Changelog",
     description: "Product updates, new features, bug fixes, and improvements to the ClaudePro Directory.",
@@ -280,7 +279,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     listPage: {
       searchPlaceholder: "Search changelog...",
-      badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
+      badges: [{ text: (count: number) => `${count} items` }],
       
     },
     detailPage: {
@@ -304,11 +303,11 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       label: "Read Update",
       type: ACTION_TYPES[3],
     },
-    urlSlug: CATEGORIES[10],
-    contentLoader: CATEGORIES[10],
+    urlSlug: "changelog",
+    contentLoader: "changelog",
   },
-  [CATEGORIES[9]]: {
-    id: CATEGORIES[9],
+  "jobs": {
+    id: "jobs" as const,
     title: "Job",
     pluralTitle: "Jobs",
     description: "Job listings for Claude-related positions, AI engineering roles, and opportunities to work with AI technology.",
@@ -332,7 +331,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     listPage: {
       searchPlaceholder: "Search jobs...",
-      badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
+      badges: [{ text: (count: number) => `${count} items` }],
       
     },
     detailPage: {
@@ -356,11 +355,11 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       label: "View Job",
       type: ACTION_TYPES[3],
     },
-    urlSlug: CATEGORIES[9],
-    contentLoader: CATEGORIES[9],
+    urlSlug: "jobs",
+    contentLoader: "jobs",
   },
-  [CATEGORIES[7]]: {
-    id: CATEGORIES[7],
+  "collections": {
+    id: "collections" as const,
     title: "Collection",
     pluralTitle: "Collections",
     description: "Curated bundles of related content items organized by theme, use case, or workflow for easy discovery.",
@@ -384,7 +383,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     listPage: {
       searchPlaceholder: "Search collections...",
-      badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
+      badges: [{ text: (count: number) => `${count} items` }],
       
     },
     detailPage: {
@@ -408,11 +407,11 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       label: "View Collection",
       type: ACTION_TYPES[3],
     },
-    urlSlug: CATEGORIES[7],
-    contentLoader: CATEGORIES[7],
+    urlSlug: "collections",
+    contentLoader: "collections",
   },
-  [CATEGORIES[2]]: {
-    id: CATEGORIES[2],
+  "rules": {
+    id: "rules" as const,
     title: "Rule",
     pluralTitle: "Rules",
     description: "Custom rules to guide Claude's behavior and responses in your projects.",
@@ -420,7 +419,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     colorScheme: "red-500",
     showOnHomepage: true,
     keywords: "Claude rules, custom rules, behavior rules, project rules, .cursorrules",
-    metaDescription: "Custom rules for Claude in October 2025. Define coding standards, architectural guidelines, and project-specific behavior for consistent AI assistance.",
+    metaDescription: `Custom rules for Claude. Define coding standards, architectural guidelines, and project-specific behavior for consistent AI assistance.`,
     typeName: "Rule",
     generateFullContent: true,
     metadataFields: ["title","description","category","slug","created_at","updated_at"],
@@ -436,7 +435,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     listPage: {
       searchPlaceholder: "Search rules...",
-      badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
+      badges: [{ text: (count: number) => `${count} items` }],
       
     },
     detailPage: {
@@ -460,11 +459,11 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       label: "Use Rule",
       type: ACTION_TYPES[0],
     },
-    urlSlug: CATEGORIES[2],
-    contentLoader: CATEGORIES[2],
+    urlSlug: "rules",
+    contentLoader: "rules",
   },
-  [CATEGORIES[0]]: {
-    id: CATEGORIES[0],
+  "agents": {
+    id: "agents" as const,
     title: "AI Agent",
     pluralTitle: "AI Agents",
     description: "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
@@ -472,7 +471,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     colorScheme: "purple-500",
     showOnHomepage: true,
     keywords: "Claude agents, AI agents, specialized assistants, workflow automation, Claude AI",
-    metaDescription: "Specialized Claude AI agents for October 2025. Community-contributed coding, writing, research, and automation configurations ready for Claude Desktop and Code.",
+    metaDescription: `Specialized Claude AI agents. Community-contributed coding, writing, research, and automation configurations ready for Claude Desktop and Code.`,
     typeName: "AI Agent",
     generateFullContent: true,
     metadataFields: ["title","description","category","slug","created_at","updated_at"],
@@ -488,7 +487,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     listPage: {
       searchPlaceholder: "Search AI agents...",
-      badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
+      badges: [{ text: (count: number) => `${count} items` }],
       
     },
     detailPage: {
@@ -512,11 +511,11 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       label: "Deploy Agent",
       type: ACTION_TYPES[0],
     },
-    urlSlug: CATEGORIES[0],
-    contentLoader: CATEGORIES[0],
+    urlSlug: "agents",
+    contentLoader: "agents",
   },
-  [CATEGORIES[5]]: {
-    id: CATEGORIES[5],
+  "statuslines": {
+    id: "statuslines" as const,
     title: "Statusline",
     pluralTitle: "Statuslines",
     description: "Customizable status line configurations for Claude Code CLI with real-time session information.",
@@ -540,7 +539,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     listPage: {
       searchPlaceholder: "Search statuslines...",
-      badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
+      badges: [{ text: (count: number) => `${count} items` }],
       
     },
     detailPage: {
@@ -564,11 +563,11 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       label: "Copy Script",
       type: ACTION_TYPES[2],
     },
-    urlSlug: CATEGORIES[5],
-    contentLoader: CATEGORIES[5],
+    urlSlug: "statuslines",
+    contentLoader: "statuslines",
   },
-  [CATEGORIES[8]]: {
-    id: CATEGORIES[8],
+  "guides": {
+    id: "guides" as const,
     title: "Guide",
     pluralTitle: "Guides",
     description: "Comprehensive guides, tutorials, comparisons, and workflows for Claude. SEO-optimized content covering best practices, use cases, and troubleshooting.",
@@ -592,7 +591,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     listPage: {
       searchPlaceholder: "Search guides...",
-      badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
+      badges: [{ text: (count: number) => `${count} items` }],
       
     },
     detailPage: {
@@ -616,13 +615,13 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       label: "Read Guide",
       type: ACTION_TYPES[3],
     },
-    urlSlug: CATEGORIES[8],
-    contentLoader: CATEGORIES[8],
+    urlSlug: "guides",
+    contentLoader: "guides",
   }
 };
 
-export const ALL_CATEGORY_IDS = [CATEGORIES[0], CATEGORIES[10], CATEGORIES[7], CATEGORIES[3], CATEGORIES[8], CATEGORIES[4], CATEGORIES[9], CATEGORIES[1], CATEGORIES[2], CATEGORIES[6], CATEGORIES[5]] as const;
+export const ALL_CATEGORY_IDS = ["agents", "changelog", "collections", "commands", "guides", "hooks", "jobs", "mcp", "rules", "skills", "statuslines"] as const;
 
-export const HOMEPAGE_CATEGORY_IDS = [CATEGORIES[0], CATEGORIES[7], CATEGORIES[3], CATEGORIES[4], CATEGORIES[1], CATEGORIES[2], CATEGORIES[6], CATEGORIES[5]] as const;
+export const HOMEPAGE_CATEGORY_IDS = ["agents", "collections", "commands", "hooks", "mcp", "rules", "skills", "statuslines"] as const;
 
-export const CACHEABLE_CATEGORY_IDS = [CATEGORIES[0], CATEGORIES[7], CATEGORIES[3], CATEGORIES[8], CATEGORIES[4], CATEGORIES[1], CATEGORIES[2], CATEGORIES[6], CATEGORIES[5]] as const;
+export const CACHEABLE_CATEGORY_IDS = ["agents", "collections", "commands", "guides", "hooks", "mcp", "rules", "skills", "statuslines"] as const;

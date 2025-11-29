@@ -5,6 +5,32 @@
  *
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
+import { Constants, type Database } from '@heyclaude/database-types';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
+import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
+import  { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/server';
+import {
+  generatePageMetadata,
+  getCategoryConfig,
+  getContentAnalytics,
+  getContentDetailCore,
+  getRelatedContent,
+} from '@heyclaude/web-runtime/server';
+import  { type Metadata } from 'next';
+import { notFound } from 'next/navigation';
+
+import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
+import { UnifiedDetailPage } from '@/src/components/content/detail-page/content-detail-view';
+import { ReadProgress } from '@/src/components/content/read-progress';
+import { Pulse } from '@/src/components/core/infra/pulse';
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
+
 export const revalidate = 7200;
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
@@ -86,31 +112,6 @@ export async function generateStaticParams() {
   return parameters;
 }
 
-import { Constants, type Database } from '@heyclaude/database-types';
-import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
-import type { RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import {
-  generatePageMetadata,
-  getCategoryConfig,
-  getContentAnalytics,
-  getContentDetailCore,
-  getRelatedContent,
-} from '@heyclaude/web-runtime/server';
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-
-import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
-import { UnifiedDetailPage } from '@/src/components/content/detail-page/content-detail-view';
-import { ReadProgress } from '@/src/components/content/read-progress';
-import { Pulse } from '@/src/components/core/infra/pulse';
-import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
-
 // Map route categories (plural) to RecentlyViewedCategory (singular)
 // Use Constants.public.Enums.content_category to avoid hardcoded enum values
 const CONTENT_CATEGORY_ENUMS = Constants.public.Enums.content_category;
@@ -138,7 +139,7 @@ const COLLECTION_CATEGORY = 'collections' as const;
  * @see CATEGORY_TO_RECENTLY_VIEWED
  * @see RecentlyViewedCategory
  */
-function mapCategoryToRecentlyViewed(category: string): RecentlyViewedCategory | null {
+function mapCategoryToRecentlyViewed(category: string): null | RecentlyViewedCategory {
   return CATEGORY_TO_RECENTLY_VIEWED[category] ?? null;
 }
 
@@ -242,13 +243,13 @@ export default async function DetailPage({
     // This is expected behavior during build-time static generation when generateStaticParams
     // generates paths for content that may have been removed from the database
     // During build, missing content is expected - only log at debug level
-    // During runtime, log at warn level to catch real issues
-    const isBuildTime =
-      process.env['NEXT_PHASE'] === 'phase-production-build' ||
-      process.env['VERCEL_ENV'] === 'production';
+    // During runtime, log at warn level to catch real issues (except in production where it's also expected)
+    const suppressMissingContentWarning =
+      env.NEXT_PHASE === 'phase-production-build' ||
+      env.VERCEL_ENV === 'production';
     
-    if (isBuildTime) {
-      reqLogger.debug('DetailPage: content not found during build (expected)', {
+    if (suppressMissingContentWarning) {
+      reqLogger.debug('DetailPage: content not found during build/production (expected)', {
         section: 'core-content-fetch',
         category,
         slug,

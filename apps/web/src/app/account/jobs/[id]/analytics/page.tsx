@@ -2,7 +2,7 @@
  * Job Analytics Page - Display view/click metrics for job postings.
  */
 
-import type { JobStatus } from '@heyclaude/web-runtime';
+import  { type JobStatus } from '@heyclaude/web-runtime';
 import { formatRelativeDate } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -18,7 +18,7 @@ import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
   CardDescription,
   CardHeader,
   CardTitle  } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -111,7 +111,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true} variant="outline">
+            <Button asChild variant="outline">
               <Link href={ROUTES.ACCOUNT_JOBS}>Back to job listings</Link>
             </Button>
           </CardContent>
@@ -136,7 +136,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
   return (
     <div className="space-y-6">
       <div>
-        <Button variant="ghost" size="sm" asChild={true} className="mb-4">
+        <Button variant="ghost" size="sm" asChild className="mb-4">
           <Link href={ROUTES.ACCOUNT_JOBS}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Jobs
@@ -147,14 +147,12 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
             <h1 className="mb-2 font-bold text-3xl">Job Analytics</h1>
             <p className="text-muted-foreground">{job.title}</p>
           </div>
-          {job.slug && (
-            <Button variant="outline" asChild={true}>
+          {job.slug ? <Button variant="outline" asChild>
               <Link href={`${ROUTES.JOBS}/${job.slug}`}>
                 <ExternalLink className="mr-2 h-4 w-4" />
                 View Listing
               </Link>
-            </Button>
-          )}
+            </Button> : null}
         </div>
       </div>
 
@@ -185,18 +183,14 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
               <p className="text-muted-foreground">Type</p>
               <p className="font-medium capitalize">{job.type}</p>
             </div>
-            {job.posted_at && (
-              <div>
+            {job.posted_at ? <div>
                 <p className="text-muted-foreground">Posted</p>
                 <p className="font-medium">{formatRelativeDate(job.posted_at)}</p>
-              </div>
-            )}
-            {job.expires_at && (
-              <div>
+              </div> : null}
+            {job.expires_at ? <div>
                 <p className="text-muted-foreground">Expires</p>
                 <p className="font-medium">{formatRelativeDate(job.expires_at)}</p>
-              </div>
-            )}
+              </div> : null}
           </div>
         </CardContent>
       </Card>

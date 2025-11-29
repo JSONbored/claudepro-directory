@@ -11,6 +11,7 @@ import {
 import { join } from 'node:path';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import type { Database } from '@heyclaude/database-types';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
 import { ensureEnvVars } from '../toolkit/env.js';
 import { logger } from '../toolkit/logger.js';
@@ -89,7 +90,7 @@ export async function runBackupDatabase(options: BackupDatabaseOptions = {}): Pr
       });
     } catch (error) {
       logger.warn(
-        `   ⚠️  Fingerprint RPC error: ${error instanceof Error ? error.message : error}`,
+        `   ⚠️  Fingerprint RPC error: ${normalizeError(error, 'Operation failed').message}`,
         {
           script: 'backup-database',
         }
@@ -325,7 +326,7 @@ Notes:
     } catch (error) {
       logger.error(
         '   ✗ R2 upload failed',
-        error instanceof Error ? error : new Error(String(error)),
+        normalizeError(error, 'R2 upload failed'),
         {
           script: 'backup-database',
         }
@@ -359,7 +360,7 @@ Notes:
       }
     } catch (error) {
       logger.warn(
-        `   ⚠️  Failed to send heartbeat (non-critical): ${error instanceof Error ? error.message : error}`,
+        `   ⚠️  Failed to send heartbeat (non-critical): ${normalizeError(error, 'Operation failed').message}`,
         { script: 'backup-database' }
       );
     }

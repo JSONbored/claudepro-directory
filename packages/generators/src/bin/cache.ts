@@ -2,6 +2,7 @@
 
 import { runCacheCli, showCacheCliHelp } from '../commands/cache-cli.js';
 import { logger } from '../toolkit/logger.js';
+import { normalizeError } from '@heyclaude/shared-runtime';
 
 const args = process.argv.slice(2).filter((arg) => arg !== '--');
 const [command, pattern] = args;
@@ -18,7 +19,7 @@ try {
   }
   runCacheCli(options);
 } catch (error) {
-  const errorObj = error instanceof Error ? error : new Error(String(error));
+  const errorObj = normalizeError(error, 'Cache CLI error');
   logger.error('Cache CLI error', errorObj, { command, pattern });
   process.exit(1);
 }

@@ -24,9 +24,9 @@ import {
 } from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
-  errorToString,
   logger,
   MAX_BODY_SIZE,
+  normalizeError,
   validateBodySize,
 } from '@heyclaude/shared-runtime';
 
@@ -129,7 +129,7 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
     payload = JSON.parse(bodyText);
   } catch (error) {
     return badRequestResponse(
-      `Invalid JSON payload: ${errorToString(error)}`,
+      `Invalid JSON payload: ${normalizeError(error, 'Invalid JSON').message}`,
       notificationCorsHeaders
     );
   }

@@ -1,7 +1,7 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import  { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { cache } from 'react';
 
@@ -9,7 +9,7 @@ import { fetchCached } from '../../cache/fetch-cached.ts';
 import { generateContentTags } from '../content-helpers.ts';
 
 interface PaginatedContentParameters {
-  category?: string | null;
+  category?: null | string;
   limit: number;
   offset: number;
 }
@@ -17,7 +17,7 @@ interface PaginatedContentParameters {
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 function toContentCategory(
-  value: string | null | undefined
+  value: null | string | undefined
 ): Database['public']['Enums']['content_category'] | undefined {
   if (!value) return undefined;
   const lowered = value.trim().toLowerCase();

@@ -2,6 +2,7 @@
 
 import { runVerifyMcpbPackages } from '../commands/verify-mcpb-packages.js';
 import { logger } from '../toolkit/logger.js';
+import { normalizeError } from '@heyclaude/shared-runtime';
 
 runVerifyMcpbPackages()
   .then((result: unknown) => {
@@ -20,7 +21,7 @@ runVerifyMcpbPackages()
   .catch((error: unknown) => {
     logger.error(
       '💥 MCPB verification failed',
-      error instanceof Error ? error : new Error(String(error)),
+      normalizeError(error, 'MCPB verification failed'),
       {
         script: 'verify-mcpb',
       }

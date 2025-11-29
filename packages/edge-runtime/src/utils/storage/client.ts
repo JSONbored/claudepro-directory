@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabaseAnon, supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { errorToString } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
@@ -140,8 +140,8 @@ export async function deleteStorageObjects(
         bucket,
         pathCount: paths.length,
       });
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorObj = normalizeError(error, 'Storage delete failed');
+      const errorMessage = errorObj.message;
       logger.error('Delete failed', {
         ...logContext,
         err: errorObj,
@@ -155,14 +155,14 @@ export async function deleteStorageObjects(
       bucket,
       pathCount: paths.length,
     });
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const errorObj = normalizeError(error, 'Storage delete error');
     logger.error('Delete error', {
       ...logContext,
       err: errorObj,
     });
     return {
       success: false,
-      error: errorToString(error),
+      error: normalizeError(error, "Operation failed").message,
     };
   }
 }
@@ -186,8 +186,8 @@ export async function createSignedStorageUrl(
         bucket,
         path,
       });
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorObj = normalizeError(error, 'Signed URL generation failed');
+      const errorMessage = errorObj.message;
       logger.error('Signed URL error', {
         ...logContext,
         err: errorObj,
@@ -201,14 +201,14 @@ export async function createSignedStorageUrl(
       bucket,
       path,
     });
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const errorObj = normalizeError(error, 'Signed URL exception');
     logger.error('Signed URL exception', {
       ...logContext,
       err: errorObj,
     });
     return {
       success: false,
-      error: errorToString(error),
+      error: normalizeError(error, "Operation failed").message,
     };
   }
 }

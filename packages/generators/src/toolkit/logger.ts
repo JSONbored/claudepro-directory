@@ -14,7 +14,7 @@
  */
 
 import pino from 'pino';
-import { createPinoConfig } from '@heyclaude/shared-runtime';
+import { createPinoConfig, normalizeError } from '@heyclaude/shared-runtime';
 
 // Create Pino logger instance with centralized configuration
 // For CLI tools, we use a pretty-printed format for better readability
@@ -47,7 +47,7 @@ export const logger = {
     // Pino's stdSerializers.err automatically handles error serialization
     const logData: Record<string, unknown> = { ...(meta || {}) };
     if (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj = normalizeError(error, message);
       logData['err'] = errorObj;
     }
     pinoLogger.error(logData, message);

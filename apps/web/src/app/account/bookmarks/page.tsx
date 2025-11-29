@@ -3,7 +3,7 @@ import {
   generateRequestId,
   logger,
 } from '@heyclaude/web-runtime/logging/server';
-import type { Metadata } from 'next';
+import  { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 const SOURCE_ROUTE = '/account/bookmarks';

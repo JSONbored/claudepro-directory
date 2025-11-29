@@ -12,6 +12,13 @@
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./schemas/env": {
+      "development": "./src/schemas/env.ts",
+      "types": "./dist/schemas/env.d.ts",
+      "import": "./dist/schemas/env.js",
+      "require": "./dist/schemas/env.js",
+      "default": "./dist/schemas/env.js"
+    },
     "./privacy.ts": {
       "development": "./src/privacy.ts",
       "types": "./dist/privacy.d.ts",
@@ -35,7 +42,8 @@
   },
   "devDependencies": {
     "@types/sanitize-html": "^2.16.0",
-    "esbuild": "^0.27.0"
+    "esbuild": "^0.27.0",
+    "pino-pretty": "^13.1.2"
   },
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",

@@ -9,6 +9,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
@@ -129,7 +130,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       } catch (error) {
         // Error already logged by useLoggedAsync
         toasts.error.fromError(
-          error instanceof Error ? error : new Error('Failed to save collection'),
+          normalizeError(error, 'Failed to save collection'),
           'Failed to save collection'
         );
       }

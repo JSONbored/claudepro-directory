@@ -9,7 +9,7 @@ import { createClient } from '@supabase/supabase-js';
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import type { ExtendedDatabase } from '@heyclaude/edge-runtime/database-extensions.types.ts';
-import { errorToString } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
 const {
@@ -151,7 +151,7 @@ export async function pgmqMetrics(queueName: string): Promise<{
     };
   } catch (error) {
     // If metrics check fails, return null (safe fallback - queue will be treated as empty)
-    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    const errorObj = normalizeError(error, 'Failed to get queue metrics');
     logger.warn(`Failed to get metrics for queue '${queueName}'`, {
       err: errorObj,
     });
