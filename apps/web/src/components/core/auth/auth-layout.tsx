@@ -18,15 +18,18 @@ interface SplitAuthLayoutProps {
 }
 
 /**
- * Responsive split layout for authentication pages that displays a brand panel and an auth card.
+ * Responsive split authentication layout with a brand panel and an authentication card.
  *
- * Renders a two-column, animated side-by-side layout on large screens and a stacked layout on smaller screens.
- * Both desktop columns are vertically centered within the full viewport height.
+ * Renders an animated two-column, vertically centered layout on large screens and a stacked layout
+ * with a header on small screens. The auth card appears in the right column on desktop and inside
+ * the centered mobile card on smaller viewports.
  *
- * @param brandPanel - Content displayed on the left (brand) column for large screens.
+ * @param brandPanel - Content rendered in the left (brand) column on large screens.
  * @param authPanel - Authentication card content rendered in the right column on large screens and inside the centered card on mobile.
- * @param mobileHeader - Header content shown above the stacked mobile layout.
- * @returns The rendered React element composing the split authentication layout.
+ * @param mobileHeader - Header content displayed above the stacked mobile layout.
+ * @returns The split authentication layout element.
+ *
+ * @see SplitAuthLayoutProps
  */
 // Shared card border style for Claude orange accent
 const cardBorderStyle = {

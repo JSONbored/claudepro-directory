@@ -83,14 +83,20 @@ interface UseSafeActionReturn<TInput, TData> {
 }
 
 /**
- * Type-safe wrapper for useAction that bypasses Zod v4 + next-safe-action v8 type inference issues.
+ * Type-safe client-compatible wrapper around `useAction` that preserves runtime behavior while fixing
+ * TypeScript inference issues when Zod v4 schemas are re-exported through barrel files.
  *
- * The wrapper uses type assertions to work around TypeScript's inability to properly infer
- * Standard Schema types through module re-exports. The runtime behavior is unchanged.
+ * Uses a type assertion to avoid incorrect StandardSchema type inference; runtime behavior is
+ * identical to `useAction`.
  *
- * @param action - The safe action function to execute
- * @param callbacks - Optional callbacks for action lifecycle events
- * @returns Hook return object with execute functions and result
+ * ⚠️ Client-Compatible
+ *
+ * @param {TAction} action - The action function to wrap; must be a function that returns a `Promise`
+ *                           whose resolved value may include an optional `data` property.
+ * @param {any} callbacks - Optional lifecycle callbacks forwarded to `useAction`.
+ * @returns {UseSafeActionReturn<ExtractActionInput<TAction>, ExtractActionData<TAction>>} The hook
+ *          return object exposing `execute`, `executeAsync`, `input`, `result`, `reset`, `status`,
+ *          and boolean status flags.
  */
 export function useSafeAction<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
