@@ -3,5 +3,5 @@
   "buildCommand": "turbo build --filter=web",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "ignoreCommand": "if [ \"$VERCEL_ENV\" = \"preview\" ] && [ -n \"$VERCEL_GIT_PULL_REQUEST_ID\" ]; then exit 1; fi; git diff --quiet HEAD^ HEAD -- apps/web packages config tsconfig.json turbo.json pnpm-lock.yaml"
+  "ignoreCommand": "if [ \"$VERCEL_ENV\" = \"production\" ]; then exit 1; fi; if [ \"$VERCEL_ENV\" = \"preview\" ] && [ -n \"$VERCEL_GIT_PULL_REQUEST_ID\" ]; then exit 1; fi; exit 0"
 }
