@@ -68,7 +68,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "16.0.3",
+    "@next/bundle-analyzer": "16.0.5",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/canvas-confetti": "^1.9.0",
     "@types/he": "^1.2.3",
