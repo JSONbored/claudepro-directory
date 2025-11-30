@@ -101,6 +101,13 @@ export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
         search: mcp.slug,
       });
 
+    if (fileError) {
+      logger.warn(`Storage list error for ${mcp.slug}: ${fileError.message}`, {
+        script: 'verify-mcpb-packages',
+        slug: mcp.slug,
+      });
+    }
+
     const hasStorageFile =
       !fileError && Boolean(fileData) && fileData.some((file) => file.name === `${mcp.slug}.mcpb`);
 
@@ -150,16 +157,16 @@ export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
     logger.warn('⚠️  Missing packages:', {
       script: 'verify-mcpb-packages',
       missing_count: result.missing_packages,
-      missingPackages: result.missing_packages_list.map((mcp) => ({
-        slug: mcp.slug,
-        title: (mcp.title && mcp.title.trim()) ? mcp.title.trim() : 'No title',
-      })),
+      missingPackages: result.missing_packages_list.map((mcp) => {
+        const title = mcp.title?.trim() || 'No title';
+        return { slug: mcp.slug, title };
+      }),
     });
     logger.info('\nMissing packages list:', {
       script: 'verify-mcpb-packages',
     });
     for (const mcp of result.missing_packages_list) {
-      const title = (mcp.title && mcp.title.trim()) ? mcp.title.trim() : 'No title';
+      const title = mcp.title?.trim() || 'No title';
       logger.info(`  - ${mcp.slug} (${title})`, {
         script: 'verify-mcpb-packages',
       });

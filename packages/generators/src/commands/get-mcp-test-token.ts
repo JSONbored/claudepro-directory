@@ -22,10 +22,14 @@ const cliLog = {
   error: (...args: unknown[]) => console.error(...args),
 };
 
-
 const SUPABASE_URL = process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? 
-  process.env['SUPABASE_URL'] ?? 
-  'https://hgtjdifxfapoltfflowc.supabase.co';
+  process.env['SUPABASE_URL'];
+
+if (!SUPABASE_URL) {
+  cliLog.error('❌ Error: SUPABASE_URL not found in environment variables');
+  cliLog.error('   Set NEXT_PUBLIC_SUPABASE_URL or SUPABASE_URL');
+  process.exit(1);
+}
 
 const SUPABASE_ANON_KEY = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? 
   process.env['SUPABASE_ANON_KEY'] ?? 
@@ -40,7 +44,35 @@ if (!SUPABASE_ANON_KEY) {
 const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /**
- * Obtain and print a Supabase access token and usage instructions for MCP testing by signing in with provided credentials or reusing an existing session.
+ * Print token information and usage instructions.
+ */
+function printTokenInfo(
+  session: { access_token: string; expires_at: number | null | undefined },
+  user: { id: string; email?: string | null }
+): void {
+  cliLog.log('\n✅ Success!');
+  cliLog.log('\n📋 Token Information:');
+  cliLog.log('─'.repeat(60));
+  cliLog.log('Access Token:');
+  cliLog.log(session.access_token);
+  cliLog.log('\nUser ID:', user.id);
+  cliLog.log('User Email:', user.email ?? 'N/A');
+  if (session.expires_at === null || session.expires_at === undefined) {
+    cliLog.log('Token Expires: N/A');
+  } else {
+    cliLog.log('Token Expires:', new Date(session.expires_at * 1000).toISOString());
+  }
+  cliLog.log('─'.repeat(60));
+  cliLog.log('\n💡 Usage:');
+  cliLog.log(`  export MCP_TEST_TOKEN="${session.access_token}"`);
+  cliLog.log(`  curl -X POST http://localhost:54321/functions/v1/mcp-directory/mcp \\`);
+  cliLog.log(`    -H "Authorization: Bearer $MCP_TEST_TOKEN" \\`);
+  cliLog.log(`    -H "Content-Type: application/json" \\`);
+  cliLog.log(`    -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'`);
+}
+
+/**
+ * Obtain a Supabase access token for MCP testing by signing in with provided credentials or reusing an existing session, and print the token and usage instructions.
  *
  * If the CLI is invoked with `--email <email>` and `--password <password>`, the function attempts to sign in with those credentials and prints the session token, user information, token expiry (ISO timestamp or `N/A`), and example export/curl usage. If credentials are not provided, the function checks for an active Supabase session and, when found, prints the same token information and usage instructions.
  *
@@ -89,29 +121,7 @@ async function getToken() {
       process.exit(1);
     }
 
-    const session = data.session;
-    const user = data.user;
-
-    cliLog.log('\n✅ Signed in successfully!');
-    cliLog.log('\n📋 Token Information:');
-    cliLog.log('─'.repeat(60));
-    cliLog.log('Access Token:');
-    cliLog.log(session.access_token);
-    cliLog.log('\nUser ID:', user.id);
-    cliLog.log('User Email:', user.email ?? 'N/A');
-    if (session.expires_at === null || session.expires_at === undefined) {
-      cliLog.log('Token Expires: N/A');
-    } else {
-      cliLog.log('Token Expires:', new Date(session.expires_at * 1000).toISOString());
-    }
-    cliLog.log('─'.repeat(60));
-    cliLog.log('\n💡 Usage:');
-    cliLog.log(`  export MCP_TEST_TOKEN="${session.access_token}"`);
-    cliLog.log(`  curl -X POST http://localhost:54321/functions/v1/mcp-directory/mcp \\`);
-    cliLog.log(`    -H "Authorization: Bearer $MCP_TEST_TOKEN" \\`);
-    cliLog.log(`    -H "Content-Type: application/json" \\`);
-    cliLog.log(`    -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'`);
-    
+    printTokenInfo(data.session, data.user);
     return;
   }
 
@@ -135,25 +145,7 @@ async function getToken() {
     process.exit(1);
   }
 
-  cliLog.log('\n✅ Found active session!');
-  cliLog.log('\n📋 Token Information:');
-  cliLog.log('─'.repeat(60));
-  cliLog.log('Access Token:');
-  cliLog.log(session.access_token);
-  cliLog.log('\nUser ID:', session.user.id);
-  cliLog.log('User Email:', session.user.email ?? 'N/A');
-  if (session.expires_at === null || session.expires_at === undefined) {
-    cliLog.log('Token Expires: N/A');
-  } else {
-    cliLog.log('Token Expires:', new Date(session.expires_at * 1000).toISOString());
-  }
-  cliLog.log('─'.repeat(60));
-  cliLog.log('\n💡 Usage:');
-  cliLog.log(`  export MCP_TEST_TOKEN="${session.access_token}"`);
-  cliLog.log(`  curl -X POST http://localhost:54321/functions/v1/mcp-directory/mcp \\`);
-  cliLog.log(`    -H "Authorization: Bearer $MCP_TEST_TOKEN" \\`);
-  cliLog.log(`    -H "Content-Type: application/json" \\`);
-  cliLog.log(`    -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'`);
+  printTokenInfo(session, session.user);
 }
 
 getToken().catch((error: unknown) => {

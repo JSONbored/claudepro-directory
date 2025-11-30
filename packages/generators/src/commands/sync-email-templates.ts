@@ -2,22 +2,24 @@ import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// NOTE: We import from the source directly to access the manifest and templates
-// Using relative path because edge-runtime is Deno/source-based, not compiled
-// TypeScript can't resolve Deno-style imports in edge-runtime, but runtime (tsx) handles it fine
-// @ts-expect-error -- edge-runtime uses Deno imports that tsc can't resolve
-import {
-  EMAIL_TEMPLATE_MANIFEST as EMAIL_TEMPLATE_MANIFEST_RAW,
-  type EmailTemplateDefinition,
-  type EmailTemplateSlug,
-} from '../../../edge-runtime/src/utils/email/templates/manifest.js';
+// NOTE: edge-runtime uses Deno-style imports that tsc can't resolve in Node.js context.
+// We import types from the package export, but the manifest is imported via relative path
+// since the manifest.ts file imports templates using Deno-style subpaths.
+import type {
+  EmailTemplateDefinition,
+  EmailTemplateSlug,
+} from '@heyclaude/edge-runtime/utils/email/templates/manifest';
+
+// Runtime import via relative path (tsx handles this fine, tsc cannot resolve Deno imports)
+// @ts-expect-error -- edge-runtime manifest uses Deno-style imports that tsc can't resolve
+import { EMAIL_TEMPLATE_MANIFEST as EMAIL_TEMPLATE_MANIFEST_RAW } from '@heyclaude/edge-runtime/utils/email/templates/manifest';
 import { Resend } from 'resend';
 
 import { ensureEnvVars } from '../toolkit/env.js';
 import { logger } from '../toolkit/logger.js';
 
-// Type assertion to ensure proper typing
-const EMAIL_TEMPLATE_MANIFEST: readonly EmailTemplateDefinition<Record<string, unknown>>[] = EMAIL_TEMPLATE_MANIFEST_RAW as readonly EmailTemplateDefinition<Record<string, unknown>>[];
+// Type assertion for the manifest
+const EMAIL_TEMPLATE_MANIFEST = EMAIL_TEMPLATE_MANIFEST_RAW as readonly EmailTemplateDefinition<Record<string, unknown>>[];
 
 // ============================================================================
 // Constants & Types
@@ -53,7 +55,7 @@ interface ResendResponse<T = unknown> {
 
 // Helper to get properly typed manifest
 function getTypedManifest(): readonly TemplateDefinition[] {
-  return EMAIL_TEMPLATE_MANIFEST;
+  return EMAIL_TEMPLATE_MANIFEST as readonly TemplateDefinition[];
 }
 
 interface UploadOptions {
@@ -246,19 +248,22 @@ export async function runSyncEmail() {
     const entry = map[slug] ?? {};
     let templateId: string | undefined = force ? undefined : entry.resendTemplateId;
 
+    // Resend SDK templates API - types may not be fully exposed in all SDK versions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Resend templates API types incomplete
+    const templates = (resend as any).templates as {
+      create: (opts: { name: string; subject: string; html: string }) => Promise<ResendResponse<{ id: string }>>;
+      update: (opts: { id: string; name: string; subject: string; html: string }) => Promise<ResendResponse>;
+      publish: (id: string) => Promise<ResendResponse>;
+    };
+
     if (templateId === undefined) {
       await delay(REQUEST_SPACING_MS);
       const createResult = await callWithRateLimitRetry(
-        async () => {
-          // Cast to access templates API (may not be in SDK types)
-          const templates = resend as unknown as { templates: { create: (opts: { name: string; subject: string; html: string }) => Promise<ResendResponse<{ id: string }>> } };
-          const result = await templates.templates.create({
-            name: definition.displayName,
-            subject,
-            html,
-          });
-          return result;
-        },
+        async () => templates.create({
+          name: definition.displayName,
+          subject,
+          html,
+        }),
         slug,
         'create template'
       );
@@ -273,16 +278,12 @@ export async function runSyncEmail() {
       await delay(REQUEST_SPACING_MS);
       const idToUpdate = templateId;
       const updateResult = await callWithRateLimitRetry(
-        async () => {
-          // Cast to access templates API (may not be in SDK types)
-          const templates = resend as unknown as { templates: { update: (id: string, opts: { name: string; subject: string; html: string }) => Promise<ResendResponse> } };
-          const result = await templates.templates.update(idToUpdate, {
-            name: definition.displayName,
-            subject,
-            html,
-          });
-          return result;
-        },
+        async () => templates.update({
+          id: idToUpdate,
+          name: definition.displayName,
+          subject,
+          html,
+        }),
         slug,
         'update template'
       );
@@ -290,21 +291,10 @@ export async function runSyncEmail() {
       logger.info(`Updated template ${slug}`, { script: 'sync-email', audit: true, templateId: idToUpdate });
     }
 
-    // Publish (Resend requires explicit publish step for templates to be live?)
-    // Checking docs/behavior: Often create/update is enough for drafts, but if there is a publish API:
-    // Based on original script: resend.templates.publish(templateId)
-    /* 
-       Note: Resend Node SDK types might not strictly expose 'publish' if it's newer or different version
-       We cast to unknown to support the method call as in the original script
-    */
+    // Publish template to make it live
     await delay(REQUEST_SPACING_MS);
     const publishResult = await callWithRateLimitRetry(
-      async () => {
-        // Cast to access templates API (may not be in SDK types)
-        const resendWithTemplates = resend as unknown as { templates: { publish: (id: string) => Promise<ResendResponse> } };
-        const result = await resendWithTemplates.templates.publish(templateId);
-        return result;
-      },
+      async () => templates.publish(templateId!),
       slug,
       'publish template'
     );

@@ -82,6 +82,7 @@ export async function runGenerateServerActions(targetAction?: string) {
     }
 
     spinner.text = 'Generating code...';
+    let generatedCount = 0;
 
     for (const [actionName, config] of actionsToGenerate) {
       const rpcName = config.rpc;
@@ -95,9 +96,10 @@ export async function runGenerateServerActions(targetAction?: string) {
       }
 
       await generateActionFile(actionName, config, rpcMeta, meta.enums, meta.compositeTypes);
+      generatedCount++;
     }
 
-    spinner.succeed(`Generated ${actionsToGenerate.length} actions.`);
+    spinner.succeed(`Generated ${generatedCount} actions.`);
   } catch (error) {
     spinner.fail('Failed to generate server actions');
     logger.error((error as Error).message);
@@ -116,7 +118,11 @@ function toPascalCase(str: string) {
 function serializeArgValue(value: unknown): string {
   if (value === null) return 'null';
   if (value === undefined) return 'undefined';
-  if (typeof value === 'string') return `'${value}'`;
+  if (typeof value === 'string') {
+    // Escape backslashes first, then single quotes to avoid syntax errors
+    const escaped = value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    return `'${escaped}'`;
+  }
   if (typeof value === 'number') return String(value);
   if (typeof value === 'boolean') return String(value);
   if (Array.isArray(value)) return `[${value.map(serializeArgValue).join(', ')}]`;

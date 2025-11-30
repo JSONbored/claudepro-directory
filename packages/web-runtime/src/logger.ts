@@ -108,25 +108,20 @@ const pinoConfig = createPinoConfig({
           // Fire-and-forget: Don't await, don't block UI
           // Performance: Pino batches logs automatically, so this is efficient
           // Security: Redaction happens before transmit, so no sensitive data sent
-          // Level parameter is the numeric log level (10=trace, 20=debug, 30=info, 40=warn, 50=error, 60=fatal)
-          // We use it to ensure only warn (40) and error (50+) logs are sent (double-check, though transmit.level already filters)
-          // Convert level to number if it's a string (Pino.Level can be string or number)
-          const numericLevel = typeof level === 'number' ? level : (logEvent.level?.value ?? 40);
-          if (numericLevel >= 40) {
-            fetch('/api/logs/client', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                ...logEvent,
-                level, // Include numeric level for server-side processing
-              }),
-              // Keepalive ensures request completes even if page unloads
-              keepalive: true,
-            }).catch(() => {
-              // Silently fail - don't log errors about logging
-              // Prevents infinite loops if logging endpoint fails
-            });
-          }
+          // Note: transmit.level: 'warn' already filters to warn (40) and above
+          fetch('/api/logs/client', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...logEvent,
+              level, // Include numeric level for server-side processing
+            }),
+            // Keepalive ensures request completes even if page unloads
+            keepalive: true,
+          }).catch(() => {
+            // Silently fail - don't log errors about logging
+            // Prevents infinite loops if logging endpoint fails
+          });
         },
       };
     })();
@@ -373,6 +368,21 @@ class RequestLogger extends Logger {
 
   override isLevelEnabled(level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'): boolean {
     return this.childPino.isLevelEnabled(level);
+  }
+
+  override child(bindings: Record<string, unknown>): Logger {
+    const nestedChild = this.childPino.child(bindings);
+    return new RequestLogger(nestedChild);
+  }
+
+  override forRequest(request: Request): Logger {
+    const url = new URL(request.url);
+    const nestedChild = this.childPino.child({
+      method: request.method,
+      url: url.pathname + url.search,
+      userAgent: request.headers.get('user-agent') || '',
+    });
+    return new RequestLogger(nestedChild);
   }
 }
 

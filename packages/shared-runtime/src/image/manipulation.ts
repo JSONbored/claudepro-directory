@@ -69,7 +69,7 @@ export async function ensureImageMagickInitialized(): Promise<void> {
     const { normalizeError } = await import('@heyclaude/shared-runtime');
     const normalizedError = normalizeError(error, 'ImageMagick initialization failed');
     initError = normalizedError;
-    throw new Error(`Failed to initialize ImageMagick: ${normalizedError.message}`);
+    throw normalizedError;
   }
 }
 

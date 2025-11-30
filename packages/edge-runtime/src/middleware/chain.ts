@@ -16,11 +16,11 @@ export function chain<T extends RouterContext = RouterContext>(
         if (i <= index) throw new Error('next() called multiple times');
         index = i;
         if (i === middlewares.length) {
-          return handler(ctx);
+          return await handler(ctx);
         }
         const fn = middlewares[i];
         if (!fn) {
-          return handler(ctx);
+          return await handler(ctx);
         }
         return fn(ctx, () => dispatch(i + 1));
       };
