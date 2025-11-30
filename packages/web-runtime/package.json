@@ -86,6 +86,10 @@
       "types": "./src/utils/error-handler.ts",
       "default": "./src/utils/error-handler.ts"
     },
+    "./utils/heading-normalization": {
+      "types": "./src/utils/heading-normalization.ts",
+      "default": "./src/utils/heading-normalization.ts"
+    },
     "./utils/request-context": {
       "types": "./src/utils/request-context.ts",
       "default": "./src/utils/request-context.ts"

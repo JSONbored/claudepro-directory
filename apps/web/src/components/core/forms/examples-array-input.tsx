@@ -271,7 +271,7 @@ export function ExamplesArrayInput({
                     variant="ghost"
                     size="sm"
                     onClick={() => removeExample(index)}
-                    className={`${iconSize.xl} p-0`}
+                    className={`${cluster.compact} p-1`}
                     title="Remove example"
                   >
                     <Trash className={iconSize.sm} />

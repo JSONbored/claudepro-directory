@@ -20,6 +20,11 @@ import { HighlightedText } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Validate and sanitize job application link.
+ * Enforces HTTPS protocol and removes credentials.
+ * Returns '#' for any invalid URLs.
+ */
 function getSafeJobLink(link?: string | null): string {
   if (!link || typeof link !== 'string') return '#';
   try {
@@ -109,7 +114,7 @@ export function JobCard({ job }: JobCardProps) {
               )}
               <div>
                 <CardTitle
-                  className="text-lg font-semibold text-xl transition-colors-smooth group-hover:text-accent"
+                  className="font-semibold text-xl transition-colors-smooth group-hover:text-accent"
                 >
                   <Link href={`/jobs/${job.slug}`}>{highlightedTitle}</Link>
                 </CardTitle>
@@ -210,9 +215,8 @@ export function JobCard({ job }: JobCardProps) {
           >
             {(() => {
               const safeJobLink = getSafeJobLink(job.link);
-              // Explicit validation: getSafeJobLink guarantees the URL is safe
-              // It validates protocol (HTTPS only), hostname (whitelisted job board domains only),
-              // and returns '#' for any invalid URLs. At this point, safeJobLink is validated
+              // getSafeJobLink guarantees the URL uses HTTPS protocol,
+              // removes credentials, and returns '#' for invalid URLs
               const validatedUrl: string = safeJobLink;
               return (
                 <a href={validatedUrl} target="_blank" rel="noopener noreferrer">

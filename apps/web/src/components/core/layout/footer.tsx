@@ -20,6 +20,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { memo, useEffect, useMemo, useState } from 'react';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { ThemeToggle } from '@heyclaude/web-runtime/ui';
+import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 
 // Type for resource links with optional icon
 interface ResourceLink {
@@ -27,9 +30,6 @@ interface ResourceLink {
   label: string;
   icon?: typeof Rss;
 }
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
-import { ThemeToggle } from '@heyclaude/web-runtime/ui';
 
 /**
  * Footer Component
@@ -270,12 +270,11 @@ function FooterComponent() {
                   src={`${EXTERNAL_SERVICES.betterstack.status}/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
                   width="250"
                   height="30"
-                  frameBorder="0"
                   scrolling="no"
                   title="System Status"
                   className="rounded-md"
                   loading="lazy"
-                  style={{ colorScheme: 'normal' }}
+                  style={{ colorScheme: 'normal', border: 'none' }}
                 />
               )}
             </div>

@@ -611,7 +611,7 @@ export function JobForm({
                 <p className={`${muted.default} text-xs mt-2`}>{planInfoSubtitle}</p>
               )}
               {selectedPlanOption.benefits && (
-                <ul className="mt-3 list-disc space-y-1 pl-4 text-muted-foreground text-xs">
+                <ul className={`mt-3 list-disc space-y-1 pl-4 ${muted.default} text-xs`}>
                   {selectedPlanOption.benefits.map((benefit) => (
                     <li key={benefit}>{benefit}</li>
                   ))}

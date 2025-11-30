@@ -611,8 +611,14 @@ export function DetailHeaderActions({
                           const a = document.createElement('a');
                           a.href = url;
                           a.download = `${contentItem.slug}.md`;
+                          a.style.display = 'none';
+                          document.body.appendChild(a);
                           a.click();
-                          URL.revokeObjectURL(url);
+                          // Delay cleanup to allow browser to start download
+                          setTimeout(() => {
+                            URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+                          }, 500);
                         }}
                         label="Download"
                         successMessage="Downloaded markdown file!"

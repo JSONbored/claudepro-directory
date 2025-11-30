@@ -298,7 +298,7 @@ export function ListItemManager(props: ListItemManagerProps) {
                 return (
                   <div
                     key={itemKey}
-                    className={`${between.center} rounded border p-2`}
+                    className={cn(between.center, 'rounded border p-2')}
                   >
                     <span className="text-sm">{item}</span>
                     <Button
