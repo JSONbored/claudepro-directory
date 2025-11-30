@@ -23,11 +23,10 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { useFormSubmit, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useFormSubmit, useLoggedAsync, useSafeAction } from '@heyclaude/web-runtime/hooks';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
-import { useSafeAction } from '@heyclaude/web-runtime/hooks';
 import { useEffect, useId, useState } from 'react';
 import { FormField } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -258,7 +257,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         }
 
         return result;
-      }
+      } else {
         const companyId = initialData?.id;
         if (!companyId) {
           throw new Error('Company ID is required for updates');
@@ -274,6 +273,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         }
 
         return result;
+      }
     });
   };
 
