@@ -14,6 +14,18 @@ import { useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hook
 
 const MAX_RAIL_ITEMS = 6;
 
+/**
+ * Convert a recently viewed entry into a HomepageContentItem for display and analytics.
+ *
+ * @param item - A single entry from `useRecentlyViewed()` representing a recently viewed item.
+ *               Its `viewedAt` timestamp is used for the item's creation/date_added fields;
+ *               `tags` will be an empty array if not provided.
+ * @returns A `HomepageContentItem` constructed from `item`; the `category` is set to the plural
+ *          route form that matches the database `content_category` enum.
+ *
+ * @see getCategoryRoute
+ * @see useRecentlyViewed
+ */
 function toHomepageContentItem(
   item: ReturnType<typeof useRecentlyViewed>['recentlyViewed'][number]
 ): HomepageContentItem {

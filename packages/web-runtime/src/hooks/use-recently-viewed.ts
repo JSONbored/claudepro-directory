@@ -78,15 +78,16 @@ const CATEGORY_TO_ROUTE: Record<RecentlyViewedCategory, string> = {
 };
 
 /**
- * Get the URL route segment for a recently viewed category.
- * Converts singular category names to plural route slugs.
- * 
- * @param category - The singular category name from RecentlyViewedCategory
- * @returns The plural route slug to use in URLs
- * 
+ * Map a singular recently-viewed category to its plural URL route segment.
+ *
+ * **⚠️ Client-Compatible**
+ *
+ * @param {RecentlyViewedCategory} category - The singular category name (e.g., 'agent', 'hook').
+ * @returns {string} The plural route slug to use in URLs (e.g., '/agents', '/hooks').
+ *
  * @example
  * getCategoryRoute('agent') // '/agents'
- * getCategoryRoute('hook') // '/hooks'
+ * getCategoryRoute('hook')  // '/hooks'
  */
 export function getCategoryRoute(category: RecentlyViewedCategory): string {
   return CATEGORY_TO_ROUTE[category];

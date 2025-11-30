@@ -31,8 +31,23 @@ let initialized = false;
 let initError: Error | null = null;
 
 /**
- * Ensure ImageMagick is initialized before use
- * This is safe to call multiple times - it will only initialize once
+ * Ensure ImageMagick WebAssembly runtime is initialized and ready for use.
+ *
+ * Attempts to load the magick.wasm bytes from the installed package and initialize
+ * the magick-wasm runtime. This function is idempotent: subsequent calls return
+ * immediately if initialization already succeeded. If a previous initialization
+ * attempt failed, the stored initialization error is rethrown.
+ *
+ * Edge cases:
+ * - If reading the WASM bytes or initialization fails, the underlying error is
+ *   normalized and stored; subsequent calls will throw that stored error.
+ * - Designed for use in edge environments (Deno/Supabase Edge Functions) where
+ *   Deno.readFile and dynamic imports are available.
+ *
+ * @returns Resolves when initialization completes successfully.
+ * @throws {Error} If initialization fails; the thrown error message describes the failure and the original error is normalized and stored for future calls.
+ * @see initializeImageMagick
+ * @see ImageMagick
  */
 export async function ensureImageMagickInitialized(): Promise<void> {
   if (initialized) return;

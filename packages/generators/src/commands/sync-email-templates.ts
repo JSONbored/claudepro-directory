@@ -151,7 +151,41 @@ function ensureSuccess<T extends ResendResponse>(result: T, action: string) {
 
 // ============================================================================
 // Main Command
-// ============================================================================
+/**
+ * Syncs local email templates from the repository manifest to the Resend service by creating, updating, and publishing templates.
+ *
+ * This command-line entrypoint reads the typed email template manifest and the on-disk template map, then for each selected template:
+ * - builds sample data, subject, and rendered HTML,
+ * - creates a new Resend template or updates an existing one (optionally forcing creation),
+ * - publishes the template,
+ * - and updates the template map with the Resend template ID and upload timestamp.
+ *
+ * Side effects:
+ * - Reads the template manifest and the template map file from disk.
+ * - Writes an updated template map to disk when not run in dry-run mode.
+ * - Makes network requests to the Resend API (create / update / publish).
+ *
+ * Command-line flags:
+ * - --dry-run: Log actions but do not perform network requests or write the template map.
+ * - --force: Create new templates instead of reusing existing Resend template IDs.
+ * - --only=<slug1,slug2>: Limit sync to the specified comma-separated template slugs.
+ *
+ * @param dryRun - When true (via `--dry-run`), no network requests or file writes are performed.
+ * @param force - When true (via `--force`), existing Resend template IDs are ignored and new templates are created.
+ * @param only - Comma-separated list of template slugs provided via `--only=` to restrict which templates are processed.
+ * @throws Error - If required environment variables (e.g., RESEND_API_KEY) are missing, if Resend API responses are invalid, or if retryable requests exhaust their retry budget.
+ * @example
+ *   # Full sync (creates/updates and publishes templates)
+ *   node scripts/sync-email
+ *
+ *   # Dry run: show actions without network or disk changes
+ *   node scripts/sync-email --dry-run
+ *
+ *   # Force creation of new templates for a subset
+ *   node scripts/sync-email --force --only=welcome,new-user
+ *
+ * @returns void
+ */
 
 export async function runSyncEmail() {
   const args = process.argv.slice(2);

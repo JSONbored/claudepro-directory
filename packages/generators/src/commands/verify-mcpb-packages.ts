@@ -20,6 +20,19 @@ interface VerificationResult {
   with_packages: number;
 }
 
+/**
+ * Verifies that all MCP content entries have MCPB package URLs in the database and corresponding files in Supabase storage.
+ *
+ * This function:
+ * - Ensures the SUPABASE_SERVICE_ROLE_KEY environment variable is present.
+ * - Fetches all content rows with category "mcp" from the database.
+ * - Identifies entries missing a `mcpb_storage_url`.
+ * - For entries with a non-empty `mcpb_storage_url`, checks the `mcpb-packages` storage bucket for a `<slug>.mcpb` file.
+ * - Logs a summary, warnings for missing packages and storage mismatches, and a success message when no issues are found.
+ *
+ * @returns The verification summary including totals, lists of missing packages, and storage mismatches (`VerificationResult`).
+ * @throws Error If fetching MCP content from the database fails.
+ */
 export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
   await ensureEnvVars(['SUPABASE_SERVICE_ROLE_KEY']);
 
