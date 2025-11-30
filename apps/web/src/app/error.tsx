@@ -16,6 +16,19 @@ import { useEffect } from 'react';
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 
+/**
+ * Renders a full-screen error UI shown when an uncaught client-side error occurs and logs the error to the monitoring backend.
+ *
+ * Displays a descriptive message, development-only error details (when NODE_ENV is "development"), action buttons to retry or go home, and quick links to key sections.
+ *
+ * @param props.error - The caught error object; may include an optional `digest` string used for diagnostic correlation.
+ * @param props.reset - Callback invoked to attempt recovery (e.g., retry or re-render) when the user clicks "Try Again".
+ * @returns The error boundary React element to present to the user.
+ *
+ * @see logClientErrorBoundary
+ * @see Card
+ * @see ROUTES
+ */
 export default function ErrorBoundary({
   error,
   reset,

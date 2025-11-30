@@ -36,16 +36,18 @@ import { createPinoConfig } from '@heyclaude/shared-runtime';
 import { normalizeError } from './errors';
 
 /**
- * Creates a destination stream that uses console methods for proper Vercel log level detection.
- * 
- * **Why this is needed (Vercel compatibility):**
- * Vercel determines log levels by which CONSOLE METHOD is used:
- * - console.log() → info (gray)
- * - console.warn() → warning (orange in streaming functions)
- * - console.error() → error (red)
- * 
- * Pino by default writes everything to stdout, which Vercel sees as "info".
- * This destination uses the actual console methods so Vercel properly detects log levels.
+ * Creates a Node.js destination stream that routes JSON log chunks to console methods so Vercel detects log levels correctly.
+ *
+ * ⚠️ Server-Only Function — returns `undefined` in browser environments.
+ *
+ * The destination parses a `"levelValue"` numeric field from the incoming JSON chunk and maps values to console methods:
+ * - >= 50 → `console.error`
+ * - >= 40 → `console.warn`
+ * - otherwise → `console.log`
+ *
+ * If `"levelValue"` is not present, it defaults to `30` (info). The chunk's trailing newline is trimmed before writing.
+ *
+ * @returns {pino.DestinationStream | undefined} A destination stream that writes to `console.log`/`console.warn`/`console.error` on Node.js, or `undefined` when running in a browser.
  */
 function createVercelCompatibleDestination(): pino.DestinationStream | undefined {
   // Only use in Node.js server environment

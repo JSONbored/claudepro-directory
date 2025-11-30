@@ -40,11 +40,25 @@ if (!SUPABASE_ANON_KEY) {
 const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /**
- * Obtain a Supabase access token for MCP testing by signing in with provided credentials or reusing an existing session, and print the token and usage instructions.
+ * Obtain and print a Supabase access token and usage instructions for MCP testing by signing in with provided credentials or reusing an existing session.
  *
- * Reads `--email` and `--password` from process arguments; if both are provided, attempts to sign in and prints the session token and user info. If no credentials are provided, checks for an existing Supabase session and prints the session token and user info when found.
+ * If the CLI is invoked with `--email <email>` and `--password <password>`, the function attempts to sign in with those credentials and prints the session token, user information, token expiry (ISO timestamp or `N/A`), and example export/curl usage. If credentials are not provided, the function checks for an active Supabase session and, when found, prints the same token information and usage instructions.
  *
- * Exits the process with code 1 on sign-in failure, when no session is returned, or when no active session exists.
+ * Side effects:
+ * - Writes informational and error messages to the console (stdout/stderr) via `cliLog`.
+ * - Calls `process.exit(1)` on sign-in failure, when session retrieval fails, or when no active session exists.
+ *
+ * @param --email - The email address provided as a command-line argument (e.g., `--email you@example.com`).
+ * @param --password - The password provided as a command-line argument (e.g., `--password yourpassword`).
+ * @returns Promise<void> indicating completion after printing token information or exiting the process on error.
+ *
+ * @example
+ * # Sign in with credentials and print token
+ * tsx packages/generators/src/commands/get-mcp-test-token.ts --email you@example.com --password yourpassword
+ *
+ * @example
+ * # Use an existing session (no args)
+ * tsx packages/generators/src/commands/get-mcp-test-token.ts
  */
 async function getToken() {
   const args = process.argv.slice(2);

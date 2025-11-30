@@ -16,6 +16,17 @@ import { useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hook
 
 const DISMISS_KEY = 'heyclaude_recently_viewed_mobile_dismissed';
 
+/**
+ * Renders a mobile-only "Recently Viewed" bottom tray that shows locally saved browsing history.
+ *
+ * The tray auto-opens when recently viewed items are loaded and the user has not dismissed it.
+ * It persists a "don't show again" preference to localStorage and allows clearing or removing items.
+ *
+ * @returns The component's React element, or `null` when the tray is hidden.
+ *
+ * @see {@link useRecentlyViewed}
+ * @see {@link getCategoryRoute}
+ */
 export function RecentlyViewedMobileTray() {
   const { recentlyViewed, isLoaded, removeItem, clearAll } = useRecentlyViewed();
   const [open, setOpen] = useState(false);

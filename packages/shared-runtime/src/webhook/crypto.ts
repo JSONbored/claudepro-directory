@@ -15,6 +15,21 @@ type GlobalWithBuffer = typeof globalThis & {
 
 const nodeBuffer = (globalThis as GlobalWithBuffer).Buffer;
 
+/**
+ * Decode a Base64-encoded string into a Uint8Array of bytes.
+ *
+ * Uses the global `atob` API when available (browser environments). In Node.js
+ * environments it falls back to the global `Buffer` extracted as `nodeBuffer`.
+ *
+ * @param {string} value - The Base64-encoded input string.
+ * @returns {Uint8Array} A byte array representing the decoded data.
+ * @throws {Error} If neither `atob` nor `Buffer` is available in the runtime.
+ *
+ * @example
+ * const bytes = decodeBase64('SGVsbG8sIFdvcmxkIQ=='); // Uint8Array for "Hello, World!"
+ *
+ * @see encodeBase64
+ */
 function decodeBase64(value: string): Uint8Array {
   if (typeof globalThis.atob === 'function') {
     const binary = globalThis.atob(value);
