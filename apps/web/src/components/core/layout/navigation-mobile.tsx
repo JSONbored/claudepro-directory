@@ -76,6 +76,18 @@ interface NavigationMobileProps {
 
 const CONTACT_CHANNELS = getContactChannels();
 
+/**
+ * Renders the mobile navigation sheet/drawer for small screens with staggered animations, a swipe-to-close handle, header logo, action/primary/secondary navigation sections, and footer contact actions.
+ *
+ * @param props.isActive - Predicate that receives a path and returns whether that path is currently active.
+ * @param props.isOpen - Controls whether the sheet is open.
+ * @param props.onOpenChange - Called with the new open state when the sheet opens or closes.
+ * @returns The mobile navigation React element.
+ *
+ * @see NavLink
+ * @see getAnimationConfig
+ * @see ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION
+ */
 export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationMobileProps) {
   const [springDefault, setSpringDefault] = useState({
     type: 'spring' as const,

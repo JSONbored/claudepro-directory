@@ -60,6 +60,24 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/tools/config-recommender');
 }
 
+/**
+ * Render the Config Recommender landing page.
+ *
+ * Renders a server-side React page that presents a client-side, rule-based quiz and
+ * supporting informational sections (hero, benefits, features, and newsletter CTA).
+ * Creates a request-scoped logger with a generated requestId, normalizes and logs
+ * render errors, and re-throws normalized errors so they are handled by the application's
+ * error boundary.
+ *
+ * @returns The React element tree for the Config Recommender landing page.
+ *
+ * @see generateRequestId
+ * @see logger
+ * @see normalizeError
+ * @see QuizForm
+ * @see NewsletterCTAVariant
+ * @see generatePageMetadata
+ */
 export default function ConfigRecommenderPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

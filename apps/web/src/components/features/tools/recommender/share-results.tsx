@@ -25,6 +25,20 @@ interface ShareResultsProps {
   onClose: () => void;
 }
 
+/**
+ * Displays a modal dialog that lets the user copy a shareable URL and post prefilled share messages to Twitter, LinkedIn, Facebook, or email.
+ *
+ * The dialog constructs a share message from `resultCount` and encodes the message and `shareUrl` into provider-specific share links. Clicking the copy button copies `shareUrl` to the clipboard and each social action opens the corresponding share link.
+ *
+ * @param shareUrl - The URL to share; shown in a read-only input and used to build provider share links.
+ * @param resultCount - Number used to compose the prefilled share text (e.g., "I just found {resultCount} perfect Claude configurations...").
+ * @param onClose - Callback invoked when the dialog requests to close.
+ * @returns The Dialog element containing the share input, copy action, and social share buttons.
+ *
+ * @see SimpleCopyButton
+ * @see Dialog
+ * @see Button
+ */
 export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsProps) {
   const shareText = `I just found ${resultCount} perfect Claude configurations for my needs! 🚀`;
   const encodedShareText = encodeURIComponent(shareText);

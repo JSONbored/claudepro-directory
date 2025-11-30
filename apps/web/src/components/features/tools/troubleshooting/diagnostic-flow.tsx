@@ -18,6 +18,24 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Renders an interactive diagnostic flowchart that guides users through yes/no questions and
+ * presents a solution when a terminal step is reached.
+ *
+ * The component normalizes `steps` (falls back to a default step if none provided), tracks the
+ * current step index and the sequence of answered questions, advances according to each step's
+ * `yesPath`/`noPath`, and exposes a control to restart the flow.
+ *
+ * @param props - Component props
+ * @param props.title - Visible title shown at the top of the card
+ * @param props.steps - Ordered array of diagnostic steps. Each step should include at least a `question`
+ *                      string; optional `yesPath`/`noPath` values select the next step by matching a
+ *                      step's `question`. A step with a `solution` string is treated as terminal.
+ * @param props.description - Optional descriptive text displayed under the title
+ * @returns A React element containing the interactive diagnostic flow UI
+ *
+ * @see DiagnosticFlowProps
+ */
 export function DiagnosticFlow(props: DiagnosticFlowProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, steps, description } = props;

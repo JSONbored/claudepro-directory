@@ -65,6 +65,24 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies');
 }
 
+/**
+ * Renders the server-side "My Companies" page for the authenticated user, including
+ * authentication handling, user-scoped logging, server-side data fetch for the user's
+ * companies, and UI states for unauthenticated, error, empty, and populated lists.
+ *
+ * The component:
+ * - Redirects anonymous visitors to a sign-in prompt.
+ * - Fetches the authenticated user's companies and handles fetch errors with a user-facing error card.
+ * - Renders an empty-state call-to-action when the user has no companies.
+ * - Renders a companies grid with safe logo and website rendering, per-company stats, and action links.
+ *
+ * @returns The React element for the Companies page (sign-in prompt, error card, empty state, or companies list).
+ *
+ * @see getAuthenticatedUser
+ * @see getUserCompanies
+ * @see isAllowedHttpUrl
+ * @see generateRequestId
+ */
 export default async function CompaniesPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

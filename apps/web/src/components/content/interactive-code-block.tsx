@@ -109,6 +109,21 @@ interface ShareDropdownProps {
   onMouseLeave: () => void;
 }
 
+/**
+ * Render a floating share dropdown with Twitter, LinkedIn, and copy-link actions.
+ *
+ * @param currentUrl - The full URL to be shared; used to build platform-specific share links.
+ * @param category - Content category used in generated share metadata and share text.
+ * @param slug - Content slug used in generated share metadata and share text.
+ * @param onShare - Callback invoked with the selected platform identifier: `'twitter'`, `'linkedin'`, or `'copy_link'`.
+ * @param onMouseLeave - Callback invoked when pointer leaves the dropdown (used to close the dropdown).
+ * @returns A React element representing the share dropdown UI.
+ *
+ * @see generateShareUrl
+ * @see generateShareText
+ * @see TwitterShareButton
+ * @see LinkedinShareButton
+ */
 function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: ShareDropdownProps) {
   return (
     <motion.div
@@ -189,6 +204,27 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
   );
 }
 
+/**
+ * Render a syntax-highlighted, interactive code block with copy, screenshot, share, and download actions.
+ *
+ * Renders server-provided Shiki HTML (sanitized on the client), displays optional filename and language badge,
+ * collapses long blocks based on `maxLines`, and provides client-side handlers for copying, downloading,
+ * screenshotting, and sharing the code. Telemetry events are emitted for user interactions.
+ *
+ * @param html - Server-rendered Shiki HTML for the highlighted code; sanitized on the client before insertion.
+ * @param code - Raw source code string used for copy, download, and screenshot generation.
+ * @param language - Language label used for the badge and to determine default download extension; defaults to `'text'`.
+ * @param filename - Optional filename displayed in the header and used as the screenshot title when present.
+ * @param maxLines - Number of lines before the block collapses; defaults to `20`.
+ * @param showLineNumbers - Whether to apply line-number styling to the rendered HTML; defaults to `true`.
+ * @param className - Additional CSS classes applied to the outer container.
+ *
+ * @returns The rendered JSX element for the interactive code block.
+ *
+ * @see sanitizeShikiHtml
+ * @see ShareDropdown
+ * @see generateCodeScreenshot
+ */
 export function ProductionCodeBlock({
   html,
   code,

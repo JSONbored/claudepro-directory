@@ -41,6 +41,25 @@ function getSafeJobLink(link?: string | null): string {
   }
 }
 
+/**
+ * Render a job card displaying job metadata, visual highlights, tags, and primary actions.
+ *
+ * The component shows company information (logo, name), a title (uses pre-highlighted HTML when available),
+ * a short description (also using pre-highlighted HTML when provided), location, posted date, salary,
+ * type and remote badges, up to four tag badges with a "+N more" indicator, and two action buttons:
+ * "Apply Now" (opens the job link in a new tab after sanitization via `getSafeJobLink`) and "View Details"
+ * (navigates to the internal job detail route). If the job is featured, a prominent "Featured" badge is shown.
+ *
+ * @param job - Job data used to populate the card. Expected fields include:
+ *   `slug`, `title`, `title_highlighted?`, `description?`, `description_highlighted?`,
+ *   `company`, `company_logo?`, `location?`, `posted_at?`, `salary?`, `type?`, `remote?`,
+ *   `tags?`, `link?`, and `tier?`.
+ * @returns A React element representing the job card for the provided `job`.
+ *
+ * @see getSafeJobLink - used to sanitize and validate external job links before navigation
+ * @see HighlightedText - renders server-provided highlighted HTML with a fallback
+ * @see usePulse - analytics hook used for click telemetry on action buttons
+ */
 export function JobCard({ job }: JobCardProps) {
   const pulse = usePulse();
   const isFeatured = job.tier === 'featured';

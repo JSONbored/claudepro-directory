@@ -40,21 +40,13 @@ interface AnnouncementBannerClientProps {
 }
 
 /**
- * AnnouncementBannerClient Component
+ * Renders a dismissible announcement banner for a single announcement with persistent dismissal state.
  *
- * Client component for rendering announcement banner with dismissal.
- * Receives announcement data from server component.
- *
- * Features:
- * - Persistent dismissal tracking (localStorage)
- * - Responsive design (mobile + desktop)
- * - Accessibility (WCAG 2.1 AA compliant)
- * - Keyboard navigation (Escape to dismiss)
- * - Reduced motion support
- * - Touch-friendly dismiss button (44x44px minimum)
- * - SSR-safe with client-side hydration (prevents flash)
- *
- * Database-first: Migrated from announcement-banner.tsx
+ * @param announcement - Announcement data used to render title, tag, href, icon, variant, and dismissible flag.
+ * @returns The announcement banner element when active; otherwise `null` if not mounted or dismissed.
+ * @see useAnnouncementDismissal
+ * @see Announcement
+ * @see AnnouncementTag
  */
 export function AnnouncementBannerClient({ announcement }: AnnouncementBannerClientProps) {
   // Get dismissal state for this announcement

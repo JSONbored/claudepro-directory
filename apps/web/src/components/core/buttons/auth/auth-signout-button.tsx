@@ -28,6 +28,21 @@ export interface AuthSignOutButtonProps extends ButtonStyleProps {
   scope?: AuthSignOutScope;
 }
 
+/**
+ * Renders a sign-out button that signs the current user out and redirects to the homepage.
+ *
+ * @param size - Visual size of the button (e.g., 'sm', 'md', 'lg').
+ * @param variant - Visual variant of the button (e.g., 'ghost', 'solid').
+ * @param className - Additional CSS classes applied to the button.
+ * @param disabled - When `true`, the button is non-interactive.
+ * @param scope - Scope of the sign-out operation: `'global'` signs out this session, `'local'` signs out the current device, `'others'` signs out other sessions.
+ * @returns A JSX element for the sign-out button.
+ *
+ * @see createSupabaseBrowserClient
+ * @see useLoggedAsync
+ * @see toasts
+ * @see normalizeError
+ */
 export function AuthSignOutButton({
   size = 'sm',
   variant = 'ghost',

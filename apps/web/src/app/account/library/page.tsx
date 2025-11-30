@@ -40,6 +40,21 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/library');
 }
 
+/**
+ * Renders the account "My Library" page: verifies the authenticated user, loads the user's
+ * bookmarks and collections, and returns the appropriate UI for authenticated, unauthenticated,
+ * empty-state, or error conditions.
+ *
+ * Performs server-side authentication and data fetching, emits request- and user-scoped logs,
+ * and maps backend library statistics to the rendered counts.
+ *
+ * @returns A React element representing the library page UI (bookmarks and collections) or an
+ *          authentication/error fallback UI.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserLibrary
+ * @see ROUTES
+ */
 export default async function LibraryPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

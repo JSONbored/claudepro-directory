@@ -56,7 +56,14 @@ interface FieldRendererProps {
 }
 
 /**
- * Text input field renderer
+ * Renders a configured text input field (including optional icon, label, and help text).
+ *
+ * @param field - Field configuration describing label, name, placeholder, icon, sizing, and validation attributes.
+ * @param formId - Prefix used to generate a stable HTML id for the field (`${formId}-${field.name}`).
+ * @returns The field's JSX element when `field.type` is `'text'`, or `null` otherwise.
+ *
+ * @see SingleFieldRenderer
+ * @see TextareaFieldRenderer
  */
 function TextFieldRenderer({ field, formId }: FieldRendererProps) {
   if (field.type !== 'text') return null;
@@ -109,7 +116,23 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
 }
 
 /**
- * Textarea field renderer
+ * Render a textarea form field using the provided field definition and form identifier.
+ *
+ * Renders a labeled textarea with optional monospace styling, rows, placeholder, default value,
+ * required flag, and help text. The field is wrapped in a responsive grid column class derived
+ * from the field's `gridColumn` setting.
+ *
+ * @param props.field - Field definition for the textarea; expected properties include
+ *   `name`, `label`, `placeholder`, `required`, `rows`, `defaultValue`, `helpText`, `monospace`,
+ *   and `gridColumn`.
+ * @param props.formId - Base identifier used to build the element id as `${formId}-${field.name}`.
+ * @returns The textarea field element when `field.type === 'textarea'`, or `null` otherwise.
+ *
+ * @see TextFieldRenderer
+ * @see NumberFieldRenderer
+ * @see SelectFieldRenderer
+ * @see ContentTypeFieldRenderer
+ * @see GRID_COLUMN_CLASSES
  */
 function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
   if (field.type !== 'textarea') return null;
@@ -136,7 +159,17 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
 }
 
 /**
- * Number input field renderer
+ * Render a numeric input field when the provided field configuration has type "number".
+ *
+ * Renders a labeled numeric input with min, max, step, default value, placeholder, and required attributes;
+ * places help text below the input and applies a grid column class derived from the field's `gridColumn`.
+ *
+ * @param field - Field definition for the input. Used properties: `type`, `name`, `label`, `min`, `max`, `step`, `defaultValue`, `placeholder`, `required`, `helpText`, and `gridColumn`.
+ * @param formId - Prefix used to build a stable HTML id for the field (`${formId}-${field.name}`).
+ * @returns A JSX element for the configured number input, or `null` if `field.type` is not `"number"`.
+ *
+ * @see GRID_COLUMN_CLASSES
+ * @see ContentTypeFieldRenderer
  */
 function NumberFieldRenderer({ field, formId }: FieldRendererProps) {
   if (field.type !== 'number') return null;
@@ -164,7 +197,17 @@ function NumberFieldRenderer({ field, formId }: FieldRendererProps) {
 }
 
 /**
- * Select dropdown field renderer
+ * Render a labeled select dropdown for a configured form field when the field's type is `select`.
+ *
+ * Renders a container with an accessible label, a select element populated from `field.options`, and optional help text; layout width is determined from the field's `gridColumn`.
+ *
+ * @param field - Field configuration for the select input (name, label, options, defaultValue, required, helpText, gridColumn).
+ * @param formId - Prefix used to build a stable HTML id for the field (`${formId}-${field.name}`).
+ * @returns A JSX element containing the labeled select and help text when `field.type` is `'select'`, `null` otherwise.
+ *
+ * @see SingleFieldRenderer
+ * @see ContentTypeFieldRenderer
+ * @see GRID_COLUMN_CLASSES
  */
 function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
   if (field.type !== 'select') return null;

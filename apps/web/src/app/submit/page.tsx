@@ -149,7 +149,22 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Edge-cached data: Dashboard data fetched from edge-cached data layer
  */
-// revalidate is set at the top of the file
+/**
+ * Render the Submit page for database-first community submissions.
+ *
+ * Fetches submission dashboard data, submission form configuration, and content templates (with defensive fallbacks), composes community stats and recent merged submissions, and renders the submission form alongside a right-hand sidebar with stats, recent activity, promos, and a newsletter CTA.
+ *
+ * Data fetching is request-scoped and uses per-request logging; form configuration errors will abort rendering while dashboard and template errors use fallbacks so the page can still render partially. The page respects the file-level ISR revalidation setting (revalidate = 86400).
+ *
+ * @returns A React element representing the Submit page layout and UI.
+ *
+ * @see SubmitFormClient
+ * @see SubmitPageHero
+ * @see SidebarActivityCard
+ * @see getSubmissionDashboard
+ * @see getSubmissionFormFields
+ * @see getContentTemplates
+ */
 
 export default async function SubmitPage() {
   // Generate single requestId for this page request

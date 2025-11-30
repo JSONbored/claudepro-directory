@@ -15,6 +15,20 @@ import { AuthSignOutButton } from '@/src/components/core/buttons/auth/auth-signo
 import { AccountSidebar } from '@/src/components/features/account/account-sidebar';
 import { AccountSidebarSkeleton } from '@/src/components/features/account/account-sidebar-skeleton';
 
+/**
+ * Server-side layout that renders the protected account dashboard with a sidebar and main content area.
+ *
+ * Performs authentication and session refresh checks, provides user metadata to the sidebar, and wraps
+ * the main content with MFA protection.
+ *
+ * @param children - The content rendered in the main (protected) area of the account dashboard.
+ * @returns A React element containing the account layout (header, sidebar, and protected main content).
+ *
+ * @see getAuthenticatedUser
+ * @see createSupabaseServerClient
+ * @see AccountSidebar
+ * @see AccountMFAGuard
+ */
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   // Authentication check - required in layout for route protection
   // eslint-disable-next-line architectural-rules/no-blocking-operations-in-layouts -- Required for protected route authentication

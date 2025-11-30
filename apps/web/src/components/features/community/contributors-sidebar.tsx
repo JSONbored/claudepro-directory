@@ -116,6 +116,21 @@ export interface ContributorsSidebarProps {
   newMembers: UserProfile[];
 }
 
+/**
+ * Render a sticky sidebar showing trending contributors, new members, and community statistics.
+ *
+ * The component renders up to five trending contributors and up to five new members, and displays
+ * a total-members badge. User-derived URLs and display names are validated and sanitized; items
+ * with unsafe or invalid profile URLs are omitted from rendering.
+ *
+ * @param topContributors - Array of user profiles shown in the "Trending Contributors" section (up to 5 items)
+ * @param newMembers - Array of user profiles shown in the "New Members" section (up to 5 items)
+ * @returns A React element containing the contributors sidebar
+ *
+ * @see getSafeUserProfileUrl
+ * @see sanitizeDisplayName
+ * @see isValidInternalPath
+ */
 function ContributorsSidebarComponent({ topContributors, newMembers }: ContributorsSidebarProps) {
   return (
     <aside className={`${sticky.top4} space-y-6`}>

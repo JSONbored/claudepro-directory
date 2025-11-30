@@ -100,7 +100,23 @@ export function UnifiedContentBlock(props: UnifiedContentBlockProps) {
 
 // ============================================================================
 // VARIANT 1: CASE STUDY
-// ============================================================================
+/**
+ * Render a case study card that presents a company's challenge, solution, results, optional metrics, and an optional testimonial.
+ *
+ * @param props - Props for the case study card.
+ * @param props.company - Company name shown in the card title.
+ * @param props.industry - Optional industry label displayed as a badge.
+ * @param props.challenge - Text describing the challenge the company faced.
+ * @param props.solution - Text describing the solution provided.
+ * @param props.results - Text summarizing the results achieved.
+ * @param props.metrics - Optional array of metric objects; each metric should include `label`, `value`, and an optional `trend` (e.g., "up", "down", "+", or other).
+ * @param props.testimonial - Optional testimonial containing `quote`, `author`, and optional `role`.
+ * @param props.logo - Optional logo information used to render a visual identifier for the company.
+ * @returns A React element representing the formatted case study card.
+ *
+ * @see UnifiedContentBlock
+ * @see CaseStudyProps
+ */
 
 function CaseStudyVariant(props: CaseStudyProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -277,7 +293,21 @@ function FeatureGridVariant(props: FeatureGridProps) {
 
 // ============================================================================
 // VARIANT 3: TLDR SUMMARY
-// ============================================================================
+/**
+ * Render a TL;DR-style content card with an optional list of key takeaways.
+ *
+ * Renders an Article-styled Card containing an abstract paragraph for `content` and,
+ * when `keyPoints` is provided and non-empty, a "Key Takeaways" list where each point
+ * is shown with an indicator icon.
+ *
+ * @param props.content - Short summary or abstract text to display in the card
+ * @param props.keyPoints - Optional ordered list of concise takeaway points
+ * @param props.title - Visible title shown in the card header
+ * @returns A JSX element representing the TLDR card with the provided content and key points
+ *
+ * @see UnifiedContentBlock
+ * @see Card
+ */
 
 function TLDRVariant(props: TLDRSummaryProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -367,7 +397,22 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
 
 // ============================================================================
 // VARIANT 5: QUICK REFERENCE
-// ============================================================================
+/**
+ * Renders a quick-reference card showing labeled name/value pairs in a responsive grid.
+ *
+ * Renders nothing when `items` is empty or undefined. Each item is marked up as a
+ * schema.org PropertyValue with `name`, `value`, and optional description.
+ *
+ * @param props.title - Card title displayed in the header
+ * @param props.description - Optional header description used as the card description and schema.org description
+ * @param props.items - Array of reference items; each item should include `label`, `value`, and optional `description`
+ * @param props.columns - Optional layout hint; when `2`, items are rendered in two columns on medium+ screens
+ * @returns A Card element containing a grid of property items, or `null` if `items` is empty
+ *
+ * @see QuickReferenceProps
+ * @see CaseStudyVariant
+ * @see TLDRVariant
+ */
 
 function QuickReferenceVariant(props: QuickReferenceProps) {
   // Database CHECK constraint validates structure - no runtime validation needed

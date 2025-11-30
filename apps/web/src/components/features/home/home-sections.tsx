@@ -50,6 +50,25 @@ const UnifiedSearch = dynamic(
   }
 );
 
+/**
+ * Client-side homepage component that renders search, quick stats, featured sections, and tabbed content using initial and runtime data.
+ *
+ * Renders an SSR-capable UnifiedSearch, a stats display (mobile carousel and desktop layout), a searchable results section, featured category sections, and a paginated tabs section. Handles client-side pagination, category-aware searching, filter state, and graceful fallbacks if static config is unavailable.
+ *
+ * @param initialData - Mapping of content category keys to arrays of displayable content used to populate featured sections and build slug lookup maps.
+ * @param featuredByCategory - Optional override mapping of featured content per category (used by featured sections); falls back to `initialData` when not provided.
+ * @param stats - Optional object with category counts used to render the quick stats display; may contain numeric values or objects with a `total` field.
+ * @param featuredJobs - Optional list of featured job rows to pass into featured sections (defaults to an empty array).
+ * @param searchFilters - Runtime search filter options (tags, authors, categories) exposed to the search component.
+ * @param weekStart - Optional ISO date or week-start value forwarded to sections that accept a `weekStart` prop.
+ * @param serverCategoryIds - Optional list of category ids provided by the server used as a fallback when static config or initialData-derived categories are unavailable.
+ *
+ * @returns The homepage JSX element tree rendered on the client.
+ *
+ * @see UnifiedSearch
+ * @see LazyFeaturedSections
+ * @see LazyTabsSection
+ */
 function HomePageClientComponent({
   initialData,
   featuredByCategory,

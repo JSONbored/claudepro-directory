@@ -15,6 +15,23 @@ interface QuizProgressProps {
   percentComplete: number;
 }
 
+/**
+ * Displays a quiz progress summary with a counter badge, a horizontal progress bar, and step indicators.
+ *
+ * Renders the current question over the total in a badge, shows a "Complete!" indicator when `percentComplete` is 100,
+ * provides a visual progress bar with appropriate ARIA attributes, and renders circular step indicators that reflect
+ * completed, current, and pending states.
+ *
+ * @param currentQuestion - The 1-based index of the currently active question.
+ * @param totalQuestions - The total number of questions in the quiz.
+ * @param percentComplete - The overall completion percentage (0–100) used to size the progress bar.
+ * @returns The rendered quiz progress UI element.
+ *
+ * @see UnifiedBadge
+ * @see between
+ * @see cluster
+ * @see absolute
+ */
 export function QuizProgress({
   currentQuestion,
   totalQuestions,

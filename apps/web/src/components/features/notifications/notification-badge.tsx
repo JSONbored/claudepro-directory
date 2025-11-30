@@ -25,6 +25,14 @@ interface NotificationBadgeProps {
   className?: string;
 }
 
+/**
+ * Displays a small animated unread notifications badge when notifications are enabled and there is at least one unread.
+ *
+ * @param className - Optional additional CSS classes applied to the badge container.
+ * @returns The badge element showing the unread count (capped at "9+") with an ARIA live label, or `null` when notifications are disabled or there are no unread notifications.
+ * @see NotificationFAB
+ * @see getAnimationConfig
+ */
 export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
   const { unreadCount, flags } = useNotificationsContext();
   const [springBouncy, setSpringBouncy] = useState({

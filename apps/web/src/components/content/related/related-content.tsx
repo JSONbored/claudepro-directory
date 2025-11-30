@@ -73,6 +73,27 @@ function getCategoryFromPath(pathname: string | undefined): string {
   return pathParts[0] || 'unknown';
 }
 
+/**
+ * Renders a related content section that fetches and displays a curated grid of related items.
+ *
+ * Fetching is driven by the provided pathname, tags, keywords, and filtering flags; the component
+ * displays an optional titled header and a unified card grid with category and match-type badges.
+ *
+ * @param featured - When true, prioritize featured related items.
+ * @param exclude - Array of slugs to exclude from results.
+ * @param limit - Maximum number of related items to display.
+ * @param currentTags - Tags from the current content used to influence relatedness.
+ * @param currentKeywords - Keywords from the current content used to influence relatedness.
+ * @param pathname - Optional explicit pathname to use when resolving the current category; falls back to window location when omitted.
+ * @param title - Header title text for the related content section.
+ * @param showTitle - When true, render the section header.
+ *
+ * @returns The section element containing the related content list and card grid.
+ *
+ * @see getRelatedContent
+ * @see getCategoryFromPath
+ * @see UnifiedCardGrid
+ */
 export function RelatedContentClient({
   featured = false,
   exclude = [],

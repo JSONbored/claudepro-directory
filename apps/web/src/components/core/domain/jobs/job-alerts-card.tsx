@@ -52,6 +52,21 @@ interface JobAlertsCardProps {
   defaultRemote?: 'remote' | 'any';
 }
 
+/**
+ * Renders a "Job alerts" card with a form to collect an email and job preferences, and subscribe the user to role notifications.
+ *
+ * The form captures email, preferred category, experience level, and remote preference, and uses the newsletter hook to submit and manage state.
+ *
+ * @param defaultCategory - Initial selected job category (defaults to `'all'`).
+ * @param defaultExperience - Initial selected experience level (defaults to `'any'`).
+ * @param defaultRemote - Initial selected remote preference, either `'remote'` or `'any'` (defaults to `'any'`).
+ * @returns The Job Alerts card React element.
+ *
+ * @see useNewsletter
+ * @see CATEGORY_OPTIONS
+ * @see EXPERIENCE_OPTIONS
+ * @see REMOTE_OPTIONS
+ */
 export function JobAlertsCard({
   defaultCategory = 'all',
   defaultExperience = 'any',

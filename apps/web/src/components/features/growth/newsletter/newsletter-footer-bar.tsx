@@ -26,6 +26,23 @@ export interface NewsletterFooterBarProps {
   ctaVariant?: 'aggressive' | 'social_proof' | 'value_focused';
 }
 
+/**
+ * Renders a bottom-fixed newsletter signup bar that appears after a configurable delay and can be dismissed.
+ *
+ * The bar respects an inline-CTA whitelist from app settings, supports three copy variants, and renders
+ * responsive layouts (desktop and mobile). If dismissed or if an inline CTA is active on the current path,
+ * the component does not render.
+ *
+ * @param props.source - Source identifier used by NewsletterForm for signups
+ * @param props.dismissible - Whether a dismiss button is shown and dismissal state is persisted to localStorage (default: true)
+ * @param props.showAfterDelay - Milliseconds to wait before showing the bar; if undefined, the value is loaded from newsletter config or defaults to 30000
+ * @param props.respectInlineCTA - When true, suppresses the footer bar on pages configured to show an inline CTA (default: true)
+ * @param props.ctaVariant - Copy variant to use: 'aggressive', 'social_proof', or 'value_focused' (default: 'value_focused')
+ * @returns The newsletter footer bar element when visible, or `null` when hidden or suppressed
+ *
+ * @see NewsletterForm
+ * @see NEWSLETTER_CTA_CONFIG
+ */
 export function NewsletterFooterBar({
   source,
   dismissible = true,

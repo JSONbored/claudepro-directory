@@ -122,7 +122,19 @@ export async function generateMetadata({
 }
 
 /**
- * Changelog Detail Page Component
+ * Render the changelog detail page for a given entry slug.
+ *
+ * Fetches the changelog entry by slug, initializes a request-scoped logger, and returns the full page UI
+ * including read progress, view tracking, structured data, meta (canonical) link, and rendered changelog content.
+ *
+ * @param params - An object containing the route params; must resolve to `{ slug: string }`.
+ * @returns The rendered React element for the changelog entry page.
+ * @throws Will throw a normalized error if loading the changelog entry fails.
+ * @see getChangelogEntryBySlug
+ * @see ReadProgress
+ * @see Pulse
+ * @see StructuredData
+ * @see ChangelogContent
  */
 export default async function ChangelogEntryPage({
   params,

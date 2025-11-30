@@ -84,6 +84,20 @@ export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/companies');
 }
 
+/**
+ * Renders the Companies directory page: loads a list of companies, logs request-scoped events, and returns the server-rendered UI.
+ *
+ * Fetches up to 50 companies, renders a hero, a responsive grid of company cards (or an empty-state card), and a newsletter CTA.
+ * The page validates external company websites before rendering external links and marks featured companies and basic stats when present.
+ *
+ * @returns The page's JSX element rendering the companies directory.
+ * @throws Normalized error when loading the companies list fails (rethrows the result of `normalizeError`).
+ * @see getCompaniesList
+ * @see getSafeWebsiteUrl
+ * @see generateRequestId
+ * @see normalizeError
+ * @remarks This page uses ISR with a revalidation interval of 86,400 seconds (24 hours).
+ */
 export default async function CompaniesPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

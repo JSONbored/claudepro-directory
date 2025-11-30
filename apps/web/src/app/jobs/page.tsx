@@ -103,7 +103,32 @@ export async function generateMetadata({
   });
 }
 
-// Deferred Jobs List Section Component for PPR
+/**
+ * Renders the jobs listing section for the /jobs page using server-side data.
+ *
+ * Fetches filtered jobs via `getFilteredJobs`, applies client-side sorting, and renders one of:
+ * - a placeholder when there are no jobs in the system,
+ * - a "no jobs found" message when filters produce zero results,
+ * - a grid of JobCard entries when jobs are available.
+ *
+ * When any filter/search parameter is present, the component bypasses cache and performs uncached SSR for fresh results.
+ * When no filters are active, the listing is served with ISR/cached behavior.
+ *
+ * @param props.searchQuery - Full-text search string to filter jobs.
+ * @param props.category - Category slug to filter jobs (omit or use 'all' for no category filter).
+ * @param props.employment - Employment type to filter (e.g., 'full-time', or 'any' for no filter).
+ * @param props.experience - Experience level to filter (e.g., 'senior', or 'any' for no filter).
+ * @param props.remote - If provided, filters by remote-friendly (`true`) or non-remote (`false`) roles.
+ * @param props.sort - Sort option applied after fetching (`'newest' | 'oldest' | 'salary'`).
+ * @param props.limit - Maximum number of jobs to fetch.
+ * @param props.offset - Offset for pagination.
+ * @returns JSX element containing the jobs section markup.
+ *
+ * @see getFilteredJobs
+ * @see applyJobSorting
+ * @see JobsCountBadge
+ * @see JobCard
+ */
 async function JobsListSection({
   searchQuery,
   category,
@@ -240,6 +265,22 @@ async function JobsListSection({
   );
 }
 
+/**
+ * Server-rendered jobs listing page that parses query parameters, builds filter URLs, and renders the jobs UI.
+ *
+ * Parses search and filter query parameters (search/q/query, category, employment, experience, remote, sort, page, limit),
+ * normalizes pagination (clamps page and limit, computes offset), and exposes helper IDs and a buildFilterUrl function
+ * used by the filter form and active-filter controls. The page streams the total job count via JobsCountBadge and
+ * delegates filtered job fetching and rendering to JobsListSection; filtered queries bypass the cache while the base
+ * list uses ISR-appropriate rendering.
+ *
+ * @param props.searchParams - Incoming URL search parameters (may be a Promise). Supported keys: `q`, `query`, `search`, `category`, `employment`, `experience`, `remote`, `sort`, `page`, `limit`.
+ * @returns The rendered jobs page JSX.
+ *
+ * @see JobsListSection
+ * @see JobsCountBadge
+ * @see getFilteredJobs
+ */
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

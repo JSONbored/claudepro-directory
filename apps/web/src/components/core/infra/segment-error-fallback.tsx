@@ -34,6 +34,22 @@ interface SegmentErrorFallbackProps {
   error?: Error & { digest?: string };
 }
 
+/**
+ * Renders a centered fallback UI for rendering segment-related errors with optional reset and link actions.
+ *
+ * Shows a title and description, an optional reset button (when `onReset` is provided), optional action links, and — only in development builds — an expandable error details panel that displays `error.message` and optional `error.digest`.
+ *
+ * @param props.title - Primary heading text shown in the fallback card.
+ * @param props.description - Secondary descriptive text shown below the title.
+ * @param props.resetText - Label for the optional reset button; defaults to `"Try again"`.
+ * @param props.onReset - If provided, a reset button is rendered and invoked when clicked.
+ * @param props.links - Optional array of link items to render as action buttons.
+ * @param props.error - Optional error object; when present in development builds its message and optional `digest` are displayed.
+ * @returns The JSX element for the segment error fallback UI.
+ *
+ * @see FallbackLink
+ * @see isDevelopment
+ */
 export function SegmentErrorFallback({
   title,
   description,

@@ -8,7 +8,17 @@ import type { MetricsDisplayProps } from '@heyclaude/web-runtime/types/component
 import { cluster, grid, iconSize } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 
-// Lightweight Badge component for delta display
+/**
+ * Renders a compact delta badge showing an icon and label for an increase, decrease, or unchanged state.
+ *
+ * @param props.deltaType - One of `'increase'`, `'decrease'`, or `'unchanged'`; determines the icon and color styling.
+ * @param props.className - Optional additional CSS class names to apply to the badge container.
+ * @returns A span element rendering a small rounded badge containing the chosen icon and the `deltaType` label.
+ *
+ * @see MetricsDisplay
+ * @see iconSize
+ * @see cn
+ */
 function BadgeDelta({
   deltaType,
   className,
@@ -46,6 +56,29 @@ function BadgeDelta({
   );
 }
 
+/**
+ * Render a responsive grid of KPI metric cards with an optional title and description.
+ *
+ * Renders a semantic Dataset section (schema.org) that displays each metric as a card containing a label,
+ * a prominent value, and an optional change indicator rendered with BadgeDelta. Visual styling for each
+ * card (gradient, border hover, and delta type) is derived from the metric's `trend`. This component
+ * does not perform runtime validation of `metrics`; the input structure is expected to be validated upstream
+ * (e.g., by a database CHECK constraint).
+ *
+ * @param props - Component props
+ * @param props.title - Optional section title shown above the metrics
+ * @param props.description - Optional descriptive text shown under the title
+ * @param props.metrics - Array of metric objects to render. Each metric should include:
+ *   - `label?: string` — optional metric label; defaults to "Metric N" when absent
+ *   - `value: string | number` — primary displayed metric value
+ *   - `change?: string` — optional textual change displayed next to the delta badge
+ *   - `trend?: 'up' | 'down' | string` — determines visual treatment; `'up'` → increase, `'down'` → decrease, otherwise unchanged
+ * @returns A section element containing the rendered metric cards and optional header content
+ *
+ * @see BadgeDelta
+ * @see grid.responsive3
+ * @see cluster.compact
+ */
 export function MetricsDisplay(props: MetricsDisplayProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, metrics, description } = props;

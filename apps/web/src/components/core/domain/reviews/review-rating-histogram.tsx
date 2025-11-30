@@ -13,6 +13,22 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { Card } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Renders a rating histogram card that shows the average rating and a 1–5 star distribution.
+ *
+ * Computes the distribution chart data server-side and displays either a placeholder when there
+ * are no reviews or a card with the average rating, star visualization, review count, and a
+ * horizontal bar chart of ratings.
+ *
+ * @param distribution - Optional object with fields `rating_1` … `rating_5` containing counts for each star level
+ * @param totalReviews - Total number of reviews used to compute percentage values and decide empty state
+ * @param averageRating - Average rating value shown numerically and via the star display
+ * @returns A React element rendering the rating histogram or an empty-state placeholder
+ *
+ * @see ChartContainer
+ * @see HorizontalBarChart
+ * @see StarDisplay
+ */
 export function ReviewRatingHistogram({
   distribution,
   totalReviews,

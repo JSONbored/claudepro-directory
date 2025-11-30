@@ -16,6 +16,20 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = false;
 
+/**
+ * Renders the Terms of Service page, embedding the last updated date and contact channels.
+ *
+ * @remarks
+ * This server component sources runtime values for last-updated and contact channels and is intended for static rendering; the file exports `revalidate = false` (no ISR).
+ *
+ * @returns The Terms of Service page as a React element.
+ *
+ * @see generatePageMetadata
+ * @see getLastUpdatedDate
+ * @see getContactChannels
+ * @see APP_CONFIG
+ * @see NavLink
+ */
 export default function TermsPage() {
   const lastUpdated = getLastUpdatedDate();
   const channels = getContactChannels();

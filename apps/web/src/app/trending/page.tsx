@@ -44,6 +44,26 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/trending');
 }
 
+/**
+ * Render the Trending page by fetching and displaying trending, popular, and recent configurations based on optional search parameters.
+ *
+ * This server component:
+ * - Reads and normalizes `searchParams.category` (supports string or array) and `searchParams.limit` (defaults to 12, capped at 100).
+ * - Validates the category; if invalid, logs a warning and falls back to the default (all categories).
+ * - Fetches page data for trending, popular, and recent items, logs counts for each section, maps results into displayable items, and renders the page layout including badges, content sections, and a newsletter CTA.
+ *
+ * @param searchParams - Object containing URL search parameters. Recognized keys:
+ *   - `category`: optional string or string[] to scope results; the first value is used when an array is provided.
+ *   - `limit`: optional numeric limit for items (defaults to 12, maximum 100).
+ * @returns A React element representing the complete Trending page layout and content.
+ *
+ * @see getTrendingPageData
+ * @see mapTrendingMetrics
+ * @see mapPopularContent
+ * @see mapRecentContent
+ * @see TrendingContent
+ * @see NewsletterCTAVariant
+ */
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

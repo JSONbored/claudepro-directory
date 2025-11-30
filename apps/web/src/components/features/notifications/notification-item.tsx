@@ -18,6 +18,15 @@ interface NotificationItemProps {
   notification: NotificationRecord;
 }
 
+/**
+ * Render a notification card with a dismiss control and an optional action button or link.
+ *
+ * @param props.notification - Notification record containing title, message, type, action_label, action_href, and id.
+ * @returns The JSX element representing the notification item.
+ *
+ * @see useNotificationsContext
+ * @see NotificationRecord
+ */
 export function NotificationItem({ notification }: NotificationItemProps) {
   const { dismiss, closeSheet } = useNotificationsContext();
 

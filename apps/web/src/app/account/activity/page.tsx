@@ -30,6 +30,23 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/activity');
 }
 
+/**
+ * Renders the Account Activity page: authenticates the user, fetches activity summary and timeline,
+ * and returns a UI that adapts to authentication state and partial data availability.
+ *
+ * Fetch behavior:
+ * - Authenticates the request-scoped user.
+ * - Loads activity summary and timeline in parallel and tolerates partial failures (renders available sections).
+ * - Logs authentication, data-fetch outcomes, and render completion with request-scoped and user-scoped context.
+ *
+ * @returns The rendered Activity page as a React element.
+ *
+ * @see getAuthenticatedUser
+ * @see getActivitySummary
+ * @see getActivityTimeline
+ * @see ActivityTimeline
+ * @see generatePageMetadata
+ */
 export default async function ActivityPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

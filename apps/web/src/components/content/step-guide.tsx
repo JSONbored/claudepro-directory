@@ -12,6 +12,21 @@ import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { UnifiedContentBox } from '@/src/components/core/domain/content/featured-content-box';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Renders a server-side HowTo guide composed of ordered steps with optional syntax-highlighted code blocks.
+ *
+ * Renders a semantic HowTo section containing a header (title, optional description, optional total time) and an ordered list of step cards; steps that include code are highlighted server-side and displayed with a ProductionCodeBlock, and steps may optionally include a duration and a tip callout.
+ *
+ * @param props - Component properties.
+ * @param props.steps - Array of steps to render; each step may include `title`, `content` or `description`, optional `code` (shell script content), optional `time`, and optional `tip`. Steps with `code` will be highlighted and shown as a code block.
+ * @param props.title - Title displayed at the top of the guide.
+ * @param props.description - Optional description displayed under the title.
+ * @param props.totalTime - Optional total estimated time displayed in the header.
+ * @returns The rendered HowTo section as a React element.
+ *
+ * @see highlightCodeEdge
+ * @see ProductionCodeBlock
+ */
 export async function StepByStepGuide(props: StepByStepGuideProps) {
   const { steps, title, description, totalTime } = props;
 

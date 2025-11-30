@@ -60,6 +60,21 @@ export function UnifiedContentBox(props: UnifiedContentBoxProps) {
   }
 }
 
+/**
+ * Render an accordion of expandable items with optional single- or multi-open behavior.
+ *
+ * Renders an accessible section containing a list of cards; each card can be expanded to reveal its answer/content.
+ *
+ * @param props - AccordionVariant props
+ * @param props.items - Ordered list of accordion items. Each item should include `title`, `content`, and optional `defaultOpen` to pre-open that item.
+ * @param props.title - Optional heading for the entire accordion section.
+ * @param props.description - Optional descriptive text shown under the section heading.
+ * @param props.allowMultiple - When true, multiple items may be open at once; when false, opening an item closes others.
+ * @returns A React element representing the accordion UI.
+ *
+ * @see UnifiedContentBox
+ * @see AccordionVariant
+ */
 function AccordionBox(props: AccordionVariant) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { items, title, description, allowMultiple } = props;
@@ -180,6 +195,19 @@ function FAQBox(props: FAQVariant) {
   );
 }
 
+/**
+ * Render an informational box with an icon, optional title, and content styled according to the variant.
+ *
+ * @param props - Component props
+ * @param props.title - Optional heading text displayed alongside the variant icon
+ * @param props.children - Content rendered inside the info box
+ * @param props.variant - Visual variant key; one of `'info' | 'warning' | 'success' | 'error'`. Defaults to `'info'`
+ * @returns A JSX element representing a schema.org `Note` with variant-specific colors and iconography
+ *
+ * @see UnifiedContentBox
+ * @see INFOBOX_COLORS
+ * @see InfoBoxVariant
+ */
 function InfoBoxComponent(props: InfoBoxVariant) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, children, variant } = props;
@@ -215,6 +243,17 @@ function InfoBoxComponent(props: InfoBoxVariant) {
   );
 }
 
+/**
+ * Renders a styled callout alert with an icon, optional title, and descriptive content selected by `type`.
+ *
+ * @param props - Component props.
+ * @param props.type - Callout variant that determines the icon and visual intent: 'info', 'warning', 'error', 'success', or 'tip'.
+ * @param props.title - Optional heading shown above the callout content.
+ * @param props.children - Content displayed inside the callout.
+ * @returns The callout element configured for the provided `type`.
+ * @see InfoBoxComponent
+ * @see UnifiedContentBox
+ */
 function CalloutComponent(props: CalloutVariant) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { type, title, children } = props;

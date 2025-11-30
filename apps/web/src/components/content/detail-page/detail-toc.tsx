@@ -61,6 +61,21 @@ function normalizeHeadings(
   return Array.from(deduped.values());
 }
 
+/**
+ * Renders an "On this page" table of contents for the provided headings.
+ *
+ * Displays a navigable list of headings, highlights the currently active heading,
+ * scrolls to headings when clicked (respecting prefers-reduced-motion), and keeps
+ * the browser URL hash in sync with the active heading. Returns null when there
+ * are fewer than three normalized headings.
+ *
+ * @param props.headings - Array of heading metadata to render (may be undefined or null).
+ * @param props.className - Optional additional className applied to the root nav element.
+ * @returns A navigation element containing the table of contents, or `null` if not rendered.
+ *
+ * @see normalizeHeadings
+ * @see ContentHeadingMetadata
+ */
 export function DetailToc({ headings, className }: DetailTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
   const [activeId, setActiveId] = useState<string | null>(null);

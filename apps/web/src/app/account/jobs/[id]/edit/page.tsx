@@ -40,6 +40,19 @@ interface EditJobPageProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Renders the Edit Job page for a specific job, loading the authenticated user, the job data, and plan catalog, and providing a form that updates the job and redirects on success.
+ *
+ * @param props.params - Object with `id` of the job to edit.
+ * @param props.params.id - The job identifier from the route.
+ * @returns The page JSX that displays the job edit form and validation/warning UI.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserJobById
+ * @see getPaymentPlanCatalog
+ * @see updateJob
+ * @see JobForm
+ */
 export default async function EditJobPage({ params }: EditJobPageProperties) {
   const { id } = await params;
   

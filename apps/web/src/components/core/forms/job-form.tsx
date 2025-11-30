@@ -133,6 +133,23 @@ interface JobFormProps {
   planCatalog: PaymentPlanCatalogEntry[];
 }
 
+/**
+ * Renders a job creation/edit form that collects job details, requirements, benefits, tags, application info, and listing plan, and submits a validated CreateJobInput to the provided handler.
+ *
+ * The form derives selectable plan options from `planCatalog` (falls back to legacy defaults when absent), validates workplace and experience enum values, assembles tags/requirements/benefits, and invokes `onSubmit` inside a logged transition. It shows success or error toasts and supports an optional featured listing upgrade.
+ *
+ * @param initialData - Optional partial job data used to pre-fill form fields (title, company, plan, tier, tags, requirements, benefits, etc.).
+ * @param onSubmit - Callback invoked with the assembled CreateJobInput when the form is submitted. Expected to return an object `{ success: boolean, requiresPayment?: boolean, job?: ... }`; the component displays success or payment messaging based on that result.
+ * @param submitLabel - Optional label for the submit button (defaults to "Create Job").
+ * @param planCatalog - Optional array of PaymentPlanCatalogEntry used to build plan options (standard/featured); when empty, the component uses LEGACY_PLAN_OPTIONS.
+ *
+ * @returns The rendered job form element (JSX) wired to validate input, manage UI state, and call `onSubmit`.
+ *
+ * @see CompanySelector
+ * @see ListItemManager
+ * @see LEGACY_PLAN_OPTIONS
+ * @see PLAN_LABELS
+ */
 export function JobForm({
   initialData,
   onSubmit,

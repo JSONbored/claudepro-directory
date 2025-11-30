@@ -93,11 +93,22 @@ const categoryNavigationCardPropsSchema = z.object({
 export type CategoryNavigationCardProps = z.infer<typeof categoryNavigationCardPropsSchema>;
 
 /**
- * CategoryNavigationCard Component (Server Component)
+ * Renders a horizontal navigation of category icons with tooltips and an optional active highlight.
  *
- * Renders category navigation with icons and tooltips.
- * Supports active state highlighting and custom colors.
- * No React.memo needed - server components don't re-render
+ * Displays each category as a linked icon with a tooltip containing the category label and description.
+ * This is a server component and does not perform client-side data fetching or incremental static regeneration.
+ *
+ * @param currentCategory - The key of the currently active category; used to apply active styling.
+ * @param categories - A record mapping category keys to their display metadata (label, icon, description, optional color and activeColor).
+ * @param basePath - The base path prepended to each category link (defaults to '/guides').
+ * @returns The JSX element that renders the category navigation bar.
+ *
+ * @see Tooltip
+ * @see TooltipTrigger
+ * @see TooltipContent
+ * @see between
+ * @see iconSize
+ * @see DIMENSIONS
  */
 export function CategoryNavigationCard({
   currentCategory,

@@ -35,6 +35,27 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Renders the Account Dashboard page for the authenticated user, showing account stats,
+ * quick actions, recently saved items, and recommended next items.
+ *
+ * This server component performs server-side authentication and data fetching:
+ * it obtains the authenticated user, loads the account dashboard bundle (dashboard, library, homepage),
+ * resolves recent bookmark content details, and derives personalized recommendations.
+ *
+ * The component returns a UI that:
+ * - Prompts sign-in when the request is unauthenticated.
+ * - Shows an error card if dashboard data cannot be loaded.
+ * - Displays bookmark count, membership tier, and account age.
+ * - Lists up to three recent saved items and up to three recommended items (excluding already-bookmarked content).
+ *
+ * @returns The rendered dashboard page as JSX.
+ *
+ * @see getAuthenticatedUser
+ * @see getAccountDashboardBundle
+ * @see getContentDetailCore
+ * @see RecentlySavedGrid
+ */
 export default async function AccountDashboard() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

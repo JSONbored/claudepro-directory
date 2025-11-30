@@ -22,6 +22,22 @@ import Link from 'next/link';
 import { Button } from '@heyclaude/web-runtime/ui';
 import { Card, CardContent } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Render a promotional card highlighting hiring options for Claude developers.
+ *
+ * The component displays a title and subtitle, honest growth metrics, three concise
+ * value propositions with check icons, a primary call-to-action button linking to
+ * the partner pricing route, and a small trust signal. Animations are applied to
+ * groups and individual elements for staged entrance and micro-interactions.
+ *
+ * @returns A React element containing the jobs promotional card.
+ *
+ * @see Card
+ * @see CardContent
+ * @see Button
+ * @see ROUTES.PARTNER
+ * @see https://www.framer.com/motion/ (motion animations used)
+ */
 export function JobsPromo() {
   return (
     <motion.div

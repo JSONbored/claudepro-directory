@@ -104,51 +104,35 @@ export type ListItemManagerProps =
 // =============================================================================
 
 /**
- * ListItemManager Component
+ * Renders a controlled UI for managing a dynamic list of string items with add, remove and validation controls.
  *
- * Manages dynamic string arrays in forms with add/remove/validation.
+ * Supports three visual variants ("badge", "list", "custom"), optional limits (minItems, maxItems, maxLength),
+ * duplicate prevention, an item counter, and hooks for change tracking.
  *
- * @example
- * ```tsx
- * // Badge variant (interests, tags)
- * <ListItemManager
- *   variant="badge"
- *   label="Interests & Skills"
- *   items={interests}
- *   onChange={setInterests}
- *   onFieldChange={() => setHasChanges(true)}
- *   placeholder="Add an interest..."
- *   maxItems={10}
- *   maxLength={30}
- *   noDuplicates
- *   showCounter
- *   badgeStyle="secondary"
- * />
+ * @param props.label - Visible label for the field
+ * @param props.items - Current array of string items
+ * @param props.onChange - Callback invoked with the new items array when items change
+ * @param props.variant - Visual variant: "badge" | "list" | "custom"
+ * @param props.placeholder - Input placeholder text (default: "Add item...")
+ * @param props.description - Optional helper text displayed below the input
+ * @param props.className - Additional className applied to the root container
+ * @param props.disabled - When true, disables input and remove actions
+ * @param props.minItems - Minimum required number of items (used for validation messages)
+ * @param props.maxItems - Maximum allowed number of items
+ * @param props.maxLength - Maximum character length per item
+ * @param props.noDuplicates - When true, prevents adding duplicate items
+ * @param props.showCounter - When true and maxItems is provided, shows "n/max" counter
+ * @param props.errorMessage - Optional custom error text to display beneath the control
+ * @param props.onFieldChange - Optional callback invoked after a successful add or remove
+ * @param props.badgeStyle - (badge variant) visual style for badges ("secondary" | "outline" | "default")
+ * @param props.renderItem - (custom variant) render callback: (item, index, onRemove) => ReactNode
  *
- * // List variant (requirements)
- * <ListItemManager
- *   variant="list"
- *   label="Requirements"
- *   items={requirements}
- *   onChange={setRequirements}
- *   placeholder="e.g., 5+ years of Python experience"
- *   maxItems={20}
- * />
+ * @returns The rendered JSX element for the ListItemManager component.
  *
- * // Custom variant
- * <ListItemManager
- *   variant="custom"
- *   label="Custom Items"
- *   items={customItems}
- *   onChange={setCustomItems}
- *   renderItem={(item, index, onRemove) => (
- *     <div key={index}>
- *       {item}
- *       <button onClick={onRemove}>Remove</button>
- *     </div>
- *   )}
- * />
- * ```
+ * @see UnifiedBadge
+ * @see Button
+ * @see Input
+ * @see Label
  */
 export function ListItemManager(props: ListItemManagerProps) {
   const {

@@ -178,6 +178,18 @@ function getSafeContentUrl(
   return `/${type}/${slug}`;
 }
 
+/**
+ * Renders the account "My Submissions" page, fetching the current user's submissions and displaying them with controls for viewing PRs, content links, and creating new submissions.
+ *
+ * Fetches the authenticated user and the user's dashboard data (submissions). If the user is not authenticated, renders a sign-in prompt. If dashboard loading fails, renders an error message. Validates submission enums, constructs safe PR and content links, logs data-integrity issues, and renders a list of SubmissionCard components or an empty-state card.
+ *
+ * @returns The React element tree for the submissions page.
+ *
+ * @see getAuthenticatedUser - authentication helper used to resolve the current user
+ * @see getUserDashboard - server-side data fetch that returns submissions
+ * @see SubmissionCard - presentation component used to render individual submissions
+ * @see generateRequestId - request-scoped identifier used for logging
+ */
 export default async function SubmissionsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

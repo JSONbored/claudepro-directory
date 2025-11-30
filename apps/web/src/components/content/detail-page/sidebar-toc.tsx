@@ -75,6 +75,21 @@ function normalizeHeadings(
   return Array.from(deduped.values());
 }
 
+/**
+ * Renders a right-rail "On this page" table of contents with scroll-linked highlighting and in-page navigation.
+ *
+ * The component normalizes the provided headings, highlights the heading currently visible in the viewport,
+ * updates the URL hash to reflect the active section, and supports smooth scrolling on click (respecting
+ * the user's reduced-motion preference).
+ *
+ * @param headings - Optional array of heading metadata to build the TOC; invalid or duplicate entries are ignored.
+ * @param className - Optional additional class names applied to the container.
+ * @param minHeadings - Minimum number of headings required to render the TOC (default: 2).
+ * @returns A navigation element containing the TOC markup, or `null` if there are fewer than `minHeadings`.
+ *
+ * @see normalizeHeadings
+ * @see focusRing
+ */
 export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
   const [activeId, setActiveId] = useState<string | null>(null);

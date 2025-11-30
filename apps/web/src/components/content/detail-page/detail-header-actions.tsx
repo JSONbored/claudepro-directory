@@ -172,12 +172,21 @@ export interface DetailHeaderActionsProps {
 }
 
 /**
- * DetailHeaderActions Component (Client Component)
+ * Renders interactive header actions for a content detail view, including navigation, copy, pin, share, download, and primary/secondary actions.
  *
- * Interactive action buttons for the detail header
- * - Back button with router navigation
- * - Copy button with state and toast notifications
- * - Primary and secondary action buttons with click handlers
+ * @param item - The content record displayed by the detail view (typically a `ContentItem` or server-side content result); used for slugs, titles, description, and download/copy sources.
+ * @param typeName - Human-readable content type label shown as a badge (e.g., "Template", "Snippet").
+ * @param category - Content category used for routing, analytics, and conditional features (e.g., "mcp", "skills").
+ * @param hasContent - Whether the item exposes copyable or exportable payloads; toggles the content actions region.
+ * @param displayTitle - The title string rendered in the header; used for pinning and share metadata when present.
+ * @param primaryAction - The primary call-to-action presented in the actions sidebar.
+ * @param secondaryActions - Optional array of additional actions rendered as outline buttons in the sidebar.
+ * @param onCopyContent - Optional override that replaces the component's default copy behavior; when provided the caller is responsible for performing copy, analytics, and any post-copy UI (toasts, email capture).
+ *
+ * @see sanitizePathSegment
+ * @see getContentForCopy
+ * @see usePinboard
+ * @see ShareMenu
  */
 export function DetailHeaderActions({
   item,

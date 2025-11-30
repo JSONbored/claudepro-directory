@@ -22,6 +22,22 @@ export interface JobToggleButtonProps extends ButtonStyleProps {
   currentStatus: JobStatus;
 }
 
+/**
+ * Button that toggles a job's status between `active` and `draft`, shows success/error toasts, and refreshes the page.
+ *
+ * @param jobId - Identifier of the job to toggle
+ * @param currentStatus - Current status of the job (`'active'` or `'draft'`)
+ * @param size - Button size variant (defaults to `'sm'`)
+ * @param variant - Button visual variant (defaults to `'ghost'`)
+ * @param className - Additional CSS class names applied to the button
+ * @param disabled - When `true`, disables the button (defaults to `false`)
+ *
+ * @returns The button element that triggers the job status toggle and displays UI feedback
+ *
+ * @see toggleJobStatus
+ * @see useLoggedAsync
+ * @see toasts
+ */
 export function JobToggleButton({
   jobId,
   currentStatus,

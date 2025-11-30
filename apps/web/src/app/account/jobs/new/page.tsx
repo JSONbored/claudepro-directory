@@ -19,6 +19,20 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/jobs/new');
 }
 
+/**
+ * Render the "Post a Job" page containing the job form and a server action to create a job.
+ *
+ * The component loads the payment plan catalog server-side (falls back to an empty catalog on failure),
+ * provides a `handleSubmit` server action that calls `createJob`, handles required payment flows
+ * (returns a checkout URL payload when needed) and performs a redirect to the jobs list when creation
+ * succeeds without payment. All fetch and action errors are normalized and logged.
+ *
+ * @returns The page's React element containing the job form and related UI.
+ *
+ * @see JobForm
+ * @see createJob
+ * @see getPaymentPlanCatalog
+ */
 export default async function NewJobPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

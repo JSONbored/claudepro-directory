@@ -54,13 +54,17 @@ export interface CollectionDetailViewProps {
 }
 
 /**
- * Collection Detail View Component
+ * Render collection detail sections including prerequisites, embedded items, installation order, and compatibility.
  *
- * Renders collection-specific sections in a consistent, accessible layout.
- * Uses Suspense for lazy loading of embedded item content.
+ * This server component performs server-side data fetching for category configurations and the embedded items referenced by the collection metadata, then renders accessible UI sections for prerequisites, "What's Included" (grouped by category), recommended installation order, and compatibility indicators.
  *
- * @param props - Component props with collection data
- * @returns Collection detail view JSX
+ * @param props - Component props
+ * @param props.collection - Database content row representing a collection (category `"collections"`)
+ * @returns JSX element for the collection detail view
+ *
+ * @see getCategoryConfigs
+ * @see getContentBySlug
+ * @see ConfigCard
  */
 export async function CollectionDetailView({ collection }: CollectionDetailViewProps) {
   // Load category configs once (single RPC call)

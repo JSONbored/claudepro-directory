@@ -40,6 +40,20 @@ type QuizQuestion = {
   }>;
 };
 
+/**
+ * Convert a raw quiz configuration RPC result into an array of normalized QuizQuestion objects.
+ *
+ * The function normalizes nullable/missing fields into sensible defaults (empty strings for text,
+ * `false` for booleans, `0` for numeric ordering, and empty arrays for options) and maps option
+ * fields to the QuizQuestion option shape.
+ *
+ * @param config - Raw `QuizConfigurationResult` returned from the `get_quiz_configuration` RPC; may be `null` or an empty array.
+ * @returns An array of `QuizQuestion` objects when `config` contains entries, or `null` if `config` is `null`, not an array, or empty.
+ *
+ * @see get_quiz_configurationAction
+ * @see QuizForm
+ * @see QuizQuestion
+ */
 function mapQuizConfigToQuestions(config: QuizConfigurationResult | null): QuizQuestion[] | null {
   if (!(config && Array.isArray(config)) || config.length === 0) {
     return null;
@@ -104,6 +118,21 @@ function encodeQuizAnswers(answers: QuizAnswers): string {
   return Buffer.from(JSON.stringify(answers)).toString('base64url');
 }
 
+/**
+ * Renders an interactive multi-step quiz that fetches question configuration, collects and validates user answers, and generates configuration recommendations.
+ *
+ * This component:
+ * - Loads quiz configuration from the server on mount and maps it to internal question data.
+ * - Presents questions one at a time (single- and multi-select), enforces required fields and per-question validation, and shows a review step.
+ * - Submits validated answers to generate recommendations, encodes the answers, and navigates to the results page on success.
+ * - Displays loading states, per-field errors, and user-facing toasts for load/validation/submission failures.
+ *
+ * @returns The quiz form UI element for collecting and submitting quiz answers.
+ *
+ * @see QuizProgress
+ * @see QuestionCard
+ * @see generateConfigRecommendations
+ */
 export function QuizForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

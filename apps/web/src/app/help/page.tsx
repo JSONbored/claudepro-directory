@@ -100,6 +100,18 @@ const commonQuestions = [
   },
 ];
 
+/**
+ * Render the Help Center page that displays help topics, common questions, quick actions, and contact options.
+ *
+ * This component is a presentational page built from static data: it renders topic cards with links, FAQ cards,
+ * quick action tiles (Search, Guides, Contact Support), and a final call-to-action to contact support or join the community.
+ *
+ * @returns The JSX element representing the Help Center page.
+ *
+ * @see APP_CONFIG
+ * @see NavLink
+ * @see HoverCard
+ */
 export default function HelpPage() {
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">

@@ -36,6 +36,28 @@ interface SubmissionCardProps {
   VALID_SUBMISSION_TYPES: Database['public']['Enums']['submission_type'][];
 }
 
+/**
+ * Render a card representing a user submission with status/type badges, metadata, alerts, and action links.
+ *
+ * Logs warnings when the submission's status, content_type, or content_slug are missing or invalid.
+ *
+ * @param submission - The submission record to display.
+ * @param index - Fallback index used when `submission.id` is not present.
+ * @param getStatusBadge - Function that returns a badge element for a validated submission status.
+ * @param getTypeLabel - Function that returns a human-readable label for a validated submission type.
+ * @param formatSubmissionDate - Function that formats ISO date strings for display.
+ * @param getPrLinkProps - Function that derives PR link props from a submission.
+ * @param getContentLinkProps - Function that derives content link props from a submission type, slug, and status.
+ * @param isValidSubmissionStatus - Type guard that validates submission status values.
+ * @param isValidSubmissionType - Type guard that validates submission content_type values.
+ * @param VALID_SUBMISSION_STATUSES - Array of allowed submission status values used for validation and logging.
+ * @param VALID_SUBMISSION_TYPES - Array of allowed submission type values used for validation and logging.
+ * @returns The JSX element for the submission card.
+ *
+ * @see PrLinkButton
+ * @see ContentLinkButton
+ * @see UnifiedBadge
+ */
 export function SubmissionCard({
   submission,
   index,

@@ -32,6 +32,22 @@ interface TemplateSelectorProps {
   onSelect: (template: MergedTemplateItem) => void;
 }
 
+/**
+ * Renders a template picker button that opens a dropdown list of templates and invokes `onSelect` when a template is chosen.
+ *
+ * If `templates` is empty, this component renders nothing.
+ *
+ * @param props.templates - Array of template objects to display. Each item should include `id`, `name`, and `description`.
+ * @param props.onSelect - Callback invoked with the selected template when a dropdown item is clicked.
+ * @returns The dropdown menu UI for selecting a template, or `null` when no templates are provided.
+ *
+ * @see DropdownMenu
+ * @see DropdownMenuTrigger
+ * @see DropdownMenuContent
+ * @see DropdownMenuItem
+ * @see Button
+ * @see DIMENSIONS
+ */
 export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps) {
   if (templates.length === 0) {
     return null;

@@ -45,6 +45,23 @@ function isSponsorshipActive(
   );
 }
 
+/**
+ * Render the account sponsorships overview page for the authenticated user.
+ *
+ * Renders one of the following states:
+ * - Sign-in prompt when there is no authenticated user.
+ * - Error message when loading sponsorships fails.
+ * - Empty state when the user has no sponsorships.
+ * - A list of sponsorship cards showing status badges, impressions/clicks/CTR, progress toward limits, and links to analytics when sponsorships exist.
+ *
+ * This server component performs server-side data fetching for the current user's sponsorships and emits structured request- and user-scoped logs for auditing and diagnostics.
+ *
+ * @returns The page's React element that displays the appropriate state or the sponsorships grid.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserSponsorships
+ * @see isSponsorshipActive
+ */
 export default async function SponsorshipsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

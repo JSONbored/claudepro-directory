@@ -54,6 +54,22 @@ interface OnboardingToastsOptions {
   customToasts?: OnboardingToast[];
 }
 
+/**
+ * Manage onboarding toast notifications: determine whether to show toasts for a given context,
+ * create server-side notifications when needed, persist "seen" state locally, and provide controls
+ * to mark or reset seen state.
+ *
+ * @param options.enabled - Whether the hook is active; when false no network or local checks occur
+ * @param options.context - Context key used to scope onboarding toasts (e.g., `"wizard"`, `"submit"`)
+ * @param options.customToasts - Optional custom list of onboarding toasts to create instead of defaults
+ * @returns An object with the following properties:
+ *   - hasSeenToasts: boolean — `true` if toasts for the provided context have been recorded as seen
+ *   - activeToasts: Set<string> — IDs of toasts that were successfully created and are currently active
+ *   - markToastsAsSeen: () => Promise<void> — mark current context toasts as seen (updates localStorage)
+ *   - resetToasts: () => void — remove the seen flag for the current context from localStorage
+ *   - resetAllToasts: () => void — clear all onboarding seen state from localStorage
+ *   - isActive: boolean — `true` if there are any active toasts
+ */
 export function useOnboardingToasts({
   enabled = true,
   context = 'wizard',
