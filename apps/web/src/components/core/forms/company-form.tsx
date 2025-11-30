@@ -69,8 +69,19 @@ async function fileToBase64(file: File) {
 }
 
 /**
- * Form component for creating and editing company profiles.
- * Includes logo upload with validation, company details, and metadata.
+ * Form component for creating or editing a company profile and managing its logo.
+ *
+ * Renders inputs for company details (name, website, description, size, industry, optional date)
+ * and a logo upload flow that validates file type, size, and dimensions before uploading.
+ *
+ * @param initialData - Optional company data used to prefill the form when editing
+ * @param mode - Operation mode: "create" renders creation flow, "edit" renders update flow
+ *
+ * @see fileToBase64
+ * @see uploadCompanyLogoAction
+ * @see useFormSubmit
+ * @see FORM_CONFIG
+ * @see ROUTES.ACCOUNT_COMPANIES
  */
 export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const logoUploadId = useId();

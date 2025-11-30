@@ -338,14 +338,19 @@ export function logTrace(message: string, logContext: Record<string, unknown>): 
 }
 
 /**
- * Log an error message with optional error normalization and flush buffered logs.
+ * Log an error with optional normalization and ensure buffered logs are flushed.
  *
- * The logger's bindings are mixed into the provided context automatically before logging.
+ * Merges the logger's current bindings into `logContext`, attaches a normalized `err`
+ * field when `error` is provided, emits an error-level log, and awaits a logger flush
+ * so entries are persisted before execution ends.
  *
- * @param message - Human-readable log message
- * @param logContext - Additional structured fields to include in the log; logger bindings (for example `requestId`, `operation`, `userId`) are merged automatically
- * @param error - Optional error to normalize and attach to the log as the `err` field
- * @returns Void
+ * @param message {string} - Human-readable log message
+ * @param logContext {Record<string, unknown>} - Additional structured fields to include in the log; logger bindings (for example `requestId`, `operation`, `userId`) are merged automatically
+ * @param error {unknown} - Optional error to normalize and attach as the `err` field
+ * @returns {Promise<void>} Resolves once the log has been emitted and the logger flush has completed
+ * @throws {unknown} If the logger's flush callback reports an error; the implementation will attempt to write a diagnostic message to stderr or console before rejecting
+ * @see normalizeError
+ * @see pinoLogger
  */
 export async function logError(message: string, logContext: Record<string, unknown>, error?: unknown): Promise<void> {
   // Build log data - mixin will automatically inject bindings (requestId, operation, userId, etc.)
