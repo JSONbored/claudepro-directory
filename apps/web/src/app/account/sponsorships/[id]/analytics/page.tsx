@@ -5,8 +5,9 @@ import {
   getSponsorshipAnalytics,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { cluster, absolute } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { POSITION_PATTERNS, UI_CLASSES, UnifiedBadge, Button ,
+import { UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
@@ -161,7 +162,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+        <div className={cluster.compact}>
           <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
           <h1 className="font-bold text-3xl">Sponsorship Analytics</h1>
         </div>
@@ -241,7 +242,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
             <div>
               <p className="font-medium text-sm">Status</p>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <div className={cluster.compact}>
                 <UnifiedBadge variant="base" style={sponsorship.active ? 'default' : 'outline'}>
                   {sponsorship.active ? 'Active' : 'Inactive'}
                 </UnifiedBadge>
@@ -283,11 +284,11 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                     {/* Impressions bar */}
                     <div className="relative h-8 overflow-hidden rounded bg-muted">
                       <div
-                        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-primary/30 transition-all`}
+                        className={`${absolute.topLeft} h-full bg-primary/30 transition-all`}
                         style={{ width: `${(impressions / maxImpressions) * 100}%` }}
                       />
                       <div
-                        className={`${POSITION_PATTERNS.ABSOLUTE_INSET} flex items-center px-2 text-xs`}
+                        className={`${absolute.inset} flex items-center px-2 text-xs`}
                       >
                         {impressions > 0 && `${impressions} views`}
                       </div>
@@ -295,11 +296,11 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                     {/* Clicks bar */}
                     <div className="relative h-8 overflow-hidden rounded bg-muted">
                       <div
-                        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-accent/50 transition-all`}
+                        className={`${absolute.topLeft} h-full bg-accent/50 transition-all`}
                         style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
                       />
                       <div
-                        className={`${POSITION_PATTERNS.ABSOLUTE_INSET} flex items-center px-2 text-xs`}
+                        className={`${absolute.inset} flex items-center px-2 text-xs`}
                       >
                         {clicks > 0 && `${clicks} clicks`}
                       </div>

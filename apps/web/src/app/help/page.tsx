@@ -7,7 +7,7 @@ import {
   MessageSquare,
   Search,
 } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES, NavLink, HoverCard , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
+import { NavLink, HoverCard , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 
 
@@ -219,14 +219,14 @@ export default function HelpPage() {
             <div className="flex justify-center gap-4">
               <NavLink
                 href="/contact"
-                className={`inline-flex items-center gap-2 rounded-lg bg-accent ${UI_CLASSES.CONTAINER_PADDING_SM} text-accent-foreground transition-colors hover:bg-accent/90`}
+                className="inline-flex items-center gap-2 rounded-lg bg-accent px-3 py-2 text-accent-foreground transition-colors hover:bg-accent/90"
               >
                 <MessageSquare className="h-4 w-4" />
                 Contact Us
               </NavLink>
               <Link
                 href="/community"
-                className={`inline-flex items-center gap-2 rounded-lg border border-accent/20 ${UI_CLASSES.CONTAINER_PADDING_SM} transition-colors hover:bg-accent/10`}
+                className="inline-flex items-center gap-2 rounded-lg border border-accent/20 px-3 py-2 transition-colors hover:bg-accent/10"
               >
                 Join Community
               </Link>

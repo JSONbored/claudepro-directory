@@ -4,14 +4,14 @@
 
 'use client';
 
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cardBody } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 
 export function AuthMobileHeader() {
   return (
     <motion.div
-      className={UI_CLASSES.CARD_BODY_SPACING}
+      className={cardBody.default}
       style={{ backgroundColor: 'oklch(74% 0.2 35)' }}
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}

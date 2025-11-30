@@ -11,6 +11,7 @@ import {
   getUserCompanies,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { between, cluster } from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building2,
@@ -25,7 +26,7 @@ import {
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge, Button ,
+import { UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
@@ -175,7 +176,7 @@ export default async function CompaniesPage() {
 
   return (
     <div className="space-y-6">
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <div>
           <h1 className="mb-2 font-bold text-3xl">My Companies</h1>
           <p className="text-muted-foreground">
@@ -225,7 +226,7 @@ export default async function CompaniesPage() {
               return (
                 <Card key={company.id}>
                   <CardHeader>
-                    <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                    <div className="flex items-start justify-between">
                       <div className="flex flex-1 items-start gap-4">
                         {(() => {
                           // Validate logo URL is safe (should be from Supabase storage or trusted domain)
@@ -271,7 +272,7 @@ export default async function CompaniesPage() {
                           </div>
                         )}
                         <div className="flex-1">
-                          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                          <div className={cluster.compact}>
                             <CardTitle>{company.name}</CardTitle>
                             {company.featured ? <UnifiedBadge variant="base" style="default">
                                 Featured
@@ -324,7 +325,7 @@ export default async function CompaniesPage() {
                                 href={validatedUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`mt-2 inline-flex items-center gap-1 text-sm ${UI_CLASSES.LINK_ACCENT}`}
+                                className="mt-2 inline-flex items-center gap-1 text-sm text-accent hover:underline"
                               >
                                 <ExternalLink className="h-3 w-3" />
                                 {displayText}
@@ -338,22 +339,22 @@ export default async function CompaniesPage() {
 
                   <CardContent>
                     <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
-                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                      <div className={cluster.tight}>
                         <Briefcase className="h-4 w-4" />
                         {company.stats?.active_jobs ?? 0} active job
                         {(company.stats?.active_jobs ?? 0) === 1 ? '' : 's'}
                       </div>
-                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                      <div className={cluster.tight}>
                         <Eye className="h-4 w-4" />
                         {(company.stats?.total_views ?? 0).toLocaleString()} views
                       </div>
-                      {company.stats?.latest_job_posted_at ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                      {company.stats?.latest_job_posted_at ? <div className={cluster.tight}>
                           <Calendar className="h-4 w-4" />
                           Last job posted {formatRelativeDate(company.stats.latest_job_posted_at)}
                         </div> : null}
                     </div>
 
-                    <div className={UI_CLASSES.FLEX_GAP_2}>
+                    <div className={cluster.compact}>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`${ROUTES.ACCOUNT_COMPANIES}/${company.id}/edit`}>
                           <Edit className="mr-1 h-3 w-3" />

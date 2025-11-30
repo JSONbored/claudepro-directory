@@ -10,13 +10,14 @@ import {
   getSubmissionDashboard,
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
+import { cluster, iconSize, muted } from '@heyclaude/web-runtime/design-system';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/server';
-import { cn, UI_CLASSES, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
+import { cn, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
@@ -306,28 +307,28 @@ export default async function SubmitPage() {
           {/* Stats Card - 3-column grid */}
           <Card>
             <CardHeader>
-              <CardTitle className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'font-medium text-sm')}>
-                <TrendingUp className={UI_CLASSES.ICON_SM} />
+              <CardTitle className={cn(cluster.compact, 'font-medium text-sm')}>
+                <TrendingUp className={iconSize.sm} />
                 Community Stats
               </CardTitle>
             </CardHeader>
-            <CardContent className={UI_CLASSES.GRID_COLS_3_GAP_2}>
+            <CardContent className="grid grid-cols-3 gap-2">
               {/* Total */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-blue-500/10')}>
                 <div className="font-bold text-2xl text-blue-400">{stats.total}</div>
-                <div className={UI_CLASSES.TEXT_XS_MUTED}>Total</div>
+                <div className={`${muted.default} text-xs`}>Total</div>
               </div>
 
               {/* Pending */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-yellow-500/10')}>
                 <div className="font-bold text-2xl text-yellow-400">{stats.pending}</div>
-                <div className={UI_CLASSES.TEXT_XS_MUTED}>Pending</div>
+                <div className={`${muted.default} text-xs`}>Pending</div>
               </div>
 
               {/* This Week */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-green-500/10')}>
                 <div className="font-bold text-2xl text-green-400">{stats.merged_this_week}</div>
-                <div className={UI_CLASSES.TEXT_XS_MUTED}>This Week</div>
+                <div className={`${muted.default} text-xs`}>This Week</div>
               </div>
             </CardContent>
           </Card>

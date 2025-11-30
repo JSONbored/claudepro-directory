@@ -32,7 +32,7 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { getCategoryConfigs, getContentBySlug } from '@heyclaude/web-runtime/data';
 import { AlertTriangle, CheckCircle } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
 import { Suspense } from 'react';
 import { ConfigCard } from '@heyclaude/web-runtime/ui';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
@@ -151,7 +151,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
               <AlertTriangle
-                className={`${UI_CLASSES.ICON_MD} text-yellow-500`}
+                className={`${iconSize.md} text-yellow-500`}
                 aria-hidden="true"
               />
               Prerequisites
@@ -160,9 +160,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
           <CardContent>
             <ul className="space-y-2">
               {prerequisites.map((prereq: string) => (
-                <li key={prereq} className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
+                <li key={prereq} className="flex items-start gap-2">
                   <CheckCircle
-                    className={`h-4 w-4 text-muted-foreground ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                    className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0"
                     aria-hidden="true"
                   />
                   <span className="text-muted-foreground text-sm">{prereq}</span>
@@ -227,7 +227,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
               {installationOrder.map((slug: string, index: number) => {
                 const item = validItems.find((i: ItemWithData) => i?.slug === slug);
                 return (
-                  <li key={slug} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                  <li key={slug} className="flex items-start gap-3">
                     <span
                       className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm"
                       aria-hidden="true"
@@ -253,15 +253,15 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <div className={cluster.compact}>
                 {compatibility.claudeDesktop ? (
                   <CheckCircle
-                    className={`${UI_CLASSES.ICON_SM} text-green-500`}
+                    className={`${iconSize.sm} text-green-500`}
                     aria-hidden="true"
                   />
                 ) : (
                   <AlertTriangle
-                    className={`${UI_CLASSES.ICON_SM} text-red-500`}
+                    className={`${iconSize.sm} text-red-500`}
                     aria-hidden="true"
                   />
                 )}
@@ -269,15 +269,15 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                   Claude Desktop {compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
                 </span>
               </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <div className={cluster.compact}>
                 {compatibility.claudeCode ? (
                   <CheckCircle
-                    className={`${UI_CLASSES.ICON_SM} text-green-500`}
+                    className={`${iconSize.sm} text-green-500`}
                     aria-hidden="true"
                   />
                 ) : (
                   <AlertTriangle
-                    className={`${UI_CLASSES.ICON_SM} text-red-500`}
+                    className={`${iconSize.sm} text-red-500`}
                     aria-hidden="true"
                   />
                 )}

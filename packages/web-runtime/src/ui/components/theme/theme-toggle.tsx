@@ -39,7 +39,9 @@ import { logger } from '../../../logger.ts';
 import { getTimeoutConfig } from '../../../config/static-configs.ts';
 import { useViewTransition } from '../../../hooks/use-view-transition.ts';
 import { Moon, Sun } from '../../../icons.tsx';
-import { UI_CLASSES } from '../../constants.ts';
+// Design System imports
+import { cluster } from '../../../design-system/styles/layout.ts';
+import { iconSize } from '../../../design-system/styles/icons.ts';
 import { Switch } from '../switch.tsx';
 
 /**
@@ -197,8 +199,8 @@ export function ThemeToggle() {
   if (!theme) return null;
 
   return (
-    <div ref={containerRef} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-      <Sun className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} aria-hidden="true" />
+    <div ref={containerRef} className={cluster.compact}>
+      <Sun className={`${iconSize.sm} text-muted-foreground`} aria-hidden="true" />
       <Switch
         checked={theme === 'dark'}
         onCheckedChange={(checked) => {
@@ -237,7 +239,7 @@ export function ThemeToggle() {
         onClick={handleToggle}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       />
-      <Moon className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} aria-hidden="true" />
+      <Moon className={`${iconSize.sm} text-muted-foreground`} aria-hidden="true" />
     </div>
   );
 }

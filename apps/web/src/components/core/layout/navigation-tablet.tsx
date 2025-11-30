@@ -4,11 +4,10 @@
  * Horizontal scroll with first 5 nav items
  */
 
+import { cluster, absolute } from '@heyclaude/web-runtime/design-system';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
-  POSITION_PATTERNS,
-  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { PrefetchLink } from '@heyclaude/web-runtime/ui';
@@ -44,7 +43,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       <span className="relative inline-block">
         {children}
         <span
-          className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} ${
+          className={`${absolute.bottomLeft} ${DIMENSIONS.UNDERLINE} bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} ${
             active ? 'w-full' : 'w-0 group-hover:w-full'
           }`}
           aria-hidden="true"
@@ -68,7 +67,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
       transition={{ duration: 0.3, ease: 'easeOut' }}
       aria-label="Tablet navigation"
     >
-      <div className={`flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} px-2`}>
+      <div className={`flex ${cluster.tight} px-2`}>
         {PRIMARY_NAVIGATION.slice(0, 5).map((link, index) => (
           <motion.div
             key={link.href}

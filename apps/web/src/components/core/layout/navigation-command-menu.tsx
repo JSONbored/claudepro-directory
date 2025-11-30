@@ -1,8 +1,8 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
 import * as Icons from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
 import {
@@ -65,7 +65,7 @@ export function NavigationCommandMenu({
     // Type guard: check if it's a valid React component
     if (typeof Icon === 'function') {
       const IconComponent = Icon as React.ComponentType<{ className?: string }>;
-      return <IconComponent className={`${UI_CLASSES.ICON_SM} shrink-0 text-muted-foreground`} />;
+      return <IconComponent className={`${iconSize.sm} shrink-0 text-muted-foreground`} />;
     }
     return null;
   };
@@ -77,13 +77,13 @@ export function NavigationCommandMenu({
     const path = item.path; // Type narrowing: path is now definitely string
     return (
       <CommandItem key={path} onSelect={() => handleSelect(path)} className="group cursor-pointer">
-        <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+        <span className={cluster.compact}>
           {getIcon(item.icon_name)}
           <div className="flex flex-col items-start">
             <span>{item.title}</span>
             {item.description && (
               <span
-                className={`text-muted-foreground text-xs transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}
+                className="text-muted-foreground text-xs transition-colors group-hover:text-accent"
               >
                 {item.description}
               </span>

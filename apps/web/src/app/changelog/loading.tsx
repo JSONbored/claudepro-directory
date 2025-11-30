@@ -5,7 +5,8 @@
  * Shows placeholder cards matching the layout of ChangelogCard components.
  */
 
-import { UI_CLASSES, PageHeaderSkeleton, Skeleton  } from '@heyclaude/web-runtime/ui';
+import { cluster } from '@heyclaude/web-runtime/design-system';
+import { PageHeaderSkeleton, Skeleton  } from '@heyclaude/web-runtime/ui';
 
 
 export default function ChangelogLoading() {
@@ -15,7 +16,7 @@ export default function ChangelogLoading() {
       <div className="space-y-4">
         <Skeleton size="sm" width="xs" className="mb-4" />
         <PageHeaderSkeleton />
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6}>
+        <div className={cluster.relaxed}>
           <Skeleton size="sm" width="lg" />
           <Skeleton size="sm" width="lg" />
         </div>
@@ -38,7 +39,7 @@ export default function ChangelogLoading() {
             </div>
             <Skeleton size="lg" width="2/3" className="mb-2" />
             <Skeleton size="sm" width="3xl" className="mb-4" />
-            <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
+            <div className="flex flex-wrap gap-2">
               <Skeleton size="sm" width="xs" rounded="full" />
               <Skeleton size="sm" width="xs" rounded="full" />
               <Skeleton size="sm" width="xs" rounded="full" />

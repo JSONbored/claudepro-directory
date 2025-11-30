@@ -13,7 +13,7 @@
  */
 
 import { Users } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import { memo } from 'react';
 import {
   ProfileCard,
@@ -40,7 +40,7 @@ function TopContributorsComponent({
   return (
     <section className="container mx-auto px-4 py-12">
       <div className="mb-6 flex items-center gap-3">
-        <Users className={`${UI_CLASSES.ICON_LG} text-accent`} />
+        <Users className={`${iconSize.lg} text-accent`} />
         <h2 className="font-bold text-2xl">{title}</h2>
       </div>
 

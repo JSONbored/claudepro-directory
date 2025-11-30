@@ -1,5 +1,6 @@
-import { DIMENSIONS, STATE_PATTERNS } from '../constants.ts';
+import { DIMENSIONS } from '../constants.ts';
 import { cn } from '../utils.ts';
+import { focusRing } from '../../design-system/styles/interactive.ts';
 import type * as React from 'react';
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -12,7 +13,7 @@ const Textarea = ({ className, ref, error, errorId, ...props }: TextareaProps) =
   return (
     <textarea
       className={cn(
-        `flex ${DIMENSIONS.TEXTAREA_SM} w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground ${STATE_PATTERNS.FOCUS_RING} ${STATE_PATTERNS.DISABLED_CURSOR}`,
+        `flex ${DIMENSIONS.TEXTAREA_SM} w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground ${focusRing.default} disabled:opacity-50 disabled:cursor-not-allowed`,
         error && 'border-destructive focus-visible:ring-destructive',
         className as string | undefined
       )}

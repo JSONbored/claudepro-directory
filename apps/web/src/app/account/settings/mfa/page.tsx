@@ -3,10 +3,11 @@
  * Allows users to manage their multi-factor authentication settings
  */
 
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import { Shield } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES,
+import {
   Card,
   CardContent,
   CardDescription,
@@ -64,7 +65,7 @@ export default async function MFASettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Shield className={UI_CLASSES.ICON_SM} />
+            <Shield className={iconSize.sm} />
             MFA Factors
           </CardTitle>
           <CardDescription>

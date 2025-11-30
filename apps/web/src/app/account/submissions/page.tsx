@@ -5,9 +5,10 @@ import {
   getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { between, iconSize, submissionBadge  } from '@heyclaude/web-runtime/design-system';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
+import { UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
@@ -293,7 +294,7 @@ export default async function SubmissionsPage() {
   const getStatusBadge = (status: Database['public']['Enums']['submission_status']) => {
     const variant = SUBMISSION_STATUS_VARIANTS[status];
     const Icon = variant.icon;
-    const colorClass = BADGE_COLORS.submissionStatus[status];
+    const colorClass = submissionBadge[status];
 
     return (
       <UnifiedBadge variant="base" style="outline" className={colorClass}>
@@ -358,7 +359,7 @@ export default async function SubmissionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <div>
           <h1 className="mb-2 font-bold text-3xl">My Submissions</h1>
           <p className="text-muted-foreground">
@@ -367,7 +368,7 @@ export default async function SubmissionsPage() {
         </div>
         <Button asChild>
           <Link href={ROUTES.SUBMIT}>
-            <Send className={`mr-2 ${UI_CLASSES.ICON_SM}`} />
+            <Send className={`mr-2 ${iconSize.sm}`} />
             New Submission
           </Link>
         </Button>
@@ -376,7 +377,7 @@ export default async function SubmissionsPage() {
       {submissions.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center py-12">
-            <Send className={`mb-4 h-12 w-12 ${UI_CLASSES.ICON_NEUTRAL}`} />
+            <Send className="mb-4 h-12 w-12 text-muted-foreground" />
             <h3 className="mb-2 font-semibold text-xl">No submissions yet</h3>
             <p className="mb-4 max-w-md text-center text-muted-foreground">
               Share your Claude configurations with the community! Your contributions help everyone
@@ -384,7 +385,7 @@ export default async function SubmissionsPage() {
             </p>
             <Button asChild>
               <Link href={ROUTES.SUBMIT}>
-                <Send className={`mr-2 ${UI_CLASSES.ICON_SM}`} />
+                <Send className={`mr-2 ${iconSize.sm}`} />
                 Submit Your First Configuration
               </Link>
             </Button>
@@ -418,7 +419,7 @@ export default async function SubmissionsPage() {
         <CardContent className="pt-6">
           <div className="flex gap-3">
             <GitPullRequest
-              className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO} ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+              className={`${iconSize.md} text-blue-600 mt-0.5 shrink-0`}
             />
             <div className="flex-1">
               <p className="font-medium text-blue-400 text-sm">How it works</p>

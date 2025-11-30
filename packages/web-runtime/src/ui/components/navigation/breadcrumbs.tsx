@@ -44,7 +44,7 @@ import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 import { ChevronRight, Home } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
-import { STATE_PATTERNS } from '../../constants.ts';
+import { focusRing } from '../../../design-system/styles/interactive.ts';
 
 /** Single breadcrumb item */
 export interface BreadcrumbItem {
@@ -197,7 +197,7 @@ export function Breadcrumbs({
                 <Link
                   href={item.href}
                   className={cn(
-                    STATE_PATTERNS.FOCUS_RING,
+                    focusRing.default,
                     'flex items-center gap-1 rounded-sm text-muted-foreground transition-colors',
                     'hover:text-foreground'
                   )}

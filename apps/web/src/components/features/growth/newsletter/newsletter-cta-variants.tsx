@@ -1,10 +1,11 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
 import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Mail } from '@heyclaude/web-runtime/icons';
-import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cn, DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import {
@@ -205,9 +206,9 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         )}
       >
         <CardHeader className="pb-5">
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-3`}>
+          <div className={`${cluster.default} mb-3`}>
             <div className="rounded-lg border border-primary/20 bg-primary/10 p-2.5">
-              <Mail className={`${UI_CLASSES.ICON_MD} text-primary`} aria-hidden="true" />
+              <Mail className={`${iconSize.md} text-primary`} aria-hidden="true" />
             </div>
             <CardTitle className="font-bold text-xl">{finalHeadline}</CardTitle>
           </div>
@@ -234,8 +235,8 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           className
         )}
       >
-        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} min-w-0 flex-1`}>
-          <Mail className={`${UI_CLASSES.ICON_MD} shrink-0 text-primary`} aria-hidden="true" />
+        <div className={`${cluster.default} min-w-0 flex-1`}>
+          <Mail className={`${iconSize.md} shrink-0 text-primary`} aria-hidden="true" />
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium text-sm">{finalHeadline}</p>
             <p className="truncate text-muted-foreground text-xs">{finalDescription}</p>
@@ -261,7 +262,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         <CardHeader className="flex-1">
           <div className="mb-4">
             <div className="inline-flex rounded-lg border border-primary/20 bg-primary/10 p-3">
-              <Mail className={`${UI_CLASSES.ICON_LG} text-primary`} aria-hidden="true" />
+              <Mail className={`${iconSize.lg} text-primary`} aria-hidden="true" />
             </div>
           </div>
           <CardTitle className="mb-3 font-bold text-xl">{finalHeadline}</CardTitle>

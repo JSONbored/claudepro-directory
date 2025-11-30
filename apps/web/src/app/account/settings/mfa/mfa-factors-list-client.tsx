@@ -1,7 +1,8 @@
 'use client';
 
+import { iconLeading } from '@heyclaude/web-runtime/design-system';
 import { Shield } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES, Button  } from '@heyclaude/web-runtime/ui';
+import { Button  } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 
 import { EnrollMFADialog } from '@/src/components/features/account/mfa/enroll-mfa-dialog';
@@ -19,7 +20,7 @@ export function MFAFactorsListClient() {
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button onClick={() => setEnrollDialogOpen(true)}>
-          <Shield className={UI_CLASSES.ICON_SM_LEADING} />
+          <Shield className={iconLeading.sm} />
           Add Authenticator
         </Button>
       </div>

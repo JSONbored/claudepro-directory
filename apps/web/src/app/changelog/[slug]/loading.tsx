@@ -5,7 +5,7 @@
  * Shows placeholder content matching the layout of the detail page.
  */
 
-import { Skeleton, UI_CLASSES, Separator  } from '@heyclaude/web-runtime/ui';
+import { Skeleton, Separator  } from '@heyclaude/web-runtime/ui';
 
 
 export default function ChangelogEntryLoading() {
@@ -43,7 +43,7 @@ export default function ChangelogEntryLoading() {
         </div>
 
         {/* Category Badges */}
-        <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
+        <div className="flex flex-wrap gap-2">
           {Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={`category-${index + 1}`} size="sm" width="xs" rounded="full" />
           ))}

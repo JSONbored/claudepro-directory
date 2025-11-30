@@ -1,7 +1,7 @@
 'use client';
 
-import { STATE_PATTERNS } from '../constants.ts';
 import { cn } from '../utils.ts';
+import { focusRing } from '../../design-system/styles/interactive.ts';
 import * as SwitchPrimitives from '@radix-ui/react-switch';
 import type * as React from 'react';
 
@@ -14,7 +14,7 @@ const Switch = ({
 }) => (
   <SwitchPrimitives.Root
     className={cn(
-      `peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors ${STATE_PATTERNS.FOCUS_RING} focus-visible:ring-offset-background ${STATE_PATTERNS.DISABLED_CURSOR} data-[state=checked]:bg-primary data-[state=unchecked]:bg-input`,
+      `peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors ${focusRing.default} focus-visible:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed data-[state=checked]:bg-primary data-[state=unchecked]:bg-input`,
       className
     )}
     {...props}

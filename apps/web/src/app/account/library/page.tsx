@@ -10,6 +10,7 @@ import {
   getUserLibrary,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { between, cluster } from '@heyclaude/web-runtime/design-system';
 import {
   Bookmark as BookmarkIcon,
   ExternalLink,
@@ -18,7 +19,7 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
+import { NavLink, UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
@@ -152,7 +153,7 @@ export default async function LibraryPage() {
 
   return (
     <div className="space-y-6">
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <div>
           <h1 className="mb-2 font-bold text-3xl">My Library</h1>
           <p className="text-muted-foreground">
@@ -160,7 +161,7 @@ export default async function LibraryPage() {
           </p>
         </div>
         <Link href={ROUTES.ACCOUNT_LIBRARY_NEW}>
-          <Button className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <Button className={cluster.compact}>
             <Plus className="h-4 w-4" />
             New Collection
           </Button>
@@ -169,13 +170,13 @@ export default async function LibraryPage() {
 
       <Tabs defaultValue="bookmarks" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="bookmarks" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <TabsTrigger value="bookmarks" className={cluster.compact}>
             <BookmarkIcon className="h-4 w-4" />
             Bookmarks ({bookmarkCount})
           </TabsTrigger>
           <TabsTrigger
             value={Constants.public.Enums.content_category[8]} // 'collections'
-            className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+            className={cluster.compact}
           >
             <FolderOpen className="h-4 w-4" />
             Collections ({collectionCount})
@@ -202,9 +203,9 @@ export default async function LibraryPage() {
               {bookmarks.map((bookmark) => (
                 <Card key={bookmark.id}>
                   <CardHeader>
-                    <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                    <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                        <div className={cluster.compact}>
                           <UnifiedBadge variant="base" style="outline" className="capitalize">
                             {bookmark.content_type}
                           </UnifiedBadge>
@@ -248,7 +249,7 @@ export default async function LibraryPage() {
                   together and share them with others.
                 </p>
                 <Link href={ROUTES.ACCOUNT_LIBRARY_NEW}>
-                  <Button className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                  <Button className={cluster.compact}>
                     <Plus className="h-4 w-4" />
                     Create Your First Collection
                   </Button>
@@ -258,12 +259,12 @@ export default async function LibraryPage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {collections.map((collection) => (
-                <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
+                <Card key={collection.id} className="cursor-pointer transition-all duration-200 hover:bg-muted/50 hover:shadow-md">
                   <Link href={`/account/library/${collection.slug}`}>
                     <CardHeader>
-                      <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                      <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
+                          <div className={`${cluster.compact} mb-2`}>
                             <Layers className="h-4 w-4 text-primary" />
                             {collection.is_public ? <UnifiedBadge variant="base" style="outline" className="text-xs">
                                 Public
@@ -277,7 +278,7 @@ export default async function LibraryPage() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                      <div className={between.center}>
                         <p className="text-muted-foreground text-xs">
                           {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'}
                         </p>

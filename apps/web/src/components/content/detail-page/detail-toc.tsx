@@ -2,7 +2,8 @@
 
 import { ListTree } from '@heyclaude/web-runtime/icons';
 import type { ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
-import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
+import { cn } from '@heyclaude/web-runtime/ui';
+import { focusRing } from '@heyclaude/web-runtime/design-system';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface DetailTocProps {
@@ -197,7 +198,7 @@ export function DetailToc({ headings, className }: DetailTocProps) {
                 type="button"
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
-                  STATE_PATTERNS.FOCUS_RING,
+                  focusRing.default,
                   'w-full rounded-md px-2 py-1.5 text-left text-sm transition-colors',
                   activeId === heading.id
                     ? 'bg-accent/15 text-foreground'

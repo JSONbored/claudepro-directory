@@ -7,6 +7,7 @@ import { Constants } from '@heyclaude/database-types';
 import  { type JobsFilterResult } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getFilteredJobs } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { between, cluster, grid, muted, absolute } from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Clock,
@@ -18,7 +19,7 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import  { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
-import { POSITION_PATTERNS, UI_CLASSES, UnifiedBadge, Button , Card, CardContent, Input ,
+import { UnifiedBadge, Button , Card, CardContent, Input ,
   Select,
   SelectContent,
   SelectItem,
@@ -221,7 +222,7 @@ async function JobsListSection({
 
   return (
     <>
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <div>
           <h2 className="font-bold text-2xl">
             {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'} Found
@@ -321,7 +322,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
   return (
     <div className="min-h-screen bg-background">
-      <section className={UI_CLASSES.CONTAINER_OVERFLOW_BORDER}>
+      <section className="relative overflow-hidden border-b border-border">
         <div className="container mx-auto px-4 py-20">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 flex justify-center">
@@ -330,9 +331,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
               </div>
             </div>
 
-            <h1 className={UI_CLASSES.TEXT_HEADING_HERO}>AI Jobs Board</h1>
+            <h1 className="mb-4 font-bold text-4xl tracking-tight sm:text-5xl">AI Jobs Board</h1>
 
-            <p className={UI_CLASSES.TEXT_HEADING_MEDIUM}>
+            <p className="mx-auto mt-4 max-w-xl text-muted-foreground text-lg">
               Discover opportunities with companies building the future of artificial intelligence.
               From startups to industry giants, find your perfect role.
             </p>
@@ -357,7 +358,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </div>
 
             <Button variant="outline" size="sm" asChild>
-              <Link href={ROUTES.PARTNER} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <Link href={ROUTES.PARTNER} className={cluster.compact}>
                 <Plus className="h-3 w-3" />
                 Post a Job
               </Link>
@@ -371,10 +372,10 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         <div className="container mx-auto">
           <Card className="card-gradient glow-effect">
             <CardContent className="space-y-4 p-6">
-              <form method="GET" action="/jobs" className={UI_CLASSES.GRID_RESPONSIVE_4}>
+              <form method="GET" action="/jobs" className={grid.responsive4}>
                   <div className="relative">
                     <Search
-                      className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_LEFT} -translate-y-1/2 h-4 w-4 transform text-muted-foreground`}
+                      className={`${absolute.topHalfLeft} -translate-y-1/2 h-4 w-4 transform text-muted-foreground`}
                     />
                     <Input
                       id={searchInputId}
@@ -425,7 +426,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     </SelectContent>
                   </Select>
 
-                  <div className={UI_CLASSES.FLEX_GAP_2}>
+                  <div className={cluster.compact}>
                     <Button
                       type="button"
                       variant={remote ? 'default' : 'outline'}
@@ -488,8 +489,8 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   (employment ?? '') !== 'any' ||
                   (experience ?? '') !== 'any' ||
                   sort !== 'newest' ||
-                  remote) ? <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4 border-border border-t pt-4`}>
-                    <span className={UI_CLASSES.TEXT_SM_MUTED}>Active filters:</span>
+                  remote) ? <div className="flex flex-wrap gap-2 mt-4 border-border border-t pt-4">
+                    <span className={`${muted.default} text-sm`}>Active filters:</span>
                     {searchQuery ? <UnifiedBadge variant="base" style="secondary">
                         Search: {searchQuery}
                         <Link

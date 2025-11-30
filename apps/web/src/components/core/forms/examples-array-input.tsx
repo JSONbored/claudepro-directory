@@ -41,7 +41,8 @@
  */
 
 import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@heyclaude/web-runtime/icons';
-import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { between, cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cn, DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -203,7 +204,7 @@ export function ExamplesArrayInput({
       <input type="hidden" name={name} value={examplesJson} />
 
       {/* Header */}
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <div>
           <Label className="font-semibold text-base">Usage Examples (optional)</Label>
           <p className={cn('text-sm', 'text-muted-foreground', 'mt-1')}>
@@ -217,9 +218,9 @@ export function ExamplesArrayInput({
           size="sm"
           onClick={addExample}
           disabled={examples.length >= maxExamples}
-          className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+          className={cluster.compact}
         >
-          <Plus className={UI_CLASSES.ICON_SM} />
+          <Plus className={iconSize.sm} />
           Add Example
         </Button>
       </div>
@@ -250,16 +251,16 @@ export function ExamplesArrayInput({
           return (
             <Card key={example.id} className={cn(!validation.valid && 'border-destructive')}>
               <CardHeader className="pb-3">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                <div className={between.center}>
                   <button
                     type="button"
                     onClick={() => toggleExpanded(index)}
-                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} flex-1 text-left transition-opacity hover:opacity-70`}
+                    className={`${cluster.compact} flex-1 text-left transition-opacity hover:opacity-70`}
                   >
                     {isExpanded ? (
-                      <ChevronUp className={UI_CLASSES.ICON_SM} />
+                      <ChevronUp className={iconSize.sm} />
                     ) : (
-                      <ChevronDown className={UI_CLASSES.ICON_SM} />
+                      <ChevronDown className={iconSize.sm} />
                     )}
                     <CardTitle className="text-base">
                       {example.title || `Example ${index + 1}`}
@@ -270,10 +271,10 @@ export function ExamplesArrayInput({
                     variant="ghost"
                     size="sm"
                     onClick={() => removeExample(index)}
-                    className={`${UI_CLASSES.ICON_XL} p-0`}
+                    className={`${iconSize.xl} p-0`}
                     title="Remove example"
                   >
-                    <Trash className={UI_CLASSES.ICON_SM} />
+                    <Trash className={iconSize.sm} />
                   </Button>
                 </div>
                 {!validation.valid && (
@@ -373,7 +374,7 @@ export function ExamplesArrayInput({
           onClick={addExample}
           className="flex w-full items-center gap-2"
         >
-          <Plus className={UI_CLASSES.ICON_SM} />
+          <Plus className={iconSize.sm} />
           Add Another Example ({examples.length}/{maxExamples})
         </Button>
       )}

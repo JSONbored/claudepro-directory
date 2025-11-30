@@ -14,7 +14,7 @@
 
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { Award, Medal, TrendingUp } from '@heyclaude/web-runtime/icons';
-import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { between, iconSize, sticky } from '@heyclaude/web-runtime/design-system';
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
@@ -118,12 +118,12 @@ export interface ContributorsSidebarProps {
 
 function ContributorsSidebarComponent({ topContributors, newMembers }: ContributorsSidebarProps) {
   return (
-    <aside className={`${POSITION_PATTERNS.STICKY_TOP_4} space-y-6`}>
+    <aside className={`${sticky.top4} space-y-6`}>
       {/* Trending Contributors */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <TrendingUp className={`${UI_CLASSES.ICON_SM} text-accent`} />
+            <TrendingUp className={`${iconSize.sm} text-accent`} />
             <CardTitle className="text-sm">Trending Contributors</CardTitle>
           </div>
         </CardHeader>
@@ -180,7 +180,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                   <p className="truncate font-medium text-sm">{displayName}</p>
                   {contributor.total_contributions !== undefined && (
                     <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                      <Award className={UI_CLASSES.ICON_XS} />
+                      <Award className={iconSize.xs} />
                       <span>{contributor.total_contributions} contributions</span>
                     </div>
                   )}
@@ -224,7 +224,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       alt={displayName}
                       width={32}
                       height={32}
-                      className={`${UI_CLASSES.ICON_XL} shrink-0 rounded-full object-cover`}
+                      className={`${iconSize.xl} shrink-0 rounded-full object-cover`}
                     />
                   ) : (
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-xs">
@@ -250,7 +250,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
           <CardTitle className="text-sm">Community Stats</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+          <div className={between.center}>
             <span className="text-muted-foreground text-xs">Total Members</span>
             <UnifiedBadge variant="base" style="secondary" className="text-xs">
               {topContributors.length + newMembers.length}

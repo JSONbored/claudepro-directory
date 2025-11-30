@@ -1,7 +1,8 @@
 'use client';
 
-import { ANIMATION_CONSTANTS, STATE_PATTERNS } from '../constants.ts';
+import { ANIMATION_CONSTANTS } from '../constants.ts';
 import { cn } from '../utils.ts';
+import { focusRing } from '../../design-system/styles/interactive.ts';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useState } from 'react';
@@ -30,7 +31,7 @@ const Input = ({ className, type, ref, error, errorId, onFocus, onBlur, ...props
       <input
         type={type}
         className={cn(
-          `relative flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground ${STATE_PATTERNS.FOCUS_RING} ${STATE_PATTERNS.DISABLED_CURSOR} md:text-sm`,
+          `relative flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground ${focusRing.default} disabled:opacity-50 disabled:cursor-not-allowed md:text-sm`,
           error && 'border-destructive focus-visible:ring-destructive',
           className
         )}

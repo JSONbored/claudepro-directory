@@ -14,6 +14,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { muted, stack } from '@heyclaude/web-runtime/design-system';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import {
@@ -25,7 +26,7 @@ import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useFormSubmit, useLoggedAsync, useSafeAction } from '@heyclaude/web-runtime/hooks';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import { useEffect, useId, useState } from 'react';
 import { FormField } from '@heyclaude/web-runtime/ui';
@@ -360,14 +361,14 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 </div>
               </div>
             ) : (
-              <label htmlFor={logoUploadId} className={UI_CLASSES.UPLOAD_ZONE}>
-                <div className={`${UI_CLASSES.FLEX_COL_GAP_2} items-center text-center`}>
+              <label htmlFor={logoUploadId} className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 p-8 transition-colors hover:border-muted-foreground/50 hover:bg-muted">
+                <div className={`${stack.compact} items-center text-center`}>
                   <FileText className="h-8 w-8 text-muted-foreground" />
                   <div>
                     <p className="font-medium text-sm">
                       {isUploadingLogo ? 'Uploading...' : 'Click to upload logo'}
                     </p>
-                    <p className={UI_CLASSES.TEXT_SM_MUTED}>Max 200KB, 512x512px</p>
+                    <p className={`${muted.default} text-sm`}>Max 200KB, 512x512px</p>
                   </div>
                 </div>
               </label>
@@ -377,7 +378,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
               id={logoUploadId}
               type="file"
               accept="image/jpeg,image/png,image/webp"
-              className={UI_CLASSES.INPUT_HIDDEN}
+              className="sr-only"
               disabled={isUploadingLogo}
               onChange={(e) => {
                 const file = e.target.files?.[0];

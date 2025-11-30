@@ -20,7 +20,8 @@ import {
   X,
 } from '@heyclaude/web-runtime/icons';
 import type { FilterState, UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { iconSize, absolute } from '@heyclaude/web-runtime/design-system';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useId, useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -291,9 +292,9 @@ function UnifiedSearchComponent({
         <div className="space-y-3">
           <div className="relative">
             <div
-              className={`-translate-y-1/2 pointer-events-none ${POSITION_PATTERNS.ABSOLUTE_TOP_HALF} left-4 z-10`}
+              className={`-translate-y-1/2 pointer-events-none ${absolute.topHalf} left-4 z-10`}
             >
-              <Search className={`${UI_CLASSES.ICON_MD} text-accent`} aria-hidden="true" />
+              <Search className={`${iconSize.md} text-accent`} aria-hidden="true" />
             </div>
             <Input
               id={searchInputId}
@@ -427,7 +428,7 @@ function UnifiedSearchComponent({
                 aria-controls={filterPanelId}
                 aria-label={`${isFilterOpen ? 'Close' : 'Open'} filter panel${activeFilterCount > 0 ? ` (${activeFilterCount} active filters)` : ''}`}
               >
-                <Filter className={UI_CLASSES.ICON_SM} aria-hidden="true" />
+                <Filter className={iconSize.sm} aria-hidden="true" />
                 <span>Filter</span>
                 {activeFilterCount > 0 && (
                   <UnifiedBadge

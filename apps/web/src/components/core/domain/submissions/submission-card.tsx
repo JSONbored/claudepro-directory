@@ -1,6 +1,6 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/web-runtime/core';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { between, cluster } from '@heyclaude/web-runtime/design-system';
 import type { ReactElement } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import {
@@ -105,9 +105,9 @@ export function SubmissionCard({
   return (
     <Card key={submission.id ?? `submission-${index}`}>
       <CardHeader>
-        <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+        <div className={between.start}>
           <div className="flex-1">
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+            <div className={cluster.compact}>
               {status ? (
                 getStatusBadge(status)
               ) : (
@@ -175,7 +175,7 @@ export function SubmissionCard({
           </div>
         )}
 
-        <div className={UI_CLASSES.FLEX_GAP_2}>
+        <div className={cluster.compact}>
           {prLinkProps && <PrLinkButton href={prLinkProps.href} />}
           {contentLinkProps && <ContentLinkButton href={contentLinkProps.href} />}
         </div>

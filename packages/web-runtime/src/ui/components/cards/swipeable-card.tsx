@@ -40,7 +40,9 @@ import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
 import { getAnimationConfig } from '../../../config/static-configs.ts';
 import { Bookmark, Copy as CopyIcon } from '../../../icons.tsx';
-import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
+// Design System imports
+import { absolute } from '../../../design-system/styles/position.ts';
+import { iconSize } from '../../../design-system/styles/icons.ts';
 import { SEMANTIC_COLORS } from '../../colors.ts';
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import type { ReactNode } from 'react';
@@ -168,21 +170,21 @@ export function SwipeableCardWrapper({
     <div className="relative">
       {/* Swipe Indicator - Copy (Right) */}
       <motion.div
-        className={`pointer-events-none ${POSITION_PATTERNS.ABSOLUTE_INSET_Y_LEFT} z-0 flex w-20 items-center justify-start pl-4`}
+        className={`pointer-events-none ${absolute.insetYLeft} z-0 flex w-20 items-center justify-start pl-4`}
         style={{ opacity: copyIndicatorOpacity }}
       >
         <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_COPY}`}>
-          <CopyIcon className={UI_CLASSES.ICON_MD} aria-hidden="true" />
+          <CopyIcon className={iconSize.md} aria-hidden="true" />
         </div>
       </motion.div>
 
       {/* Swipe Indicator - Bookmark (Left) */}
       <motion.div
-        className={`pointer-events-none ${POSITION_PATTERNS.ABSOLUTE_INSET_Y_RIGHT} z-0 flex w-20 items-center justify-end pr-4`}
+        className={`pointer-events-none ${absolute.insetYRight} z-0 flex w-20 items-center justify-end pr-4`}
         style={{ opacity: bookmarkIndicatorOpacity }}
       >
         <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_BOOKMARK}`}>
-          <Bookmark className={UI_CLASSES.ICON_MD} aria-hidden="true" />
+          <Bookmark className={iconSize.md} aria-hidden="true" />
         </div>
       </motion.div>
 

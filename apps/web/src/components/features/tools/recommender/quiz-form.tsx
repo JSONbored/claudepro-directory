@@ -61,7 +61,8 @@ function mapQuizConfigToQuestions(config: QuizConfigurationResult | null): QuizQ
 }
 
 import { ArrowLeft, ArrowRight, Sparkles } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { between, cluster, iconLeading, iconSize } from '@heyclaude/web-runtime/design-system';
+import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
 import { InlineSpinner } from '@heyclaude/web-runtime/ui';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
@@ -301,7 +302,7 @@ export function QuizForm() {
 
       <Card className="relative overflow-hidden">
         <CardHeader>
-          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <CardTitle className={cluster.compact}>
             <span className="text-muted-foreground text-sm">
               Question {currentQuestion} of {totalQuestions}
             </span>
@@ -361,7 +362,7 @@ export function QuizForm() {
                 <Card className="border-primary/20 bg-primary/5">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <Sparkles className={`${UI_CLASSES.ICON_MD} text-primary`} />
+                      <Sparkles className={`${iconSize.md} text-primary`} />
                       What happens next?
                     </CardTitle>
                   </CardHeader>
@@ -434,14 +435,14 @@ export function QuizForm() {
           )}
 
           <Separator className="my-6" />
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+          <div className={between.center}>
             <Button
               type="button"
               variant="outline"
               onClick={goToPrevious}
               disabled={currentQuestion === 1 || isPending}
             >
-              <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
+              <ArrowLeft className={iconLeading.sm} />
               Previous
             </Button>
 
@@ -461,7 +462,7 @@ export function QuizForm() {
                   <InlineSpinner size="sm" message="Generating..." />
                 ) : (
                   <>
-                    <Sparkles className={UI_CLASSES.ICON_SM_LEADING} />
+                    <Sparkles className={iconLeading.sm} />
                     Get Results
                   </>
                 )}

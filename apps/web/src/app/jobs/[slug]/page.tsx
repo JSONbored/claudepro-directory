@@ -4,6 +4,7 @@
 
 import { Constants } from '@heyclaude/database-types';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { cluster } from '@heyclaude/web-runtime/design-system';
 import {
   ArrowLeft,
   Building2,
@@ -18,7 +19,7 @@ import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtim
 import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/server';
 import  { type PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
-import { UI_CLASSES, UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
+import { UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -258,7 +259,7 @@ export default async function JobPage({ params }: PageProps) {
             </Button>
 
             <div className="max-w-4xl">
-              <div className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} mb-6 gap-4`}>
+              <div className="flex items-start gap-4 mb-6">
                 <div className="rounded-lg bg-accent/10 p-3">
                   <Building2 className="h-6 w-6 text-primary" />
                 </div>
@@ -269,29 +270,29 @@ export default async function JobPage({ params }: PageProps) {
               </div>
 
               <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <div className={cluster.tight}>
                   <MapPin className="h-4 w-4" />
                   <span>{job.location}</span>
                 </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <div className={cluster.tight}>
                   <DollarSign className="h-4 w-4" />
                   <span>{job.salary ?? 'Competitive'}</span>
                 </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <div className={cluster.tight}>
                   <Clock className="h-4 w-4" />
                   <span>{job.type}</span>
                 </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <div className={cluster.tight}>
                   <Users className="h-4 w-4" />
                   <span>{job.category}</span>
                 </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <div className={cluster.tight}>
                   <Calendar className="h-4 w-4" />
                   <span>Posted {job.posted_at}</span>
                 </div>
               </div>
 
-              <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
+              <div className="flex flex-wrap gap-2">
                 {tags.map((skill: string) => (
                   <UnifiedBadge key={skill} variant="base" style="secondary">
                     {skill}
@@ -321,7 +322,7 @@ export default async function JobPage({ params }: PageProps) {
                 <CardContent>
                   <ul className="space-y-2">
                     {requirements.map((request: string) => (
-                      <li key={request} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                      <li key={request} className="flex items-start gap-3">
                         <span className="mt-1 text-accent">•</span>
                         <span>{request}</span>
                       </li>
@@ -338,7 +339,7 @@ export default async function JobPage({ params }: PageProps) {
                   <CardContent>
                     <ul className="space-y-2">
                       {benefits.map((benefit: string) => (
-                        <li key={benefit} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                        <li key={benefit} className="flex items-start gap-3">
                           <span className="mt-1 text-green-500">✓</span>
                           <span>{benefit}</span>
                         </li>
@@ -394,18 +395,18 @@ export default async function JobPage({ params }: PageProps) {
                   <CardTitle>Job Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
+                  <div className={`${cluster.compact} text-sm`}>
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span>
                       {(job.type ?? 'Unknown').charAt(0).toUpperCase() +
                         (job.type ?? 'Unknown').slice(1)}
                     </span>
                   </div>
-                  <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
+                  <div className={`${cluster.compact} text-sm`}>
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <span>{job.remote ? 'Remote Available' : 'On-site'}</span>
                   </div>
-                  <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
+                  <div className={`${cluster.compact} text-sm`}>
                     <Users className="h-4 w-4 text-muted-foreground" />
                     <span>
                       {(job.category ?? 'General').charAt(0).toUpperCase() +

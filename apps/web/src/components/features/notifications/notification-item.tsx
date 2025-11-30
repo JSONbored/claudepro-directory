@@ -5,8 +5,8 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import { Bell, X } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -48,7 +48,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
         }
         aria-label="Dismiss notification"
       >
-        <X className={UI_CLASSES.ICON_SM} />
+        <X className={iconSize.sm} />
       </button>
 
       <div className="flex gap-3 pr-6">
@@ -60,7 +60,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
           }
           `}
         >
-          <Bell className={UI_CLASSES.ICON_MD} />
+          <Bell className={iconSize.md} />
         </div>
 
         <div className="flex-1 space-y-1">

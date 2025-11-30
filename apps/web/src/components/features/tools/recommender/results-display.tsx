@@ -22,7 +22,7 @@ import {
   Sparkles,
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
-import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { between, cluster, iconLeading, iconSize, absolute } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { BookmarkButton } from '@heyclaude/web-runtime/ui';
@@ -140,8 +140,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   return (
     <div className="space-y-8">
       <div className="space-y-4 text-center">
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
-          <Sparkles className={`${UI_CLASSES.ICON_LG} text-primary`} />
+        <div className="flex items-center justify-center gap-2">
+          <Sparkles className={`${iconSize.lg} text-primary`} />
           <h1 className="font-bold text-3xl md:text-4xl">Your Personalized Recommendations</h1>
         </div>
 
@@ -153,11 +153,11 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
         <div className={'flex-wrap items-center justify-center gap-3'}>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <TrendingUp className={UI_CLASSES.ICON_XS_LEADING} />
+            <TrendingUp className={iconLeading.xs} />
             {(summary?.avg_match_score ?? 0).toFixed(0)}% Avg Match
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <BarChart className={UI_CLASSES.ICON_XS_LEADING} />
+            <BarChart className={iconLeading.xs} />
             {(summary?.diversity_score ?? 0).toFixed(0)}% Diversity
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="outline" className="text-sm">
@@ -173,7 +173,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             disabled={isPending}
             className="gap-2"
           >
-            <Bookmark className={UI_CLASSES.ICON_SM} />
+            <Bookmark className={iconSize.sm} />
             {isPending ? 'Saving...' : 'Save All to Library'}
           </Button>
           <Button
@@ -182,12 +182,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             onClick={() => setShowShareModal(true)}
             className="gap-2"
           >
-            <Share2 className={UI_CLASSES.ICON_SM} />
+            <Share2 className={iconSize.sm} />
             Share Results
           </Button>
           <Button variant="outline" size="sm" asChild={true}>
             <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className="gap-2">
-              <RefreshCw className={UI_CLASSES.ICON_SM} />
+              <RefreshCw className={iconSize.sm} />
               Start Over
             </Link>
           </Button>
@@ -197,7 +197,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       <Collapsible open={showRefinePanel} onOpenChange={setShowRefinePanel}>
         <CollapsibleTrigger asChild={true}>
           <Button variant="ghost" size="sm" className="w-full gap-2">
-            <Settings className={UI_CLASSES.ICON_SM} />
+            <Settings className={iconSize.sm} />
             Adjust Preferences
             <ChevronDown
               className={`h-4 w-4 transition-transform ${showRefinePanel ? 'rotate-180' : ''}`}
@@ -214,7 +214,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                <div className={between.center}>
                   <span className="font-medium text-sm">Minimum Match Score</span>
                   <span className="text-muted-foreground text-sm">{minScore}%</span>
                 </div>
@@ -233,7 +233,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               </div>
 
               <div className="space-y-2">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                <div className={between.center}>
                   <span className="font-medium text-sm">Maximum Results</span>
                   <span className="text-muted-foreground text-sm">{maxResults}</span>
                 </div>
@@ -253,7 +253,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
               <div className="pt-4">
                 <Separator className="mb-4" />
-                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}>
+                <div className={`${between.center} text-sm`}>
                   <span className="text-muted-foreground">Showing results:</span>
                   <span className="font-medium">
                     {filteredResults.length} of {results?.length ?? 0}
@@ -383,9 +383,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     ? result.author
                     : undefined;
                 const getMatchScoreColor = (score: number) => {
-                  if (score >= 90) return UI_CLASSES.SCORE_EXCELLENT;
-                  if (score >= 75) return UI_CLASSES.SCORE_GOOD;
-                  if (score >= 60) return UI_CLASSES.SCORE_FAIR;
+                  if (score >= 90) return 'text-green-500';
+                  if (score >= 75) return 'text-blue-500';
+                  if (score >= 60) return 'text-yellow-500';
                   return 'text-muted-foreground';
                 };
                 const getMatchGradient = (score: number) => {
@@ -397,7 +397,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
                 return (
                   <div key={result.slug} className="relative">
-                    <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} z-10`}>
+                    <div className={`${absolute.topRightOffsetXl} z-10`}>
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild={true}>
@@ -406,7 +406,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                               style="secondary"
                               className={`${getMatchScoreColor(matchScore)} px-3 py-1 font-bold text-base`}
                             >
-                              <Sparkles className={UI_CLASSES.ICON_XS_LEADING} />
+                              <Sparkles className={iconLeading.xs} />
                               {matchScore}%
                             </UnifiedBadge>
                           </TooltipTrigger>
@@ -418,18 +418,18 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </div>
 
                     {rank !== null && rank <= 3 && (
-                      <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT_OFFSET_XL} z-10`}>
+                      <div className={`${absolute.topLeftOffsetXl} z-10`}>
                         <UnifiedBadge
                           variant="base"
                           style="outline"
                           className="bg-background/80 backdrop-blur-sm"
                         >
-                          <Award className={UI_CLASSES.ICON_XS_LEADING} />#{rank}
+                          <Award className={iconLeading.xs} />#{rank}
                         </UnifiedBadge>
                       </div>
                     )}
 
-                    <div className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_RIGHT_OFFSET} z-10`}>
+                    <div className={`${absolute.bottomRightOffset} z-10`}>
                       <BookmarkButton
                         contentType={result.category}
                         contentSlug={result.slug}
@@ -438,7 +438,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </div>
 
                     <div
-                      className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-linear-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
+                      className={`${absolute.inset} bg-linear-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
                     />
 
                     <Link href={targetPath}>
@@ -459,10 +459,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         renderContent={() => (
                           <>
                             <div
-                              className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} mb-3 rounded-lg bg-accent/50 p-3`}
+                              className="flex items-start gap-2 mb-3 rounded-lg bg-accent/50 p-3"
                             >
                               <Info
-                                className={`h-4 w-4 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                                className="h-4 w-4 text-primary mt-0.5 shrink-0"
                               />
                               <div>
                                 <p className="font-medium text-sm">Why recommended:</p>
@@ -493,10 +493,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                             className="group -mx-4 -mb-4 mt-2 w-full"
                             asChild={true}
                           >
-                            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
+                            <span className="flex items-center justify-center gap-2">
                               View Details
                               <ArrowRight
-                                className={`${UI_CLASSES.ICON_SM} transition-transform group-hover:translate-x-1`}
+                                className={`${iconSize.sm} transition-transform group-hover:translate-x-1`}
                               />
                             </span>
                           </Button>
@@ -511,7 +511,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
           {filteredResults.length === 0 && (
             <Card>
-              <CardContent className={UI_CLASSES.FLEX_COL_ITEMS_CENTER_JUSTIFY_CENTER}>
+              <CardContent className="flex flex-col items-center justify-center py-8">
                 <p className="text-muted-foreground">No results in this category</p>
               </CardContent>
             </Card>
@@ -521,8 +521,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
-          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Sparkles className={`${UI_CLASSES.ICON_MD} text-primary`} />
+          <CardTitle className={cluster.compact}>
+            <Sparkles className={`${iconSize.md} text-primary`} />
             What's Next?
           </CardTitle>
         </CardHeader>
@@ -531,11 +531,11 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             Ready to start using these configurations? Click any card to view detailed setup
             instructions, examples, and documentation.
           </p>
-          <div className={UI_CLASSES.FLEX_WRAP_GAP_3}>
+          <div className="flex flex-wrap gap-3">
             <Button asChild={true}>
               <Link href="/" className="gap-2">
                 Browse All Configs
-                <ArrowRight className={UI_CLASSES.ICON_SM} />
+                <ArrowRight className={iconSize.sm} />
               </Link>
             </Button>
             <Button variant="outline" asChild={true}>

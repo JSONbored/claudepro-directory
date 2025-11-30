@@ -16,7 +16,8 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { isValidCategory, logClientWarning, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -224,7 +225,7 @@ export function CollectionItemManager({
               ) : (
                 availableToAdd.map((bookmark) => (
                   <SelectItem key={bookmark.id} value={bookmark.id}>
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                    <div className={cluster.compact}>
                       <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                         {bookmark.content_type}
                       </UnifiedBadge>
@@ -239,9 +240,9 @@ export function CollectionItemManager({
         <Button
           onClick={handleAdd}
           disabled={!selectedBookmarkId || isPending}
-          className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+          className={cluster.compact}
         >
-          <Plus className={UI_CLASSES.ICON_SM} />
+          <Plus className={iconSize.sm} />
           Add
         </Button>
       </div>
@@ -260,29 +261,29 @@ export function CollectionItemManager({
           {items.map((item: CollectionItem, index: number) => (
             <div
               key={item.id}
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50`}
+              className={`${cluster.default} rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50`}
             >
               {/* Order Controls */}
               <div className="flex flex-col gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${UI_CLASSES.ICON_LG} p-0`}
+                  className={`${iconSize.lg} p-0`}
                   onClick={() => handleMoveUp(index)}
                   disabled={index === 0 || isPending}
                   aria-label="Move up"
                 >
-                  <ArrowUp className={UI_CLASSES.ICON_XS} />
+                  <ArrowUp className={iconSize.xs} />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${UI_CLASSES.ICON_LG} p-0`}
+                  className={`${iconSize.lg} p-0`}
                   onClick={() => handleMoveDown(index)}
                   disabled={index === items.length - 1 || isPending}
                   aria-label="Move down"
                 >
-                  <ArrowDown className={UI_CLASSES.ICON_XS} />
+                  <ArrowDown className={iconSize.xs} />
                 </Button>
               </div>
 
@@ -293,7 +294,7 @@ export function CollectionItemManager({
 
               {/* Content Info */}
               <div className="flex-1">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <div className={cluster.compact}>
                   <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                     {item.content_type}
                   </UnifiedBadge>
@@ -303,7 +304,7 @@ export function CollectionItemManager({
               </div>
 
               {/* Actions */}
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+              <div className={cluster.tight}>
                 {(() => {
                   const safeContentUrl = getSafeContentUrl(item.content_type, item.content_slug);
                   if (!safeContentUrl) return null;
@@ -311,23 +312,23 @@ export function CollectionItemManager({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`${UI_CLASSES.ICON_XL} p-0`}
+                      className={`${iconSize.xl} p-0`}
                       onClick={() => window.open(safeContentUrl, '_blank')}
                       aria-label="View item"
                     >
-                      <ExternalLink className={UI_CLASSES.ICON_SM} />
+                      <ExternalLink className={iconSize.sm} />
                     </Button>
                   );
                 })()}
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${UI_CLASSES.ICON_XL} p-0 text-destructive hover:text-destructive`}
+                  className={`${iconSize.xl} p-0 text-destructive hover:text-destructive`}
                   onClick={() => handleRemove(item.id)}
                   disabled={isPending}
                   aria-label="Remove item"
                 >
-                  <Trash className={UI_CLASSES.ICON_SM} />
+                  <Trash className={iconSize.sm} />
                 </Button>
               </div>
             </div>

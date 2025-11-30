@@ -5,10 +5,10 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import { getContentItemUrl, isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
@@ -161,7 +161,7 @@ export function RelatedContentClient({
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="shrink-0 rounded-lg bg-primary/10 p-2">
-                <Sparkles className={`${UI_CLASSES.ICON_MD} text-primary sm:h-6 sm:w-6`} />
+                <Sparkles className={`${iconSize.md} text-primary sm:h-6 sm:w-6`} />
               </div>
               <div className="min-w-0">
                 <h2 className="mb-1 font-bold text-foreground text-xl sm:text-2xl" itemProp="name">

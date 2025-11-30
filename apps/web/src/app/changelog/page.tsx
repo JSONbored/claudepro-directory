@@ -26,9 +26,10 @@ import { Constants } from '@heyclaude/database-types';
 import  { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { cluster } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink  } from '@heyclaude/web-runtime/ui';
+import { NavLink  } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
@@ -197,7 +198,7 @@ export default async function ChangelogPage() {
             </div>
 
             {/* Stats */}
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-muted-foreground text-sm`}>
+            <div className={`${cluster.relaxed} text-muted-foreground text-sm`}>
               <div>
                 <span className="font-semibold text-foreground">
                   {overview.metadata?.total_entries ?? publishedEntries.length}

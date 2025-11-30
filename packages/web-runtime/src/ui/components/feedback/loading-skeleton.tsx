@@ -8,7 +8,7 @@
  *
  * Architecture:
  * - Client component (uses Motion.dev animations)
- * - Uses web-runtime UI constants for styling
+ * - Uses unified design system for styling
  * - Respects prefers-reduced-motion (falls back to pulse)
  * - GPU-accelerated animations
  *
@@ -28,8 +28,10 @@
  * ```
  */
 
-import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
 import { cn } from '../../utils.ts';
+// Design System imports
+import { absolute } from '../../../design-system/styles/position.ts';
+import { stack, cluster, wrap, grid, between } from '../../../design-system/styles/layout.ts';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -106,7 +108,7 @@ export function Skeleton({
       {/* Shimmer wave effect - only if not disabled */}
       {!noShimmer && (
         <motion.div
-          className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-linear-to-r from-transparent via-white/10 to-transparent`}
+          className={`${absolute.inset} bg-linear-to-r from-transparent via-white/10 to-transparent`}
           animate={{
             x: ['-100%', '100%'],
           }}
@@ -127,7 +129,7 @@ export function Skeleton({
 function LoadingSkeleton() {
   return (
     <div className={'flex min-h-screen items-center justify-center'}>
-      <div className={UI_CLASSES.FLEX_COL_ITEMS_CENTER_GAP_4}>
+      <div className={stack.comfortable + ' items-center'}>
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <p className="text-muted-foreground">Loading...</p>
       </div>
@@ -150,7 +152,7 @@ function ConfigCardSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDi
       <Skeleton size="md" width="3/4" className="mb-3" />
       <Skeleton size="sm" width="3xl" className="mb-2" />
       <Skeleton size="sm" width="5/6" className="mb-4" />
-      <div className={UI_CLASSES.FLEX_GAP_2}>
+      <div className={cluster.compact}>
         <Skeleton size="sm" width="xs" rounded="full" />
         <Skeleton size="sm" width="xs" rounded="full" />
       </div>
@@ -170,7 +172,7 @@ function ConfigGridSkeleton({
   return (
     <div className={cn('container mx-auto px-4 py-8', className)} {...props}>
       <PageHeaderSkeleton />
-      <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
+      <div className={grid.contentTight}>
         {[...Array(count)].map((_, i) => (
           <motion.div
             key={`config-skeleton-${i + 1}`}
@@ -228,7 +230,7 @@ function ContentListSkeleton({
             </div>
             <Skeleton size="sm" width="xs" rounded="full" />
           </div>
-          <div className={UI_CLASSES.FLEX_GAP_2}>
+          <div className={cluster.compact}>
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
@@ -260,7 +262,7 @@ function FilterBarSkeleton({
       className={cn('space-y-6 rounded-lg border border-border/50 bg-card/30 p-6', className)}
       {...props}
     >
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <Skeleton size="md" width="lg" />
         <Skeleton size="sm" width="sm" />
       </div>
@@ -286,7 +288,7 @@ function FilterBarSkeleton({
           </motion.div>
         ))}
       </div>
-      <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
+      <div className={wrap.compact}>
         {[...Array(8)].map((_, i) => (
           <motion.div
             key={`tag-skeleton-${i + 1}`}
@@ -390,12 +392,12 @@ function FeaturedSectionSkeleton({
   return (
     <div className={cn('space-y-8', className)} {...props}>
       {/* Section Header */}
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <Skeleton size="lg" width="lg" />
         <Skeleton size="sm" width="sm" />
       </div>
       {/* Card Grid with Stagger */}
-      <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
+      <div className={grid.responsive3}>
         {[...Array(count)].map((_, i) => (
           <motion.div
             key={`featured-skeleton-${i + 1}`}
@@ -434,7 +436,7 @@ function HomepageStatsSkeleton({
       {[...Array(7)].map((_, i) => (
         <motion.div
           key={`stat-skeleton-${i + 1}`}
-          className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+          className={cluster.compact}
           initial={stagger ? { opacity: 0, scale: 0.9 } : false}
           animate={stagger ? { opacity: 1, scale: 1 } : {}}
           transition={

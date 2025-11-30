@@ -31,9 +31,10 @@ import {
   getChangelogEntryBySlug,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { cluster } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink, Separator   } from '@heyclaude/web-runtime/ui';
+import { NavLink, Separator   } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import  { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -184,7 +185,7 @@ export default async function ChangelogEntryPage({
 
         {/* Header */}
         <header className="space-y-4 pb-6">
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-muted-foreground text-sm`}>
+          <div className={`${cluster.default} text-muted-foreground text-sm`}>
             <Calendar className="h-4 w-4" />
             <time dateTime={entry.release_date}>
               {formatChangelogDate(entry.release_date)}
@@ -194,7 +195,7 @@ export default async function ChangelogEntryPage({
           <h1 className="font-bold text-4xl tracking-tight">{entry.title}</h1>
 
           {/* Canonical URL */}
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
+          <div className={`${cluster.compact} text-sm`}>
             <span className="text-muted-foreground">Permanent link:</span>
             <a
               href={canonicalUrl}

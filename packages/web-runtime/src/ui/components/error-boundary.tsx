@@ -15,7 +15,9 @@ import type {
   ErrorFallbackProps,
 } from '../../types/component.types.ts';
 import { createErrorBoundaryFallback } from '../../client/error-handler.ts';
-import { UI_CLASSES } from '../../ui/constants.ts';
+// Design System imports
+import { cluster } from '../../design-system/styles/layout.ts';
+import { iconSize, iconLeading } from '../../design-system/styles/icons.ts';
 import { Button } from './button.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card.tsx';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
@@ -39,9 +41,9 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
     <div className={'flex min-h-screen items-center justify-center bg-background p-4'}>
       <Card className={'w-full max-w-2xl'}>
         <CardHeader>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
+          <div className={cluster.default}>
             <AlertTriangle
-              className={`${UI_CLASSES.ICON_XL} text-destructive`}
+              className={`${iconSize.xl} text-destructive`}
               aria-hidden="true"
             />
             <CardTitle as="h1" className="text-2xl">
@@ -68,11 +70,11 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
 
           <div className="flex gap-3">
             <Button onClick={handleReset} variant="default">
-              <RefreshCw className={UI_CLASSES.ICON_SM_LEADING} />
+              <RefreshCw className={iconLeading.sm} />
               Try Again
             </Button>
             <Button onClick={handleGoHome} variant="outline">
-              <Home className={UI_CLASSES.ICON_SM_LEADING} />
+              <Home className={iconLeading.sm} />
               Go Home
             </Button>
           </div>

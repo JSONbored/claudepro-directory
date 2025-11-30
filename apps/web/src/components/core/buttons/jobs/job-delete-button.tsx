@@ -7,10 +7,11 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { deleteJob } from '@heyclaude/web-runtime/actions';
+import { iconLeading } from '@heyclaude/web-runtime/design-system';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Trash } from '@heyclaude/web-runtime/icons';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -80,7 +81,7 @@ export function JobDeleteButton({
       disabled={disabled || isPending || isDeleting}
       className={cn('text-destructive', className)}
     >
-      <Trash className={UI_CLASSES.ICON_XS_LEADING} />
+      <Trash className={iconLeading.xs} />
       Delete
     </Button>
   );

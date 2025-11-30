@@ -42,15 +42,16 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { getAnimationConfig } from '../../../config/static-configs.ts';
 import { Star, TrendingUp, Zap } from '../../../icons.tsx';
-import { ANIMATION_CONSTANTS, UI_CLASSES } from '../../constants.ts';
 import { cn } from '../../utils.ts';
 import { SEMANTIC_COLORS } from '../../colors.ts';
+// Design System imports
+import { animation } from '../../../design-system/tokens.ts';
+import { iconLeading } from '../../../design-system/styles/icons.ts';
+import { transition } from '../../../design-system/styles/interactive.ts';
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
-import { useEffect, useState } from 'react';
 
 /**
  * Base badge variants (from original badge.tsx)
@@ -230,21 +231,8 @@ const BadgeWrapper = ({
 );
 
 export function UnifiedBadge(props: UnifiedBadgeProps) {
-  const [springDefault, setSpringDefault] = useState({
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 17,
-  });
-
-  useEffect(() => {
-    // Load animation config from static defaults
-    const config = getAnimationConfig();
-    setSpringDefault({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.default.stiffness'],
-      damping: config['animation.spring.default.damping'],
-    });
-  }, []);
+  // Use unified design system animation tokens
+  const springDefault = animation.spring.default;
 
   // Base badge variant
   if (props.variant === 'base') {
@@ -269,7 +257,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
-            `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
+            `border font-medium text-xs ${transition.default} hover:shadow-md hover:shadow-primary/20`,
             categoryBadgeStyles[props.category as keyof typeof categoryBadgeStyles] ??
               'badge-category-rules',
             props.className
@@ -287,7 +275,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
-            `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
+            `border font-medium text-xs ${transition.default} hover:shadow-md hover:shadow-primary/20`,
             sourceBadgeStyles[props.source],
             props.className
           )}
@@ -304,7 +292,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
-            `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
+            `border font-medium text-xs ${transition.default} hover:shadow-md hover:shadow-primary/20`,
             statusBadgeStyles[props.status],
             props.className
           )}
@@ -324,9 +312,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         case 'featured':
           return <Star className="mr-1 h-3 w-3 fill-current" aria-hidden="true" />;
         case 'promoted':
-          return <TrendingUp className={UI_CLASSES.ICON_XS_LEADING} aria-hidden="true" />;
+          return <TrendingUp className={iconLeading.xs} aria-hidden="true" />;
         case 'spotlight':
-          return <Zap className={UI_CLASSES.ICON_XS_LEADING} aria-hidden="true" />;
+          return <Zap className={iconLeading.xs} aria-hidden="true" />;
         default:
           return null;
       }
@@ -370,7 +358,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         <button
           type="button"
           className={cn(
-            `inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`,
+            `inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs ${transition.default}`,
             'cursor-pointer bg-accent text-accent-foreground shadow-lg shadow-primary/25',
             props.className
           )}
@@ -487,7 +475,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
             'px-2.5 py-0.5',
             'font-semibold text-[10px] uppercase tracking-wider',
             'rounded-full border',
-            ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT,
+            transition.default,
             'hover:shadow-md hover:shadow-primary/20',
             variantStyles[badgeVariant],
             props.className

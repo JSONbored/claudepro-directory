@@ -1,13 +1,14 @@
 import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, Button ,
+import { Button ,
   Card,
   CardContent,
   CardDescription,
@@ -166,8 +167,8 @@ export default async function ActivityPage() {
               <CardTitle className="text-sm">Submissions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <GitPullRequest className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO}`} />
+              <div className={cluster.compact}>
+                <GitPullRequest className={`${iconSize.md} text-blue-600`} />
                 <span className="font-bold text-2xl">
                   {summary.merged_submissions}/{summary.total_submissions}
                 </span>

@@ -18,7 +18,8 @@ import type { Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Award, ExternalLink, Users } from '@heyclaude/web-runtime/icons';
-import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { badge, buttonGhost, iconSize, iconWrapper } from '@heyclaude/web-runtime/design-system';
+import { memberBadge } from '@heyclaude/web-runtime/design-system';
 import { memo } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { BaseCard } from '@heyclaude/web-runtime/ui';
@@ -105,7 +106,7 @@ const getMemberBadge = (user: UserProfile) => {
   if (user.company) {
     return {
       label: 'Company Owner',
-      className: BADGE_COLORS.memberType.owner,
+      className: memberBadge.owner,
     };
   }
 
@@ -114,14 +115,14 @@ const getMemberBadge = (user: UserProfile) => {
   if (contributionCount >= 10) {
     return {
       label: 'Contributor',
-      className: BADGE_COLORS.memberType.contributor,
+      className: memberBadge.contributor,
     };
   }
 
   // Default: Member
   return {
     label: 'Member',
-    className: BADGE_COLORS.memberType.member,
+    className: memberBadge.member,
   };
 };
 
@@ -177,7 +178,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
           <UnifiedBadge
             variant="base"
             style="outline"
-            className={`${UI_CLASSES.TEXT_BADGE} ${memberBadge.className}`}
+            className={`${badge.default} ${memberBadge.className}`}
           >
             {memberBadge.label}
           </UnifiedBadge>
@@ -188,7 +189,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               key={interest}
               variant="base"
               style="secondary"
-              className={`${UI_CLASSES.TEXT_BADGE} border-primary/20 text-primary`}
+              className={`${badge.default} border-primary/20 text-primary`}
             >
               {interest}
             </UnifiedBadge>
@@ -204,8 +205,8 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               style="secondary"
               className="h-7 gap-1.5 border-primary/20 bg-primary/10 font-medium text-primary"
             >
-              <Award className={UI_CLASSES.ICON_XS} aria-hidden="true" />
-              <span className={UI_CLASSES.TEXT_BADGE}>{user.total_contributions}</span>
+              <Award className={iconSize.xs} aria-hidden="true" />
+              <span className={badge.default}>{user.total_contributions}</span>
             </UnifiedBadge>
           )}
 
@@ -216,8 +217,8 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               style="secondary"
               className="h-7 gap-1.5 border-border bg-muted/50 font-medium text-foreground"
             >
-              <Users className={UI_CLASSES.ICON_XS} aria-hidden="true" />
-              <span className={UI_CLASSES.TEXT_BADGE}>{user.followers_count}</span>
+              <Users className={iconSize.xs} aria-hidden="true" />
+              <span className={badge.default}>{user.followers_count}</span>
             </UnifiedBadge>
           )}
         </>
@@ -233,7 +234,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                  className={`${iconWrapper.sm} ${buttonGhost.icon}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     pulse
@@ -260,7 +261,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
                   }}
                   aria-label={`Visit ${displayName}'s website`}
                 >
-                  <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                  <ExternalLink className={iconSize.xs} aria-hidden="true" />
                 </Button>
               );
             })()}
@@ -274,7 +275,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                  className={`${iconWrapper.sm} ${buttonGhost.icon}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     pulse
@@ -301,7 +302,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
                   }}
                   aria-label={`Visit ${displayName} on X/Twitter`}
                 >
-                  <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                  <ExternalLink className={iconSize.xs} aria-hidden="true" />
                 </Button>
               );
             })()}
@@ -318,7 +319,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               <Button
                 variant="ghost"
                 size="sm"
-                className={`${UI_CLASSES.BUTTON_ICON_TEXT_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                className={`h-7 gap-1.5 px-2 text-xs ${buttonGhost.icon}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   window.location.href = safeProfileUrl;

@@ -15,12 +15,12 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { cluster, iconSize, groupHover } from '@heyclaude/web-runtime/design-system';
 import type {
   DisplayableContent,
   FilterState,
   HomePageClientProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -414,7 +414,7 @@ function HomePageClientComponent({
                           transition={springDefault}
                         >
                           <Icon
-                            className={`${UI_CLASSES.ICON_SM} shrink-0-accent`}
+                            className={`${iconSize.sm} shrink-0 text-accent`}
                             aria-hidden="true"
                           />
                           <span className="font-medium text-sm">
@@ -452,7 +452,7 @@ function HomePageClientComponent({
                       aria-label={`View all ${displayText}`}
                     >
                       <motion.div
-                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} cursor-pointer rounded-md border border-transparent px-2 py-1 transition-colors`}
+                        className={`${cluster.snug} cursor-pointer rounded-md border border-transparent px-2 py-1 transition-colors`}
                         whileHover={{
                           scale: 1.05,
                           y: -2,
@@ -466,10 +466,10 @@ function HomePageClientComponent({
                         }}
                       >
                         <Icon
-                          className={`${UI_CLASSES.ICON_SM} transition-colors group-hover:text-accent`}
+                          className={`${iconSize.sm} transition-colors group-hover:text-accent`}
                           aria-hidden="true"
                         />
-                        <span className={`transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}>
+                        <span className={`transition-colors ${groupHover.accent}`}>
                           <NumberTicker
                             value={
                               typeof stats[categoryId] === 'number'

@@ -1,12 +1,13 @@
 'use client';
 
 import { createReview, updateReview } from '@heyclaude/web-runtime/actions';
+import { between, cluster } from '@heyclaude/web-runtime/design-system';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import {
   MAX_REVIEW_LENGTH,
   type ReviewFormProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
 import { ReviewRatingInteractive } from '@/src/components/core/domain/reviews/review-rating-interactive';
@@ -167,7 +168,7 @@ export function ReviewForm({
             Review text cannot exceed {MAX_REVIEW_LENGTH} characters
           </p>
         )}
-        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-1`}>
+        <div className={`${between.center} mt-1`}>
           <p className="text-muted-foreground text-xs">
             Help others by sharing details about your experience
           </p>
@@ -180,7 +181,7 @@ export function ReviewForm({
       </div>
 
       {/* Submit Buttons */}
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} pt-2`}>
+      <div className={`${cluster.compact} pt-2`}>
         <Button type="submit" disabled={!isValid || isPending}>
           {isPending ? 'Submitting...' : isEditing ? 'Update Review' : 'Submit Review'}
         </Button>

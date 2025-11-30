@@ -7,6 +7,7 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
+import { iconSize, stack } from '@heyclaude/web-runtime/design-system';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
 import {
@@ -14,7 +15,7 @@ import {
   logClientError,
   logClientWarn,
 } from '@heyclaude/web-runtime/logging/client';
-import { UI_CLASSES, Button ,
+import { Button ,
   Card,
   CardContent,
   CardDescription,
@@ -211,7 +212,7 @@ export default function OAuthLinkCallbackPage({
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center py-8">
-            <Loader2 className={`${UI_CLASSES.ICON_XL} animate-spin text-muted-foreground`} />
+            <Loader2 className={`${iconSize.xl} animate-spin text-muted-foreground`} />
           </CardContent>
         </Card>
       </div>
@@ -226,14 +227,14 @@ export default function OAuthLinkCallbackPage({
           <div
             className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
           >
-            <AlertCircle className={`${UI_CLASSES.ICON_LG} text-destructive`} />
+            <AlertCircle className={`${iconSize.lg} text-destructive`} />
           </div>
           <CardTitle>Account Linking Failed</CardTitle>
           <CardDescription>
             {errorMessage ?? 'An error occurred while linking your account.'}
           </CardDescription>
         </CardHeader>
-        <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
+        <CardContent className={stack.compact}>
           <Button type="button" onClick={() => router.push('/account/connected-accounts')}>
             Return to Connected Accounts
           </Button>

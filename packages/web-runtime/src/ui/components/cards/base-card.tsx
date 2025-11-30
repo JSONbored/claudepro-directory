@@ -44,7 +44,6 @@
 import { getSocialLinks } from '../../../data/marketing/contact.ts';
 import { APP_CONFIG } from '../../../data/config/constants.ts';
 import { getViewTransitionName } from '../../utils.ts';
-import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
 import { UnifiedBadge } from '../badges/unified-badge.tsx';
 import { SwipeableCardWrapper } from './swipeable-card.tsx';
 import { HoverCard } from '../animation/hover-card.tsx';
@@ -53,6 +52,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ca
 import { type UseCardNavigationOptions, useCardNavigation } from '../../../hooks/use-card-navigation.ts';
 import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
+// Design System imports
+import { absolute } from '../../../design-system/styles/position.ts';
+import { cluster, wrap } from '../../../design-system/styles/layout.ts';
+import { card as cardStyles, cardPadding, cardHeader } from '../../../design-system/styles/cards.ts';
+import { muted } from '../../../design-system/styles/typography.ts';
 import type { ReactNode, HTMLAttributes } from 'react';
 import { memo } from 'react';
 
@@ -338,7 +342,7 @@ export const BaseCard = memo(
       // Card content wrapper - conditionally render with or without motion animations
       const cardElement = (
         <CardComponent
-          className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? UI_CLASSES.CARD_PADDING_DEFAULT : ''} ${variant === 'review' ? `rounded-lg border ${UI_CLASSES.CARD_PADDING_COMPACT}` : ''} ${compactMode ? UI_CLASSES.CARD_PADDING_COMPACT : ''} ${className || ''} relative`}
+          className={`${disableNavigation ? '' : cardStyles.interactive} ${variant === 'detailed' ? cardPadding.default : ''} ${variant === 'review' ? `rounded-lg border ${cardPadding.compact}` : ''} ${compactMode ? cardPadding.compact : ''} ${className || ''} relative`}
           style={{
             ...viewTransitionStyle,
             contain: 'paint',
@@ -352,12 +356,12 @@ export const BaseCard = memo(
           {/* Top accent border for related content */}
           {topAccent && (
             <div
-              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_FULL} h-px bg-border opacity-70 transition-opacity group-hover:opacity-100`}
+              className={`${absolute.topFull} h-px bg-border opacity-70 transition-opacity group-hover:opacity-100`}
             />
           )}
 
           <CardHeaderComponent
-            className={`${variant === 'review' ? `${UI_CLASSES.MARGIN_COMPACT} p-0` : 'pb-3'} ${compactMode ? UI_CLASSES.CARD_HEADER_TIGHT : ''}`}
+            className={`${variant === 'review' ? 'mb-3 p-0' : 'pb-3'} ${compactMode ? cardHeader.tight : ''}`}
           >
             {/* Custom header slot (for review avatar/rating, changelog date) */}
             {renderHeader?.()}
@@ -368,14 +372,14 @@ export const BaseCard = memo(
                 <div className="flex-1">
                   {/* Top badges slot (type, difficulty, sponsored, etc.) */}
                   {renderTopBadges && (
-                    <div className={`mb-1 flex items-center ${UI_CLASSES.SPACE_COMPACT}`}>
+                    <div className={`mb-1 ${cluster.compact}`}>
                       {renderTopBadges()}
                     </div>
                   )}
 
                   {/* Title */}
                   <CardTitleComponent
-                    className={`${UI_CLASSES.TEXT_CARD_TITLE} text-foreground ${disableNavigation ? '' : 'transition-colors-smooth group-hover:text-accent'}`}
+                    className={`text-lg font-semibold text-foreground ${disableNavigation ? '' : 'transition-colors-smooth group-hover:text-accent'}`}
                   >
                     {displayTitle}
                   </CardTitleComponent>
@@ -390,7 +394,7 @@ export const BaseCard = memo(
 
                 {/* Source badge (right side of header) */}
                 {source && (
-                  <div className={`ml-2 flex items-center ${UI_CLASSES.SPACE_TIGHT}`}>
+                  <div className={`ml-2 ${cluster.tight}`}>
                     <UnifiedBadge
                       variant="source"
                       source={
@@ -415,11 +419,11 @@ export const BaseCard = memo(
             className={`${variant === 'review' ? 'p-0' : 'pt-0'} ${compactMode ? 'pt-0' : ''}`}
           >
             {/* Custom content slot (for review expandable text) */}
-            {renderContent && <div className={UI_CLASSES.MARGIN_COMPACT}>{renderContent()}</div>}
+            {renderContent && <div className="mb-3">{renderContent()}</div>}
 
             {/* Tags */}
             {tags && tags.length > 0 && (
-              <div className={UI_CLASSES.CARD_BADGE_CONTAINER}>
+              <div className={wrap.compact + ' mb-4'}>
                 {visibleTags?.map((tag: string, index: number) => {
                   // Use highlighted tag if available, otherwise use original
                   const highlightedTag = highlightedTags?.[index];
@@ -442,7 +446,7 @@ export const BaseCard = memo(
                   <UnifiedBadge
                     variant="base"
                     style="outline"
-                    className={`${UI_CLASSES.BADGE_METADATA} ${UI_CLASSES.TEXT_BADGE}`}
+                    className="border-muted-foreground/20 text-muted-foreground text-xs font-semibold"
                   >
                     +{overflowCount}
                   </UnifiedBadge>
@@ -451,10 +455,10 @@ export const BaseCard = memo(
             )}
 
             {/* Footer: Metadata and Actions */}
-            <div className={UI_CLASSES.CARD_FOOTER_RESPONSIVE}>
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               {/* Left side: Author and custom metadata */}
               {(showAuthor && author) || customMetadataText ? (
-                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_METADATA}`}>
+                <div className={`${cluster.compact} ${muted.xs}`}>
                   {showAuthor && author && (
                     <span>
                       by{' '}
@@ -476,7 +480,7 @@ export const BaseCard = memo(
               )}
 
               {/* Right side: Metadata badges and actions */}
-              <div className={UI_CLASSES.CARD_METADATA_BADGES}>
+              <div className={cluster.compact + ' text-xs flex-nowrap'}>
                 {/* Metadata badges slot (view count, item count, etc.) */}
                 {renderMetadataBadges?.()}
 

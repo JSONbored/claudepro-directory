@@ -33,7 +33,17 @@ import {
   type SubmissionFormSection,
   type TextFieldDefinition,
 } from '@heyclaude/web-runtime/types/component.types';
-import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  between,
+  cluster,
+  iconLeading,
+  iconSize,
+  marginBottom,
+  muted,
+  responsive,
+  stack,
+} from '@heyclaude/web-runtime/design-system';
+import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useEffect, useId, useState, useTransition } from 'react';
 import { z } from 'zod';
@@ -487,14 +497,14 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         >
           <Card className={'mb-6 border-green-500/20 bg-green-500/5'}>
             <CardContent className={'pt-6'}>
-              <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_START}>
+              <div className="flex flex-col items-start gap-3 sm:flex-row">
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ ...springBouncy, delay: 0.2 }}
                 >
                   <CheckCircle
-                    className={`h-6 w-6 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                    className="h-6 w-6 text-green-500 mt-0.5 shrink-0"
                   />
                 </motion.div>
                 <div className="min-w-0 flex-1">
@@ -531,7 +541,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
       )}
 
       {/* Main Form - Sectioned with visual hierarchy */}
-      <form onSubmit={handleSubmit} className={UI_CLASSES.SPACE_Y_6}>
+      <form onSubmit={handleSubmit} className={stack.loose}>
         {/* Section 1: Content Type + Template */}
         <FormSectionCard
           step={1}
@@ -542,14 +552,14 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           showBorderBeam={false}
         >
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className={UI_CLASSES.SPACE_Y_2}>
+            <div className={stack.compact}>
               <Label htmlFor={`${formId}-type`}>Content Type *</Label>
               <div className="relative">
                 <Layers
                   className={cn(
-                    UI_CLASSES.ICON_SM,
+                    iconSize.sm,
                     '-translate-y-1/2 pointer-events-none absolute top-1/2 left-3',
-                    UI_CLASSES.TEXT_MUTED
+                    muted.default
                   )}
                 />
                 <select
@@ -573,7 +583,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
               </div>
             </div>
 
-            <div className={UI_CLASSES.SPACE_Y_2}>
+            <div className={stack.compact}>
               <Label>Quick Start</Label>
               <TemplateSelector templates={templates} onSelect={handleTemplateSelect} />
             </div>
@@ -589,12 +599,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           theme="blue"
           showBorderBeam={false}
         >
-          <div className={UI_CLASSES.SPACE_Y_4}>
+          <div className={stack.default}>
             {/* Name Field + Duplicate Warning */}
-            <div className={UI_CLASSES.SPACE_Y_2}>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+            <div className={stack.compact}>
+              <div className={between.center}>
                 <Label htmlFor={`${formId}-name`}>{nameFieldConfig.label}</Label>
-                <span className={cn(UI_CLASSES.TEXT_XS_MUTED, 'font-medium')}>
+                <span className={cn(`${muted.default} text-xs`, 'font-medium')}>
                   {name.length}/100
                 </span>
               </div>
@@ -616,18 +626,18 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     animate={{ scale: 1 }}
                     transition={springBouncy}
                   >
-                    <CheckCircle className={cn(UI_CLASSES.ICON_SM, UI_CLASSES.ICON_SUCCESS)} />
+                    <CheckCircle className={cn(iconSize.sm, 'text-green-600')} />
                   </motion.div>
                 )}
               </div>
-              <p className={UI_CLASSES.TEXT_XS_MUTED}>
+              <p className={`${muted.default} text-xs`}>
                 {nameFieldConfig.helpText ?? 'A clear, descriptive name for your configuration'}
               </p>
               <DuplicateWarning contentType={contentType} name={name} />
             </div>
 
             {/* Description Field with Markdown Preview */}
-            <div className={UI_CLASSES.SPACE_Y_2}>
+            <div className={stack.compact}>
               <Label htmlFor={`${formId}-description`}>Description *</Label>
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="w-full">
@@ -649,7 +659,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     rows={6}
                     className="resize-y font-sans"
                   />
-                  <p className={cn(UI_CLASSES.TEXT_XS_MUTED, UI_CLASSES.MARGIN_TOP_MICRO)}>
+                  <p className={cn(`${muted.default} text-xs`, marginBottom.micro)}>
                     Supports markdown formatting (bold, italic, lists, links, code blocks)
                   </p>
                 </TabsContent>
@@ -663,7 +673,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     {description ? (
                       <p className="whitespace-pre-wrap">{description}</p>
                     ) : (
-                      <p className={UI_CLASSES.TEXT_MUTED}>
+                      <p className={muted.default}>
                         Nothing to preview yet. Write something in the Write tab!
                       </p>
                     )}
@@ -705,7 +715,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           theme="purple"
           showBorderBeam={false}
         >
-          <div className={UI_CLASSES.SPACE_Y_4}>
+          <div className={stack.default}>
             {/* Tags Field */}
             {tagFields.length > 0 && (
               <ContentTypeFieldRenderer config={{ fields: tagFields }} formId={formId} />
@@ -718,7 +728,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
         {/* Enhanced Submit Button */}
         <motion.div
-          className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3} pt-2 sm:pt-4`}
+          className={`${responsive.smRowGap} pt-2 sm:pt-4`}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
@@ -734,13 +744,13 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     ease: 'easeInOut',
                   }}
                 >
-                  <Github className={UI_CLASSES.ICON_SM} />
+                  <Github className={iconSize.sm} />
                 </motion.div>
                 Creating PR...
               </>
             ) : (
               <>
-                <Send className={UI_CLASSES.ICON_SM_LEADING} />
+                <Send className={iconLeading.sm} />
                 Submit for Review
               </>
             )}
@@ -749,8 +759,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
         {/* Info Box */}
         <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3 sm:p-4">
-          <div className={`${UI_CLASSES.FLEX_GAP_2} sm:gap-3`}>
-            <Github className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+          <div className={`${cluster.compact} sm:gap-3`}>
+            <Github className="h-5 w-5 text-blue-400 mt-0.5 shrink-0" />
             <div className="min-w-0 flex-1">
               <p className={'font-medium text-blue-400 text-sm'}>How it works</p>
               <p className={'mt-1 text-muted-foreground text-sm'}>

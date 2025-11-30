@@ -1,9 +1,10 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { responsive } from '@heyclaude/web-runtime/design-system';
 import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
-import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
 import { Input } from '@heyclaude/web-runtime/ui';
@@ -171,7 +172,7 @@ export function NewsletterModal({
             />
           </div>
 
-          <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
+          <div className={responsive.smRowGap}>
             <Button
               type="submit"
               disabled={isSubmitting || !email.trim()}

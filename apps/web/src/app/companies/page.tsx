@@ -1,5 +1,6 @@
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { between, grid } from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building,
@@ -9,7 +10,7 @@ import {
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge, Button ,
+import { UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
@@ -128,7 +129,7 @@ export default async function CompaniesPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
-      <section className={`${UI_CLASSES.CONTAINER_OVERFLOW_BORDER}`}>
+      <section className="relative overflow-hidden border-b border-border">
         <div className="container mx-auto px-4 py-20">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 flex justify-center">
@@ -137,9 +138,9 @@ export default async function CompaniesPage() {
               </div>
             </div>
 
-            <h1 className={UI_CLASSES.TEXT_HEADING_HERO}>Companies Directory</h1>
+            <h1 className="mb-4 font-bold text-4xl tracking-tight sm:text-5xl">Companies Directory</h1>
 
-            <p className={UI_CLASSES.TEXT_HEADING_MEDIUM}>
+            <p className="mx-auto mt-4 max-w-xl text-muted-foreground text-lg">
               Discover companies building the future with Claude and Cursor
             </p>
 
@@ -182,9 +183,9 @@ export default async function CompaniesPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
+          <div className={grid.responsive3}>
             {companies.map((company, index) => (
-              <Card key={company.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
+              <Card key={company.id} className="card-gradient transition-all duration-200 hover:shadow-lg">
                 {company.featured ? <div className="-top-2 -right-2 absolute z-10">
                     <UnifiedBadge variant="base" className="bg-accent text-accent-foreground">
                       <Star className="mr-1 h-3 w-3" />
@@ -193,7 +194,7 @@ export default async function CompaniesPage() {
                   </div> : null}
 
                 <CardHeader>
-                  <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                  <div className="flex items-start gap-3">
                     {company.logo ? <Image
                         src={company.logo}
                         alt={`${company.name} logo`}
@@ -243,7 +244,7 @@ export default async function CompaniesPage() {
                       )}
                     </div> : null}
 
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  <div className={between.center}>
                     {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
                     {company.size ? <UnifiedBadge variant="base" style="outline" className="text-xs">
                         {company.size} employees

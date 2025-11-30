@@ -7,7 +7,7 @@
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import type { DiagnosticFlowProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize, muted } from '@heyclaude/web-runtime/design-system';
 import React from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -68,7 +68,7 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
       <CardContent>
         <div className="space-y-4">
           {path.length > 0 && (
-            <div className={UI_CLASSES.TEXT_SM_MUTED}>
+            <div className={`${muted.default} text-sm`}>
               <p className={'mb-2 font-medium'}>Diagnostic Path:</p>
               <ol className={'list-inside list-decimal space-y-1'}>
                 {path.map((step) => (
@@ -83,9 +83,9 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
               {isComplete ? (
                 <div className="space-y-4">
                   <div
-                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-green-600 dark:text-green-400`}
+                    className={`${cluster.compact} text-green-600 dark:text-green-400`}
                   >
-                    <CheckCircle className={UI_CLASSES.ICON_MD} />
+                    <CheckCircle className={iconSize.md} />
                     <p className="font-medium">Solution Found:</p>
                   </div>
                   <p className="text-muted-foreground">{currentStepData?.solution}</p>

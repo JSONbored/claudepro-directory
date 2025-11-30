@@ -1,9 +1,9 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
@@ -100,7 +100,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
 
   return (
     <Alert className="border-yellow-500/20 bg-yellow-500/5">
-      <AlertTriangle className={`${UI_CLASSES.ICON_SM} text-yellow-400`} />
+      <AlertTriangle className={`${iconSize.sm} text-yellow-400`} />
       <AlertTitle className="text-yellow-400">Suggestion</AlertTitle>
       <AlertDescription>
         <p className={'text-muted-foreground text-sm'}>{warning}</p>

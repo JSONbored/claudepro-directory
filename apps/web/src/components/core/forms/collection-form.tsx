@@ -16,9 +16,10 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { cluster } from '@heyclaude/web-runtime/design-system';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
 import { useFormSubmit } from '@heyclaude/web-runtime/hooks';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { FormField } from '@heyclaude/web-runtime/ui';
@@ -135,7 +136,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
   };
 
   return (
-    <form onSubmit={onSubmit} className={UI_CLASSES.FORM_SECTION_SPACING}>
+    <form onSubmit={onSubmit} className="space-y-6">
       {/* Collection Name */}
       <FormField
         variant="input"
@@ -177,7 +178,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       />
 
       {/* Public Toggle */}
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} rounded-lg border p-4`}>
+      <div className={`${cluster.default} rounded-lg border p-4`}>
         <Checkbox
           id={isPublicId}
           checked={isPublic}
@@ -196,7 +197,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Bookmarks Selection (only in create mode initially) */}
       {mode === 'create' && bookmarks.length > 0 && (
-        <div className={UI_CLASSES.FORM_GROUP_SPACING}>
+        <div className="space-y-4">
           <div>
             <Label className="text-base">Add Bookmarks (Optional)</Label>
             <p className={'mt-1 text-muted-foreground text-sm'}>
@@ -207,7 +208,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} rounded-md p-2 hover:bg-accent`}
+                className="flex items-start gap-3 rounded-md p-2 hover:bg-accent"
               >
                 <Checkbox
                   id={bookmark.id}
@@ -227,7 +228,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                 <div className="flex-1">
                   <Label
                     htmlFor={bookmark.id}
-                    className={`cursor-pointer font-normal text-sm ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
+                    className={`cursor-pointer font-normal text-sm ${cluster.compact}`}
                   >
                     <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                       {bookmark.content_type}

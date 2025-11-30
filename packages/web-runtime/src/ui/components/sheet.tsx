@@ -14,8 +14,11 @@
 
 import { UI_ANIMATION } from '../../config/unified-config.ts';
 import { X } from '../../icons.tsx';
-import { POSITION_PATTERNS, UI_CLASSES } from '../constants.ts';
 import { cn } from '../utils.ts';
+// Design System imports
+import { iconSize } from '../../design-system/styles/icons.ts';
+import { stack } from '../../design-system/styles/layout.ts';
+import { fixed, absolute } from '../../design-system/styles/position.ts';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion, useDragControls } from 'motion/react';
@@ -38,7 +41,7 @@ const SheetOverlay = ({
 }) => (
   <SheetPrimitive.Overlay
     className={cn(
-      `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 ${POSITION_PATTERNS.FIXED_INSET} z-50 bg-black/80 will-change-opacity data-[state=closed]:animate-out data-[state=open]:animate-in`,
+      `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 ${fixed.inset} z-50 bg-black/80 will-change-opacity data-[state=closed]:animate-out data-[state=open]:animate-in`,
       className
     )}
     {...props}
@@ -157,9 +160,9 @@ const SheetContent = ({
           {children}
           <SheetPrimitive.Close
             data-radix-sheet-close={true}
-            className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary`}
+            className={`${absolute.topRightOffsetXl} rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary`}
           >
-            <X className={UI_CLASSES.ICON_SM} />
+            <X className={iconSize.sm} />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         </motion.div>
@@ -171,7 +174,7 @@ SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(UI_CLASSES.FLEX_COL_SPACE_Y_2, 'text-center sm:text-left', className)}
+    className={cn(stack.tight, 'text-center sm:text-left', className)}
     {...props}
   />
 );

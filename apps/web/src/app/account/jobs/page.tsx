@@ -9,6 +9,7 @@ import {
   getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { between, cluster, jobStatusBadge  } from '@heyclaude/web-runtime/design-system';
 import {
   BarChart,
   Briefcase,
@@ -19,7 +20,7 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
+import { UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
@@ -89,7 +90,7 @@ function resolveTierLabel(
 }
 
 function getStatusColor(status: JobStatus): string {
-  return BADGE_COLORS.jobStatus[status];
+  return jobStatusBadge[status];
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -294,14 +295,14 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   ) => {
     if (tier === 'featured') {
       return (
-        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PUBLISHED}>
+        <UnifiedBadge variant="base" className="bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400">
           Featured
         </UnifiedBadge>
       );
     }
     if (plan === 'subscription') {
       return (
-        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PREMIUM}>
+        <UnifiedBadge variant="base" className="bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">
           Subscription
         </UnifiedBadge>
       );
@@ -329,7 +330,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
           </AlertDescription>
         </Alert>
       )}
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <div>
           <h1 className="mb-2 font-bold text-3xl">My Job Listings</h1>
           <p className="text-muted-foreground">
@@ -398,9 +399,9 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
             return (
               <Card key={job.id}>
                 <CardHeader>
-                  <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                      <div className={cluster.compact}>
                         <UnifiedBadge
                           variant="base"
                           style="outline"
@@ -420,7 +421,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
 
                 <CardContent>
                   <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                    <div className={cluster.tight}>
                       <Eye className="h-4 w-4" />
                       {job.view_count ?? 0} views
                     </div>
@@ -428,7 +429,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                     {job.expires_at ? <div>Expires {formatRelativeDate(job.expires_at)}</div> : null}
                   </div>
                   {showBillingCard ? <div className="mb-4 rounded-lg border border-muted border-dashed bg-muted/20 p-3 text-xs sm:text-sm">
-                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                      <div className={between.center}>
                         <span className="font-semibold text-foreground">Billing</span>
                         <UnifiedBadge variant="base" style="outline" className="capitalize">
                           {planLabel} • {tierLabel}
@@ -441,7 +442,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                       </div>
                     </div> : null}
 
-                  <div className={UI_CLASSES.FLEX_GAP_2}>
+                  <div className={cluster.compact}>
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/account/jobs/${job.id}/edit`}>
                         <Edit className="mr-1 h-3 w-3" />

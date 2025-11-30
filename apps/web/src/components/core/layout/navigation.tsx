@@ -9,13 +9,12 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { cluster, between, iconSize, iconLeading, buttonGhost, sticky } from '@heyclaude/web-runtime/design-system';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, DiscordIcon } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
-  POSITION_PATTERNS,
   RESPONSIVE_PATTERNS,
-  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { motion, useScroll, useTransform } from 'motion/react';
 import Link from 'next/link';
@@ -109,7 +108,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
       />
 
       <motion.header
-        className={`${POSITION_PATTERNS.STICKY_TOP} z-50 w-full px-3 pt-1 pb-3 will-change-transform contain-layout`}
+        className={`${sticky.top} z-50 w-full px-3 pt-1 pb-3 will-change-transform contain-layout`}
         style={{ opacity: navOpacity }}
       >
         <div className="container mx-auto">
@@ -120,7 +119,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
           >
             <div className={RESPONSIVE_PATTERNS.PADDING_RESPONSIVE_SM}>
               <div
-                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-[height] ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} will-change-auto ${
+                className={`${between.center} transition-[height] ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} will-change-auto ${
                   isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
@@ -128,7 +127,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                 <Link
                   href={ROUTES.HOME}
                   prefetch={true}
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_FLEX_SHRINK_0} no-underline`}
+                  className={`${cluster.none} shrink-0 no-underline`}
                   aria-label="heyclaude - Go to homepage"
                 >
                   <motion.div style={{ scale: logoScale }}>
@@ -146,19 +145,19 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                 <NavigationTablet isActive={isActive} onMobileMenuOpen={() => setIsOpen(true)} />
 
                 {/* Right Side Actions */}
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
+                <div className={cluster.snug}>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={openPinboardDrawer}
-                    className={`relative ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                    className={`relative ${buttonGhost.icon}`}
                     aria-label={
                       pinCount > 0
                         ? `Open pinboard (${pinCount} saved)`
                         : 'Open pinboard (save items for later)'
                     }
                   >
-                    <Bookmark className={UI_CLASSES.ICON_XS} />
+                    <Bookmark className={iconSize.xs} />
                     {pinCount > 0 && (
                       <span className="-right-1 -top-1 absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-semibold text-[10px] text-primary-foreground">
                         {pinCount > 99 ? '99+' : pinCount}
@@ -175,10 +174,10 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                           asChild={true}
                           variant="outline"
                           size="sm"
-                          className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}
+                          className="hidden text-xs md:flex"
                         >
                           <Link href={link.href} prefetch={true}>
-                            {ActionIcon && <ActionIcon className={UI_CLASSES.ICON_XS_LEADING} />}
+                            {ActionIcon && <ActionIcon className={iconLeading.xs} />}
                             {link.label}
                           </Link>
                         </Button>
@@ -189,13 +188,13 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                     variant="ghost"
                     size="sm"
                     onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                    className={`hidden md:flex ${UI_CLASSES.TEXT_NAV} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                    className={`hidden md:flex text-sm font-medium ${buttonGhost.icon}`}
                     aria-label="Join our Discord community"
                   >
-                    <DiscordIcon className={UI_CLASSES.ICON_XS} />
+                    <DiscordIcon className={iconSize.xs} />
                   </Button>
 
-                  <GitHubStarsButton className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`} />
+                  <GitHubStarsButton className="hidden text-xs md:flex" />
 
                   <UserMenu className={'hidden md:flex'} />
 

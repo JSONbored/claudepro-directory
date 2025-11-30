@@ -38,7 +38,10 @@ import { useLoggedAsync, usePulse, useConfetti } from '../../../hooks/index.ts';
 import { Bookmark, BookmarkCheck, Loader2 } from '../../../icons.tsx';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { cn } from '../../../ui/utils.ts';
-import { UI_CLASSES } from '../../../ui/constants.ts';
+// Design System imports
+import { iconSize } from '../../../design-system/styles/icons.ts';
+import { buttonSize } from '../../../design-system/styles/buttons.ts';
+import { badge } from '../../../design-system/styles/typography.ts';
 import { toasts } from '../../../client/toast.ts';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -199,24 +202,24 @@ export function BookmarkButton({
     <Button
       variant={variant}
       size={size}
-      className={cn(UI_CLASSES.ICON_BUTTON_SM, className)}
+      className={cn(buttonSize.iconSm, className)}
       onClick={handleToggle}
       disabled={disabled || isPending}
       aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
       title={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
     >
       {isPending ? (
-        <Loader2 className={`${UI_CLASSES.ICON_XS} animate-spin`} aria-hidden="true" />
+        <Loader2 className={`${iconSize.xs} animate-spin`} aria-hidden="true" />
       ) : isBookmarked ? (
         <BookmarkCheck
-          className={`${UI_CLASSES.ICON_XS} fill-current text-primary`}
+          className={`${iconSize.xs} fill-current text-primary`}
           aria-hidden="true"
         />
       ) : (
-        <Bookmark className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+        <Bookmark className={iconSize.xs} aria-hidden="true" />
       )}
       {showLabel && !isPending && (
-        <span className={`ml-1 ${UI_CLASSES.TEXT_BADGE}`}>{isBookmarked ? 'Saved' : 'Save'}</span>
+        <span className={`ml-1 ${badge.default}`}>{isBookmarked ? 'Saved' : 'Save'}</span>
       )}
     </Button>
   );

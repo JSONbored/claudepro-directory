@@ -25,6 +25,7 @@ import {
   Share2,
   Twitter,
 } from '@heyclaude/web-runtime/icons';
+import { cluster, iconSize, codeBlock } from '@heyclaude/web-runtime/design-system';
 import {
   copyScreenshotToClipboard,
   copyShareLink,
@@ -34,7 +35,6 @@ import {
   generateShareText,
   generateShareUrl,
   toasts,
-  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 // DOMPurify will be dynamically imported
 import { motion } from 'motion/react';
@@ -114,7 +114,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT} top-full z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
+      className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
       onMouseLeave={onMouseLeave}
     >
       {/* Twitter Share */}
@@ -137,8 +137,8 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           onClick={() => onShare('twitter')}
         >
           <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
-            <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-[#1DA1F2]/20`}>
-              <Twitter className={`${UI_CLASSES.ICON_XS} text-[#1DA1F2]`} />
+            <div className={`${codeBlock.socialIconWrapper} bg-[#1DA1F2]/20`}>
+              <Twitter className={`${iconSize.xs} text-[#1DA1F2]`} />
             </div>
             <span className="text-foreground">Share on Twitter</span>
           </div>
@@ -166,8 +166,8 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           onClick={() => onShare('linkedin')}
         >
           <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
-            <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-[#0A66C2]/20`}>
-              <Linkedin className={`${UI_CLASSES.ICON_XS} text-[#0A66C2]`} />
+            <div className={`${codeBlock.socialIconWrapper} bg-[#0A66C2]/20`}>
+              <Linkedin className={`${iconSize.xs} text-[#0A66C2]`} />
             </div>
             <span className="text-foreground">Share on LinkedIn</span>
           </div>
@@ -180,8 +180,8 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
         onClick={() => onShare('copy_link')}
         className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-foreground text-sm transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]"
       >
-        <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-accent/20`}>
-          <Copy className={UI_CLASSES.ICON_XS} />
+        <div className={`${codeBlock.socialIconWrapper} bg-accent/20`}>
+          <Copy className={iconSize.xs} />
         </div>
         <span>Copy Link</span>
       </button>
@@ -508,21 +508,21 @@ export function ProductionCodeBlock({
   const maxHeight = `${maxLines * 1.6}rem`; // 1.6rem per line
 
   return (
-    <div className={`${UI_CLASSES.CODE_BLOCK_GROUP_WRAPPER} ${className}`}>
+    <div className={`${codeBlock.groupWrapper} ${className}`}>
       {/* Header with filename, language badge, and action buttons */}
       {filename && (
-        <div className={UI_CLASSES.CODE_BLOCK_HEADER}>
-          <span className={UI_CLASSES.CODE_BLOCK_FILENAME}>{filename}</span>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+        <div className={codeBlock.header}>
+          <span className={codeBlock.filename}>{filename}</span>
+          <div className={cluster.tight}>
             {/* Screenshot button */}
             <motion.button
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className={`${UI_CLASSES.CODE_BLOCK_BUTTON_ICON} disabled:opacity-50`}
+              className={`${codeBlock.buttonIcon} disabled:opacity-50`}
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
-              <Camera className={UI_CLASSES.ICON_XS} />
+              <Camera className={iconSize.xs} />
             </motion.button>
 
             {/* Share button with dropdown */}
@@ -530,10 +530,10 @@ export function ProductionCodeBlock({
               <motion.button
                 type="button"
                 onClick={() => setIsShareOpen(!isShareOpen)}
-                className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
+                className={codeBlock.buttonIcon}
                 title="Share code"
               >
-                <Share2 className={UI_CLASSES.ICON_XS} />
+                <Share2 className={iconSize.xs} />
               </motion.button>
 
               {/* Share dropdown - positioned below button */}
@@ -554,13 +554,13 @@ export function ProductionCodeBlock({
               onClick={handleCopy}
               animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: 0.3 }}
-              className={UI_CLASSES.CODE_BLOCK_BUTTON_BASE}
+              className={codeBlock.buttonBase}
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className={`${UI_CLASSES.ICON_XS} text-green-500`} />
+                <Check className={`${iconSize.xs} text-green-500`} />
               ) : (
-                <Copy className={`${UI_CLASSES.ICON_XS} text-muted-foreground`} />
+                <Copy className={`${iconSize.xs} text-muted-foreground`} />
               )}
             </motion.button>
 
@@ -568,10 +568,10 @@ export function ProductionCodeBlock({
             <motion.button
               type="button"
               onClick={handleDownload}
-              className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
+              className={codeBlock.buttonIcon}
               title="Download code"
             >
-              <Download className={UI_CLASSES.ICON_XS} />
+              <Download className={iconSize.xs} />
             </motion.button>
 
             {/* Language badge - Polar-style minimal */}
@@ -594,16 +594,16 @@ export function ProductionCodeBlock({
       >
         {/* Top-right action buttons + badge (when no filename header) */}
         {!filename && (
-          <div className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_LG} z-20 flex items-center gap-1">
+          <div className="absolute right-4 top-4 z-20 flex items-center gap-1">
             {/* Screenshot button */}
             <motion.button
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className={`${UI_CLASSES.CODE_BLOCK_BUTTON_ICON} disabled:opacity-50`}
+              className={`${codeBlock.buttonIcon} disabled:opacity-50`}
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
-              <Camera className={UI_CLASSES.ICON_XS} />
+              <Camera className={iconSize.xs} />
             </motion.button>
 
             {/* Share button with dropdown */}
@@ -611,10 +611,10 @@ export function ProductionCodeBlock({
               <motion.button
                 type="button"
                 onClick={() => setIsShareOpen(!isShareOpen)}
-                className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
+                className={codeBlock.buttonIcon}
                 title="Share code"
               >
-                <Share2 className={UI_CLASSES.ICON_XS} />
+                <Share2 className={iconSize.xs} />
               </motion.button>
 
               {/* Share dropdown - positioned below button */}
@@ -635,13 +635,13 @@ export function ProductionCodeBlock({
               onClick={handleCopy}
               animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: 0.3 }}
-              className={UI_CLASSES.CODE_BLOCK_BUTTON_BASE}
+              className={codeBlock.buttonBase}
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className={`${UI_CLASSES.ICON_XS} text-green-500`} />
+                <Check className={`${iconSize.xs} text-green-500`} />
               ) : (
-                <Copy className={`${UI_CLASSES.ICON_XS} text-muted-foreground`} />
+                <Copy className={`${iconSize.xs} text-muted-foreground`} />
               )}
             </motion.button>
 
@@ -649,10 +649,10 @@ export function ProductionCodeBlock({
             <motion.button
               type="button"
               onClick={handleDownload}
-              className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
+              className={codeBlock.buttonIcon}
               title="Download code"
             >
-              <Download className={UI_CLASSES.ICON_XS} />
+              <Download className={iconSize.xs} />
             </motion.button>
 
             {/* Language badge - Polar-style minimal */}

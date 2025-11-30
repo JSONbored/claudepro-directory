@@ -72,8 +72,13 @@ import {
   Sparkles,
 } from '../../../icons.tsx';
 import type { ConfigCardProps, ContentItem } from '../../../types/component.types.ts';
-import { BADGE_COLORS, UI_CLASSES } from '../../constants.ts';
 import { SEMANTIC_COLORS } from '../../colors.ts';
+// Design System imports
+import { cluster } from '../../../design-system/styles/layout.ts';
+import { iconSize, iconLeading } from '../../../design-system/styles/icons.ts';
+import { buttonSize, buttonGhost } from '../../../design-system/styles/buttons.ts';
+import { badge } from '../../../design-system/styles/typography.ts';
+import { collectionTypeBadge, difficultyBadge } from '../../../design-system/styles/badges.ts';
 import { getDisplayTitle } from '../../utils.ts';
 import { toasts } from '../../../client/toast.ts';
 import { BaseCard, type BaseCardProps } from './base-card.tsx';
@@ -611,9 +616,9 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="outline"
-                  className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.collectionType[collectionType as keyof typeof BADGE_COLORS.collectionType] || ''}`}
+                  className={`${badge.default} ${collectionTypeBadge[collectionType as keyof typeof collectionTypeBadge] || ''}`}
                 >
-                  <Layers className={UI_CLASSES.ICON_XS_LEADING} aria-hidden="true" />
+                  <Layers className={iconLeading.xs} aria-hidden="true" />
                   {COLLECTION_TYPE_LABELS[collectionType as keyof typeof COLLECTION_TYPE_LABELS]}
                 </UnifiedBadge>
               )}
@@ -625,7 +630,7 @@ export const ConfigCard = memo(
                   <UnifiedBadge
                     variant="base"
                     style="outline"
-                    className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.difficulty[collectionDifficulty]}`}
+                    className={`${badge.default} ${difficultyBadge[collectionDifficulty]}`}
                   >
                     {collectionDifficulty}
                   </UnifiedBadge>
@@ -635,7 +640,7 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="outline"
-                  className={`${UI_CLASSES.BADGE_METADATA} ${UI_CLASSES.TEXT_BADGE}`}
+                  className={`border-border/50 bg-muted/30 text-muted-foreground ${badge.default}`}
                 >
                   {itemCount} {itemCount === 1 ? 'item' : 'items'}
                 </UnifiedBadge>
@@ -646,15 +651,15 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="secondary"
-                  className={`fade-in slide-in-from-top-2 animate-in ${UI_CLASSES.SPACE_TIGHT} font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md ${SEMANTIC_COLORS.FEATURED}`}
+                  className={`fade-in slide-in-from-top-2 animate-in ${cluster.tight} font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md ${SEMANTIC_COLORS.FEATURED}`}
                 >
                   {featuredRank && featuredRank <= 3 ? (
                     <Award
-                      className={`${UI_CLASSES.ICON_XS} text-amber-500`}
+                      className={`${iconSize.xs} text-amber-500`}
                       aria-hidden="true"
                     />
                   ) : (
-                    <Sparkles className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                    <Sparkles className={iconSize.xs} aria-hidden="true" />
                   )}
                   Featured
                   {featuredRank && <span className="text-xs opacity-75">#{featuredRank}</span>}
@@ -700,7 +705,7 @@ export const ConfigCard = memo(
               <Button
                 variant="ghost"
                 size="sm"
-                className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                className={`${buttonSize.iconSm} ${buttonGhost.icon}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!item.slug) return;
@@ -740,7 +745,7 @@ export const ConfigCard = memo(
                 aria-label={`View ${displayTitle} repository on GitHub`}
                 title="View on GitHub"
               >
-                <Github className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                <Github className={iconSize.xs} aria-hidden="true" />
               </Button>
             )}
 
@@ -748,7 +753,7 @@ export const ConfigCard = memo(
               <Button
                 variant="ghost"
                 size="sm"
-                className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                className={`${buttonSize.iconSm} ${buttonGhost.icon}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!item.slug) return;
@@ -789,7 +794,7 @@ export const ConfigCard = memo(
                 aria-label={`View ${displayTitle} documentation`}
                 title="View documentation"
               >
-                <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                <ExternalLink className={iconSize.xs} aria-hidden="true" />
               </Button>
             )}
 
@@ -821,15 +826,15 @@ export const ConfigCard = memo(
               <Button
                 variant={pinned ? 'secondary' : 'ghost'}
                 size="sm"
-                className={`${UI_CLASSES.ICON_BUTTON_SM} ${pinned ? '' : UI_CLASSES.BUTTON_GHOST_ICON}`}
+                className={`${buttonSize.iconSm} ${pinned ? '' : buttonGhost.icon}`}
                 onClick={handlePinToggle}
                 aria-label={pinned ? 'Unpin from pinboard' : 'Pin to pinboard'}
                 title={pinned ? 'Unpin from pinboard' : 'Pin to pinboard'}
               >
                 {pinned ? (
-                  <Pin className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                  <Pin className={iconSize.xs} aria-hidden="true" />
                 ) : (
-                  <PinOff className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                  <PinOff className={iconSize.xs} aria-hidden="true" />
                 )}
               </Button>
             </div>
@@ -839,7 +844,7 @@ export const ConfigCard = memo(
               <Button
                 variant="ghost"
                 size="sm"
-                className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                className={`${buttonSize.iconSm} ${buttonGhost.icon}`}
                 onClick={(event) => {
                   event.stopPropagation();
                   copyInlineValue(
@@ -862,7 +867,7 @@ export const ConfigCard = memo(
                 aria-label="Copy configuration JSON"
                 title="Copy configuration JSON"
               >
-                <FileJson className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                <FileJson className={iconSize.xs} aria-hidden="true" />
               </Button>
             )}
 
@@ -875,8 +880,8 @@ export const ConfigCard = memo(
                   errorMessage="Failed to copy link"
                   variant="ghost"
                   size="sm"
-                  className={UI_CLASSES.ICON_BUTTON_SM}
-                  iconClassName={UI_CLASSES.ICON_XS}
+                  className={buttonSize.iconSm}
+                  iconClassName={iconSize.xs}
                   ariaLabel={`Copy link to ${displayTitle}`}
                   onCopySuccess={() => {
                     const category: Database['public']['Enums']['content_category'] =
@@ -904,7 +909,7 @@ export const ConfigCard = memo(
               <Button
                 variant="ghost"
                 size="sm"
-                className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                className={`${buttonSize.iconSm} ${buttonGhost.icon}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isSafeCategoryAndSlug(item.category, item.slug)) {
@@ -928,7 +933,7 @@ export const ConfigCard = memo(
                 aria-label={`View details for ${displayTitle}${cardConfig.showViewCount && viewCount !== undefined && typeof viewCount === 'number' ? ` - ${formatViewCount(viewCount)}` : ''}`}
                 title="View details"
               >
-                <Eye className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                <Eye className={iconSize.xs} aria-hidden="true" />
               </Button>
               {cardConfig.showViewCount &&
                 viewCount !== undefined &&

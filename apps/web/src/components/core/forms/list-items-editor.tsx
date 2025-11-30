@@ -20,7 +20,8 @@
  */
 
 import { X } from '@heyclaude/web-runtime/icons';
-import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { between, cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -231,7 +232,7 @@ export function ListItemManager(props: ListItemManagerProps) {
       <Label>{label}</Label>
 
       {/* Input + Button */}
-      <div className={UI_CLASSES.FLEX_GAP_2}>
+      <div className={cluster.compact}>
         <Input
           value={currentInput}
           onChange={(e) => setCurrentInput(e.target.value)}
@@ -265,7 +266,7 @@ export function ListItemManager(props: ListItemManagerProps) {
         <>
           {/* Badge variant */}
           {props.variant === 'badge' && (
-            <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-3`}>
+            <div className="flex flex-wrap gap-2 mt-3">
               {items.map((item, index) => (
                 <UnifiedBadge
                   key={item}
@@ -281,7 +282,7 @@ export function ListItemManager(props: ListItemManagerProps) {
                     aria-label={`Remove ${item}`}
                     disabled={disabled}
                   >
-                    <X className={UI_CLASSES.ICON_XS} />
+                    <X className={iconSize.xs} />
                   </button>
                 </UnifiedBadge>
               ))}
@@ -297,7 +298,7 @@ export function ListItemManager(props: ListItemManagerProps) {
                 return (
                   <div
                     key={itemKey}
-                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} rounded border p-2`}
+                    className={`${between.center} rounded border p-2`}
                   >
                     <span className="text-sm">{item}</span>
                     <Button

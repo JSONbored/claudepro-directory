@@ -16,8 +16,8 @@ import {
   getSocialLinks,
 } from '@heyclaude/web-runtime/core';
 import { Calendar, Copy, Eye, Tag, User } from '@heyclaude/web-runtime/icons';
+import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 
 export interface DetailMetadataProps {
@@ -152,8 +152,8 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
               // At this point, safeAuthorUrl is validated and safe for use in external links
               const validatedUrl: string = safeAuthorUrl;
               return (
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <User className={UI_CLASSES.ICON_SM} />
+                <div className={cluster.compact}>
+                  <User className={iconSize.sm} />
                   <a
                     href={validatedUrl}
                     target="_blank"
@@ -166,20 +166,20 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
               );
             })()}
           {'date_added' in item && item.date_added && (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Calendar className={UI_CLASSES.ICON_SM} />
+            <div className={cluster.compact}>
+              <Calendar className={iconSize.sm} />
               <span>{formatDate(item.date_added)}</span>
             </div>
           )}
           {typeof viewCount === 'number' && viewCount > 0 && (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Eye className={UI_CLASSES.ICON_SM} />
+            <div className={cluster.compact}>
+              <Eye className={iconSize.sm} />
               <span>{formatViewCount(viewCount)}</span>
             </div>
           )}
           {typeof copyCount === 'number' && copyCount > 0 && (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Copy className={UI_CLASSES.ICON_SM} />
+            <div className={cluster.compact}>
+              <Copy className={iconSize.sm} />
               <span>{formatCopyCount(copyCount)}</span>
             </div>
           )}
@@ -187,8 +187,8 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
       )}
       {/* Tags */}
       {hasTags && tags.length > 0 && (
-        <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-          <Tag className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} />
+        <div className="flex flex-wrap gap-2">
+          <Tag className={`${iconSize.sm} text-muted-foreground`} />
           {tags.map((tag) => (
             <UnifiedBadge key={tag} variant="base" style="outline" className="text-xs">
               {tag}

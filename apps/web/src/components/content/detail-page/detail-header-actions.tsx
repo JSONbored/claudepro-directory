@@ -45,8 +45,10 @@ import {
   FileText,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
+import { iconLeading, badge } from '@heyclaude/web-runtime/design-system';
 import type { ContentItem, CopyType } from '@heyclaude/web-runtime/types/component.types';
-import { STATE_PATTERNS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { toasts } from '@heyclaude/web-runtime/ui';
+import { hoverText } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
@@ -392,9 +394,9 @@ export function DetailHeaderActions({
           variant="ghost"
           size="sm"
           onClick={() => router.back()}
-          className={`text-muted-foreground ${STATE_PATTERNS.HOVER_TEXT_FOREGROUND} -ml-2`}
+          className={`text-muted-foreground ${hoverText.foreground} -ml-2`}
         >
-          <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
+          <ArrowLeft className={iconLeading.sm} />
           Back
         </Button>
       </motion.div>
@@ -408,11 +410,11 @@ export function DetailHeaderActions({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={`${UI_CLASSES.TEXT_BADGE} font-medium`}
+              className={`${badge.default} font-medium`}
             >
               {typeName}
             </UnifiedBadge>
-            <UnifiedBadge variant="base" style="outline" className={UI_CLASSES.TEXT_BADGE}>
+            <UnifiedBadge variant="base" style="outline" className={badge.default}>
               {category}
             </UnifiedBadge>
           </div>
@@ -452,7 +454,7 @@ export function DetailHeaderActions({
                 }}
                 className="w-full"
               >
-                <Download className={UI_CLASSES.ICON_SM_LEADING} />
+                <Download className={iconLeading.sm} />
                 {category === Constants.public.Enums.content_category[1] ? 'Download .mcpb' : 'Download'}
               </Button>
             </motion.div>
@@ -469,12 +471,12 @@ export function DetailHeaderActions({
               >
                 {pinned ? (
                   <>
-                    <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
+                    <Bookmark className={iconLeading.sm} />
                     Pinned
                   </>
                 ) : (
                   <>
-                    <BookmarkPlus className={UI_CLASSES.ICON_SM_LEADING} />
+                    <BookmarkPlus className={iconLeading.sm} />
                     Pin
                   </>
                 )}
@@ -501,7 +503,7 @@ export function DetailHeaderActions({
             className="w-full justify-start text-muted-foreground"
             onClick={openPinboardDrawer}
           >
-            <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
+            <Bookmark className={iconLeading.sm} />
             View pinboard ({pinnedItems.length})
           </Button>
 
@@ -524,7 +526,7 @@ export function DetailHeaderActions({
                       </>
                     ) : (
                       <>
-                        <Copy className={UI_CLASSES.ICON_SM_LEADING} />
+                        <Copy className={iconLeading.sm} />
                         Copy Content
                       </>
                     )}

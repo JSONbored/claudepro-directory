@@ -4,8 +4,8 @@
 
 'use client';
 
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import { Bell } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
@@ -47,7 +47,7 @@ export function NotificationToastHandler() {
     if (toShow) {
       toast(toShow.title, {
         description: toShow.message,
-        icon: <Bell className={UI_CLASSES.ICON_SM} />,
+        icon: <Bell className={iconSize.sm} />,
         duration: 5000,
         action: toShow.action_label
           ? {

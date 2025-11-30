@@ -1,6 +1,7 @@
 'use client';
 
 import { formatRelativeDate, type JobType, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { cluster, stack, iconSize, iconLeading, cardHeader, cardBody, badge, marginBottom, jobTypeBadge } from '@heyclaude/web-runtime/design-system';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   Building,
@@ -11,7 +12,6 @@ import {
   Star,
 } from '@heyclaude/web-runtime/icons';
 import type { JobCardProps } from '@heyclaude/web-runtime/types/component.types';
-import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
@@ -69,7 +69,7 @@ export function JobCard({ job }: JobCardProps) {
         <HighlightedText
           html={job.description_highlighted}
           fallback={job.description}
-          className={UI_CLASSES.TEXT_CARD_DESCRIPTION}
+          className="text-sm text-muted-foreground"
         />
       );
     }
@@ -78,25 +78,25 @@ export function JobCard({ job }: JobCardProps) {
 
   return (
     <Card
-      className={`${UI_CLASSES.CARD_GRADIENT_HOVER} relative ${
+      className={`group relative transition-all hover:shadow-lg hover:border-accent/20 ${
         isFeatured
-          ? `${UI_CLASSES.JOB_FEATURED_BORDER} ${UI_CLASSES.JOB_FEATURED_GRADIENT} ${UI_CLASSES.JOB_FEATURED_GLOW}`
+          ? 'border-amber-400/50 bg-gradient-to-br from-amber-50/10 to-transparent shadow-amber-500/5'
           : ''
       }`}
     >
       {isFeatured && (
         <div className="-top-2 -right-2 absolute z-10">
-          <UnifiedBadge variant="base" style="default" className={UI_CLASSES.JOB_FEATURED_BADGE}>
-            <Star className={UI_CLASSES.ICON_XS_LEADING} />
+          <UnifiedBadge variant="base" style="default" className="bg-amber-500 text-white shadow-lg">
+            <Star className={iconLeading.xs} />
             Featured
           </UnifiedBadge>
         </div>
       )}
 
-      <CardHeader className={UI_CLASSES.CARD_HEADER_DEFAULT}>
+      <CardHeader className={cardHeader.default}>
         <div className={'flex items-start justify-between'}>
           <div className="flex-1">
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
+            <div className={`${cluster.default} mb-2`}>
               {job.company_logo && (
                 <Image
                   src={job.company_logo}
@@ -109,46 +109,46 @@ export function JobCard({ job }: JobCardProps) {
               )}
               <div>
                 <CardTitle
-                  className={`${UI_CLASSES.TEXT_CARD_TITLE} text-xl transition-colors-smooth group-hover:text-accent`}
+                  className="text-lg font-semibold text-xl transition-colors-smooth group-hover:text-accent"
                 >
                   <Link href={`/jobs/${job.slug}`}>{highlightedTitle}</Link>
                 </CardTitle>
                 <div
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_METADATA}`}
+                  className={`${cluster.compact} text-xs text-muted-foreground`}
                 >
-                  <Building className={UI_CLASSES.ICON_SM} />
+                  <Building className={iconSize.sm} />
                   <span className="font-medium">{job.company}</span>
                 </div>
               </div>
             </div>
 
-            <div className={`${UI_CLASSES.FLEX_WRAP_GAP_3} text-muted-foreground text-sm`}>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                <MapPin className={UI_CLASSES.ICON_SM} />
+            <div className="flex flex-wrap gap-3 text-muted-foreground text-sm">
+              <div className={cluster.tight}>
+                <MapPin className={iconSize.sm} />
                 {job.location}
               </div>
               {job.posted_at && (
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                  <Clock className={UI_CLASSES.ICON_SM} />
+                <div className={cluster.tight}>
+                  <Clock className={iconSize.sm} />
                   {formatRelativeDate(job.posted_at)}
                 </div>
               )}
               {job.salary && (
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                  <DollarSign className={UI_CLASSES.ICON_SM} />
+                <div className={cluster.tight}>
+                  <DollarSign className={iconSize.sm} />
                   {job.salary}
                 </div>
               )}
             </div>
           </div>
 
-          <div className={`flex flex-col items-end ${UI_CLASSES.SPACE_COMPACT}`}>
+          <div className={`flex flex-col items-end ${stack.compact}`}>
             {job.type && (
               <UnifiedBadge
                 variant="base"
                 style="default"
                 className={
-                  BADGE_COLORS.jobType[job.type as JobType] || 'bg-muted text-muted-foreground'
+                  jobTypeBadge[job.type as JobType] || 'bg-muted text-muted-foreground'
                 }
               >
                 {job.type.replace('-', ' ')}
@@ -163,30 +163,30 @@ export function JobCard({ job }: JobCardProps) {
         </div>
       </CardHeader>
 
-      <CardContent className={UI_CLASSES.CARD_CONTENT_DEFAULT}>
-        <p className={`${UI_CLASSES.MARGIN_DEFAULT} line-clamp-2`}>{highlightedDescription}</p>
+      <CardContent className={cardBody.default}>
+        <p className={`${marginBottom.comfortable} line-clamp-2`}>{highlightedDescription}</p>
 
-        <div className={UI_CLASSES.MARGIN_DEFAULT}>
-          <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
+        <div className={marginBottom.comfortable}>
+          <div className="flex flex-wrap gap-2">
             {(job.tags || []).slice(0, 4).map((tag: string) => (
               <UnifiedBadge
                 key={tag}
                 variant="base"
                 style="outline"
-                className={UI_CLASSES.TEXT_BADGE}
+                className={badge.default}
               >
                 {tag}
               </UnifiedBadge>
             ))}
             {Array.isArray(job.tags) && job.tags.length > 4 && (
-              <UnifiedBadge variant="base" style="outline" className={UI_CLASSES.TEXT_BADGE}>
+              <UnifiedBadge variant="base" style="outline" className={badge.default}>
                 +{job.tags.length - 4} more
               </UnifiedBadge>
             )}
           </div>
         </div>
 
-        <div className={`flex ${UI_CLASSES.SPACE_DEFAULT}`}>
+        <div className={`flex ${stack.comfortable}`}>
           <Button
             asChild={true}
             className="flex-1"
@@ -217,7 +217,7 @@ export function JobCard({ job }: JobCardProps) {
               return (
                 <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
                   Apply Now
-                  <ExternalLink className={`ml-2 ${UI_CLASSES.ICON_SM}`} />
+                  <ExternalLink className={`ml-2 ${iconSize.sm}`} />
                 </a>
               );
             })()}

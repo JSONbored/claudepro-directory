@@ -13,7 +13,7 @@ import  {
   type DisplayableContent,
   type HomepageContentItem,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES, UnifiedBadge  } from '@heyclaude/web-runtime/ui';
+import { UnifiedBadge  } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
@@ -113,12 +113,12 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
               Trending Configurations
             </h1>
 
-            <p className={UI_CLASSES.TEXT_HEADING_LARGE}>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
               Discover the most popular and trending Claude configurations in our community. Stay up
               to date with what developers are using and loving.
             </p>
 
-            <ul className={`${UI_CLASSES.FLEX_WRAP_GAP_2} list-none justify-center`}>
+            <ul className="flex flex-wrap gap-2 list-none justify-center">
               <li>
                 <UnifiedBadge variant="base" style="secondary">
                   <Clock className="mr-1 h-3 w-3" aria-hidden="true" />

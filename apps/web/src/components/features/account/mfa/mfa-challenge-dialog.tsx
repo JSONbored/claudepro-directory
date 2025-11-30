@@ -10,7 +10,8 @@ import { createMFAChallenge, listMFAFactors, verifyMFAChallenge } from '@heyclau
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
-import { errorToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { iconLeading, iconSize } from '@heyclaude/web-runtime/design-system';
+import { errorToasts } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -160,7 +161,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
       <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Shield className={UI_CLASSES.ICON_SM} />
+            <Shield className={iconSize.sm} />
             Two-Factor Authentication Required
           </DialogTitle>
           <DialogDescription>
@@ -170,14 +171,14 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
 
         {error && (
           <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-destructive text-sm">
-            <AlertCircle className={UI_CLASSES.ICON_SM} />
+            <AlertCircle className={iconSize.sm} />
             <span>{error}</span>
           </div>
         )}
 
         {loading && factors.length === 0 ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className={`${UI_CLASSES.ICON_XL} animate-spin text-muted-foreground`} />
+            <Loader2 className={`${iconSize.xl} animate-spin text-muted-foreground`} />
           </div>
         ) : (
           <div className="space-y-4">
@@ -241,7 +242,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
             >
               {loading ? (
                 <>
-                  <Loader2 className={`${UI_CLASSES.ICON_SM_LEADING} animate-spin`} />
+                  <Loader2 className={`${iconLeading.sm} animate-spin`} />
                   Verifying...
                 </>
               ) : (

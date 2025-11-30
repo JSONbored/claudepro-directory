@@ -1,7 +1,7 @@
 'use client';
 
+import { between } from '@heyclaude/web-runtime/design-system';
 import { Clock, Trash, X } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -99,7 +99,7 @@ export function RecentlyViewedMobileTray() {
                   key={`${item.category}-${item.slug}`}
                   className="rounded-xl border border-border/50 p-4"
                 >
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  <div className={between.center}>
                     <div>
                       <p className="text-muted-foreground text-xs uppercase">{item.category}</p>
                       <Link

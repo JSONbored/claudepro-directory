@@ -3,7 +3,6 @@ import  { type CreateJobInput } from '@heyclaude/web-runtime';
 import { createJob } from '@heyclaude/web-runtime/actions';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
@@ -145,7 +144,7 @@ export default async function NewJobPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className={`mb-2 ${UI_CLASSES.HEADING_H2}`}>Post a Job</h1>
+        <h1 className="mb-2 font-bold text-3xl tracking-tight">Post a Job</h1>
         <p className="text-muted-foreground">
           Create a new job listing to reach talented developers
         </p>

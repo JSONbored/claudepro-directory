@@ -28,7 +28,7 @@ type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSection = ContentRow['metadata'];
 
-import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { changelogBadge } from '@heyclaude/web-runtime/design-system';
 import { SanitizedHTML } from './sanitized-html';
 
 /**
@@ -92,13 +92,13 @@ export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps
     <article className={'max-w-none space-y-6'}>
       {/* Category Badges */}
       {nonEmptyCategories.length > 0 && (
-        <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} py-2`}>
+        <div className="flex flex-wrap gap-2 py-2">
           {nonEmptyCategories.map((category) => (
             <UnifiedBadge
               key={category}
               variant="base"
               style="outline"
-              className={`${BADGE_COLORS.changelogCategory[category as keyof typeof BADGE_COLORS.changelogCategory]} font-medium`}
+              className={`${changelogBadge[category as keyof typeof changelogBadge]} font-medium`}
             >
               {category}
             </UnifiedBadge>

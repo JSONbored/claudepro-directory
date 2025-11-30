@@ -9,7 +9,8 @@
  * @module lib/components/loading-factory
  */
 
-import { UI_CLASSES } from '../../constants.ts';
+// Design System imports
+import { grid, stack, cluster, padding, marginBottom } from '../../../design-system/styles/layout.ts';
 import { getSkeletonKeys } from '../../../skeleton-keys.ts';
 import {
   ConfigCardSkeleton,
@@ -49,7 +50,7 @@ const SKELETON_CONFIGS: Record<string, SkeletonConfig> = {
   grid3: {
     cardsPerRow: 3,
     totalCards: 9,
-    gridClass: UI_CLASSES.GRID_RESPONSIVE_3_TIGHT,
+    gridClass: grid.contentTight,
   },
   // Wide 2-column grid (guides, jobs)
   grid2: {
@@ -61,7 +62,7 @@ const SKELETON_CONFIGS: Record<string, SkeletonConfig> = {
   list: {
     cardsPerRow: 1,
     totalCards: 8,
-    gridClass: UI_CLASSES.SPACE_Y_4,
+    gridClass: stack.comfortable,
   },
 } as const;
 
@@ -80,13 +81,13 @@ export function CategoryLoading({
   const config = SKELETON_CONFIGS[selectedVariant] as SkeletonConfig;
 
   return (
-    <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
+    <div className={`container mx-auto ${padding.xDefault} py-8`}>
       {/* Header */}
       <PageHeaderSkeleton />
 
       {/* Search bar (optional) */}
       {showSearch && (
-        <div className={UI_CLASSES.MARGIN_RELAXED}>
+        <div className={marginBottom.relaxed}>
           <Skeleton size="lg" width="3xl" className="h-12" />
         </div>
       )}
@@ -110,23 +111,23 @@ export function DetailPageLoading() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-border/50 border-b bg-card/30">
-        <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
+        <div className={`container mx-auto ${padding.xDefault} py-8`}>
           {/* Back button */}
-          <Skeleton size="sm" width="sm" className={UI_CLASSES.MARGIN_COMFORTABLE} />
+          <Skeleton size="sm" width="sm" className={marginBottom.comfortable} />
 
           {/* Title section */}
           <div
-            className={`${UI_CLASSES.MARGIN_COMFORTABLE} flex items-start ${UI_CLASSES.SPACE_COMFORTABLE}`}
+            className={`${marginBottom.comfortable} flex items-start ${cluster.default}`}
           >
             <Skeleton size="xl" width="xs" className="shrink-0" />
-            <div className={`flex-1 ${UI_CLASSES.SPACE_Y_4}`}>
+            <div className={`flex-1 ${stack.comfortable}`}>
               <Skeleton size="xl" width="3/4" />
               <Skeleton size="md" width="3xl" />
             </div>
           </div>
 
           {/* Metadata badges */}
-          <div className={`flex flex-wrap ${UI_CLASSES.SPACE_COMPACT}`}>
+          <div className={`flex flex-wrap ${cluster.compact}`}>
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />
@@ -136,14 +137,14 @@ export function DetailPageLoading() {
 
       {/* Content with sidebar */}
       <div
-        className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} ${UI_CLASSES.PADDING_Y_SECTION}`}
+        className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}
       >
-        <div className={`grid grid-cols-1 ${UI_CLASSES.SPACE_LOOSE} lg:grid-cols-3`}>
+        <div className={`grid grid-cols-1 ${cluster.loose} lg:grid-cols-3`}>
           {/* Main content */}
-          <div className={`${UI_CLASSES.SPACE_Y_6} lg:col-span-2`}>
+          <div className={`${stack.loose} lg:col-span-2`}>
             {/* Content card */}
             <div
-              className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
+              className={`${stack.comfortable} rounded-lg border ${padding.comfortable}`}
             >
               <Skeleton size="md" width="3xl" />
               <Skeleton size="sm" width="3xl" />
@@ -153,10 +154,10 @@ export function DetailPageLoading() {
 
             {/* Code block skeleton */}
             <div
-              className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
+              className={`${stack.comfortable} rounded-lg border ${padding.comfortable}`}
             >
               <Skeleton size="sm" width="sm" />
-              <div className={UI_CLASSES.SPACE_Y_2}>
+              <div className={stack.tight}>
                 {Array.from({ length: 8 }).map((_, i) => (
                   <Skeleton key={KEYS_8[i]} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
                 ))}
@@ -165,9 +166,9 @@ export function DetailPageLoading() {
           </div>
 
           {/* Sidebar */}
-          <div className={UI_CLASSES.SPACE_Y_6}>
+          <div className={stack.loose}>
             <div
-              className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
+              className={`${stack.comfortable} rounded-lg border ${padding.comfortable}`}
             >
               <Skeleton size="md" width="sm" />
               <Skeleton size="sm" width="3xl" />
@@ -188,19 +189,19 @@ export function GuideDetailLoading() {
   return (
     <div className="min-h-screen bg-background">
       <div className="border-border/50 border-b bg-card/30">
-        <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
-          <Skeleton size="sm" width="sm" className={UI_CLASSES.MARGIN_COMFORTABLE} />
+        <div className={`container mx-auto ${padding.xDefault} py-8`}>
+          <Skeleton size="sm" width="sm" className={marginBottom.comfortable} />
           <div className="max-w-4xl">
             <div
-              className={`${UI_CLASSES.MARGIN_COMFORTABLE} flex items-start ${UI_CLASSES.SPACE_COMFORTABLE}`}
+              className={`${marginBottom.comfortable} flex items-start ${cluster.default}`}
             >
               <Skeleton size="xl" width="xs" />
-              <div className={`flex-1 ${UI_CLASSES.SPACE_Y_4}`}>
+              <div className={`flex-1 ${stack.comfortable}`}>
                 <Skeleton size="xl" width="3/4" />
                 <Skeleton size="md" width="3xl" />
               </div>
             </div>
-            <div className={`flex flex-wrap ${UI_CLASSES.SPACE_COMPACT}`}>
+            <div className={`flex flex-wrap ${cluster.compact}`}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={KEYS_5[i]} size="sm" width="xs" rounded="full" />
               ))}
@@ -210,21 +211,21 @@ export function GuideDetailLoading() {
       </div>
 
       <div
-        className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} ${UI_CLASSES.PADDING_Y_SECTION}`}
+        className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}
       >
-        <div className={`grid grid-cols-1 ${UI_CLASSES.SPACE_LOOSE} lg:grid-cols-3`}>
-          <div className={`${UI_CLASSES.SPACE_Y_6} lg:col-span-2`}>
+        <div className={`grid grid-cols-1 ${cluster.loose} lg:grid-cols-3`}>
+          <div className={`${stack.loose} lg:col-span-2`}>
             <div
-              className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
+              className={`${stack.comfortable} rounded-lg border ${padding.comfortable}`}
             >
               {Array.from({ length: 12 }).map((_, i) => (
                 <Skeleton key={KEYS_12[i]} size="sm" width={i % 4 === 0 ? '2/3' : '3xl'} />
               ))}
             </div>
           </div>
-          <div className={UI_CLASSES.SPACE_Y_6}>
+          <div className={stack.loose}>
             <div
-              className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
+              className={`${stack.comfortable} rounded-lg border ${padding.comfortable}`}
             >
               <Skeleton size="md" width="sm" />
               {Array.from({ length: 3 }).map((_, i) => (
@@ -244,12 +245,12 @@ export function GuideDetailLoading() {
  */
 export function SearchResultsLoading() {
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className={stack.loose}>
       {/* Results count */}
       <Skeleton size="sm" width="sm" />
 
       {/* Results grid */}
-      <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
+      <div className={grid.contentTight}>
         {Array.from({ length: 9 }).map((_, i) => (
           <ConfigCardSkeleton key={KEYS_9[i]} />
         ))}
@@ -266,22 +267,22 @@ export function HomePageLoading() {
     <div className="min-h-screen bg-background">
       {/* Hero */}
       <section className="border-border/50 border-b">
-        <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-16 text-center`}>
+        <div className={`container mx-auto ${padding.xDefault} py-16 text-center`}>
           <Skeleton
             size="xl"
             width="3/4"
-            className={`mx-auto ${UI_CLASSES.MARGIN_COMFORTABLE} h-16`}
+            className={`mx-auto ${marginBottom.comfortable} h-16`}
           />
           <Skeleton size="md" width="2/3" className="mx-auto" />
         </div>
       </section>
 
       {/* Search */}
-      <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
+      <div className={`container mx-auto ${padding.xDefault} py-8`}>
         <div className="mx-auto max-w-4xl">
-          <Skeleton size="lg" width="3xl" className={`${UI_CLASSES.MARGIN_COMFORTABLE} h-14`} />
+          <Skeleton size="lg" width="3xl" className={`${marginBottom.comfortable} h-14`} />
           {/* Stats */}
-          <div className={`flex flex-wrap justify-center ${UI_CLASSES.SPACE_COMFORTABLE}`}>
+          <div className={`flex flex-wrap justify-center ${cluster.default}`}>
             {Array.from({ length: 7 }).map((_, i) => (
               <Skeleton key={KEYS_7[i]} size="sm" width="sm" />
             ))}
@@ -290,14 +291,14 @@ export function HomePageLoading() {
       </div>
 
       {/* Content sections */}
-      <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} pb-16`}>
+      <div className={`container mx-auto ${padding.xDefault} pb-16`}>
         {Array.from({ length: 3 }).map((_, sectionIndex) => (
-          <div key={KEYS_3[sectionIndex]} className={UI_CLASSES.MARGIN_SECTION}>
-            <div className={`${UI_CLASSES.MARGIN_COMFORTABLE} flex items-center justify-between`}>
+          <div key={KEYS_3[sectionIndex]} className={marginBottom.section}>
+            <div className={`${marginBottom.comfortable} flex items-center justify-between`}>
               <Skeleton size="lg" width="lg" />
               <Skeleton size="sm" width="sm" />
             </div>
-            <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
+            <div className={grid.responsive3}>
               {Array.from({ length: 6 }).map((_, i) => (
                 <ConfigCardSkeleton key={KEYS_6[i]} />
               ))}
@@ -314,7 +315,7 @@ export function HomePageLoading() {
  */
 export function ChangelogListLoading() {
   return (
-    <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
+    <div className={`container mx-auto ${padding.xDefault} py-8`}>
       <PageHeaderSkeleton />
       <ContentListSkeleton count={8} />
     </div>
@@ -442,20 +443,20 @@ export function createCategoryLoading(config: CategoryLoadingConfig = {}) {
 
   function CustomCategoryLoading() {
     return (
-      <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
+      <div className={`container mx-auto ${padding.xDefault} py-8`}>
         {/* Header */}
         <PageHeaderSkeleton />
 
         {/* Search bar (optional) */}
         {showSearch && (
-          <div className={UI_CLASSES.MARGIN_RELAXED}>
+          <div className={marginBottom.relaxed}>
             <Skeleton size="lg" width="3xl" className="h-12" />
           </div>
         )}
 
         {/* Filter bar (optional) */}
         {showFilters && (
-          <div className={`${UI_CLASSES.MARGIN_COMFORTABLE} flex flex-wrap gap-2`}>
+          <div className={`${marginBottom.comfortable} flex flex-wrap gap-2`}>
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="sm" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />

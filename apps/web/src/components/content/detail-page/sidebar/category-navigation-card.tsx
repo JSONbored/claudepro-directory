@@ -58,8 +58,9 @@
  */
 
 import { nonEmptyString } from '@heyclaude/shared-runtime';
+import { between, iconSize } from '@heyclaude/web-runtime/design-system';
 import type { LucideIcon } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { z } from 'zod';
 import {
@@ -106,7 +107,7 @@ export function CategoryNavigationCard({
   // Database CHECK constraint validates structure - no runtime validation needed
   return (
     <TooltipProvider delayDuration={300}>
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} px-1`}>
+      <div className={`${between.center} px-1`}>
         {Object.entries(categories).map(([key, info]) => {
           const Icon = info.icon;
           const isActive = currentCategory === key;
@@ -122,7 +123,7 @@ export function CategoryNavigationCard({
                       : `text-muted-foreground ${info.color || 'hover:bg-muted/50 hover:text-primary'}`
                   }`}
                 >
-                  <Icon className={UI_CLASSES.ICON_SM} />
+                  <Icon className={iconSize.sm} />
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="bottom" className={`${DIMENSIONS.TOOLTIP_MAX} text-xs`}>

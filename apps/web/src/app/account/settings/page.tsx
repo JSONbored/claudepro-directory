@@ -11,8 +11,9 @@ import {
   getUserSettings,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { between } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, Button ,
+import { Button ,
   Card,
   CardContent,
   CardDescription,
@@ -175,7 +176,7 @@ export default async function SettingsPage() {
       {/* Profile Information */}
       <Card>
         <CardHeader>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+          <div className={between.center}>
             <div>
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>Update your public profile details</CardDescription>

@@ -5,7 +5,7 @@
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import type { ComparisonTableProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import {
   Card,
   CardContent,
@@ -52,7 +52,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
                   <td className="p-4">
                     {typeof item.option1 === 'boolean' ? (
                       item.option1 ? (
-                        <CheckCircle className={`${UI_CLASSES.ICON_MD} text-green-500`} />
+                        <CheckCircle className={`${iconSize.md} text-green-500`} />
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )
@@ -63,7 +63,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
                   <td className="p-4">
                     {typeof item.option2 === 'boolean' ? (
                       item.option2 ? (
-                        <CheckCircle className={`${UI_CLASSES.ICON_MD} text-green-500`} />
+                        <CheckCircle className={`${iconSize.md} text-green-500`} />
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )
@@ -75,7 +75,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
                     <td className="p-4">
                       {typeof item.option3 === 'boolean' ? (
                         item.option3 ? (
-                          <CheckCircle className={`${UI_CLASSES.ICON_MD} text-green-500`} />
+                          <CheckCircle className={`${iconSize.md} text-green-500`} />
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )

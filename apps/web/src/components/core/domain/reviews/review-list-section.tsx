@@ -12,8 +12,9 @@ import {
   logUnhandledPromise,
 } from '@heyclaude/web-runtime/core';
 import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';
+import { between, cluster, buttonGhost } from '@heyclaude/web-runtime/design-system';
 import type { ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { BaseCard } from '@heyclaude/web-runtime/ui';
@@ -172,9 +173,9 @@ export function ReviewListSection({
       )}
 
       {/* Sort Controls */}
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
+      <div className={between.center}>
         <h3 className="font-semibold text-lg">Reviews ({aggregateRating?.count ?? 0})</h3>
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+        <div className={cluster.compact}>
           <Label htmlFor={sortSelectId} className="text-muted-foreground text-sm">
             Sort by:
           </Label>
@@ -293,8 +294,8 @@ function ReviewCardItem({
       renderContent={() => (
         <div className="space-y-3">
           {/* Rating + Date */}
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+          <div className={between.center}>
+            <div className={cluster.tight}>
               <StarDisplay rating={review.rating ?? 0} size="sm" />
               <span className="ml-1 text-muted-foreground text-xs">
                 {(review.rating ?? 0).toFixed(1)}
@@ -324,7 +325,7 @@ function ReviewCardItem({
           )}
 
           {/* Actions */}
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} pt-2`}>
+          <div className={`${cluster.compact} pt-2`}>
             {/* Helpful Button */}
             {!isOwnReview && (
               <Button
@@ -342,7 +343,7 @@ function ReviewCardItem({
                     toasts.error.reviewActionFailed('vote');
                   }
                 }}
-                className={UI_CLASSES.BUTTON_GHOST_ICON}
+                className={buttonGhost.icon}
               >
                 <ThumbsUp className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
                 Helpful ({review.helpful_count ?? 0})
@@ -356,7 +357,7 @@ function ReviewCardItem({
                   variant="ghost"
                   size="sm"
                   onClick={onEdit}
-                  className={UI_CLASSES.BUTTON_GHOST_ICON}
+                  className={buttonGhost.icon}
                 >
                   <Edit className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
                   Edit
@@ -365,7 +366,7 @@ function ReviewCardItem({
                   variant="ghost"
                   size="sm"
                   onClick={onDelete}
-                  className={`${UI_CLASSES.BUTTON_GHOST_ICON} text-destructive hover:text-destructive`}
+                  className={`${buttonGhost.icon} text-destructive hover:text-destructive`}
                 >
                   <Trash className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
                   Delete

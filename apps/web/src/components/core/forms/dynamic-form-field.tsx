@@ -25,7 +25,8 @@ import type {
   FormFieldConfig,
   GridColumn,
 } from '@heyclaude/web-runtime/types/component.types';
-import { getResponsiveGridClass, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { iconSize, stack, absolute } from '@heyclaude/web-runtime/design-system';
+import { getResponsiveGridClass } from '@heyclaude/web-runtime/ui';
 import { Input } from '@heyclaude/web-runtime/ui';
 import { Label } from '@heyclaude/web-runtime/ui';
 import { Textarea } from '@heyclaude/web-runtime/ui';
@@ -66,15 +67,15 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
   const iconPosition = field.iconPosition || 'left';
 
   return (
-    <div className={`${UI_CLASSES.FORM_FIELD_SPACING} ${gridClass}`}>
+    <div className={`${stack.compact} ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       {Icon ? (
         <div className="relative">
           {iconPosition === 'left' && (
             <div
-              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_LEFT} -translate-y-1/2 text-muted-foreground`}
+              className={`${absolute.topHalfLeft} -translate-y-1/2 text-muted-foreground`}
             >
-              <Icon className={UI_CLASSES.ICON_SM} />
+              <Icon className={iconSize.sm} />
             </div>
           )}
           <Input
@@ -87,9 +88,9 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
           />
           {iconPosition === 'right' && (
             <div
-              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_RIGHT} -translate-y-1/2 text-muted-foreground`}
+              className={`${absolute.topHalfRight} -translate-y-1/2 text-muted-foreground`}
             >
-              <Icon className={UI_CLASSES.ICON_SM} />
+              <Icon className={iconSize.sm} />
             </div>
           )}
         </div>
@@ -118,7 +119,7 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
   const monoClass = field.monospace ? 'font-mono text-sm' : '';
 
   return (
-    <div className={`${UI_CLASSES.FORM_FIELD_SPACING} ${gridClass}`}>
+    <div className={`${stack.compact} ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <Textarea
         id={fieldId}
@@ -144,7 +145,7 @@ function NumberFieldRenderer({ field, formId }: FieldRendererProps) {
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
 
   return (
-    <div className={`${UI_CLASSES.FORM_FIELD_SPACING} ${gridClass}`}>
+    <div className={`${stack.compact} ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <Input
         id={fieldId}
@@ -172,7 +173,7 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
 
   return (
-    <div className={`${UI_CLASSES.FORM_FIELD_SPACING} ${gridClass}`}>
+    <div className={`${stack.compact} ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <select
         id={fieldId}

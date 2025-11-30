@@ -18,13 +18,14 @@
  */
 
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { cluster } from '@heyclaude/web-runtime/design-system';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge,
+import { UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
@@ -130,7 +131,7 @@ export default function ConfigRecommenderPage() {
             <div className="grid gap-6 md:grid-cols-3">
               <Card>
                 <CardHeader>
-                  <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
+                  <CardTitle className={`${cluster.compact} text-lg`}>
                     <span
                       className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm"
                     >
@@ -149,7 +150,7 @@ export default function ConfigRecommenderPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
+                  <CardTitle className={`${cluster.compact} text-lg`}>
                     <span
                       className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm"
                     >
@@ -168,7 +169,7 @@ export default function ConfigRecommenderPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
+                  <CardTitle className={`${cluster.compact} text-lg`}>
                     <span
                       className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm"
                     >
@@ -193,48 +194,48 @@ export default function ConfigRecommenderPage() {
           <div className="mx-auto max-w-4xl">
             <Card className="border-accent/20 bg-accent/5">
               <CardHeader>
-                <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <CardTitle className={cluster.compact}>
                   <BarChart className="h-5 w-5 text-primary" />
                   What You'll Get
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="grid gap-3 sm:grid-cols-2">
-                  <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
+                  <li className="flex items-start gap-2">
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
                     />
                     <span className="text-sm">
                       Personalized match scores for each configuration
                     </span>
                   </li>
-                  <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
+                  <li className="flex items-start gap-2">
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
                     />
                     <span className="text-sm">Clear explanations of why each was recommended</span>
                   </li>
-                  <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
+                  <li className="flex items-start gap-2">
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
                     />
                     <span className="text-sm">Ranked results from best to good fit</span>
                   </li>
-                  <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
+                  <li className="flex items-start gap-2">
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
                     />
                     <span className="text-sm">Shareable results to discuss with your team</span>
                   </li>
-                  <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
+                  <li className="flex items-start gap-2">
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
                     />
                     <span className="text-sm">Direct links to setup guides and documentation</span>
                   </li>
-                  <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
+                  <li className="flex items-start gap-2">
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
                     />
                     <span className="text-sm">Filter results by category and use case</span>
                   </li>

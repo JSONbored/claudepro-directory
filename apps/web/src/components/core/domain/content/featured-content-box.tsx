@@ -14,7 +14,8 @@ import type {
   FAQProps,
   InfoBoxProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { cn, INFOBOX_COLORS, INFOBOX_ICON_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { between, cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cn, INFOBOX_COLORS, INFOBOX_ICON_COLORS } from '@heyclaude/web-runtime/ui';
 import { useCallback, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
@@ -110,17 +111,17 @@ function AccordionBox(props: AccordionVariant) {
               aria-expanded={openItems.has(index)}
             >
               <CardHeader className="transition-colors hover:bg-muted/30">
-                <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} itemProp="name">
+                <CardTitle className={between.center} itemProp="name">
                   <span>{item.title}</span>
                   <div className="ml-4 shrink-0">
                     {openItems.has(index) ? (
                       <ChevronUp
-                        className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-transform`}
+                        className={`${iconSize.sm} text-muted-foreground transition-transform`}
                         aria-hidden="true"
                       />
                     ) : (
                       <ChevronDown
-                        className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-transform`}
+                        className={`${iconSize.sm} text-muted-foreground transition-transform`}
                         aria-hidden="true"
                       />
                     )}
@@ -187,10 +188,10 @@ function InfoBoxComponent(props: InfoBoxVariant) {
   const variantKey = currentVariant.toUpperCase() as keyof typeof INFOBOX_COLORS;
 
   const iconMap: Record<'info' | 'warning' | 'success' | 'error', React.ReactElement> = {
-    info: <Info className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.INFO)} />,
-    warning: <AlertTriangle className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.WARNING)} />,
-    success: <CheckCircle className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.SUCCESS)} />,
-    error: <AlertTriangle className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.ERROR)} />,
+    info: <Info className={cn(iconSize.md, INFOBOX_ICON_COLORS.INFO)} />,
+    warning: <AlertTriangle className={cn(iconSize.md, INFOBOX_ICON_COLORS.WARNING)} />,
+    success: <CheckCircle className={cn(iconSize.md, INFOBOX_ICON_COLORS.SUCCESS)} />,
+    error: <AlertTriangle className={cn(iconSize.md, INFOBOX_ICON_COLORS.ERROR)} />,
   };
 
   return (
@@ -200,7 +201,7 @@ function InfoBoxComponent(props: InfoBoxVariant) {
       className={cn('my-6 rounded-r-lg border-l-4 p-6', INFOBOX_COLORS[variantKey])}
     >
       {title && (
-        <div className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'mb-3')}>
+        <div className={cn(cluster.compact, 'mb-3')}>
           {iconMap[currentVariant]}
           <h4 className="font-semibold text-foreground" itemProp="name">
             {title}
@@ -220,12 +221,12 @@ function CalloutComponent(props: CalloutVariant) {
 
   return (
     <Alert className="my-6">
-      <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-        {type === 'info' && <Info className={UI_CLASSES.ICON_SM} />}
-        {type === 'warning' && <AlertTriangle className={UI_CLASSES.ICON_SM} />}
-        {type === 'error' && <AlertTriangle className={UI_CLASSES.ICON_SM} />}
-        {type === 'success' && <CheckCircle className={UI_CLASSES.ICON_SM} />}
-        {type === 'tip' && <Zap className={UI_CLASSES.ICON_SM} />}
+      <div className="flex items-start gap-3">
+        {type === 'info' && <Info className={iconSize.sm} />}
+        {type === 'warning' && <AlertTriangle className={iconSize.sm} />}
+        {type === 'error' && <AlertTriangle className={iconSize.sm} />}
+        {type === 'success' && <CheckCircle className={iconSize.sm} />}
+        {type === 'tip' && <Zap className={iconSize.sm} />}
         <div className="flex-1">
           {title && <AlertTitle>{title}</AlertTitle>}
           <AlertDescription className="mt-2">{children}</AlertDescription>

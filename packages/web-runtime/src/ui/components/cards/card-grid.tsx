@@ -39,7 +39,8 @@
 import { logUnhandledPromise } from '../../../entries/core.ts';
 import { useInfiniteScroll } from '../../../hooks/use-infinite-scroll.ts';
 import type { DisplayableContent } from '../../../types/component.types.ts';
-import { UI_CLASSES } from '../../constants.ts';
+// Design System imports
+import { grid } from '../../../design-system/styles/layout.ts';
 import { ErrorBoundary } from '../error-boundary.tsx';
 import { ConfigCard } from './config-card.tsx';
 import { motion } from 'motion/react';
@@ -98,10 +99,10 @@ type CardRenderingProps =
 export type UnifiedCardGridProps = BaseGridProps & CardRenderingProps;
 
 const GRID_VARIANTS: Record<GridVariant, string> = {
-  normal: UI_CLASSES.GRID_RESPONSIVE_3,
-  tight: UI_CLASSES.GRID_RESPONSIVE_3_TIGHT,
-  wide: UI_CLASSES.GRID_RESPONSIVE_4,
-  list: UI_CLASSES.GRID_RESPONSIVE_LIST,
+  normal: grid.responsive3,
+  tight: grid.contentTight,
+  wide: grid.responsive4,
+  list: grid.list,
 };
 
 /**

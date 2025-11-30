@@ -5,7 +5,8 @@
 
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@heyclaude/web-runtime/icons';
 import type { MetricsDisplayProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cluster, grid, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cn } from '@heyclaude/web-runtime/ui';
 
 // Lightweight Badge component for delta display
 function BadgeDelta({
@@ -17,11 +18,11 @@ function BadgeDelta({
 }) {
   const icon =
     deltaType === 'increase' ? (
-      <ArrowUpIcon className={UI_CLASSES.ICON_XS} />
+      <ArrowUpIcon className={iconSize.xs} />
     ) : deltaType === 'decrease' ? (
-      <ArrowDownIcon className={UI_CLASSES.ICON_XS} />
+      <ArrowDownIcon className={iconSize.xs} />
     ) : (
-      <MinusIcon className={UI_CLASSES.ICON_XS} />
+      <MinusIcon className={iconSize.xs} />
     );
 
   const colorClass =
@@ -68,7 +69,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
       )}
 
       {/* Grid layout - responsive columns */}
-      <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
+      <div className={grid.responsive3}>
         {validMetrics.map((metric, index) => {
           const metricLabel = metric.label || `Metric ${index + 1}`;
           const metricValue = metric.value;
@@ -108,7 +109,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
 
               {/* Change indicator */}
               {metricChange && (
-                <div className={`mt-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}>
+                <div className={`mt-4 ${cluster.compact}`}>
                   <BadgeDelta deltaType={deltaType} className="font-semibold" />
                   <span className="font-medium text-muted-foreground text-sm">{metricChange}</span>
                 </div>

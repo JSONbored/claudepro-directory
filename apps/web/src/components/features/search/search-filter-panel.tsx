@@ -13,8 +13,8 @@
  * - Apply/Clear actions
  */
 
+import { between, cluster } from '@heyclaude/web-runtime/design-system';
 import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { memo, useId } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -181,7 +181,7 @@ function SearchFilterPanelComponent({
         <fieldset className="space-y-3">
           <div className={'border-border/50 border-t pt-3'} />
           <div>
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-3`}>
+            <div className={`${between.center} mb-3`}>
               <legend className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Tags
               </legend>
@@ -200,7 +200,7 @@ function SearchFilterPanelComponent({
               className={'h-40 w-full rounded-md border border-border/50 p-4 md:h-48'}
               aria-label="Select tags to filter by"
             >
-              <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
+              <div className="flex flex-wrap gap-2">
                 {availableTags.map((tag) => (
                   <button
                     key={tag}
@@ -243,7 +243,7 @@ function SearchFilterPanelComponent({
           >
             Clear All Filters
           </Button>
-          <div className={UI_CLASSES.FLEX_GAP_2}>
+          <div className={cluster.compact}>
             {onCancel && (
               <Button
                 variant="outline"

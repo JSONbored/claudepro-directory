@@ -3,9 +3,9 @@
  * Shows average rating and distribution across 1-5 stars
  */
 
+import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
 import { Star } from '@heyclaude/web-runtime/icons';
 import type { ReviewHistogramProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import {
   ChartContainer,
   HorizontalBarChart,
@@ -46,8 +46,8 @@ export function ReviewRatingHistogram({
     return (
       <Card className="bg-muted/50 p-6">
         <div className="text-center">
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2 justify-center`}>
-            <Star className={`${UI_CLASSES.ICON_XL} text-muted-foreground/30`} aria-hidden="true" />
+          <div className={`${cluster.compact} mb-2 justify-center`}>
+            <Star className={`${iconSize.xl} text-muted-foreground/30`} aria-hidden="true" />
           </div>
           <p className="text-muted-foreground text-sm">No reviews yet. Be the first to review!</p>
         </div>
@@ -59,9 +59,9 @@ export function ReviewRatingHistogram({
     <Card className="p-6">
       {/* Header: Average Rating */}
       <div className="mb-6">
-        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
+        <div className={`${cluster.default} mb-2`}>
           <div className="font-bold text-4xl">{averageRating.toFixed(1)}</div>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+          <div className={cluster.tight}>
             <StarDisplay rating={averageRating} size="md" />
           </div>
         </div>

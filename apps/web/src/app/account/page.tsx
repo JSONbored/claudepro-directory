@@ -7,10 +7,11 @@ import {
   getContentDetailCore,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { cluster } from '@heyclaude/web-runtime/design-system';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import  { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
+import { NavLink, UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
@@ -263,7 +264,7 @@ export default async function AccountDashboard() {
             <CardTitle className="text-sm">Bookmarks</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+            <div className={cluster.compact}>
               <Bookmark className="h-5 w-5 text-primary" />
               <span className="font-bold text-3xl">{bookmarkCount ?? 0}</span>
             </div>
@@ -294,7 +295,7 @@ export default async function AccountDashboard() {
             <CardTitle className="text-sm">Member Since</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+            <div className={cluster.compact}>
               <Calendar className="h-5 w-5 text-primary" />
               <span className="font-bold text-3xl">{accountAge}</span>
             </div>

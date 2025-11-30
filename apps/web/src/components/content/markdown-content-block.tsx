@@ -49,7 +49,7 @@ import type {
   QuickReferenceProps,
   TLDRSummaryProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize, muted } from '@heyclaude/web-runtime/design-system';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { Avatar, AvatarFallback, AvatarImage } from '@heyclaude/web-runtime/ui';
 import {
@@ -122,7 +122,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
           </div>
           {logo && (
             <div className={'flex h-16 w-16 items-center justify-center rounded-lg bg-muted'}>
-              <BookOpen className={`${UI_CLASSES.ICON_XL} text-muted-foreground`} />
+              <BookOpen className={`${iconSize.xl} text-muted-foreground`} />
             </div>
           )}
         </div>
@@ -167,7 +167,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
                     </span>
                   )}
                 </p>
-                <p className={UI_CLASSES.TEXT_SM_MUTED}>{metric.label}</p>
+                <p className={`${muted.default} text-sm`}>{metric.label}</p>
               </div>
             ))}
           </div>
@@ -290,8 +290,8 @@ function TLDRVariant(props: TLDRSummaryProps) {
       className="my-8 border-primary border-l-4 bg-primary/5"
     >
       <CardHeader>
-        <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <Zap className={`${UI_CLASSES.ICON_MD} text-primary`} />
+        <CardTitle className={cluster.compact}>
+          <Zap className={`${iconSize.md} text-primary`} />
           {title}
         </CardTitle>
       </CardHeader>
@@ -385,8 +385,8 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
       className="my-8 border-accent border-l-4 bg-accent/5"
     >
       <CardHeader>
-        <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <BookOpen className={`${UI_CLASSES.ICON_MD} text-accent-foreground`} />
+        <CardTitle className={cluster.compact}>
+          <BookOpen className={`${iconSize.md} text-accent-foreground`} />
           {title}
         </CardTitle>
         {description && <CardDescription itemProp="description">{description}</CardDescription>}
@@ -398,10 +398,10 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
               key={`${item.label}-${index}`}
               itemScope={true}
               itemType="https://schema.org/PropertyValue"
-              className={`${UI_CLASSES.FLEX_COL_GAP_2} rounded-lg border bg-card/50 p-3 sm:flex-row sm:items-start sm:gap-4`}
+              className="flex flex-col gap-2 rounded-lg border bg-card/50 p-3 sm:flex-row sm:items-start sm:gap-4"
             >
               <div className="sm:w-1/3">
-                <dt itemProp="name" className={`font-medium ${UI_CLASSES.TEXT_SM_MUTED}`}>
+                <dt itemProp="name" className={`font-medium ${muted.default} text-sm`}>
                   {item.label}
                 </dt>
               </div>
@@ -409,7 +409,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
                 <dd itemProp="value" className="mb-1 font-semibold text-foreground">
                   {item.value}
                 </dd>
-                {item.description && <p className={UI_CLASSES.TEXT_SM_MUTED}>{item.description}</p>}
+                {item.description && <p className={`${muted.default} text-sm`}>{item.description}</p>}
               </div>
             </div>
           ))}

@@ -15,8 +15,12 @@
 
 import { UI_ANIMATION } from '../../config/unified-config.ts';
 import { X } from '../../icons.tsx';
-import { POSITION_PATTERNS, STATE_PATTERNS, UI_CLASSES } from '../constants.ts';
 import { cn } from '../utils.ts';
+// Design System imports
+import { iconSize } from '../../design-system/styles/icons.ts';
+import { heading, body } from '../../design-system/styles/typography.ts';
+import { fixed, absolute } from '../../design-system/styles/position.ts';
+import { focusRing } from '../../design-system/styles/interactive.ts';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -39,7 +43,7 @@ const DialogOverlay = ({
   <DialogPrimitive.Overlay ref={ref} asChild={true} {...props}>
     <motion.div
       className={cn(
-        `${POSITION_PATTERNS.FIXED_INSET} z-50 bg-black/80 backdrop-blur-sm`,
+        `${fixed.inset} z-50 bg-black/80 backdrop-blur-sm`,
         className
       )}
       initial={{ opacity: 0 }}
@@ -72,7 +76,7 @@ const DialogContent = ({
       <DialogPrimitive.Content ref={ref} asChild={true} {...props}>
         <motion.div
           className={cn(
-            `${POSITION_PATTERNS.FIXED_CENTER} z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg`,
+            `${fixed.center} z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg`,
             className
           )}
           initial={{ opacity: 0, scale: 0.95, y: '-48%' }}
@@ -83,14 +87,14 @@ const DialogContent = ({
           {children}
           <DialogPrimitive.Close
             className={cn(
-              POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL,
+              absolute.topRightOffsetXl,
               'rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100',
-              STATE_PATTERNS.FOCUS_RING_OFFSET,
-              STATE_PATTERNS.DISABLED_STANDARD,
+              focusRing.offset,
+              'disabled:opacity-50 disabled:pointer-events-none',
               'data-[state=open]:bg-accent data-[state=open]:text-muted-foreground'
             )}
           >
-            <X className={UI_CLASSES.ICON_SM} />
+            <X className={iconSize.sm} />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         </motion.div>
@@ -122,7 +126,7 @@ const DialogTitle = ({
 }) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn(UI_CLASSES.HEADING_H5, 'leading-none tracking-tight', className)}
+    className={cn(heading.h5, 'leading-none tracking-tight', className)}
     {...props}
   />
 );
@@ -137,7 +141,7 @@ const DialogDescription = ({
 }) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn(UI_CLASSES.TEXT_BODY_SM, 'text-muted-foreground', className)}
+    className={cn(body.sm, 'text-muted-foreground', className)}
     {...props}
   />
 );

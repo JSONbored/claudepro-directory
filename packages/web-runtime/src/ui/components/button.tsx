@@ -16,7 +16,9 @@
 
 import { UI_ANIMATION } from '../../config/unified-config.ts';
 import { cn } from '../../ui/utils.ts';
-import { STATE_PATTERNS, UI_CLASSES } from '../../ui/constants.ts';
+// Design System imports
+import { padding } from '../../design-system/styles/layout.ts';
+import { focusRing, hoverBg, hoverText } from '../../design-system/styles/interactive.ts';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'motion/react';
@@ -31,19 +33,19 @@ interface RippleType {
 }
 
 const buttonVariants = cva(
-  `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors ${STATE_PATTERNS.FOCUS_RING} ${STATE_PATTERNS.DISABLED_STANDARD} [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0`,
+  `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors ${focusRing.default} disabled:opacity-50 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0`,
   {
     variants: {
       variant: {
         default: 'bg-accent text-accent-foreground hover:bg-accent/90',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: `border border-input bg-background ${STATE_PATTERNS.HOVER_BG_DEFAULT} ${STATE_PATTERNS.HOVER_TEXT_ACCENT}`,
+        outline: `border border-input bg-background ${hoverBg.default} ${hoverText.accent}`,
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        ghost: `${STATE_PATTERNS.HOVER_BG_DEFAULT} ${STATE_PATTERNS.HOVER_TEXT_ACCENT}`,
+        ghost: `${hoverBg.default} ${hoverText.accent}`,
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
-        default: `h-10 ${UI_CLASSES.CONTAINER_PADDING_SM}`,
+        default: `h-10 ${padding.xDefault}`,
         sm: 'h-9 rounded-md px-3',
         lg: 'h-11 rounded-md px-8',
         icon: 'h-10 w-10',

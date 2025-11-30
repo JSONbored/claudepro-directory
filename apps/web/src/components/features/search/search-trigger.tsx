@@ -1,7 +1,7 @@
 'use client';
 
+import { iconSize, groupHover } from '@heyclaude/web-runtime/design-system';
 import { Search } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 
 interface SearchTriggerProps {
@@ -34,7 +34,7 @@ export function SearchTrigger({
         `}
       >
         <Search
-          className={`${UI_CLASSES.ICON_SM} text-muted-foreground ${UI_CLASSES.GROUP_HOVER_ACCENT}`}
+          className={`${iconSize.sm} text-muted-foreground ${groupHover.accent}`}
         />
         <span className={'flex-1 text-left text-sm'}>Search content...</span>
         {showShortcut && (
@@ -48,7 +48,7 @@ export function SearchTrigger({
 
   return (
     <Button variant={variant} onClick={onClick} className={`${sizeClasses[size]} ${className}`}>
-      <Search className={UI_CLASSES.ICON_SM} />
+      <Search className={iconSize.sm} />
       <span className="sr-only">Search</span>
       {showShortcut && size !== 'sm' && (
         <div className={'ml-2 flex items-center gap-1'}>

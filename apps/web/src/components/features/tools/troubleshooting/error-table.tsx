@@ -7,7 +7,7 @@
 
 import { AlertTriangle, Info } from '@heyclaude/web-runtime/icons';
 import type { ErrorTableProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import {
   Card,
@@ -29,9 +29,9 @@ export function ErrorTable(props: ErrorTableProps) {
   };
 
   const severityIcons = {
-    critical: <AlertTriangle className={UI_CLASSES.ICON_SM} />,
-    warning: <Info className={UI_CLASSES.ICON_SM} />,
-    info: <Info className={UI_CLASSES.ICON_SM} />,
+    critical: <AlertTriangle className={iconSize.sm} />,
+    warning: <Info className={iconSize.sm} />,
+    info: <Info className={iconSize.sm} />,
   };
 
   return (
@@ -64,7 +64,7 @@ export function ErrorTable(props: ErrorTableProps) {
                       style="secondary"
                       className={severityColors[error.severity || 'info']}
                     >
-                      <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                      <span className={cluster.tight}>
                         {severityIcons[error.severity || 'info']}
                         {error.severity}
                       </span>

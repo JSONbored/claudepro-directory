@@ -4,9 +4,10 @@ import {
   getUserSponsorships,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { between, cluster, muted } from '@heyclaude/web-runtime/design-system';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge, Button ,
+import { UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
@@ -107,7 +108,7 @@ export default async function SponsorshipsPage() {
     userLogger.info('SponsorshipsPage: user has no sponsorships');
     return (
       <div className="space-y-6">
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+        <div className={between.center}>
           <div>
             <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
             <p className="text-muted-foreground">No active campaigns yet</p>
@@ -138,7 +139,7 @@ export default async function SponsorshipsPage() {
 
   return (
     <div className="space-y-6">
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <div>
           <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
           <p className="text-muted-foreground">
@@ -172,12 +173,12 @@ export default async function SponsorshipsPage() {
           return (
             <Card key={sponsorship.id}>
               <CardHeader>
-                <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                    <div className={cluster.compact}>
                       <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
                       {isActive ? (
-                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_APPROVED}>
+                        <UnifiedBadge variant="base" className="bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400">
                           Active
                         </UnifiedBadge>
                       ) : (
@@ -185,7 +186,7 @@ export default async function SponsorshipsPage() {
                           Inactive
                         </UnifiedBadge>
                       )}
-                      {hasHitLimit ? <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_WARNING}>
+                      {hasHitLimit ? <UnifiedBadge variant="base" className="bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400">
                           Limit Reached
                         </UnifiedBadge> : null}
                     </div>
@@ -211,20 +212,20 @@ export default async function SponsorshipsPage() {
                 <div className="mb-4 grid grid-cols-3 gap-4">
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
+                      className={`${cluster.tight} mb-1 text-muted-foreground text-xs`}
                     >
                       <Eye className="h-3 w-3" />
                       Impressions
                     </div>
                     <div className="font-bold text-2xl">{impressionCount.toLocaleString()}</div>
-                    {sponsorship.impression_limit ? <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                    {sponsorship.impression_limit ? <div className={`${muted.default} text-xs`}>
                         of {sponsorship.impression_limit.toLocaleString()}
                       </div> : null}
                   </div>
 
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
+                      className={`${cluster.tight} mb-1 text-muted-foreground text-xs`}
                     >
                       <MousePointer className="h-3 w-3" />
                       Clicks
@@ -234,7 +235,7 @@ export default async function SponsorshipsPage() {
 
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
+                      className={`${cluster.tight} mb-1 text-muted-foreground text-xs`}
                     >
                       <BarChart className="h-3 w-3" />
                       CTR

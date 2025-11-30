@@ -7,13 +7,14 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
+import { between, iconSize, muted } from '@heyclaude/web-runtime/design-system';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import type { CreateJobInput } from '@heyclaude/web-runtime';
 import type { PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Star } from '@heyclaude/web-runtime/icons';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import { useEffect, useId, useMemo, useState, useTransition } from 'react';
 import { CompanySelector } from '@/src/components/core/forms/company-selector';
 import { FormField } from '@heyclaude/web-runtime/ui';
@@ -579,7 +580,7 @@ export function JobForm({
                         <> - {formatPlanPrice(option.standardPriceCents, option.isSubscription)}</>
                       )}
                     </div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                    <div className={`${muted.default} text-xs`}>
                       {option.description ?? PLAN_DESCRIPTION_FALLBACK[option.plan]}
                     </div>
                   </div>
@@ -589,10 +590,10 @@ export function JobForm({
           </Select>
           {selectedPlanOption && (
             <div className="mt-4 rounded-lg border border-border/50 bg-muted/20 p-4 text-sm">
-              <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+              <div className={between.start}>
                 <div>
                   <div className="font-semibold">{PLAN_LABELS[selectedPlanOption.plan]}</div>
-                  <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-1`}>
+                  <p className={`${muted.default} text-xs mt-1`}>
                     {selectedPlanOption.description ??
                       PLAN_DESCRIPTION_FALLBACK[selectedPlanOption.plan]}
                   </p>
@@ -607,7 +608,7 @@ export function JobForm({
                 )}
               </div>
               {planInfoSubtitle && (
-                <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-2`}>{planInfoSubtitle}</p>
+                <p className={`${muted.default} text-xs mt-2`}>{planInfoSubtitle}</p>
               )}
               {selectedPlanOption.benefits && (
                 <ul className="mt-3 list-disc space-y-1 pl-4 text-muted-foreground text-xs">
@@ -618,7 +619,7 @@ export function JobForm({
               )}
             </div>
           )}
-          <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-2`}>
+          <p className={`${muted.default} text-xs mt-2`}>
             Payment via Polar.sh after submission. Job goes live immediately after payment
             confirmation.
           </p>
@@ -635,10 +636,10 @@ export function JobForm({
                   htmlFor={featuredCheckboxId}
                   className="flex cursor-pointer items-center gap-2 font-semibold text-sm"
                 >
-                  <Star className={`${UI_CLASSES.ICON_SM} text-orange-500`} />
+                  <Star className={`${iconSize.sm} text-orange-500`} />
                   Make this a Featured Listing
                 </Label>
-                <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-1`}>{featuredUpsellDescription}</p>
+                <p className={`${muted.default} text-xs mt-1`}>{featuredUpsellDescription}</p>
                 {featuredUpgradeLabel && (
                   <p className="mt-2 font-medium text-orange-600 text-sm dark:text-orange-400">
                     {featuredUpgradeLabel}

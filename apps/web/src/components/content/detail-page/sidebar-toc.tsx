@@ -14,7 +14,8 @@
  */
 
 import type { ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
-import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
+import { cn } from '@heyclaude/web-runtime/ui';
+import { focusRing } from '@heyclaude/web-runtime/design-system';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface SidebarTocProps {
@@ -212,7 +213,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
                 type="button"
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
-                  STATE_PATTERNS.FOCUS_RING,
+                  focusRing.default,
                   'group relative w-full py-1.5 text-left text-[13px] leading-snug transition-colors',
                   'hover:text-foreground',
                   isActive ? 'text-foreground' : 'text-muted-foreground'

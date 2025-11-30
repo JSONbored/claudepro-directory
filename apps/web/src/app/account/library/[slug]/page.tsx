@@ -4,9 +4,10 @@ import {
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { cluster } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge, SimpleCopyButton,
+import { UnifiedBadge, SimpleCopyButton,
   Button,
   Card,
   CardContent,
@@ -134,15 +135,15 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       {/* Header */}
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button variant="ghost" className={`mb-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}>
+          <Button variant="ghost" className={`mb-4 ${cluster.compact}`}>
             <ArrowLeft className="h-4 w-4" />
             Back to Library
           </Button>
         </Link>
 
-        <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+        <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
+            <div className={`${cluster.compact} mb-2`}>
               <h1 className="font-bold text-3xl">{collection.name}</h1>
               {collection.is_public ? <UnifiedBadge variant="base" style="outline" className="text-xs">
                   Public
@@ -155,18 +156,18 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
             </div>
           </div>
 
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <div className={cluster.compact}>
             {shareUrl ? <SimpleCopyButton
                 content={shareUrl}
                 label="Share"
                 successMessage="Link copied to clipboard!"
                 variant="outline"
                 size="sm"
-                className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                className={cluster.compact}
                 iconClassName="h-4 w-4"
               /> : null}
             <Link href={`/account/library/${slug}/edit`}>
-              <Button variant="outline" size="sm" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <Button variant="outline" size="sm" className={cluster.compact}>
                 <Edit className="h-4 w-4" />
                 Edit
               </Button>

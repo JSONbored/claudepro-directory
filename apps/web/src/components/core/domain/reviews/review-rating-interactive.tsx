@@ -1,8 +1,8 @@
 'use client';
 
+import { cluster } from '@heyclaude/web-runtime/design-system';
 import { Star } from '@heyclaude/web-runtime/icons';
 import type { ReviewRatingInteractiveProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Rating, RatingButton } from '@heyclaude/web-runtime/ui';
 
 /**
@@ -28,7 +28,7 @@ export function ReviewRatingInteractive({
   const iconSize = sizeMap[size];
 
   return (
-    <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${className}`}>
+    <div className={`${cluster.tight} ${className}`}>
       <Rating
         value={value}
         onValueChange={onChange}

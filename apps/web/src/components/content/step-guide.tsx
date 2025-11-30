@@ -5,8 +5,8 @@
 
 import { highlightCodeEdge } from '@heyclaude/web-runtime/data';
 import { Zap } from '@heyclaude/web-runtime/icons';
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import type { StepByStepGuideProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { UnifiedContentBox } from '@/src/components/core/domain/content/featured-content-box';
@@ -36,7 +36,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
         )}
         {totalTime && (
           <div className={'flex items-center gap-2 text-muted-foreground text-sm'}>
-            <Zap className={UI_CLASSES.ICON_SM} />
+            <Zap className={iconSize.sm} />
             <span itemProp="totalTime">Total time: {totalTime}</span>
           </div>
         )}

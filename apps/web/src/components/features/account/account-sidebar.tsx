@@ -19,8 +19,9 @@ import {
   TrendingUp,
   User as UserIcon,
 } from '@heyclaude/web-runtime/icons';
+import { muted } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
+import { Button, Card } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -131,7 +132,7 @@ export async function AccountSidebar({
         )}
         <div className="flex-1">
           <p className="font-medium">{profile?.name ?? userNameMetadata}</p>
-          <p className={UI_CLASSES.TEXT_XS_MUTED}>{user.email ?? ''}</p>
+          <p className={`${muted.default} text-xs`}>{user.email ?? ''}</p>
           {profile?.slug ? (
             <Link href={`/u/${profile.slug}`} className="text-accent text-xs hover:underline">
               View Profile

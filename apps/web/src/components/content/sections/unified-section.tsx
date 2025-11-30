@@ -20,8 +20,9 @@ import {
   Terminal,
   Zap,
 } from '@heyclaude/web-runtime/icons';
+import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
 import type { UnifiedSectionProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -74,8 +75,8 @@ function Wrapper({
     >
       <Card className={cn('', className)}>
         <CardHeader>
-          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Icon className={UI_CLASSES.ICON_MD} />
+          <CardTitle className={cluster.compact}>
+            <Icon className={iconSize.md} />
             {title}
           </CardTitle>
           {description && <CardDescription>{description}</CardDescription>}
@@ -173,7 +174,7 @@ function List({ items, color }: { items: string[]; color: string }) {
   return (
     <ul className="space-y-2">
       {items.map((item) => (
-        <li key={item.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+        <li key={item.slice(0, 50)} className="flex items-start gap-3">
           <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
           <span className="text-sm leading-relaxed">{item}</span>
         </li>
@@ -194,13 +195,13 @@ function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: stri
     <ul className="space-y-4">
       {items.map((item, index) =>
         typeof item === 'string' ? (
-          <li key={getEnhancedListKey(item, index)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+          <li key={getEnhancedListKey(item, index)} className="flex items-start gap-3">
             <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
             <span className="text-sm leading-relaxed">{item}</span>
           </li>
         ) : (
           <li key={getEnhancedListKey(item, index)} className="space-y-2">
-            <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+            <div className="flex items-start gap-3">
               <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
               <div className="space-y-1">
                 <p className="font-medium text-foreground text-sm">{item.issue}</p>
@@ -261,7 +262,7 @@ function Platform({
           <h5 className="mb-2 font-medium text-sm">Configuration Paths</h5>
           <div className="space-y-1 text-sm">
             {Object.entries(paths).map(([k, p]) => (
-              <div key={k} className={UI_CLASSES.FLEX_GAP_2}>
+              <div key={k} className={cluster.compact}>
                 <UnifiedBadge variant="base" style="outline" className="capitalize">
                   {k}
                 </UnifiedBadge>

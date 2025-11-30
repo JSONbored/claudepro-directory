@@ -9,7 +9,7 @@
  * Architecture:
  * - Client component (uses Motion.dev animations)
  * - Next.js-specific (uses Next.js Link component)
- * - Uses web-runtime UI constants and design tokens
+ * - Uses unified design system tokens
  * - Accepts custom action rendering for flexibility
  *
  * Features:
@@ -43,9 +43,10 @@ import {
   AlertCircle,
   AlertTriangle,
 } from '../../../icons.tsx';
-import { UI_CLASSES } from '../../constants.ts';
 import { cn } from '../../utils.ts';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '../../design-tokens/submission-form.ts';
+// Design System imports - unified tokens and composable styles
+import { colors, animation } from '../../../design-system/tokens.ts';
+import { center, stack, responsive } from '../../../design-system/styles/layout.ts';
 import type { LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -79,24 +80,24 @@ export interface EmptyStateProps {
 }
 
 /**
- * Variant color configurations
+ * Variant color configurations using unified design tokens
  */
 const variantConfig = {
   default: {
-    iconBg: `${TOKENS.colors.accent.primary}10`,
-    iconColor: TOKENS.colors.accent.primary,
+    iconBg: `${colors.brand.orange}10`,
+    iconColor: colors.brand.orange,
   },
   search: {
-    iconBg: `${TOKENS.colors.info.bg}`,
-    iconColor: TOKENS.colors.info.text,
+    iconBg: colors.semantic.info.dark.bg,
+    iconColor: colors.semantic.info.dark.text,
   },
   error: {
-    iconBg: `${TOKENS.colors.error.bg}`,
-    iconColor: TOKENS.colors.error.text,
+    iconBg: colors.semantic.error.dark.bg,
+    iconColor: colors.semantic.error.dark.text,
   },
   success: {
-    iconBg: `${TOKENS.colors.success.bg}`,
-    iconColor: TOKENS.colors.success.text,
+    iconBg: colors.semantic.success.dark.bg,
+    iconColor: colors.semantic.success.dark.text,
   },
 };
 
@@ -120,14 +121,15 @@ export function EmptyState({
   className,
   noAnimation = false,
 }: EmptyStateProps) {
-  const colors = variantConfig[variant];
+  const variantColors = variantConfig[variant];
 
+  // Animation configurations using unified design tokens
   const containerAnimation = noAnimation
     ? {}
     : {
         initial: { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 },
-        transition: TOKENS.animations.spring.smooth,
+        transition: animation.spring.smooth,
       };
 
   const iconAnimation = noAnimation
@@ -135,7 +137,7 @@ export function EmptyState({
     : {
         initial: { scale: 0, rotate: -180 },
         animate: { scale: 1, rotate: 0 },
-        transition: { ...TOKENS.animations.spring.bouncy, delay: 0.15 },
+        transition: { ...animation.spring.bouncy, delay: 0.15 },
       };
 
   const ctaAnimation = noAnimation
@@ -143,7 +145,7 @@ export function EmptyState({
     : {
         initial: { opacity: 0, y: 10 },
         animate: { opacity: 1, y: 0 },
-        transition: { ...TOKENS.animations.spring.smooth, delay: 0.3 },
+        transition: { ...animation.spring.smooth, delay: 0.3 },
       };
 
   // Render action button
@@ -194,10 +196,10 @@ export function EmptyState({
         {...iconAnimation}
         className="mb-6 rounded-full p-6"
         style={{
-          backgroundColor: colors.iconBg,
+          backgroundColor: variantColors.iconBg,
         }}
       >
-        <Icon className="h-12 w-12" style={{ color: colors.iconColor }} aria-hidden="true" />
+        <Icon className="h-12 w-12" style={{ color: variantColors.iconColor }} aria-hidden="true" />
       </motion.div>
 
       {/* Title */}
@@ -210,7 +212,7 @@ export function EmptyState({
       {(actionLabel || secondaryActionLabel || renderAction || renderSecondaryAction) && (
         <motion.div
           {...ctaAnimation}
-          className={cn(UI_CLASSES.SPACE_DEFAULT, 'flex flex-col sm:flex-row')}
+          className={cn(stack.default, responsive.smRowGap)}
         >
           {renderActionButton()}
           {renderSecondaryActionButton()}
@@ -236,17 +238,17 @@ export function CompactEmptyState({
 }) {
   return (
     <div
-      className={cn('flex flex-col items-center justify-center px-4 py-8 text-center', className)}
+      className={cn(center.column, 'px-4 py-8 text-center', className)}
     >
       <div
         className="mb-3 rounded-full p-3"
         style={{
-          backgroundColor: `${TOKENS.colors.accent.primary}10`,
+          backgroundColor: `${colors.brand.orange}10`,
         }}
       >
         <Icon
           className="h-6 w-6"
-          style={{ color: TOKENS.colors.accent.primary }}
+          style={{ color: colors.brand.orange }}
           aria-hidden="true"
         />
       </div>

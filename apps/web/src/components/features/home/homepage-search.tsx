@@ -8,9 +8,9 @@
  * Uses infinite scroll for optimal performance with large result sets
  */
 
+import { between, emptyCard } from '@heyclaude/web-runtime/design-system';
 import { Search } from '@heyclaude/web-runtime/icons';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type FC, memo } from 'react';
 import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
 import { ConfigCard } from '@heyclaude/web-runtime/ui';
@@ -33,7 +33,7 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
 
   return (
     <div className="mb-16">
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
+      <div className={`${between.center} mb-8`}>
         <h2 className={'font-bold text-2xl'}>
           Search Results
           <span className={'ml-2 text-muted-foreground'}>({filteredResults.length} found)</span>
@@ -63,7 +63,7 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
           )}
         />
       ) : (
-        <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>
+        <div className={emptyCard.default}>
           <Search className={'mx-auto mb-4 h-12 w-12 text-muted-foreground/50'} />
           <h3 className={'mb-2 font-semibold text-lg'}>No results found</h3>
           <p className="text-muted-foreground">

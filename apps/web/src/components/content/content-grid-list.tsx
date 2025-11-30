@@ -1,10 +1,11 @@
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink, HelpCircle } from '@heyclaude/web-runtime/icons';
+import { cluster, iconLeading, iconSize, emptyCard } from '@heyclaude/web-runtime/design-system';
 import type {
   ContentListServerProps,
   DisplayableContent,
 } from '@heyclaude/web-runtime/types/component.types';
-import { ICON_NAME_MAP, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { ICON_NAME_MAP } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content/content-search';
@@ -33,7 +34,7 @@ function ContentHeroSection<T extends DisplayableContent>({
         ];
 
   return (
-    <section className={UI_CLASSES.CONTAINER_OVERFLOW_BORDER} aria-labelledby={pageTitleId}>
+    <section className={emptyCard.default} aria-labelledby={pageTitleId}>
       <div className={'container mx-auto px-4 py-20'}>
         <div className={'mx-auto max-w-3xl text-center'}>
           <div className={'mb-6 flex justify-center'}>
@@ -41,16 +42,16 @@ function ContentHeroSection<T extends DisplayableContent>({
               {(() => {
                 const IconComponent =
                   ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
-                return <IconComponent className={`${UI_CLASSES.ICON_XL} text-primary`} />;
+                return <IconComponent className={`${iconSize.xl} text-primary`} />;
               })()}
             </div>
           </div>
 
-          <h1 id={pageTitleId} className={UI_CLASSES.TEXT_HEADING_HERO}>
+          <h1 id={pageTitleId} className="mb-4 font-bold text-4xl tracking-tight sm:text-5xl">
             {title}
           </h1>
 
-          <p className={UI_CLASSES.TEXT_HEADING_MEDIUM}>{description}</p>
+          <p className="mx-auto mt-4 max-w-xl text-muted-foreground text-lg">{description}</p>
 
           <ul className={'mb-8 flex list-none flex-wrap justify-center gap-2'}>
             {displayBadges.map((badge, idx) => (
@@ -63,7 +64,7 @@ function ContentHeroSection<T extends DisplayableContent>({
                           ICON_NAME_MAP[badge.icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
                         return (
                           <BadgeIconComponent
-                            className={UI_CLASSES.ICON_XS_LEADING}
+                            className={iconLeading.xs}
                             aria-hidden="true"
                           />
                         );
@@ -79,10 +80,10 @@ function ContentHeroSection<T extends DisplayableContent>({
           <Button variant="outline" size="sm" asChild={true}>
             <Link
               href={ROUTES.SUBMIT}
-              className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+              className={cluster.compact}
               aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
             >
-              <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+              <ExternalLink className={iconSize.xs} aria-hidden="true" />
               Submit {title.slice(0, -1)}
             </Link>
           </Button>

@@ -1,5 +1,6 @@
 'use client';
 
+import { responsive } from '@heyclaude/web-runtime/design-system';
 import {
   Button,
   Card,
@@ -7,7 +8,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 
@@ -56,7 +56,7 @@ export function SegmentErrorFallback({
             </Button>
           )}
           {links.length > 0 && (
-            <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}`}>
+            <div className={responsive.smRowGap}>
               {links.map((link) => (
                 <Button
                   key={`${link.href}-${link.label}`}

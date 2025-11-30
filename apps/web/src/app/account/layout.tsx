@@ -3,9 +3,9 @@
  * Uses Suspense for non-blocking sidebar data fetching.
  */
 
+import { cluster } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
@@ -74,7 +74,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
     <div className="min-h-screen bg-background">
       <div className="border-b px-4 py-4">
         <div className="container mx-auto flex items-center justify-between">
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} group`}>
+          <div className={`${cluster.compact} group`}>
             <Link href="/" className="transition-colors-smooth group-hover:text-accent">
               ← Back to Directory
             </Link>

@@ -11,9 +11,10 @@ import {
   getAuthenticatedUser,
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
+import { between, cluster, muted } from '@heyclaude/web-runtime/design-system';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink, UnifiedBadge,
+import { NavLink, UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
@@ -224,7 +225,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                 })()}
 
                 <div className="mt-3 flex items-center gap-4 text-sm">
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  <div className={cluster.tight}>
                     <Users className="h-4 w-4" />
                     {follower_count ?? 0} followers
                   </div>
@@ -236,7 +237,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                       <NavLink
                         href={profile.website}
                         external
-                        className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}
+                        className={cluster.tight}
                       >
                         <Globe className="h-4 w-4" />
                         Website
@@ -266,20 +267,20 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                 <CardTitle className="text-sm">Activity Stats</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Contributions</span>
+                <div className={between.center}>
+                  <span className={`${muted.default} text-sm`}>Contributions</span>
                   <UnifiedBadge variant="base" style="secondary">
                     {contributions?.length ?? 0}
                   </UnifiedBadge>
                 </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Collections</span>
+                <div className={between.center}>
+                  <span className={`${muted.default} text-sm`}>Collections</span>
                   <UnifiedBadge variant="base" style="secondary">
                     {collections?.length ?? 0}
                   </UnifiedBadge>
                 </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
+                <div className={between.center}>
+                  <span className={`${muted.default} text-sm`}>Member since</span>
                   <span className="text-sm">
                     {profile?.created_at
                       ? new Date(profile.created_at).toLocaleDateString('en-US', {
@@ -332,7 +333,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         return null;
                       }
                       return (
-                        <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
+                        <Card key={collection.id} className="cursor-pointer transition-all duration-200 hover:bg-muted/50 hover:shadow-md">
                           <NavLink href={safeCollectionUrl}>
                             <CardHeader>
                               <CardTitle className="text-lg">{collection.name}</CardTitle>
@@ -342,7 +343,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                             </CardHeader>
                             <CardContent>
                               <div
-                                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}
+                                className={`${between.center} text-sm`}
                               >
                                 <span className="text-muted-foreground">
                                   {collection.item_count ?? 0}{' '}
@@ -391,7 +392,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         return null;
                       }
                       return (
-                        <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
+                        <Card key={item.id} className="cursor-pointer transition-all duration-200 hover:bg-muted/50 hover:shadow-md">
                           <NavLink href={safeContentUrl}>
                             <CardHeader>
                               <div className="mb-2 flex items-center justify-between">

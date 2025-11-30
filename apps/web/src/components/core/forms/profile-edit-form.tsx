@@ -9,7 +9,7 @@ import type { Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTransition } from 'react';
 import type { Resolver } from 'react-hook-form';
@@ -138,7 +138,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={UI_CLASSES.FORM_SECTION_SPACING}>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <FormField
         variant="input"
         label="Name"
@@ -214,7 +214,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         description="Press Enter or click Add"
       />
 
-      <div className={`${UI_CLASSES.FORM_GROUP_SPACING} pt-2`}>
+      <div className="space-y-4 pt-2">
         <ToggleField
           label="Public profile"
           description="Allow others to view your profile"

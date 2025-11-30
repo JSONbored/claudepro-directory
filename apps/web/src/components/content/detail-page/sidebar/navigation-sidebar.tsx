@@ -18,8 +18,9 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Copy, ExternalLink, Github, Thermometer } from '@heyclaude/web-runtime/icons';
+import { cluster, iconSize, iconLeading, muted, categoryBadge } from '@heyclaude/web-runtime/design-system';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { BADGE_COLORS, getDisplayTitle, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { getDisplayTitle } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
@@ -223,7 +224,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 asChild={true}
               >
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
-                  <Github className={UI_CLASSES.ICON_SM_LEADING} />
+                  <Github className={iconLeading.sm} />
                   View on GitHub
                 </a>
               </Button>
@@ -274,7 +275,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                     asChild={true}
                   >
                     <a href={safeDocUrl} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className={UI_CLASSES.ICON_SM_LEADING} />
+                      <ExternalLink className={iconLeading.sm} />
                       Documentation
                     </a>
                   </Button>
@@ -298,8 +299,8 @@ export const DetailSidebar = memo(function DetailSidebar({
                   variant="base"
                   style="default"
                   className={`font-medium text-xs ${
-                    BADGE_COLORS.category[contentItem.category as CategoryType] ||
-                    BADGE_COLORS.category.default
+                    categoryBadge[contentItem.category as CategoryType] ||
+                    categoryBadge.default
                   }`}
                 >
                   {contentItem.category === Constants.public.Enums.content_category[1] // 'mcp'
@@ -324,8 +325,8 @@ export const DetailSidebar = memo(function DetailSidebar({
               return (
                 <div>
                   <h4 className={'mb-1 font-medium'}>Temperature</h4>
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                    <Thermometer className={`${UI_CLASSES.ICON_XS} text-orange-500`} />
+                  <div className={cluster.compact}>
+                    <Thermometer className={`${iconSize.xs} text-orange-500`} />
                     <UnifiedBadge
                       variant="base"
                       style="outline"
@@ -352,7 +353,7 @@ export const DetailSidebar = memo(function DetailSidebar({
             {hasAuth && (
               <div>
                 <h4 className={'mb-1 font-medium'}>Authentication</h4>
-                <p className={UI_CLASSES.TEXT_SM_MUTED}>
+                <p className={`${muted.default} text-sm`}>
                   {(metadata['requiresAuth'] as boolean) ? 'Required' : 'Not required'}
                 </p>
               </div>
@@ -396,7 +397,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 className="w-full justify-start gap-3 text-left"
                 onClick={action.onClick}
               >
-                <Copy className={UI_CLASSES.ICON_SM_LEADING} />
+                <Copy className={iconLeading.sm} />
                 <div className="text-left">
                   <div className="font-medium text-sm">{action.label}</div>
                   {action.description && (
@@ -462,7 +463,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <Link
                   key={relatedSlug}
                   href={validatedUrl}
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} block w-full cursor-pointer rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50`}
+                  className="flex items-center justify-between w-full cursor-pointer rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50"
                 >
                   <div className={'min-w-0 flex-1'}>
                     <h4 className="truncate font-medium text-sm">

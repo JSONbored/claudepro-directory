@@ -1,5 +1,6 @@
 import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { cluster, grid } from '@heyclaude/web-runtime/design-system';
 import {
   Github,
   Layers,
@@ -16,7 +17,7 @@ import {
   getHomepageCategoryIds,
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES, UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
+import { UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
@@ -148,7 +149,7 @@ export default async function CommunityPage() {
 
             <h1 className="mb-6 font-bold text-4xl md:text-6xl">Join the Claude Community</h1>
 
-            <p className={UI_CLASSES.TEXT_HEADING_LARGE}>
+            <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground leading-relaxed">
               Connect with developers and AI enthusiasts building with Claude. Share your
               configurations, learn from the community, and contribute to our open-source directory.
             </p>
@@ -179,11 +180,11 @@ export default async function CommunityPage() {
       {/* Community Stats */}
       <section className="px-4 py-16">
         <div className="container mx-auto">
-          <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
+          <div className={grid.responsive3}>
             {statCards.map(({ icon: Icon, title, value, description }) => (
               <Card key={title}>
                 <CardHeader>
-                  <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                  <CardTitle className={cluster.compact}>
                     <Icon className="h-5 w-5 text-primary" />
                     {title}
                   </CardTitle>

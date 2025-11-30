@@ -25,8 +25,9 @@
  * ```
  */
 
+import { between, cluster } from '@heyclaude/web-runtime/design-system';
 import { ChevronDown, ChevronUp, Clock, Trash, X } from '@heyclaude/web-runtime/icons';
-import { ANIMATION_CONSTANTS, cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { ANIMATION_CONSTANTS, cn } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { memo, useState } from 'react';
@@ -88,7 +89,7 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
         className={`flex flex-col gap-1.5 rounded-lg border border-border/50 bg-card px-3 py-2.5 ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/50 hover:bg-accent/5`}
       >
         {/* Header: Badge + Time */}
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+        <div className={between.center}>
           <UnifiedBadge variant="base" style="outline" className="text-[10px] capitalize">
             {item.category}
           </UnifiedBadge>
@@ -168,12 +169,12 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
       )}
     >
       {/* Header */}
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+      <div className={between.center}>
+        <div className={cluster.compact}>
           <Clock className="h-4 w-4 text-muted-foreground" />
           <h3 className="font-semibold text-foreground text-sm">Recently Viewed</h3>
         </div>
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+        <div className={cluster.tight}>
           {/* Clear all button */}
           <Button
             variant="ghost"

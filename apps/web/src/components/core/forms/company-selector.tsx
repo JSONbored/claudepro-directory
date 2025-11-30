@@ -5,13 +5,13 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { iconSize, muted } from '@heyclaude/web-runtime/design-system';
 import {
   createCompany,
   getCompanyByIdAction,
   searchCompaniesAction,
 } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Building2, Plus, Search } from 'lucide-react';
 import { useCallback, useEffect, useId, useState, useTransition } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -210,7 +210,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
           >
             {selectedCompany ? (
               <span className="flex items-center gap-2">
-                <Building2 className={UI_CLASSES.ICON_SM} />
+                <Building2 className={iconSize.sm} />
                 {selectedCompany.name}
               </span>
             ) : (
@@ -218,7 +218,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                 {defaultCompanyName || 'Select or create company...'}
               </span>
             )}
-            <Search className={`${UI_CLASSES.ICON_SM} opacity-50`} />
+            <Search className={`${iconSize.sm} opacity-50`} />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[400px] p-0" align="start">
@@ -269,7 +269,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                 className="h-9"
               />
               {isSearching ? (
-                <p className={`${UI_CLASSES.TEXT_SM_MUTED} px-2 py-4`}>Searching...</p>
+                <p className={`${muted.default} text-sm px-2 py-4`}>Searching...</p>
               ) : companies.length > 0 ? (
                 <div className="max-h-[200px] space-y-1 overflow-y-auto">
                   {companies.map((company) => (
@@ -279,13 +279,13 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                       onClick={() => handleSelect(company)}
                       className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-accent"
                     >
-                      <Building2 className={UI_CLASSES.ICON_SM} />
+                      <Building2 className={iconSize.sm} />
                       <span>{company.name}</span>
                     </button>
                   ))}
                 </div>
               ) : searchQuery.length >= 2 ? (
-                <p className={`${UI_CLASSES.TEXT_SM_MUTED} px-2 py-4`}>No companies found</p>
+                <p className={`${muted.default} text-sm px-2 py-4`}>No companies found</p>
               ) : null}
               <Button
                 type="button"
@@ -293,7 +293,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                 className="w-full"
                 onClick={() => setShowCreateForm(true)}
               >
-                <Plus className={UI_CLASSES.ICON_SM} />
+                <Plus className={iconSize.sm} />
                 Create new company
               </Button>
             </div>

@@ -13,7 +13,6 @@ import {
   getPaymentPlanCatalog,
   getUserJobById,
 } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 
@@ -199,7 +198,7 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className={`mb-2 ${UI_CLASSES.HEADING_H2}`}>Edit Job Listing</h1>
+        <h1 className="mb-2 font-bold text-3xl tracking-tight">Edit Job Listing</h1>
         <p className="text-muted-foreground">Update your job posting details</p>
       </div>
       {hasInvalidData ? <div className="rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">

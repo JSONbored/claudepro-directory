@@ -1,10 +1,11 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { iconSize, responsive, stack } from '@heyclaude/web-runtime/design-system';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { Mail } from '@heyclaude/web-runtime/icons';
-import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cn, DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
 import { InlineSpinner } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -39,8 +40,8 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className={cn('w-full', className)}>
-      <div className={UI_CLASSES.FLEX_COL_GAP_3}>
-        <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
+      <div className={stack.default}>
+        <div className={responsive.smRowGap}>
           <div className="relative flex-1">
             <Input
               type="email"
@@ -90,7 +91,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             ) : (
               <span className="flex items-center gap-2">
                 {NEWSLETTER_CTA_CONFIG.buttonText}
-                <Mail className={UI_CLASSES.ICON_SM} aria-hidden="true" />
+                <Mail className={iconSize.sm} aria-hidden="true" />
               </span>
             )}
           </Button>

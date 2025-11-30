@@ -1,7 +1,7 @@
 /**
  * useOnboardingToasts Hook
  *
- * Manages onboarding notifications via flux-station notification system.
+ * Manages onboarding notifications via Vercel API flux routes.
  * Features:
  * - Server-side notification management
  * - Persistent dismissal via database
@@ -10,7 +10,6 @@
  * - Context-aware messaging
  */
 
-import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import { useCallback, useEffect, useState } from 'react';
@@ -69,23 +68,15 @@ export function useOnboardingToasts({
     subscribe: false,
   });
 
-  // Fetch active notifications from flux-station
+  // Fetch active notifications from Vercel API
   useEffect(() => {
     if (!(enabled && user)) return;
 
     const fetchNotifications = async () => {
       try {
-        const fluxStationUrl = env.NEXT_PUBLIC_SUPABASE_URL
-          ? `${env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/active-notifications`
-          : null;
-        if (!fluxStationUrl) {
-          logger.warn('NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification fetch');
-          return;
-        }
-        const response = await fetch(fluxStationUrl, {
-          headers: {
-            Authorization: `Bearer ${user.id}`,
-          },
+        // Use relative URL for Vercel API routes (same origin)
+        const response = await fetch('/api/flux/notifications/active', {
+          credentials: 'include', // Include cookies for auth
         });
 
         if (response.ok) {
@@ -136,7 +127,7 @@ export function useOnboardingToasts({
     }
   }, [context]);
 
-  // Create onboarding notifications via flux-station
+  // Create onboarding notifications via Vercel API
   useEffect(() => {
     if (!enabled || hasSeenToasts || !user) return;
 
@@ -144,29 +135,32 @@ export function useOnboardingToasts({
       const toastsToShow = customToasts || ONBOARDING_TOASTS;
 
       try {
-        // Create notifications in database via edge function
-        const fluxStationUrl = env.NEXT_PUBLIC_SUPABASE_URL
-          ? `${env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/notifications/create`
-          : null;
-        if (!fluxStationUrl) {
-          logger.warn('NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification creation');
-          return;
-        }
+        // Create notifications in database via Vercel API
         for (const toast of toastsToShow) {
-          await fetch(fluxStationUrl, {
+          const response = await fetch('/api/flux/notifications/create', {
             method: 'POST',
+            credentials: 'include', // Include cookies for auth
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${user.id}`,
             },
             body: JSON.stringify({
-              type: 'announcement', // Edge function expects 'announcement' or 'feedback'
+              type: 'onboarding',
               priority: 'low',
               title: toast.title,
               message: toast.message,
-              // Note: metadata field is not supported by notifications table schema
+              metadata: {
+                context: context,
+              },
             }),
           });
+
+          if (!response.ok) {
+            logger.warn('Failed to create onboarding notification', {
+              toastId: toast.id,
+              status: response.status,
+            });
+            continue;
+          }
 
           setActiveToasts((prev) => new Set(prev).add(toast.id));
         }

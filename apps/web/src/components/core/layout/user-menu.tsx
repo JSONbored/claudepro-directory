@@ -20,6 +20,7 @@
  */
 
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { iconSize, iconLeading } from '@heyclaude/web-runtime/design-system';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   Activity,
@@ -28,7 +29,7 @@ import {
   Settings,
   User as UserIcon,
 } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -98,7 +99,7 @@ export function UserMenu({ className }: UserMenuProps) {
   if (loading) {
     return (
       <div className={`flex items-center ${className}`}>
-        <Skeleton size="lg" width="lg" rounded="full" className={UI_CLASSES.ICON_XL} />
+        <Skeleton size="lg" width="lg" rounded="full" className={iconSize.xl} />
       </div>
     );
   }
@@ -114,7 +115,7 @@ export function UserMenu({ className }: UserMenuProps) {
           className="border-accent/20 bg-accent/10 font-medium text-accent text-xs hover:bg-accent hover:text-white"
         >
           <Link href="/login" aria-label="Get started - Sign in with GitHub">
-            <UserIcon className={UI_CLASSES.ICON_XS_LEADING} />
+            <UserIcon className={iconLeading.xs} />
             <span className="hidden lg:inline">Get Started</span>
           </Link>
         </Button>
@@ -149,7 +150,7 @@ export function UserMenu({ className }: UserMenuProps) {
               className="relative h-8 w-8 rounded-full p-0 hover:ring-2 hover:ring-accent/30"
               aria-label={`User menu for ${displayName}`}
             >
-              <Avatar className={UI_CLASSES.ICON_XL}>
+              <Avatar className={iconSize.xl}>
                 {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName || 'User avatar'} />}
                 <AvatarFallback className="bg-accent/20 font-semibold text-accent text-sm">
                   {initials}
@@ -177,21 +178,21 @@ export function UserMenu({ className }: UserMenuProps) {
           {/* Navigation Links */}
           <DropdownMenuItem asChild={true}>
             <Link href="/account/settings">
-              <Settings className={UI_CLASSES.ICON_SM_LEADING} />
+              <Settings className={iconLeading.sm} />
               <span>Settings</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild={true}>
             <Link href="/account/library">
-              <BookOpen className={UI_CLASSES.ICON_SM_LEADING} />
+              <BookOpen className={iconLeading.sm} />
               <span>Library</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild={true}>
             <Link href="/account/activity">
-              <Activity className={UI_CLASSES.ICON_SM_LEADING} />
+              <Activity className={iconLeading.sm} />
               <span>Activity</span>
             </Link>
           </DropdownMenuItem>
@@ -204,7 +205,7 @@ export function UserMenu({ className }: UserMenuProps) {
             disabled={signingOut}
             className="cursor-pointer text-destructive focus:text-destructive"
           >
-            <LogOut className={UI_CLASSES.ICON_SM_LEADING} />
+            <LogOut className={iconLeading.sm} />
             <span>{signingOut ? 'Signing out...' : 'Sign out'}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

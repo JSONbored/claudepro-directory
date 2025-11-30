@@ -10,9 +10,10 @@ import {
   getAuthenticatedUser,
   getPublicCollectionDetail,
 } from '@heyclaude/web-runtime/data';
+import { between, cluster } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
+import { NavLink, UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
@@ -156,7 +157,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
         <div className="space-y-6">
           {/* Navigation */}
           <Link href={`/u/${slug}`}>
-            <Button variant="ghost" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+            <Button variant="ghost" className={cluster.compact}>
               <ArrowLeft className="h-4 w-4" />
               Back to {profileUser?.name ?? slug}'s Profile
             </Button>
@@ -164,8 +165,8 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
           {/* Header */}
           <div>
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-2`}>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+            <div className={`${between.center} mb-2`}>
+              <div className={cluster.compact}>
                 <h1 className="font-bold text-3xl">{collection?.name ?? 'Untitled Collection'}</h1>
                 <UnifiedBadge variant="base" style="outline">
                   Public
@@ -220,7 +221,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                             {index + 1}
                           </div>
                           <div className="flex-1">
-                            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                            <div className={cluster.compact}>
                               <UnifiedBadge variant="base" style="outline" className="capitalize">
                                 {item.content_type}
                               </UnifiedBadge>
@@ -238,7 +239,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                                  className={cluster.compact}
                                 >
                                   <ExternalLink className="h-4 w-4" />
                                   View
@@ -248,7 +249,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                                className={cluster.compact}
                                 disabled
                               >
                                 <ExternalLink className="h-4 w-4" />

@@ -6,10 +6,11 @@
  */
 
 import { getSocialLinks, logClientWarning, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Github } from '@heyclaude/web-runtime/icons';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
 
@@ -84,7 +85,7 @@ export function GitHubStarsButton({
       className={cn('gap-2', className)}
       aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}`}
     >
-      <Github className={UI_CLASSES.ICON_SM} aria-hidden="true" />
+      <Github className={iconSize.sm} aria-hidden="true" />
       {typeof stars === 'number' && (
         <span className="font-medium tabular-nums">{stars.toLocaleString()}</span>
       )}

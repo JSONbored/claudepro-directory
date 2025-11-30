@@ -1,5 +1,6 @@
 import { getPartnerContactChannels, getPartnerCtas } from '@heyclaude/web-runtime/core';
 import { getPartnerHeroStats, getPartnerPricing } from '@heyclaude/web-runtime/data';
+import { iconSize, muted } from '@heyclaude/web-runtime/design-system';
 import {
   BarChart,
   Briefcase,
@@ -16,7 +17,7 @@ import {
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/server';
-import { RESPONSIVE_PATTERNS, UI_CLASSES, UnifiedBadge, HoverCard , Button ,
+import { RESPONSIVE_PATTERNS, UnifiedBadge, HoverCard , Button ,
   Card,
   CardContent,
   CardDescription,
@@ -83,11 +84,11 @@ export default async function PartnerPage() {
       {/* Hero Section */}
       <div className="mx-auto mb-12 max-w-5xl text-center">
         <h1
-          className={`mb-4 ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL} ${UI_CLASSES.HEADING_H1.split(' ')[1]}`}
+          className={`mb-4 ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL} tracking-tight`}
         >
           Reach {heroStats.monthlyVisitors.toLocaleString()}+ Claude AI Developers
         </h1>
-        <p className={`mb-6 ${UI_CLASSES.TEXT_BODY_LG} text-muted-foreground`}>
+        <p className="mb-6 text-lg text-muted-foreground">
           The largest directory of Claude configurations. Attract engineers building the future of
           AI tooling.
         </p>
@@ -97,31 +98,31 @@ export default async function PartnerPage() {
           <Card>
             <CardContent className="pt-6 pb-6">
               <p
-                className={`mb-1 ${UI_CLASSES.HEADING_H3.split(' ').slice(0, 2).join(' ')} text-primary`}
+                className="mb-1 font-semibold text-2xl text-primary"
               >
                 {heroStats.monthlyVisitors.toLocaleString()}+
               </p>
-              <p className={UI_CLASSES.TEXT_SM_MUTED}>Monthly Visitors</p>
+              <p className={`${muted.default} text-sm`}>Monthly Visitors</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 pb-6">
               <p
-                className={`mb-1 ${UI_CLASSES.HEADING_H3.split(' ').slice(0, 2).join(' ')} text-primary`}
+                className="mb-1 font-semibold text-2xl text-primary"
               >
                 {heroStats.monthlyPageViews.toLocaleString()}+
               </p>
-              <p className={UI_CLASSES.TEXT_SM_MUTED}>Page Views</p>
+              <p className={`${muted.default} text-sm`}>Page Views</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 pb-6">
               <p
-                className={`mb-1 ${UI_CLASSES.HEADING_H3.split(' ').slice(0, 2).join(' ')} text-primary`}
+                className="mb-1 font-semibold text-2xl text-primary"
               >
                 {configCount.toLocaleString()}+
               </p>
-              <p className={UI_CLASSES.TEXT_SM_MUTED}>Configurations</p>
+              <p className={`${muted.default} text-sm`}>Configurations</p>
             </CardContent>
           </Card>
         </div>
@@ -166,7 +167,7 @@ export default async function PartnerPage() {
               <CardHeader>
                 <div className="mb-4 flex items-start justify-between">
                   <div className="rounded-lg bg-blue-500/10 p-3">
-                    <Briefcase className={`${UI_CLASSES.ICON_LG} ${UI_CLASSES.ICON_INFO}`} />
+                    <Briefcase className={`${iconSize.lg} text-blue-600`} />
                   </div>
                   <UnifiedBadge
                     variant="base"
@@ -191,9 +192,9 @@ export default async function PartnerPage() {
                     <span className="font-bold text-3xl text-primary">
                       ${pricing.jobs.discounted}
                     </span>
-                    <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
+                    <span className={`${muted.default} text-sm`}>/month</span>
                   </div>
-                  <p className={UI_CLASSES.TEXT_XS_MUTED}>
+                  <p className={`${muted.default} text-xs`}>
                     {pricing.jobs.durationDays}-day featured placement • Launch pricing
                   </p>
                 </div>
@@ -201,24 +202,24 @@ export default async function PartnerPage() {
                 {/* Features */}
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
-                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>Featured in /jobs section</p>
+                    <Check className={`mt-0.5 ${iconSize.sm} text-green-600`} />
+                    <p className="text-sm">Featured in /jobs section</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>Company logo & branding</p>
+                    <Check className={`mt-0.5 ${iconSize.sm} text-green-600`} />
+                    <p className="text-sm">Company logo & branding</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>Apply button to your ATS</p>
+                    <Check className={`mt-0.5 ${iconSize.sm} text-green-600`} />
+                    <p className="text-sm">Apply button to your ATS</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>{pricing.jobs.durationDays}-day visibility</p>
+                    <Check className={`mt-0.5 ${iconSize.sm} text-green-600`} />
+                    <p className="text-sm">{pricing.jobs.durationDays}-day visibility</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>Analytics dashboard</p>
+                    <Check className={`mt-0.5 ${iconSize.sm} text-green-600`} />
+                    <p className="text-sm">Analytics dashboard</p>
                   </div>
                 </div>
 
@@ -239,7 +240,7 @@ export default async function PartnerPage() {
               <CardHeader>
                 <div className="mb-4 flex items-start justify-between">
                   <div className="rounded-lg bg-purple-500/10 p-3">
-                    <Megaphone className={`${UI_CLASSES.ICON_LG} text-purple-500`} />
+                    <Megaphone className={`${iconSize.lg} text-purple-500`} />
                   </div>
                   <UnifiedBadge
                     variant="base"
@@ -264,32 +265,32 @@ export default async function PartnerPage() {
                     <span className="font-bold text-3xl text-primary">
                       ${pricing.sponsored.discounted}
                     </span>
-                    <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
+                    <span className={`${muted.default} text-sm`}>/month</span>
                   </div>
-                  <p className={UI_CLASSES.TEXT_XS_MUTED}>Per listing • Launch pricing</p>
+                  <p className={`${muted.default} text-xs`}>Per listing • Launch pricing</p>
                 </div>
 
                 {/* Features */}
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
-                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>Top placement in category</p>
+                    <Check className={`mt-0.5 ${iconSize.sm} text-green-600`} />
+                    <p className="text-sm">Top placement in category</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>"Sponsored" badge</p>
+                    <Check className={`mt-0.5 ${iconSize.sm} text-green-600`} />
+                    <p className="text-sm">"Sponsored" badge</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>Homepage feature rotation</p>
+                    <Check className={`mt-0.5 ${iconSize.sm} text-green-600`} />
+                    <p className="text-sm">Homepage feature rotation</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>Analytics dashboard</p>
+                    <Check className={`mt-0.5 ${iconSize.sm} text-green-600`} />
+                    <p className="text-sm">Analytics dashboard</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>Custom call-to-action</p>
+                    <Check className={`mt-0.5 ${iconSize.sm} text-green-600`} />
+                    <p className="text-sm">Custom call-to-action</p>
                   </div>
                 </div>
 
@@ -314,7 +315,7 @@ export default async function PartnerPage() {
             <CardContent className="pt-6">
               <Eye className="mb-3 h-8 w-8 text-primary" />
               <p className="mb-2 font-semibold">Highly Engaged Audience</p>
-              <p className={UI_CLASSES.TEXT_SM_MUTED}>
+              <p className={`${muted.default} text-sm`}>
                 5.3 pages/visit average • Engineers actively building with Claude AI
               </p>
             </CardContent>
@@ -323,7 +324,7 @@ export default async function PartnerPage() {
             <CardContent className="pt-6">
               <MousePointer className="mb-3 h-8 w-8 text-primary" />
               <p className="mb-2 font-semibold">Quality Over Quantity</p>
-              <p className={UI_CLASSES.TEXT_SM_MUTED}>
+              <p className={`${muted.default} text-sm`}>
                 Focused community of AI engineers, not random traffic
               </p>
             </CardContent>
@@ -332,7 +333,7 @@ export default async function PartnerPage() {
             <CardContent className="pt-6">
               <BarChart className="mb-3 h-8 w-8 text-primary" />
               <p className="mb-2 font-semibold">Transparent Analytics</p>
-              <p className={UI_CLASSES.TEXT_SM_MUTED}>
+              <p className={`${muted.default} text-sm`}>
                 Real-time dashboard with views, clicks, and engagement metrics
               </p>
             </CardContent>
@@ -347,7 +348,7 @@ export default async function PartnerPage() {
           <Card>
             <CardContent className="pt-6">
               <p className="mb-2 font-semibold">How quickly can I get started?</p>
-              <p className={UI_CLASSES.TEXT_SM_MUTED}>
+              <p className={`${muted.default} text-sm`}>
                 Email us today, and we'll have your listing live within 24 hours. No lengthy
                 onboarding process.
               </p>
@@ -356,7 +357,7 @@ export default async function PartnerPage() {
           <Card>
             <CardContent className="pt-6">
               <p className="mb-2 font-semibold">Can I cancel anytime?</p>
-              <p className={UI_CLASSES.TEXT_SM_MUTED}>
+              <p className={`${muted.default} text-sm`}>
                 Yes, absolutely. No contracts, no commitments. Just email us and we'll process your
                 cancellation immediately.
               </p>
@@ -365,7 +366,7 @@ export default async function PartnerPage() {
           <Card>
             <CardContent className="pt-6">
               <p className="mb-2 font-semibold">Do you offer bulk pricing?</p>
-              <p className={UI_CLASSES.TEXT_SM_MUTED}>
+              <p className={`${muted.default} text-sm`}>
                 Yes! Email us for custom pricing if you need multiple job listings or sponsored
                 placements.
               </p>
@@ -391,7 +392,7 @@ export default async function PartnerPage() {
                 Email: {partnerContacts.partnerEmail}
               </a>
             </Button>
-            <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-4`}>
+            <p className={`${muted.default} text-xs mt-4`}>
               Response time: Within 24 hours • No setup fees • Simple monthly billing
             </p>
           </CardContent>

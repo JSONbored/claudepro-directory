@@ -1,7 +1,7 @@
 'use client';
 
+import { padding } from '@heyclaude/web-runtime/design-system';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect } from 'react';
 
 /**
@@ -47,7 +47,7 @@ export default function GlobalError({
             <button
               type="button"
               onClick={reset}
-              className={`cursor-pointer rounded-md border-none bg-primary ${UI_CLASSES.CONTAINER_PADDING_SM} text-base text-primary-foreground transition-colors hover:bg-primary/90`}
+              className={`cursor-pointer rounded-md border-none bg-primary ${padding.xDefault} text-base text-primary-foreground transition-colors hover:bg-primary/90`}
             >
               Reset Application
             </button>

@@ -1,6 +1,6 @@
 import type { Database } from '@heyclaude/database-types';
 import { ArrowRight, Calendar } from '@heyclaude/web-runtime/icons';
-import { BADGE_COLORS } from '@heyclaude/web-runtime/ui';
+import { changelogBadge } from '@heyclaude/web-runtime/design-system';
 import {
   formatChangelogDateShort,
   getNonEmptyCategories,
@@ -60,7 +60,7 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
                   key={category}
                   variant="base"
                   style="outline"
-                  className={`${BADGE_COLORS.changelogCategory[category as keyof typeof BADGE_COLORS.changelogCategory]} text-xs`}
+                  className={`${changelogBadge[category as keyof typeof changelogBadge]} text-xs`}
                 >
                   {category}
                 </UnifiedBadge>
@@ -96,7 +96,7 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
                       key={category}
                       variant="base"
                       style="outline"
-                      className={`${BADGE_COLORS.changelogCategory[category as keyof typeof BADGE_COLORS.changelogCategory]} font-medium`}
+                      className={`${changelogBadge[category as keyof typeof changelogBadge]} font-medium`}
                     >
                       {category}
                     </UnifiedBadge>

@@ -8,12 +8,13 @@
 'use client';
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { responsive } from '@heyclaude/web-runtime/design-system';
 import { AlertCircle, Home, RefreshCw } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
   logClientError,
 } from '@heyclaude/web-runtime/logging/client';
-import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
+import { Button, Card } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
 
@@ -63,7 +64,7 @@ export default function ServerError() {
           </p>
         </div>
 
-        <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
+        <div className={responsive.smRowGap}>
           <Button onClick={() => globalThis.location.reload()} size="lg">
             <RefreshCw className="mr-2 h-4 w-4" />
             Reload Page

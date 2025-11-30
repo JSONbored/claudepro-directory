@@ -1,12 +1,10 @@
 'use client';
 
 import { Check, ChevronDown, ChevronUp } from '../../icons.tsx';
-import {
-  DIMENSIONS,
-  POSITION_PATTERNS,
-  STATE_PATTERNS,
-  UI_CLASSES,
-} from '../constants.ts';
+import { iconSize } from '../../design-system/styles/icons.ts';
+import { absolute } from '../../design-system/styles/position.ts';
+import { focusRing } from '../../design-system/styles/interactive.ts';
+import { DIMENSIONS } from '../constants.ts';
 import { cn } from '../utils.ts';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import type * as React from 'react';
@@ -39,7 +37,7 @@ const SelectTrigger = ({
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      `flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground ${STATE_PATTERNS.FOCUS_OUTLINE} ${STATE_PATTERNS.DISABLED_CURSOR} [&>span]:line-clamp-1`,
+      `flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground ${focusRing.outline} disabled:opacity-50 disabled:cursor-not-allowed [&>span]:line-clamp-1`,
       error && 'border-destructive focus:ring-destructive',
       className
     )}
@@ -49,7 +47,7 @@ const SelectTrigger = ({
   >
     {children}
     <SelectPrimitive.Icon asChild={true}>
-      <ChevronDown className={`${UI_CLASSES.ICON_SM} opacity-50`} aria-hidden="true" />
+      <ChevronDown className={`${iconSize.sm} opacity-50`} aria-hidden="true" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 );
@@ -67,7 +65,7 @@ const SelectScrollUpButton = ({
     className={cn('flex cursor-default items-center justify-center py-1', className)}
     {...props}
   >
-    <ChevronUp className={UI_CLASSES.ICON_SM} />
+    <ChevronUp className={iconSize.sm} />
   </SelectPrimitive.ScrollUpButton>
 );
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName;
@@ -84,7 +82,7 @@ const SelectScrollDownButton = ({
     className={cn('flex cursor-default items-center justify-center py-1', className)}
     {...props}
   >
-    <ChevronDown className={UI_CLASSES.ICON_SM} />
+    <ChevronDown className={iconSize.sm} />
   </SelectPrimitive.ScrollDownButton>
 );
 SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName;
@@ -152,16 +150,16 @@ const SelectItem = ({
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      `relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-none ${STATE_PATTERNS.HOVER_BG_DEFAULT} ${STATE_PATTERNS.HOVER_TEXT_ACCENT} data-disabled:pointer-events-none data-disabled:opacity-50`,
+      `relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-none hover:bg-accent/10 hover:text-accent data-disabled:pointer-events-none data-disabled:opacity-50`,
       className
     )}
     {...props}
   >
     <span
-      className={`${POSITION_PATTERNS.ABSOLUTE_LEFT_ICON} flex h-3.5 w-3.5 items-center justify-center`}
+      className={`${absolute.leftIcon} flex h-3.5 w-3.5 items-center justify-center`}
     >
       <SelectPrimitive.ItemIndicator>
-        <Check className={UI_CLASSES.ICON_SM} />
+        <Check className={iconSize.sm} />
       </SelectPrimitive.ItemIndicator>
     </span>
 

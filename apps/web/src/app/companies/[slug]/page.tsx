@@ -7,6 +7,7 @@
 import  { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { between, cluster, muted } from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building,
@@ -16,7 +17,7 @@ import {
   Users,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge,
+import { UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
@@ -193,7 +194,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
               )}
 
               <div className="flex-1">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
+                <div className={cluster.default}>
                   <h1 className="font-bold text-3xl">{company.name}</h1>
                   {company.featured ? <UnifiedBadge variant="base" style="default">
                       Featured
@@ -205,24 +206,24 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                 <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
                   <SafeWebsiteLink
                     url={company.website}
-                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.LINK_ACCENT}`}
+                    className={`${cluster.tight} text-accent hover:text-accent-hover transition-colors duration-200`}
                   >
                     <Globe className="h-4 w-4" />
                     Website
                   </SafeWebsiteLink>
 
-                  {company.industry ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.industry ? <div className={cluster.tight}>
                       <TrendingUp className="h-4 w-4" />
                       {company.industry}
                     </div> : null}
 
                   {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
-                  {company.size ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.size ? <div className={cluster.tight}>
                       <Users className="h-4 w-4" />
                       {company.size}
                     </div> : null}
 
-                  {company.using_cursor_since ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.using_cursor_since ? <div className={cluster.tight}>
                       <Calendar className="h-4 w-4" />
                       Using Claude since{' '}
                       {new Date(company.using_cursor_since).toLocaleDateString('en-US', {
@@ -241,7 +242,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
             {/* Main content - Active jobs */}
             <div className="space-y-6">
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+              <div className={between.center}>
                 <h2 className="font-bold text-2xl">
                   Active Positions ({active_jobs?.length ?? 0})
                 </h2>
@@ -334,37 +335,37 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   <CardDescription>Hiring activity and engagement</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                    <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Jobs Posted</span>
+                  <div className={between.center}>
+                    <span className={`${muted.default} text-sm`}>Total Jobs Posted</span>
                     <span className="font-semibold">{stats?.total_jobs ?? 0}</span>
                   </div>
 
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                    <span className={UI_CLASSES.TEXT_SM_MUTED}>Active Openings</span>
+                  <div className={between.center}>
+                    <span className={`${muted.default} text-sm`}>Active Openings</span>
                     <span className="font-semibold text-green-600">{stats?.active_jobs ?? 0}</span>
                   </div>
 
-                  {stats && (stats.remote_jobs ?? 0) > 0 ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                      <span className={UI_CLASSES.TEXT_SM_MUTED}>Remote Positions</span>
+                  {stats && (stats.remote_jobs ?? 0) > 0 ? <div className={between.center}>
+                      <span className={`${muted.default} text-sm`}>Remote Positions</span>
                       <span className="font-semibold">{stats.remote_jobs ?? 0}</span>
                     </div> : null}
 
-                  {stats?.avg_salary_min ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                      <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
+                  {stats?.avg_salary_min ? <div className={between.center}>
+                      <span className={`${muted.default} text-sm`}>Avg. Salary</span>
                       <span className="font-semibold">
                         ${(stats.avg_salary_min / 1000).toFixed(0)}k+
                       </span>
                     </div> : null}
 
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                    <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Views</span>
+                  <div className={between.center}>
+                    <span className={`${muted.default} text-sm`}>Total Views</span>
                     <span className="font-semibold">
                       {(stats?.total_views ?? 0).toLocaleString()}
                     </span>
                   </div>
 
-                  {stats?.latest_job_posted_at ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                      <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
+                  {stats?.latest_job_posted_at ? <div className={between.center}>
+                      <span className={`${muted.default} text-sm`}>Latest Posting</span>
                       <span className="font-semibold text-sm">
                         {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
                           month: 'short',
@@ -382,12 +383,12 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   <CardTitle className="text-lg">Interested in joining?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
+                  <p className={`${muted.default} text-sm mb-4`}>
                     {company.website
                       ? 'Visit their website to learn more about the company and culture.'
                       : 'Check back regularly for new opportunities!'}
                   </p>
-                  <SafeWebsiteLink url={company.website} className={UI_CLASSES.LINK_ACCENT}>
+                  <SafeWebsiteLink url={company.website} className="text-accent hover:text-accent-hover transition-colors duration-200">
                     Visit Website
                   </SafeWebsiteLink>
                 </CardContent>

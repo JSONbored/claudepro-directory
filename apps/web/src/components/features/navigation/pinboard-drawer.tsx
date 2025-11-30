@@ -1,8 +1,8 @@
 'use client';
 
 import { formatRelativeDate } from '@heyclaude/web-runtime';
+import { iconSize, iconLeading } from '@heyclaude/web-runtime/design-system';
 import { BookmarkMinus, BookmarkPlus } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -28,7 +28,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
       <SheetContent side="right" className="sm:max-w-lg">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2 text-left">
-            <BookmarkPlus className={UI_CLASSES.ICON_SM_LEADING} />
+            <BookmarkPlus className={iconLeading.sm} />
             Pinned for Later
           </SheetTitle>
           <SheetDescription className="text-left">
@@ -89,7 +89,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                       onClick={() => unpinItem(item.category, item.slug)}
                       aria-label={`Unpin ${item.title}`}
                     >
-                      <BookmarkMinus className={UI_CLASSES.ICON_SM} />
+                      <BookmarkMinus className={iconSize.sm} />
                     </Button>
                   </div>
                 </li>

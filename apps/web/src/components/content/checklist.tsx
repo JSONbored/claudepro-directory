@@ -6,8 +6,8 @@
  */
 
 import { AlertTriangle, BookOpen, CheckCircle } from '@heyclaude/web-runtime/icons';
+import { between, cluster, iconSize } from '@heyclaude/web-runtime/design-system';
 import type { ChecklistProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import React from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import {
@@ -48,16 +48,16 @@ export function Checklist(props: ChecklistProps) {
   };
 
   const typeIcons = {
-    prerequisites: <BookOpen className={UI_CLASSES.ICON_MD} />,
-    security: <AlertTriangle className={UI_CLASSES.ICON_MD} />,
-    testing: <CheckCircle className={UI_CLASSES.ICON_MD} />,
+    prerequisites: <BookOpen className={iconSize.md} />,
+    security: <AlertTriangle className={iconSize.md} />,
+    testing: <CheckCircle className={iconSize.md} />,
   };
 
   return (
     <Card itemScope={true} itemType="https://schema.org/ItemList" className="my-8">
       <CardHeader>
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+        <div className={between.center}>
+          <CardTitle className={cluster.compact}>
             {typeIcons[type]}
             {title || `${type.charAt(0).toUpperCase() + type.slice(1)} Checklist`}
           </CardTitle>
@@ -100,12 +100,12 @@ export function Checklist(props: ChecklistProps) {
                   }`}
                 >
                   {checkedItems.has(index) && (
-                    <CheckCircle className={`${UI_CLASSES.ICON_XS} text-primary-foreground`} />
+                    <CheckCircle className={`${iconSize.xs} text-primary-foreground`} />
                   )}
                 </div>
               </button>
               <div className="flex-1">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <div className={cluster.compact}>
                   <span
                     itemProp="name"
                     className={`font-medium ${checkedItems.has(index) ? 'text-muted-foreground line-through' : ''}`}

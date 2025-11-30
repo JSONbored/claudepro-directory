@@ -25,12 +25,17 @@ interface NotificationDismissParams {
   authToken: string;
 }
 
-function getFluxStationUrl(): string {
+function getFluxApiUrl(): string {
   // Try env vars with fallback chain
-  const customUrl = (env as Record<string, unknown>)['NEXT_PUBLIC_FLUX_STATION_URL'] as string | undefined;
-  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+  // Now uses Vercel API routes instead of Supabase Edge Functions
+  const customUrl = (env as Record<string, unknown>)['NEXT_PUBLIC_FLUX_API_URL'] as string | undefined;
+  const siteUrl = (env as Record<string, unknown>)['NEXT_PUBLIC_SITE_URL'] as string | undefined;
   
-  return customUrl || `${supabaseUrl}/functions/v1/flux-station`;
+  const url = customUrl || siteUrl;
+  if (!url) {
+    throw new Error('Flux API URL not configured: NEXT_PUBLIC_FLUX_API_URL or NEXT_PUBLIC_SITE_URL must be set');
+  }
+  return url;
 }
 
 export async function dismissNotifications({
@@ -42,10 +47,10 @@ export async function dismissNotifications({
     return 0;
   }
 
-  const fluxStationUrl = getFluxStationUrl();
+  const fluxApiUrl = getFluxApiUrl();
 
   try {
-    const response = await fetch(`${fluxStationUrl}/dismiss`, {
+    const response = await fetch(`${fluxApiUrl}/api/flux/notifications/dismiss`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -62,8 +67,8 @@ export async function dismissNotifications({
     const result = (await response.json()) as { dismissed: number; traceId?: string };
     return result.dismissed;
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to dismiss notifications via flux-station');
-    logger.error('Failed to dismiss notifications via flux-station', normalized, {
+    const normalized = normalizeError(error, 'Failed to dismiss notifications');
+    logger.error('Failed to dismiss notifications', normalized, {
       userId,
       notificationIdsCount: notificationIds.length,
     });
@@ -75,10 +80,10 @@ export async function createNotification(
   input: NotificationCreateInput,
   authToken?: string
 ): Promise<NotificationRecord> {
-  const fluxStationUrl = getFluxStationUrl();
+  const fluxApiUrl = getFluxApiUrl();
 
   try {
-    const response = await fetch(`${fluxStationUrl}/notifications/create`, {
+    const response = await fetch(`${fluxApiUrl}/api/flux/notifications/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -98,8 +103,8 @@ export async function createNotification(
     };
     return result.notification;
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to create notification via flux-station');
-    logger.error('Failed to create notification via flux-station', normalized, {
+    const normalized = normalizeError(error, 'Failed to create notification');
+    logger.error('Failed to create notification', normalized, {
       ...(input.id && { notificationId: input.id }),
       title: input.title,
     });

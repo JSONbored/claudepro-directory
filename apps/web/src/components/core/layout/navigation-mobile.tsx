@@ -7,13 +7,12 @@
 'use client';
 
 import { getContactChannels } from '@heyclaude/web-runtime/core';
+import { grid, iconSize, absolute } from '@heyclaude/web-runtime/design-system';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
-  POSITION_PATTERNS,
-  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -59,7 +58,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       <span className="relative inline-block">
         {children}
         <span
-          className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} ${
+          className={`${absolute.bottomLeft} ${DIMENSIONS.UNDERLINE} bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} ${
             active ? 'w-full' : 'w-0 group-hover:w-full'
           }`}
           aria-hidden="true"
@@ -97,7 +96,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetTrigger asChild={true}>
         <Button variant="ghost" size="sm" className="md:hidden" aria-label="Open mobile menu">
-          <Menu className={UI_CLASSES.ICON_LG} />
+          <Menu className={iconSize.lg} />
         </Button>
       </SheetTrigger>
       <SheetContent
@@ -106,7 +105,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
       >
         {/* Swipe-to-close indicator */}
         <motion.div
-          className="${POSITION_PATTERNS.ABSOLUTE_TOP_HALF} -translate-x-1/2 left-1/2 h-1 w-12 cursor-grab rounded-full bg-border/50 active:cursor-grabbing"
+          className={`${absolute.topHalf} -translate-x-1/2 left-1/2 h-1 w-12 cursor-grab rounded-full bg-border/50 active:cursor-grabbing`}
           drag="y"
           dragConstraints={{ top: 0, bottom: 50 }}
           onDragEnd={(_, info) => {
@@ -225,7 +224,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <div className={`${UI_CLASSES.GRID_COLS_3_GAP_4} px-4`}>
+            <div className={`${grid.cols3} gap-4 px-4`}>
               {[
                 {
                   icon: DiscordIcon,
@@ -248,7 +247,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                     onClick={item.onClick}
                     aria-label={item.label}
                   >
-                    <item.icon className={UI_CLASSES.ICON_XL} />
+                    <item.icon className={iconSize.xl} />
                   </Button>
                 </motion.div>
               ))}

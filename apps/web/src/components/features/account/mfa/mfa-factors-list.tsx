@@ -9,7 +9,8 @@ import { listMFAFactors, type MFAFactor, unenrollMFAFactor } from '@heyclaude/we
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertTriangle, CheckCircle, Loader2, Shield, Trash } from '@heyclaude/web-runtime/icons';
-import { errorToasts, successToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { iconLeading, iconSize } from '@heyclaude/web-runtime/design-system';
+import { errorToasts, successToasts } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -131,7 +132,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className={`${UI_CLASSES.ICON_XL} animate-spin text-muted-foreground`} />
+        <Loader2 className={`${iconSize.xl} animate-spin text-muted-foreground`} />
       </div>
     );
   }
@@ -162,7 +163,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
           >
             <div className="flex items-center gap-4">
               <div className="rounded-full border bg-accent/5 p-3">
-                <Shield className={UI_CLASSES.ICON_LG} />
+                <Shield className={iconSize.lg} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -171,7 +172,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
                   </h3>
                   {factor.status === 'verified' ? (
                     <UnifiedBadge variant="base" style="default" className="gap-1">
-                      <CheckCircle className={UI_CLASSES.ICON_XS} />
+                      <CheckCircle className={iconSize.xs} />
                       Active
                     </UnifiedBadge>
                   ) : (
@@ -200,7 +201,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
                 }}
                 className="text-destructive hover:bg-destructive/10"
               >
-                <Trash className={UI_CLASSES.ICON_SM_LEADING} />
+                <Trash className={iconLeading.sm} />
                 Remove
               </Button>
             )}
@@ -239,7 +240,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
             <Button variant="destructive" onClick={handleUnenroll} disabled={unenrolling}>
               {unenrolling ? (
                 <>
-                  <Loader2 className={`${UI_CLASSES.ICON_SM_LEADING} animate-spin`} />
+                  <Loader2 className={`${iconLeading.sm} animate-spin`} />
                   Removing...
                 </>
               ) : (

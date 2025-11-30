@@ -10,9 +10,10 @@ import {
   getUserJobById,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { between, jobStatusBadge  } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
+import { UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
@@ -40,7 +41,7 @@ function formatStatus(rawStatus: string): string {
 }
 
 function getStatusColor(status: JobStatus): string {
-  return BADGE_COLORS.jobStatus[status];
+  return jobStatusBadge[status];
 }
 
 export async function generateMetadata({ params }: JobAnalyticsPageProperties): Promise<Metadata> {
@@ -142,7 +143,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
             Back to Jobs
           </Link>
         </Button>
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+        <div className={between.center}>
           <div>
             <h1 className="mb-2 font-bold text-3xl">Job Analytics</h1>
             <p className="text-muted-foreground">{job.title}</p>
@@ -158,7 +159,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
 
       <Card>
         <CardHeader>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+          <div className={between.center}>
             <CardTitle>Listing Details</CardTitle>
             <UnifiedBadge variant="base" style="outline" className={getStatusColor(status)}>
               {formatStatus(status)}

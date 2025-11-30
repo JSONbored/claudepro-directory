@@ -7,7 +7,8 @@
 'use client';
 
 import { CheckCircle, Clock, Send, Sparkles, Users } from '@heyclaude/web-runtime/icons';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize, marginBottom, muted, padding, stack } from '@heyclaude/web-runtime/design-system';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { BorderBeam } from '@heyclaude/web-runtime/ui';
 
@@ -67,8 +68,8 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
     <motion.div
       className={cn(
         'relative overflow-hidden rounded-2xl border border-border/50 bg-card',
-        UI_CLASSES.PADDING_RELAXED,
-        UI_CLASSES.MARGIN_RELAXED,
+        padding.relaxed,
+        marginBottom.relaxed,
         className
       )}
       initial="hidden"
@@ -80,20 +81,20 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
       <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_auto]">
         {/* Left: Content */}
-        <div className={UI_CLASSES.SPACE_Y_4}>
+        <div className={stack.default}>
           {/* Badge */}
           <motion.div variants={itemVariants}>
             <div
               className={cn(
                 'inline-flex rounded-full border border-primary/20 bg-primary/10',
-                UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2,
-                UI_CLASSES.PADDING_X_DEFAULT,
+                cluster.compact,
+                padding.xDefault,
                 'py-1.5',
-                UI_CLASSES.TEXT_SM
+                'text-sm'
               )}
             >
               <motion.div variants={iconVariants}>
-                <Sparkles className={cn(UI_CLASSES.ICON_SM, 'text-primary')} />
+                <Sparkles className={cn(iconSize.sm, 'text-primary')} />
               </motion.div>
               <span className="font-medium text-primary">Community Contributions</span>
             </div>
@@ -106,7 +107,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
           {/* Description */}
           <motion.p
-            className={cn('max-w-2xl', UI_CLASSES.TEXT_BODY_LG, UI_CLASSES.TEXT_MUTED)}
+            className={cn('max-w-2xl text-lg', muted.default)}
             variants={itemVariants}
           >
             Contribute to the largest Claude configuration library. No JSON formatting required - we
@@ -115,19 +116,19 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
           {/* Feature badges */}
           <motion.div
-            className={cn(UI_CLASSES.FLEX_WRAP_ITEMS_CENTER_GAP_3, UI_CLASSES.TEXT_SM_MUTED)}
+            className={cn('flex flex-wrap items-center gap-3', `${muted.default} text-sm`)}
             variants={itemVariants}
           >
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
-              <CheckCircle className={cn(UI_CLASSES.ICON_SM, UI_CLASSES.ICON_SUCCESS)} />
+            <div className={cluster.snug}>
+              <CheckCircle className={cn(iconSize.sm, 'text-green-600')} />
               <span>Auto PR creation</span>
             </div>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
-              <Clock className={cn(UI_CLASSES.ICON_SM, UI_CLASSES.ICON_INFO)} />
+            <div className={cluster.snug}>
+              <Clock className={cn(iconSize.sm, 'text-blue-600')} />
               <span>Fast review</span>
             </div>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
-              <Users className={cn(UI_CLASSES.ICON_SM, 'text-purple-500')} />
+            <div className={cluster.snug}>
+              <Users className={cn(iconSize.sm, 'text-purple-500')} />
               <span>{stats.total}+ configs</span>
             </div>
           </motion.div>
@@ -135,7 +136,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
         {/* Right: Illustration (hidden on mobile) */}
         <motion.div
-          className={cn('hidden lg:flex', UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER)}
+          className={cn('hidden lg:flex items-center justify-center')}
           variants={itemVariants}
         >
           <motion.div
@@ -145,8 +146,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
           >
             <div
               className={cn(
-                'h-32 w-32 rounded-2xl border border-primary/20 bg-primary/10',
-                UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER
+                'h-32 w-32 rounded-2xl border border-primary/20 bg-primary/10 flex items-center justify-center'
               )}
             >
               <Send className="h-16 w-16 text-primary" />

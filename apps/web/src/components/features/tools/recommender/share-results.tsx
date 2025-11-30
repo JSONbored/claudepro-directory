@@ -7,7 +7,7 @@
 
 import { logger } from '@heyclaude/web-runtime/core';
 import { Facebook, Linkedin, Mail, Share2, Twitter } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
 import { SimpleCopyButton } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -41,8 +41,8 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Share2 className={UI_CLASSES.ICON_MD} />
+          <DialogTitle className={cluster.compact}>
+            <Share2 className={iconSize.md} />
             Share Your Results
           </DialogTitle>
           <DialogDescription>
@@ -52,7 +52,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
 
         <div className="space-y-4">
           {/* Copy link */}
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <div className={cluster.compact}>
             <Input
               readOnly={true}
               value={shareUrl}
@@ -66,7 +66,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               variant="outline"
               size="icon"
               className="shrink-0"
-              iconClassName={UI_CLASSES.ICON_SM}
+              iconClassName={iconSize.sm}
               ariaLabel="Copy share link"
               onCopySuccess={() => {
                 logger.info('Share link copied', { from: 'share-results-dialog' });
@@ -85,7 +85,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   logger.info('Recommendation results shared', { platform: 'twitter' });
                 }}
               >
-                <Twitter className={UI_CLASSES.ICON_SM} />
+                <Twitter className={iconSize.sm} />
                 Twitter
               </a>
             </Button>
@@ -99,7 +99,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   logger.info('Recommendation results shared', { platform: 'linkedin' });
                 }}
               >
-                <Linkedin className={UI_CLASSES.ICON_SM} />
+                <Linkedin className={iconSize.sm} />
                 LinkedIn
               </a>
             </Button>
@@ -113,7 +113,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   logger.info('Recommendation results shared', { platform: 'facebook' });
                 }}
               >
-                <Facebook className={UI_CLASSES.ICON_SM} />
+                <Facebook className={iconSize.sm} />
                 Facebook
               </a>
             </Button>
@@ -125,7 +125,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   logger.info('Recommendation results shared', { platform: 'email' });
                 }}
               >
-                <Mail className={UI_CLASSES.ICON_SM} />
+                <Mail className={iconSize.sm} />
                 Email
               </a>
             </Button>

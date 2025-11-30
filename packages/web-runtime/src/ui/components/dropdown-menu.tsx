@@ -12,8 +12,11 @@
  */
 
 import { Check, ChevronRight, Circle } from '../../icons.tsx';
-import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '../constants.ts';
+import { DIMENSIONS } from '../constants.ts';
 import { cn } from '../utils.ts';
+// Design System imports
+import { iconSize } from '../../design-system/styles/icons.ts';
+import { absolute } from '../../design-system/styles/position.ts';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -170,10 +173,10 @@ const DropdownMenuCheckboxItem = ({
     {...props}
   >
     <span
-      className={`${POSITION_PATTERNS.ABSOLUTE_LEFT_ICON} flex h-3.5 w-3.5 items-center justify-center`}
+      className={`${absolute.leftIcon} flex h-3.5 w-3.5 items-center justify-center`}
     >
       <DropdownMenuPrimitive.ItemIndicator>
-        <Check className={UI_CLASSES.ICON_SM} />
+        <Check className={iconSize.sm} />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}
@@ -198,7 +201,7 @@ const DropdownMenuRadioItem = ({
     {...props}
   >
     <span
-      className={`${POSITION_PATTERNS.ABSOLUTE_LEFT_ICON} flex h-3.5 w-3.5 items-center justify-center`}
+      className={`${absolute.leftIcon} flex h-3.5 w-3.5 items-center justify-center`}
     >
       <DropdownMenuPrimitive.ItemIndicator>
         <Circle className="h-2 w-2 fill-current" />

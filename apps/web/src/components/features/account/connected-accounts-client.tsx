@@ -14,7 +14,8 @@ import {
   GithubBrandIcon,
   GoogleBrandIcon,
 } from '@heyclaude/web-runtime/icons';
-import { errorToasts, successToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { iconSize } from '@heyclaude/web-runtime/design-system';
+import { errorToasts, successToasts } from '@heyclaude/web-runtime/ui';
 import { type ComponentType, useState, useTransition } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -138,14 +139,14 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
           >
             <div className="flex items-center gap-4">
               <div className="rounded-full border bg-accent/5 p-3">
-                <IconComponent className={UI_CLASSES.ICON_LG} />
+                <IconComponent className={iconSize.lg} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium">{config.label}</h3>
                   {isConnected && (
                     <UnifiedBadge variant="base" style="default" className="gap-1">
-                      <CheckCircle className={UI_CLASSES.ICON_XS} />
+                      <CheckCircle className={iconSize.xs} />
                       Connected
                     </UnifiedBadge>
                   )}

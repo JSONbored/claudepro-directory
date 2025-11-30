@@ -6,11 +6,11 @@ import type { Database } from '@heyclaude/database-types';
 import { trackMissingData } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
+import { between, iconSize } from '@heyclaude/web-runtime/design-system';
 import type {
   DisplayableContent,
   UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { type FC, memo, useEffect, useMemo } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -54,10 +54,10 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
 
     return (
       <div>
-        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
+        <div className={`${between.center} mb-8`}>
           <h2 className={'font-bold text-2xl'}>{title}</h2>
           <Link href={href} className="flex items-center gap-2 text-accent hover:underline">
-            View all <ExternalLink className={UI_CLASSES.ICON_SM} />
+            View all <ExternalLink className={iconSize.sm} />
           </Link>
         </div>
         <UnifiedCardGrid
@@ -170,13 +170,13 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
       {/* Featured Jobs - Dynamic from database */}
       {featuredJobs.length > 0 && (
         <div>
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
+          <div className={`${between.center} mb-8`}>
             <h2 className={'font-bold text-2xl'}>Featured Jobs</h2>
             <Link
               href={ROUTES.JOBS}
               className="flex items-center gap-2 text-accent hover:underline"
             >
-              View all <ExternalLink className={UI_CLASSES.ICON_SM} />
+              View all <ExternalLink className={iconSize.sm} />
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">

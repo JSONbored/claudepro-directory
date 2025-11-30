@@ -6,7 +6,8 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { ChevronDown, FileText } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
   DropdownMenu,
@@ -40,11 +41,11 @@ export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps)
     <DropdownMenu>
       <DropdownMenuTrigger asChild={true}>
         <Button variant="outline" className="w-full justify-between" type="button">
-          <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <FileText className={UI_CLASSES.ICON_SM} />
+          <span className={cluster.compact}>
+            <FileText className={iconSize.sm} />
             Use Template
           </span>
-          <ChevronDown className={`${UI_CLASSES.ICON_SM} opacity-50`} />
+          <ChevronDown className={`${iconSize.sm} opacity-50`} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

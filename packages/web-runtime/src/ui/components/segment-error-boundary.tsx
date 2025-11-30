@@ -26,7 +26,8 @@ import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 
 import { logClientErrorBoundary, logClientWarn } from '../../utils/client-logger.ts';
 import { usePulse } from '../../hooks/use-pulse.ts';
-import { UI_CLASSES } from '../constants.ts';
+// Design System imports
+import { responsive } from '../../design-system/styles/layout.ts';
 import { Button } from './button.tsx';
 import {
   Card,
@@ -128,7 +129,7 @@ function SegmentErrorFallbackUI({
           </Button>
 
           {links.length > 0 && (
-            <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}`}>
+            <div className={responsive.smRowGap}>
               {links.map((link) => (
                 <Button
                   key={`${link.href}-${link.label}`}
