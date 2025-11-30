@@ -235,6 +235,13 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   );
 }
 
+/**
+ * Access the notifications context for the current React tree.
+ *
+ * @returns The `NotificationsContextValue` provided by the nearest `NotificationsProvider`.
+ * @throws Error if called outside of a `NotificationsProvider`.
+ * @see NotificationsProvider
+ */
 export function useNotificationsContext(): NotificationsContextValue {
   const ctx = useContext(NotificationsContext);
   if (!ctx) {
