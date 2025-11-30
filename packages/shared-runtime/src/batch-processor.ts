@@ -5,6 +5,150 @@
 
 import { createUtilityContext, logError, logInfo, logWarn } from './logging.ts';
 
+// =============================================================================
+// BatchProcessor Class (Queue-style API)
+// =============================================================================
+
+export interface BatchProcessorOptions<T> {
+  /** Number of items to accumulate before processing */
+  batchSize: number;
+  /** Interval in ms to flush incomplete batches */
+  flushInterval: number;
+  /** Function to process a batch of items */
+  processor: (items: T[]) => Promise<void>;
+}
+
+/**
+ * Queue-style batch processor that accumulates items and processes them
+ * when either the batch size is reached or the flush interval expires.
+ */
+export class BatchProcessor<T> {
+  private batch: T[] = [];
+  private readonly batchSize: number;
+  private readonly flushInterval: number;
+  private readonly processor: (items: T[]) => Promise<void>;
+  private flushTimer: ReturnType<typeof setTimeout> | null = null;
+  private isShutdown = false;
+  private isProcessing = false;
+  private processingPromise: Promise<void> | null = null;
+
+  constructor(options: BatchProcessorOptions<T>) {
+    this.batchSize = options.batchSize;
+    this.flushInterval = options.flushInterval;
+    this.processor = options.processor;
+    this.scheduleFlush();
+  }
+
+  /**
+   * Add an item to the batch. Triggers processing if batch size is reached.
+   */
+  add(item: T): void {
+    if (this.isShutdown) {
+      return;
+    }
+
+    this.batch.push(item);
+
+    if (this.batch.length >= this.batchSize) {
+      void this.processBatch();
+    }
+  }
+
+  /**
+   * Flush pending items immediately.
+   */
+  async flush(): Promise<void> {
+    // Wait for any ongoing processing to complete
+    if (this.processingPromise) {
+      await this.processingPromise;
+    }
+
+    if (this.batch.length > 0) {
+      await this.processBatch();
+    }
+  }
+
+  /**
+   * Shutdown the processor, flushing any pending items.
+   */
+  async shutdown(): Promise<void> {
+    this.isShutdown = true;
+    this.cancelScheduledFlush();
+    await this.flush();
+  }
+
+  private scheduleFlush(): void {
+    // Use setTimeout instead of setInterval to avoid infinite loops with fake timers
+    this.cancelScheduledFlush();
+    if (!this.isShutdown) {
+      this.flushTimer = setTimeout(() => {
+        if (this.batch.length > 0 && !this.isProcessing) {
+          void this.processBatch()
+            .then(() => {
+              // Re-schedule after processing
+              this.scheduleFlush();
+            })
+            .catch(async (error) => {
+              // Log error and continue the flush loop to prevent it from stopping
+              const logContext = createUtilityContext('batch-processor', 'flush-loop', {
+                flush_interval_ms: this.flushInterval,
+              });
+              await logError('Batch flush loop failed', logContext, error);
+              // Re-schedule even after error to keep the loop running
+              this.scheduleFlush();
+            });
+        } else {
+          // Re-schedule even if nothing to process
+          this.scheduleFlush();
+        }
+      }, this.flushInterval);
+    }
+  }
+
+  private cancelScheduledFlush(): void {
+    if (this.flushTimer) {
+      clearTimeout(this.flushTimer);
+      this.flushTimer = null;
+    }
+  }
+
+  private async processBatch(): Promise<void> {
+    if (this.batch.length === 0 || this.isProcessing) {
+      return;
+    }
+
+    this.isProcessing = true;
+    const itemsToProcess = [...this.batch];
+    this.batch = [];
+
+    this.processingPromise = (async () => {
+      try {
+        await this.processor(itemsToProcess);
+      } catch (error) {
+        // Log error but don't throw - continue processing
+        const logContext = createUtilityContext('batch-processor', 'process-batch', {
+          batch_size: itemsToProcess.length,
+        });
+        await logError('Batch processing failed', logContext, error);
+      } finally {
+        this.isProcessing = false;
+        this.processingPromise = null;
+        
+        // Check if more items accumulated during processing
+        if (this.batch.length >= this.batchSize) {
+          void this.processBatch();
+        }
+      }
+    })();
+
+    await this.processingPromise;
+  }
+}
+
+// =============================================================================
+// batchProcess Function (Array-style API)
+// =============================================================================
+
 export interface BatchProcessOptions<T> {
   concurrency?: number;
   onError?: (item: T, error: unknown, attempt: number) => void;

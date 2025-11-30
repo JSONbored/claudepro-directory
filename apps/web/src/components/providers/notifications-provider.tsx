@@ -11,7 +11,7 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
-import { useAction } from 'next-safe-action/hooks';
+import { useSafeAction } from '@heyclaude/web-runtime/hooks';
 import {
   createContext,
   useCallback,
@@ -47,6 +47,19 @@ interface NotificationsContextValue {
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
 const DISMISSED_STORAGE_KEY = 'notification-storage';
 
+/**
+ * Provides notification state, controls, and feature-flagged fetching/dismissal to descendant components.
+ *
+ * Exposes a NotificationsContext value that includes the current notifications, unread count, methods to
+ * dismiss single or all notifications, sheet open/close/toggle controls, a manual refresh function, and
+ * derived feature flags. Dismissed notification IDs are persisted to localStorage and synced to the server;
+ * notifications are refreshed on mount and periodically while enabled.
+ *
+ * @param children - React children that will receive the notifications context
+ *
+ * @see NotificationsContext
+ * @see useNotificationsContext
+ */
 export function NotificationsProvider({ children }: { children: React.ReactNode }) {
   // Get static layout flags
   const layoutFlags = getLayoutFlags();
@@ -66,8 +79,8 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const dismissedIdsRef = useRef<string[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const { executeAsync: fetchNotifications } = useAction(getActiveNotificationsAction);
-  const { executeAsync: performDismiss } = useAction(dismissNotificationsAction);
+  const { executeAsync: fetchNotifications } = useSafeAction(getActiveNotificationsAction);
+  const { executeAsync: performDismiss } = useSafeAction(dismissNotificationsAction);
 
   useEffect(() => {
     dismissedIdsRef.current = dismissedIds;
@@ -222,6 +235,13 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   );
 }
 
+/**
+ * Access the notifications context for the current React tree.
+ *
+ * @returns The `NotificationsContextValue` provided by the nearest `NotificationsProvider`.
+ * @throws Error if called outside of a `NotificationsProvider`.
+ * @see NotificationsProvider
+ */
 export function useNotificationsContext(): NotificationsContextValue {
   const ctx = useContext(NotificationsContext);
   if (!ctx) {

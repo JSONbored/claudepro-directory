@@ -19,29 +19,50 @@ export class TimeoutError extends Error {
  * @param timeoutMs - Timeout in milliseconds
  * @param errorMessage - Custom error message
  */
-export async function withTimeout<T>(
+export function withTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,
   errorMessage?: string
 ): Promise<T> {
-  // Handle zero or negative timeouts - reject immediately
-  if (timeoutMs <= 0) {
-    throw new TimeoutError(
-      errorMessage ?? `Operation timed out after ${timeoutMs}ms`,
-      timeoutMs
+  // Handle invalid timeout values (NaN, non-finite, zero or negative)
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+    return Promise.reject(
+      new TimeoutError(
+        errorMessage || `Invalid timeout value: ${timeoutMs}ms (must be a positive finite number)`,
+        timeoutMs
+      )
     );
   }
 
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) => {
-      setTimeout(() => {
+  return new Promise<T>((resolve, reject) => {
+    let settled = false;
+    
+    const timeoutId = setTimeout(() => {
+      if (!settled) {
+        settled = true;
         reject(
           new TimeoutError(errorMessage ?? `Operation timed out after ${timeoutMs}ms`, timeoutMs)
         );
-      }, timeoutMs);
-    }),
-  ]);
+      }
+    }, timeoutMs);
+    
+    promise.then(
+      (result) => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timeoutId);
+          resolve(result);
+        }
+      },
+      (error) => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timeoutId);
+          reject(error);
+        }
+      }
+    );
+  });
 }
 
 /**

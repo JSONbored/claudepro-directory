@@ -36,8 +36,8 @@ const nextConfig = {
     '@heyclaude/data-layer',
     '@heyclaude/database-types',
   ],
-  // Exclude packages that shouldn't be bundled
-  serverExternalPackages: ['@imagemagick/magick-wasm'],
+  // Exclude packages that shouldn't be bundled (pino has test files that break Turbopack)
+  serverExternalPackages: ['@imagemagick/magick-wasm', 'pino', 'pino-pretty', 'thread-stream', 'sonic-boom'],
   cacheLife: {
     minutes: { stale: 300, revalidate: 60, expire: 3600 },
     quarter: { stale: 900, revalidate: 300, expire: 7200 },
@@ -93,6 +93,10 @@ const nextConfig = {
       '@generated': './generated',
       // Stub out edge function image manipulation code for web bundle
       '@heyclaude/shared-runtime/src/image/manipulation': resolve(__dirname, './src/lib/stubs/image-manipulation-stub.ts'),
+      // Fix Turbopack subpath export resolution for zod v4 (required by @hookform/resolvers@5.x)
+      // Turbopack has issues resolving subpath exports in pnpm monorepos
+      'zod/v4/core': 'zod/v4/core',
+      'zod/v4': 'zod/v4',
     },
   },
 

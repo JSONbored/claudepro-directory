@@ -9,12 +9,14 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@heyclaude/database-types": ["../database-types/src/index.ts"]
+      "@heyclaude/database-types": ["../database-types/src/index.ts"],
+      "@heyclaude/shared-runtime/*": ["../shared-runtime/src/*"]
     }
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
   "references": [
-    { "path": "../database-types/tsconfig.json" }
+    { "path": "../database-types/tsconfig.json" },
+    { "path": "../shared-runtime/tsconfig.json" }
   ]
 }

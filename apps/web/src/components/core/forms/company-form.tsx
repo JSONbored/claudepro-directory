@@ -23,11 +23,10 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { useFormSubmit, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useFormSubmit, useLoggedAsync, useSafeAction } from '@heyclaude/web-runtime/hooks';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
-import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useId, useState } from 'react';
 import { FormField } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -54,8 +53,17 @@ interface CompanyFormProps {
 
 // Default form validation values (will be loaded from config in component)
 const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const DEFAULT_MAX_DIMENSION = 2048; // 2048px
+const DEFAULT_MAX_DIMENSION = 2048;
 
+/**
+ * Convert a File into a base64-encoded string.
+ *
+ * @param file - The file whose contents will be encoded
+ * @returns The file data as a base64-encoded string
+ *
+ * @see CompanyForm
+ * @see uploadCompanyLogoAction
+ */
 async function fileToBase64(file: File) {
   const buffer = await file.arrayBuffer();
   let binary = '';
@@ -69,8 +77,19 @@ async function fileToBase64(file: File) {
 }
 
 /**
- * Form component for creating and editing company profiles.
- * Includes logo upload with validation, company details, and metadata.
+ * Form component for creating or editing a company profile and managing its logo.
+ *
+ * Renders inputs for company details (name, website, description, size, industry, optional date)
+ * and a logo upload flow that validates file type, size, and dimensions before uploading.
+ *
+ * @param initialData - Optional company data used to prefill the form when editing
+ * @param mode - Operation mode: "create" renders creation flow, "edit" renders update flow
+ *
+ * @see fileToBase64
+ * @see uploadCompanyLogoAction
+ * @see useFormSubmit
+ * @see FORM_CONFIG
+ * @see ROUTES.ACCOUNT_COMPANIES
  */
 export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const logoUploadId = useId();
@@ -80,7 +99,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const [useCursorDate, setUseCursorDate] = useState<boolean>(!!initialData?.using_cursor_since);
   const [maxFileSize, setMaxFileSize] = useState(DEFAULT_MAX_FILE_SIZE);
   const [maxDimension, setMaxDimension] = useState(DEFAULT_MAX_DIMENSION);
-  const { executeAsync: uploadLogo } = useAction(uploadCompanyLogoAction);
+  const { executeAsync: uploadLogo } = useSafeAction(uploadCompanyLogoAction);
 
   // Use standardized form submission hook
   const { isPending, handleSubmit, router } = useFormSubmit({

@@ -19,14 +19,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1  # Shallow clone for speed
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Extract plaintext submission
         id: extract
@@ -120,9 +120,6 @@ jobs:
               submission: submission
             };
 
-      - name: Install Supabase client
-        run: pnpm install -g @supabase/supabase-js
-
       - name: Insert to Supabase via RPC (Database-First)
         if: steps.extract.outputs.result && fromJSON(steps.extract.outputs.result).valid
         uses: nick-fields/retry@v3
@@ -134,35 +131,42 @@ jobs:
           max_attempts: 3
           retry_on: error
           command: |
-            # Create Node.js script to call RPC function (database-first)
+            # Create Node.js script using native fetch (no dependencies)
             cat > insert-via-rpc.mjs << 'EOF'
-            import { createClient } from '@supabase/supabase-js';
             import { readFileSync } from 'fs';
 
             const supabaseUrl = process.env.SUPABASE_URL;
             const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
             const submissionData = JSON.parse(readFileSync('submission.json', 'utf8'));
 
-            const supabase = createClient(supabaseUrl, supabaseKey);
-
-            // Call database RPC function (includes validation, rate limiting, auto-approve)
-            const { data, error } = await supabase.rpc('submit_content_for_review', {
-              p_submission_type: submissionData.submission_type,
-              p_name: submissionData.name,
-              p_description: submissionData.description,
-              p_category: submissionData.category,
-              p_author: submissionData.author,
-              p_content_data: submissionData.content_data,
-              p_author_profile_url: submissionData.author_profile_url || null,
-              p_github_url: submissionData.github_url || null,
-              p_tags: submissionData.tags || []
+            // Call Supabase RPC via REST API (native fetch, no dependencies)
+            const response = await fetch(`${supabaseUrl}/rest/v1/rpc/submit_content_for_review`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${supabaseKey}`,
+              },
+              body: JSON.stringify({
+                p_submission_type: submissionData.submission_type,
+                p_name: submissionData.name,
+                p_description: submissionData.description,
+                p_category: submissionData.category,
+                p_author: submissionData.author,
+                p_content_data: submissionData.content_data,
+                p_author_profile_url: submissionData.author_profile_url || null,
+                p_github_url: submissionData.github_url || null,
+                p_tags: submissionData.tags || []
+              }),
             });
 
-            if (error) {
-              console.error('RPC error:', error);
+            if (!response.ok) {
+              const error = await response.text();
+              console.error('RPC error:', response.status, error);
               process.exit(1);
             }
 
+            const data = await response.json();
             console.log('Submission created via RPC:', data);
             console.log('SUBMISSION_ID=' + data.submission_id);
             console.log('STATUS=' + data.status);

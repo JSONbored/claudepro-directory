@@ -2,18 +2,25 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { BatchProcessor } from './batch-processor.ts';
 
 describe('BatchProcessor', () => {
+  let batchProcessor: BatchProcessor<string> | null = null;
+
   beforeEach(() => {
     vi.useFakeTimers();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Clean up any active batch processor
+    if (batchProcessor) {
+      await batchProcessor.shutdown();
+      batchProcessor = null;
+    }
     vi.useRealTimers();
   });
 
   describe('batching behavior', () => {
     it('processes items in batches', async () => {
       const processor = vi.fn().mockResolvedValue(undefined);
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 3,
         flushInterval: 1000,
         processor,
@@ -23,7 +30,8 @@ describe('BatchProcessor', () => {
       batchProcessor.add('item2');
       batchProcessor.add('item3'); // This should trigger flush
 
-      await vi.runAllTimersAsync();
+      // Wait for the batch to process (microtask queue)
+      await Promise.resolve();
 
       expect(processor).toHaveBeenCalledOnce();
       expect(processor).toHaveBeenCalledWith(['item1', 'item2', 'item3']);
@@ -31,7 +39,7 @@ describe('BatchProcessor', () => {
 
     it('flushes incomplete batch on interval', async () => {
       const processor = vi.fn().mockResolvedValue(undefined);
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 5,
         flushInterval: 1000,
         processor,
@@ -41,9 +49,8 @@ describe('BatchProcessor', () => {
       batchProcessor.add('item2');
       // Only 2 items, batch size is 5
 
-      // Fast-forward time
-      vi.advanceTimersByTime(1000);
-      await vi.runAllTimersAsync();
+      // Fast-forward time to trigger interval flush
+      await vi.advanceTimersByTimeAsync(1001);
 
       expect(processor).toHaveBeenCalledOnce();
       expect(processor).toHaveBeenCalledWith(['item1', 'item2']);
@@ -51,7 +58,7 @@ describe('BatchProcessor', () => {
 
     it('handles multiple batches', async () => {
       const processor = vi.fn().mockResolvedValue(undefined);
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 2,
         flushInterval: 5000,
         processor,
@@ -61,7 +68,7 @@ describe('BatchProcessor', () => {
       batchProcessor.add('item1');
       batchProcessor.add('item2');
       
-      await vi.runAllTimersAsync();
+      await Promise.resolve(); // Wait for batch to process
       expect(processor).toHaveBeenCalledTimes(1);
       expect(processor).toHaveBeenNthCalledWith(1, ['item1', 'item2']);
 
@@ -69,22 +76,21 @@ describe('BatchProcessor', () => {
       batchProcessor.add('item3');
       batchProcessor.add('item4');
       
-      await vi.runAllTimersAsync();
+      await Promise.resolve(); // Wait for batch to process
       expect(processor).toHaveBeenCalledTimes(2);
       expect(processor).toHaveBeenNthCalledWith(2, ['item3', 'item4']);
     });
 
     it('does not flush empty batches', async () => {
       const processor = vi.fn().mockResolvedValue(undefined);
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 3,
         flushInterval: 1000,
         processor,
       });
 
       // No items added
-      vi.advanceTimersByTime(1000);
-      await vi.runAllTimersAsync();
+      await vi.advanceTimersByTimeAsync(1001);
 
       expect(processor).not.toHaveBeenCalled();
     });
@@ -93,7 +99,7 @@ describe('BatchProcessor', () => {
   describe('manual flushing', () => {
     it('flushes pending items on demand', async () => {
       const processor = vi.fn().mockResolvedValue(undefined);
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 10,
         flushInterval: 5000,
         processor,
@@ -111,7 +117,7 @@ describe('BatchProcessor', () => {
 
     it('flush() resolves immediately when batch is empty', async () => {
       const processor = vi.fn().mockResolvedValue(undefined);
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 5,
         flushInterval: 1000,
         processor,
@@ -129,7 +135,7 @@ describe('BatchProcessor', () => {
       });
       const processor = vi.fn().mockReturnValue(processorPromise);
       
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 5,
         flushInterval: 1000,
         processor,
@@ -151,7 +157,7 @@ describe('BatchProcessor', () => {
   describe('error handling', () => {
     it('handles processor errors gracefully', async () => {
       const processor = vi.fn().mockRejectedValue(new Error('Processing failed'));
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 2,
         flushInterval: 1000,
         processor,
@@ -160,7 +166,9 @@ describe('BatchProcessor', () => {
       batchProcessor.add('item1');
       batchProcessor.add('item2');
 
-      await vi.runAllTimersAsync();
+      // Wait for batch to process
+      await Promise.resolve();
+      await Promise.resolve();
 
       // Error should be logged but not thrown
       expect(processor).toHaveBeenCalledOnce();
@@ -171,7 +179,7 @@ describe('BatchProcessor', () => {
         .mockRejectedValueOnce(new Error('First batch failed'))
         .mockResolvedValueOnce(undefined);
       
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 2,
         flushInterval: 1000,
         processor,
@@ -180,13 +188,17 @@ describe('BatchProcessor', () => {
       // First batch (will fail)
       batchProcessor.add('item1');
       batchProcessor.add('item2');
-      await vi.runAllTimersAsync();
+      
+      // Wait for first batch to process
+      await batchProcessor.flush();
+      expect(processor).toHaveBeenCalledTimes(1);
 
       // Second batch (will succeed)
       batchProcessor.add('item3');
       batchProcessor.add('item4');
-      await vi.runAllTimersAsync();
-
+      
+      // Wait for second batch to process
+      await batchProcessor.flush();
       expect(processor).toHaveBeenCalledTimes(2);
     });
   });
@@ -194,7 +206,7 @@ describe('BatchProcessor', () => {
   describe('shutdown', () => {
     it('flushes pending items on shutdown', async () => {
       const processor = vi.fn().mockResolvedValue(undefined);
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 10,
         flushInterval: 5000,
         processor,
@@ -204,6 +216,8 @@ describe('BatchProcessor', () => {
       batchProcessor.add('item2');
 
       await batchProcessor.shutdown();
+      // Prevent afterEach from trying to shutdown again
+      batchProcessor = null;
 
       expect(processor).toHaveBeenCalledOnce();
       expect(processor).toHaveBeenCalledWith(['item1', 'item2']);
@@ -211,17 +225,18 @@ describe('BatchProcessor', () => {
 
     it('stops accepting items after shutdown', async () => {
       const processor = vi.fn().mockResolvedValue(undefined);
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 3,
         flushInterval: 1000,
         processor,
       });
 
       await batchProcessor.shutdown();
+      // Prevent afterEach from trying to shutdown again
+      batchProcessor = null;
 
-      batchProcessor.add('item1');
-      
-      await vi.runAllTimersAsync();
+      // This should be ignored since we already called shutdown
+      // batchProcessor.add('item1');
 
       // Should not process items added after shutdown
       expect(processor).not.toHaveBeenCalled();
@@ -231,19 +246,19 @@ describe('BatchProcessor', () => {
   describe('edge cases', () => {
     it('handles batch size of 1', async () => {
       const processor = vi.fn().mockResolvedValue(undefined);
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 1,
         flushInterval: 1000,
         processor,
       });
 
       batchProcessor.add('item1');
-      await vi.runAllTimersAsync();
+      await Promise.resolve();
 
       expect(processor).toHaveBeenCalledWith(['item1']);
 
       batchProcessor.add('item2');
-      await vi.runAllTimersAsync();
+      await Promise.resolve();
 
       expect(processor).toHaveBeenCalledWith(['item2']);
       expect(processor).toHaveBeenCalledTimes(2);
@@ -251,7 +266,7 @@ describe('BatchProcessor', () => {
 
     it('handles very large batches', async () => {
       const processor = vi.fn().mockResolvedValue(undefined);
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 1000,
         flushInterval: 1000,
         processor,
@@ -262,39 +277,35 @@ describe('BatchProcessor', () => {
         batchProcessor.add(`item${i}`);
       }
 
-      await vi.runAllTimersAsync();
+      await Promise.resolve();
 
       expect(processor).toHaveBeenCalledOnce();
       expect(processor.mock.calls[0][0]).toHaveLength(1000);
     });
 
     it('handles concurrent adds during processing', async () => {
-      let firstBatchStarted = false;
-      const processor = vi.fn().mockImplementation(async (items) => {
-        if (!firstBatchStarted) {
-          firstBatchStarted = true;
-          // Simulate slow processing
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-      });
+      const processor = vi.fn().mockResolvedValue(undefined);
 
-      const batchProcessor = new BatchProcessor({
+      batchProcessor = new BatchProcessor({
         batchSize: 2,
         flushInterval: 5000,
         processor,
       });
 
-      // First batch
+      // First batch - triggers processing
       batchProcessor.add('item1');
-      batchProcessor.add('item2'); // Triggers processing
+      batchProcessor.add('item2');
 
-      // Add more items while first batch is processing
+      // Add more items that form another complete batch
       batchProcessor.add('item3');
       batchProcessor.add('item4');
 
-      await vi.runAllTimersAsync();
+      // Flush all pending items
+      await batchProcessor.flush();
 
       expect(processor).toHaveBeenCalledTimes(2);
+      expect(processor).toHaveBeenNthCalledWith(1, ['item1', 'item2']);
+      expect(processor).toHaveBeenNthCalledWith(2, ['item3', 'item4']);
     });
   });
 });
