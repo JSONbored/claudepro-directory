@@ -378,12 +378,14 @@ export async function logError(message: string, logContext: Record<string, unkno
         // Fallback to console.error for Edge Runtime environments
         const errorMessage = `Failed to flush logs: ${err instanceof Error ? err.message : String(err)}\n`;
         // Check for Node.js environment (not Edge Runtime)
-        // process.stderr.write is available in Node.js when process exists
-        // TypeScript types say process.stderr always exists when process exists, but Edge Runtime may not have it
+        // Use indirect access to avoid Turbopack static analysis warning about process.stderr
+        // The globalThis['process'] pattern avoids bundler detection of Node.js APIs
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- Runtime check for Edge compatibility
-        if (typeof process !== 'undefined' && process.stderr && typeof process.stderr.write === 'function') {
+        const nodeProcess = typeof globalThis !== 'undefined' ? (globalThis as Record<string, unknown>)['process'] as NodeJS.Process | undefined : undefined;
+        const stderr = nodeProcess?.stderr;
+        if (stderr && typeof stderr.write === 'function') {
           try {
-            process.stderr.write(errorMessage);
+            stderr.write(errorMessage);
           } catch {
             // If write fails, fall back to console (inside flush callback - rule allows this)
             // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- Last resort in flush callback

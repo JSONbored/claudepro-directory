@@ -11,7 +11,7 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
-import { useAction } from 'next-safe-action/hooks';
+import { useSafeAction } from '@heyclaude/web-runtime/hooks';
 import {
   createContext,
   useCallback,
@@ -66,8 +66,8 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const dismissedIdsRef = useRef<string[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const { executeAsync: fetchNotifications } = useAction(getActiveNotificationsAction);
-  const { executeAsync: performDismiss } = useAction(dismissNotificationsAction);
+  const { executeAsync: fetchNotifications } = useSafeAction(getActiveNotificationsAction);
+  const { executeAsync: performDismiss } = useSafeAction(dismissNotificationsAction);
 
   useEffect(() => {
     dismissedIdsRef.current = dismissedIds;

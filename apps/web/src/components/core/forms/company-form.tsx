@@ -27,7 +27,7 @@ import { useFormSubmit, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
-import { useAction } from 'next-safe-action/hooks';
+import { useSafeAction } from '@heyclaude/web-runtime/hooks';
 import { useEffect, useId, useState } from 'react';
 import { FormField } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -80,7 +80,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const [useCursorDate, setUseCursorDate] = useState<boolean>(!!initialData?.using_cursor_since);
   const [maxFileSize, setMaxFileSize] = useState(DEFAULT_MAX_FILE_SIZE);
   const [maxDimension, setMaxDimension] = useState(DEFAULT_MAX_DIMENSION);
-  const { executeAsync: uploadLogo } = useAction(uploadCompanyLogoAction);
+  const { executeAsync: uploadLogo } = useSafeAction(uploadCompanyLogoAction);
 
   // Use standardized form submission hook
   const { isPending, handleSubmit, router } = useFormSubmit({
@@ -247,7 +247,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         }
 
         return result;
-      } else {
+      }
         const companyId = initialData?.id;
         if (!companyId) {
           throw new Error('Company ID is required for updates');
@@ -263,7 +263,6 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         }
 
         return result;
-      }
     });
   };
 

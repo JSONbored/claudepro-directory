@@ -23,7 +23,6 @@
     "heyclaude-generate-zod": "./src/bin/generate-zod-schemas.ts",
     "heyclaude-generate-actions": "./src/bin/generate-server-actions.ts",
     "heyclaude-generate-edge-routes": "./src/bin/generate-edge-routes.ts",
-    "heyclaude-verify-routes": "./src/bin/verify-routes.ts",
     "heyclaude-mcp-login": "./src/bin/mcp-login.ts"
   },
   "exports": {

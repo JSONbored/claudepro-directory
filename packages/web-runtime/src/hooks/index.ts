@@ -1,5 +1,6 @@
 export * from './use-announcement-dismissal.ts';
 export * from './use-authenticated-user.ts';
+export { useSafeAction, useAction } from './use-safe-action.ts';
 export * from './use-card-navigation.ts';
 export * from './use-copy-to-clipboard.ts';
 export * from './use-field-highlight.ts';
