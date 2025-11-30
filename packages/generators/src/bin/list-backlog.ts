@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 import { runListBacklog } from '../commands/list-backlog.js';
 import { logger } from '../toolkit/logger.js';
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { verifyRoutes } from '../commands/verify-routes.js';

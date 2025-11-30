@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 import { runReplayWebhook } from '../commands/replay-webhook.js';
 import { logger } from '../toolkit/logger.js';
 
