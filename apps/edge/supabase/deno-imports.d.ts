@@ -9,7 +9,6 @@
  * Actual types come from the packages themselves at runtime via Deno's type resolution.
  *
  * This file intentionally uses `any` types and `export *` for Deno module compatibility.
- * All biome linting rules are disabled for this file via overrides in biome.json.
  */
 
 // JSR (JavaScript Registry) imports

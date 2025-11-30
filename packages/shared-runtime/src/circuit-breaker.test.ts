@@ -147,7 +147,9 @@ describe('CircuitBreaker', () => {
       // Second request should be rejected (exceeds halfOpenMaxAttempts)
       await expect(circuitBreaker.execute(slowFn)).rejects.toThrow('Circuit breaker is HALF_OPEN');
       
-      await promise1; // Wait for first request to complete
+      // Advance timers to complete the first request
+      await vi.advanceTimersByTimeAsync(1001);
+      await promise1;
     });
   });
 

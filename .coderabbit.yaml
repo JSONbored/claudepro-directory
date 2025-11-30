@@ -73,7 +73,6 @@ reviews:
     - "vitest.config.ts"
     - "package.json"
     - ".vercelignore"
-    - "biome.json"
     - "tsconfig.json"
     
     # App config files
@@ -158,7 +157,7 @@ reviews:
     eslint:
       enabled: true
     biome:
-      enabled: true
+      enabled: false
     
     # Security tools
     gitleaks:

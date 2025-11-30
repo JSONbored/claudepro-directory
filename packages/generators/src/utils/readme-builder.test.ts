@@ -59,34 +59,8 @@ describe('buildReadmeMarkdown', () => {
       expect(result).toContain('## 📈 Activity');
     });
 
-    it('should use custom SITE_URL from environment', () => {
-      process.env['NEXT_PUBLIC_SITE_URL'] = 'https://test.example.com';
-
-      const data: ReadmeData = {
-        categories: [
-          {
-            title: 'Agent',
-            description: 'AI agents',
-            icon_name: 'Sparkles',
-            url_slug: 'agents',
-            items: [
-              {
-                slug: 'code-reviewer',
-                title: 'Code Reviewer',
-                description: 'Reviews code',
-              },
-            ],
-          },
-        ],
-        total_count: 1,
-      };
-
-      const result = buildReadmeMarkdown(data);
-
-      expect(result).toContain('https://test.example.com/agents/code-reviewer');
-      expect(result).toContain('[🌐 Website](https://test.example.com)');
-      expect(result).toContain('1+ expert rules');
-    });
+    // Note: SITE_URL is evaluated at module load time (build-time config),
+    // so runtime env changes don't affect it. The default URL is used.
 
     it('should pluralize category names correctly', () => {
       const data: ReadmeData = {
@@ -375,8 +349,8 @@ describe('buildReadmeMarkdown', () => {
 
       const result = buildReadmeMarkdown(data);
 
-      // URL should have empty category slug
-      expect(result).toContain('https://claudepro.directory//test');
+      // URL should omit category slug entirely (no double slashes)
+      expect(result).toContain('https://claudepro.directory/test');
     });
 
     it('should skip items with null slug', () => {

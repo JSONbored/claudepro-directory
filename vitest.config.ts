@@ -157,7 +157,11 @@ export default defineConfig({
       '@heyclaude/web-runtime': resolve(__dirname, './packages/web-runtime/src'),
       '@heyclaude/data-layer': resolve(__dirname, './packages/data-layer/src'),
       // Use src for tests to avoid needing dist build
-      // Point to index.ts explicitly to ensure proper module resolution
+      // Handle both base import and subpath imports for shared-runtime
+      '@heyclaude/shared-runtime/schemas/env': resolve(
+        __dirname,
+        './packages/shared-runtime/src/schemas/env.ts'
+      ),
       '@heyclaude/shared-runtime': resolve(
         __dirname,
         './packages/shared-runtime/src/index.ts'

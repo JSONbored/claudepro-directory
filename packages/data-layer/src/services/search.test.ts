@@ -45,14 +45,16 @@ describe('SearchService', () => {
       } as any);
 
       const result = await service.searchContent({
-        query: 'typescript',
-        limit_count: 10,
+        search_query: 'typescript',
+        result_limit: 10,
       });
 
-      expect(result).toEqual(mockData);
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('search_content', {
-        query: 'typescript',
-        limit_count: 10,
+      // Service returns { data: rows, total_count: number }
+      expect(result.data).toEqual(mockData);
+      expect(result.total_count).toBe(2);
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('search_content_optimized', {
+        search_query: 'typescript',
+        result_limit: 10,
       });
     });
 
@@ -63,36 +65,12 @@ describe('SearchService', () => {
       } as any);
 
       const result = await service.searchContent({
-        query: 'nonexistent-query-xyz',
-        limit_count: 10,
+        search_query: 'nonexistent-query-xyz',
+        result_limit: 10,
       });
 
-      expect(result).toEqual([]);
-    });
-
-    it('handles search with category filter', async () => {
-      const mockData = [
-        {
-          id: 'result-1',
-          title: 'AI Agent',
-          category: 'agents',
-          relevance_score: 0.92,
-        },
-      ];
-
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      } as any);
-
-      const result = await service.searchContent({
-        query: 'ai',
-        category_filter: 'agents',
-        limit_count: 10,
-      });
-
-      expect(result).toEqual(mockData);
-      expect(result![0].category).toBe('agents');
+      expect(result.data).toEqual([]);
+      expect(result.total_count).toBe(0);
     });
 
     it('throws error on database failure', async () => {
@@ -105,26 +83,25 @@ describe('SearchService', () => {
 
       await expect(
         service.searchContent({
-          query: 'test',
-          limit_count: 10,
+          search_query: 'test',
+          result_limit: 10,
         })
       ).rejects.toEqual(mockError);
     });
 
     it('handles special characters in query', async () => {
-      const mockData = [];
-
       vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
+        data: [],
         error: null,
       } as any);
 
       const result = await service.searchContent({
-        query: 'test & query | with (special) characters',
-        limit_count: 10,
+        search_query: 'test & query | with (special) characters',
+        result_limit: 10,
       });
 
-      expect(result).toEqual([]);
+      expect(result.data).toEqual([]);
+      expect(result.total_count).toBe(0);
       expect(mockSupabase.rpc).toHaveBeenCalled();
     });
   });

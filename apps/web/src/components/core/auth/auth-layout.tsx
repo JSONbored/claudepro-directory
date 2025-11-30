@@ -33,7 +33,7 @@ interface SplitAuthLayoutProps {
  */
 // Shared card border style for Claude orange accent
 const cardBorderStyle = {
-  borderWidth: '0.5px',
+  borderWidth: '1px',
   borderStyle: 'solid',
   borderColor: 'oklch(74% 0.2 35)',
 } as const;
