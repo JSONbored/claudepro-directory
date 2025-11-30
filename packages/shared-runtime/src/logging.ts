@@ -322,12 +322,15 @@ export function logInfo(message: string, logContext: Record<string, unknown>): v
 }
 
 /**
- * Log a trace-level message with the current logger bindings merged into the provided context.
+ * Emit a trace-level log entry using the current logger bindings merged with the provided context.
  *
- * The logger will automatically mix in bindings (for example request id, operation, user id) when emitting this entry.
+ * The provided `logContext` is combined with the logger's active bindings (for example request id, operation, user id)
+ * before emitting. When the logger's trace level is not enabled, this function performs no action.
  *
- * @param message - The message to record
- * @param logContext - Context object whose fields will be merged with the logger's current bindings before logging
+ * @param {string} message - The message to record.
+ * @param {Record<string, unknown>} logContext - Additional structured fields to include with the log entry; these are merged with the logger's current bindings.
+ * @returns {void} No value is returned; the function emits a log entry or no-ops if trace level is disabled.
+ * @see {@link logInfo}, {@link logError}, {@link logger.bindings}
  */
 export function logTrace(message: string, logContext: Record<string, unknown>): void {
   // Only log if trace level is enabled (avoids unnecessary work)
@@ -338,14 +341,20 @@ export function logTrace(message: string, logContext: Record<string, unknown>): 
 }
 
 /**
- * Log an error message with optional error normalization and flush buffered logs.
+ * Emit an error-level log with optional normalized error information and wait for the logger to flush.
  *
- * The logger's bindings are mixed into the provided context automatically before logging.
+ * Builds a log payload by merging the provided structured `logContext` with the logger's current bindings,
+ * attaches a normalized `err` field when `error` is supplied, emits an error-level log via the Pino logger,
+ * and awaits completion of the logger's internal flush to increase the likelihood the entry is persisted before
+ * execution ends.
  *
- * @param message - Human-readable log message
- * @param logContext - Additional structured fields to include in the log; logger bindings (for example `requestId`, `operation`, `userId`) are merged automatically
- * @param error - Optional error to normalize and attach to the log as the `err` field
- * @returns Void
+ * @param {string} message - Human-readable log message describing the error/event.
+ * @param {Record<string, unknown>} logContext - Additional structured fields to include in the log; logger bindings (for example `requestId`, `operation`, `userId`) are merged automatically by the logger mixin.
+ * @param {unknown} [error] - Optional error value to normalize and attach as the `err` field in the log entry.
+ * @returns {Promise<void>} Resolves once the log has been emitted and the logger flush has completed.
+ * @throws {unknown} If the logger's flush callback reports an error; the implementation will attempt to write a diagnostic message to stderr (when available) or `console.error` before rejecting.
+ * @see normalizeError
+ * @see pinoLogger
  */
 export async function logError(message: string, logContext: Record<string, unknown>, error?: unknown): Promise<void> {
   // Build log data - mixin will automatically inject bindings (requestId, operation, userId, etc.)
@@ -378,12 +387,14 @@ export async function logError(message: string, logContext: Record<string, unkno
         // Fallback to console.error for Edge Runtime environments
         const errorMessage = `Failed to flush logs: ${err instanceof Error ? err.message : String(err)}\n`;
         // Check for Node.js environment (not Edge Runtime)
-        // process.stderr.write is available in Node.js when process exists
-        // TypeScript types say process.stderr always exists when process exists, but Edge Runtime may not have it
+        // Use indirect access to avoid Turbopack static analysis warning about process.stderr
+        // The globalThis['process'] pattern avoids bundler detection of Node.js APIs
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- Runtime check for Edge compatibility
-        if (typeof process !== 'undefined' && process.stderr && typeof process.stderr.write === 'function') {
+        const nodeProcess = typeof globalThis !== 'undefined' ? (globalThis as Record<string, unknown>)['process'] as NodeJS.Process | undefined : undefined;
+        const stderr = nodeProcess?.stderr;
+        if (stderr && typeof stderr.write === 'function') {
           try {
-            process.stderr.write(errorMessage);
+            stderr.write(errorMessage);
           } catch {
             // If write fails, fall back to console (inside flush callback - rule allows this)
             // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- Last resort in flush callback

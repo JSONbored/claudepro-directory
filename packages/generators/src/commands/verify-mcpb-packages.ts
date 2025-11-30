@@ -20,6 +20,19 @@ interface VerificationResult {
   with_packages: number;
 }
 
+/**
+ * Verifies that all MCP content entries have MCPB package URLs in the database and corresponding files in Supabase storage.
+ *
+ * This function:
+ * - Ensures the SUPABASE_SERVICE_ROLE_KEY environment variable is present.
+ * - Fetches all content rows with category "mcp" from the database.
+ * - Identifies entries missing a `mcpb_storage_url`.
+ * - For entries with a non-empty `mcpb_storage_url`, checks the `mcpb-packages` storage bucket for a `<slug>.mcpb` file.
+ * - Logs a summary, warnings for missing packages and storage mismatches, and a success message when no issues are found.
+ *
+ * @returns The verification summary including totals, lists of missing packages, and storage mismatches (`VerificationResult`).
+ * @throws Error If fetching MCP content from the database fails.
+ */
 export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
   await ensureEnvVars(['SUPABASE_SERVICE_ROLE_KEY']);
 
@@ -73,7 +86,10 @@ export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
   );
 
   const withPackages = mcpContent.filter(
-    (mcp) => Boolean(mcp.mcpb_storage_url) && mcp.mcpb_storage_url.trim().length > 0
+    (mcp): mcp is typeof mcp & { mcpb_storage_url: string } => {
+      const url = mcp.mcpb_storage_url;
+      return url !== null && url !== undefined && url.trim().length > 0;
+    }
   );
 
   const storageMismatches: VerificationResult['storage_mismatches_list'] = [];
@@ -84,6 +100,13 @@ export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
       .list('packages', {
         search: mcp.slug,
       });
+
+    if (fileError) {
+      logger.warn(`Storage list error for ${mcp.slug}: ${fileError.message}`, {
+        script: 'verify-mcpb-packages',
+        slug: mcp.slug,
+      });
+    }
 
     const hasStorageFile =
       !fileError && Boolean(fileData) && fileData.some((file) => file.name === `${mcp.slug}.mcpb`);
@@ -134,16 +157,16 @@ export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
     logger.warn('⚠️  Missing packages:', {
       script: 'verify-mcpb-packages',
       missing_count: result.missing_packages,
-      missingPackages: result.missing_packages_list.map((mcp) => ({
-        slug: mcp.slug,
-        title: (mcp.title && mcp.title.trim()) ? mcp.title.trim() : 'No title',
-      })),
+      missingPackages: result.missing_packages_list.map((mcp) => {
+        const title = mcp.title?.trim() || 'No title';
+        return { slug: mcp.slug, title };
+      }),
     });
     logger.info('\nMissing packages list:', {
       script: 'verify-mcpb-packages',
     });
     for (const mcp of result.missing_packages_list) {
-      const title = (mcp.title && mcp.title.trim()) ? mcp.title.trim() : 'No title';
+      const title = mcp.title?.trim() || 'No title';
       logger.info(`  - ${mcp.slug} (${title})`, {
         script: 'verify-mcpb-packages',
       });

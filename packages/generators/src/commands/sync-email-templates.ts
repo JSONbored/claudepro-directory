@@ -2,20 +2,24 @@ import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// NOTE: We import from the source directly to access the manifest and templates
-// This requires the build system to handle TSX and resolving these paths
-import {
-  EMAIL_TEMPLATE_MANIFEST as EMAIL_TEMPLATE_MANIFEST_RAW,
-  type EmailTemplateDefinition,
-  type EmailTemplateSlug,
-} from '@heyclaude/edge-runtime/utils/email/templates/manifest.js';
+// NOTE: edge-runtime uses Deno-style imports that tsc can't resolve in Node.js context.
+// We import types from the package export, but the manifest is imported via relative path
+// since the manifest.ts file imports templates using Deno-style subpaths.
+import type {
+  EmailTemplateDefinition,
+  EmailTemplateSlug,
+} from '@heyclaude/edge-runtime/utils/email/templates/manifest';
+
+// Runtime import via relative path (tsx handles this fine, tsc cannot resolve Deno imports)
+// @ts-expect-error -- edge-runtime manifest uses Deno-style imports that tsc can't resolve
+import { EMAIL_TEMPLATE_MANIFEST as EMAIL_TEMPLATE_MANIFEST_RAW } from '@heyclaude/edge-runtime/utils/email/templates/manifest';
 import { Resend } from 'resend';
 
 import { ensureEnvVars } from '../toolkit/env.js';
 import { logger } from '../toolkit/logger.js';
 
-// Type assertion to ensure proper typing
-const EMAIL_TEMPLATE_MANIFEST: readonly EmailTemplateDefinition<Record<string, unknown>>[] = EMAIL_TEMPLATE_MANIFEST_RAW as readonly EmailTemplateDefinition<Record<string, unknown>>[];
+// Type assertion for the manifest
+const EMAIL_TEMPLATE_MANIFEST = EMAIL_TEMPLATE_MANIFEST_RAW as readonly EmailTemplateDefinition<Record<string, unknown>>[];
 
 // ============================================================================
 // Constants & Types
@@ -51,13 +55,13 @@ interface ResendResponse<T = unknown> {
 
 // Helper to get properly typed manifest
 function getTypedManifest(): readonly TemplateDefinition[] {
-  return EMAIL_TEMPLATE_MANIFEST;
+  return EMAIL_TEMPLATE_MANIFEST as readonly TemplateDefinition[];
 }
 
 interface UploadOptions {
   dryRun: boolean;
   force: boolean;
-  onlySlugs?: EmailTemplateSlug[];
+  onlySlugs?: EmailTemplateSlug[] | undefined;
 }
 
 // ============================================================================
@@ -149,7 +153,41 @@ function ensureSuccess<T extends ResendResponse>(result: T, action: string) {
 
 // ============================================================================
 // Main Command
-// ============================================================================
+/**
+ * Syncs local email templates from the repository manifest to the Resend service by creating, updating, and publishing templates.
+ *
+ * This command-line entrypoint reads the typed email template manifest and the on-disk template map, then for each selected template:
+ * - builds sample data, subject, and rendered HTML,
+ * - creates a new Resend template or updates an existing one (optionally forcing creation),
+ * - publishes the template,
+ * - and updates the template map with the Resend template ID and upload timestamp.
+ *
+ * Side effects:
+ * - Reads the template manifest and the template map file from disk.
+ * - Writes an updated template map to disk when not run in dry-run mode.
+ * - Makes network requests to the Resend API (create / update / publish).
+ *
+ * Command-line flags:
+ * - --dry-run: Log actions but do not perform network requests or write the template map.
+ * - --force: Create new templates instead of reusing existing Resend template IDs.
+ * - --only=<slug1,slug2>: Limit sync to the specified comma-separated template slugs.
+ *
+ * @param dryRun - When true (via `--dry-run`), no network requests or file writes are performed.
+ * @param force - When true (via `--force`), existing Resend template IDs are ignored and new templates are created.
+ * @param only - Comma-separated list of template slugs provided via `--only=` to restrict which templates are processed.
+ * @throws Error - If required environment variables (e.g., RESEND_API_KEY) are missing, if Resend API responses are invalid, or if retryable requests exhaust their retry budget.
+ * @example
+ *   # Full sync (creates/updates and publishes templates)
+ *   node scripts/sync-email
+ *
+ *   # Dry run: show actions without network or disk changes
+ *   node scripts/sync-email --dry-run
+ *
+ *   # Force creation of new templates for a subset
+ *   node scripts/sync-email --force --only=welcome,new-user
+ *
+ * @returns void
+ */
 
 export async function runSyncEmail() {
   const args = process.argv.slice(2);
@@ -171,7 +209,7 @@ export async function runSyncEmail() {
 
   // Ensure API key
   await ensureEnvVars(['RESEND_API_KEY']);
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env['RESEND_API_KEY'];
   if (!apiKey) throw new Error('RESEND_API_KEY is undefined after check');
 
   const resend = new Resend(apiKey);
@@ -210,17 +248,22 @@ export async function runSyncEmail() {
     const entry = map[slug] ?? {};
     let templateId: string | undefined = force ? undefined : entry.resendTemplateId;
 
+    // Resend SDK templates API - types may not be fully exposed in all SDK versions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Resend templates API types incomplete
+    const templates = (resend as any).templates as {
+      create: (opts: { name: string; subject: string; html: string }) => Promise<ResendResponse<{ id: string }>>;
+      update: (opts: { id: string; name: string; subject: string; html: string }) => Promise<ResendResponse>;
+      publish: (id: string) => Promise<ResendResponse>;
+    };
+
     if (templateId === undefined) {
       await delay(REQUEST_SPACING_MS);
       const createResult = await callWithRateLimitRetry(
-        async () => {
-          const result = await resend.templates.create({
-            name: definition.displayName,
-            subject,
-            html,
-          });
-          return result as ResendResponse<{ id: string }>;
-        },
+        async () => templates.create({
+          name: definition.displayName,
+          subject,
+          html,
+        }),
         slug,
         'create template'
       );
@@ -235,14 +278,12 @@ export async function runSyncEmail() {
       await delay(REQUEST_SPACING_MS);
       const idToUpdate = templateId;
       const updateResult = await callWithRateLimitRetry(
-        async () => {
-          const result = await resend.templates.update(idToUpdate, {
-            name: definition.displayName,
-            subject,
-            html,
-          });
-          return result as ResendResponse;
-        },
+        async () => templates.update({
+          id: idToUpdate,
+          name: definition.displayName,
+          subject,
+          html,
+        }),
         slug,
         'update template'
       );
@@ -250,20 +291,10 @@ export async function runSyncEmail() {
       logger.info(`Updated template ${slug}`, { script: 'sync-email', audit: true, templateId: idToUpdate });
     }
 
-    // Publish (Resend requires explicit publish step for templates to be live?)
-    // Checking docs/behavior: Often create/update is enough for drafts, but if there is a publish API:
-    // Based on original script: resend.templates.publish(templateId)
-    /* 
-       Note: Resend Node SDK types might not strictly expose 'publish' if it's newer or different version
-       We cast to unknown to support the method call as in the original script
-    */
+    // Publish template to make it live
     await delay(REQUEST_SPACING_MS);
     const publishResult = await callWithRateLimitRetry(
-      async () => {
-        const templates = resend.templates as unknown as { publish: (id: string) => Promise<ResendResponse> };
-        const result = await templates.publish(templateId);
-        return result;
-      },
+      async () => templates.publish(templateId!),
       slug,
       'publish template'
     );

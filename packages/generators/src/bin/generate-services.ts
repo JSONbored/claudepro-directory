@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 import { runGenerateServices } from '../commands/generate-services.js';
 import { logger } from '../toolkit/logger.js';
 

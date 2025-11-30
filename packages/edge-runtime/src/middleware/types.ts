@@ -9,4 +9,4 @@ export type Middleware<T extends RouterContext = RouterContext> = (
 
 export type Handler<T extends RouterContext = RouterContext> = (
   ctx: T
-) => Promise<Response>;
+) => Response | Promise<Response>;

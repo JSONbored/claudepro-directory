@@ -12,6 +12,11 @@
  * - Mixin for dynamic context
  * - Child logger support with bindings
  * 
+ * **Vercel Compatibility:**
+ * - Uses level-routing destination to ensure warn/error logs go to stderr
+ * - Vercel categorizes logs by output stream: stdout=info, stderr=error
+ * - This ensures warn/error logs appear correctly in Vercel's log dashboard
+ * 
  * @module shared-runtime/logger
  */
 
@@ -20,130 +25,118 @@ import pino from 'pino';
 import { createPinoConfig } from './config.ts';
 
 /**
- * Create a Pino logger instance with centralized configuration
- * 
- * Supports ALL Pino features via the comprehensive PinoConfigOptions interface.
- * 
- * **Important:** The `destination` parameter is NOT a config option - it's passed as the second argument.
- * Use this function's second parameter for destinations (files, streams, etc.).
- * 
- * @param options - Optional configuration overrides (includes EVERY Pino feature)
- * @param destination - Optional destination stream/file (use `pino.destination()` or `pino.multistream()`)
- * @returns Pino logger instance with all features available
- * 
- * @remarks
- * **Performance:** By default, logs to stdout/stderr (async, optimal performance).
- * For file logging, use `pino.destination()` for optimal performance (uses SonicBoom).
- * 
- * **Vercel Compatibility:** Default destination (stdout) works perfectly with Vercel logs.
- * No additional configuration needed - all JSON logs are automatically captured.
- * 
- * **Future-Proof for External Services:**
- * - Use `transport` option in config for external services (Datadog, BetterStack, etc.)
- * - Or use `destination` parameter for file logging
- * - Both can be used together (transport for external, destination for local)
- * 
+ * Create a Pino-compatible destination stream that routes logs to console methods so Vercel can detect log levels correctly.
+ *
+ * This destination inspects the log JSON for a numeric `levelValue` (e.g., 30, 40, 50) and calls `console.log`, `console.warn`, or `console.error`
+ * so Vercel classifies messages as info, warning, or error respectively. If `levelValue` cannot be found, the function treats the message
+ * as info (levelValue 30). The function returns `undefined` when running in a browser-like environment (when `globalThis.window` is defined)
+ * so the default browser console behavior is preserved.
+ *
+ * Edge cases:
+ * - If the log chunk does not contain a parsable `levelValue`, the destination assumes level 30 (info).
+ * - The implementation uses a lightweight regex to locate `levelValue` and does not JSON-parse the chunk.
+ *
+ * @returns {pino.DestinationStream | undefined} A destination stream object with a `write(chunk: string)` method that routes to console methods, or `undefined` when running in a browser environment.
+ * @see createLogger - integrates this destination when no explicit destination is provided for Vercel compatibility.
  * @example
- * ```typescript
- * import { createLogger } from '@heyclaude/shared-runtime/logger';
- * 
- * // Basic usage (logs to stdout - works with Vercel)
+ * // Used internally by createLogger when no destination is supplied:
+ * const dest = createVercelCompatibleDestination();
+ */
+function createVercelCompatibleDestination(): pino.DestinationStream | undefined {
+  // Only use in Node.js server environment
+  // Browser environment already uses console methods via Pino's browser config
+   
+  if (globalThis.window !== undefined) {
+    return undefined;
+  }
+  
+  return {
+    write(chunk: string) {
+      // Quick regex to find levelValue in the JSON (added by our formatter)
+      // Our formatter outputs: { "level": "info", "levelValue": 30, ... }
+      // Level values: trace=10, debug=20, info=30, warn=40, error=50, fatal=60
+      const levelMatch = /"levelValue"\s*:\s*(\d+)/.exec(chunk);
+      const levelValue = levelMatch?.[1] === undefined 
+        ? 30 
+        : Number.parseInt(levelMatch[1], 10);
+      
+      // Remove trailing newline for cleaner console output
+      const logLine = chunk.trimEnd();
+      
+      // Use console methods for proper Vercel log level detection
+      // console.warn → warning (orange) in streaming functions
+      // console.error → error (red)
+      // console.log → info (gray)
+      /* eslint-disable architectural-rules/no-console-in-production-enhanced -- Required for Vercel log level detection */
+      if (levelValue >= 50) { // error=50, fatal=60
+        console.error(logLine);
+      } else if (levelValue >= 40) { // warn=40
+        console.warn(logLine);
+      } else {
+        console.log(logLine);
+      }
+      /* eslint-enable architectural-rules/no-console-in-production-enhanced */
+    },
+  } as pino.DestinationStream;
+}
+
+/**
+ * Create and return a configured Pino logger instance, optionally bound to a specific destination stream.
+ *
+ * @param {Parameters<typeof createPinoConfig>[0]} options - Optional Pino configuration overrides (see PinoConfigOptions); include serializers, transport, level, service, browser transmit, etc.
+ * @param {pino.DestinationStream} [destination] - Optional Pino destination stream (e.g., `pino.destination()` or `pino.multistream()`); when provided it is passed directly to `pino(config, destination)`.
+ * @returns {pino.Logger} A Pino logger instance configured with the provided options and destination (or the module's default/vercel-compatible destination when `destination` is not supplied).
+ *
+ * @remarks
+ * - Performance: Default behavior logs to stdout/stderr (async, high-performance). For file-based logging prefer `pino.destination()` (uses SonicBoom).
+ * - Vercel compatibility: When no explicit destination is provided, the function attempts to use an internal Vercel-compatible destination that routes messages to console methods so Vercel correctly classifies log levels.
+ * - Use `transport` in `options` for external services and/or provide a `destination` for local/file logging; both can be used together.
+ *
+ * @example
  * const logger = createLogger({ service: 'my-service' });
- * logger.info({ userId: '123' }, 'Hello world');
- * logger.error({ err: new Error('Something went wrong') }, 'Error occurred');
- * 
- * // Create child logger with additional context
- * const childLogger = logger.child({ requestId: 'req-123' });
- * childLogger.info('Processing request');
- * 
- * // Update bindings dynamically
- * childLogger.setBindings({ userId: 'user-456' });
- * childLogger.info('User action');
- * 
- * // Audit & Security logging (use structured tags, not custom levels)
- * // This approach works with standard Pino types and any log aggregator
- * logger.info('User action logged', { audit: true, userId: 'user-123', action: 'login' });
- * logger.error('Security violation', { securityEvent: true, severity: 'high', ... });
- * 
- * // Advanced: Custom serializers
- * const apiLogger = createLogger({
- *   service: 'api',
- *   serializers: {
- *     user: (user) => ({ id: user.id, email: user.email }),
- *   }
- * });
- * 
- * // Advanced: File destination (CORRECT way)
- * import { destination } from 'pino';
- * const fileLogger = createLogger(
- *   { service: 'file-logger' },
- *   destination('./app.log') // Second parameter, not in options!
- * );
- * 
- * // Advanced: Multiple destinations (CORRECT way)
- * import { multistream } from 'pino';
- * const multiLogger = createLogger(
- *   { service: 'multi' },
- *   multistream([
- *     { stream: process.stdout, level: 'info' },
- *     { stream: process.stderr, level: 'error' }
- *   ]) // Second parameter, not in options!
- * );
- * 
- * // Advanced: Transport (for external services)
- * const transportLogger = createLogger({
- *   service: 'transport',
- *   transport: {
- *     target: 'pino-pretty', // Development only
- *     options: { colorize: true }
- *   }
- * });
- * 
- * // Advanced: Transport + Destination (both together)
- * const hybridLogger = createLogger(
- *   {
- *     service: 'hybrid',
- *     transport: {
- *       target: 'pino-datadog-transport',
- *       options: { ddClientConf: { ... } }
- *     }
- *   },
- *   destination('./local.log') // Also log to file
- * );
- * 
- * // Advanced: Browser transmit
- * const browserLogger = createLogger({
- *   service: 'browser',
- *   browser: {
- *     transmit: {
- *       level: 'error',
- *       send: (level, logEvent) => {
- *         fetch('/api/logs', {
- *           method: 'POST',
- *           body: JSON.stringify(logEvent)
- *         });
- *       }
- *     }
- *   }
- * });
- * ```
- * 
- * @see {@link https://getpino.io/#/docs/api#pino-options-destination | Pino Destination Documentation}
- * @see {@link https://getpino.io/#/docs/api#pino-destination | pino.destination()}
- * @see {@link https://getpino.io/#/docs/api#pino-multistream | pino.multistream()}
+ * const fileLogger = createLogger({ service: 'file' }, pino.destination('./app.log'));
+ *
+ * @see {@link https://getpino.io/#/docs/api#pino-options-destination}
+ * @see {@link https://getpino.io/#/docs/api#pino-destination}
+ * @see {@link https://getpino.io/#/docs/api#pino-multistream}
  */
 export function createLogger(
   options?: Parameters<typeof createPinoConfig>[0],
   destination?: pino.DestinationStream
 ): pino.Logger {
   const config = createPinoConfig(options);
+  
+  // If custom destination provided, use it
+  if (destination) {
+    // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
+    return pino(config, destination);
+  }
+  
+  // Create Vercel-compatible destination that uses console methods
+  // This ensures Vercel properly detects log levels:
+  // - console.error() → error (red)
+  // - console.warn() → warning (orange in streaming functions)
+  // - console.log() → info (gray)
+  const vercelDest = createVercelCompatibleDestination();
+  
+  if (vercelDest) {
+    // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
+    return pino(config, vercelDest);
+  }
+  
+  // Browser/Edge fallback: use default Pino destination (stdout)
   // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
-  return destination ? pino(config, destination) : pino(config);
+  return pino(config);
 }
 
 /**
  * Default logger instance
  * Use this for simple logging needs
+ * 
+ * **Vercel Compatibility:**
+ * - Uses level-routing destination by default
+ * - warn/error/fatal logs go to stderr (shown as error in Vercel)
+ * - trace/debug/info logs go to stdout (shown as info in Vercel)
  * 
  * @example
  * ```typescript

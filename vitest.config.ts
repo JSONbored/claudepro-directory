@@ -3,21 +3,25 @@ import { resolve } from 'path';
 
 /**
  * Vitest Configuration
- * 
+ *
  * Test files should be co-located with source files using *.test.ts naming.
  * Example: content.ts → content.test.ts (same directory)
- * 
+ *
  * This matches the existing pattern (resend.test.ts) and keeps related code together.
- * 
+ *
  * Environment:
  * - .tsx test files use 'jsdom' (React component tests)
  * - .ts test files use 'node' (server-side/utility tests)
+ *
+ * Projects:
+ * - Enables parallel test runs across packages for improved CI/CD performance
+ * - Each package runs in isolation with its own configuration
  */
 export default defineConfig({
   test: {
     // Enable global test functions (describe, it, expect, vi)
     globals: true,
-    
+
     // Environment based on file extension
     // Component tests (.tsx) need jsdom, server tests (.ts) use node
     environment: 'node',
@@ -29,13 +33,13 @@ export default defineConfig({
       ['**/*.test.ts', 'node'],
       ['**/*.spec.ts', 'node'],
     ],
-    
+
     // Include test files (only in source directories, not node_modules)
     include: [
       'packages/**/*.{test,spec}.{ts,tsx}',
       'apps/**/*.{test,spec}.{ts,tsx}',
     ],
-    
+
     // Exclude patterns
     exclude: [
       '**/node_modules/**', // Explicitly exclude all node_modules
@@ -46,7 +50,7 @@ export default defineConfig({
       '**/*.generated.{ts,tsx}', // Exclude auto-generated files
       'apps/edge/functions/**', // Edge functions use Deno, test separately
     ],
-    
+
     // Coverage configuration
     coverage: {
       provider: 'v8',
@@ -74,20 +78,78 @@ export default defineConfig({
         statements: 60,
       },
     },
-    
+
     // Setup files run before all tests
     setupFiles: ['./vitest.setup.ts'],
-    
+
     // Test timeout (5 seconds default, increase for slow tests)
     testTimeout: 5000,
-    
+
     // Reporter configuration
     reporters: ['verbose'],
-    
+
     // Watch mode configuration
     watch: false, // Disable by default (use test:watch script)
+
+    // Projects for parallel test execution across packages
+    projects: [
+      {
+        test: {
+          name: 'shared-runtime',
+          root: './packages/shared-runtime',
+          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          environment: 'node',
+        },
+      },
+      {
+        test: {
+          name: 'data-layer',
+          root: './packages/data-layer',
+          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          environment: 'node',
+        },
+      },
+      {
+        test: {
+          name: 'web-runtime-node',
+          root: './packages/web-runtime',
+          include: ['src/**/*.{test,spec}.ts'],
+          exclude: ['src/**/*.{test,spec}.tsx'],
+          environment: 'node',
+        },
+      },
+      {
+        test: {
+          name: 'web-runtime-react',
+          root: './packages/web-runtime',
+          include: ['src/**/*.{test,spec}.tsx'],
+          environment: 'jsdom',
+        },
+      },
+      {
+        test: {
+          name: 'generators',
+          root: './packages/generators',
+          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          environment: 'node',
+        },
+      },
+      {
+        test: {
+          name: 'web-app',
+          root: './apps/web',
+          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          environmentMatchGlobs: [
+            ['**/*.test.tsx', 'jsdom'],
+            ['**/*.spec.tsx', 'jsdom'],
+            ['**/*.test.ts', 'node'],
+            ['**/*.spec.ts', 'node'],
+          ],
+        },
+      },
+    ],
   },
-  
+
   // Path aliases (match tsconfig.json and Next.js config)
   resolve: {
     alias: {
@@ -95,10 +157,23 @@ export default defineConfig({
       '@heyclaude/web-runtime': resolve(__dirname, './packages/web-runtime/src'),
       '@heyclaude/data-layer': resolve(__dirname, './packages/data-layer/src'),
       // Use src for tests to avoid needing dist build
-      // Point to index.ts explicitly to ensure proper module resolution
-      '@heyclaude/shared-runtime': resolve(__dirname, './packages/shared-runtime/src/index.ts'),
-      '@heyclaude/database-types': resolve(__dirname, './packages/database-types/src'),
-      '@heyclaude/edge-runtime': resolve(__dirname, './packages/edge-runtime/src'),
+      // Handle both base import and subpath imports for shared-runtime
+      '@heyclaude/shared-runtime/schemas/env': resolve(
+        __dirname,
+        './packages/shared-runtime/src/schemas/env.ts'
+      ),
+      '@heyclaude/shared-runtime': resolve(
+        __dirname,
+        './packages/shared-runtime/src/index.ts'
+      ),
+      '@heyclaude/database-types': resolve(
+        __dirname,
+        './packages/database-types/src'
+      ),
+      '@heyclaude/edge-runtime': resolve(
+        __dirname,
+        './packages/edge-runtime/src'
+      ),
     },
     // Ensure mocks take precedence over actual module resolution
     // 'development' condition allows using source files in tests (from package.json exports)

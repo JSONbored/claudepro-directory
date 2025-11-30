@@ -110,6 +110,10 @@ describe('runGenerateReadme', () => {
       json: async () => mockData,
     });
 
+    // Reset buildReadmeMarkdown mock to return valid content
+    const { buildReadmeMarkdown } = await import('../utils/readme-builder.ts');
+    vi.mocked(buildReadmeMarkdown).mockReturnValue('# Valid README');
+
     await expect(runGenerateReadme({ outputPath: '/../etc/passwd' })).rejects.toThrow('outside repository root');
   });
 });

@@ -60,9 +60,30 @@ reviews:
     # NOTE: For CLI with --type all, this still discovers all files first
     # Use --type committed/uncommitted for CLI, or PR reviews for full directory reviews
     
+    # Source code
     - "apps/web/src/**/*.{ts,tsx}"
     - "apps/edge/functions/**/*.{ts,tsx}"
     - "packages/**/src/**/*.{ts,tsx}"
+    
+    # GitHub Actions workflows
+    - ".github/workflows/**/*.yml"
+    
+    # Root config files
+    - "turbo.json"
+    - "vitest.config.ts"
+    - "package.json"
+    - ".vercelignore"
+    - "tsconfig.json"
+    
+    # App config files
+    - "apps/web/next.config.mjs"
+    - "apps/web/vercel.json"
+    - "apps/web/package.json"
+    - "apps/web/tsconfig.json"
+    
+    # Package config files
+    - "packages/**/package.json"
+    - "packages/**/tsconfig.json"
     
     # ============================================
     # EXCLUDE PATHS (further filtering within included paths)
@@ -79,15 +100,21 @@ reviews:
     - "!**/coverage/**"
     - "!**/.nyc_output/**"
     
-    # Exclude file types
-    - "!**/*.json"                 # Exclude JSON (except what we include)
-    - "!**/*.md"                    # Exclude markdown
-    - "!**/*.yml"                   # Exclude YAML
-    - "!**/*.yaml"                  # Exclude YAML
-    - "!**/*.toml"                  # Exclude TOML
-    - "!**/*.css"                   # Exclude CSS
-    - "!**/*.scss"                  # Exclude SCSS
-    - "!**/*.html"                  # Exclude HTML
+    # Exclude lock files (auto-generated, not useful to review)
+    - "!**/pnpm-lock.yaml"
+    - "!**/package-lock.json"
+    - "!**/yarn.lock"
+    
+    # Exclude documentation
+    - "!**/*.md"
+    - "!**/LICENSE"
+    - "!**/CHANGELOG.md"
+    - "!**/README.md"
+    
+    # Exclude style files
+    - "!**/*.css"
+    - "!**/*.scss"
+    - "!**/*.html"
     
     # Exclude generated files
     - "!**/*.generated.ts"
@@ -123,9 +150,6 @@ reviews:
     - "!**/*.log"
     - "!**/*.cache"
     - "!**/.env*"
-    - "!**/LICENSE"
-    - "!**/README.md"
-    - "!**/CHANGELOG.md"
   
   # Tool configuration - enable only what's relevant
   tools:
@@ -133,7 +157,7 @@ reviews:
     eslint:
       enabled: true
     biome:
-      enabled: true
+      enabled: false
     
     # Security tools
     gitleaks:

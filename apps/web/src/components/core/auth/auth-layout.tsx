@@ -1,10 +1,13 @@
 /**
  * Split-screen auth layout - Redis-inspired design with Claude orange accent
+ *
+ * Full-viewport centered layout with:
+ * - Desktop: Side-by-side brand panel + auth card (both vertically centered)
+ * - Mobile: Stacked layout with centered auth card
  */
 
 'use client';
 
-import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 
@@ -14,27 +17,36 @@ interface SplitAuthLayoutProps {
   mobileHeader: ReactNode;
 }
 
+// Shared card border style for Claude orange accent
+const cardBorderStyle = {
+  borderWidth: '1px',
+  borderStyle: 'solid',
+  borderColor: 'oklch(74% 0.2 35)',
+} as const;
+
 /**
- * Responsive split layout for authentication pages that displays a brand panel and an auth card.
+ * Renders a responsive, split authentication layout with a desktop two-column view and a stacked mobile view.
  *
- * Renders a two-column, animated side-by-side layout on large screens and a stacked layout on smaller screens.
+ * On large screens, displays an animated two-column layout with the brand panel on the left and
+ * the auth card on the right, both vertically centered. On small screens, displays a stacked
+ * layout with a mobile header above the centered auth card.
  *
- * @param brandPanel - Content displayed on the left (brand) column for large screens.
- * @param authPanel - Authentication card content rendered in the right column on large screens and inside the centered card on mobile.
- * @param mobileHeader - Header content shown above the stacked mobile layout.
- * @returns The rendered React element composing the split authentication layout.
+ * @param brandPanel - React node displayed in the left column on large screens (hidden on mobile).
+ * @param authPanel - React node placed inside the emphasized auth card on desktop and inside the mobile card on small screens.
+ * @param mobileHeader - React node displayed above the stacked mobile layout.
+ * @returns The layout JSX element that composes the brand panel, authentication card, and optional mobile header.
  *
- * @see DIMENSIONS from @heyclaude/web-runtime/ui
- * @see motion from 'motion/react'
+ * @see SplitAuthLayoutProps
+ * @see cardBorderStyle
  */
 export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAuthLayoutProps) {
   return (
-    <div className={`relative ${DIMENSIONS.FULL_VIEWPORT} overflow-hidden bg-background`}>
-      {/* Desktop: Side-by-side layout */}
-      <div className="hidden h-full lg:grid lg:grid-cols-2 lg:items-center">
-        {/* Left: Brand content */}
+    <div className="relative min-h-screen min-h-dvh overflow-hidden bg-background">
+      {/* Desktop: Side-by-side layout - both sides vertically centered */}
+      <div className="hidden min-h-screen min-h-dvh lg:grid lg:grid-cols-2">
+        {/* Left: Brand content - centered */}
         <motion.div
-          className="flex items-center justify-center px-16"
+          className="flex min-h-screen min-h-dvh items-center justify-center px-12 xl:px-16"
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
@@ -42,15 +54,11 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
           {brandPanel}
         </motion.div>
 
-        {/* Right: Auth card with Claude orange accent */}
-        <div className="flex items-center justify-center">
+        {/* Right: Auth card - centered with Claude orange accent */}
+        <div className="flex min-h-screen min-h-dvh items-center justify-center px-8">
           <motion.div
-            className={`${DIMENSIONS.DROPDOWN_LG} rounded-2xl bg-card p-12 shadow-2xl`}
-            style={{
-              borderWidth: '0.5px',
-              borderStyle: 'solid',
-              borderColor: 'oklch(74% 0.2 35)',
-            }}
+            className="w-full max-w-md rounded-2xl bg-card p-10 shadow-2xl xl:p-12"
+            style={cardBorderStyle}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
@@ -61,17 +69,10 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
       </div>
 
       {/* Mobile: Stacked layout */}
-      <div className="flex h-full flex-col lg:hidden">
+      <div className="flex min-h-screen min-h-dvh flex-col lg:hidden">
         {mobileHeader}
         <div className="flex flex-1 items-center justify-center p-6">
-          <div
-            className="w-full max-w-md rounded-2xl bg-card p-8"
-            style={{
-              borderWidth: '0.5px',
-              borderStyle: 'solid',
-              borderColor: 'oklch(74% 0.2 35)',
-            }}
-          >
+          <div className="w-full max-w-md rounded-2xl bg-card p-8" style={cardBorderStyle}>
             {authPanel}
           </div>
         </div>

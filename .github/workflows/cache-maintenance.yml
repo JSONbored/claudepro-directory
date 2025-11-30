@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: '0 2 * * 0'  # Weekly on Sunday 2am UTC
   workflow_dispatch:
+    inputs:
+      delete_all:
+        description: 'Delete ALL caches (use sparingly)'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: cache-maintenance
@@ -13,13 +19,13 @@ jobs:
   cleanup:
     name: Cleanup Old Caches
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     permissions:
       actions: write  # Required to delete caches
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1  # Shallow clone for speed
 
@@ -30,13 +36,39 @@ jobs:
           # Install gh actions-cache extension
           gh extension install actions/gh-actions-cache || true
 
-          # Delete all caches to free up storage
-          echo "Deleting all caches..."
-          gh actions-cache delete --all --repo ${{ github.repository }} || true
-
-          # List current caches
+          echo "📊 Current cache status BEFORE cleanup:"
+          gh actions-cache list --limit 50 || echo "No caches found"
           echo ""
-          echo "📊 Current cache status:"
+
+          if [ "${{ inputs.delete_all }}" = "true" ]; then
+            echo "⚠️ Deleting ALL caches (manual trigger)..."
+            gh actions-cache delete --all --repo ${{ github.repository }} || true
+          else
+            echo "🗑️ Deleting old/stale caches (keeping recent ones)..."
+            
+            # Delete caches older than 7 days for closed PRs
+            echo "Cleaning up PR caches..."
+            gh actions-cache list --limit 100 | \
+              grep -E 'refs/pull/[0-9]+' | \
+              awk '{print $1}' | \
+              while read -r key; do
+                echo "  Deleting: $key"
+                gh actions-cache delete "$key" --repo ${{ github.repository }} --confirm || true
+              done
+            
+            # Delete stale turbo caches (keep most recent 5)
+            echo "Cleaning up old turbo caches..."
+            gh actions-cache list --key "Linux-turbo-" --limit 100 | \
+              tail -n +6 | \
+              awk '{print $1}' | \
+              while read -r key; do
+                echo "  Deleting: $key"
+                gh actions-cache delete "$key" --repo ${{ github.repository }} --confirm || true
+              done
+          fi
+
+          echo ""
+          echo "📊 Current cache status AFTER cleanup:"
           gh actions-cache list --limit 20 || echo "No caches found"
 
           echo ""

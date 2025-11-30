@@ -34,68 +34,120 @@
 import pino from 'pino';
 import { createPinoConfig } from '@heyclaude/shared-runtime';
 import { normalizeError } from './errors';
-const pinoInstance = pino(
-  createPinoConfig({
-    service: 'web-runtime',
-    // Browser configuration: Disable console in production, enable transmit
-    browser: (() => {
-        const transmitConfig = (() => {
-        // Only enable in browser environment
-        if (typeof window === 'undefined') {
-          return undefined;
-        }
 
-        const isProduction = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production';
-        const consoleEnabled = typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
+/**
+ * Creates a Node.js destination stream that routes JSON log chunks to console methods so Vercel detects log levels correctly.
+ *
+ * ⚠️ Server-Only Function — returns `undefined` in browser environments.
+ *
+ * The destination parses a `"levelValue"` numeric field from the incoming JSON chunk and maps values to console methods:
+ * - >= 50 → `console.error`
+ * - >= 40 → `console.warn`
+ * - otherwise → `console.log`
+ *
+ * If `"levelValue"` is not present, it defaults to `30` (info). The chunk's trailing newline is trimmed before writing.
+ *
+ * @returns {pino.DestinationStream | undefined} A destination stream that writes to `console.log`/`console.warn`/`console.error` on Node.js, or `undefined` when running in a browser.
+ */
+function createVercelCompatibleDestination(): pino.DestinationStream | undefined {
+  // Only use in Node.js server environment
+  // Browser environment already uses console methods via Pino's browser config
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for browser/server detection
+  if (typeof window !== 'undefined') {
+    return undefined;
+  }
+  
+  return {
+    write(chunk: string) {
+      // Quick regex to find levelValue in the JSON (added by our formatter)
+      // Level values: trace=10, debug=20, info=30, warn=40, error=50, fatal=60
+      const levelMatch = /"levelValue"\s*:\s*(\d+)/.exec(chunk);
+      const levelValue = levelMatch?.[1] !== undefined 
+        ? Number.parseInt(levelMatch[1], 10) 
+        : 30;
+      
+      // Remove trailing newline for cleaner console output
+      const logLine = chunk.trimEnd();
+      
+      // Use console methods for proper Vercel log level detection
+      /* eslint-disable no-console, architectural-rules/no-console-in-production-enhanced -- Required for Vercel log level detection */
+      if (levelValue >= 50) { // error=50, fatal=60
+        console.error(logLine);
+      } else if (levelValue >= 40) { // warn=40
+        console.warn(logLine);
+      } else {
+        console.log(logLine);
+      }
+      /* eslint-enable no-console, architectural-rules/no-console-in-production-enhanced */
+    },
+  } as pino.DestinationStream;
+}
 
-        // Enable transmit in production (always) or development (if console enabled)
-        // This ensures we capture client-side errors even when console is disabled
-        if (!isProduction && !consoleEnabled) {
-          return undefined;
-        }
+const pinoConfig = createPinoConfig({
+  service: 'web-runtime',
+  // Browser configuration: Disable console in production, enable transmit
+  browser: (() => {
+      const transmitConfig = (() => {
+      // Only enable in browser environment
+      if (typeof window === 'undefined') {
+        return undefined;
+      }
 
-        return {
-          level: 'warn' as pino.LevelOrString, // Only send warn and error logs (reduces network traffic)
-          send: (level: pino.Level, logEvent: pino.LogEvent) => {
-            // Fire-and-forget: Don't await, don't block UI
-            // Performance: Pino batches logs automatically, so this is efficient
-            // Security: Redaction happens before transmit, so no sensitive data sent
-            // Level parameter is the numeric log level (10=trace, 20=debug, 30=info, 40=warn, 50=error, 60=fatal)
-            // We use it to ensure only warn (40) and error (50+) logs are sent (double-check, though transmit.level already filters)
-            // Convert level to number if it's a string (Pino.Level can be string or number)
-            const numericLevel = typeof level === 'number' ? level : (logEvent.level?.value ?? 40);
-            if (numericLevel >= 40) {
-              fetch('/api/logs/client', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  ...logEvent,
-                  level, // Include numeric level for server-side processing
-                }),
-                // Keepalive ensures request completes even if page unloads
-                keepalive: true,
-              }).catch(() => {
-                // Silently fail - don't log errors about logging
-                // Prevents infinite loops if logging endpoint fails
-              });
-            }
-          },
-        };
-      })();
+      const isProduction = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production';
+      const consoleEnabled = typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
+
+      // Enable transmit in production (always) or development (if console enabled)
+      // This ensures we capture client-side errors even when console is disabled
+      if (!isProduction && !consoleEnabled) {
+        return undefined;
+      }
 
       return {
-        // Console logging: Only enabled if NEXT_PUBLIC_LOGGER_CONSOLE=true
-        // In production, this is false (users don't see logs in browser console)
-        disabled: typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] !== 'true',
-        // Serialize all objects for proper formatting
-        serialize: true,
-        // Enable transmit for error/warn logs (sends to /api/logs/client)
-        // This is the ONLY way logs appear in production (users don't see them)
-        ...(transmitConfig && { transmit: transmitConfig }),
+        level: 'warn' as pino.LevelOrString, // Only send warn and error logs (reduces network traffic)
+        send: (level: pino.Level, logEvent: pino.LogEvent) => {
+          // Fire-and-forget: Don't await, don't block UI
+          // Performance: Pino batches logs automatically, so this is efficient
+          // Security: Redaction happens before transmit, so no sensitive data sent
+          // Note: transmit.level: 'warn' already filters to warn (40) and above
+          fetch('/api/logs/client', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...logEvent,
+              level, // Include numeric level for server-side processing
+            }),
+            // Keepalive ensures request completes even if page unloads
+            keepalive: true,
+          }).catch(() => {
+            // Silently fail - don't log errors about logging
+            // Prevents infinite loops if logging endpoint fails
+          });
+        },
       };
-    })(),
-  })
-);
+    })();
+
+    return {
+      // Console logging: Only enabled if NEXT_PUBLIC_LOGGER_CONSOLE=true
+      // In production, this is false (users don't see logs in browser console)
+      disabled: typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] !== 'true',
+      // Serialize all objects for proper formatting
+      serialize: true,
+      // Enable transmit for error/warn logs (sends to /api/logs/client)
+      // This is the ONLY way logs appear in production (users don't see them)
+      ...(transmitConfig && { transmit: transmitConfig }),
+    };
+  })(),
+});
+
+// Create pino instance with Vercel-compatible destination
+// This ensures Vercel properly detects log levels via console methods:
+// - console.error() → error (red)
+// - console.warn() → warning (orange in streaming functions)
+// - console.log() → info (gray)
+const vercelDest = createVercelCompatibleDestination();
+const pinoInstance = vercelDest 
+  ? pino(pinoConfig, vercelDest)
+  : pino(pinoConfig);
 
 export type LogContextValue =
   | string
@@ -316,6 +368,21 @@ class RequestLogger extends Logger {
 
   override isLevelEnabled(level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'): boolean {
     return this.childPino.isLevelEnabled(level);
+  }
+
+  override child(bindings: Record<string, unknown>): Logger {
+    const nestedChild = this.childPino.child(bindings);
+    return new RequestLogger(nestedChild);
+  }
+
+  override forRequest(request: Request): Logger {
+    const url = new URL(request.url);
+    const nestedChild = this.childPino.child({
+      method: request.method,
+      url: url.pathname + url.search,
+      userAgent: request.headers.get('user-agent') || '',
+    });
+    return new RequestLogger(nestedChild);
   }
 }
 

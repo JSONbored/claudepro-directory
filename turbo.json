@@ -36,19 +36,24 @@
     "build": {
       "outputs": [".next/**", "!.next/cache/**"],
       "inputs": [
-        "apps/web/**/*",
-        "packages/**/src/**/*",
+        "apps/web/src/**/*.{ts,tsx,css}",
+        "apps/web/public/**/*",
+        "apps/web/next.config.mjs",
+        "apps/web/tsconfig.json",
+        "apps/web/package.json",
+        "packages/**/src/**/*.{ts,tsx}",
         "packages/**/package.json",
+        "!packages/generators/**",
+        "!packages/edge-runtime/**",
+        "!**/*.test.{ts,tsx}",
+        "!**/*.spec.{ts,tsx}",
         "package.json",
         "pnpm-lock.yaml",
-        "next.config.mjs",
         "tsconfig.json"
       ],
       "dependsOn": [
         "^build",
-        "generate:service-worker:exec",
-        "^type-check",
-        "lint:build"
+        "generate:service-worker:exec"
       ]
     },
     "lint:build": {
@@ -65,8 +70,9 @@
     },
     "type-check": {
       "dependsOn": ["^build"],
-      "outputs": ["**/*.tsbuildinfo"],
-      "cache": true
+      "outputs": [],
+      "cache": true,
+      "interactive": false
     },
     "type-check:edge": {
       "outputs": [],
@@ -77,7 +83,12 @@
       "cache": true
     },
     "lint": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "@heyclaude/database-types#build",
+        "@heyclaude/shared-runtime#build",
+        "@heyclaude/data-layer#build",
+        "@heyclaude/web-runtime#build"
+      ],
       "outputs": [],
       "cache": true
     },
@@ -93,36 +104,48 @@
       "cache": true
     },
     "generators:build": {
-      "outputs": ["dist/**"],
+      "outputs": ["packages/generators/dist/**", "packages/generators/tsconfig.tsbuildinfo"],
       "inputs": [
         "packages/generators/src/**/*",
         "packages/generators/tsconfig.json",
-        "package.json"
+        "packages/generators/package.json"
       ],
       "cache": true,
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "@heyclaude/database-types#build",
+        "@heyclaude/shared-runtime#build",
+        "@heyclaude/data-layer#build",
+        "@heyclaude/web-runtime#build"
+      ]
     },
     "@heyclaude/web-runtime#build": {
-      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
-      "inputs": ["src/**/*", "tsconfig.json"],
+      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true,
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "@heyclaude/database-types#build",
+        "@heyclaude/shared-runtime#build",
+        "@heyclaude/data-layer#build"
+      ]
     },
     "@heyclaude/data-layer#build": {
-      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
-      "inputs": ["src/**/*", "tsconfig.json"],
+      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true,
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "@heyclaude/database-types#build",
+        "@heyclaude/shared-runtime#build"
+      ]
     },
     "@heyclaude/shared-runtime#build": {
-      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
-      "inputs": ["src/**/*", "tsconfig.json"],
+      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true,
-      "dependsOn": ["^build"]
+      "dependsOn": ["@heyclaude/database-types#build"]
     },
     "@heyclaude/database-types#build": {
-      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
-      "inputs": ["src/**/*", "tsconfig.json"],
+      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true
     },
     "dev:exec": {
@@ -201,10 +224,6 @@
       "dependsOn": ["generators:build"],
       "cache": false
     },
-    "verify:routes:exec": {
-      "dependsOn": ["generators:build"],
-      "cache": false
-    },
     "email:upload:exec": {
       "dependsOn": ["generators:build"],
       "cache": false,
@@ -238,6 +257,36 @@
     "CI",
     "CONTINUOUS_INTEGRATION",
     "NEXT_PUBLIC_SUPABASE_URL",
-    "SUPABASE_SERVICE_ROLE_KEY"
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_ANON_KEY",
+    "SUPABASE_JWT_SECRET",
+    "POSTGRES_URL",
+    "POSTGRES_PRISMA_URL",
+    "POSTGRES_URL_NON_POOLING",
+    "POSTGRES_PASSWORD",
+    "RATE_LIMIT_SECRET",
+    "CACHE_WARM_AUTH_TOKEN",
+    "VIEW_COUNT_SALT",
+    "WEBHOOK_SECRET",
+    "GITHUB_TOKEN",
+    "GITHUB_OWNER",
+    "GITHUB_REPO",
+    "GITHUB_BRANCH",
+    "RESEND_API_KEY",
+    "RESEND_AUDIENCE_ID",
+    "RESEND_WEBHOOK_SECRET",
+    "CRON_SECRET",
+    "BETTERSTACK_HEARTBEAT_WEEKLY_TASKS",
+    "BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE",
+    "REVALIDATE_SECRET",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "R2_ENDPOINT",
+    "R2_BUCKET_NAME",
+    "EXPERIMENTATION_CONFIG_ITEM_KEY",
+    "STATSIG_SERVER_API_KEY",
+    "EXPERIMENTATION_CONFIG",
+    "AUTONOMA_CLIENT_ID",
+    "AUTONOMA_SECRET_ID"
   ]
 }
