@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 import { runGenerateEdgeRoutes } from '../commands/generate-edge-routes.js';
 import { logger } from '../toolkit/logger.js';
 

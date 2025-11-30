@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 import { mcpLogin } from '../commands/mcp-login.js';
 import { logger } from '../toolkit/logger.js';
 

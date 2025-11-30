@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { runGenerateChangelog } from '../commands/changelog.js';

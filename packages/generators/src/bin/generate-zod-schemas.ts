@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 import { runGenerateZodSchemas } from '../commands/generate-zod-schemas.js';
 import { logger } from '../toolkit/logger.js';
 

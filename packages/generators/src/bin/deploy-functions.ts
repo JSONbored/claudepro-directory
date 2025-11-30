@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 import { runDeployFunctions } from '../commands/deploy-functions.js';
 
 runDeployFunctions();
