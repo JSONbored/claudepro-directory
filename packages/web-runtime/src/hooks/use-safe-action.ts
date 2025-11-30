@@ -38,6 +38,24 @@ type ExtractActionInput<T> = T extends (input: infer I, ...args: infer _Rest) =>
   : unknown;
 
 /**
+ * Callbacks for action lifecycle events.
+ * Exported for documentation purposes - the actual parameter uses `any` due to
+ * type inference limitations with next-safe-action's HookCallbacks type.
+ */
+export interface SafeActionCallbacks<TInput, TData> {
+  onSuccess?: (args: { data?: TData; input: TInput }) => void;
+  onError?: (args: {
+    error: { serverError?: string; validationErrors?: unknown };
+    input: TInput;
+  }) => void;
+  onSettled?: (args: {
+    result: { data?: TData; serverError?: string };
+    input: TInput;
+  }) => void;
+  onExecute?: (args: { input: TInput }) => void;
+}
+
+/**
  * Hook return type that preserves the action's input and output types
  */
 interface UseSafeActionReturn<TInput, TData> {
@@ -79,6 +97,9 @@ export function useSafeAction<
   TAction extends (...args: any[]) => Promise<any>,
 >(
   action: TAction,
+  // Note: We use `any` here because SafeActionCallbacks<TInput, TData> is incompatible
+  // with next-safe-action's HookCallbacks type due to exactOptionalPropertyTypes.
+  // See SafeActionCallbacks for the expected shape.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   callbacks?: any
 ): UseSafeActionReturn<ExtractActionInput<TAction>, ExtractActionData<TAction>> {
