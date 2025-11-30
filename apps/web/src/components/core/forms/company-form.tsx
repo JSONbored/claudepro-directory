@@ -53,7 +53,9 @@ interface CompanyFormProps {
 
 // Default form validation values (will be loaded from config in component)
 const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const DEFAULT_MAX_DIMENSION = 2048; /**
+const DEFAULT_MAX_DIMENSION = 2048;
+
+/**
  * Convert a File into a base64-encoded string.
  *
  * @param file - The file whose contents will be encoded
@@ -62,7 +64,6 @@ const DEFAULT_MAX_DIMENSION = 2048; /**
  * @see CompanyForm
  * @see uploadCompanyLogoAction
  */
-
 async function fileToBase64(file: File) {
   const buffer = await file.arrayBuffer();
   let binary = '';

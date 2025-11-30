@@ -83,10 +83,20 @@ export class BatchProcessor<T> {
     if (!this.isShutdown) {
       this.flushTimer = setTimeout(() => {
         if (this.batch.length > 0 && !this.isProcessing) {
-          void this.processBatch().then(() => {
-            // Re-schedule after processing
-            this.scheduleFlush();
-          });
+          void this.processBatch()
+            .then(() => {
+              // Re-schedule after processing
+              this.scheduleFlush();
+            })
+            .catch(async (error) => {
+              // Log error and continue the flush loop to prevent it from stopping
+              const logContext = createUtilityContext('batch-processor', 'flush-loop', {
+                flush_interval_ms: this.flushInterval,
+              });
+              await logError('Batch flush loop failed', logContext, error);
+              // Re-schedule even after error to keep the loop running
+              this.scheduleFlush();
+            });
         } else {
           // Re-schedule even if nothing to process
           this.scheduleFlush();

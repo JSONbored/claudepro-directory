@@ -24,11 +24,11 @@ export function withTimeout<T>(
   timeoutMs: number,
   errorMessage?: string
 ): Promise<T> {
-  // Handle zero or negative timeouts - reject immediately
-  if (timeoutMs <= 0) {
+  // Handle invalid timeout values (NaN, non-finite, zero or negative)
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
     return Promise.reject(
       new TimeoutError(
-        errorMessage ?? `Operation timed out after ${timeoutMs}ms`,
+        errorMessage || `Invalid timeout value: ${timeoutMs}ms (must be a positive finite number)`,
         timeoutMs
       )
     );

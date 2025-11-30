@@ -60,11 +60,12 @@ export class CircuitBreaker {
     }
 
     if (this.state === 'HALF_OPEN') {
-      // In HALF_OPEN state, only allow limited concurrent requests
-      if (this.halfOpenAttempts >= this.halfOpenMaxAttempts) {
+      // Check and increment atomically to prevent race condition
+      const currentAttempts = this.halfOpenAttempts++;
+      if (currentAttempts >= this.halfOpenMaxAttempts) {
+        this.halfOpenAttempts--; // rollback
         throw new Error('Circuit breaker is HALF_OPEN');
       }
-      this.halfOpenAttempts++;
     }
 
     try {
@@ -149,7 +150,7 @@ export interface CircuitBreakerConfig {
   resetTimeoutMs: number; // Time to wait before attempting reset
 }
 
-type InternalCircuitState = 'closed' | 'half-open' | 'open';
+type InternalCircuitState = 'CLOSED' | 'HALF_OPEN' | 'OPEN';
 
 interface InternalCircuitBreakerState {
   failures: number;
@@ -171,7 +172,7 @@ class InternalCircuitBreaker {
       halfOpenMaxAttempts: config.halfOpenMaxAttempts ?? 3,
     };
     this.state = {
-      state: 'closed',
+      state: 'CLOSED',
       failures: 0,
       lastFailureTime: 0,
       halfOpenAttempts: 0,
@@ -181,7 +182,7 @@ class InternalCircuitBreaker {
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     this.updateState();
 
-    if (this.state.state === 'open') {
+    if (this.state.state === 'OPEN') {
       throw new Error('Circuit breaker is open - service unavailable');
     }
 
@@ -199,26 +200,26 @@ class InternalCircuitBreaker {
     const now = Date.now();
 
     // Only check for state transition if circuit is open
-    if (this.state.state === 'open' && now - this.state.lastFailureTime >= this.config.resetTimeoutMs) {
-      this.state.state = 'half-open';
+    if (this.state.state === 'OPEN' && now - this.state.lastFailureTime >= this.config.resetTimeoutMs) {
+      this.state.state = 'HALF_OPEN';
       this.state.halfOpenAttempts = 0;
       const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
         key: this.key,
         resetTimeoutMs: this.config.resetTimeoutMs,
-        state: 'half-open',
+        state: 'HALF_OPEN',
       });
       logInfo('Circuit half-open (testing recovery)', logContext);
     }
   }
 
   private onSuccess(): void {
-    if (this.state.state === 'half-open') {
-      this.state.state = 'closed';
+    if (this.state.state === 'HALF_OPEN') {
+      this.state.state = 'CLOSED';
       this.state.failures = 0;
       this.state.halfOpenAttempts = 0;
       const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
         key: this.key,
-        state: 'closed',
+        state: 'CLOSED',
       });
       logInfo('Circuit closed (recovery successful)', logContext);
     } else {
@@ -230,23 +231,23 @@ class InternalCircuitBreaker {
     this.state.failures++;
     this.state.lastFailureTime = Date.now();
 
-    if (this.state.state === 'half-open') {
+    if (this.state.state === 'HALF_OPEN') {
       this.state.halfOpenAttempts++;
       if (this.state.halfOpenAttempts >= this.config.halfOpenMaxAttempts) {
-        this.state.state = 'open';
+        this.state.state = 'OPEN';
         this.state.halfOpenAttempts = 0;
         const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
           key: this.key,
-          state: 'open',
+          state: 'OPEN',
           halfOpenAttempts: this.state.halfOpenAttempts,
         });
         logWarn('Circuit opened (half-open failures)', logContext);
       }
     } else if (this.state.failures >= this.config.failureThreshold) {
-      this.state.state = 'open';
+      this.state.state = 'OPEN';
       const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
         key: this.key,
-        state: 'open',
+        state: 'OPEN',
         failures: this.state.failures,
         threshold: this.config.failureThreshold,
       });
@@ -264,7 +265,7 @@ class InternalCircuitBreaker {
       failures: 0,
       halfOpenAttempts: 0,
       lastFailureTime: 0,
-      state: 'closed',
+      state: 'CLOSED',
     };
   }
 }
