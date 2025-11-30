@@ -168,7 +168,7 @@
     "clsx": "^2.1.1",
     "devalue": "^5.5.0",
     "html2canvas-pro": "^1.5.13",
-    "lucide-react": "^0.460.0",
+    "lucide-react": "^0.555.0",
     "motion": "^12.23.24",
     "next-safe-action": "^8.0.11",
     "pino": "^10.1.0",
