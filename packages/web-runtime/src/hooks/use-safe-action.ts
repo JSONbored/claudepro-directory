@@ -56,20 +56,25 @@ export interface SafeActionCallbacks<TInput, TData> {
 }
 
 /**
- * Hook return type that preserves the action's input and output types
+ * Hook return type that preserves the action's input and output types.
+ * Matches next-safe-action's useAction return shape including fetchError for transport errors.
  */
 interface UseSafeActionReturn<TInput, TData> {
   execute: (input: TInput) => void;
   executeAsync: (input: TInput) => Promise<{
     data?: TData;
     serverError?: string;
-    validationErrors?: Record<string, { _errors?: string[] }>;
+    fetchError?: string;
+    // Kept loose to match client-level validation error configuration
+    validationErrors?: unknown;
   }>;
   input: TInput | undefined;
   result: {
     data?: TData;
     serverError?: string;
-    validationErrors?: Record<string, { _errors?: string[] }>;
+    fetchError?: string;
+    // Kept loose to match client-level validation error configuration
+    validationErrors?: unknown;
   };
   reset: () => void;
   status: 'idle' | 'executing' | 'transitioning' | 'hasSucceeded' | 'hasErrored' | 'hasNavigated';

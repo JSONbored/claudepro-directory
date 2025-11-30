@@ -5,23 +5,161 @@
 
 import { createUtilityContext, logInfo, logWarn } from './logging.ts';
 
+// =============================================================================
+// Exported CircuitBreaker Class (for direct instantiation)
+// =============================================================================
+
+export interface CircuitBreakerOptions {
+  /** Number of failures before opening circuit */
+  failureThreshold: number;
+  /** Time in ms to wait before attempting reset */
+  resetTimeout: number;
+  /** Max attempts in half-open state */
+  halfOpenMaxAttempts?: number;
+}
+
+export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+
+export interface CircuitBreakerMetrics {
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+}
+
+/**
+ * Circuit breaker implementation for resilient calls.
+ * Prevents cascading failures by opening circuit after threshold failures.
+ */
+export class CircuitBreaker {
+  private state: CircuitState = 'CLOSED';
+  private failures = 0;
+  private lastFailureTime = 0;
+  private halfOpenAttempts = 0;
+  private metrics: CircuitBreakerMetrics = {
+    totalRequests: 0,
+    successfulRequests: 0,
+    failedRequests: 0,
+  };
+
+  private readonly failureThreshold: number;
+  private readonly resetTimeout: number;
+  private readonly halfOpenMaxAttempts: number;
+
+  constructor(options: CircuitBreakerOptions) {
+    this.failureThreshold = options.failureThreshold;
+    this.resetTimeout = options.resetTimeout;
+    this.halfOpenMaxAttempts = options.halfOpenMaxAttempts ?? 1;
+  }
+
+  async execute<T>(fn: () => Promise<T>): Promise<T> {
+    this.updateState();
+    this.metrics.totalRequests++;
+
+    if (this.state === 'OPEN') {
+      throw new Error('Circuit breaker is OPEN');
+    }
+
+    if (this.state === 'HALF_OPEN') {
+      // In HALF_OPEN state, only allow limited concurrent requests
+      if (this.halfOpenAttempts >= this.halfOpenMaxAttempts) {
+        throw new Error('Circuit breaker is HALF_OPEN');
+      }
+      this.halfOpenAttempts++;
+    }
+
+    try {
+      const result = await fn();
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onFailure();
+      throw error;
+    }
+  }
+
+  private updateState(): void {
+    const now = Date.now();
+
+    // Only check for state transition if circuit is open
+    if (this.state === 'OPEN' && now - this.lastFailureTime >= this.resetTimeout) {
+      this.state = 'HALF_OPEN';
+      this.halfOpenAttempts = 0;
+    }
+  }
+
+  private onSuccess(): void {
+    this.metrics.successfulRequests++;
+    if (this.state === 'HALF_OPEN') {
+      // Success in half-open state: close the circuit
+      this.state = 'CLOSED';
+      this.failures = 0;
+      this.halfOpenAttempts = 0;
+    } else {
+      this.failures = 0;
+    }
+  }
+
+  private onFailure(): void {
+    this.metrics.failedRequests++;
+    this.failures++;
+    this.lastFailureTime = Date.now();
+
+    if (this.state === 'HALF_OPEN') {
+      // Failure in half-open state: immediately open the circuit
+      this.state = 'OPEN';
+      this.halfOpenAttempts = 0;
+    } else if (this.failures >= this.failureThreshold) {
+      this.state = 'OPEN';
+    }
+  }
+
+  getState(): CircuitState {
+    this.updateState();
+    return this.state;
+  }
+
+  getFailureCount(): number {
+    return this.failures;
+  }
+
+  getMetrics(): CircuitBreakerMetrics {
+    return { ...this.metrics };
+  }
+
+  reset(): void {
+    this.state = 'CLOSED';
+    this.failures = 0;
+    this.lastFailureTime = 0;
+    this.halfOpenAttempts = 0;
+    this.metrics = {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+    };
+  }
+}
+
+// =============================================================================
+// Internal CircuitBreaker for withCircuitBreaker function
+// =============================================================================
+
 export interface CircuitBreakerConfig {
   failureThreshold: number; // Number of failures before opening circuit
   halfOpenMaxAttempts?: number; // Max attempts in half-open state
   resetTimeoutMs: number; // Time to wait before attempting reset
 }
 
-export type CircuitState = 'closed' | 'half-open' | 'open';
+type InternalCircuitState = 'closed' | 'half-open' | 'open';
 
-interface CircuitBreakerState {
+interface InternalCircuitBreakerState {
   failures: number;
   halfOpenAttempts: number;
   lastFailureTime: number;
-  state: CircuitState;
+  state: InternalCircuitState;
 }
 
-class CircuitBreaker {
-  private state: CircuitBreakerState;
+class InternalCircuitBreaker {
+  private state: InternalCircuitBreakerState;
   private config: Required<CircuitBreakerConfig>;
   private key: string;
 
@@ -116,7 +254,7 @@ class CircuitBreaker {
     }
   }
 
-  getState(): CircuitState {
+  getState(): InternalCircuitState {
     this.updateState();
     return this.state.state;
   }
@@ -132,11 +270,11 @@ class CircuitBreaker {
 }
 
 // Global circuit breaker instances per operation type
-const circuitBreakers = new Map<string, CircuitBreaker>();
+const circuitBreakers = new Map<string, InternalCircuitBreaker>();
 
-function getCircuitBreaker(key: string, config: CircuitBreakerConfig): CircuitBreaker {
+function getInternalCircuitBreaker(key: string, config: CircuitBreakerConfig): InternalCircuitBreaker {
   if (!circuitBreakers.has(key)) {
-    circuitBreakers.set(key, new CircuitBreaker(key, config));
+    circuitBreakers.set(key, new InternalCircuitBreaker(key, config));
   }
   const breaker = circuitBreakers.get(key);
   if (!breaker) {
@@ -169,6 +307,6 @@ export async function withCircuitBreaker<T>(
   fn: () => Promise<T>,
   config: CircuitBreakerConfig = CIRCUIT_BREAKER_CONFIGS.rpc
 ): Promise<T> {
-  const breaker = getCircuitBreaker(key, config);
+  const breaker = getInternalCircuitBreaker(key, config);
   return breaker.execute(fn);
 }
