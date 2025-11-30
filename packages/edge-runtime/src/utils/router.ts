@@ -13,7 +13,7 @@ export interface RouterContext {
 export interface RouteDefinition<C extends RouterContext> {
   name: string;
   match: (context: C) => boolean;
-  handler: (context: C) => Promise<Response>;
+  handler: (context: C) => Response | Promise<Response>;
   methods?: readonly HttpMethod[];
   cors?: Record<string, string>;
   errorContext?: string;

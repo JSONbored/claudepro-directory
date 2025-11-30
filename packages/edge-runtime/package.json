@@ -7,6 +7,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./utils/email/templates/manifest": {
+      "types": "./src/utils/email/templates/manifest.ts",
+      "default": "./src/utils/email/templates/manifest.ts"
     }
   },
   "dependencies": {

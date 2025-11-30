@@ -58,6 +58,44 @@ export type RecentlyViewedCategory =
   | 'skill' // maps to 'skills'
   | 'job'; // maps to 'jobs'
 
+/**
+ * Maps singular RecentlyViewedCategory to plural route slug.
+ * Used for generating correct URLs from recently viewed items.
+ * 
+ * @example
+ * getCategoryRoute('agent') // returns 'agents'
+ * getCategoryRoute('mcp') // returns 'mcp' (unchanged)
+ */
+const CATEGORY_TO_ROUTE: Record<RecentlyViewedCategory, string> = {
+  agent: 'agents',
+  mcp: 'mcp',
+  hook: 'hooks',
+  command: 'commands',
+  rule: 'rules',
+  statusline: 'statuslines',
+  skill: 'skills',
+  job: 'jobs',
+};
+
+/**
+ * Get the URL route segment for a recently viewed category.
+ * Converts singular category names to plural route slugs.
+ * Returns the slug without a leading slash.
+ *
+ * **⚠️ Client-Compatible**
+ *
+ * @param category - The singular category name from RecentlyViewedCategory
+ * @returns The plural route slug without a leading slash (e.g., 'agents', 'hooks')
+ *
+ * @example
+ * getCategoryRoute('agent') // 'agents'
+ * getCategoryRoute('hook') // 'hooks'
+ * getCategoryRoute('mcp') // 'mcp' (unchanged)
+ */
+export function getCategoryRoute(category: RecentlyViewedCategory): string {
+  return CATEGORY_TO_ROUTE[category];
+}
+
 export interface RecentlyViewedItem {
   category: RecentlyViewedCategory;
   slug: string;

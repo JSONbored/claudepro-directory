@@ -1,6 +1,5 @@
 'use client';
 
-import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
@@ -8,7 +7,28 @@ import { UI_CLASSES, Button , Card  } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
 
+/**
+ * CRITICAL: Direct reference to process.env.NODE_ENV
+ * Next.js inlines this at build time. Do NOT use dynamic env lookups here!
+ * The shared-runtime isDevelopment uses dynamic lookup which doesn't work client-side.
+ */
+// eslint-disable-next-line architectural-rules/require-env-validation-schema -- NODE_ENV is inlined by Next.js at build time, not a runtime lookup
+const isDevelopment = process.env.NODE_ENV === 'development';
 
+
+/**
+ * Renders a full-screen error UI shown when an uncaught client-side error occurs and logs the error to the monitoring backend.
+ *
+ * Displays a descriptive message, development-only error details (when NODE_ENV is "development"), action buttons to retry or go home, and quick links to key sections.
+ *
+ * @param props.error - The caught error object; may include an optional `digest` string used for diagnostic correlation.
+ * @param props.reset - Callback invoked to attempt recovery (e.g., retry or re-render) when the user clicks "Try Again".
+ * @returns The error boundary React element to present to the user.
+ *
+ * @see logClientErrorBoundary
+ * @see Card
+ * @see ROUTES
+ */
 export default function ErrorBoundary({
   error,
   reset,

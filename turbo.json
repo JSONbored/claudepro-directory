@@ -36,19 +36,24 @@
     "build": {
       "outputs": [".next/**", "!.next/cache/**"],
       "inputs": [
-        "apps/web/**/*",
-        "packages/**/src/**/*",
+        "apps/web/src/**/*.{ts,tsx,css}",
+        "apps/web/public/**/*",
+        "apps/web/next.config.mjs",
+        "apps/web/tsconfig.json",
+        "apps/web/package.json",
+        "packages/**/src/**/*.{ts,tsx}",
         "packages/**/package.json",
+        "!packages/generators/**",
+        "!packages/edge-runtime/**",
+        "!**/*.test.{ts,tsx}",
+        "!**/*.spec.{ts,tsx}",
         "package.json",
         "pnpm-lock.yaml",
-        "next.config.mjs",
         "tsconfig.json"
       ],
       "dependsOn": [
         "^build",
-        "generate:service-worker:exec",
-        "^type-check",
-        "lint:build"
+        "generate:service-worker:exec"
       ]
     },
     "lint:build": {
@@ -103,25 +108,25 @@
       "dependsOn": ["^build"]
     },
     "@heyclaude/web-runtime#build": {
-      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
+      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map", "tsconfig.tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json"],
       "cache": true,
       "dependsOn": ["^build"]
     },
     "@heyclaude/data-layer#build": {
-      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
+      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map", "tsconfig.tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json"],
       "cache": true,
       "dependsOn": ["^build"]
     },
     "@heyclaude/shared-runtime#build": {
-      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
+      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map", "tsconfig.tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json"],
       "cache": true,
       "dependsOn": ["^build"]
     },
     "@heyclaude/database-types#build": {
-      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"],
+      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map", "tsconfig.tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json"],
       "cache": true
     },

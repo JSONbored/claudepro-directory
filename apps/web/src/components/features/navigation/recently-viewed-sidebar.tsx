@@ -32,7 +32,7 @@ import Link from 'next/link';
 import { memo, useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
-import { type RecentlyViewedItem, useRecentlyViewed } from '@heyclaude/web-runtime/hooks';
+import { type RecentlyViewedItem, useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks';
 
 // =============================================================================
 // ITEM COMPONENT
@@ -51,7 +51,7 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
 }: RecentlyViewedItemProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const href = `/${item.category}/${item.slug}`;
+  const href = `/${getCategoryRoute(item.category)}/${item.slug}`;
 
   // Format timestamp
   const viewedDate = new Date(item.viewedAt);

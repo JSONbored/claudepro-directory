@@ -65,7 +65,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Verify production build
-        run: turbo build --filter=web
+        run: pnpm exec turbo build --filter=web
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
