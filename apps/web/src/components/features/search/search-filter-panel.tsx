@@ -43,6 +43,29 @@ export interface SearchFilterPanelProps {
   showActions?: boolean;
 }
 
+/**
+ * Render a configurable search filter panel with category, author, date range, popularity, tag selection, and action controls.
+ *
+ * The component delegates all state changes to the provided callbacks and conditionally renders controls
+ * based on the available options and provided handlers. Accessibility attributes and unique IDs are applied
+ * to interactive controls.
+ *
+ * @param props.filters - Current filter state (category, author, dateRange, popularity, tags).
+ * @param props.availableTags - Optional list of tag options shown in the tag selector.
+ * @param props.availableAuthors - Optional list of author options shown in the author select.
+ * @param props.availableCategories - Optional list of category options shown in the category select.
+ * @param props.activeFilterCount - Number of currently active filters; used to enable/disable actions.
+ * @param props.onFilterChange - Callback invoked with (key, value) when a single filter field changes.
+ * @param props.onToggleTag - Callback invoked with (tag) to add or remove a tag from the tag filter.
+ * @param props.onClearFilters - Callback invoked to clear all filters.
+ * @param props.onApplyFilters - Optional callback invoked when the user applies filters.
+ * @param props.onCancel - Optional callback invoked when the user cancels filter changes.
+ * @param props.showActions - Whether to render action buttons (defaults to true).
+ *
+ * @returns A React element representing the search filter panel UI.
+ *
+ * @see SearchFilterPanel — memoized export wrapping this component
+ */
 function SearchFilterPanelComponent({
   filters,
   availableTags = [],

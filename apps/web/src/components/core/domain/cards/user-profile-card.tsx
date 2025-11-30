@@ -126,6 +126,19 @@ const getMemberBadge = (user: UserProfile) => {
   };
 };
 
+/**
+ * Renders a user profile card with avatar, badges, metadata, and optional action buttons.
+ *
+ * @param props.user - The user profile to display; may include runtime stats and optional company info.
+ * @param props.variant - Visual variant of the card; "compact" reduces layout density, "default" is standard.
+ * @param props.showActions - If true, renders action buttons (website, social link, view profile) when available.
+ *
+ * @returns A JSX element representing the profile card for the provided user.
+ *
+ * @see getMemberBadge
+ * @see getSafeExternalUrl
+ * @see BaseCard
+ */
 function ProfileCardComponent({ user, variant = 'default', showActions = true }: ProfileCardProps) {
   const pulse = usePulse();
   const memberBadge = getMemberBadge(user);

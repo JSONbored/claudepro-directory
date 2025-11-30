@@ -35,10 +35,11 @@ export const revalidate = 7200;
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
- * Produce static route parameters for a subset of popular content to pre-render at build time.
+ * Generate static route parameters for a subset of popular content to pre-render at build time.
  *
- * Returns an array of { category, slug } entries containing up to 30 top items per homepage category.
- * Invalid or missing slugs are excluded; other pages remain available for on-demand rendering via dynamicParams.
+ * Produces an array of `{ category, slug }` entries for the top items in each homepage category, including
+ * only items that have a slug. The per-category result set is limited (10 items) to reduce build time;
+ * pages not included here remain available for on-demand rendering via `dynamicParams` and ISR (revalidate = 7200).
  *
  * @returns An array of objects with `category` and `slug` to be used as static params for pre-rendering
  *

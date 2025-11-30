@@ -105,11 +105,23 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the Changelog page with server-loaded entries, client-side filtering, structured data, and a newsletter CTA.
+ * Render the Changelog page with server-loaded changelog entries, structured data, client-side filtering, and a newsletter CTA.
  *
- * Loads published changelog entries, displays totals and latest release information, and delegates interactive filtering to the client-side list component. If loading fails, a minimal fallback UI is returned.
+ * Loads published entries and server-calculated category counts, normalizes entry shapes for the client, and renders:
+ * - SEO structured data for the /changelog route
+ * - Header with totals and latest release date (when available)
+ * - A client-side ChangelogListClient for interactive filtering
+ * - A newsletter CTA footer variant
  *
- * @returns The React element for the changelog page, or a minimal fallback UI when data loading fails.
+ * If loading the overview fails, returns a minimal fallback UI with an error message.
+ *
+ * @returns The React element for the changelog page; when data loading fails, a minimal fallback UI element is returned.
+ *
+ * @see getChangelogOverview
+ * @see ChangelogListClient
+ * @see StructuredData
+ * @see NewsletterCTAVariant
+ * @see revalidate (ISR configuration exported from this module)
  */
 export default async function ChangelogPage() {
   // Generate single requestId for this page request

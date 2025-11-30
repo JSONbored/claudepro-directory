@@ -41,6 +41,20 @@ interface ResourceLink {
  */
 const CONTACT_CHANNELS = getContactChannels();
 
+/**
+ * Site footer component that renders branding, social links, navigation columns (Browse, Resources, Support, Legal),
+ * and a theme-aware system status badge.
+ *
+ * The Resources column includes a context-aware RSS link that adapts to the current route, and the status badge
+ * is only rendered after client mount to avoid hydration issues.
+ *
+ * @returns A React element representing the site's footer.
+ *
+ * @see HeyClaudeLogo
+ * @see ThemeToggle
+ * @see UnifiedBadge
+ * @see ROUTES
+ */
 function FooterComponent() {
   const currentYear = new Date().getFullYear();
   const { resolvedTheme } = useTheme();

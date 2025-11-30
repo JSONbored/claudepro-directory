@@ -15,6 +15,20 @@ interface ChangelogStickyEntryProps {
   targetPath: string;
 }
 
+/**
+ * Renders a responsive changelog entry with a sticky desktop sidebar and a clickable content card.
+ *
+ * Displays the release date, title, category badges, optional hero image, TLDR, and a "Read full changelog" affordance.
+ *
+ * @param entry - A changelog row from the public database containing fields like `title`, `release_date`, `changes`, `og_image`, and `tldr`.
+ * @param targetPath - URL to the full changelog entry; used for all navigation links in the component.
+ * @returns The JSX element for the sticky changelog entry layout.
+ *
+ * @see formatChangelogDateShort
+ * @see getRelativeTime
+ * @see getNonEmptyCategories
+ * @see UnifiedBadge
+ */
 export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntryProps) {
   const displayDate = getRelativeTime(entry.release_date);
   const nonEmptyCategories = getNonEmptyCategories(entry.changes);

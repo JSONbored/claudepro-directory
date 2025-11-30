@@ -37,6 +37,24 @@ export async function generateMetadata({ params }: AnalyticsPageProperties): Pro
   return generatePageMetadata('/account/sponsorships/:id/analytics', { params: { id } });
 }
 
+/**
+ * Renders the sponsorship analytics page for a specific sponsorship ID, presenting overview metrics,
+ * campaign details, a 30-day performance chart, and optimization tips.
+ *
+ * Fetches authenticated user context and sponsorship analytics for the current user; if no user is
+ * authenticated the page shows a sign-in prompt, and if analytics are missing the page triggers a
+ * 404 via Next.js `notFound()`. Invalid or nullable backend fields are handled with safe defaults
+ * and logged.
+ *
+ * @param props.params - An object containing route parameters.
+ * @param props.params.id - The sponsorship identifier used to load analytics.
+ * @returns The server-rendered React element for the Sponsorship Analytics page.
+ *
+ * @see getSponsorshipAnalytics - Loads sponsorship analytics from the public database
+ * @see getAuthenticatedUser - Resolves the current authenticated user
+ * @see MetricsDisplay - Component used to present overview metrics
+ * @see UnifiedBadge - Component used to display sponsorship tier and status
+ */
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProperties) {
   const { id } = await params;
 

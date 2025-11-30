@@ -69,6 +69,20 @@ interface NavigationDesktopProps {
   onCommandPaletteOpen: () => void;
 }
 
+/**
+ * Desktop-only primary navigation with dropdowns, grouped links, and a search trigger.
+ *
+ * Renders the full site navigation for screens >= 1280px with dropdown menus for items that have children,
+ * grouped secondary links under a "More" menu, footer quick links (Community, Partner Program, Consulting),
+ * and a SearchTrigger that opens the command palette via the provided callback.
+ *
+ * @param isActive - Function that receives a path and returns whether that path is active; used to mark links as active.
+ * @param onCommandPaletteOpen - Callback invoked when the search/command palette trigger is clicked.
+ * @returns The navigation JSX element intended for desktop (xl) viewports.
+ *
+ * @see NavLink
+ * @see SearchTrigger
+ */
 export function NavigationDesktop({ isActive, onCommandPaletteOpen }: NavigationDesktopProps) {
   return (
     <nav

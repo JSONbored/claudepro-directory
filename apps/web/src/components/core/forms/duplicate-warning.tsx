@@ -32,6 +32,22 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+/**
+ * Shows a contextual suggestion when a provided name appears generic.
+ *
+ * Checks the debounced `name` against a short list of common generic names and, when matched,
+ * renders a warning Alert recommending a more specific, descriptive name. While the check is
+ * running it renders a subtle "Checking for duplicates..." animated message; if no warning is
+ * necessary the component renders `null`.
+ *
+ * @param props.contentType - Ignored in this component; present for callers that pass a content category.
+ * @param props.name - The name to evaluate for genericness; names shorter than 3 characters are ignored.
+ * @returns A JSX element with a suggestion Alert when a generic name is detected, or `null` when no warning is needed.
+ *
+ * @see getTimeoutConfig — loads the debounce delay used for name evaluation
+ * @see useDebounce — debounces `name` before performing the check
+ * @see Alert, AlertTitle, AlertDescription, AlertTriangle — UI primitives used to render the suggestion
+ */
 export function DuplicateWarning({ contentType: _contentType, name }: DuplicateWarningProps) {
   const [checking, setChecking] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);

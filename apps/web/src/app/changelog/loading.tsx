@@ -9,6 +9,19 @@ import { cluster } from '@heyclaude/web-runtime/design-system';
 import { PageHeaderSkeleton, Skeleton  } from '@heyclaude/web-runtime/ui';
 
 
+/**
+ * Render a loading skeleton for the changelog page.
+ *
+ * Renders placeholder UI for the changelog interface: a header skeleton (including a page header and small chips),
+ * a responsive category filter row with seven tab placeholders, and six changelog card placeholders each showing
+ * title, description, and tag skeletons.
+ *
+ * @returns A JSX element containing skeleton placeholders for the header, category filters, and changelog cards.
+ *
+ * @see PageHeaderSkeleton
+ * @see Skeleton
+ * @see cluster
+ */
 export default function ChangelogLoading() {
   return (
     <div className="container max-w-6xl space-y-8 py-8">

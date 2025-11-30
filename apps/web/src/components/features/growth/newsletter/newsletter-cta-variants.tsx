@@ -56,6 +56,25 @@ export type NewsletterCTAVariantProps =
   | NewsletterMinimalProps
   | NewsletterCardProps;
 
+/**
+ * Render a newsletter CTA UI for the specified variant using contextual copy, experiment-driven copy, and runtime newsletter configuration.
+ *
+ * Loads newsletter configuration and subscriber count to determine final headline and description, then renders one of the supported variants ('hero', 'inline', 'minimal', 'card') or `null` when the variant is unrecognized.
+ *
+ * @param props - Component props.
+ * @param props.variant - Visual variant to render: 'hero' | 'inline' | 'minimal' | 'card'.
+ * @param props.source - Tracking/source identifier passed to the NewsletterForm.
+ * @param props.className - Optional additional CSS classes applied to the root container.
+ * @param props.category - Optional newsletter category used to select contextual copy.
+ * @param props.headline - Optional explicit headline to override contextual/variant copy.
+ * @param props.description - Optional explicit description to override contextual/variant copy.
+ * @param props.ctaVariant - Optional CTA copy variant; defaults to 'value_focused' when omitted.
+ * @returns The rendered CTA element corresponding to `props.variant`, or `null` if the variant is unsupported.
+ *
+ * @see NewsletterForm
+ * @see loadNewsletterConfig
+ * @see useNewsletterCount
+ */
 export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
   const {
     variant,

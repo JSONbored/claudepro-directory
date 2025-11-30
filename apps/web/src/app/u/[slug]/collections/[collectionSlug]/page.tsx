@@ -87,6 +87,24 @@ export async function generateMetadata({ params }: PublicCollectionPagePropertie
   });
 }
 
+/**
+ * Renders the public collection detail page for a given user and collection slug.
+ *
+ * This server component performs a per-request server-side fetch of collection detail
+ * (including profile, collection metadata, items, and ownership) and returns the
+ * fully rendered page. If the collection is not found it triggers a 404 response.
+ *
+ * Data fetching is performed each request (no ISR); the component also records a non-blocking
+ * "view" pulse for analytics and conditions UI (owner controls, item links) on the fetched data.
+ *
+ * @param params - Route parameters object containing `slug` (user slug) and `collectionSlug` (collection slug).
+ * @returns The React element that renders the public collection detail page.
+ *
+ * @see getPublicCollectionDetail
+ * @see getAuthenticatedUser
+ * @see getSafeContentLink
+ * @see Pulse
+ */
 export default async function PublicCollectionPage({ params }: PublicCollectionPageProperties) {
   const { slug, collectionSlug } = await params;
 

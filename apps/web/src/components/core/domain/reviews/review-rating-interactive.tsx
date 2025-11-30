@@ -6,8 +6,21 @@ import type { ReviewRatingInteractiveProps } from '@heyclaude/web-runtime/types/
 import { Rating, RatingButton } from '@heyclaude/web-runtime/ui';
 
 /**
- * Interactive star rating input component
- * Used for collecting user ratings
+ * Renders an interactive star-based rating input allowing users to select a rating.
+ *
+ * @param value - Current rating value (displayed and used as the selected value)
+ * @param max - Maximum number of stars to render
+ * @param onChange - Callback invoked with the new rating value when the selection changes
+ * @param size - Visual size preset for the star icons; one of "sm", "md", or "lg"
+ * @param showValue - When true, displays the numeric rating value alongside the stars
+ * @param className - Additional CSS classes applied to the component wrapper
+ * @param aria-describedby - ID reference for an element that describes this control
+ * @param aria-invalid - Indicates whether the current value is invalid for accessibility
+ * @returns The rendered star rating UI element
+ *
+ * @see Rating
+ * @see RatingButton
+ * @see Star
  */
 export function ReviewRatingInteractive({
   value,

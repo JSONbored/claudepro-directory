@@ -50,6 +50,18 @@ interface UserMenuProps {
   className?: string;
 }
 
+/**
+ * Renders an authentication-aware user menu: a loading skeleton while auth is pending, a "Get Started" sign-in prompt when no user is authenticated, or an avatar-triggered dropdown with account links and sign-out when a user is present.
+ *
+ * The component also handles the sign-out flow (scoped to the current device) and disables the sign-out control while the operation is in progress.
+ *
+ * @param className - Optional container className to apply to the root element
+ * @returns The user menu UI element (JSX) appropriate for the current authentication state
+ *
+ * @see useAuthenticatedUser
+ * @see toasts
+ * @see getAnimationConfig
+ */
 export function UserMenu({ className }: UserMenuProps) {
   const [signingOut, setSigningOut] = useState(false);
   const [springDefault, setSpringDefault] = useState({

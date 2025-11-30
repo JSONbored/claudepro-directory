@@ -49,6 +49,22 @@ const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon>
   changelog: Bot,
 };
 
+/**
+ * Renders a styled card wrapper with a header (icon and title), optional description, and content.
+ *
+ * Chooses an icon from the `category` mapping when provided; otherwise uses the supplied `icon`.
+ *
+ * @param title - Header title text shown next to the icon
+ * @param description - Optional header description rendered beneath the title
+ * @param icon - Fallback Lucide icon component used when `category` is not provided
+ * @param category - Optional content category key used to select an icon from `ICONS`
+ * @param className - Optional additional class names applied to the outer Card
+ * @param children - Content rendered inside the card body
+ * @returns A React element that displays a card with a header (icon, title, optional description) and the provided children
+ *
+ * @see ICONS
+ * @see Card
+ */
 function Wrapper({
   title,
   description,
@@ -170,6 +186,16 @@ function CodeGroupTabs({
   );
 }
 
+/**
+ * Renders a vertical list of text items where each item is prefixed by a colored dot.
+ *
+ * @param props.items - Array of item strings to render; each string is used as the visible label and as the stable key (first 50 characters).
+ * @param props.color - Tailwind class or classes applied to the dot to indicate color (for example `"bg-green-500"`).
+ * @returns A `<ul>` element containing the rendered list items.
+ *
+ * @see EnhancedList
+ * @see Wrapper
+ */
 function List({ items, color }: { items: string[]; color: string }) {
   return (
     <ul className="space-y-2">
@@ -190,6 +216,20 @@ const getEnhancedListKey = (item: EnhancedListItem, index: number) =>
     ? `enhanced-string-${item.slice(0, 50)}-${index}`
     : `enhanced-object-${item.issue}-${item.solution.slice(0, 50)}-${index}`;
 
+/**
+ * Render a vertical list where each entry is either a simple text item or an issue/solution pair with a colored leading dot.
+ *
+ * The component accepts an array of items where each item is either a string (rendered as a single-line list entry)
+ * or an object with `issue` and `solution` fields (rendered as a titled issue with a nested solution). Each list entry
+ * is prefixed by a small dot whose color is controlled by the `color` class string.
+ *
+ * @param items - Array of items to render. Each item is either a `string` or an object `{ issue: string; solution: string }`.
+ * @param color - Tailwind (or utility) class string applied to the leading dot for each item (controls dot color).
+ * @returns The rendered unordered list JSX element containing the provided items.
+ *
+ * @see getEnhancedListKey
+ * @see List
+ */
 function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: string }) {
   return (
     <ul className="space-y-4">
@@ -219,6 +259,21 @@ type PlatformStep =
   | { type: 'command'; html: string; code: string }
   | { type: 'text'; text: string };
 
+/**
+ * Renders a titled platform setup section with ordered steps and optional configuration paths.
+ *
+ * Renders each step as either a Bash code block (for `command` steps) or an inline text bullet (for `text` steps). When `paths` is provided, renders a "Configuration Paths" list with labeled badges and code-styled paths.
+ *
+ * @param name - Display name of the platform used in the section header and to derive filenames for command steps
+ * @param steps - Ordered array of steps to render. Each step is either:
+ *   - `{ type: 'command', html, code }` — rendered as a Bash code block with a generated filename
+ *   - `{ type: 'text', text }` — rendered as an inline text bullet
+ * @param paths - Optional mapping of configuration key to filesystem path shown under "Configuration Paths"
+ * @returns A JSX element containing the platform header, rendered steps, and optional configuration paths section
+ *
+ * @see ProductionCodeBlock
+ * @see UnifiedBadge
+ */
 function Platform({
   name,
   steps,

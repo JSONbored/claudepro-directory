@@ -32,6 +32,19 @@ interface CompanySelectorProps {
 
 const DEFAULT_DEBOUNCE_MS = 300;
 
+/**
+ * UI control that lets users search for an existing company or create and select a new one.
+ *
+ * Renders a popover trigger with a searchable list of companies, a debounced remote search, and an inline form to create a company; calls `onChange` when a company is selected.
+ *
+ * @param value - Currently selected company id (or falsy when none).
+ * @param onChange - Callback invoked with the selected company's `(id, name)`.
+ * @param defaultCompanyName - Fallback company name shown when no company is selected (used for legacy forms).
+ *
+ * @see createCompany
+ * @see searchCompaniesAction
+ * @see getCompanyByIdAction
+ */
 export function CompanySelector({ value, onChange, defaultCompanyName }: CompanySelectorProps) {
   const buttonId = useId();
   const nameInputId = useId();

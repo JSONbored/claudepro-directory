@@ -27,8 +27,18 @@ import { StarDisplay } from '@heyclaude/web-runtime/ui';
 import { ReviewRatingHistogram } from './review-rating-histogram';
 
 /**
- * Complete review section with list, pagination, and sorting
- * Displays all reviews for a piece of content with aggregate statistics
+ * Render the reviews section for the given content, showing aggregate rating, a sortable paginated list of reviews, and per-review actions (edit, delete, mark helpful).
+ *
+ * This component loads review data with aggregate statistics, manages sorting and pagination state, supports inline editing for the current user's review, and exposes controls for loading more reviews. It handles API errors by logging and showing toasts and refreshes aggregate stats after changes.
+ *
+ * @param contentType - The content category used by the reviews API (e.g., article, product).
+ * @param contentSlug - The unique slug/identifier for the content whose reviews are displayed.
+ * @param currentUserId - Optional id of the currently authenticated user; used to show edit/delete controls for the user's own reviews.
+ * @returns The rendered reviews section as a React element.
+ *
+ * @see ReviewRatingHistogram
+ * @see ReviewCardItem
+ * @see ReviewForm
  */
 export function ReviewListSection({
   contentType,
@@ -234,8 +244,24 @@ export function ReviewListSection({
 }
 
 /**
- * Review Card Item Component
- * Displays an individual review with actions
+ * Renders a single review card with rating, text, and contextual actions (helpful, edit, delete).
+ *
+ * Renders a read-only card for other users and an inline editable ReviewForm for the current user's review when `isEditing` is true. If required review fields are missing, returns `null`.
+ *
+ * @param review - Review record with aggregated stats and related user data.
+ * @param currentUserId - ID of the currently authenticated user; used to determine ownership and which actions to show.
+ * @param contentType - Content category for the review (used when rendering or editing).
+ * @param contentSlug - Content identifier used when editing the review.
+ * @param onEdit - Callback invoked when the Edit action is requested.
+ * @param onDelete - Callback invoked when the Delete action is requested.
+ * @param isEditing - If true and the current user owns the review, render the editable ReviewForm instead of the read-only card.
+ * @param onCancelEdit - Callback invoked after a successful edit or when editing is cancelled.
+ *
+ * @returns A card element displaying the review and available actions, or `null` if essential review data is missing.
+ *
+ * @see ReviewForm
+ * @see BaseCard
+ * @see markReviewHelpful
  */
 function ReviewCardItem({
   review,

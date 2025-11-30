@@ -31,6 +31,24 @@ interface EnrollMFADialogProps {
   onEnrolled: () => void;
 }
 
+/**
+ * Render a controlled dialog that guides the user through enrolling a TOTP MFA factor and verifying it.
+ *
+ * The dialog runs a two-step flow: generate an enrollment QR code/secret, then create and verify a challenge
+ * with a 6-digit code from the user's authenticator app. On successful verification the component calls
+ * `onEnrolled` and closes the dialog. Local state manages step, loading, errors, QR/secret display, and the
+ * verification code input.
+ *
+ * @param props.open - Whether the dialog is open
+ * @param props.onOpenChange - Callback invoked when the dialog open state changes
+ * @param props.onEnrolled - Callback invoked after successful MFA enrollment
+ * @returns The dialog JSX that provides enrollment and verification UI for TOTP-based MFA
+ *
+ * @see createSupabaseBrowserClient
+ * @see enrollTOTPFactor
+ * @see createMFAChallenge
+ * @see verifyMFAChallenge
+ */
 export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADialogProps) {
   const [step, setStep] = useState<'enroll' | 'verify'>('enroll');
   const [loading, setLoading] = useState(false);

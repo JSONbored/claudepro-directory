@@ -121,6 +121,23 @@ function getSafeAuthorProfileHref(
   return SOCIAL_LINK_SNAPSHOT.authorProfile;
 }
 
+/**
+ * Render metadata and tags for a content item including author, date, view count, and copy count.
+ *
+ * Server component that produces read-only, server-rendered markup; returns null when the item has no metadata or tags to display.
+ *
+ * @param item - The content item (or RPC-derived item) whose metadata and tags will be rendered.
+ * @param viewCount - Optional total view count; displayed only when a number greater than 0 is provided.
+ * @param copyCount - Optional total copy count; displayed only when a number greater than 0 is provided.
+ *
+ * @returns A React element containing the metadata and tag badges, or `null` if there is nothing to display.
+ *
+ * @see getSafeAuthorProfileHref
+ * @see formatDate
+ * @see formatViewCount
+ * @see formatCopyCount
+ * @see UnifiedBadge
+ */
 export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataProps) {
   const hasViewCount = typeof viewCount === 'number' && viewCount > 0;
   const hasCopyCount = typeof copyCount === 'number' && copyCount > 0;

@@ -16,8 +16,24 @@ import { Label } from '@heyclaude/web-runtime/ui';
 import { Textarea } from '@heyclaude/web-runtime/ui';
 
 /**
- * Form for creating and editing reviews
- * Extracted from unified review component for better tree-shaking
+ * Render a form for creating or editing a review for a content item.
+ *
+ * Displays a star rating control, an optional text review textarea with live character count and validation
+ * against MAX_REVIEW_LENGTH, and action buttons to submit or cancel. When submitted, the form will call
+ * createReview or updateReview, show contextual toasts, refresh the router, and invoke the optional
+ * onSuccess callback.
+ *
+ * @param contentType - The content type identifier for the item being reviewed (used when creating a review)
+ * @param contentSlug - The slug/identifier for the content item being reviewed (used when creating a review)
+ * @param existingReview - Optional existing review object; when provided the form is initialized for editing
+ * @param onSuccess - Optional callback invoked after a successful create or update operation
+ * @param onCancel - Optional callback invoked when the user cancels the form (shown only when provided)
+ * @returns The rendered review form element
+ *
+ * @see ReviewRatingInteractive
+ * @see createReview
+ * @see updateReview
+ * @see MAX_REVIEW_LENGTH
  */
 export function ReviewForm({
   contentType,

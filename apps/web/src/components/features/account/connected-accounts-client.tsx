@@ -65,6 +65,21 @@ const PROVIDER_CONFIG: Record<
   },
 };
 
+/**
+ * Renders the Connected Accounts UI for viewing, linking, and unlinking OAuth providers.
+ *
+ * Displays each supported provider with its connection state, linked account details (email and last sign-in),
+ * and actions to link or unlink accounts. Prevents unlinking when it would remove the last remaining connected provider,
+ * and shows a confirmation dialog before performing an unlink operation.
+ *
+ * @param identities - Array of user identity records (may include null entries) returned by the server's get_user_identities RPC; used to determine which providers are connected and to show provider-specific account details.
+ * @returns The connected-accounts management React element containing provider rows, informational copy, and an unlink confirmation dialog.
+ *
+ * @see PROVIDER_CONFIG
+ * @see unlinkOAuthProvider
+ * @see successToasts
+ * @see errorToasts
+ */
 export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientProps) {
   const [isPending, startTransition] = useTransition();
   const [unlinkDialogOpen, setUnlinkDialogOpen] = useState(false);

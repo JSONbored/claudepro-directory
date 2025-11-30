@@ -29,6 +29,22 @@ interface MFAChallengeDialogProps {
   onVerified: () => void;
 }
 
+/**
+ * Renders a modal dialog that prompts the user for a 6-digit MFA code, verifies the selected verified MFA factor, and notifies the parent when verification succeeds.
+ *
+ * The dialog loads the user's verified MFA factors, allows selecting one (when multiple exist), accepts a 6-digit code, performs challenge creation and verification, displays loading and error states, and calls `onVerified` after a successful verification and brief session refresh wait.
+ *
+ * @param open - Whether the dialog is visible.
+ * @param onVerified - Callback invoked after successful MFA verification.
+ *
+ * @returns The dialog element that handles MFA factor selection, code entry, verification flow, and user-facing error/loading states.
+ *
+ * @see listMFAFactors
+ * @see createMFAChallenge
+ * @see verifyMFAChallenge
+ * @see useLoggedAsync
+ * @see createSupabaseBrowserClient
+ */
 export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

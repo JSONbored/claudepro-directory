@@ -65,6 +65,32 @@ const SearchErrorFallback = () => (
   <div className="p-4 text-center text-muted-foreground">Error loading search</div>
 );
 
+/**
+ * Unified search UI with a debounced search input, optional filter panel, saved-search presets, and analytics tracking.
+ *
+ * Renders a searchable interface that supports sorting, tag/author/category filters, applying/clearing filters, a saved-presets rail, and sends analytics pulses for searches and filter actions.
+ *
+ * @param placeholder - Placeholder text for the search input.
+ * @param onSearch - Callback invoked with the sanitized search query when the input debounces.
+ * @param onFiltersChange - Optional callback invoked when filters change.
+ * @param filters - Initial filter state to populate the filter panel and sort selector.
+ * @param availableTags - List of available tag values to show in the filter panel.
+ * @param availableAuthors - List of available author values to show in the filter panel.
+ * @param availableCategories - List of available category values to show in the filter panel.
+ * @param resultCount - Number of search results to surface in announcements and summaries.
+ * @param className - Optional additional container CSS classes.
+ * @param showFilters - Whether to render the sort control and collapsible filter panel.
+ * @param savedSearches - Optional array of saved search/preset objects to render in the presets rail.
+ * @param onSelectSavedSearch - Callback invoked when a saved preset is applied (receives preset id).
+ * @param onRemoveSavedSearch - Callback invoked when a saved preset is requested to be removed (receives preset id).
+ * @param onSavePresetRequest - Callback invoked when the "Save current filters" action is requested.
+ * @param isPresetSaveDisabled - Disables the save-preset button when true.
+ *
+ * @returns The React element for the unified search component.
+ *
+ * @see useUnifiedSearch
+ * @see SearchFilterPanel
+ */
 function UnifiedSearchComponent({
   placeholder = 'Search...',
   onSearch,

@@ -76,6 +76,19 @@ interface ResultsDisplayProps {
   shareUrl: string;
 }
 
+/**
+ * Render a results UI that presents personalized recommendations and tools for filtering, sharing, and saving them.
+ *
+ * Displays summary metrics and the user's selections, lets the user refine results by minimum match score and maximum count, switch between category tabs, open a share modal, and save visible recommendations to the user's library.
+ *
+ * @param recommendations - Recommendation response containing `results`, `summary`, `total_matches`, and the original `answers` used to generate recommendations.
+ * @param shareUrl - URL used by the share modal when sharing results.
+ * @returns A React element containing the recommendations UI.
+ *
+ * @see {@link ShareResults}
+ * @see {@link addBookmarkBatch}
+ * @see {@link getContentItemUrl}
+ */
 export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProps) {
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

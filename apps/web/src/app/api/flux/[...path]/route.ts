@@ -24,6 +24,19 @@ interface RouteContext {
   }>;
 }
 
+/**
+ * Handle GET requests for the Flux catch-all API route and forward them to the Flux router.
+ *
+ * Resolves the dynamic path segments from `context`, creates a request-scoped log context, and delegates
+ * processing to the Flux routing implementation.
+ *
+ * @param request - The incoming Next.js request object for the GET operation.
+ * @param context - Route context containing resolved dynamic route parameters; `context.params.path` is the path segments array.
+ * @returns A Response object representing the Flux API response for the routed GET request.
+ * @see routeFluxRequest
+ * @see generateRequestId
+ * @see logger
+ */
 export async function GET(request: NextRequest, context: RouteContext) {
   const requestId = generateRequestId();
   const params = await context.params;
@@ -37,6 +50,17 @@ export async function GET(request: NextRequest, context: RouteContext) {
   return routeFluxRequest('GET', params.path, request);
 }
 
+/**
+ * Handle POST requests for the Flux catch-all API route and forward them to the Flux router.
+ *
+ * @param {NextRequest} request - The incoming Next.js request for the POST operation.
+ * @param {RouteContext} context - Route context containing a promise-resolved `params.path` array of path segments.
+ * @returns {Promise<Response>} A Response produced by the Flux router for the given path and request.
+ *
+ * @see routeFluxRequest
+ * @see generateRequestId
+ * @see logger
+ */
 export async function POST(request: NextRequest, context: RouteContext) {
   const requestId = generateRequestId();
   const params = await context.params;
@@ -50,6 +74,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
   return routeFluxRequest('POST', params.path, request);
 }
 
+/**
+ * Handle CORS preflight and OPTIONS requests for the Flux catch-all API route.
+ *
+ * Delegates to the runtime's `handleOptions` helper to produce the appropriate
+ * preflight response with allowed methods and headers.
+ *
+ * @returns The `Response` produced by `handleOptions`, configured for CORS/preflight.
+ * @see {@link @heyclaude/web-runtime/flux~handleOptions}
+ */
 export function OPTIONS() {
   return handleOptions();
 }

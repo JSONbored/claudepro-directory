@@ -128,10 +128,18 @@ function validateExample(example: UsageExample): { valid: boolean; error?: strin
 }
 
 /**
- * ExamplesArrayInput Component
+ * Renders a controlled UI for creating, editing, validating, and serializing an array of usage examples.
  *
- * Manages a dynamic array of usage examples with validation.
- * Serializes to JSON and stores in hidden input for form submission.
+ * The component maintains local state for examples and their expanded panels, validates each example,
+ * and serializes the examples (excluding internal IDs) to a hidden input named by `name` for form submission.
+ *
+ * @param name - Form field name to receive the serialized examples JSON
+ * @param defaultValue - Initial list of examples to populate the editor (IDs will be generated if missing)
+ * @param maxExamples - Maximum number of examples allowed (defaults to 10)
+ * @returns The JSX element that provides the examples editor and a hidden input containing the serialized examples
+ *
+ * @see validateExample
+ * @see UsageExample
  */
 export function ExamplesArrayInput({
   name,

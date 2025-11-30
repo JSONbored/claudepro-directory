@@ -18,6 +18,19 @@ export interface NewsletterFormProps {
   className?: string;
 }
 
+/**
+ * Renders a newsletter subscription form with email input, submit button, inline validation, and optional confetti on successful subscription.
+ *
+ * The form manages email state, shows a loading spinner while submitting, displays an error message when subscription fails, and fires subtle confetti if enabled in configuration after a successful subscription.
+ *
+ * @param source - Source identifier to annotate where the newsletter signup originated (used by the subscription hook).
+ * @param className - Optional additional CSS class names to apply to the form container.
+ * @returns The newsletter form element ready to be embedded in a React tree.
+ *
+ * @see useNewsletter
+ * @see useConfetti
+ * @see NEWSLETTER_CTA_CONFIG
+ */
 export function NewsletterForm({ source, className }: NewsletterFormProps) {
   const { fireConfetti } = useConfetti();
   const { email, setEmail, isSubmitting, subscribe, error } = useNewsletter({

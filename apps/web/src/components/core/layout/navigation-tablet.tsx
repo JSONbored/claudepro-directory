@@ -58,6 +58,18 @@ interface NavigationTabletProps {
   onMobileMenuOpen: () => void;
 }
 
+/**
+ * Renders a horizontally scrollable tablet navigation bar showing the first five primary items and a "More" button.
+ *
+ * Renders the first five entries from PRIMARY_NAVIGATION as navigation links with entry animations and a "More" button that opens additional options.
+ *
+ * @param isActive - Callback that receives a path and returns whether that path is currently active; used to apply active styling to links.
+ * @param onMobileMenuOpen - Handler invoked when the "More" button is clicked.
+ * @returns A navigation React element intended for tablet layouts (hidden on small screens, visible on md and above).
+ *
+ * @see NavLink
+ * @see PRIMARY_NAVIGATION
+ */
 export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTabletProps) {
   return (
     <motion.nav

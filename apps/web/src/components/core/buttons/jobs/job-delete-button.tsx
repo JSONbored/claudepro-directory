@@ -20,6 +20,23 @@ export interface JobDeleteButtonProps extends ButtonStyleProps {
   jobId: string;
 }
 
+/**
+ * Renders a "Delete" button that confirms and deletes a job listing by ID.
+ *
+ * Presents a confirmation dialog, calls the job deletion API, shows success or error toasts,
+ * and refreshes the router on successful deletion. Disables the button while deletion is in progress.
+ *
+ * @param jobId - The identifier of the job to delete.
+ * @param size - Button size variant (defaults to `'sm'`).
+ * @param variant - Button visual variant (defaults to `'ghost'`).
+ * @param className - Additional CSS class names to apply to the button.
+ * @param disabled - If `true`, the button is rendered disabled regardless of deletion state.
+ * @returns The rendered delete Button element.
+ *
+ * @see deleteJob
+ * @see useLoggedAsync
+ * @see toasts
+ */
 export function JobDeleteButton({
   jobId,
   size = 'sm',

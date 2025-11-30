@@ -59,6 +59,19 @@ interface ProfileEditFormProps {
   profile: ProfileData;
 }
 
+/**
+ * Renders a profile edit form wired to React Hook Form and the generated Zod schema, allowing a user to edit and submit profile fields.
+ *
+ * The form handles validation, shows field-level errors, manages interests via ListItemManager, and submits updates through the updateProfile API while displaying contextual toasts.
+ *
+ * @param profile - Initial profile values used to populate the form. Expected to include fields such as `display_name`, `bio`, `work`, `website`, `social_x_link`, `interests`, `profile_public`, and `follow_email`. Missing fields are populated with sensible defaults.
+ * @returns The JSX form element used to edit and submit a user's profile.
+ *
+ * @see ListItemManager
+ * @see updateProfile
+ * @see toasts
+ * @see profileFormSchema
+ */
 export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [isPending, startTransition] = useTransition();
   const runLoggedAsync = useLoggedAsync({

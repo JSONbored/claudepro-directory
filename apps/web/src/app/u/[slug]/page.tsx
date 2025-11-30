@@ -128,6 +128,24 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
   });
 }
 
+/**
+ * Render the public user profile page for the given route slug.
+ *
+ * Fetches the public profile, activity stats, public collections, and contributions for the requested user,
+ * determines viewer context to control follow actions, validates slugs and related item URLs, and returns
+ * the fully rendered page or triggers a 404 when the slug is invalid or the profile is not found.
+ *
+ * @param props - Route parameters object containing `slug`
+ * @returns The React element for the user profile page
+ *
+ * @see {@link isValidSlug}
+ * @see {@link getPublicUserProfile}
+ * @see {@link getAuthenticatedUser}
+ * @see {@link getSafeContentUrl}
+ * @see {@link getSafeCollectionUrl}
+ * @see {@link sanitizeDisplayText}
+ * @see {@link notFound}
+ */
 export default async function UserProfilePage({ params }: UserProfilePageProperties) {
   const { slug } = await params;
 

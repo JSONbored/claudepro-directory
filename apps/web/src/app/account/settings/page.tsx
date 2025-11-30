@@ -1,4 +1,3 @@
-
 /**
  * Settings Page - User profile and account management.
  */
@@ -39,6 +38,25 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/settings');
 }
 
+/**
+ * Render the account settings page for the authenticated user, handling data loading,
+ * missing-user initialization, and appropriate fallback UIs for unauthenticated or error states.
+ *
+ * The component performs request-scoped logging, fetches the authenticated user and their
+ * settings, attempts to initialize a missing user record, and renders profile editing,
+ * account details, and profile-picture controls (or compact fallback cards when required).
+ *
+ * @returns A React element containing the settings UI or a fallback UI when the user is not
+ * authenticated or settings/profile data cannot be loaded.
+ *
+ * @see generateRequestId
+ * @see getAuthenticatedUser
+ * @see getUserSettings
+ * @see ensureUserRecord
+ * @see ProfileEditForm
+ * @see RefreshProfileButton
+ * @see ROUTES
+ */
 export default async function SettingsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

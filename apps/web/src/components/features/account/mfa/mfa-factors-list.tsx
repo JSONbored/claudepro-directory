@@ -27,6 +27,20 @@ interface MFAFactorsListProps {
   onFactorUnenrolled?: () => void;
 }
 
+/**
+ * Renders a list of the user's enrolled MFA factors and provides UI to remove verified factors.
+ *
+ * Fetches MFA factors on mount, displays loading/error/empty states, and allows unenrolling a verified
+ * factor after confirmation while preventing removal of the last verified factor. On successful unenrollment
+ * the list is reloaded and the optional callback is invoked.
+ *
+ * @param props.onFactorUnenrolled - Optional callback invoked after a factor is successfully unenrolled.
+ * @returns The component's rendered JSX element tree.
+ *
+ * @see listMFAFactors
+ * @see unenrollMFAFactor
+ * @see useLoggedAsync
+ */
 export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
   const [factors, setFactors] = useState<MFAFactor[]>([]);
   const [loading, setLoading] = useState(true);

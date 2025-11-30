@@ -36,19 +36,63 @@ interface JobAnalyticsPageProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Format a raw job status into a human-friendly title-cased string.
+ *
+ * @param rawStatus - Status value as stored (may contain underscores and lowercase letters)
+ * @returns The status with underscores replaced by spaces and each word capitalized (e.g., `in_review` -> `In Review`)
+ *
+ * @see getStatusColor
+ * @see jobStatusBadge
+ */
 function formatStatus(rawStatus: string): string {
   return rawStatus.replaceAll('_', ' ').replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/**
+ * Get the design-system color key associated with a job status.
+ *
+ * @param status - The job status to map to a badge color
+ * @returns The color key string from the `jobStatusBadge` mapping for `status`
+ *
+ * @see jobStatusBadge
+ * @see JobStatus
+ */
 function getStatusColor(status: JobStatus): string {
   return jobStatusBadge[status];
 }
 
+/**
+ * Builds page metadata for the job analytics route using the job `id` from route parameters.
+ *
+ * @param props - The page properties object containing route parameters.
+ * @param props.params - An object (or promise resolving to an object) with route parameters.
+ * @param props.params.id - The job identifier used to populate the analytics route metadata.
+ * @returns The generated Next.js page metadata for `/account/jobs/:id/analytics`.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: JobAnalyticsPageProperties): Promise<Metadata> {
   const { id } = await params;
   return generatePageMetadata('/account/jobs/:id/analytics', { params: { id } });
 }
 
+/**
+ * Render the authenticated Job Analytics page for the job specified by `params.id`.
+ *
+ * Performs server-side authentication, loads the user's job data, computes basic metrics
+ * (views, clicks, CTR) and renders a dashboard with listing details, performance metrics,
+ * and contextual insights. If the user is unauthenticated the request is redirected to the
+ * login route; if the job cannot be loaded or is not owned by the user, a fallback UI is rendered.
+ *
+ * @param params - Route parameters object containing the job `id` (i.e., `{ id: string }`).
+ * @returns A React element containing the job analytics dashboard, or a fallback Card when analytics are unavailable.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserJobById
+ * @see MetricsDisplay
+ * @see generateRequestId
+ */
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProperties) {
   const { id } = await params;
   

@@ -98,9 +98,15 @@ export const revalidate = 1800; // 30min ISR (fallback if edge function cache mi
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
- * Generate static params for company pages
- * Pre-renders top 10 companies at build time to optimize build performance
- * ISR with dynamicParams=true handles remaining companies on-demand
+ * Produce the list of route parameters for statically pre-rendering company pages.
+ *
+ * Retrieves up to 10 top companies at build time and returns an array of objects containing the `slug` param for each company to pre-render. On failure the function logs the error and returns an empty array so build proceeds without pre-rendered company pages.
+ *
+ * @returns An array of route parameter objects like `{ slug: string }` for the pages to statically generate.
+ *
+ * @see getCompaniesList - data loader used to fetch the top companies
+ * @see generateRequestId - used to create a request-scoped id for logging
+ * @see logger - the request-scoped logger used for error reporting
  */
 export async function generateStaticParams() {
   // Limit to top 10 companies to optimize build time
@@ -142,6 +148,22 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
   });
 }
 
+/**
+ * Renders the company profile page for a given company slug, including header, active job listings, and company statistics.
+ *
+ * This server component:
+ * - Fetches the company profile via `getCompanyProfile(slug)` and returns a 404 if no company is found.
+ * - Renders SEO structured data, company header (logo, name, description, metadata), a list of active job cards, and a sidebar with company stats and a CTA.
+ * - Uses a per-request logger (generated with `generateRequestId`) scoped to this page to record fetch outcomes.
+ *
+ * @param params - Route parameters containing the company `slug`.
+ * @returns The rendered React element tree for the company page.
+ *
+ * @see getCompanyProfile
+ * @see generateRequestId
+ * @see SafeWebsiteLink
+ * @see StructuredData
+ */
 export default async function CompanyPage({ params }: CompanyPageProperties) {
   const { slug } = await params;
 

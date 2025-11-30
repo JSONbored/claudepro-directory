@@ -14,6 +14,25 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Renders a styled feature comparison table inside a Card.
+ *
+ * Displays a header (title and description) when provided, and a table with a "Feature" column
+ * plus one column per header. For option cells, boolean values render a green check icon for
+ * `true` and a muted dash for `false`; non-boolean values render as-is. If no headers or no items
+ * are provided, nothing is rendered.
+ *
+ * @param props - Component props.
+ * @param props.title - Optional title shown in the card header.
+ * @param props.description - Optional description shown under the title.
+ * @param props.headers - Array of column header labels (excluding the leading "Feature" column).
+ * @param props.items - Array of rows; each item must include `feature` and up to `option1`, `option2`, `option3`.
+ * @returns The rendered comparison table element, or `null` when there are no headers or items.
+ *
+ * @see ComparisonTableProps
+ * @see Card
+ * @see iconSize
+ */
 export function ComparisonTable(props: ComparisonTableProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, description, headers, items } = props;

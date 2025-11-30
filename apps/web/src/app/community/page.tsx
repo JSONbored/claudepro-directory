@@ -54,6 +54,23 @@ function formatStatValue(value: null | number | undefined): string {
   }).format(value);
 }
 
+/**
+ * Renders the Community page, fetching directory and homepage metrics and displaying community stats, contribution guidance, and contact CTA.
+ *
+ * This server component:
+ * - Loads community directory entries, configuration count, and homepage metrics in parallel and uses safe fallbacks if any fetch fails.
+ * - Creates a request-scoped logger and records warnings when expected contact channels (Discord, Twitter/X) are not configured and errors when data fetches fail.
+ * - Renders hero actions for configured contact channels, three summary stat cards (Configurations, Contributors, Community Members), contribution instructions, and an email newsletter CTA.
+ *
+ * @returns The rendered React element for the Community page.
+ *
+ * @see generateRequestId
+ * @see getContactChannels
+ * @see getCommunityDirectory
+ * @see getConfigurationCount
+ * @see getHomepageData
+ * @see NewsletterCTAVariant
+ */
 export default async function CommunityPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

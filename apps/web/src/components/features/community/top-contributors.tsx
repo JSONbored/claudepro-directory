@@ -26,6 +26,16 @@ export interface TopContributorsProps {
   showCount?: number;
 }
 
+/**
+ * Displays a section of top contributor profile cards.
+ *
+ * @param contributors - Array of user profiles to display.
+ * @param title - Heading text shown above the contributors. Defaults to "Top Contributors".
+ * @param showCount - Maximum number of contributors to render. Defaults to 6.
+ * @returns A React element containing the contributors section, or `null` when no contributors are provided.
+ * @see ProfileCard
+ * @see UserProfile
+ */
 function TopContributorsComponent({
   contributors,
   title = 'Top Contributors',

@@ -36,7 +36,22 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
  * ISR: 2 hours (7200s) - Job postings are relatively stable
  */
 export const revalidate = 7200;
-export const dynamicParams = true; // Allow jobs not pre-rendered to be rendered on-demand
+export const dynamicParams = true; /**
+ * Validate and sanitize an external website URL for safe use in href attributes.
+ *
+ * Accepts a string URL and returns a canonicalized href when the URL is allowed:
+ * only `https:` URLs are permitted, while `http:` is permitted only for localhost
+ * hostnames (`localhost`, `127.0.0.1`, `::1`). Returns `null` for invalid,
+ * disallowed, or unsafe URLs.
+ *
+ * The returned href has credentials stripped, hostname normalized to lowercase
+ * (trailing dot removed), and default ports (`80`, `443`) removed.
+ *
+ * @param url - The input URL to validate and sanitize; may be `null` or `undefined`.
+ * @returns A sanitized canonical href string when allowed, or `null` if the input is invalid or disallowed.
+ *
+ * @see getSafeMailtoUrl
+ */
 
 function getSafeWebsiteUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
@@ -113,6 +128,17 @@ function getSafeMailtoUrl(email: null | string | undefined): null | string {
   return `mailto:${encodeURIComponent(normalized)}`;
 }
 
+/**
+ * Build metadata for a job detail page based on the incoming slug.
+ *
+ * Attempts to load the job by slug and includes the job as the page item when available; otherwise generates default route metadata for /jobs/:slug.
+ *
+ * @param params - An object (or promise resolving to an object) that provides the `slug` route parameter.
+ * @returns The Next.js Metadata for the job page, optionally populated with the job item and its tags.
+ *
+ * @see getJobBySlug
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -147,6 +173,18 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Produce the list of slugs to pre-render at build time for the jobs listing.
+ *
+ * Attempts to fetch up to the top 10 jobs and returns an array of { slug } objects for Incremental Static Regeneration (ISR); remaining job pages are rendered on-demand because dynamicParams is enabled.
+ *
+ * This runs at build-time (or during ISR revalidation) and uses a scoped logger and requestId for tracing; on fetch errors or when no jobs are available it returns a single placeholder slug.
+ *
+ * @returns An array of route parameter objects like `{ slug: string }` to be used by Next.js for static generation.
+ *
+ * @see getFilteredJobs - server helper used to fetch the top jobs
+ * @see dynamicParams - page-level flag enabling on-demand rendering for non-pre-rendered slugs
+ */
 export async function generateStaticParams() {
   // Limit to top 10 jobs to optimize build time
   // ISR with dynamicParams=true handles remaining jobs on-demand
@@ -181,6 +219,19 @@ export async function generateStaticParams() {
   }
 }
 
+/**
+ * Renders the job detail page for a given slug: validates the slug, loads job data server-side, and returns the page UI or a 404 when the slug is invalid or the job does not exist.
+ *
+ * The page uses server-side data fetching and participates in ISR as configured at the module level (revalidation and dynamicParams). A per-request logger is created for scoped diagnostics.
+ *
+ * @param params - Route parameters object containing `slug`
+ * @returns The rendered job detail page as JSX.Element
+ *
+ * @see getJobBySlug - Loads job data from the database
+ * @see getSafeWebsiteUrl - Validates external application links before rendering
+ * @see getSafeMailtoUrl - Validates contact email before rendering mailto links
+ * @see notFound - Triggers a Next.js 404 for invalid or missing resources
+ */
 export default async function JobPage({ params }: PageProps) {
   if (!params) {
     notFound();

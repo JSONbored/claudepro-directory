@@ -12,6 +12,23 @@ interface SearchTriggerProps {
   className?: string;
 }
 
+/**
+ * Render a compact search trigger button that opens the search UI when activated.
+ *
+ * Renders either a full-width minimal button or a styled Button component depending on `variant`.
+ *
+ * @param onClick - Optional click handler invoked when the trigger is activated
+ * @param variant - Visual variant of the trigger; one of `'outline' | 'minimal' | 'ghost' | 'default'` (default: `'outline'`)
+ * @param size - Visual size of the trigger; one of `'sm' | 'md' | 'lg'` (default: `'md'`)
+ * @param showShortcut - Whether to display the keyboard shortcut hint (⌘K) (default: `true`)
+ * @param className - Optional additional class names applied to the root element
+ * @returns A React element representing the search trigger button
+ *
+ * @see Search
+ * @see Button
+ * @see iconSize
+ * @see groupHover
+ */
 export function SearchTrigger({
   onClick,
   variant = 'outline',

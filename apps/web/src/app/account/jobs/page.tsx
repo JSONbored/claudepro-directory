@@ -80,6 +80,14 @@ function resolvePlanLabel(
   return JOB_PLAN_LABELS[plan];
 }
 
+/**
+ * Return a human-readable label for a job tier.
+ *
+ * @param tier - The job tier enum value; if `undefined` or `null`, the function uses the default `standard` tier.
+ * @returns The friendly label for the provided `tier`; returns `Standard` when `tier` is missing.
+ *
+ * @see JOB_TIER_LABELS
+ */
 function resolveTierLabel(
   tier?: Database['public']['Enums']['job_tier'] | null
 ): string {
@@ -89,10 +97,26 @@ function resolveTierLabel(
   return JOB_TIER_LABELS[tier];
 }
 
+/**
+ * Return the badge color token associated with a job status.
+ *
+ * @param status - The job status to resolve
+ * @returns The badge color token (design-system token or CSS class) for the provided status
+ *
+ * @see jobStatusBadge
+ */
 function getStatusColor(status: JobStatus): string {
   return jobStatusBadge[status];
 }
 
+/**
+ * Generate page metadata for the "My Job Listings" account page.
+ *
+ * Uses the shared page metadata helper to produce canonical metadata for the '/account/jobs' route.
+ *
+ * @returns Metadata for the '/account/jobs' page
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/jobs');
 }
@@ -101,6 +125,27 @@ interface MyJobsPageProperties {
   searchParams?: Promise<{ job_id?: string; payment?: string; }>;
 }
 
+/**
+ * Renders the "My Job Listings" account page for the authenticated user, including job rows, billing summaries, and a payment confirmation banner when applicable.
+ *
+ * This server component:
+ * - Ensures the user is authenticated and shows a sign-in prompt if not.
+ * - Loads the user's dashboard data and per-job billing summaries, with structured logging on failures.
+ * - Validates and normalizes job rows returned from the dashboard RPC.
+ * - Shows per-job controls (edit, analytics, view, toggle status, delete) and billing information when present.
+ * - Displays a payment success alert when `searchParams.payment === 'success'` and `searchParams.job_id` match a job.
+ *
+ * Notes:
+ * - This page is configured for dynamic server-side rendering and Node.js runtime.
+ *
+ * @param searchParams - Optional query parameters from the page URL (may include `payment` and `job_id`) used to show payment state or target a specific job.
+ * @returns The rendered JSX for the My Job Listings account page.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserDashboard
+ * @see getJobBillingSummaries
+ * @see ROUTES
+ */
 export default async function MyJobsPage({ searchParams }: MyJobsPageProperties) {
   const resolvedSearchParameters = searchParams ? await searchParams : {};
   const paymentStatus = resolvedSearchParameters.payment;

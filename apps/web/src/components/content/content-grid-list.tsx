@@ -16,6 +16,21 @@ import { RecentlyViewedSidebar } from '@/src/components/features/navigation/rece
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Renders the hero section for a content list page including title, description, icon, badges, and a submit action.
+ *
+ * @template T - The content item shape used to compute badge defaults.
+ * @param props.title - Page title shown as the main heading.
+ * @param props.description - Short descriptive text shown under the heading.
+ * @param props.icon - Name of the icon to display in the decorative icon area.
+ * @param props.items - Array of content items; used to derive default badges (e.g., item count).
+ * @param props.badges - Optional custom badges to display; if empty, a default set is shown.
+ * @returns The hero section JSX element for the content list page.
+ *
+ * @see ContentListServer
+ * @see UnifiedBadge
+ * @see ROUTES.SUBMIT
+ */
 function ContentHeroSection<T extends DisplayableContent>({
   title,
   description,

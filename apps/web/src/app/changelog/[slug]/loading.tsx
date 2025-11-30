@@ -8,6 +8,17 @@
 import { Skeleton, Separator  } from '@heyclaude/web-runtime/ui';
 
 
+/**
+ * Renders a skeleton UI for a changelog entry detail page.
+ *
+ * The component outputs static placeholder markup (multiple `Skeleton` elements and a `Separator`)
+ * that imitates the layout of a changelog entry while the real content loads.
+ *
+ * @returns The loading skeleton for the changelog entry page as a JSX element.
+ *
+ * @see {@link @heyclaude/web-runtime/ui#Skeleton}
+ * @see {@link @heyclaude/web-runtime/ui#Separator}
+ */
 export default function ChangelogEntryLoading() {
   return (
     <article className="container max-w-4xl space-y-8 py-8">

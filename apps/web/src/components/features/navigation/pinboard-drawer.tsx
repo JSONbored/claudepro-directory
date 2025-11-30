@@ -19,6 +19,19 @@ interface PinboardDrawerProps {
   onOpenChange: (open: boolean) => void;
 }
 
+/**
+ * Displays a right-side drawer listing items the user pinned for later.
+ *
+ * Renders a header, a status row with a "Clear all" action when pins exist, a loading skeleton while pins load, and either a list of pinned items with unpin controls or an empty-state message. Clicking a pinned item's title navigates to its detail page and closes the drawer.
+ *
+ * @param open - Controls whether the drawer is visible.
+ * @param onOpenChange - Called when the drawer open state should change.
+ *
+ * @returns The Pinboard drawer UI as a React element.
+ *
+ * @see usePinboard
+ * @see formatRelativeDate
+ */
 export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
   const { pinnedItems, isLoaded, unpinItem, clearAll } = usePinboard();
   const hasPins = pinnedItems.length > 0;

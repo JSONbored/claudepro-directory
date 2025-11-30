@@ -8,6 +8,17 @@ import { cardBody } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 
+/**
+ * Mobile header for authentication pages that displays the HeyClaude logo and a compact title.
+ *
+ * Renders an animated, condensed header intended for mobile layouts with a background styled via the design system.
+ *
+ * @returns A React element representing the animated mobile auth header.
+ *
+ * @see HeyClaudeLogo
+ * @see cardBody
+ * @see motion
+ */
 export function AuthMobileHeader() {
   return (
     <motion.div
