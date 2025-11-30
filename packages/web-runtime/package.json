@@ -161,7 +161,7 @@
     "@heyclaude/data-layer": "workspace:*",
     "@heyclaude/database-types": "workspace:*",
     "@radix-ui/react-slot": "^1.2.4",
-    "@supabase/ssr": "^0.7.0",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.84.0",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
