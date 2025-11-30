@@ -98,9 +98,13 @@ export const dynamicParams = true; // Allow unknown slugs to be rendered on dema
 
 /**
  * Generate static params for company pages
- * Pre-renders top 50 companies at build time for optimal SEO and performance
+ * Pre-renders top 10 companies at build time to optimize build performance
+ * ISR with dynamicParams=true handles remaining companies on-demand
  */
 export async function generateStaticParams() {
+  // Limit to top 10 companies to optimize build time
+  const MAX_STATIC_COMPANIES = 10;
+
   // Generate requestId for static params generation (build-time)
   const staticParamsRequestId = generateRequestId();
   
@@ -115,7 +119,7 @@ export async function generateStaticParams() {
   const { getCompaniesList } = await import('@heyclaude/web-runtime/data');
 
   try {
-    const result = await getCompaniesList(50, 0);
+    const result = await getCompaniesList(MAX_STATIC_COMPANIES, 0);
     const companies = result.companies ?? [];
 
     return companies

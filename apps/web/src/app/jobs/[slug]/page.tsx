@@ -35,6 +35,7 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
  * ISR: 2 hours (7200s) - Job postings are relatively stable
  */
 export const revalidate = 7200;
+export const dynamicParams = true; // Allow jobs not pre-rendered to be rendered on-demand
 
 function getSafeWebsiteUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
@@ -146,6 +147,10 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
+  // Limit to top 10 jobs to optimize build time
+  // ISR with dynamicParams=true handles remaining jobs on-demand
+  const MAX_STATIC_JOBS = 10;
+
   // Generate requestId for static params generation (build-time)
   const staticParametersRequestId = generateRequestId();
   
@@ -159,7 +164,7 @@ export async function generateStaticParams() {
 
   const { getFilteredJobs } = await import('@heyclaude/web-runtime/server');
   try {
-    const jobsResult = await getFilteredJobs({});
+    const jobsResult = await getFilteredJobs({ limit: MAX_STATIC_JOBS });
     const jobs = jobsResult?.jobs ?? [];
 
     if (jobs.length === 0) {
@@ -167,7 +172,7 @@ export async function generateStaticParams() {
       return [{ slug: 'placeholder' }];
     }
 
-    return jobs.map((job) => ({ slug: job.slug }));
+    return jobs.slice(0, MAX_STATIC_JOBS).map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
     reqLogger.error('JobPage: getJobs threw in generateStaticParams', normalized);

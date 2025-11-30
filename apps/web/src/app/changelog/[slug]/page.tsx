@@ -44,11 +44,17 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
 
 export const revalidate = 7200;
+export const dynamicParams = true; // Allow older changelog entries to be rendered on-demand
 
 /**
- * Generate static params for all changelog entries
+ * Generate static params for recent changelog entries
+ * Pre-renders top 20 entries to optimize build time while maintaining SEO coverage
+ * Older entries are rendered on-demand via ISR (revalidate = 7200s)
  */
 export async function generateStaticParams() {
+  // Limit to top 20 changelog entries (most recent) to optimize build time
+  const MAX_STATIC_ENTRIES = 20;
+
   // Generate requestId for static params generation (build-time)
   const requestId = generateRequestId();
   
@@ -63,7 +69,8 @@ export async function generateStaticParams() {
   try {
     const entries = await getAllChangelogEntries();
 
-    return entries.map((entry) => ({
+    // Only pre-render the most recent entries to optimize build time
+    return entries.slice(0, MAX_STATIC_ENTRIES).map((entry) => ({
       slug: entry.slug,
     }));
   } catch (error) {

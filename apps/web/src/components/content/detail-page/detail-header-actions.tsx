@@ -382,28 +382,29 @@ export function DetailHeaderActions({
 
   return (
     <>
-      {/* Back navigation */}
-      <div className="mb-6">
-        <motion.div
-          whileHover={{ x: -2 }}
-          whileTap={{ scale: 0.97 }}
-          className="inline-block"
+      {/* Back navigation - minimal */}
+      <motion.div
+        whileHover={{ x: -2 }}
+        whileTap={{ scale: 0.97 }}
+        className="mb-4 inline-block"
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.back()}
+          className={`text-muted-foreground ${STATE_PATTERNS.HOVER_TEXT_FOREGROUND} -ml-2`}
         >
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className={`text-muted-foreground ${STATE_PATTERNS.HOVER_TEXT_FOREGROUND}`}
-          >
-            <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
-            Back
-          </Button>
-        </motion.div>
-      </div>
+          <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
+          Back
+        </Button>
+      </motion.div>
 
-      {/* Main content header */}
-      <div className={`${UI_CLASSES.FLEX_COL_GAP_6} lg:flex-row lg:items-start lg:justify-between`}>
-        <div className="flex-1">
-          <div className={'mb-4 flex items-center gap-3'}>
+      {/* Two-column hero layout for desktop */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px] lg:gap-10">
+        {/* Left column - Content info */}
+        <div className="space-y-4">
+          {/* Badges - inline */}
+          <div className="flex items-center gap-2">
             <UnifiedBadge
               variant="base"
               style="secondary"
@@ -416,73 +417,31 @@ export function DetailHeaderActions({
             </UnifiedBadge>
           </div>
 
-          <h1 className={`mb-4 ${UI_CLASSES.HEADING_H1}`}>{displayTitle}</h1>
+          {/* Title - larger and more prominent */}
+          <h1 className="font-bold text-3xl tracking-tight lg:text-4xl">{displayTitle}</h1>
 
+          {/* Description - larger line height for readability */}
           {contentItem.description && (
-            <p className={`mb-6 ${UI_CLASSES.TEXT_BODY_LG} text-muted-foreground`}>
+            <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground lg:text-xl">
               {contentItem.description}
             </p>
           )}
         </div>
 
-        {/* Action buttons */}
-        <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
-          {/* Share Menu - multiple platform options */}
-          <ShareMenu
-            url={shareUrl}
-            title={displayTitle}
-            description={contentItem.description ?? undefined}
-            utmCampaign={category}
-            onShare={(platform) => {
-              pulse.share({ platform, category, slug: contentItem.slug, url: shareUrl }).catch(() => {
-                // Silent fail for analytics
-              });
-            }}
-          />
-
-          <motion.div whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.02 }}>
-            <Button
-              variant={pinned ? 'secondary' : 'outline'}
-              onClick={handleTogglePin}
-              className="min-w-0"
-            >
-              {pinned ? (
-                <>
-                  <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
-                  Pinned
-                </>
-              ) : (
-                <>
-                  <BookmarkPlus className={UI_CLASSES.ICON_SM_LEADING} />
-                  Pin for later
-                </>
-              )}
-            </Button>
-          </motion.div>
-
-          <motion.div whileTap={{ scale: 0.97 }}>
-            <Button
-              variant="ghost"
-              className="min-w-0 justify-start border border-border/50 border-dashed"
-              onClick={openPinboardDrawer}
-            >
-              <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
-              View pinboard ({pinnedItems.length})
-            </Button>
-          </motion.div>
-
-          {/* Primary action button - only show if not a download action, or if download is available */}
+        {/* Right column - Actions sidebar (sticky on desktop) */}
+        <aside className="space-y-3 rounded-lg border border-border/50 bg-card/50 p-4 lg:sticky lg:top-24 lg:self-start">
+          {/* Primary CTA - Full width */}
           {(!(primaryAction.type === 'download') || hasDownloadAvailable) && (
-            <motion.div whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.02 }}>
-              <Button onClick={() => handleActionClick(primaryAction)} className="min-w-0">
+            <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.01 }}>
+              <Button onClick={() => handleActionClick(primaryAction)} className="w-full">
                 {primaryAction.label}
               </Button>
             </motion.div>
           )}
 
-          {/* Conditional download button - show when download is available but primaryAction is not download */}
+          {/* Conditional download button */}
           {hasDownloadAvailable && primaryAction.type !== 'download' && (
-            <motion.div whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.02 }}>
+            <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.01 }}>
               <Button
                 onClick={() => {
                   if (hasMcpbDownload) {
@@ -491,176 +450,209 @@ export function DetailHeaderActions({
                     handleDownload('zip', contentItem, category, pulse);
                   }
                 }}
-                className="min-w-0"
+                className="w-full"
               >
                 <Download className={UI_CLASSES.ICON_SM_LEADING} />
-                {category === Constants.public.Enums.content_category[1] ? 'Download .mcpb' : 'Download'} {/* mcp */}
+                {category === Constants.public.Enums.content_category[1] ? 'Download .mcpb' : 'Download'}
               </Button>
             </motion.div>
           )}
 
-          {hasContent && (
-            <motion.div
-              whileTap={{ scale: 0.97 }}
-              animate={copied ? { scale: [1, 1.05, 1] } : {}}
-              transition={{ duration: 0.3 }}
-            >
-              <Button variant="outline" onClick={handleCopyContent} className="min-w-0">
-                {copied ? (
+          {/* Secondary actions row */}
+          <div className="flex flex-wrap gap-2">
+            <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
+              <Button
+                variant={pinned ? 'secondary' : 'outline'}
+                onClick={handleTogglePin}
+                className="w-full"
+                size="sm"
+              >
+                {pinned ? (
                   <>
-                    <motion.span
-                      initial={{ scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                    >
-                      <Check className="mr-2 h-4 w-4 text-green-500" />
-                    </motion.span>
-                    Copied!
+                    <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
+                    Pinned
                   </>
                 ) : (
                   <>
-                    <Copy className={UI_CLASSES.ICON_SM_LEADING} />
-                    Copy Content
+                    <BookmarkPlus className={UI_CLASSES.ICON_SM_LEADING} />
+                    Pin
                   </>
                 )}
               </Button>
             </motion.div>
+
+            <ShareMenu
+              url={shareUrl}
+              title={displayTitle}
+              description={contentItem.description ?? undefined}
+              utmCampaign={category}
+              onShare={(platform) => {
+                pulse.share({ platform, category, slug: contentItem.slug, url: shareUrl }).catch(() => {
+                  // Silent fail for analytics
+                });
+              }}
+            />
+          </div>
+
+          {/* View Pinboard link */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground"
+            onClick={openPinboardDrawer}
+          >
+            <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
+            View pinboard ({pinnedItems.length})
+          </Button>
+
+          {/* Content actions divider */}
+          {hasContent && (
+            <>
+              <div className="border-border/50 border-t" />
+              <div className="flex flex-wrap gap-2">
+                <motion.div
+                  whileTap={{ scale: 0.97 }}
+                  animate={copied ? { scale: [1, 1.05, 1] } : {}}
+                  transition={{ duration: 0.3 }}
+                  className="flex-1"
+                >
+                  <Button variant="outline" onClick={handleCopyContent} size="sm" className="w-full">
+                    {copied ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4 text-green-500" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className={UI_CLASSES.ICON_SM_LEADING} />
+                        Copy Content
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+
+                {/* Copy for AI button */}
+                {(() => {
+                  const safeCategory = sanitizePathSegment(category);
+                  const safeSlug = sanitizePathSegment(contentItem.slug);
+                  if (!(safeCategory && safeSlug)) {
+                    logger.warn('DetailHeaderActions: Invalid category or slug for AI copy button', {
+                      category,
+                      slug: contentItem.slug,
+                    });
+                    return null;
+                  }
+                  return (
+                    <ContentActionButton
+                      url={`/${safeCategory}/${safeSlug}/llms.txt`}
+                      action={async (content) => {
+                        await copyToClipboard(content);
+                      }}
+                      label="Copy for AI"
+                      successMessage="Copied llms.txt to clipboard!"
+                      icon={Sparkles}
+                      trackAnalytics={async () => {
+                        await pulse.copy({
+                          category,
+                          slug: contentItem.slug,
+                          metadata: { action_type: 'llmstxt' },
+                        });
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                    />
+                  );
+                })()}
+              </div>
+
+              {/* Download/Export row */}
+              <div className="flex flex-wrap gap-2">
+                {(() => {
+                  const safeCategory = sanitizePathSegment(category);
+                  const safeSlug = sanitizePathSegment(contentItem.slug);
+                  if (!(safeCategory && safeSlug)) {
+                    return null;
+                  }
+                  return (
+                    <>
+                      <ContentActionButton
+                        url={`/${safeCategory}/${safeSlug}.md?include_metadata=true&include_footer=false`}
+                        action={async (content) => {
+                          await copyToClipboard(content);
+                          showModal({
+                            copyType: 'markdown',
+                            category,
+                            slug: contentItem.slug,
+                            ...(referrer && { referrer }),
+                          });
+                        }}
+                        label="Copy Markdown"
+                        successMessage="Copied markdown to clipboard!"
+                        icon={FileText}
+                        trackAnalytics={async () => {
+                          await pulse.copy({
+                            category,
+                            slug: contentItem.slug,
+                            metadata: { action_type: 'copy' },
+                          });
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                      />
+                      <ContentActionButton
+                        url={`/${safeCategory}/${safeSlug}.md`}
+                        action={async (content) => {
+                          const blob = new Blob([content], { type: 'text/markdown' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `${contentItem.slug}.md`;
+                          a.click();
+                          URL.revokeObjectURL(url);
+                        }}
+                        label="Download"
+                        successMessage="Downloaded markdown file!"
+                        icon={Download}
+                        trackAnalytics={async () => {
+                          await pulse.download({
+                            category,
+                            slug: contentItem.slug,
+                            action_type: 'download_markdown',
+                          });
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                      />
+                    </>
+                  );
+                })()}
+              </div>
+            </>
           )}
 
-          {/* Copy for AI button */}
-          {(() => {
-            const safeCategory = sanitizePathSegment(category);
-            const safeSlug = sanitizePathSegment(contentItem.slug);
-            if (!(safeCategory && safeSlug)) {
-              // Log warning but don't crash - gracefully skip this button
-              logger.warn('DetailHeaderActions: Invalid category or slug for AI copy button', {
-                category,
-                slug: contentItem.slug,
-              });
-              return null;
-            }
-            return (
-              <ContentActionButton
-                url={`/${safeCategory}/${safeSlug}/llms.txt`}
-                action={async (content) => {
-                  await copyToClipboard(content);
-                }}
-                label="Copy for AI"
-                successMessage="Copied llms.txt to clipboard!"
-                icon={Sparkles}
-                trackAnalytics={async () => {
-                  await pulse.copy({
-                    category,
-                    slug: contentItem.slug,
-                    metadata: { action_type: 'llmstxt' },
-                  });
-                }}
-                variant="outline"
-                size="default"
-                className="min-w-0"
-              />
-            );
-          })()}
-
-          {/* Copy as Markdown button */}
-          {(() => {
-            const safeCategory = sanitizePathSegment(category);
-            const safeSlug = sanitizePathSegment(contentItem.slug);
-            if (!(safeCategory && safeSlug)) {
-              // Log warning but don't crash - gracefully skip this button
-              logger.warn(
-                'DetailHeaderActions: Invalid category or slug for Markdown copy button',
-                {
-                  category,
-                  slug: contentItem.slug,
-                }
-              );
-              return null;
-            }
-            return (
-              <ContentActionButton
-                url={`/${safeCategory}/${safeSlug}.md?include_metadata=true&include_footer=false`}
-                action={async (content) => {
-                  await copyToClipboard(content);
-                  showModal({
-                    copyType: 'markdown',
-                    category,
-                    slug: contentItem.slug,
-                    ...(referrer && { referrer }),
-                  });
-                }}
-                label="Copy Markdown"
-                successMessage="Copied markdown to clipboard!"
-                icon={FileText}
-                trackAnalytics={async () => {
-                  await pulse.copy({
-                    category,
-                    slug: contentItem.slug,
-                    metadata: { action_type: 'copy' },
-                  });
-                }}
-                variant="outline"
-                size="default"
-                className="min-w-0"
-              />
-            );
-          })()}
-
-          {/* Download Markdown button */}
-          {(() => {
-            const safeCategory = sanitizePathSegment(category);
-            const safeSlug = sanitizePathSegment(contentItem.slug);
-            if (!(safeCategory && safeSlug)) {
-              // Log warning but don't crash - gracefully skip this button
-              logger.warn(
-                'DetailHeaderActions: Invalid category or slug for Markdown download button',
-                {
-                  category,
-                  slug: contentItem.slug,
-                }
-              );
-              return null;
-            }
-            return (
-              <ContentActionButton
-                url={`/${safeCategory}/${safeSlug}.md`}
-                action={async (content) => {
-                  const blob = new Blob([content], { type: 'text/markdown' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `${contentItem.slug}.md`;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                }}
-                label="Download"
-                successMessage="Downloaded markdown file!"
-                icon={Download}
-                trackAnalytics={async () => {
-                  await pulse.download({
-                    category,
-                    slug: contentItem.slug,
-                    action_type: 'download_markdown',
-                  });
-                }}
-                variant="outline"
-                size="default"
-                className="min-w-0"
-              />
-            );
-          })()}
-
-          {secondaryActions?.map((action) => (
-            <Button
-              key={action.label}
-              variant="outline"
-              onClick={() => handleActionClick(action)}
-              className="min-w-0"
-            >
-              {action.label}
-            </Button>
-          ))}
-        </div>
+          {/* Secondary actions */}
+          {secondaryActions && secondaryActions.length > 0 && (
+            <>
+              <div className="border-border/50 border-t" />
+              <div className="flex flex-wrap gap-2">
+                {secondaryActions.map((action) => (
+                  <Button
+                    key={action.label}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleActionClick(action)}
+                    className="flex-1"
+                  >
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+            </>
+          )}
+        </aside>
       </div>
     </>
   );

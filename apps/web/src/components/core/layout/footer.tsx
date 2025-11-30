@@ -1,7 +1,7 @@
 /**
  * Site Footer Component
- * Provides navigation links and llms.txt discovery
- * Enhanced with Motion.dev magnetic hover effects (Phase 1.5 - October 2025)
+ * Modern, engaging footer with visual hierarchy and responsive design
+ * Enhanced with Motion.dev animations (November 2025)
  *
  * @module components/layout/footer
  */
@@ -9,19 +9,24 @@
 'use client';
 
 import { getContactChannels } from '@heyclaude/web-runtime/core';
-import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import {
   APP_CONFIG,
   EXTERNAL_SERVICES,
   ROUTES,
 } from '@heyclaude/web-runtime/data/config/constants';
-import { DiscordIcon, ExternalLink, Github, Rss, Sparkles } from '@heyclaude/web-runtime/icons';
-import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { DiscordIcon, ExternalLink, Github, Heart, Rss, Sparkles } from '@heyclaude/web-runtime/icons';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { memo, useEffect, useMemo, useState } from 'react';
+
+// Type for resource links with optional icon
+interface ResourceLink {
+  href: string;
+  label: string;
+  icon?: typeof Rss;
+}
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { ThemeToggle } from '@heyclaude/web-runtime/ui';
@@ -41,11 +46,6 @@ function FooterComponent() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
-  const [springDefault, setSpringDefault] = useState({
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 17,
-  });
 
   // Context-aware RSS feed - shows most relevant feed for current page
   const rssFeed = useMemo(() => {
@@ -71,243 +71,214 @@ function FooterComponent() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    const config = getAnimationConfig();
-    setSpringDefault({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.default.stiffness'],
-      damping: config['animation.spring.default.damping'],
-    });
-  }, []);
+  // Navigation link groups
+  const browseLinks = [
+    { href: ROUTES.AGENTS, label: 'Agents' },
+    { href: ROUTES.MCP, label: 'MCP Servers' },
+    { href: ROUTES.COMMANDS, label: 'Commands' },
+    { href: ROUTES.RULES, label: 'Rules' },
+    { href: ROUTES.HOOKS, label: 'Hooks' },
+    { href: ROUTES.STATUSLINES, label: 'Statuslines' },
+    { href: ROUTES.SKILLS, label: 'Skills' },
+    { href: ROUTES.COLLECTIONS, label: 'Collections' },
+  ];
+
+  const resourceLinks: ResourceLink[] = [
+    { href: ROUTES.GUIDES, label: 'Guides' },
+    { href: ROUTES.CHANGELOG, label: 'Changelog' },
+    { href: ROUTES.COMMUNITY, label: 'Community' },
+    { href: ROUTES.SUBMIT, label: 'Submit' },
+    { href: rssFeed.url, label: 'RSS', icon: Rss },
+    { href: ROUTES.LLMS_TXT, label: 'LLMs.txt', icon: Sparkles },
+  ];
+
+  const supportLinks = [
+    { href: '/consulting', label: 'Work with JSONbored' },
+    { href: '/contact', label: 'Contact' },
+    { href: '/help', label: 'Help' },
+    { href: '/accessibility', label: 'Accessibility' },
+  ];
+
+  const legalLinks = [
+    { href: '/privacy', label: 'Privacy' },
+    { href: '/terms', label: 'Terms' },
+    { href: '/cookies', label: 'Cookies' },
+  ];
 
   return (
-    <footer className={'border-border/50 border-t bg-background/95 backdrop-blur'}>
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        {/* Four-column grid with better mobile stacking */}
-        <div className={UI_CLASSES.GRID_COLS_1_MD_2_LG_4}>
-          {/* About Section - Takes full width on mobile */}
+    <footer className="border-border/50 border-t bg-background">
+      <div className="container mx-auto px-4 py-10 lg:py-12">
+        {/* Main footer content - Two section layout */}
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_2.5fr] lg:gap-16">
+          
+          {/* Left section - Brand & Social */}
           <motion.div
-            className="text-center md:text-left"
+            className="space-y-6"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
           >
-            <div className={'mb-4 flex justify-center md:justify-start'}>
+            {/* Logo */}
+            <div>
               <HeyClaudeLogo size="md" inView={true} duration={1.5} />
             </div>
-            <p
-              className={`mx-auto mb-6 max-w-sm text-muted-foreground md:mx-0 ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_SM}`}
-            >
+            
+            {/* Description */}
+            <p className="max-w-sm text-muted-foreground text-sm leading-relaxed">
               {APP_CONFIG.description}
             </p>
 
-            {/* Social Icons + Theme Toggle + Badge - Vertical stack */}
-            <div className={UI_CLASSES.FLEX_COL_MD_ITEMS_START}>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4}>
-                {[
-                  { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
-                  { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
-                ].map((social) => (
-                  <Link
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="link-icon text-muted-foreground"
-                    aria-label={social.label}
-                  >
-                    <social.icon className={UI_CLASSES.ICON_MD} />
-                  </Link>
-                ))}
-                {/* Theme Toggle */}
-                <ThemeToggle />
-              </div>
-
-              {/* Open Source Badge */}
-              <UnifiedBadge
-                variant="base"
-                style="outline"
-                className="border-accent/20 bg-accent/5 text-accent"
-              >
-                <ExternalLink className="mr-1 h-3 w-3 text-accent" />
-                Open Source
-              </UnifiedBadge>
+            {/* Social links */}
+            <div className="flex items-center gap-4">
+              {[
+                { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
+                { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
+              ].map((social) => (
+                <Link
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label={social.label}
+                >
+                  <social.icon className="h-5 w-5" />
+                </Link>
+              ))}
+              <ThemeToggle />
             </div>
+
+            {/* Badge */}
+            <UnifiedBadge
+              variant="base"
+              style="outline"
+              className="border-accent/20 bg-accent/5 text-accent"
+            >
+              <ExternalLink className="mr-1.5 h-3 w-3" />
+              Open Source
+            </UnifiedBadge>
           </motion.div>
 
-          {/* Browse - All 8 main categories */}
+          {/* Right section - Navigation grid */}
           <motion.div
-            className="text-center md:text-left"
+            className="grid grid-cols-2 gap-8 sm:grid-cols-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <h3 className={`mb-4 font-semibold ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}>
-              Browse
-            </h3>
-            <ul className={'space-y-3 md:space-y-2'}>
-              {[
-                { href: ROUTES.AGENTS, label: 'Agents' },
-                { href: ROUTES.MCP, label: 'MCP Servers' },
-                { href: ROUTES.COMMANDS, label: 'Commands' },
-                { href: ROUTES.RULES, label: 'Rules' },
-                { href: ROUTES.HOOKS, label: 'Hooks' },
-                { href: ROUTES.STATUSLINES, label: 'Statuslines' },
-                { href: ROUTES.SKILLS, label: 'Skills' },
-                { href: ROUTES.COLLECTIONS, label: 'Collections' },
-              ].map((link, index) => (
-                <motion.li
-                  key={link.href}
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.15 + index * 0.05 }}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.05, x: 3 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={springDefault}
-                    className="inline-block"
-                  >
+            {/* Browse column */}
+            <div>
+              <h3 className="mb-4 font-semibold text-foreground text-sm">Browse</h3>
+              <ul className="space-y-2.5">
+                {browseLinks.map((link) => (
+                  <li key={link.href}>
                     <Link
                       href={link.href}
-                      className={`link-accent-underline text-muted-foreground transition-colors hover:text-foreground ${UI_CLASSES.TEXT_XS}`}
+                      className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                     >
                       {link.label}
                     </Link>
-                  </motion.div>
-                </motion.li>
-              ))}
-            </ul>
-          </motion.div>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Resources */}
-          <motion.div
-            className="text-center md:text-left"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
-            <h3 className={`mb-4 font-semibold ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}>
-              Resources
-            </h3>
-            <ul className={'space-y-3 md:space-y-2'}>
-              {[
-                { href: ROUTES.GUIDES, label: 'Guides', icon: null },
-                { href: ROUTES.CHANGELOG, label: 'Changelog', icon: null },
-                { href: ROUTES.COMMUNITY, label: 'Community', icon: null },
-                { href: ROUTES.SUBMIT, label: 'Submit Content', icon: null },
-                { href: ROUTES.PARTNER, label: 'Partner Program', icon: null },
-                { href: rssFeed.url, label: rssFeed.label, icon: Rss },
-                { href: ROUTES.LLMS_TXT, label: 'LLMs.txt', icon: Sparkles },
-              ].map((link, index) => (
-                <motion.li
-                  key={link.href}
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 + index * 0.05 }}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.05, x: 3 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={springDefault}
-                    className="inline-block"
-                  >
+            {/* Resources column */}
+            <div>
+              <h3 className="mb-4 font-semibold text-foreground text-sm">Resources</h3>
+              <ul className="space-y-2.5">
+                {resourceLinks.map((link) => (
+                  <li key={link.href}>
                     <Link
                       href={link.href}
-                      className={`inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground ${UI_CLASSES.TEXT_XS}`}
-                      aria-label={link.label}
+                      className="inline-flex items-center gap-1.5 text-muted-foreground text-sm transition-colors hover:text-foreground"
                     >
-                      {link.icon && <link.icon className={UI_CLASSES.ICON_SM} />}
+                      {link.icon && <link.icon className="h-3.5 w-3.5" />}
                       <span>{link.label}</span>
                     </Link>
-                  </motion.div>
-                </motion.li>
-              ))}
-            </ul>
-          </motion.div>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Support */}
-          <motion.div
-            className="text-center md:text-left"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
-            <h3 className={`mb-4 font-semibold ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}>
-              Support
-            </h3>
-            <ul className={'space-y-3 md:space-y-2'}>
-              {[
-                { href: '/consulting', label: 'Work with JSONbored' },
-                { href: '/cookies', label: 'Cookie Policy' },
-                { href: '/contact', label: 'Contact Us' },
-                { href: '/help', label: 'Help Center' },
-                { href: '/accessibility', label: 'Accessibility' },
-                { href: '/sitemap.xml', label: 'Sitemap' },
-              ].map((link, index) => (
-                <motion.li
-                  key={link.href}
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.25 + index * 0.05 }}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.05, x: 3 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={springDefault}
-                    className="inline-block"
-                  >
+            {/* Support column */}
+            <div>
+              <h3 className="mb-4 font-semibold text-foreground text-sm">Support</h3>
+              <ul className="space-y-2.5">
+                {supportLinks.map((link) => (
+                  <li key={link.href}>
                     <Link
                       href={link.href}
-                      className={`link-accent-underline text-muted-foreground transition-colors hover:text-foreground ${UI_CLASSES.TEXT_XS}`}
+                      className="text-muted-foreground text-sm transition-colors hover:text-foreground"
                     >
                       {link.label}
                     </Link>
-                  </motion.div>
-                </motion.li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Legal column */}
+            <div>
+              <h3 className="mb-4 font-semibold text-foreground text-sm">Legal</h3>
+              <ul className="space-y-2.5">
+                {legalLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-muted-foreground text-sm transition-colors hover:text-foreground"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </motion.div>
         </div>
 
-        {/* Bottom Bar - Clean layout */}
+        {/* Bottom bar - Modern divider and layout */}
         <motion.div
-          className={
-            'mt-8 flex flex-col items-center justify-between gap-4 border-border/30 border-t pt-6 md:mt-12 md:flex-row'
-          }
+          className="mt-12 border-border/30 border-t pt-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
         >
-          {/* Left: Copyright */}
-          <div className="text-muted-foreground text-sm">
-            <p>© {currentYear} heyclau.de / Claude Pro Directory. All rights reserved.</p>
-          </div>
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            {/* Left - Copyright with heart */}
+            <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+              <span>© {currentYear}</span>
+              <span className="text-border">•</span>
+              <span>Made with</span>
+              <Heart className="h-3.5 w-3.5 fill-red-500/80 text-red-500/80" />
+              <span>by</span>
+              <Link 
+                href="/consulting" 
+                className="font-medium text-foreground underline-offset-4 hover:underline"
+              >
+                JSONbored
+              </Link>
+            </div>
 
-          {/* Right: Status Badge */}
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER}>
-            {/* BetterStack Status Badge - Theme-aware */}
-            {mounted && (
-              <iframe
-                src={`${EXTERNAL_SERVICES.betterstack.status}/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
-                width="250"
-                height="30"
-                frameBorder="0"
-                scrolling="no"
-                title="System Status"
-                className="rounded-md"
-                loading="lazy"
-                style={{ colorScheme: 'normal' }}
-              />
-            )}
+            {/* Right - Status badge */}
+            <div className="flex items-center gap-4">
+              {mounted && (
+                <iframe
+                  src={`${EXTERNAL_SERVICES.betterstack.status}/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
+                  width="250"
+                  height="30"
+                  frameBorder="0"
+                  scrolling="no"
+                  title="System Status"
+                  className="rounded-md"
+                  loading="lazy"
+                  style={{ colorScheme: 'normal' }}
+                />
+              )}
+            </div>
           </div>
         </motion.div>
       </div>

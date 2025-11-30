@@ -1,6 +1,9 @@
 /**
  * NotificationsProvider
  * Centralizes notification fetch, realtime updates, dismissed state, and feature flags.
+ *
+ * IMPORTANT: Only fetches notifications for authenticated users to avoid auth errors.
+ * Uses useAuthenticatedUser hook to check auth state before calling server actions.
  */
 'use client';
 
@@ -11,7 +14,7 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
-import { useSafeAction } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser, useSafeAction } from '@heyclaude/web-runtime/hooks';
 import {
   createContext,
   useCallback,
@@ -74,6 +77,12 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     [layoutFlags]
   );
 
+  // Check authentication state - only fetch notifications for authenticated users
+  // This prevents auth errors for unauthenticated visitors browsing the site
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuthenticatedUser({
+    context: 'NotificationsProvider',
+  });
+
   const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   const dismissedIdsRef = useRef<string[]>([]);
@@ -103,7 +112,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   }, [dismissedIds]);
 
   const refresh = useCallback(async () => {
-    if (!flags.enableNotifications) return;
+    // Only fetch notifications for authenticated users with notifications enabled
+    // This prevents auth errors for unauthenticated visitors
+    if (!flags.enableNotifications || !isAuthenticated) return;
     try {
       const latest = await fetchNotifications({ dismissedIds: dismissedIdsRef.current });
 
@@ -140,7 +151,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         }
       );
     }
-  }, [fetchNotifications, flags.enableNotifications]);
+  }, [fetchNotifications, flags.enableNotifications, isAuthenticated]);
 
   useEffect(() => {
     try {
@@ -159,7 +170,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   }, []);
 
   useEffect(() => {
-    if (!(isInitialized && flags.enableNotifications)) return;
+    // Wait for both initialization and auth state resolution before fetching
+    // This prevents auth errors for unauthenticated users
+    if (!(isInitialized && flags.enableNotifications && !isAuthLoading && isAuthenticated)) return;
     refresh().catch((error) => {
       logClientError(
         '[NotificationsProvider] Failed to refresh notifications on mount',
@@ -167,10 +180,11 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         'NotificationsProvider.mount'
       );
     });
-  }, [flags.enableNotifications, isInitialized, refresh]);
+  }, [flags.enableNotifications, isInitialized, isAuthLoading, isAuthenticated, refresh]);
 
   useEffect(() => {
-    if (!(flags.enableNotifications && isInitialized)) {
+    // Only set up periodic refresh for authenticated users
+    if (!(flags.enableNotifications && isInitialized && !isAuthLoading && isAuthenticated)) {
       return undefined;
     }
     const id = window.setInterval(() => {
@@ -179,10 +193,13 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       );
     }, 60000);
     return () => window.clearInterval(id);
-  }, [flags.enableNotifications, isInitialized, refresh]);
+  }, [flags.enableNotifications, isInitialized, isAuthLoading, isAuthenticated, refresh]);
 
   const dismiss = useCallback(
     (id: string) => {
+      // Silently ignore dismiss attempts from unauthenticated users
+      if (!isAuthenticated) return;
+
       setDismissedIds((prev) => {
         if (prev.includes(id)) return prev;
         return [...prev, id];
@@ -196,11 +213,13 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           });
         });
     },
-    [performDismiss, refresh]
+    [isAuthenticated, performDismiss, refresh]
   );
 
   const dismissAll = useCallback(() => {
-    if (notifications.length === 0) return;
+    // Silently ignore dismiss attempts from unauthenticated users
+    if (!isAuthenticated || notifications.length === 0) return;
+
     const ids = notifications.map((notification) => notification.id);
     setDismissedIds((prev) => Array.from(new Set([...prev, ...ids])));
     setNotifications([]);
@@ -212,7 +231,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           count: ids.length,
         });
       });
-  }, [notifications, performDismiss, refresh]);
+  }, [isAuthenticated, notifications, performDismiss, refresh]);
 
   const contextValue = useMemo<NotificationsContextValue>(
     () => ({

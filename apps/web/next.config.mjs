@@ -135,7 +135,10 @@ const nextConfig = {
   },
 
   experimental: {
+    // Turbopack filesystem caching for development (30-50% faster rebuilds)
     turbopackFileSystemCacheForDev: true,
+    // Note: turbopackFileSystemCacheForBuild is only available in Next.js canary
+    // TODO: Enable when Next.js stable supports it for major production build improvements
     staticGenerationMaxConcurrency: 32,
     staleTimes: {
       dynamic: 30,
@@ -416,9 +419,19 @@ const nextConfig = {
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
       {
-        source: '/(agents|mcp|rules|commands|hooks|guides)/:path*',
+        // Content detail pages - all categories
+        // Matches ISR revalidate time (7200s/2hr) with 24hr stale-while-revalidate
+        source: '/(agents|mcp|rules|commands|hooks|guides|skills|statuslines|collections)/:slug',
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' },
+          { key: 'Cache-Control', value: 'public, s-maxage=7200, stale-while-revalidate=86400' },
+          { key: 'Vary', value: 'Accept-Encoding' },
+        ],
+      },
+      {
+        // Content category listing pages
+        source: '/(agents|mcp|rules|commands|hooks|guides|skills|statuslines|collections)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=3600, stale-while-revalidate=86400' },
           { key: 'Vary', value: 'Accept-Encoding' },
         ],
       },

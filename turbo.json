@@ -22,13 +22,15 @@
       "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
     },
     "generate:service-worker:exec": {
-      "dependsOn": ["generators:build"],
       "outputs": ["apps/web/public/service-worker.js"],
       "inputs": [
-        "packages/generators/src/**/*",
+        "packages/generators/src/commands/generate-service-worker.ts",
+        "packages/generators/src/bin/generate-service-worker.ts",
+        "packages/generators/src/toolkit/cache.ts",
+        "packages/generators/src/toolkit/logger.ts",
+        "packages/generators/templates/service-worker.template.js",
         "packages/web-runtime/src/data/config/category/category-config.ts",
-        "apps/web/src/lib/data/config/constants.ts",
-        "apps/web/src/lib/data/config/constants.server.ts",
+        "packages/shared-runtime/src/config/security.ts",
         "package.json"
       ],
       "cache": true

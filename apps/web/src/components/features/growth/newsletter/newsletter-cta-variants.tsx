@@ -5,6 +5,7 @@ import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runti
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Mail } from '@heyclaude/web-runtime/icons';
 import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import {
   Card,
@@ -116,48 +117,80 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <div
         className={cn(
-          'w-full bg-linear-to-br from-card/80 via-card/60 to-card/40',
-          'backdrop-blur-sm',
-          'rounded-2xl border border-border/30',
-          'shadow-black/5 shadow-lg',
-          'p-10 md:p-16',
+          'w-full',
+          'rounded-xl border border-border/50',
+          'bg-card/50',
+          'px-6 py-10 md:px-10 md:py-12 lg:px-12 lg:py-14',
           'text-center',
           className
         )}
       >
-        <div className="mb-6 flex justify-center">
-          <div className="rounded-2xl border border-accent/20 bg-accent/10 p-4 shadow-accent/10 shadow-md backdrop-blur-sm">
-            <Mail className={`${UI_CLASSES.ICON_XL} text-accent`} aria-hidden="true" />
+        {/* Icon */}
+        <motion.div 
+          className="mb-5 inline-flex"
+          initial={{ scale: 0.9, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        >
+          <div className="rounded-xl border border-border bg-background p-3">
+            <Mail className="h-6 w-6 text-foreground md:h-7 md:w-7" aria-hidden="true" />
           </div>
-        </div>
+        </motion.div>
 
-        <h2 className="mb-4 font-bold text-3xl text-foreground leading-tight tracking-tight md:text-4xl">
+        {/* Headline */}
+        <motion.h2 
+          className="mx-auto mb-3 max-w-md font-semibold text-xl text-foreground leading-tight tracking-tight md:text-2xl"
+          initial={{ y: 10, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1 }}
+        >
           {finalHeadline}
-        </h2>
+        </motion.h2>
 
-        <p className="mx-auto mb-8 max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
+        {/* Description */}
+        <motion.p 
+          className="mx-auto mb-6 max-w-lg text-muted-foreground text-sm leading-relaxed md:text-base"
+          initial={{ y: 10, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.15 }}
+        >
           {finalDescription}
-        </p>
+        </motion.p>
 
-        <div className="mx-auto max-w-xl">
+        {/* Form */}
+        <motion.div 
+          className="mx-auto max-w-sm"
+          initial={{ y: 10, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+        >
           <NewsletterForm source={source} className="w-full" />
-        </div>
+        </motion.div>
 
-        <div className="mt-6 flex flex-col items-center gap-2">
-          <p className="text-muted-foreground/80 text-sm">{NEWSLETTER_CTA_CONFIG.footerText}</p>
-          <p className="flex items-center gap-1.5 text-muted-foreground/60 text-xs">
-            <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-green-500" />
+        {/* Footer info */}
+        <motion.div 
+          className="mt-5 flex flex-col items-center gap-2"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.25 }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-1.5 w-1.5 rounded-full bg-green-500" />
             {isLoading ? (
-              <span className="inline-flex items-center gap-1.5">
-                Join
-                <span className="inline-block h-3 w-12 animate-pulse rounded bg-muted-foreground/20" />
-                subscribers
+              <span className="text-muted-foreground text-xs">
+                <span className="inline-block h-3 w-14 animate-pulse rounded bg-muted/50" />
               </span>
             ) : (
-              `Join ${subscriberCount} subscribers`
+              <span className="text-muted-foreground text-xs">{subscriberCount} subscribers</span>
             )}
-          </p>
-        </div>
+          </div>
+          <p className="text-muted-foreground/60 text-xs">{NEWSLETTER_CTA_CONFIG.footerText}</p>
+        </motion.div>
       </div>
     );
   }

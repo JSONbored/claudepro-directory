@@ -57,9 +57,10 @@ export async function generateStaticParams() {
   const categories = getHomepageCategoryIds;
   const parameters: Array<{ category: string; slug: string }> = [];
 
-  // Limit to top 30 items per category to balance build time vs. performance
-  // Reduced from 50 to optimize build performance while maintaining good SEO coverage
-  const MAX_ITEMS_PER_CATEGORY = 30;
+  // Limit to top 10 items per category to optimize build time
+  // Reduced from 30 to achieve ~1 minute builds while maintaining SEO coverage for top content
+  // ISR with dynamicParams=true handles remaining pages on-demand with 2hr revalidation
+  const MAX_ITEMS_PER_CATEGORY = 10;
 
   // Process all categories in parallel
   // OPTIMIZATION: Skip validation - rely on dynamicParams=true for on-demand rendering
