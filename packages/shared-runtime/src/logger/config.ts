@@ -1821,15 +1821,28 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for Edge compatibility
   const isDevelopment = typeof process !== 'undefined' && process.env?.['NODE_ENV'] !== 'production';
   const prettyPrintSetting = options?.prettyPrint ?? 'auto';
-  const shouldPrettyPrint = 
-    prettyPrintSetting === true || 
-    (prettyPrintSetting === 'auto' && isDevelopment && !options?.transport);
   
-  if (options?.transport) {
-    // Custom transport takes precedence
+  // CRITICAL: Pino transports use Node.js worker threads which are NOT available in:
+  // - Deno (Supabase Edge Functions)
+  // - Vercel Edge Runtime
+  // - Cloudflare Workers
+  // We must detect these environments and skip transport configuration entirely.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Runtime check for Deno global
+  const isDenoRuntime = typeof (globalThis as any).Deno !== 'undefined';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Runtime check for Vercel Edge Runtime global
+  const isVercelEdge = typeof (globalThis as any).EdgeRuntime !== 'undefined';
+  const isEdgeEnvironment = isDenoRuntime || isVercelEdge;
+  
+  const shouldPrettyPrint = 
+    !isEdgeEnvironment && // Never use transports in edge environments
+    (prettyPrintSetting === true || 
+    (prettyPrintSetting === 'auto' && isDevelopment && !options?.transport));
+  
+  if (options?.transport && !isEdgeEnvironment) {
+    // Custom transport takes precedence (only in Node.js environments)
     config.transport = options.transport;
   } else if (shouldPrettyPrint) {
-    // Enable pino-pretty for development
+    // Enable pino-pretty for development (Node.js only)
     // Note: pino-pretty must be installed as a dependency
     config.transport = {
       target: 'pino-pretty',

@@ -26,6 +26,9 @@ function decodeBase64(value: string): Uint8Array {
   }
 
   // nodeBuffer always exists when atob doesn't (Node.js environment)
+  if (nodeBuffer === undefined) {
+    throw new Error('Base64 decoding not available: neither atob nor Buffer is defined');
+  }
   const buffer = nodeBuffer.from(value, 'base64');
   return Uint8Array.from(buffer as ArrayLike<number>);
 }

@@ -52,8 +52,9 @@ export async function ensureImageMagickInitialized(): Promise<void> {
   } catch (error) {
     // Import normalizeError dynamically to avoid circular dependency
     const { normalizeError } = await import('@heyclaude/shared-runtime');
-    initError = normalizeError(error, 'ImageMagick initialization failed');
-    throw new Error(`Failed to initialize ImageMagick: ${initError.message}`);
+    const normalizedError = normalizeError(error, 'ImageMagick initialization failed');
+    initError = normalizedError;
+    throw new Error(`Failed to initialize ImageMagick: ${normalizedError.message}`);
   }
 }
 

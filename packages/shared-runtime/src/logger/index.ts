@@ -12,12 +12,73 @@
  * - Mixin for dynamic context
  * - Child logger support with bindings
  * 
+ * **Vercel Compatibility:**
+ * - Uses level-routing destination to ensure warn/error logs go to stderr
+ * - Vercel categorizes logs by output stream: stdout=info, stderr=error
+ * - This ensures warn/error logs appear correctly in Vercel's log dashboard
+ * 
  * @module shared-runtime/logger
  */
 
 import pino from 'pino';
 
 import { createPinoConfig } from './config.ts';
+
+/**
+ * Creates a destination stream that uses console methods for proper Vercel log level detection.
+ * 
+ * **Why this is needed:**
+ * Vercel determines log levels by which CONSOLE METHOD is used:
+ * - console.log() → info (gray)
+ * - console.warn() → warning (orange in streaming functions)
+ * - console.error() → error (red)
+ * 
+ * Pino by default writes everything to stdout, which Vercel sees as "info".
+ * This destination uses the actual console methods so Vercel properly detects log levels.
+ * 
+ * **Performance:**
+ * Uses a fast regex to find the levelValue in the JSON without full parsing.
+ * The levelValue is added by our formatter: `{ "level": "error", "levelValue": 50, ... }`
+ * 
+ * @returns A Pino-compatible destination stream, or undefined if in browser environment
+ */
+function createVercelCompatibleDestination(): pino.DestinationStream | undefined {
+  // Only use in Node.js server environment
+  // Browser environment already uses console methods via Pino's browser config
+   
+  if (globalThis.window !== undefined) {
+    return undefined;
+  }
+  
+  return {
+    write(chunk: string) {
+      // Quick regex to find levelValue in the JSON (added by our formatter)
+      // Our formatter outputs: { "level": "info", "levelValue": 30, ... }
+      // Level values: trace=10, debug=20, info=30, warn=40, error=50, fatal=60
+      const levelMatch = /"levelValue"\s*:\s*(\d+)/.exec(chunk);
+      const levelValue = levelMatch?.[1] === undefined 
+        ? 30 
+        : Number.parseInt(levelMatch[1], 10);
+      
+      // Remove trailing newline for cleaner console output
+      const logLine = chunk.trimEnd();
+      
+      // Use console methods for proper Vercel log level detection
+      // console.warn → warning (orange) in streaming functions
+      // console.error → error (red)
+      // console.log → info (gray)
+      /* eslint-disable architectural-rules/no-console-in-production-enhanced -- Required for Vercel log level detection */
+      if (levelValue >= 50) { // error=50, fatal=60
+        console.error(logLine);
+      } else if (levelValue >= 40) { // warn=40
+        console.warn(logLine);
+      } else {
+        console.log(logLine);
+      }
+      /* eslint-enable architectural-rules/no-console-in-production-enhanced */
+    },
+  } as pino.DestinationStream;
+}
 
 /**
  * Create a Pino logger instance with centralized configuration
@@ -137,13 +198,38 @@ export function createLogger(
   destination?: pino.DestinationStream
 ): pino.Logger {
   const config = createPinoConfig(options);
+  
+  // If custom destination provided, use it
+  if (destination) {
+    // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
+    return pino(config, destination);
+  }
+  
+  // Create Vercel-compatible destination that uses console methods
+  // This ensures Vercel properly detects log levels:
+  // - console.error() → error (red)
+  // - console.warn() → warning (orange in streaming functions)
+  // - console.log() → info (gray)
+  const vercelDest = createVercelCompatibleDestination();
+  
+  if (vercelDest) {
+    // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
+    return pino(config, vercelDest);
+  }
+  
+  // Browser/Edge fallback: use default Pino destination (stdout)
   // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
-  return destination ? pino(config, destination) : pino(config);
+  return pino(config);
 }
 
 /**
  * Default logger instance
  * Use this for simple logging needs
+ * 
+ * **Vercel Compatibility:**
+ * - Uses level-routing destination by default
+ * - warn/error/fatal logs go to stderr (shown as error in Vercel)
+ * - trace/debug/info logs go to stdout (shown as info in Vercel)
  * 
  * @example
  * ```typescript

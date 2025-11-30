@@ -49,7 +49,7 @@ export async function runGenerateServerActions(targetAction?: string) {
     // Load Config
     spinner.text = 'Loading action configuration...';
     const configPath = join(WEB_RUNTIME_ROOT, 'config/actions.config.ts');
-    const mod = (await jiti.import(configPath));
+    const mod = (await jiti.import(configPath)) as { ACTIONS?: Record<string, ActionConfig> };
     const actionsConfig = mod.ACTIONS;
 
     if (!actionsConfig) {
@@ -61,7 +61,7 @@ export async function runGenerateServerActions(targetAction?: string) {
     const meta = getDatabaseMeta(dbUrl);
 
     // Filter targets
-    const actionsToGenerate = targetAction
+    const actionsToGenerate: [string, ActionConfig][] = targetAction
       ? Object.entries(actionsConfig).filter(([name]) => name === targetAction)
       : Object.entries(actionsConfig);
 

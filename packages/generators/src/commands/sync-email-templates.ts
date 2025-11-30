@@ -3,12 +3,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // NOTE: We import from the source directly to access the manifest and templates
-// This requires the build system to handle TSX and resolving these paths
+// Using relative path because edge-runtime is Deno/source-based, not compiled
+// TypeScript can't resolve Deno-style imports in edge-runtime, but runtime (tsx) handles it fine
+// @ts-expect-error -- edge-runtime uses Deno imports that tsc can't resolve
 import {
   EMAIL_TEMPLATE_MANIFEST as EMAIL_TEMPLATE_MANIFEST_RAW,
   type EmailTemplateDefinition,
   type EmailTemplateSlug,
-} from '@heyclaude/edge-runtime/utils/email/templates/manifest.js';
+} from '../../../edge-runtime/src/utils/email/templates/manifest.js';
 import { Resend } from 'resend';
 
 import { ensureEnvVars } from '../toolkit/env.js';
@@ -57,7 +59,7 @@ function getTypedManifest(): readonly TemplateDefinition[] {
 interface UploadOptions {
   dryRun: boolean;
   force: boolean;
-  onlySlugs?: EmailTemplateSlug[];
+  onlySlugs?: EmailTemplateSlug[] | undefined;
 }
 
 // ============================================================================
@@ -171,7 +173,7 @@ export async function runSyncEmail() {
 
   // Ensure API key
   await ensureEnvVars(['RESEND_API_KEY']);
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env['RESEND_API_KEY'];
   if (!apiKey) throw new Error('RESEND_API_KEY is undefined after check');
 
   const resend = new Resend(apiKey);
@@ -214,12 +216,14 @@ export async function runSyncEmail() {
       await delay(REQUEST_SPACING_MS);
       const createResult = await callWithRateLimitRetry(
         async () => {
-          const result = await resend.templates.create({
+          // Cast to access templates API (may not be in SDK types)
+          const templates = resend as unknown as { templates: { create: (opts: { name: string; subject: string; html: string }) => Promise<ResendResponse<{ id: string }>> } };
+          const result = await templates.templates.create({
             name: definition.displayName,
             subject,
             html,
           });
-          return result as ResendResponse<{ id: string }>;
+          return result;
         },
         slug,
         'create template'
@@ -236,12 +240,14 @@ export async function runSyncEmail() {
       const idToUpdate = templateId;
       const updateResult = await callWithRateLimitRetry(
         async () => {
-          const result = await resend.templates.update(idToUpdate, {
+          // Cast to access templates API (may not be in SDK types)
+          const templates = resend as unknown as { templates: { update: (id: string, opts: { name: string; subject: string; html: string }) => Promise<ResendResponse> } };
+          const result = await templates.templates.update(idToUpdate, {
             name: definition.displayName,
             subject,
             html,
           });
-          return result as ResendResponse;
+          return result;
         },
         slug,
         'update template'
@@ -260,8 +266,9 @@ export async function runSyncEmail() {
     await delay(REQUEST_SPACING_MS);
     const publishResult = await callWithRateLimitRetry(
       async () => {
-        const templates = resend.templates as unknown as { publish: (id: string) => Promise<ResendResponse> };
-        const result = await templates.publish(templateId);
+        // Cast to access templates API (may not be in SDK types)
+        const resendWithTemplates = resend as unknown as { templates: { publish: (id: string) => Promise<ResendResponse> } };
+        const result = await resendWithTemplates.templates.publish(templateId);
         return result;
       },
       slug,

@@ -12,7 +12,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@heyclaude/web-runtime/ui';
-import { useRecentlyViewed } from '@heyclaude/web-runtime/hooks';
+import { useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks';
 
 const DISMISS_KEY = 'heyclaude_recently_viewed_mobile_dismissed';
 
@@ -92,7 +92,7 @@ export function RecentlyViewedMobileTray() {
                     <div>
                       <p className="text-muted-foreground text-xs uppercase">{item.category}</p>
                       <Link
-                        href={`/${item.category}/${item.slug}`}
+                        href={`/${getCategoryRoute(item.category)}/${item.slug}`}
                         className="font-semibold text-base text-primary hover:underline"
                         onClick={() => setOpen(false)}
                       >

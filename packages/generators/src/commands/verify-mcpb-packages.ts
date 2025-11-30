@@ -73,7 +73,10 @@ export async function runVerifyMcpbPackages(): Promise<VerificationResult> {
   );
 
   const withPackages = mcpContent.filter(
-    (mcp) => Boolean(mcp.mcpb_storage_url) && mcp.mcpb_storage_url.trim().length > 0
+    (mcp): mcp is typeof mcp & { mcpb_storage_url: string } => {
+      const url = mcp.mcpb_storage_url;
+      return url !== null && url !== undefined && url.trim().length > 0;
+    }
   );
 
   const storageMismatches: VerificationResult['storage_mismatches_list'] = [];

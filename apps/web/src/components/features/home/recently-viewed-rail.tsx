@@ -10,14 +10,17 @@ import { useRouter } from 'next/navigation';
 import { memo, useMemo } from 'react';
 import { ConfigCard } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
-import { useRecentlyViewed } from '@heyclaude/web-runtime/hooks';
+import { useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks';
 
 const MAX_RAIL_ITEMS = 6;
 
 function toHomepageContentItem(
   item: ReturnType<typeof useRecentlyViewed>['recentlyViewed'][number]
 ): HomepageContentItem {
-  const category = (item.category ?? 'agents') as Database['public']['Enums']['content_category'];
+  // Convert singular category (e.g., 'agent') to plural route (e.g., 'agents')
+  // which matches the database content_category enum
+  const categoryRoute = getCategoryRoute(item.category);
+  const category = categoryRoute as Database['public']['Enums']['content_category'];
   return {
     slug: item.slug,
     title: item.title,
@@ -47,7 +50,8 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
     if (!latestEntry) return '/search';
     const params = new URLSearchParams();
     if (latestEntry.category) {
-      params.set('category', latestEntry.category);
+      // Use plural route form for search category filter
+      params.set('category', getCategoryRoute(latestEntry.category));
     }
     if (latestEntry.tags && latestEntry.tags.length > 0) {
       params.set('tags', latestEntry.tags.slice(0, 5).join(','));
@@ -63,8 +67,8 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
   const handleResumeSearch = () => {
     router.push(resumeSearchHref);
     if (!latestEntry) return;
-    const category = (latestEntry.category ??
-      'agents') as Database['public']['Enums']['content_category'];
+    // Use plural route form for analytics category
+    const category = getCategoryRoute(latestEntry.category) as Database['public']['Enums']['content_category'];
     pulse
       .click({
         category,
@@ -84,8 +88,10 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
 
   const handleClearHistory = () => {
     clearAll();
-    const category = (latestEntry?.category ??
-      'agents') as Database['public']['Enums']['content_category'];
+    // Use plural route form for analytics category
+    const category = latestEntry 
+      ? getCategoryRoute(latestEntry.category) as Database['public']['Enums']['content_category']
+      : 'agents' as Database['public']['Enums']['content_category'];
     pulse
       .filter({
         category,

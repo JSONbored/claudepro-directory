@@ -14,8 +14,13 @@
  */
 
 import { type Database } from '@heyclaude/database-types';
-import { logger } from '@heyclaude/web-runtime/logging/server';
 import { createClient } from '@supabase/supabase-js';
+
+// Simple CLI logger for this script (not using Pino since it doesn't have .log())
+const cliLog = {
+  log: (...args: unknown[]) => console.log(...args),
+  error: (...args: unknown[]) => console.error(...args),
+};
 
 
 const SUPABASE_URL = process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? 
@@ -27,8 +32,8 @@ const SUPABASE_ANON_KEY = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ??
   '';
 
 if (!SUPABASE_ANON_KEY) {
-  logger.error('❌ Error: SUPABASE_ANON_KEY not found in environment variables');
-  logger.error('   Set NEXT_PUBLIC_SUPABASE_ANON_KEY or SUPABASE_ANON_KEY');
+  cliLog.error('❌ Error: SUPABASE_ANON_KEY not found in environment variables');
+  cliLog.error('   Set NEXT_PUBLIC_SUPABASE_ANON_KEY or SUPABASE_ANON_KEY');
   process.exit(1);
 }
 
@@ -59,86 +64,86 @@ async function getToken() {
 
   // If email/password provided, sign in
   if (email !== undefined && password !== undefined) {
-    logger.log('🔐 Signing in...');
+    cliLog.log('🔐 Signing in...');
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error !== null) {
-      logger.error('❌ Sign in error:', error.message);
+      cliLog.error('❌ Sign in error:', error.message);
       process.exit(1);
     }
 
     const session = data.session;
     const user = data.user;
 
-    logger.log('\n✅ Signed in successfully!');
-    logger.log('\n📋 Token Information:');
-    logger.log('─'.repeat(60));
-    logger.log('Access Token:');
-    logger.log(session.access_token);
-    logger.log('\nUser ID:', user.id);
-    logger.log('User Email:', user.email ?? 'N/A');
-    if (session.expires_at === null) {
-      logger.log('Token Expires: N/A');
+    cliLog.log('\n✅ Signed in successfully!');
+    cliLog.log('\n📋 Token Information:');
+    cliLog.log('─'.repeat(60));
+    cliLog.log('Access Token:');
+    cliLog.log(session.access_token);
+    cliLog.log('\nUser ID:', user.id);
+    cliLog.log('User Email:', user.email ?? 'N/A');
+    if (session.expires_at === null || session.expires_at === undefined) {
+      cliLog.log('Token Expires: N/A');
     } else {
-      logger.log('Token Expires:', new Date(session.expires_at * 1000).toISOString());
+      cliLog.log('Token Expires:', new Date(session.expires_at * 1000).toISOString());
     }
-    logger.log('─'.repeat(60));
-    logger.log('\n💡 Usage:');
-    logger.log(`  export MCP_TEST_TOKEN="${session.access_token}"`);
-    logger.log(`  curl -X POST http://localhost:54321/functions/v1/mcp-directory/mcp \\`);
-    logger.log(`    -H "Authorization: Bearer $MCP_TEST_TOKEN" \\`);
-    logger.log(`    -H "Content-Type: application/json" \\`);
-    logger.log(`    -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'`);
+    cliLog.log('─'.repeat(60));
+    cliLog.log('\n💡 Usage:');
+    cliLog.log(`  export MCP_TEST_TOKEN="${session.access_token}"`);
+    cliLog.log(`  curl -X POST http://localhost:54321/functions/v1/mcp-directory/mcp \\`);
+    cliLog.log(`    -H "Authorization: Bearer $MCP_TEST_TOKEN" \\`);
+    cliLog.log(`    -H "Content-Type: application/json" \\`);
+    cliLog.log(`    -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'`);
     
     return;
   }
 
   // Otherwise, check for existing session
-  logger.log('🔍 Checking for existing session...');
+  cliLog.log('🔍 Checking for existing session...');
   const { data, error } = await supabase.auth.getSession();
 
   if (error !== null) {
-    logger.error('❌ Error getting session:', error.message);
-    logger.error('\n💡 Try signing in with:');
-    logger.error('   tsx packages/generators/src/commands/get-mcp-test-token.ts --email your@email.com --password yourpassword');
+    cliLog.error('❌ Error getting session:', error.message);
+    cliLog.error('\n💡 Try signing in with:');
+    cliLog.error('   tsx packages/generators/src/commands/get-mcp-test-token.ts --email your@email.com --password yourpassword');
     process.exit(1);
   }
 
   const session = data.session;
   if (session === null) {
-    logger.log('❌ No active session found');
-    logger.log('\n💡 Sign in with:');
-    logger.log('   tsx packages/generators/src/commands/get-mcp-test-token.ts --email your@email.com --password yourpassword');
-    logger.log('\n💡 Or sign in via web app and extract token from browser DevTools');
+    cliLog.log('❌ No active session found');
+    cliLog.log('\n💡 Sign in with:');
+    cliLog.log('   tsx packages/generators/src/commands/get-mcp-test-token.ts --email your@email.com --password yourpassword');
+    cliLog.log('\n💡 Or sign in via web app and extract token from browser DevTools');
     process.exit(1);
   }
 
-  logger.log('\n✅ Found active session!');
-  logger.log('\n📋 Token Information:');
-  logger.log('─'.repeat(60));
-  logger.log('Access Token:');
-  logger.log(session.access_token);
-  logger.log('\nUser ID:', session.user.id);
-  logger.log('User Email:', session.user.email ?? 'N/A');
-  if (session.expires_at === null) {
-    logger.log('Token Expires: N/A');
+  cliLog.log('\n✅ Found active session!');
+  cliLog.log('\n📋 Token Information:');
+  cliLog.log('─'.repeat(60));
+  cliLog.log('Access Token:');
+  cliLog.log(session.access_token);
+  cliLog.log('\nUser ID:', session.user.id);
+  cliLog.log('User Email:', session.user.email ?? 'N/A');
+  if (session.expires_at === null || session.expires_at === undefined) {
+    cliLog.log('Token Expires: N/A');
   } else {
-    logger.log('Token Expires:', new Date(session.expires_at * 1000).toISOString());
+    cliLog.log('Token Expires:', new Date(session.expires_at * 1000).toISOString());
   }
-  logger.log('─'.repeat(60));
-  logger.log('\n💡 Usage:');
-  logger.log(`  export MCP_TEST_TOKEN="${session.access_token}"`);
-  logger.log(`  curl -X POST http://localhost:54321/functions/v1/mcp-directory/mcp \\`);
-  logger.log(`    -H "Authorization: Bearer $MCP_TEST_TOKEN" \\`);
-  logger.log(`    -H "Content-Type: application/json" \\`);
-  logger.log(`    -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'`);
+  cliLog.log('─'.repeat(60));
+  cliLog.log('\n💡 Usage:');
+  cliLog.log(`  export MCP_TEST_TOKEN="${session.access_token}"`);
+  cliLog.log(`  curl -X POST http://localhost:54321/functions/v1/mcp-directory/mcp \\`);
+  cliLog.log(`    -H "Authorization: Bearer $MCP_TEST_TOKEN" \\`);
+  cliLog.log(`    -H "Content-Type: application/json" \\`);
+  cliLog.log(`    -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'`);
 }
 
 getToken().catch((error: unknown) => {
   const errorMessage = error instanceof Error ? error : String(error);
-  logger.error('❌ Unexpected error:', errorMessage);
+  cliLog.error('❌ Unexpected error:', errorMessage);
   process.exit(1);
 });
