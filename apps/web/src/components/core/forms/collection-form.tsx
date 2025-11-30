@@ -16,7 +16,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { cluster } from '@heyclaude/web-runtime/design-system';
+import { cluster, row } from '@heyclaude/web-runtime/design-system';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
 import { useFormSubmit } from '@heyclaude/web-runtime/hooks';
 import { toasts } from '@heyclaude/web-runtime/ui';
@@ -219,7 +219,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="flex items-start gap-3 rounded-md p-2 hover:bg-accent"
+                className={`${row.default} rounded-md p-2 hover:bg-accent`}
               >
                 <Checkbox
                   id={bookmark.id}

@@ -248,11 +248,23 @@ export default async function CompaniesPage() {
                       <div className="flex flex-1 items-start gap-4">
                         {(() => {
                           // Validate logo URL is safe (should be from Supabase storage or trusted domain)
-                          if (!company.logo) return null;
+                          if (!company.logo) {
+                            return (
+                              <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
+                                <Building2 className="h-8 w-8 text-muted-foreground" />
+                              </div>
+                            );
+                          }
                           try {
                             const parsed = new URL(company.logo);
                             // Only allow HTTPS
-                            if (parsed.protocol !== 'https:') return null;
+                            if (parsed.protocol !== 'https:') {
+                              return (
+                                <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
+                                  <Building2 className="h-8 w-8 text-muted-foreground" />
+                                </div>
+                              );
+                            }
                             // Allow Supabase storage (public bucket path) or common CDN domains
                             // Restrict to specific CDN patterns to prevent subdomain abuse
                             const isSupabaseHost =
@@ -269,7 +281,13 @@ export default async function CompaniesPage() {
                                 parsed.pathname.startsWith('/storage/v1/object/public/')) ||
                               isCloudinary ||
                               isAwsS3;
-                            if (!isTrustedSource) return null;
+                            if (!isTrustedSource) {
+                              return (
+                                <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
+                                  <Building2 className="h-8 w-8 text-muted-foreground" />
+                                </div>
+                              );
+                            }
                             return (
                               <Image
                                 src={company.logo}
@@ -281,14 +299,13 @@ export default async function CompaniesPage() {
                               />
                             );
                           } catch {
-                            return null;
+                            return (
+                              <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
+                                <Building2 className="h-8 w-8 text-muted-foreground" />
+                              </div>
+                            );
                           }
                         })()}
-                        {!company.logo && (
-                          <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
-                            <Building2 className="h-8 w-8 text-muted-foreground" />
-                          </div>
-                        )}
                         <div className="flex-1">
                           <div className={cluster.compact}>
                             <CardTitle>{company.name}</CardTitle>

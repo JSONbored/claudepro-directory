@@ -498,9 +498,11 @@ export function DetailHeaderActions({
               description={contentItem.description ?? undefined}
               utmCampaign={category}
               onShare={(platform) => {
-                pulse.share({ platform, category, slug: contentItem.slug, url: shareUrl }).catch(() => {
-                  // Silent fail for analytics
-                });
+                logUnhandledPromise(
+                  'DetailHeaderActions: share analytics failed',
+                  pulse.share({ platform, category, slug: contentItem.slug, url: shareUrl }),
+                  { platform, category, slug: contentItem.slug }
+                );
               }}
             />
           </div>

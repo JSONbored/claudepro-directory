@@ -14,8 +14,9 @@
  * @see packages/web-runtime/src/flux for implementation
  */
 
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { routeFluxRequest, handleOptions } from '@heyclaude/web-runtime/flux';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger, createErrorResponse  } from '@heyclaude/web-runtime/logging/server';
 import { type NextRequest } from 'next/server';
 
 interface RouteContext {
@@ -40,14 +41,27 @@ interface RouteContext {
 export async function GET(request: NextRequest, context: RouteContext) {
   const requestId = generateRequestId();
   const params = await context.params;
+  const route = `/api/flux/${params.path.join('/')}`;
   const reqLogger = logger.child({
     requestId,
     operation: 'FluxAPI',
-    route: `/api/flux/${params.path.join('/')}`,
+    route,
     method: 'GET',
   });
-  reqLogger.debug('Flux GET request', { path: params.path });
-  return routeFluxRequest('GET', params.path, request);
+
+  try {
+    reqLogger.debug('Flux GET request', { path: params.path });
+    return await routeFluxRequest('GET', params.path, request);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Flux GET request failed');
+    reqLogger.error('Flux GET request failed', normalized);
+    return createErrorResponse(error, {
+      route,
+      operation: 'FluxAPI:GET',
+      method: 'GET',
+      logContext: { requestId },
+    });
+  }
 }
 
 /**
@@ -64,14 +78,27 @@ export async function GET(request: NextRequest, context: RouteContext) {
 export async function POST(request: NextRequest, context: RouteContext) {
   const requestId = generateRequestId();
   const params = await context.params;
+  const route = `/api/flux/${params.path.join('/')}`;
   const reqLogger = logger.child({
     requestId,
     operation: 'FluxAPI',
-    route: `/api/flux/${params.path.join('/')}`,
+    route,
     method: 'POST',
   });
-  reqLogger.debug('Flux POST request', { path: params.path });
-  return routeFluxRequest('POST', params.path, request);
+
+  try {
+    reqLogger.debug('Flux POST request', { path: params.path });
+    return await routeFluxRequest('POST', params.path, request);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Flux POST request failed');
+    reqLogger.error('Flux POST request failed', normalized);
+    return createErrorResponse(error, {
+      route,
+      operation: 'FluxAPI:POST',
+      method: 'POST',
+      logContext: { requestId },
+    });
+  }
 }
 
 /**

@@ -36,12 +36,24 @@ import {
 export function ComparisonTable(props: ComparisonTableProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, description, headers, items } = props;
-  const validHeaders = headers;
-  const validItems = items || [];
+  const validItems = items ?? [];
 
-  if (validHeaders.length === 0 || validItems.length === 0) {
+  if (headers.length === 0 || validItems.length === 0) {
     return null;
   }
+
+  // Helper to render option cell content
+  const renderOptionCell = (value: boolean | string | undefined) => {
+    if (value === undefined) return null;
+    if (typeof value === 'boolean') {
+      return value ? (
+        <CheckCircle className={`${iconSize.md} text-green-500`} />
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      );
+    }
+    return value;
+  };
 
   return (
     <Card className="my-8">
@@ -57,7 +69,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
             <thead className="border-b">
               <tr>
                 <th className={'p-4 text-left font-medium'}>Feature</th>
-                {validHeaders.map((header) => (
+                {headers.map((header) => (
                   <th key={header} className={'p-4 text-left font-medium'}>
                     {header}
                   </th>
@@ -68,40 +80,10 @@ export function ComparisonTable(props: ComparisonTableProps) {
               {validItems.map((item) => (
                 <tr key={item.feature} className="border-b last:border-0">
                   <td className={'p-4 font-medium'}>{item.feature}</td>
-                  <td className="p-4">
-                    {typeof item.option1 === 'boolean' ? (
-                      item.option1 ? (
-                        <CheckCircle className={`${iconSize.md} text-green-500`} />
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )
-                    ) : (
-                      item.option1
-                    )}
-                  </td>
-                  <td className="p-4">
-                    {typeof item.option2 === 'boolean' ? (
-                      item.option2 ? (
-                        <CheckCircle className={`${iconSize.md} text-green-500`} />
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )
-                    ) : (
-                      item.option2
-                    )}
-                  </td>
-                  {item.option3 !== undefined && (
-                    <td className="p-4">
-                      {typeof item.option3 === 'boolean' ? (
-                        item.option3 ? (
-                          <CheckCircle className={`${iconSize.md} text-green-500`} />
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )
-                      ) : (
-                        item.option3
-                      )}
-                    </td>
+                  <td className="p-4">{renderOptionCell(item.option1)}</td>
+                  <td className="p-4">{renderOptionCell(item.option2)}</td>
+                  {headers.length >= 3 && (
+                    <td className="p-4">{renderOptionCell(item.option3)}</td>
                   )}
                 </tr>
               ))}

@@ -40,11 +40,12 @@ const NewsletterCTAVariant = dynamicImport(
 const DEFAULT_CONTENT_CATEGORY = Constants.public.Enums.content_category[0]; // 'agents'
 
 /**
- * Dynamic Rendering Required
+ * Rendering & Caching
  *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ * This page uses server-side data fetching with edge-cached data and incremental static
+ * regeneration (`revalidate = 86400`), plus per-request logging for observability.
  *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#revalidate
  */
 export const revalidate = 86_400;
 
@@ -283,26 +284,31 @@ export default async function SubmitPage() {
   };
   const recentMerged = (dashboardData?.recent ?? [])
     .filter((submission) => isValidRecentSubmission(submission))
-    .map((submission) => {
-      // Type guard ensures these are non-null, but TypeScript needs explicit checks
+    .flatMap((submission) => {
+      // Type guard ensures these are non-null, but add a defensive runtime check
       const id = submission.id;
       const mergedAt = submission.merged_at;
       const contentName = submission.content_name;
       if (!id || !mergedAt || !contentName) {
-        // This should never happen due to type guard, but TypeScript needs this check
-        throw new Error('Invalid submission data');
+        reqLogger.warn('SubmitPage: skipping invalid recent submission data', {
+          section: 'submission-dashboard',
+          submissionId: id,
+        });
+        return [];
       }
-      return {
-        id,
-        content_name: contentName,
-        content_type: mapSubmissionTypeToContentCategory(submission.content_type),
-        merged_at: mergedAt,
-        merged_at_formatted: formatTimeAgo(mergedAt),
-        user:
-          submission.user?.name && submission.user.slug
-            ? { name: submission.user.name, slug: submission.user.slug }
-            : null,
-      };
+      return [
+        {
+          id,
+          content_name: contentName,
+          content_type: mapSubmissionTypeToContentCategory(submission.content_type),
+          merged_at: mergedAt,
+          merged_at_formatted: formatTimeAgo(mergedAt),
+          user:
+            submission.user?.name && submission.user.slug
+              ? { name: submission.user.name, slug: submission.user.slug }
+              : null,
+        },
+      ];
     });
 
   return (
@@ -323,7 +329,7 @@ export default async function SubmitPage() {
           <Card>
             <CardHeader>
               <CardTitle className={cn(cluster.compact, 'font-medium text-sm')}>
-                <TrendingUp className={iconSize.sm} />
+                <TrendingUp aria-hidden="true" className={iconSize.sm} />
                 Community Stats
               </CardTitle>
             </CardHeader>

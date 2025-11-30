@@ -65,7 +65,7 @@ interface NavigationTabletProps {
  *
  * @param isActive - Callback that receives a path and returns whether that path is currently active; used to apply active styling to links.
  * @param onMobileMenuOpen - Handler invoked when the "More" button is clicked.
- * @returns A navigation React element intended for tablet layouts (hidden on small screens, visible on md and above).
+ * @returns A navigation React element intended for tablet layouts (hidden on small screens, visible on md up to xl; tablet-only, 768–1279px).
  *
  * @see NavLink
  * @see PRIMARY_NAVIGATION

@@ -31,7 +31,7 @@ interface NavigationCommandMenuProps {
  *
  * Renders groups for primary, secondary, and action navigation items, maps item icons and descriptions, and navigates via Next.js router when an item is selected.
  *
- * @param controlledOpen - If provided, controls the open state externally (controlled component).
+ * @param open - If provided, controls the open state externally (controlled component).
  * @param onOpenChange - Optional callback invoked with the new open state when the palette is opened or closed.
  * @param navigationData - Server-provided navigation data containing `primary`, `secondary`, and `actions` arrays of navigation menu items.
  *
