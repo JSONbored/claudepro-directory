@@ -322,12 +322,15 @@ export function logInfo(message: string, logContext: Record<string, unknown>): v
 }
 
 /**
- * Log a trace-level message with the current logger bindings merged into the provided context.
+ * Emit a trace-level log entry using the current logger bindings merged with the provided context.
  *
- * The logger will automatically mix in bindings (for example request id, operation, user id) when emitting this entry.
+ * The provided `logContext` is combined with the logger's active bindings (for example request id, operation, user id)
+ * before emitting. When the logger's trace level is not enabled, this function performs no action.
  *
- * @param message - The message to record
- * @param logContext - Context object whose fields will be merged with the logger's current bindings before logging
+ * @param {string} message - The message to record.
+ * @param {Record<string, unknown>} logContext - Additional structured fields to include with the log entry; these are merged with the logger's current bindings.
+ * @returns {void} No value is returned; the function emits a log entry or no-ops if trace level is disabled.
+ * @see {@link logInfo}, {@link logError}, {@link logger.bindings}
  */
 export function logTrace(message: string, logContext: Record<string, unknown>): void {
   // Only log if trace level is enabled (avoids unnecessary work)
@@ -338,17 +341,18 @@ export function logTrace(message: string, logContext: Record<string, unknown>): 
 }
 
 /**
- * Log an error with optional normalization and ensure buffered logs are flushed.
+ * Emit an error-level log with optional normalized error information and wait for the logger to flush.
  *
- * Merges the logger's current bindings into `logContext`, attaches a normalized `err`
- * field when `error` is provided, emits an error-level log, and awaits a logger flush
- * so entries are persisted before execution ends.
+ * Builds a log payload by merging the provided structured `logContext` with the logger's current bindings,
+ * attaches a normalized `err` field when `error` is supplied, emits an error-level log via the Pino logger,
+ * and awaits completion of the logger's internal flush to increase the likelihood the entry is persisted before
+ * execution ends.
  *
- * @param message {string} - Human-readable log message
- * @param logContext {Record<string, unknown>} - Additional structured fields to include in the log; logger bindings (for example `requestId`, `operation`, `userId`) are merged automatically
- * @param error {unknown} - Optional error to normalize and attach as the `err` field
- * @returns {Promise<void>} Resolves once the log has been emitted and the logger flush has completed
- * @throws {unknown} If the logger's flush callback reports an error; the implementation will attempt to write a diagnostic message to stderr or console before rejecting
+ * @param {string} message - Human-readable log message describing the error/event.
+ * @param {Record<string, unknown>} logContext - Additional structured fields to include in the log; logger bindings (for example `requestId`, `operation`, `userId`) are merged automatically by the logger mixin.
+ * @param {unknown} [error] - Optional error value to normalize and attach as the `err` field in the log entry.
+ * @returns {Promise<void>} Resolves once the log has been emitted and the logger flush has completed.
+ * @throws {unknown} If the logger's flush callback reports an error; the implementation will attempt to write a diagnostic message to stderr (when available) or `console.error` before rejecting.
  * @see normalizeError
  * @see pinoLogger
  */

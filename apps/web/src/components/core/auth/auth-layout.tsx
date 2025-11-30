@@ -38,6 +38,16 @@ const cardBorderStyle = {
   borderColor: 'oklch(74% 0.2 35)',
 } as const;
 
+/**
+ * Renders a responsive, split authentication layout with a desktop two-column view and a stacked mobile view.
+ *
+ * @param brandPanel - React node displayed in the left column on large screens (hidden on mobile).
+ * @param authPanel - React node placed inside the emphasized auth card on desktop and inside the mobile card on small screens.
+ * @param mobileHeader - React node displayed above the stacked mobile layout.
+ * @returns The layout JSX element that composes the brand panel, authentication card, and optional mobile header.
+ *
+ * @see cardBorderStyle
+ */
 export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAuthLayoutProps) {
   return (
     <div className="relative min-h-screen min-h-dvh overflow-hidden bg-background">
