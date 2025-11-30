@@ -79,7 +79,7 @@ export const processChangelogNotifyQueue = inngest.createFunction(
     name: 'Changelog Notify',
     retries: 2,
   },
-  { cron: '*/10 * * * *' }, // Every 10 minutes
+  { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step }) => {
     const startTime = Date.now();
     const requestId = generateRequestId();

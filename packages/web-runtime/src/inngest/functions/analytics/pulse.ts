@@ -62,7 +62,7 @@ export const processPulseQueue = inngest.createFunction(
     name: 'Analytics Pulse Processor',
     retries: 1,
   },
-  { cron: '*/5 * * * *' }, // Every 5 minutes
+  { cron: '*/30 * * * *' }, // Every 30 minutes (batches queue events)
   async ({ step }) => {
     const startTime = Date.now();
     const requestId = generateRequestId();

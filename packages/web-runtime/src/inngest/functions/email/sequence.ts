@@ -2,7 +2,7 @@
  * Email Sequence Inngest Function
  *
  * Processes and sends due sequence emails (onboarding drips).
- * Runs on a cron schedule (every 2 hours).
+ * Runs on a cron schedule (every 6 hours).
  */
 
 import { normalizeError } from '@heyclaude/shared-runtime';
@@ -35,7 +35,7 @@ export const processEmailSequence = inngest.createFunction(
     name: 'Email Sequence Processor',
     retries: 1, // Limited retries for cron jobs
   },
-  { cron: '0 */2 * * *' }, // Every 2 hours
+  { cron: '0 */6 * * *' }, // Every 6 hours
   async ({ step }) => {
     const startTime = Date.now();
     const requestId = generateRequestId();
@@ -144,10 +144,37 @@ async function processSequenceEmail(
 ): Promise<void> {
   const { email, step, id: sequenceEmailId } = emailItem;
 
+  // IDEMPOTENCY: First, atomically claim this email by updating the step
+  // This prevents duplicate sends if the function retries after sending but before updating
+  // We use a conditional update that only succeeds if current_step matches expected value
+  const { data: claimResult, error: claimError } = await supabase
+    .from('email_sequences')
+    .update({
+      current_step: step + 1,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', sequenceEmailId)
+    .eq('current_step', step) // Only update if step hasn't changed (idempotency check)
+    .select('id')
+    .single();
+
+  if (claimError || !claimResult) {
+    // Either already processed (step changed) or DB error
+    // If step changed, this is a duplicate - skip silently
+    logger.info('Sequence email already claimed or not found, skipping', {
+      ...logContext,
+      sequenceId: sequenceEmailId,
+      step,
+      reason: claimError?.code === 'PGRST116' ? 'already_processed' : 'claim_failed',
+    });
+    return; // Don't throw - this is expected for duplicates
+  }
+
   // Build email content based on step
   const html = buildSequenceEmailHtml(step, email);
 
-  // Send the email
+  // Send the email - if this fails, the step is already incremented
+  // The user will get the next email in sequence instead of a duplicate
   const { error: sendError } = await sendEmail(
     {
       from: ONBOARDING_FROM,
@@ -157,29 +184,32 @@ async function processSequenceEmail(
       tags: [
         { name: 'type', value: 'sequence' },
         { name: 'step', value: String(step) },
+        { name: 'sequence_id', value: sequenceEmailId },
       ],
     },
     'Resend sequence email send timed out'
   );
 
   if (sendError) {
-    throw new Error(sendError.message);
+    // Email failed to send, but step was already incremented
+    // Log for monitoring - manual intervention may be needed
+    logger.error('Sequence email send failed after step claim', normalizeError(sendError, 'Send failed'), {
+      ...logContext,
+      email, // Auto-hashed
+      sequenceId: sequenceEmailId,
+      step,
+    });
+    // Don't throw - step is already claimed, throwing would cause retry which skips anyway
+    return;
   }
 
-  // Mark as sent in the email_sequences table
-  const { error: updateError } = await supabase
+  // Update last_sent_at to track successful delivery
+  await supabase
     .from('email_sequences')
     .update({
       last_sent_at: new Date().toISOString(),
-      current_step: step + 1,
     })
     .eq('id', sequenceEmailId);
-
-  if (updateError) {
-    // Throw on DB update failure to prevent duplicate sends on retry
-    // If we don't update the step, the email will be sent again
-    throw new Error(`Failed to mark sequence email as sent: ${updateError.message}`);
-  }
 
   logger.info('Sequence email sent', {
     ...logContext,

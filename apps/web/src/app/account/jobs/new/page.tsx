@@ -79,7 +79,10 @@ export default async function NewJobPage() {
       throw normalized;
     }
 
-    if (result.data === null || result.data === undefined) {
+    // Type assertion: result.data should exist if no serverError
+    // The action returns { data, serverError } where data is null on error
+    const resultData = result.data;
+    if (!resultData) {
       const normalized = normalizeError(
         'createJob returned no data',
         'NewJobPage: createJob returned no data'
@@ -92,7 +95,7 @@ export default async function NewJobPage() {
     type CreateJobResult = Database['public']['CompositeTypes']['create_job_with_payment_result'] & {
       checkoutUrl?: null | string;
     };
-    const jobResult = result.data as CreateJobResult;
+    const jobResult = resultData as CreateJobResult;
 
     if (jobResult.success) {
       if (jobResult.requires_payment) {

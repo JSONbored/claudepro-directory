@@ -5,6 +5,7 @@
  * - The Inngest client (for sending events)
  * - All Inngest functions (for the serve handler)
  * - The serve handler configuration
+ * - Configuration constants for reuse
  *
  * @example
  * // In apps/web/src/app/api/inngest/route.ts:
@@ -21,6 +22,19 @@ import { serve } from 'inngest/next';
 // Export the client for sending events
 export { inngest, type InngestEvents } from './client';
 
+// Export configuration for reuse in custom functions
+export {
+  CONCURRENCY_LIMITS,
+  THROTTLE_CONFIGS,
+  RATE_LIMITS,
+  DEBOUNCE_CONFIGS,
+  RETRY_CONFIGS,
+  PRIORITY_EXPRESSIONS,
+  TIMEOUTS,
+  CANCEL_ON_CONFIGS,
+  ACCOUNT_CONCURRENCY_KEYS,
+} from './config';
+
 // Email functions (Phase 2)
 import { subscribeNewsletter } from './functions/email/subscribe';
 import { sendWelcomeEmail } from './functions/email/welcome';
@@ -29,6 +43,15 @@ import { sendWeeklyDigest } from './functions/email/digest';
 import { processEmailSequence } from './functions/email/sequence';
 import { sendTransactionalEmail } from './functions/email/transactional';
 import { sendJobLifecycleEmail } from './functions/email/job-lifecycle';
+
+// Resend webhook handler (consolidated - replaces list-hygiene + engagement)
+import { handleResendWebhook } from './functions/resend/webhook';
+
+// Dynamic drip campaigns
+import {
+  newsletterDripCampaign,
+  jobPostingDripCampaign,
+} from './functions/email/drip-campaigns';
 
 // Analytics functions (Phase 3)
 import { processPulseQueue } from './functions/analytics/pulse';
@@ -45,6 +68,9 @@ import { processDiscordErrorsQueue } from './functions/discord/errors';
 // Notification functions (Phase 3)
 import { createNotification, broadcastNotification } from './functions/notifications/create';
 
+// Polar webhook functions (Phase 5 - Payment processing)
+import { handlePolarWebhook } from './functions/polar/webhook';
+
 /**
  * All Inngest functions that should be served.
  * Add new functions here as they are created.
@@ -55,25 +81,36 @@ export const functions = [
   sendWelcomeEmail,
   sendContactEmails,
   sendWeeklyDigest, // Cron: Mondays 9am UTC
-  processEmailSequence, // Cron: Every 2 hours
+  processEmailSequence, // Cron: Every 6 hours
   sendTransactionalEmail,
   sendJobLifecycleEmail,
 
+  // Resend webhook handler (Phase 4) - Consolidated
+  // Handles: bounced, complained, delivery_delayed, sent, delivered, opened, clicked
+  handleResendWebhook, // Events: resend/email.* (all 7 event types)
+
+  // Dynamic drip campaigns (Phase 4)
+  newsletterDripCampaign, // Event: email/welcome (triggers on signup)
+  jobPostingDripCampaign, // Event: job/published
+
   // Analytics functions (Phase 3) - COMPLETE
-  processPulseQueue, // Cron: Every 5 minutes
+  processPulseQueue, // Cron: Every 30 minutes
 
   // Changelog functions (Phase 3) - COMPLETE
-  processChangelogQueue, // Cron: Every 10 minutes
-  processChangelogNotifyQueue, // Cron: Every 10 minutes
+  processChangelogQueue, // Cron: Every 30 minutes
+  processChangelogNotifyQueue, // Cron: Every 30 minutes
 
   // Discord functions (Phase 3) - COMPLETE
-  processDiscordJobsQueue, // Cron: Every 5 minutes
-  processDiscordSubmissionsQueue, // Cron: Every 5 minutes
-  processDiscordErrorsQueue, // Cron: Every 5 minutes (webhook error alerts)
+  processDiscordJobsQueue, // Cron: Every 30 minutes
+  processDiscordSubmissionsQueue, // Cron: Every 30 minutes
+  processDiscordErrorsQueue, // Cron: Every 15 minutes (webhook error alerts)
 
   // Notification functions (Phase 3) - COMPLETE
   createNotification, // Event: notification/create
   broadcastNotification, // Event: notification/broadcast
+
+  // Polar webhook functions (Phase 5) - Payment processing
+  handlePolarWebhook, // Event: polar/webhook (unified handler with idempotency)
 ];
 
 // Re-export individual functions for direct imports
@@ -85,6 +122,13 @@ export { sendWeeklyDigest };
 export { processEmailSequence };
 export { sendTransactionalEmail };
 export { sendJobLifecycleEmail };
+
+// Resend webhook handler (consolidated)
+export { handleResendWebhook };
+
+// Dynamic drip campaigns
+export { newsletterDripCampaign };
+export { jobPostingDripCampaign };
 
 // Analytics functions
 export { processPulseQueue };
@@ -101,6 +145,9 @@ export { processDiscordErrorsQueue };
 // Notification functions
 export { createNotification };
 export { broadcastNotification };
+
+// Polar webhook functions
+export { handlePolarWebhook };
 
 // Import the client for serve handler
 import { inngest } from './client';

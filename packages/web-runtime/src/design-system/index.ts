@@ -12,7 +12,7 @@
  */
 
 // Re-export all tokens
-export * from './tokens.js';
+export * from './tokens';
 
 // Re-export style utilities
-export * from './styles/index.js';
+export * from './styles/index';

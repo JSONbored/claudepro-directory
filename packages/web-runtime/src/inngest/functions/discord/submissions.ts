@@ -114,7 +114,7 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
     name: 'Discord Submissions Processor',
     retries: 2,
   },
-  { cron: '*/5 * * * *' }, // Every 5 minutes
+  { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step }) => {
     const startTime = Date.now();
     const requestId = generateRequestId();

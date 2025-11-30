@@ -88,6 +88,9 @@ export const sendJobLifecycleEmail = inngest.createFunction(
     id: 'email-job-lifecycle',
     name: 'Job Lifecycle Email',
     retries: 3,
+    // Idempotency: Use action + jobId to prevent duplicate lifecycle emails
+    // Same action for same job will only trigger email once
+    idempotency: 'event.data.action + "-" + event.data.jobId',
   },
   { event: 'email/job-lifecycle' },
   async ({ event, step }) => {
@@ -95,7 +98,7 @@ export const sendJobLifecycleEmail = inngest.createFunction(
     const requestId = generateRequestId();
     const logContext = createWebAppContextWithId(requestId, '/inngest/email/job-lifecycle', 'sendJobLifecycleEmail');
 
-    const { action, userEmail, jobId, payload } = event.data;
+    const { action, employerEmail, jobId, payload, jobTitle, company } = event.data;
 
     logger.info('Job lifecycle email request received', {
       ...logContext,
@@ -114,19 +117,37 @@ export const sendJobLifecycleEmail = inngest.createFunction(
       throw new Error(`Unknown job lifecycle action: ${action}`);
     }
 
+    // Build payload with available data
+    const emailPayload: Record<string, unknown> = {
+      ...payload,
+      jobId,
+      jobTitle,
+      company,
+    };
+
     // Step 1: Send the email
     const emailResult = await step.run('send-email', async (): Promise<{
       sent: boolean;
       emailId: string | null;
     }> => {
+      // Skip if no employer email provided
+      if (!employerEmail) {
+        logger.info('No employer email provided, skipping job lifecycle email', {
+          ...logContext,
+          action,
+          jobId,
+        });
+        return { sent: false, emailId: null };
+      }
+
       try {
-        const subject = config.buildSubject(payload);
-        const html = config.buildHtml(payload);
+        const subject = config.buildSubject(emailPayload);
+        const html = config.buildHtml(emailPayload);
 
         const { data: sendData, error: sendError } = await sendEmail(
           {
             from: JOBS_FROM,
-            to: userEmail,
+            to: employerEmail,
             subject,
             html,
             tags: [{ name: 'type', value: action }],

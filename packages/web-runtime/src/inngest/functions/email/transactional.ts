@@ -50,6 +50,9 @@ export const sendTransactionalEmail = inngest.createFunction(
     id: 'email-transactional',
     name: 'Transactional Email',
     retries: 3,
+    // Idempotency: Use type + email + timestamp to prevent duplicates
+    // Note: CEL doesn't support || for null coalescing
+    idempotency: 'event.data.type + "-" + event.data.email + "-" + string(event.ts)',
   },
   { event: 'email/transactional' },
   async ({ event, step }) => {

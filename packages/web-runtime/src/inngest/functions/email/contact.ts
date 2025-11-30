@@ -28,6 +28,9 @@ export const sendContactEmails = inngest.createFunction(
     id: 'email-contact',
     name: 'Contact Form Emails',
     retries: 3,
+    // Idempotency: Use submissionId to prevent duplicate contact emails
+    // Each submission will only trigger emails once
+    idempotency: 'event.data.submissionId',
   },
   { event: 'email/contact' },
   async ({ event, step }) => {

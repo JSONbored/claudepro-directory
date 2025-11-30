@@ -76,10 +76,11 @@ export async function pgmqRead<T = Record<string, unknown>>(
   options?: { vt?: number; qty?: number }
 ): Promise<PgmqMessage<T>[] | null> {
   const client = getPgmqClient();
+  // Note: pgmq_public.read uses 'sleep_seconds' (visibility timeout) and 'n' (batch size)
   const { data, error } = await client.schema('pgmq_public').rpc('read', {
     queue_name: queueName,
-    vt: options?.vt ?? 30,
-    qty: options?.qty ?? 10,
+    sleep_seconds: options?.vt ?? 30,
+    n: options?.qty ?? 10,
   });
 
   if (error) throw error;

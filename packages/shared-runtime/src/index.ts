@@ -52,6 +52,12 @@ export * from './code-highlight.ts';
 export * from './content-processing.ts';
 export * from './rate-limit.ts';
 export * from './webhook/crypto.ts';
+
+// Discord utilities (embed builders, sanitization, constants)
+export * from './discord/index.ts';
+
+// PGMQ types and queue name constants
+export * from './pgmq/index.ts';
 export * from './crypto-utils.ts';
 // Resolve duplicate export ambiguity from env.ts
 export {

@@ -4,6 +4,11 @@
  * This client is used to define and send events to Inngest.
  * All Inngest functions in the monorepo should use this client.
  *
+ * Features:
+ * - Type-safe event schemas
+ * - Environment-aware configuration (dev/staging/production)
+ * - Middleware for logging, error tracking, and encryption
+ *
  * @see https://www.inngest.com/docs/reference/client/create
  */
 
@@ -18,11 +23,18 @@ type Events = {
   'email/subscribe': {
     data: {
       email: string;
-      source?: string;
-      referrer?: string;
-      copyType?: string;
-      copyCategory?: string;
-      copySlug?: string;
+      source?: string | undefined;
+      referrer?: string | undefined;
+      copyType?: string | undefined;
+      copyCategory?: string | undefined;
+      copySlug?: string | undefined;
+      metadata?: Record<string, unknown> | undefined;
+    };
+  };
+  'email/unsubscribe': {
+    data: {
+      email: string;
+      reason?: string | undefined;
     };
   };
   'email/welcome': {
@@ -51,9 +63,12 @@ type Events = {
   'email/job-lifecycle': {
     data: {
       action: string;
-      userEmail: string;
       jobId: string;
-      payload: Record<string, unknown>;
+      jobTitle?: string | undefined;
+      company?: string | undefined;
+      employerEmail?: string | undefined;
+      requiresPayment?: boolean | undefined;
+      payload?: Record<string, unknown> | undefined;
     };
   };
 
@@ -124,7 +139,108 @@ type Events = {
       message: string;
     };
   };
+
+  // Resend webhook events (forwarded from /api/flux/webhook/external)
+  'resend/email.sent': {
+    data: ResendEmailEventData;
+  };
+  'resend/email.delivered': {
+    data: ResendEmailEventData;
+  };
+  'resend/email.delivery_delayed': {
+    data: ResendEmailEventData;
+  };
+  'resend/email.bounced': {
+    data: ResendEmailEventData;
+  };
+  'resend/email.complained': {
+    data: ResendEmailEventData;
+  };
+  'resend/email.opened': {
+    data: ResendEmailEventData;
+  };
+  'resend/email.clicked': {
+    data: ResendEmailEventData & { click?: { link: string } };
+  };
+
+  // User lifecycle events (for drip campaigns)
+  'app/user.signup': {
+    data: {
+      userId: string;
+      email: string;
+      name?: string;
+      source?: string;
+    };
+  };
+  'app/user.onboarding.completed': {
+    data: {
+      userId: string;
+      email: string;
+    };
+  };
+
+  // Job lifecycle events (for employer drip campaigns)
+  'job/published': {
+    data: {
+      jobId: string;
+      employerEmail: string;
+      employerName?: string;
+      jobTitle: string;
+      jobSlug: string;
+    };
+  };
+  'job/deleted': {
+    data: {
+      jobId: string;
+      employerEmail?: string;
+    };
+  };
+  'job/expired': {
+    data: {
+      jobId: string;
+      employerEmail?: string;
+    };
+  };
+
+  // Polar webhook events (payment processing)
+  // Unified handler processes all Polar events with proper idempotency
+  'polar/webhook': {
+    data: PolarWebhookEventData;
+  };
 };
+
+/**
+ * Polar webhook event data structure
+ * @see https://docs.polar.sh/integrate/webhooks/events
+ */
+export interface PolarWebhookEventData {
+  /** The Polar event type (e.g., 'order.paid', 'subscription.active') */
+  eventType: string;
+  /** Unique webhook event ID from database (for idempotency) */
+  webhookId: string;
+  /** Svix ID for deduplication */
+  svixId: string | null;
+  /** Full Polar webhook payload */
+  payload: Record<string, unknown>;
+  /** Extracted job_id from metadata (if present) */
+  jobId?: string | undefined;
+  /** Extracted user_id from metadata (if present) */
+  userId?: string | undefined;
+}
+
+/**
+ * Resend email event data structure
+ * @see https://resend.com/docs/webhooks
+ */
+export interface ResendEmailEventData {
+  created_at: string;
+  email_id: string;
+  from: string;
+  to: string[];
+  subject: string;
+  // Additional fields that may be present
+  [key: string]: unknown;
+}
 
 /**
  * Inngest client instance for the HeyClaude application.

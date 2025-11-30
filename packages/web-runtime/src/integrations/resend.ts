@@ -677,10 +677,10 @@ async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise
 }
 
 /**
- * Send an email through Resend and return the API response while logging failures.
- * Uses internal Resend client if not provided.
+ * Internal email send function (bypasses safety checks)
+ * USE WITH CAUTION - prefer sendEmail() which includes safety checks
  */
-export async function sendEmail(
+async function sendEmailInternal(
   options: {
     to: string;
     subject: string;
@@ -714,6 +714,99 @@ export async function sendEmail(
 
   return { data, error };
 }
+
+// Import email safety utilities
+import {
+  checkEmailSafety,
+  logBlockedEmail,
+} from '../email/config/email-safety';
+
+/**
+ * Send an email through Resend with safety checks.
+ *
+ * In development/staging environments, this will:
+ * - Block emails to non-whitelisted addresses
+ * - Log blocked emails for debugging
+ * - Only send to whitelisted addresses or if ALLOW_DEV_EMAILS=true
+ *
+ * Environment variables:
+ * - ALLOW_DEV_EMAILS=true - Allow all emails in dev (use with caution!)
+ * - DEV_EMAIL_WHITELIST=email1@test.com,email2@test.com - Comma-separated whitelist
+ * - DEV_EMAIL_DOMAIN_WHITELIST=yourcompany.com - Allow all emails to these domains
+ *
+ * @example
+ * ```typescript
+ * // In production: sends email
+ * // In development: blocks unless whitelisted or ALLOW_DEV_EMAILS=true
+ * const { data, error, blocked } = await sendEmail({
+ *   to: 'user@example.com',
+ *   from: 'hello@yourapp.com',
+ *   subject: 'Welcome!',
+ *   html: '<p>Hello!</p>',
+ * });
+ *
+ * if (blocked) {
+ *   console.log('Email was blocked in dev mode');
+ * }
+ * ```
+ */
+export async function sendEmail(
+  options: {
+    to: string;
+    subject: string;
+    html: string;
+    from: string;
+    tags?: Array<{ name: string; value: string }>;
+    replyTo?: string;
+  },
+  timeoutMessage = 'Resend email send timed out',
+  resendClient?: Resend
+): Promise<{
+  data: { id: string } | null;
+  error: { message: string } | null;
+  blocked?: boolean | undefined;
+  blockReason?: string | undefined;
+}> {
+  // Check if email is safe to send
+  const safetyCheck = checkEmailSafety(options.to);
+
+  if (!safetyCheck.allowed) {
+    const blockReason = safetyCheck.reason || 'Blocked in non-production environment';
+
+    // Log the blocked email for debugging
+    logBlockedEmail(
+      {
+        to: options.to,
+        from: options.from,
+        subject: options.subject,
+        html: options.html,
+        tags: options.tags ?? undefined,
+      },
+      blockReason
+    );
+
+    return {
+      data: { id: `blocked-${Date.now()}` }, // Fake ID for blocked emails
+      error: null,
+      blocked: true,
+      blockReason,
+    };
+  }
+
+  // Email is allowed - send it
+  const result = await sendEmailInternal(options, timeoutMessage, resendClient);
+
+  return {
+    ...result,
+    blocked: false,
+  };
+}
+
+/**
+ * Send email without safety checks (for internal/system use only)
+ * WARNING: This bypasses all dev mode protections!
+ */
+export const sendEmailUnsafe = sendEmailInternal;
 
 /**
  * Create or find a contact in Resend, assign initial newsletter topics and an engagement segment.

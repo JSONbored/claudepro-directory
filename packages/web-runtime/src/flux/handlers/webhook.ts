@@ -35,8 +35,44 @@ interface WebhookIngestResult {
   source: WebhookSource;
   eventType: string;
   svixId: string | null;
+  webhookId: string | null; // Database ID for webhook_events record
   duplicate: boolean;
   payload: Record<string, unknown>;
+}
+
+/**
+ * Polar events that we forward to Inngest for durable processing
+ * All payment-related events are processed via Inngest for reliability
+ */
+const POLAR_SUPPORTED_EVENTS = [
+  // Order events (payment completion)
+  'order.paid',
+  'order.refunded',
+  'order.created',
+  // Subscription events
+  'subscription.active',
+  'subscription.canceled',
+  'subscription.revoked',
+  // Checkout events (informational)
+  'checkout.created',
+  'checkout.updated',
+] as const;
+
+type PolarEventType = (typeof POLAR_SUPPORTED_EVENTS)[number];
+
+// Helper to extract metadata from Polar payload
+function getPolarMetadataValue<T = unknown>(payload: Record<string, unknown>, key: string): T | undefined {
+  // Polar wraps data in a 'data' object, and metadata is nested within
+  const data = payload['data'];
+  if (data && typeof data === 'object') {
+    const dataObj = data as Record<string, unknown>;
+    const metadata = dataObj['metadata'];
+    if (metadata && typeof metadata === 'object') {
+      const metaObj = metadata as Record<string, unknown>;
+      return metaObj[key] as T | undefined;
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -214,6 +250,8 @@ async function ingestWebhookEvent(
 
   // Check for duplicate using svix_id
   let duplicate = false;
+  let webhookId: string | null = null;
+  
   if (svixId) {
     const supabase = createSupabaseAdminClient();
     const { data: existing } = await supabase
@@ -225,6 +263,7 @@ async function ingestWebhookEvent(
 
     if (existing) {
       duplicate = true;
+      webhookId = existing.id;
     } else {
       // Record the event with proper column names
       const webhookEventType = mapEventType(source, eventTypeRaw);
@@ -240,10 +279,17 @@ async function ingestWebhookEvent(
         created_at: now,
       };
       
-      const { error: insertError } = await supabase.from('webhook_events').insert(insertData);
+      const { data: insertedEvent, error: insertError } = await supabase
+        .from('webhook_events')
+        .insert(insertData)
+        .select('id')
+        .single();
+        
       if (insertError) {
         throw new Error(`Failed to record webhook event: ${insertError.message}`);
       }
+      
+      webhookId = insertedEvent?.id ?? null;
     }
   }
 
@@ -251,69 +297,132 @@ async function ingestWebhookEvent(
     source,
     eventType: eventTypeRaw || 'unknown',
     svixId,
+    webhookId,
     duplicate,
     payload,
   };
 }
 
 /**
- * Process Polar webhook events
+ * Process Polar webhook events via Inngest
+ * 
+ * Forwards all Polar events to Inngest for durable, idempotent processing.
+ * This provides:
+ * - Automatic retries on failure
+ * - Idempotency via webhookId
+ * - Better observability in Inngest dashboard
+ * - Decoupled from webhook response time
+ * 
+ * The Inngest function handles:
+ * - order.paid → Activates job listing after payment
+ * - order.refunded → Handles refund processing
+ * - subscription.* → Handles subscription lifecycle
+ * - checkout.* → Logged for analytics
  */
 async function processPolarWebhook(
   result: WebhookIngestResult,
   logContext: Record<string, unknown>
-): Promise<void> {
-  const { eventType, payload } = result;
+): Promise<{ forwarded: boolean; eventName?: string; error?: string }> {
+  const { eventType, payload, webhookId, svixId } = result;
 
-  logger.info('Processing Polar webhook', {
+  logger.info('Forwarding Polar webhook to Inngest', {
     ...logContext,
     eventType,
+    webhookId,
   });
 
-  // Handle specific event types
-  switch (eventType) {
-    case 'subscription.created':
-    case 'subscription.updated':
-    case 'subscription.canceled': {
-      // Handle subscription events
-      const data = payload['data'];
-      let subscriptionId: string | undefined;
-      if (data && typeof data === 'object') {
-        const dataObj = data as Record<string, unknown>;
-        const id = dataObj['id'];
-        subscriptionId = typeof id === 'string' ? id : undefined;
-      }
-      logger.info('Polar subscription event', {
-        ...logContext,
-        eventType,
-        subscriptionId,
-      });
-      break;
-    }
+  // Validate webhookId (required for idempotency)
+  if (!webhookId) {
+    logger.warn('Polar webhook missing webhookId, cannot forward to Inngest', {
+      ...logContext,
+      eventType,
+      svixId,
+    });
+    return { forwarded: false, error: 'Missing webhookId' };
+  }
 
-    case 'checkout.completed':
-      // Handle checkout completion
-      logger.info('Polar checkout completed', {
-        ...logContext,
-        eventType,
-      });
-      break;
+  // Check if this is a supported event type
+  if (!POLAR_SUPPORTED_EVENTS.includes(eventType as PolarEventType)) {
+    logger.info('Polar event type not in supported list', {
+      ...logContext,
+      eventType,
+      supportedEvents: POLAR_SUPPORTED_EVENTS.join(', '),
+    });
+    // Still return success - event is recorded but not forwarded
+    return { forwarded: false };
+  }
 
-    default:
-      logger.info('Unhandled Polar event type', {
-        ...logContext,
+  // Extract metadata for the Inngest event
+  const jobId = getPolarMetadataValue<string>(payload, 'job_id');
+  const userId = getPolarMetadataValue<string>(payload, 'user_id');
+
+  try {
+    // Dynamic import to avoid circular dependencies
+    const { inngest } = await import('../../inngest/client');
+
+    await inngest.send({
+      name: 'polar/webhook',
+      data: {
         eventType,
-      });
+        webhookId,
+        svixId,
+        payload,
+        jobId: jobId ?? undefined,
+        userId: userId ?? undefined,
+      },
+    });
+
+    logger.info('Polar webhook forwarded to Inngest', {
+      ...logContext,
+      eventType,
+      webhookId,
+      jobId: jobId ?? null,
+      userId: userId ?? null,
+    });
+
+    return { forwarded: true, eventName: 'polar/webhook' };
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to forward Polar webhook to Inngest');
+    logger.error('Polar webhook forwarding failed', normalized, {
+      ...logContext,
+      eventType,
+      webhookId,
+    });
+
+    // Return error but don't fail the webhook
+    // The event is recorded in webhook_events table for manual retry
+    return { forwarded: false, error: normalized.message };
   }
 }
 
 /**
+ * Valid Resend event types that we forward to Inngest
+ */
+const RESEND_EVENT_TYPES = [
+  'email.sent',
+  'email.delivered',
+  'email.delivery_delayed',
+  'email.bounced',
+  'email.complained',
+  'email.opened',
+  'email.clicked',
+] as const;
+
+type ResendEventType = typeof RESEND_EVENT_TYPES[number];
+
+/**
  * Process Resend webhook events
+ * 
+ * Forwards all Resend events to Inngest for durable processing.
+ * This enables:
+ * - Automatic list hygiene (bounce/complaint handling)
+ * - Engagement tracking (opens/clicks)
+ * - Dynamic drip campaigns based on user behavior
  */
 async function processResendWebhook(
   result: WebhookIngestResult,
   logContext: Record<string, unknown>
-): Promise<void> {
+): Promise<{ forwarded: boolean; eventName?: string }> {
   const { eventType, payload } = result;
 
   logger.info('Processing Resend webhook', {
@@ -321,37 +430,105 @@ async function processResendWebhook(
     eventType,
   });
 
-  // Handle email events (bounces, complaints, etc.)
-  switch (eventType) {
-    case 'email.bounced':
-    case 'email.complained': {
-      // Handle email delivery issues - could update subscriber status
-      // Note: email address auto-hashed by pino redaction config
-      const emailData = payload['data'] as Record<string, unknown> | undefined;
-      const emailTo = emailData?.['to'] as string[] | undefined;
-      logger.warn('Email delivery issue', {
-        ...logContext,
-        eventType,
-        email: emailTo?.[0], // Auto-hashed by pino
-      });
-      break;
+  // Validate event type
+  if (!RESEND_EVENT_TYPES.includes(eventType as ResendEventType)) {
+    logger.info('Unhandled Resend event type', {
+      ...logContext,
+      eventType,
+      supportedTypes: RESEND_EVENT_TYPES.join(', '),
+    });
+    return { forwarded: false };
+  }
+
+  // Extract email data from payload
+  const emailData = payload['data'] as Record<string, unknown> | undefined;
+  
+  // Validate required fields before forwarding to Inngest
+  const emailId = emailData?.['email_id'];
+  const from = emailData?.['from'];
+  const to = emailData?.['to'] as string[] | undefined;
+  const subject = emailData?.['subject'];
+  
+  if (!emailId || typeof emailId !== 'string') {
+    logger.warn('Resend webhook missing required email_id field', {
+      ...logContext,
+      eventType,
+      hasEmailId: !!emailId,
+    });
+    return { forwarded: false };
+  }
+  
+  if (!from || typeof from !== 'string') {
+    logger.warn('Resend webhook missing required from field', {
+      ...logContext,
+      eventType,
+      emailId,
+      hasFrom: !!from,
+    });
+    return { forwarded: false };
+  }
+  
+  if (!to || !Array.isArray(to) || to.length === 0) {
+    logger.warn('Resend webhook missing required to field', {
+      ...logContext,
+      eventType,
+      emailId,
+      hasTo: !!to,
+    });
+    return { forwarded: false };
+  }
+  
+  // Forward to Inngest for durable processing
+  try {
+    // Dynamic import to avoid circular dependencies
+    const { inngest } = await import('../../inngest/client');
+    
+    const eventName = `resend/${eventType}` as `resend/${ResendEventType}`;
+    
+    // Build the event data from the validated payload
+    const clickData = emailData?.['click'];
+    const eventData: {
+      created_at: string;
+      email_id: string;
+      from: string;
+      to: string[];
+      subject: string;
+      click?: { link: string };
+    } = {
+      created_at: String(emailData?.['created_at'] ?? new Date().toISOString()),
+      email_id: emailId,
+      from: from,
+      to: to,
+      subject: String(subject ?? ''),
+    };
+    
+    if (clickData && typeof clickData === 'object') {
+      eventData.click = clickData as { link: string };
     }
+    
+    await inngest.send({
+      name: eventName,
+      data: eventData,
+    });
 
-    case 'email.delivered':
-    case 'email.opened':
-    case 'email.clicked':
-      // Engagement tracking
-      logger.info('Email engagement event', {
-        ...logContext,
-        eventType,
-      });
-      break;
+    logger.info('Resend event forwarded to Inngest', {
+      ...logContext,
+      eventType,
+      eventName,
+      emailId: eventData.email_id,
+    });
 
-    default:
-      logger.info('Unhandled Resend event type', {
-        ...logContext,
-        eventType,
-      });
+    return { forwarded: true, eventName };
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to forward Resend event to Inngest');
+    logger.error('Resend event forwarding failed', normalized, {
+      ...logContext,
+      eventType,
+    });
+    
+    // Don't fail the webhook - log and continue
+    // The event is already recorded in webhook_events table
+    return { forwarded: false };
   }
 }
 
@@ -390,6 +567,8 @@ export async function handleExternalWebhook(request: NextRequest): Promise<NextR
 
     const result = await ingestWebhookEvent(body, request.headers);
 
+    let processingResult: { forwarded?: boolean; eventName?: string; error?: string } = {};
+
     if (result.duplicate) {
       logger.info('Webhook already processed', {
         ...logContext,
@@ -403,13 +582,14 @@ export async function handleExternalWebhook(request: NextRequest): Promise<NextR
         source: result.source,
         eventType: result.eventType,
         svixId: result.svixId,
+        webhookId: result.webhookId,
       });
 
-      // Process based on source
+      // Process based on source - both Polar and Resend forward to Inngest
       if (result.source === 'polar') {
-        await processPolarWebhook(result, logContext);
+        processingResult = await processPolarWebhook(result, logContext);
       } else if (result.source === 'resend') {
-        await processResendWebhook(result, logContext);
+        processingResult = await processResendWebhook(result, logContext);
       }
     }
 
@@ -419,10 +599,19 @@ export async function handleExternalWebhook(request: NextRequest): Promise<NextR
       durationMs,
       source: result.source,
       duplicate: result.duplicate,
+      forwarded: processingResult.forwarded,
+      eventName: processingResult.eventName,
     });
 
     return NextResponse.json(
-      { message: 'OK', source: result.source, duplicate: result.duplicate },
+      { 
+        message: 'OK', 
+        source: result.source, 
+        duplicate: result.duplicate,
+        webhookId: result.webhookId,
+        forwarded: processingResult.forwarded,
+        ...(processingResult.eventName && { eventName: processingResult.eventName }),
+      },
       { status: 200, headers: WEBHOOK_CORS_HEADERS }
     );
   } catch (error) {

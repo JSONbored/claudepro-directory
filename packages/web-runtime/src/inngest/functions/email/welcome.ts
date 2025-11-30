@@ -30,6 +30,9 @@ export const sendWelcomeEmail = inngest.createFunction(
     id: 'email-welcome',
     name: 'Welcome Email',
     retries: 3,
+    // Idempotency: Use email + triggerSource to prevent duplicate welcome emails
+    // Same email with same trigger source will only be processed once
+    idempotency: 'event.data.email + "-" + event.data.triggerSource',
   },
   { event: 'email/welcome' },
   async ({ event, step }) => {

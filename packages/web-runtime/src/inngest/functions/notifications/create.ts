@@ -7,7 +7,6 @@
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
@@ -71,93 +70,95 @@ export const createNotification = inngest.createFunction(
       throw new Error('Invalid notification: message is required');
     }
 
-    // Validate action_href if provided
+    // Validate action_href if provided - only allow http(s) protocols
     if (action_href) {
-      // Must be a relative path starting with /
-      if (!action_href.startsWith('/')) {
-        logger.warn('Invalid action_href: must be a relative path', {
+      try {
+        const url = new URL(action_href);
+        if (!['http:', 'https:'].includes(url.protocol)) {
+          logger.warn('Invalid action_href: only http/https allowed', {
+            ...logContext,
+            action_href,
+          });
+          throw new Error('Invalid action_href: only http and https URLs are allowed');
+        }
+      } catch (urlError) {
+        if (urlError instanceof Error && urlError.message.includes('only http')) {
+          throw urlError; // Re-throw our validation error
+        }
+        logger.warn('Invalid action_href: invalid URL format', {
           ...logContext,
           action_href,
         });
-        throw new Error('Invalid action_href: must be a relative path starting with /');
+        throw new Error('Invalid action_href: must be a valid URL');
       }
     }
 
-    const result = await step.run('insert-notification', async (): Promise<{
-      success: boolean;
-      notificationId: string | null;
+    // Step 1: Create the notification
+    const notification = await step.run('create-notification', async (): Promise<{
+      id: string;
     }> => {
-      try {
-        const supabase = createSupabaseAdminClient();
+      const supabase = createSupabaseAdminClient();
 
-        // Generate an ID if not provided
-        const notificationId = id || crypto.randomUUID();
+      // Use provided ID or generate new one
+      const notificationId = id ?? crypto.randomUUID();
 
-        // Build notification data - type is required
-        const notificationData: DatabaseGenerated['public']['Tables']['notifications']['Insert'] = {
-          id: notificationId,
-          title: title.trim(),
-          message: message.trim(),
-          type: (type && isValidNotificationType(type) ? type : 'announcement') as NotificationType,
-        };
+      // Build notification data carefully to avoid exactOptionalPropertyTypes issues
+      const notificationData: DatabaseGenerated['public']['Tables']['notifications']['Insert'] = {
+        id: notificationId,
+        title: title.trim(),
+        message: message.trim(),
+        type: (type && isValidNotificationType(type) ? type : 'info') as NotificationType,
+        priority: (priority && isValidNotificationPriority(priority) ? priority : 'normal') as NotificationPriority,
+      };
 
-        // Add optional fields only if they have values
-        if (priority && isValidNotificationPriority(priority)) {
-          notificationData.priority = priority;
-        }
-        if (action_label) {
-          notificationData.action_label = action_label;
-        }
-        if (action_href) {
-          notificationData.action_href = action_href;
-        }
-
-        // Use upsert if ID provided for idempotency
-        const query = id
-          ? supabase.from('notifications').upsert(notificationData, { onConflict: 'id' }).select('id').single()
-          : supabase.from('notifications').insert(notificationData).select('id').single();
-
-        const { data, error } = await query;
-
-        if (error) {
-          throw error;
-        }
-
-        return { success: true, notificationId: data?.id ?? null };
-      } catch (error) {
-        const normalized = normalizeError(error, 'Notification insert failed');
-        logger.warn('Notification insert failed', {
-          ...logContext,
-          errorMessage: normalized.message,
-        });
-        throw normalized;
+      // Add optional fields only if they have values
+      if (action_label) {
+        notificationData.action_label = action_label;
       }
+      if (action_href) {
+        notificationData.action_href = action_href;
+      }
+
+      const { data, error } = await supabase
+        .from('notifications')
+        .insert(notificationData)
+        .select('id')
+        .single();
+
+      if (error) {
+        throw new Error(`Notification insert failed: ${error.message}`);
+      }
+
+      return { id: data.id };
+    });
+
+    // Step 2: Log the notification creation
+    await step.run('log-notification', async () => {
+      logger.info('Notification created successfully', {
+        ...logContext,
+        notificationId: notification.id,
+      });
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info('Notification created', {
+    logger.info('Create notification function completed', {
       ...logContext,
       durationMs,
-      notificationId: result.notificationId,
+      notificationId: notification.id,
     });
 
     return {
       success: true,
-      notificationId: result.notificationId,
+      notificationId: notification.id,
     };
   }
 );
 
 /**
- * Broadcast a notification to all active users
+ * Broadcast a notification (system-wide announcement)
  *
- * Event payload:
- * - title: string (required)
- * - message: string (required)
- * - type?: notification type
- * - priority?: notification priority
- * - action_label?: string
- * - action_href?: string
+ * Similar to createNotification but with different defaults
+ * and potentially different distribution logic.
  */
 export const broadcastNotification = inngest.createFunction(
   {
@@ -269,6 +270,7 @@ export const broadcastNotification = inngest.createFunction(
     return {
       success: true,
       notificationId: notification.id,
+      broadcast: true,
     };
   }
 );

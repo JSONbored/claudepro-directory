@@ -61,7 +61,7 @@ export const processDiscordErrorsQueue = inngest.createFunction(
     name: 'Process Discord Errors Queue',
     retries: 3,
   },
-  { cron: '*/5 * * * *' },
+  { cron: '*/15 * * * *' }, // Every 15 minutes (errors need faster alerts)
   async ({ step }) => {
     const requestId = generateRequestId();
     const logContext = createWebAppContextWithId(

@@ -44,6 +44,9 @@ export const subscribeNewsletter = inngest.createFunction(
     id: 'email-subscribe',
     name: 'Newsletter Subscribe',
     retries: 3,
+    // Idempotency: Use email to prevent duplicate subscriptions
+    // Same email will only be processed once (source changes don't matter for deduplication)
+    idempotency: 'event.data.email',
   },
   { event: 'email/subscribe' },
   async ({ event, step }) => {

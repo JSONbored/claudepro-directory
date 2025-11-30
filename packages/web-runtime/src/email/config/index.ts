@@ -36,3 +36,16 @@ export {
   CONTACT_FROM,
   type EmailTemplate,
 } from './email-config';
+
+// Email safety utilities (prevents dev email sends)
+export {
+  getEmailSafetyConfig,
+  checkEmailSafety,
+  logBlockedEmail,
+  checkMultipleRecipients,
+  createSafeEmailSender,
+  type EmailSafetyConfig,
+  type EmailSafetyCheckResult,
+  type BlockedEmailLog,
+  type SafeEmailResult,
+} from './email-safety';

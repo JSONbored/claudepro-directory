@@ -6,12 +6,12 @@
  * @module web-runtime/design-system/styles
  */
 
-export * from './layout.js';
-export * from './typography.js';
-export * from './cards.js';
-export * from './forms.js';
-export * from './buttons.js';
-export * from './badges.js';
-export * from './icons.js';
-export * from './interactive.js';
-export * from './position.js';
+export * from './layout';
+export * from './typography';
+export * from './cards';
+export * from './forms';
+export * from './buttons';
+export * from './badges';
+export * from './icons';
+export * from './interactive';
+export * from './position';
