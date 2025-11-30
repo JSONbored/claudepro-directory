@@ -141,6 +141,13 @@ export async function generateStaticParams() {
   }
 }
 
+/**
+ * Create page metadata for a company profile page based on the route slug.
+ *
+ * @param params - Promise-resolved route params containing the `slug` for the company page.
+ * @returns Page metadata for the company identified by `slug`.
+ * @see generatePageMetadata from @heyclaude/web-runtime/data
+ */
 export async function generateMetadata({ params }: CompanyPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/companies/:slug', {

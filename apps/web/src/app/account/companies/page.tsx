@@ -61,6 +61,14 @@ function isAllowedHttpUrl(url: null | string | undefined): boolean {
   }
 }
 
+/**
+ * Provide metadata for the "My Companies" page.
+ *
+ * Generates the Next.js Metadata for the /account/companies route using the shared page metadata builder.
+ *
+ * @returns The Metadata object used by Next.js for this page.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies');
 }

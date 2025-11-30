@@ -71,6 +71,14 @@ function humanizeStatus(value?: null | string): string {
   return toTitleCase(value);
 }
 
+/**
+ * Map a job plan enum value to its human-readable label.
+ *
+ * @param plan - The job plan enum (`'one-time'` or `'subscription'`), or `null`/`undefined`
+ * @returns The human-friendly label for the given plan; defaults to "One-Time" when `plan` is missing
+ *
+ * @see JOB_PLAN_LABELS
+ */
 function resolvePlanLabel(
   plan?: Database['public']['Enums']['job_plan'] | null
 ): string {
@@ -81,10 +89,10 @@ function resolvePlanLabel(
 }
 
 /**
- * Return a human-readable label for a job tier.
+ * Get a human-readable label for a job tier.
  *
- * @param tier - The job tier enum value; if `undefined` or `null`, the function uses the default `standard` tier.
- * @returns The friendly label for the provided `tier`; returns `Standard` when `tier` is missing.
+ * @param tier - The job tier enum value; if omitted, `standard` is used.
+ * @returns The friendly label for `tier`; `Standard` when `tier` is missing.
  *
  * @see JOB_TIER_LABELS
  */
@@ -98,10 +106,10 @@ function resolveTierLabel(
 }
 
 /**
- * Return the badge color token associated with a job status.
+ * Get the badge color token for a job status.
  *
  * @param status - The job status to resolve
- * @returns The badge color token (design-system token or CSS class) for the provided status
+ * @returns The badge color token for the provided status
  *
  * @see jobStatusBadge
  */
@@ -110,9 +118,9 @@ function getStatusColor(status: JobStatus): string {
 }
 
 /**
- * Generate page metadata for the "My Job Listings" account page.
+ * Provide page metadata for the '/account/jobs' (My Job Listings) route.
  *
- * Uses the shared page metadata helper to produce canonical metadata for the '/account/jobs' route.
+ * This metadata is consumed by Next.js to populate the page head for the account jobs page.
  *
  * @returns Metadata for the '/account/jobs' page
  * @see generatePageMetadata
@@ -126,19 +134,11 @@ interface MyJobsPageProperties {
 }
 
 /**
- * Renders the "My Job Listings" account page for the authenticated user, including job rows, billing summaries, and a payment confirmation banner when applicable.
+ * Render the account "My Job Listings" page showing the user's jobs, per-job billing details, and an optional payment confirmation banner.
  *
- * This server component:
- * - Ensures the user is authenticated and shows a sign-in prompt if not.
- * - Loads the user's dashboard data and per-job billing summaries, with structured logging on failures.
- * - Validates and normalizes job rows returned from the dashboard RPC.
- * - Shows per-job controls (edit, analytics, view, toggle status, delete) and billing information when present.
- * - Displays a payment success alert when `searchParams.payment === 'success'` and `searchParams.job_id` match a job.
+ * Server-side component rendered with dynamic SSR and Node.js runtime. Shows a sign-in prompt when no authenticated user is present, loads the user's dashboard and job billing summaries, validates job rows from RPC responses, and exposes per-job controls (edit, analytics, view, toggle status, delete).
  *
- * Notes:
- * - This page is configured for dynamic server-side rendering and Node.js runtime.
- *
- * @param searchParams - Optional query parameters from the page URL (may include `payment` and `job_id`) used to show payment state or target a specific job.
+ * @param searchParams - Optional URL query parameters; may include `payment` and `job_id` to surface a payment success banner for a specific job.
  * @returns The rendered JSX for the My Job Listings account page.
  *
  * @see getAuthenticatedUser

@@ -101,12 +101,12 @@ const commonQuestions = [
 ];
 
 /**
- * Render the Help Center page that displays help topics, common questions, quick actions, and contact options.
+ * Renders the Help Center page displaying help topics, common questions, quick actions, and contact options.
  *
- * This component is a presentational page built from static data: it renders topic cards with links, FAQ cards,
- * quick action tiles (Search, Guides, Contact Support), and a final call-to-action to contact support or join the community.
+ * This presentational component builds the page from static in-file data and uses UI primitives (cards, nav links, hover cards)
+ * to surface topics, FAQs, quick actions, and a final call-to-action for contacting support or joining the community.
  *
- * @returns The JSX element representing the Help Center page.
+ * @returns The `JSX.Element` for the Help Center page.
  *
  * @see APP_CONFIG
  * @see NavLink

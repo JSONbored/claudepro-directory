@@ -51,11 +51,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 /**
- * Handle POST requests for the Flux catch-all API route and forward them to the Flux router.
+ * Forwards POST requests to the Flux router for the matched catch-all path.
  *
- * @param {NextRequest} request - The incoming Next.js request for the POST operation.
- * @param {RouteContext} context - Route context containing a promise-resolved `params.path` array of path segments.
- * @returns {Promise<Response>} A Response produced by the Flux router for the given path and request.
+ * @param request - Incoming Next.js request for the POST operation.
+ * @param context - Route context whose `params.path` (resolved promise) contains path segments.
+ * @returns The Response produced by the Flux router for the given path and request.
  *
  * @see routeFluxRequest
  * @see generateRequestId
@@ -75,13 +75,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
 }
 
 /**
- * Handle CORS preflight and OPTIONS requests for the Flux catch-all API route.
+ * Produce a CORS preflight response for the Flux catch-all API route.
  *
- * Delegates to the runtime's `handleOptions` helper to produce the appropriate
- * preflight response with allowed methods and headers.
- *
- * @returns The `Response` produced by `handleOptions`, configured for CORS/preflight.
- * @see {@link @heyclaude/web-runtime/flux~handleOptions}
+ * @returns The HTTP Response configured for CORS preflight, including allowed methods and headers.
  */
 export function OPTIONS() {
   return handleOptions();

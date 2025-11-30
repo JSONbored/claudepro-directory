@@ -70,15 +70,13 @@ interface NavigationDesktopProps {
 }
 
 /**
- * Desktop-only primary navigation with dropdowns, grouped links, and a search trigger.
+ * Render the desktop (≥1280px) primary site navigation with dropdowns, grouped secondary links, footer quick links, and a search trigger.
  *
- * Renders the full site navigation for screens >= 1280px with dropdown menus for items that have children,
- * grouped secondary links under a "More" menu, footer quick links (Community, Partner Program, Consulting),
- * and a SearchTrigger that opens the command palette via the provided callback.
+ * Renders top-level navigation items (with optional child dropdowns), a "More" menu that groups secondary links and footer quick links (Community, Partner Program, Consulting), and a SearchTrigger that opens the command palette.
  *
- * @param isActive - Function that receives a path and returns whether that path is active; used to mark links as active.
- * @param onCommandPaletteOpen - Callback invoked when the search/command palette trigger is clicked.
- * @returns The navigation JSX element intended for desktop (xl) viewports.
+ * @param isActive - Function that receives a path and returns whether that path is active; used to mark links as active
+ * @param onCommandPaletteOpen - Callback invoked when the search/command palette trigger is clicked
+ * @returns The navigation JSX element for desktop (xl) viewports
  *
  * @see NavLink
  * @see SearchTrigger

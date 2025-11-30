@@ -29,10 +29,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Check if a sponsorship is currently active
- * A sponsorship is active if:
- * - The active flag is true (not null or false)
- * - Current date is between start_date and end_date (inclusive)
+ * Determine whether a sponsorship is currently active.
+ *
+ * @param sponsorship - Sponsorship record containing `active` and ISO date strings `start_date` and `end_date`
+ * @param now - Reference time to evaluate activity against
+ * @returns `true` if the sponsorship's `active` flag is `true` and `now` is between `start_date` and `end_date` (inclusive), `false` otherwise
+ *
+ * @see SponsorshipsPage
  */
 function isSponsorshipActive(
   sponsorship: { active: boolean | null; end_date: string; start_date: string; },
@@ -48,15 +51,11 @@ function isSponsorshipActive(
 /**
  * Render the account sponsorships overview page for the authenticated user.
  *
- * Renders one of the following states:
- * - Sign-in prompt when there is no authenticated user.
- * - Error message when loading sponsorships fails.
- * - Empty state when the user has no sponsorships.
- * - A list of sponsorship cards showing status badges, impressions/clicks/CTR, progress toward limits, and links to analytics when sponsorships exist.
+ * Displays one of: a sign-in prompt when unauthenticated, an error message on fetch failure, an empty-state when no sponsorships exist, or a grid of sponsorship cards showing status badges, impressions, clicks, CTR, progress toward limits, and links to analytics.
  *
- * This server component performs server-side data fetching for the current user's sponsorships and emits structured request- and user-scoped logs for auditing and diagnostics.
+ * Performs server-side fetching of the current user's sponsorships and emits structured request- and user-scoped logs for auditing and diagnostics.
  *
- * @returns The page's React element that displays the appropriate state or the sponsorships grid.
+ * @returns The React element for the sponsorships page or the appropriate alternative state (sign-in, error, or empty state).
  *
  * @see getAuthenticatedUser
  * @see getUserSponsorships

@@ -18,15 +18,16 @@ import {
 } from '@heyclaude/web-runtime/ui';
 
 /**
- * Render a styled table that displays a list of errors with codes, severity, messages, and solutions.
+ * Display a styled card table of errors with columns for code, severity, message, and solution.
  *
- * Renders a Card containing a table with columns: Error Code, Severity, Message, and Solution. Each row is keyed by error.code and shows a severity badge (styled and iconified for `critical`, `warning`, or `info`), the error message, and a suggested solution. If `description` is provided it is shown under the title.
+ * Renders each error as a table row keyed by `error.code`, showing a monospace code, a colored
+ * severity badge with an icon, the error message, and a suggested solution. If `description` is
+ * provided it is rendered below the title.
  *
- * @param props - Component props
  * @param props.title - Heading displayed in the card title
- * @param props.errors - Array of error objects to display. Each error should include `code`, `severity` (one of `"critical" | "warning" | "info"`), `message`, and `solution`
+ * @param props.errors - Array of errors to display. Each item must include `code`, `severity` (one of `"critical" | "warning" | "info"`), `message`, and `solution`
  * @param props.description - Optional descriptive text shown below the title
- * @returns The rendered ErrorTable JSX element
+ * @returns The rendered ErrorTable element
  *
  * @see UnifiedBadge
  * @see Card

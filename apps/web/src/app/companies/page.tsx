@@ -80,6 +80,13 @@ function getSafeWebsiteUrl(url: null | string | undefined): null | string {
   }
 }
 
+/**
+ * Provide page metadata for the Companies directory.
+ *
+ * @returns Metadata for the Companies directory page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/companies');
 }

@@ -46,6 +46,13 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = 86_400;
 
+/**
+ * Format a numeric statistic into a compact, human-readable string.
+ *
+ * @param value - The numeric value to format; `null`, `undefined`, or `NaN` are treated as zero.
+ * @returns The value formatted with compact notation and up to one decimal (e.g., `1.2K`), or `'0'` for missing/invalid input.
+ * @see Intl.NumberFormat
+ */
 function formatStatValue(value: null | number | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '0';
   return Intl.NumberFormat('en', {

@@ -52,6 +52,18 @@ interface PublicCollectionPageProperties {
   params: Promise<{ collectionSlug: string; slug: string; }>;
 }
 
+/**
+ * Produce metadata for a public user's collection page and warm the collection-detail cache.
+ *
+ * Attempts to fetch the collection detail to warm server-side caches; failures during that fetch
+ * are logged and do not prevent metadata generation.
+ *
+ * @param params - Object with a `params` promise that resolves to `{ collectionSlug, slug }`.
+ * @returns Page metadata for the public collection route (`/u/:slug/collections/:collectionSlug`).
+ *
+ * @see getPublicCollectionDetail
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: PublicCollectionPageProperties): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
 

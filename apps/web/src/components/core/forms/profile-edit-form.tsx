@@ -60,12 +60,12 @@ interface ProfileEditFormProps {
 }
 
 /**
- * Renders a profile edit form wired to React Hook Form and the generated Zod schema, allowing a user to edit and submit profile fields.
+ * Render a profile edit form populated from the given profile and wired to validation, state, and submission logic.
  *
- * The form handles validation, shows field-level errors, manages interests via ListItemManager, and submits updates through the updateProfile API while displaying contextual toasts.
+ * The form manages name, bio, work, website, social link, interests, visibility, and follower-email preferences; it validates input with `profileFormSchema`, allows editing interests via `ListItemManager`, and submits updates through `updateProfile` while showing contextual toasts.
  *
- * @param profile - Initial profile values used to populate the form. Expected to include fields such as `display_name`, `bio`, `work`, `website`, `social_x_link`, `interests`, `profile_public`, and `follow_email`. Missing fields are populated with sensible defaults.
- * @returns The JSX form element used to edit and submit a user's profile.
+ * @param profile - Initial profile values used to populate the form. Expected fields include `display_name`, `bio`, `work`, `website`, `social_x_link`, `interests`, `profile_public`, and `follow_email`; missing fields are filled with sensible defaults.
+ * @returns JSX element for editing and submitting a user's profile.
  *
  * @see ListItemManager
  * @see updateProfile
@@ -259,6 +259,15 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   );
 }
 
+/**
+ * Renders a button that triggers a profile refresh from an OAuth provider and shows a toast with the outcome.
+ *
+ * @param providerLabel - Human-readable name of the OAuth provider shown in the button label and success toast
+ * @returns The button element that initiates a profile refresh when clicked
+ *
+ * @see refreshProfileFromOAuth
+ * @see toasts
+ */
 export function RefreshProfileButton({ providerLabel }: { providerLabel: string }) {
   const [isPending, startTransition] = useTransition();
 

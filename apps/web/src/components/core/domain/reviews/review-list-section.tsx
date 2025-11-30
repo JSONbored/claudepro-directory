@@ -244,20 +244,20 @@ export function ReviewListSection({
 }
 
 /**
- * Renders a single review card with rating, text, and contextual actions (helpful, edit, delete).
+ * Render a single review card showing rating, relative date, review text, and contextual actions.
  *
- * Renders a read-only card for other users and an inline editable ReviewForm for the current user's review when `isEditing` is true. If required review fields are missing, returns `null`.
+ * When `isEditing` is true and the current user owns the review, renders an inline ReviewForm for editing; otherwise renders a read-only card. If essential review fields are missing, returns `null`.
  *
- * @param review - Review record with aggregated stats and related user data.
+ * @param review - Review record including aggregated stats and the related user object; required fields: `user`, `id`, and `rating`.
  * @param currentUserId - ID of the currently authenticated user; used to determine ownership and which actions to show.
- * @param contentType - Content category for the review (used when rendering or editing).
- * @param contentSlug - Content identifier used when editing the review.
- * @param onEdit - Callback invoked when the Edit action is requested.
- * @param onDelete - Callback invoked when the Delete action is requested.
+ * @param contentType - Content category for the review; forwarded to the ReviewForm when editing.
+ * @param contentSlug - Content identifier for the review; forwarded to the ReviewForm when editing.
+ * @param onEdit - Callback invoked when the user requests to edit their review.
+ * @param onDelete - Callback invoked when the user requests to delete their review.
  * @param isEditing - If true and the current user owns the review, render the editable ReviewForm instead of the read-only card.
  * @param onCancelEdit - Callback invoked after a successful edit or when editing is cancelled.
  *
- * @returns A card element displaying the review and available actions, or `null` if essential review data is missing.
+ * @returns A JSX element displaying the review and available actions, or `null` if essential review data is missing.
  *
  * @see ReviewForm
  * @see BaseCard

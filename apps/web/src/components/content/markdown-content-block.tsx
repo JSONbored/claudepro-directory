@@ -466,7 +466,21 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
 
 // ============================================================================
 // VARIANT 6: CONTENT TABS
-// ============================================================================
+/**
+ * Render a responsive tabbed content block from a list of labeled items.
+ *
+ * Renders an optional title and description, a responsive tab list, and a content panel for each item; returns null if `items` is empty or undefined.
+ *
+ * @param props.items - Array of tab items. Each item must include `value` (unique string), `label` (tab label), and `content` (JSX or text shown in the tab panel).
+ * @param props.title - Optional heading displayed above the tabs.
+ * @param props.description - Optional descriptive text displayed under the heading.
+ * @param props.defaultValue - Optional value of the tab to select by default; falls back to the first item's `value` when omitted.
+ *
+ * @returns `JSX.Element` containing the tabbed interface, or `null` when there are no items.
+ *
+ * @see Tabs
+ * @see UnifiedContentBlock
+ */
 
 function ContentTabsVariant(props: ContentTabsProps) {
   // Database CHECK constraint validates structure - no runtime validation needed

@@ -6,17 +6,17 @@ import type { ReviewRatingInteractiveProps } from '@heyclaude/web-runtime/types/
 import { Rating, RatingButton } from '@heyclaude/web-runtime/ui';
 
 /**
- * Renders an interactive star-based rating input allowing users to select a rating.
+ * Render an interactive star rating control that lets users select and optionally view a numeric rating.
  *
- * @param value - Current rating value (displayed and used as the selected value)
+ * @param value - Current rating value displayed and used as the selected value
  * @param max - Maximum number of stars to render
  * @param onChange - Callback invoked with the new rating value when the selection changes
- * @param size - Visual size preset for the star icons; one of "sm", "md", or "lg"
+ * @param size - Visual size preset for the star icons; one of `"sm"`, `"md"`, or `"lg"`
  * @param showValue - When true, displays the numeric rating value alongside the stars
  * @param className - Additional CSS classes applied to the component wrapper
- * @param aria-describedby - ID reference for an element that describes this control
- * @param aria-invalid - Indicates whether the current value is invalid for accessibility
- * @returns The rendered star rating UI element
+ * @param ariaDescribedby - ID reference for an element that describes this control (forwarded to the underlying rating)
+ * @param ariaInvalid - Indicates whether the current value is invalid for accessibility (forwarded to the underlying rating)
+ * @returns The rendered star rating React element
  *
  * @see Rating
  * @see RatingButton

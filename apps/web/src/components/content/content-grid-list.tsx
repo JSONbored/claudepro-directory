@@ -120,6 +120,28 @@ function ContentSearchSkeleton() {
   );
 }
 
+/**
+ * Renders a full content list page including a server-rendered hero, search area, sidebar, and newsletter CTA.
+ *
+ * This is a server component: the hero section is rendered on the server immediately, while interactive parts
+ * (search client and recently viewed sidebar) are loaded inside Suspense boundaries on the client.
+ *
+ * @param title - Page title displayed in the hero and passed to search
+ * @param description - Short descriptive text shown below the title
+ * @param icon - Icon name used for the hero decorative icon
+ * @param items - Array of content items to display and to seed search zero-state suggestions
+ * @param type - Content type identifier used for search and newsletter categorization
+ * @param searchPlaceholder - Placeholder text for the search input (defaults to `Search ${title.toLowerCase()}...`)
+ * @param badges - Optional badges to show in the hero; when omitted a default badge set is derived from `items` and `title`
+ * @param category - Optional category filter forwarded to the search client
+ *
+ * @returns The React element composing the content list page
+ *
+ * @see ContentHeroSection
+ * @see ContentSearchClient
+ * @see RecentlyViewedSidebar
+ * @see NewsletterCTAVariant
+ */
 export function ContentListServer<T extends DisplayableContent>({
   title,
   description,

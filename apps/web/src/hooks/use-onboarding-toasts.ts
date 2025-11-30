@@ -55,20 +55,29 @@ interface OnboardingToastsOptions {
 }
 
 /**
- * Manage onboarding toast notifications: determine whether to show toasts for a given context,
- * create server-side notifications when needed, persist "seen" state locally, and provide controls
- * to mark or reset seen state.
+ * Manage onboarding toast notifications for a given context and provide controls to mark or reset seen state.
  *
- * @param options.enabled - Whether the hook is active; when false no network or local checks occur
- * @param options.context - Context key used to scope onboarding toasts (e.g., `"wizard"`, `"submit"`)
- * @param options.customToasts - Optional custom list of onboarding toasts to create instead of defaults
- * @returns An object with the following properties:
- *   - hasSeenToasts: boolean — `true` if toasts for the provided context have been recorded as seen
- *   - activeToasts: Set<string> — IDs of toasts that were successfully created and are currently active
- *   - markToastsAsSeen: () => Promise<void> — mark current context toasts as seen (updates localStorage)
- *   - resetToasts: () => void — remove the seen flag for the current context from localStorage
- *   - resetAllToasts: () => void — clear all onboarding seen state from localStorage
- *   - isActive: boolean — `true` if there are any active toasts
+ * Creates server-side onboarding notifications when the current user has not yet seen toasts for the provided
+ * context, persists the "seen" state in localStorage, exposes IDs of active toasts, and offers utilities to
+ * mark or reset the seen state.
+ *
+ * @param options.enabled - boolean — Whether the hook is active; when false the hook performs no network or local checks (default: `true`)
+ * @param options.context - 'wizard' | 'submit' | 'general' — Context key used to scope onboarding toasts (default: `'wizard'`)
+ * @param options.customToasts - OnboardingToast[] | undefined — Optional custom list of onboarding toasts to create instead of the default set
+ * @returns {{
+ *   hasSeenToasts: boolean;
+ *   activeToasts: Set<string>;
+ *   markToastsAsSeen: () => Promise<void>;
+ *   resetToasts: () => void;
+ *   resetAllToasts: () => void;
+ *   isActive: boolean;
+ * }} An object with:
+ *   - hasSeenToasts: `true` if toasts for the provided context have been recorded as seen, `false` otherwise.
+ *   - activeToasts: IDs of toasts that were successfully created and are currently active.
+ *   - markToastsAsSeen: Marks the current context as seen in localStorage (and attempts server-side dismissal where applicable).
+ *   - resetToasts: Removes the seen flag for the current context from localStorage.
+ *   - resetAllToasts: Clears all onboarding seen state from localStorage.
+ *   - isActive: `true` if there are any active toasts (`activeToasts.size > 0`).
  */
 export function useOnboardingToasts({
   enabled = true,
@@ -279,7 +288,22 @@ export const ONBOARDING_TOASTS_BY_CONTEXT = {
 } as const;
 
 /**
- * Manual toast trigger for specific onboarding moments
+ * Trigger a one-off onboarding toast and optionally persist that it was shown.
+ *
+ * If a `storageKey` is provided and a corresponding entry exists in localStorage,
+ * the function returns immediately without showing the toast. When a `storageKey`
+ * is provided and the toast is shown, the function marks it as seen by storing
+ * `onboarding_<storageKey> = "true"` in localStorage.
+ *
+ * Access to localStorage is best-effort: any errors reading or writing are
+ * swallowed and do not throw.
+ *
+ * @param _title - The toast title
+ * @param _message - The toast message body
+ * @param options.duration - Optional display duration in milliseconds
+ * @param options.storageKey - Optional key fragment used to persist that this specific toast was shown
+ * @returns void
+ * @see useOnboardingToasts
  */
 export function showOnboardingToast(
   _title: string,

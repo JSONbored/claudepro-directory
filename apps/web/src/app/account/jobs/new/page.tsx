@@ -15,6 +15,13 @@ import { JobForm } from '@/src/components/core/forms/job-form';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Provide page metadata for the "/account/jobs/new" route.
+ *
+ * @returns Page metadata for the "/account/jobs/new" route.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/jobs/new');
 }
@@ -63,6 +70,24 @@ export default async function NewJobPage() {
     // planCatalog remains [] - JobForm will use legacy fallback
   }
 
+  /**
+   * Server action that creates a job and handles the post-creation flow (redirect or checkout).
+   *
+   * Attempts to create a job with the provided input, handles RPC and server errors by throwing a normalized error,
+   * initiates a checkout flow when payment is required by returning a payload with a `checkoutUrl`, or redirects to
+   * the jobs list when creation succeeds without payment.
+   *
+   * @param data - Job creation input payload
+   * @returns When payment is required: an object with `{ success: true, requiresPayment: true, checkoutUrl, message }`
+   *          if a checkout URL was produced, or `{ success: false, requiresPayment: true, message }` if checkout could not
+   *          be started. When creation unexpectedly fails: `{ success: false, message }`. When creation succeeds and no
+   *          payment is required the function redirects to `/account/jobs` and does not return.
+   * @throws NormalizedError when the createJob call throws, when the RPC returns `serverError`, or when `data` is missing
+   *         from the RPC result.
+   *
+   * @see createJob
+   * @see generateRequestId
+   */
   async function handleSubmit(data: CreateJobInput) {
     'use server';
 

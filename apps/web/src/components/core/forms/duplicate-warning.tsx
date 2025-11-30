@@ -14,7 +14,13 @@ interface DuplicateWarningProps {
 }
 
 /**
- * Simple debounce hook
+ * Debounces a value and returns the most recent value only after it has remained unchanged for the specified delay.
+ *
+ * This hook updates the returned value when `value` has not changed for `delay` milliseconds.
+ *
+ * @param value - The input value to debounce
+ * @param delay - Time in milliseconds to wait after the last change before updating the returned value
+ * @returns The debounced `value` that updates only after `delay` ms of no changes
  */
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);

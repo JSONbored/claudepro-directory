@@ -21,7 +21,7 @@ interface NotificationItemProps {
 /**
  * Render a notification card with a dismiss control and an optional action button or link.
  *
- * @param props.notification - Notification record containing title, message, type, action_label, action_href, and id.
+ * @param notification - Notification record containing `id`, `title`, `message`, `type`, and optional `action_label` and `action_href`.
  * @returns The JSX element representing the notification item.
  *
  * @see useNotificationsContext

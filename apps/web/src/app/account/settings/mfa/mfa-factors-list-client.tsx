@@ -9,16 +9,12 @@ import { EnrollMFADialog } from '@/src/components/features/account/mfa/enroll-mf
 import { MFAFactorsList } from '@/src/components/features/account/mfa/mfa-factors-list';
 
 /**
- * Renders the client-side MFA factors UI with controls to add and refresh authenticators.
+ * Render the client-side MFA factors UI with controls to add authenticators and refresh the list.
  *
- * The component shows an "Add Authenticator" button that opens an enrollment dialog,
- * renders the MFA factors list, and refreshes the list whenever an authenticator is
- * enrolled or unenrolled.
+ * Shows an "Add Authenticator" button that opens an enrollment dialog, renders the MFA factors list,
+ * and refreshes the list when an authenticator is enrolled or unenrolled.
  *
- * @returns A JSX element containing:
- *  - a right-aligned "Add Authenticator" button,
- *  - an MFAFactorsList that re-mounts on changes to trigger refreshes,
- *  - an EnrollMFADialog controlled by the button and callbacks.
+ * @returns A JSX element containing the "Add Authenticator" button, the MFAFactorsList, and the EnrollMFADialog.
  *
  * @see {@link MFAFactorsList}
  * @see {@link EnrollMFADialog}

@@ -38,24 +38,29 @@ const NewsletterCTAVariant = dynamicImport(
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 900; // 15 minutes for trending data
+export const revalidate = 900; /**
+ * Produce metadata for the /trending route.
+ *
+ * @returns A Metadata object describing the /trending page.
+ * @see generatePageMetadata
+ * @see revalidate
+ */
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/trending');
 }
 
 /**
- * Render the Trending page by fetching and displaying trending, popular, and recent configurations based on optional search parameters.
+ * Render the Trending page showing trending, popular, and recent configurations based on URL search parameters.
  *
- * This server component:
- * - Reads and normalizes `searchParams.category` (supports string or array) and `searchParams.limit` (defaults to 12, capped at 100).
- * - Validates the category; if invalid, logs a warning and falls back to the default (all categories).
- * - Fetches page data for trending, popular, and recent items, logs counts for each section, maps results into displayable items, and renders the page layout including badges, content sections, and a newsletter CTA.
+ * Fetches server-side data (trending, popular, recent) according to the provided `searchParams`, maps results into displayable items, and renders the page layout including header badges, content sections, and a newsletter CTA.
  *
- * @param searchParams - Object containing URL search parameters. Recognized keys:
- *   - `category`: optional string or string[] to scope results; the first value is used when an array is provided.
- *   - `limit`: optional numeric limit for items (defaults to 12, maximum 100).
- * @returns A React element representing the complete Trending page layout and content.
+ * @param searchParams - Object of URL search parameters. Recognized keys:
+ *   - `category`: optional string or string[] to scope results; when an array the first value is used.
+ *   - `limit`: optional numeric limit for items; defaults to 12 and is capped at 100.
+ * @returns A React element representing the complete Trending page populated with fetched content.
+ *
+ * @remarks This server component performs data fetching and participates in Next.js incremental static regeneration; the file-level `revalidate` is set to 900 (15 minutes).
  *
  * @see getTrendingPageData
  * @see mapTrendingMetrics
@@ -266,6 +271,21 @@ function mapRecentContent(
   });
 }
 
+/**
+ * Normalize a raw content record into a HomepageContentItem for homepage display.
+ *
+ * Produces consistent defaults for missing fields, resolves a timestamp from `created_at` or `date_added`
+ * (falling back to the current time), ensures arrays and counts are present, and marks the item as featured
+ * when a `featuredScore` is provided.
+ *
+ * @param input - Raw content values from the database or API; optional fields will be normalized.
+ * @returns A `HomepageContentItem` with normalized `slug`, `title`, `description`, `author`, `tags`, `source`,
+ * `created_at`, `date_added`, `category`, `view_count`, `copy_count`, and a boolean `featured` flag.
+ *
+ * @see mapTrendingMetrics
+ * @see mapPopularContent
+ * @see mapRecentContent
+ */
 function toHomepageContentItem(input: {
   author?: null | string;
   category: Database['public']['Enums']['content_category'];

@@ -135,12 +135,12 @@ interface SubmitFormClientProps {
 }
 
 /**
- * Renders a multi-section submission form for creating content review requests using an uncontrolled form pattern.
+ * Render a multi-section submission form for creating content review requests.
  *
- * The form extracts values via FormData on submit and only uses React state for UI concerns that require reactivity (type switching, duplicate-name checking, description preview, submission status, and loading state). It includes template pre-fill, dynamic type-specific fields, client-side required-field enforcement based on provided formConfig, examples parsing, and a server RPC call to create the submission.
+ * Supports template pre-fill, dynamic type-specific fields, client-side required-field enforcement based on formConfig, examples parsing, duplicate-name checking, and server-side submission via submitContentForReview.
  *
- * @param formConfig - Mapping of submission content types to their corresponding form section definitions; used to render common, type-specific, name, and tag fields and to determine required fields at submit time.
- * @param templates - Array of merged content templates shown in the Quick Start template selector; selecting a template pre-fills form inputs by name.
+ * @param formConfig - Mapping of submission content types to their form section definitions used to render common, type-specific, name, and tag fields and to derive required fields at submit time.
+ * @param templates - Array of merged content templates shown in the Quick Start template selector; selecting a template pre-fills form inputs.
  *
  * @see TemplateSelector
  * @see submitContentForReview

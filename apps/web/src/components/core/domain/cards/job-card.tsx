@@ -21,9 +21,17 @@ import { Button } from '@heyclaude/web-runtime/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 /**
- * Validate and sanitize job application link.
- * Enforces HTTPS protocol and removes credentials.
- * Returns '#' for any invalid URLs.
+ * Return a sanitized HTTPS job application URL or a fallback '#'.
+ *
+ * Normalizes and validates the provided link: enforces the `https` protocol,
+ * strips username/password credentials, lowercases and trims a trailing dot
+ * from the hostname, and removes the default `443` port. If the input is
+ * missing, not a string, invalid, or not `https`, returns `'#'`.
+ *
+ * @param link - The candidate URL to validate and sanitize; may be `null` or `undefined`.
+ * @returns The sanitized HTTPS URL string, or `'#'` if the link is invalid or not HTTPS.
+ *
+ * @see JobCard - uses this helper to sanitize external job application links.
  */
 function getSafeJobLink(link?: string | null): string {
   if (!link || typeof link !== 'string') return '#';

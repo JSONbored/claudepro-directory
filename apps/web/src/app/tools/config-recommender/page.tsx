@@ -55,7 +55,17 @@ const NewsletterCTAVariant = dynamicImport(
  */
 export const revalidate = 86_400;
 
-// Generate metadata from centralized registry
+/**
+ * Produces metadata for the Config Recommender page.
+ *
+ * Delegates to the centralized metadata registry to build the metadata for the
+ * '/tools/config-recommender' route.
+ *
+ * @returns Page metadata for the Config Recommender route.
+ *
+ * @see generatePageMetadata
+ * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/tools/config-recommender');
 }

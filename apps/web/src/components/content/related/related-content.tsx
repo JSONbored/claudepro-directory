@@ -67,6 +67,15 @@ function getMatchTypeBadge(matchType: string): {
   return badges[matchType] || { label: 'Related', variant: 'outline' };
 }
 
+/**
+ * Extracts the first path segment from a pathname to determine the content category.
+ *
+ * @param pathname - A URL pathname (may include leading/trailing slashes). If `undefined`, it is treated as missing.
+ * @returns The first non-empty segment from `pathname` (the category), or `'unknown'` if no segment is available.
+ *
+ * @see getRelatedContent
+ * @see RelatedContentClient
+ */
 function getCategoryFromPath(pathname: string | undefined): string {
   if (!pathname) return 'unknown';
   const pathParts = pathname.split('/').filter(Boolean);

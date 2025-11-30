@@ -51,12 +51,12 @@ const NotificationsContext = createContext<NotificationsContextValue | null>(nul
 const DISMISSED_STORAGE_KEY = 'notification-storage';
 
 /**
- * Exposes notification state, controls, and feature-flagged behaviors to descendant components.
+ * Provides notification state, controls, and feature flags to descendant components via context.
  *
- * Provides a context value containing the current notifications, unread count, methods to dismiss a single
- * notification or all notifications, sheet controls (open/close/toggle), derived feature flags, and a manual
- * refresh function. Dismissed notification IDs are persisted to localStorage and synced to the server; notifications
- * are refreshed on mount and periodically while enabled and the user is authenticated.
+ * Exposes the current notifications and unread count, functions to dismiss a single notification or all notifications,
+ * sheet controls (open/close/toggle), derived layout feature flags, and a manual refresh function. Dismissed notification
+ * IDs are persisted to localStorage and synchronized to the server. Notification fetching and dismissal actions are
+ * gated to authenticated users and occur after authentication state is resolved.
  *
  * @param children - React children that will receive the notifications context
  *

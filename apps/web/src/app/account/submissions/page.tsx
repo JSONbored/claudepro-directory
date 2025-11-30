@@ -167,7 +167,18 @@ function isSafeType(type: string): type is Database['public']['Enums']['submissi
   return (ALLOWED_TYPES as readonly string[]).includes(type);
 }
 
-// Safe URL constructor - validates both type and slug before constructing
+/**
+ * Constructs a canonical content path for a submission when the submission type and slug are valid.
+ *
+ * Validates the submission `type` and `slug` using runtime helpers and returns the path `/type/slug` only if both are accepted.
+ *
+ * @param type - A value from the `submission_type` enum; must be one of the allowed submission types.
+ * @param slug - A content slug consisting of lowercase letters, digits, hyphens, or underscores (no dots, separators, or encoded characters).
+ * @returns The path string `/type/slug` if `type` and `slug` are valid, `null` otherwise.
+ *
+ * @see isSafeType
+ * @see isValidSlug
+ */
 function getSafeContentUrl(
   type: Database['public']['Enums']['submission_type'],
   slug: string

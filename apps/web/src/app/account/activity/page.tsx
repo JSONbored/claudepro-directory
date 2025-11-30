@@ -26,20 +26,26 @@ import { ActivityTimeline } from '@/src/components/features/user-activity/activi
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Produce the page metadata for the "/account/activity" route.
+ *
+ * @returns The Next.js `Metadata` object used to populate the activity page's head/meta.
+ *
+ * @see generatePageMetadata
+ * @see https://nextjs.org/docs/app/building-your-application/metadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/activity');
 }
 
 /**
- * Renders the Account Activity page: authenticates the user, fetches activity summary and timeline,
- * and returns a UI that adapts to authentication state and partial data availability.
+ * Render the Account Activity page and adapt the UI based on authentication and available activity data.
  *
- * Fetch behavior:
- * - Authenticates the request-scoped user.
- * - Loads activity summary and timeline in parallel and tolerates partial failures (renders available sections).
- * - Logs authentication, data-fetch outcomes, and render completion with request-scoped and user-scoped context.
+ * Loads the authenticated user, fetches activity summary and timeline in parallel (tolerating partial failures),
+ * logs authentication and data-fetch outcomes with request- and user-scoped context, and conditionally renders
+ * summary and timeline sections or appropriate fallbacks.
  *
- * @returns The rendered Activity page as a React element.
+ * @returns The Activity page React element
  *
  * @see getAuthenticatedUser
  * @see getActivitySummary

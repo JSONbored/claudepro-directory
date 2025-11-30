@@ -48,9 +48,17 @@ export const revalidate = 7200;
 export const dynamicParams = true; // Allow older changelog entries to be rendered on-demand
 
 /**
- * Generate static params for recent changelog entries
- * Pre-renders top 20 entries to optimize build time while maintaining SEO coverage
- * Older entries are rendered on-demand via ISR (revalidate = 7200s)
+ * Generate static route parameters for the most recent changelog entries.
+ *
+ * Pre-renders the top 20 changelog entries to limit build-time work; older entries
+ * are available on-demand via ISR (revalidate = 7200s) when requested.
+ *
+ * @returns An array of params objects `{ slug: string }` for the changelog entries to pre-render, limited to the most recent 20 entries.
+ *
+ * @see getAllChangelogEntries
+ * @see export const revalidate
+ * @see export const dynamicParams
+ * @see getChangelogEntryBySlug
  */
 export async function generateStaticParams() {
   // Limit to top 20 changelog entries (most recent) to optimize build time
@@ -83,7 +91,15 @@ export async function generateStaticParams() {
 }
 
 /**
- * Generate metadata for changelog detail page
+ * Generate page metadata for a changelog entry identified by its slug.
+ *
+ * Attempts to load the changelog entry and produces canonical metadata used by Next.js for the detail page.
+ *
+ * @param params - A promise resolving to route params containing `slug`
+ * @returns Metadata for the changelog entry page; if the entry cannot be loaded, returns metadata generated without item data
+ *
+ * @see getChangelogEntryBySlug
+ * @see generatePageMetadata
  */
 export async function generateMetadata({
   params,
@@ -122,19 +138,22 @@ export async function generateMetadata({
 }
 
 /**
- * Render the changelog detail page for a given entry slug.
+ * Render the changelog entry page for the given slug.
  *
- * Fetches the changelog entry by slug, initializes a request-scoped logger, and returns the full page UI
- * including read progress, view tracking, structured data, meta (canonical) link, and rendered changelog content.
+ * Fetches the changelog entry, renders page-level UI (read progress, view tracking, structured data),
+ * and returns the complete article for the changelog entry. If the entry cannot be found the route
+ * will trigger a 404 response.
  *
- * @param params - An object containing the route params; must resolve to `{ slug: string }`.
- * @returns The rendered React element for the changelog entry page.
- * @throws Will throw a normalized error if loading the changelog entry fails.
+ * @param params - A promise that resolves to an object with the route params: `{ slug: string }`
+ * @returns The React element that renders the changelog entry page
+ * @throws A normalized error if loading the changelog entry fails
+ *
  * @see getChangelogEntryBySlug
  * @see ReadProgress
  * @see Pulse
  * @see StructuredData
  * @see ChangelogContent
+ * @see revalidate — ISR interval for this page (defined in the same module)
  */
 export default async function ChangelogEntryPage({
   params,

@@ -50,9 +50,9 @@ const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon>
 };
 
 /**
- * Renders a styled card wrapper with a header (icon and title), optional description, and content.
+ * Render a styled card with a header containing an icon, title, optional description, and the supplied content.
  *
- * Chooses an icon from the `category` mapping when provided; otherwise uses the supplied `icon`.
+ * If `category` is provided, uses the corresponding icon from `ICONS`; otherwise uses the `icon` prop.
  *
  * @param title - Header title text shown next to the icon
  * @param description - Optional header description rendered beneath the title
@@ -60,7 +60,7 @@ const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon>
  * @param category - Optional content category key used to select an icon from `ICONS`
  * @param className - Optional additional class names applied to the outer Card
  * @param children - Content rendered inside the card body
- * @returns A React element that displays a card with a header (icon, title, optional description) and the provided children
+ * @returns A JSX element representing the composed card
  *
  * @see ICONS
  * @see Card
@@ -116,7 +116,22 @@ function downloadTextFile(filename: string, content: string) {
 }
 
 /**
- * Tabbed code group component for displaying multiple code blocks in tabs
+ * Render a tabbed interface that displays multiple code blocks and allows downloading the active block.
+ *
+ * Renders one tab per block using the block's `label`, shows the currently active block in a code viewer,
+ * and exposes a download button when the active block has a `filename`.
+ *
+ * @param props.blocks - Array of code block objects. Each block must include:
+ *   - `html`: rendered HTML for the code block
+ *   - `code`: raw code text
+ *   - `language`: language identifier for syntax highlighting
+ *   - `label`: tab label
+ *   - `filename` (optional): when present, enables a download button for that block
+ * @param props.onDownload - Optional callback invoked after a block's code is downloaded
+ * @returns A React element containing the tabbed code group, or `null` when no active block exists.
+ *
+ * @see ProductionCodeBlock
+ * @see downloadTextFile
  */
 function CodeGroupTabs({
   blocks,
@@ -187,11 +202,11 @@ function CodeGroupTabs({
 }
 
 /**
- * Renders a vertical list of text items where each item is prefixed by a colored dot.
+ * Render a vertical list of text items each prefixed by a colored dot.
  *
- * @param props.items - Array of item strings to render; each string is used as the visible label and as the stable key (first 50 characters).
- * @param props.color - Tailwind class or classes applied to the dot to indicate color (for example `"bg-green-500"`).
- * @returns A `<ul>` element containing the rendered list items.
+ * @param items - Array of strings to display as list items.
+ * @param color - Tailwind class or classes applied to the dot (for example, `"bg-green-500"`).
+ * @returns The rendered `<ul>` element containing the list items.
  *
  * @see EnhancedList
  * @see Wrapper
@@ -217,15 +232,14 @@ const getEnhancedListKey = (item: EnhancedListItem, index: number) =>
     : `enhanced-object-${item.issue}-${item.solution.slice(0, 50)}-${index}`;
 
 /**
- * Render a vertical list where each entry is either a simple text item or an issue/solution pair with a colored leading dot.
+ * Render a vertical list of enhanced items with a colored leading dot.
  *
- * The component accepts an array of items where each item is either a string (rendered as a single-line list entry)
- * or an object with `issue` and `solution` fields (rendered as a titled issue with a nested solution). Each list entry
- * is prefixed by a small dot whose color is controlled by the `color` class string.
+ * Items may be plain strings (rendered as a single-line entry) or objects with `issue` and `solution`
+ * (rendered as a titled issue with a supporting solution line).
  *
- * @param items - Array of items to render. Each item is either a `string` or an object `{ issue: string; solution: string }`.
- * @param color - Tailwind (or utility) class string applied to the leading dot for each item (controls dot color).
- * @returns The rendered unordered list JSX element containing the provided items.
+ * @param items - Array of items to render; each item is either a `string` or an object `{ issue: string; solution: string }`.
+ * @param color - Utility class string applied to the leading dot for each item (controls dot color).
+ * @returns A `<ul>` JSX element containing the rendered list items.
  *
  * @see getEnhancedListKey
  * @see List
@@ -260,15 +274,13 @@ type PlatformStep =
   | { type: 'text'; text: string };
 
 /**
- * Renders a titled platform setup section with ordered steps and optional configuration paths.
+ * Render a platform-specific setup section with ordered steps and optional configuration paths.
  *
- * Renders each step as either a Bash code block (for `command` steps) or an inline text bullet (for `text` steps). When `paths` is provided, renders a "Configuration Paths" list with labeled badges and code-styled paths.
+ * Each step is rendered either as a labeled Bash code block (for `command` steps) or as an inline bullet (for `text` steps). When `paths` is provided, a "Configuration Paths" list is shown with labeled badges and code-styled paths.
  *
- * @param name - Display name of the platform used in the section header and to derive filenames for command steps
- * @param steps - Ordered array of steps to render. Each step is either:
- *   - `{ type: 'command', html, code }` — rendered as a Bash code block with a generated filename
- *   - `{ type: 'text', text }` — rendered as an inline text bullet
- * @param paths - Optional mapping of configuration key to filesystem path shown under "Configuration Paths"
+ * @param name - Display name shown in the section header and used to derive filenames for command steps
+ * @param steps - Ordered steps to render; each step is either `{ type: 'command', html, code }` or `{ type: 'text', text }`
+ * @param paths - Optional mapping of configuration keys to filesystem paths displayed under "Configuration Paths"
  * @returns A JSX element containing the platform header, rendered steps, and optional configuration paths section
  *
  * @see ProductionCodeBlock
@@ -331,6 +343,26 @@ function Platform({
   );
 }
 
+/**
+ * Render a unified, variant-driven content section (lists, code blocks, examples, configuration, installation).
+ *
+ * Renders one of several layout variants based on props.variant: simple lists, enhanced lists with issue/solution items,
+ * single or grouped code blocks with optional download buttons, usage examples, configuration blocks (including multi/hook formats),
+ * and installation steps composed of Platform sections. When a content block exposes a filename, downloading that file will
+ * attempt to track the download via the pulse tracking client obtained from usePulse; tracking failures are logged but do not affect UI behavior.
+ *
+ * @param props - Properties controlling the rendered variant and its content
+ * @returns A JSX element for the requested unified section, or `null` when there is nothing to render for the given props
+ *
+ * @see Wrapper
+ * @see ProductionCodeBlock
+ * @see CodeGroupTabs
+ * @see Platform
+ * @see List
+ * @see EnhancedList
+ * @see downloadTextFile
+ * @see usePulse
+ */
 export default function UnifiedSection(props: UnifiedSectionProps) {
   const pulse = usePulse();
   const baseItem = 'item' in props ? props.item : undefined;
