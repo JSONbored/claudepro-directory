@@ -5,10 +5,17 @@
  * Zero initial bundle impact - all services lazy-loaded
  */
 
-import { isProduction } from '@heyclaude/shared-runtime/schemas/env';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
+
+/**
+ * CRITICAL: Direct reference to process.env.NODE_ENV
+ * Next.js inlines this at build time. Do NOT use dynamic env lookups here!
+ * The shared-runtime isProduction uses dynamic lookup which doesn't work client-side.
+ */
+// eslint-disable-next-line architectural-rules/require-env-validation-schema -- NODE_ENV is inlined by Next.js at build time, not a runtime lookup
+const isProduction = process.env.NODE_ENV === 'production';
 
 const VercelPulse = dynamic(
   () =>

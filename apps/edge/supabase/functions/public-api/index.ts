@@ -5,6 +5,7 @@
 import { analytics } from '@heyclaude/edge-runtime/middleware/analytics.ts';
 import { buildStandardContext, type StandardContext } from '@heyclaude/edge-runtime/utils/context.ts';
 import { chain } from '@heyclaude/edge-runtime/middleware/chain.ts';
+import type { Handler } from '@heyclaude/edge-runtime/middleware/types.ts';
 import type { HttpMethod } from '@heyclaude/edge-runtime/utils/router.ts';
 import { jsonResponse } from '@heyclaude/edge-runtime/utils/http.ts';
 import { rateLimit } from '@heyclaude/edge-runtime/middleware/rate-limit.ts';
@@ -162,7 +163,7 @@ serveEdgeApp<PublicApiContext>({
     const handler = ROUTE_HANDLERS[route.name];
     if (!handler) throw new Error(`Missing handler for route: ${route.name}`);
 
-    let chainHandler = handler;
+    let chainHandler: Handler<PublicApiContext> = handler;
 
     // Apply rate limit if configured
     if (route.rateLimit) {

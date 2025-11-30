@@ -114,10 +114,7 @@ function isValidPulseEvent(value: unknown): value is PulseEvent {
   );
 }
 
-// PulseEventExtended adds generic metadata typing for extended use cases
-interface PulseEventExtended extends PulseEvent {
-  metadata?: unknown | null;
-}
+// Note: PulseEventExtended was removed as it was unused
 
 interface PulseQueueMessage {
   msg_id: bigint;

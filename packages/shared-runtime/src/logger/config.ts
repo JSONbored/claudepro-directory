@@ -1160,6 +1160,31 @@ function defaultStreamWrite(s: string): string {
   return result;
 }
 
+/**
+ * Construct a complete Pino logger configuration with sensible defaults, privacy-minded redaction, serializers, hooks, mixin context, and optional transports.
+ *
+ * The returned configuration:
+ * - Merges provided options with secure defaults (redaction paths, censoring that hashes user IDs, serializers for user/db/request/response).
+ * - Builds a base context including BASE_CONTEXT plus optional service/name and any provided base fields.
+ * - Provides a default mixin that injects bindings (requestId, operation, userId, module, route, etc.) and observability flags (hasDbQuery, hasUser, hasError, isErrorLevel) unless those fields are explicitly provided on the log call.
+ * - Supplies a default logMethod that samples debug/trace logs to ~10% in production to reduce volume (sampling is deterministic based on a simple hash of the log payload).
+ * - Uses defaultStreamWrite for final-string sanitization unless a custom streamWrite hook is provided.
+ * - Automatically enables pino-pretty in development when appropriate, but never configures transports in detected edge runtimes (Deno or Vercel Edge). A custom transport in options will be used only in non-edge environments.
+ *
+ * Edge cases and behavior:
+ * - Redaction: SENSITIVE_PATTERNS are always included; user-provided redact can be an array or object and will be merged. The default censor hashes known user ID paths; a custom censor may override this when an object redact is supplied.
+ * - Transports/pretty-print: Transports (including pino-pretty) are explicitly disabled in edge runtimes (Deno, Vercel Edge). prettyPrint:'auto' enables pino-pretty in Node.js development when no transport is provided.
+ * - Sampling: Debug/trace sampling runs only when NODE_ENV === 'production' and does not affect higher-severity levels.
+ *
+ * @param {PinoConfigOptions | undefined} options - Optional overrides for logger behavior (redaction, serializers, hooks, mixin, transport, levels, browser settings, etc.).
+ * @returns {pino.LoggerOptions} A fully assembled Pino LoggerOptions object suitable for passing to pino().
+ * @see SENSITIVE_PATTERNS
+ * @see hashUserIdCensor
+ * @see defaultStreamWrite
+ * @example
+ * const config = createPinoConfig({ service: 'my-service', prettyPrint: 'auto' });
+ * const logger = pino(config);
+ */
 export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOptions {
   const loggerConsoleEnabled = typeof process !== 'undefined' && process.env['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
   const loggerVerbose = typeof process !== 'undefined' && process.env['NEXT_PUBLIC_LOGGER_VERBOSE'] === 'true';
@@ -1821,15 +1846,28 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for Edge compatibility
   const isDevelopment = typeof process !== 'undefined' && process.env?.['NODE_ENV'] !== 'production';
   const prettyPrintSetting = options?.prettyPrint ?? 'auto';
-  const shouldPrettyPrint = 
-    prettyPrintSetting === true || 
-    (prettyPrintSetting === 'auto' && isDevelopment && !options?.transport);
   
-  if (options?.transport) {
-    // Custom transport takes precedence
+  // CRITICAL: Pino transports use Node.js worker threads which are NOT available in:
+  // - Deno (Supabase Edge Functions)
+  // - Vercel Edge Runtime
+  // - Cloudflare Workers
+  // We must detect these environments and skip transport configuration entirely.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Runtime check for Deno global
+  const isDenoRuntime = typeof (globalThis as any).Deno !== 'undefined';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Runtime check for Vercel Edge Runtime global
+  const isVercelEdge = typeof (globalThis as any).EdgeRuntime !== 'undefined';
+  const isEdgeEnvironment = isDenoRuntime || isVercelEdge;
+  
+  const shouldPrettyPrint = 
+    !isEdgeEnvironment && // Never use transports in edge environments
+    (prettyPrintSetting === true || 
+    (prettyPrintSetting === 'auto' && isDevelopment && !options?.transport));
+  
+  if (options?.transport && !isEdgeEnvironment) {
+    // Custom transport takes precedence (only in Node.js environments)
     config.transport = options.transport;
   } else if (shouldPrettyPrint) {
-    // Enable pino-pretty for development
+    // Enable pino-pretty for development (Node.js only)
     // Note: pino-pretty must be installed as a dependency
     config.transport = {
       target: 'pino-pretty',

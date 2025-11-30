@@ -36,6 +36,17 @@ interface ActionConfig {
   rpc: string;
 }
 
+/**
+ * Generate server action modules from the ACTIONS configuration and database metadata.
+ *
+ * Loads the ACTIONS export from WEB_RUNTIME_ROOT/config/actions.config.ts, ensures the
+ * POSTGRES_URL_NON_POOLING environment variable is present, introspects the database,
+ * and writes generated action files (via generateActionFile) for either all configured
+ * actions or a single specified action. Progress is reported with a spinner and warnings
+ * are logged for missing RPC functions; on failure the process exits with code 1.
+ *
+ * @param targetAction - Optional action name to restrict generation to a single action
+ */
 export async function runGenerateServerActions(targetAction?: string) {
   const spinner = ora('Generating Server Actions...').start();
 
@@ -49,7 +60,7 @@ export async function runGenerateServerActions(targetAction?: string) {
     // Load Config
     spinner.text = 'Loading action configuration...';
     const configPath = join(WEB_RUNTIME_ROOT, 'config/actions.config.ts');
-    const mod = (await jiti.import(configPath));
+    const mod = (await jiti.import(configPath)) as { ACTIONS?: Record<string, ActionConfig> };
     const actionsConfig = mod.ACTIONS;
 
     if (!actionsConfig) {
@@ -61,7 +72,7 @@ export async function runGenerateServerActions(targetAction?: string) {
     const meta = getDatabaseMeta(dbUrl);
 
     // Filter targets
-    const actionsToGenerate = targetAction
+    const actionsToGenerate: [string, ActionConfig][] = targetAction
       ? Object.entries(actionsConfig).filter(([name]) => name === targetAction)
       : Object.entries(actionsConfig);
 
@@ -71,6 +82,7 @@ export async function runGenerateServerActions(targetAction?: string) {
     }
 
     spinner.text = 'Generating code...';
+    let generatedCount = 0;
 
     for (const [actionName, config] of actionsToGenerate) {
       const rpcName = config.rpc;
@@ -84,9 +96,10 @@ export async function runGenerateServerActions(targetAction?: string) {
       }
 
       await generateActionFile(actionName, config, rpcMeta, meta.enums, meta.compositeTypes);
+      generatedCount++;
     }
 
-    spinner.succeed(`Generated ${actionsToGenerate.length} actions.`);
+    spinner.succeed(`Generated ${generatedCount} actions.`);
   } catch (error) {
     spinner.fail('Failed to generate server actions');
     logger.error((error as Error).message);
@@ -105,7 +118,11 @@ function toPascalCase(str: string) {
 function serializeArgValue(value: unknown): string {
   if (value === null) return 'null';
   if (value === undefined) return 'undefined';
-  if (typeof value === 'string') return `'${value}'`;
+  if (typeof value === 'string') {
+    // Escape backslashes first, then single quotes to avoid syntax errors
+    const escaped = value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    return `'${escaped}'`;
+  }
   if (typeof value === 'number') return String(value);
   if (typeof value === 'boolean') return String(value);
   if (Array.isArray(value)) return `[${value.map(serializeArgValue).join(', ')}]`;

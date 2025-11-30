@@ -1,16 +1,23 @@
 'use client';
 
-import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import Link from 'next/link';
-import { Button } from '@heyclaude/web-runtime/ui';
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
+import Link from 'next/link';
+
+/**
+ * CRITICAL: Direct reference to process.env.NODE_ENV
+ * Next.js inlines this at build time. Do NOT use dynamic env lookups here!
+ * The shared-runtime isDevelopment uses dynamic lookup which doesn't work client-side.
+ */
+// eslint-disable-next-line architectural-rules/require-env-validation-schema -- NODE_ENV is inlined by Next.js at build time, not a runtime lookup
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 type FallbackLink = {
   href: string;
