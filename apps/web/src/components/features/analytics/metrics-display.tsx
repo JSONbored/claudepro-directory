@@ -142,7 +142,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
 
               {/* Change indicator */}
               {metricChange && (
-                <div className={`mt-4 ${cluster.compact}`}>
+                <div className={cn('mt-4', cluster.compact)}>
                   <BadgeDelta deltaType={deltaType} className="font-semibold" />
                   <span className="font-medium text-muted-foreground text-sm">{metricChange}</span>
                 </div>

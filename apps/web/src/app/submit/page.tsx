@@ -331,19 +331,19 @@ export default async function SubmitPage() {
               {/* Total */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-blue-500/10')}>
                 <div className="font-bold text-2xl text-blue-400">{stats.total}</div>
-                <div className={`${muted.default} text-xs`}>Total</div>
+                <div className={cn(muted.default, 'text-xs')}>Total</div>
               </div>
 
               {/* Pending */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-yellow-500/10')}>
                 <div className="font-bold text-2xl text-yellow-400">{stats.pending}</div>
-                <div className={`${muted.default} text-xs`}>Pending</div>
+                <div className={cn(muted.default, 'text-xs')}>Pending</div>
               </div>
 
               {/* This Week */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-green-500/10')}>
                 <div className="font-bold text-2xl text-green-400">{stats.merged_this_week}</div>
-                <div className={`${muted.default} text-xs`}>This Week</div>
+                <div className={cn(muted.default, 'text-xs')}>This Week</div>
               </div>
             </CardContent>
           </Card>

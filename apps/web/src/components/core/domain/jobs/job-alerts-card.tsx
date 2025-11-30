@@ -194,7 +194,7 @@ export function JobAlertsCard({
             </Button>
           </div>
 
-          <p className={cn(`${muted.default} text-xs`, 'leading-snug')}>
+          <p className={cn(muted.default, 'text-xs', 'leading-snug')}>
             We only send relevant AI roles. Unsubscribe anytime.
           </p>
         </form>

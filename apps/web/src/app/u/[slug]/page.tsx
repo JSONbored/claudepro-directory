@@ -11,7 +11,7 @@ import {
   getAuthenticatedUser,
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
-import { between, cluster, muted } from '@heyclaude/web-runtime/design-system';
+import { between, card, cluster, muted } from '@heyclaude/web-runtime/design-system';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, UnifiedBadge,
@@ -117,7 +117,7 @@ interface UserProfilePageProperties {
 }
 
 /**
- * ISR revalidation interval for user profile pages
+ * Cache forever - fully static generation without revalidation
  */
 export const revalidate = false;
 
@@ -351,7 +351,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         return null;
                       }
                       return (
-                        <Card key={collection.id} className="cursor-pointer transition-all duration-200 hover:bg-muted/50 hover:shadow-md">
+                        <Card key={collection.id} className={card.interactive}>
                           <NavLink href={safeCollectionUrl}>
                             <CardHeader>
                               <CardTitle className="text-lg">{collection.name}</CardTitle>
@@ -410,7 +410,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         return null;
                       }
                       return (
-                        <Card key={item.id} className="cursor-pointer transition-all duration-200 hover:bg-muted/50 hover:shadow-md">
+                        <Card key={item.id} className={card.interactive}>
                           <NavLink href={safeContentUrl}>
                             <CardHeader>
                               <div className="mb-2 flex items-center justify-between">

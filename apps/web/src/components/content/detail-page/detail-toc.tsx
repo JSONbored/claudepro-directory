@@ -2,6 +2,7 @@
 
 import { ListTree } from '@heyclaude/web-runtime/icons';
 import type { ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
+import { normalizeHeadings, type NormalizedHeading } from '@heyclaude/web-runtime/utils/heading-normalization';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { focusRing } from '@heyclaude/web-runtime/design-system';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -11,71 +12,6 @@ interface DetailTocProps {
   className?: string;
 }
 
-interface NormalizedHeading {
-  id: string;
-  title: string;
-  anchor: string;
-  level: number;
-}
-
-function normalizeHeadings(
-  headings: ContentHeadingMetadata[] | null | undefined
-): NormalizedHeading[] {
-  if (!Array.isArray(headings)) return [];
-
-  const deduped = new Map<string, NormalizedHeading>();
-
-  for (const heading of headings) {
-    if (!heading || typeof heading !== 'object') continue;
-    const rawId = typeof heading.id === 'string' ? heading.id.trim() : '';
-    const rawTitle = typeof heading.title === 'string' ? heading.title.trim() : '';
-
-    if (!(rawId && rawTitle)) continue;
-
-    if (deduped.has(rawId)) {
-      continue;
-    }
-
-    const level =
-      typeof heading.level === 'number' && Number.isFinite(heading.level)
-        ? Math.min(Math.max(Math.round(heading.level), 2), 6)
-        : 2;
-
-    const anchor =
-      typeof heading.anchor === 'string' && heading.anchor.startsWith('#')
-        ? heading.anchor
-        : `#${rawId}`;
-
-    deduped.set(rawId, {
-      id: rawId,
-      anchor,
-      level,
-      title: rawTitle,
-    });
-
-    if (deduped.size >= 50) {
-      break;
-    }
-  }
-
-  return Array.from(deduped.values());
-}
-
-/**
- * Renders an "On this page" table of contents for the provided headings.
- *
- * Displays a navigable list of headings, highlights the currently active heading,
- * scrolls to headings when clicked (respecting prefers-reduced-motion), and keeps
- * the browser URL hash in sync with the active heading. Returns null when there
- * are fewer than three normalized headings.
- *
- * @param props.headings - Array of heading metadata to render (may be undefined or null).
- * @param props.className - Optional additional className applied to the root nav element.
- * @returns A navigation element containing the table of contents, or `null` if not rendered.
- *
- * @see normalizeHeadings
- * @see ContentHeadingMetadata
- */
 export function DetailToc({ headings, className }: DetailTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
   const [activeId, setActiveId] = useState<string | null>(null);

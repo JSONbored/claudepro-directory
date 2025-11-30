@@ -14,6 +14,7 @@
  */
 
 import type { ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
+import { normalizeHeadings, type NormalizedHeading } from '@heyclaude/web-runtime/utils/heading-normalization';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { focusRing } from '@heyclaude/web-runtime/design-system';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -25,71 +26,6 @@ interface SidebarTocProps {
   minHeadings?: number;
 }
 
-interface NormalizedHeading {
-  id: string;
-  title: string;
-  anchor: string;
-  level: number;
-}
-
-function normalizeHeadings(
-  headings: ContentHeadingMetadata[] | null | undefined
-): NormalizedHeading[] {
-  if (!Array.isArray(headings)) return [];
-
-  const deduped = new Map<string, NormalizedHeading>();
-
-  for (const heading of headings) {
-    if (!heading || typeof heading !== 'object') continue;
-    const rawId = typeof heading.id === 'string' ? heading.id.trim() : '';
-    const rawTitle = typeof heading.title === 'string' ? heading.title.trim() : '';
-
-    if (!(rawId && rawTitle)) continue;
-
-    if (deduped.has(rawId)) {
-      continue;
-    }
-
-    const level =
-      typeof heading.level === 'number' && Number.isFinite(heading.level)
-        ? Math.min(Math.max(Math.round(heading.level), 2), 6)
-        : 2;
-
-    const anchor =
-      typeof heading.anchor === 'string' && heading.anchor.startsWith('#')
-        ? heading.anchor
-        : `#${rawId}`;
-
-    deduped.set(rawId, {
-      id: rawId,
-      anchor,
-      level,
-      title: rawTitle,
-    });
-
-    if (deduped.size >= 50) {
-      break;
-    }
-  }
-
-  return Array.from(deduped.values());
-}
-
-/**
- * Renders a right-rail "On this page" table of contents with scroll-linked highlighting and in-page navigation.
- *
- * The component normalizes the provided headings, highlights the heading currently visible in the viewport,
- * updates the URL hash to reflect the active section, and supports smooth scrolling on click (respecting
- * the user's reduced-motion preference).
- *
- * @param headings - Optional array of heading metadata to build the TOC; invalid or duplicate entries are ignored.
- * @param className - Optional additional class names applied to the container.
- * @param minHeadings - Minimum number of headings required to render the TOC (default: 2).
- * @returns A navigation element containing the TOC markup, or `null` if there are fewer than `minHeadings`.
- *
- * @see normalizeHeadings
- * @see focusRing
- */
 export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
   const [activeId, setActiveId] = useState<string | null>(null);

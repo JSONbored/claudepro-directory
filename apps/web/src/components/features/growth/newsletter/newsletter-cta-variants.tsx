@@ -154,7 +154,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         >
           <div className="rounded-xl border border-border bg-background p-3">
-            <Mail className="h-6 w-6 text-foreground md:h-7 md:w-7" aria-hidden="true" />
+            <Mail className={`${iconSize.md} text-foreground`} aria-hidden="true" />
           </div>
         </motion.div>
 

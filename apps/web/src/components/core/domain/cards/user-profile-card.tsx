@@ -270,7 +270,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
                           }
                         );
                       });
-                    window.open(safeWebsiteUrl, '_blank');
+                    window.open(safeWebsiteUrl, '_blank', 'noopener,noreferrer');
                   }}
                   aria-label={`Visit ${displayName}'s website`}
                 >
@@ -311,7 +311,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
                           }
                         );
                       });
-                    window.open(safeSocialUrl, '_blank');
+                    window.open(safeSocialUrl, '_blank', 'noopener,noreferrer');
                   }}
                   aria-label={`Visit ${displayName} on X/Twitter`}
                 >
