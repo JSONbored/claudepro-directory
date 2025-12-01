@@ -214,16 +214,67 @@ export default async function CompaniesPage() {
                     </UnifiedBadge>
                   </div> : null}
 
-                <CardHeader>
+                  <CardHeader>
                   <div className="flex items-start gap-3">
-                    {company.logo ? <Image
-                        src={company.logo}
-                        alt={`${company.name} logo`}
-                        width={48}
-                        height={48}
-                        className="h-12 w-12 rounded-lg object-cover"
-                        priority={index < 6}
-                      /> : null}
+                    {(() => {
+                      // Validate logo URL is safe (from trusted sources only)
+                      if (!company.logo) {
+                        return (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-accent">
+                            <Building className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        );
+                      }
+                      try {
+                        const parsed = new URL(company.logo);
+                        // Only allow HTTPS
+                        if (parsed.protocol !== 'https:') {
+                          return (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-accent">
+                              <Building className="h-6 w-6 text-muted-foreground" />
+                            </div>
+                          );
+                        }
+                        // Allow Supabase storage (public bucket path) or common CDN domains
+                        const isSupabaseHost =
+                          parsed.hostname.endsWith('.supabase.co') ||
+                          parsed.hostname.endsWith('.supabase.in');
+                        const isCloudinary =
+                          parsed.hostname === 'res.cloudinary.com' ||
+                          /^[a-z0-9-]+\.cloudinary\.com$/.test(parsed.hostname);
+                        const isAwsS3 =
+                          /^[a-z0-9-]+\.s3\.amazonaws\.com$/.test(parsed.hostname) ||
+                          /^s3\.[a-z0-9-]+\.amazonaws\.com$/.test(parsed.hostname);
+                        const isTrustedSource =
+                          (isSupabaseHost &&
+                            parsed.pathname.startsWith('/storage/v1/object/public/')) ||
+                          isCloudinary ||
+                          isAwsS3;
+                        if (!isTrustedSource) {
+                          return (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-accent">
+                              <Building className="h-6 w-6 text-muted-foreground" />
+                            </div>
+                          );
+                        }
+                        return (
+                          <Image
+                            src={company.logo}
+                            alt={`${company.name} logo`}
+                            width={48}
+                            height={48}
+                            className="h-12 w-12 rounded-lg object-cover"
+                            priority={index < 6}
+                          />
+                        );
+                      } catch {
+                        return (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-accent">
+                            <Building className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        );
+                      }
+                    })()}
                     <div className="flex-1">
                       <CardTitle>
                         <Link

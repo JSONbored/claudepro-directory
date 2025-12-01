@@ -79,6 +79,7 @@ export function JobToggleButton({
           {
             message: 'Job status toggle failed',
             context: { jobId, newStatus, currentStatus },
+            rethrow: true,
           }
         );
       } catch (error) {

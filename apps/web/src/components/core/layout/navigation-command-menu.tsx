@@ -29,8 +29,10 @@ interface NavigationCommandMenuProps {
 /**
  * Display a searchable command palette for site navigation and toggle it with ⌘/Ctrl+K.
  *
- * @param controlledOpen - External controlled open state; when provided, the component is controlled.
- * @param onOpenChange - Callback invoked with the new open state when the palette opens or closes.
+ * Renders groups for primary, secondary, and action navigation items, maps item icons and descriptions, and navigates via Next.js router when an item is selected.
+ *
+ * @param open - If provided, controls the open state externally (controlled component).
+ * @param onOpenChange - Optional callback invoked with the new open state when the palette is opened or closed.
  * @param navigationData - Server-provided navigation data containing `primary`, `secondary`, and `actions` arrays of navigation menu items.
  * @returns A React element that renders the navigation command palette.
  *

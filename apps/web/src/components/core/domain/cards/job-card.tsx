@@ -44,6 +44,9 @@ function getSafeJobLink(link?: string | null): string {
     url.username = '';
     url.password = '';
     url.hostname = url.hostname.replace(/\.$/, '').toLowerCase();
+    if (!url.hostname) {
+      return '#';
+    }
     if (url.port === '443') {
       url.port = '';
     }
@@ -242,11 +245,8 @@ export function JobCard({ job }: JobCardProps) {
           >
             {(() => {
               const safeJobLink = getSafeJobLink(job.link);
-              // getSafeJobLink guarantees the URL uses HTTPS protocol,
-              // removes credentials, and returns '#' for invalid URLs
-              const validatedUrl: string = safeJobLink;
               return (
-                <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
+                <a href={safeJobLink} target="_blank" rel="noopener noreferrer">
                   Apply Now
                   <ExternalLink className={`ml-2 ${iconSize.sm}`} />
                 </a>

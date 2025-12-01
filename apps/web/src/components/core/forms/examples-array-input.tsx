@@ -385,7 +385,7 @@ export function ExamplesArrayInput({
           variant="outline"
           size="sm"
           onClick={addExample}
-          className="flex w-full items-center gap-2"
+          className={cn(cluster.compact, 'w-full')}
         >
           <Plus className={iconSize.sm} />
           Add Another Example ({examples.length}/{maxExamples})

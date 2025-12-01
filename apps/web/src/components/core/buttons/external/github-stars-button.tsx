@@ -49,6 +49,7 @@ export function GitHubStarsButton({
   const [stars, setStars] = useState<number | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const apiUrl = (() => {
       try {
         const { pathname, hostname } = new URL(repoUrl);
@@ -64,7 +65,7 @@ export function GitHubStarsButton({
       return 'https://api.github.com/repos/JSONbored/claudepro-directory';
     })();
 
-    fetch(apiUrl)
+    fetch(apiUrl, { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
         const count =
@@ -72,9 +73,12 @@ export function GitHubStarsButton({
         setStars(count);
       })
       .catch((error) => {
+        if (error.name === 'AbortError') return;
         logClientWarning('GitHubStarsButton: failed to fetch star count', error, { apiUrl });
         setStars(null);
       });
+
+    return () => controller.abort();
   }, [repoUrl]);
 
   const handleClick = () => {

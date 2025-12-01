@@ -90,7 +90,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             size="lg"
             className={cn(
               `${DIMENSIONS.BUTTON_LG} shrink-0 whitespace-nowrap px-8`,
-              'bg-linear-to-rrom-accent via-accent to-primary font-semibold text-accent-foreground',
+              'bg-linear-to-r from-accent via-accent to-primary font-semibold text-accent-foreground',
               'shadow-md transition-all duration-200 ease-out',
               'hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:shadow-lg',
               'active:scale-[0.98]',
