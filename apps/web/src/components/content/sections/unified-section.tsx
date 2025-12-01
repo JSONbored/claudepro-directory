@@ -20,7 +20,7 @@ import {
   Terminal,
   Zap,
 } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, hoverBg, spaceY, marginBottom, marginTop, muted, weight ,size  , gap , padding , row } from '@heyclaude/web-runtime/design-system';
 import type { UnifiedSectionProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
@@ -152,19 +152,19 @@ function CodeGroupTabs({
   if (!activeBlock) return null;
 
   return (
-    <div className="space-y-3">
+    <div className={spaceY.default}>
       {/* Tab buttons */}
-      <div className="flex flex-wrap gap-1 border-border border-b pb-2">
+      <div className={`flex flex-wrap ${gap.tight} border-border border-b pb-2`}>
         {blocks.map((block, index) => (
           <button
             key={`${block.label}-${index}`}
             type="button"
             onClick={() => setActiveIndex(index)}
             className={cn(
-              'rounded-t-md px-3 py-1.5 font-medium text-xs transition-colors',
+              'rounded-t-md ${padding.xCompact} ${padding.ySnug} ${weight.medium} ${size.xs} transition-colors',
               activeIndex === index
                 ? 'bg-accent/20 text-accent-foreground'
-                : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                : `${muted.default} ${hoverBg.muted} hover:text-foreground`
             )}
           >
             {block.label}
@@ -183,19 +183,19 @@ function CodeGroupTabs({
 
       {/* Download button */}
       {activeBlock.filename && (
-        <div className="mt-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              downloadTextFile(activeBlock.filename ?? 'code.txt', activeBlock.code);
-              onDownload?.();
-            }}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Download {activeBlock.filename}
-          </Button>
-        </div>
+<div className={marginTop.compact}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  downloadTextFile(activeBlock.filename ?? 'code.txt', activeBlock.code);
+                  onDownload?.();
+                }}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download {activeBlock.filename}
+              </Button>
+            </div>
       )}
     </div>
   );
@@ -213,10 +213,10 @@ function CodeGroupTabs({
  */
 function List({ items, color }: { items: string[]; color: string }) {
   return (
-    <ul className="space-y-2">
+    <ul className={spaceY.compact}>
       {items.map((item) => (
-        <li key={item.slice(0, 50)} className="flex items-start gap-3">
-          <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
+        <li key={item.slice(0, 50)} className={`${row.default}`}>
+          <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 rounded-full`, color)} />
           <span className="text-sm leading-relaxed">{item}</span>
         </li>
       ))}
@@ -246,20 +246,20 @@ const getEnhancedListKey = (item: EnhancedListItem, index: number) =>
  */
 function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: string }) {
   return (
-    <ul className="space-y-4">
+    <ul className={spaceY.comfortable}>
       {items.map((item, index) =>
         typeof item === 'string' ? (
-          <li key={getEnhancedListKey(item, index)} className="flex items-start gap-3">
-            <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
+          <li key={getEnhancedListKey(item, index)} className={`${row.default}`}>
+            <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 rounded-full`, color)} />
             <span className="text-sm leading-relaxed">{item}</span>
           </li>
         ) : (
-          <li key={getEnhancedListKey(item, index)} className="space-y-2">
-            <div className="flex items-start gap-3">
-              <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
-              <div className="space-y-1">
-                <p className="font-medium text-foreground text-sm">{item.issue}</p>
-                <p className="text-muted-foreground text-sm leading-relaxed">{item.solution}</p>
+          <li key={getEnhancedListKey(item, index)} className={spaceY.compact}>
+            <div className={`${row.default}`}>
+              <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 rounded-full`, color)} />
+              <div className={spaceY.tight}>
+                <p className={`${weight.medium} text-foreground ${size.sm}`}>{item.issue}</p>
+                <p className={muted.smRelaxed}>{item.solution}</p>
               </div>
             </div>
           </li>
@@ -301,13 +301,13 @@ function Platform({
       : `platform-${name.toLowerCase()}-text-${step.text}-${index}`;
 
   return (
-    <div className="space-y-4">
-      <h4 className="font-medium">{name}</h4>
-      <div className="space-y-3">
+    <div className={spaceY.comfortable}>
+      <h4 className={weight.medium}>{name}</h4>
+      <div className={spaceY.default}>
         {steps.map((step, index) =>
           step.type === 'command' ? (
-            <div key={getStepKey(step, index)} className="space-y-2">
-              <div className="text-muted-foreground text-sm">Step {index + 1}: Run command</div>
+            <div key={getStepKey(step, index)} className={spaceY.compact}>
+              <div className={muted.sm}>Step {index + 1}: Run command</div>
               <ProductionCodeBlock
                 html={step.html}
                 code={step.code}
@@ -317,8 +317,8 @@ function Platform({
               />
             </div>
           ) : (
-            <div key={getStepKey(step, index)} className="flex items-start gap-3">
-              <div className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+            <div key={getStepKey(step, index)} className={`${row.default}`}>
+              <div className={`${marginTop.compact} h-1.5 w-1.5 shrink-0 rounded-full bg-primary`} />
               <span className="text-sm leading-relaxed">{step.text}</span>
             </div>
           )
@@ -326,14 +326,14 @@ function Platform({
       </div>
       {paths && (
         <div>
-          <h5 className="mb-2 font-medium text-sm">Configuration Paths</h5>
-          <div className="space-y-1 text-sm">
+          <h5 className={`${marginBottom.tight} ${weight.medium} ${size.sm}`}>Configuration Paths</h5>
+          <div className={`${spaceY.tight} ${size.sm}`}>
             {Object.entries(paths).map(([k, p]) => (
               <div key={k} className={cluster.compact}>
                 <UnifiedBadge variant="base" style="outline" className="capitalize">
                   {k}
                 </UnifiedBadge>
-                <code className="rounded bg-muted px-1 py-0.5 text-xs">{String(p)}</code>
+                <code className={`rounded bg-muted ${padding.xMicro} ${padding.yHair} ${size.xs}`}>{String(p)}</code>
               </div>
             ))}
           </div>
@@ -447,7 +447,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           />
           {/* Download button below code block for better UX */}
           {props.filename && (
-            <div className="mt-3">
+            <div className={marginTop.compact}>
               <Button
                 variant="outline"
                 size="sm"
@@ -486,7 +486,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
               maxLines={20}
             />
             {block.filename && (
-              <div className="mt-3">
+              <div className={marginTop.compact}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -530,21 +530,21 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           {...(props.icon && { icon: props.icon })}
           {...(props.className && { className: props.className })}
         >
-          <div className="space-y-6">
+          <div className={spaceY.relaxed}>
             {props.examples.map((ex, i) => (
               <article
                 key={`${ex.title}-${i}`}
-                className="space-y-3"
+                className={spaceY.default}
                 itemScope={true}
                 itemType="https://schema.org/SoftwareSourceCode"
               >
-                <div className="space-y-1">
-                  <h4 className="font-semibold text-base text-foreground" itemProp="name">
+                <div className={spaceY.tight}>
+                  <h4 className={`${weight.semibold} ${size.base} text-foreground`} itemProp="name">
                     {ex.title}
                   </h4>
                   {ex.description && (
                     <p
-                      className="text-muted-foreground text-sm leading-relaxed"
+                      className={muted.smRelaxed}
                       itemProp="description"
                     >
                       {ex.description}
@@ -564,7 +564,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   />
                   {/* Download button for example code */}
                   {ex.filename && (
-                    <div className="mt-3">
+                    <div className={marginTop.compact}>
                       <Button
                         variant="outline"
                         size="sm"
@@ -594,7 +594,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             description="Add these configurations to your Claude Desktop or Claude Code setup"
             {...(props.className && { className: props.className })}
           >
-            <div className="space-y-6">
+            <div className={spaceY.relaxed}>
               {props.configs.map((c) => (
                 <div key={c.key}>
                   <ProductionCodeBlock
@@ -606,7 +606,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   />
                   {/* Download button for config */}
                   {c.filename && (
-                    <div className="mt-3">
+                    <div className={marginTop.compact}>
                       <Button
                         variant="outline"
                         size="sm"
@@ -634,9 +634,9 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             description="Hook setup and script content"
             {...(props.className && { className: props.className })}
           >
-            <div className="space-y-4">
+            <div className={spaceY.comfortable}>
               {props.hookConfig && (
-                <div className="space-y-2">
+                <div className={spaceY.compact}>
                   <ProductionCodeBlock
                     html={props.hookConfig.html}
                     code={props.hookConfig.code}
@@ -660,7 +660,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                 </div>
               )}
               {props.scriptContent && (
-                <div className="space-y-2">
+                <div className={spaceY.compact}>
                   <ProductionCodeBlock
                     html={props.scriptContent.html}
                     code={props.scriptContent.code}
@@ -703,7 +703,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           />
           {/* Download button for configuration */}
           {props.filename && (
-            <div className="mt-3">
+            <div className={marginTop.compact}>
               <Button
                 variant="outline"
                 size="sm"
@@ -730,7 +730,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           description="Setup instructions and requirements"
           {...(props.className && { className: props.className })}
         >
-          <div className="space-y-6">
+          <div className={spaceY.relaxed}>
             {d.claudeCode && (
               <Platform
                 name="Claude Code Setup"
@@ -749,7 +749,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             {d.mcpb && <Platform name="One-Click Install (.mcpb)" steps={d.mcpb.steps} />}
             {d.requirements && d.requirements.length > 0 && (
               <div>
-                <h4 className="mb-2 font-medium">Requirements</h4>
+                <h4 className={`${marginBottom.tight} ${weight.medium}`}>Requirements</h4>
                 <List items={d.requirements} color="bg-orange-500" />
               </div>
             )}

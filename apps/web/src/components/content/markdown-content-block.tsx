@@ -49,7 +49,7 @@ import type {
   QuickReferenceProps,
   TLDRSummaryProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { cluster, iconSize, muted } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, muted, stack, spaceY, marginBottom, marginTop, weight, radius, size, padding, gap, row, maxWidth } from '@heyclaude/web-runtime/design-system';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { Avatar, AvatarFallback, AvatarImage } from '@heyclaude/web-runtime/ui';
 import {
@@ -127,43 +127,43 @@ function CaseStudyVariant(props: CaseStudyProps) {
       <CardHeader className="pb-4">
         <div className={'flex items-start justify-between'}>
           <div>
-            <CardTitle className="text-2xl" itemProp="headline">
+            <CardTitle className={`${size['2xl']}`} itemProp="headline">
               {company} Case Study
             </CardTitle>
             {industry && (
-              <UnifiedBadge variant="base" style="outline" className="mt-2">
+              <UnifiedBadge variant="base" style="outline" className={marginTop.compact}>
                 {industry}
               </UnifiedBadge>
             )}
           </div>
           {logo && (
-            <div className={'flex h-16 w-16 items-center justify-center rounded-lg bg-muted'}>
-              <BookOpen className={`${iconSize.xl} text-muted-foreground`} />
+            <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} bg-muted`}>
+              <BookOpen className={`${iconSize.xl} ${muted.default}`} />
             </div>
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className={spaceY.relaxed}>
         <div>
-          <h4 className={'mb-2 font-semibold text-destructive'}>Challenge</h4>
-          <p className="text-muted-foreground">{challenge}</p>
+          <h4 className={`mb-2 ${weight.semibold} text-destructive`}>Challenge</h4>
+          <p className={muted.default}>{challenge}</p>
         </div>
 
         <div>
-          <h4 className={'mb-2 font-semibold text-primary'}>Solution</h4>
-          <p className="text-muted-foreground">{solution}</p>
+          <h4 className={`mb-2 ${weight.semibold} text-primary`}>Solution</h4>
+          <p className={muted.default}>{solution}</p>
         </div>
 
         <div>
-          <h4 className={'mb-2 font-semibold text-green-600 dark:text-green-400'}>Results</h4>
-          <p className="text-muted-foreground">{results}</p>
+          <h4 className={`mb-2 ${weight.semibold} text-green-600 dark:text-green-400`}>Results</h4>
+          <p className={muted.default}>{results}</p>
         </div>
 
         {metrics && Array.isArray(metrics) && metrics.length > 0 && (
-          <div className={'grid grid-cols-2 gap-4 border-t pt-4 md:grid-cols-3'}>
+          <div className={`grid grid-cols-2 ${gap.comfortable} border-t pt-4 md:grid-cols-3`}>
             {metrics.map((metric) => (
               <div key={metric.label} className="text-center">
-                <p className={'flex items-center justify-center gap-1 font-bold text-2xl'}>
+                <p className={`flex items-center justify-center ${gap.tight} ${weight.bold} ${size['2xl']}`}>
                   {metric.value}
                   {metric.trend && (
                     <span
@@ -183,19 +183,19 @@ function CaseStudyVariant(props: CaseStudyProps) {
                     </span>
                   )}
                 </p>
-                <p className={`${muted.default} text-sm`}>{metric.label}</p>
+                <p className={muted.sm}>{metric.label}</p>
               </div>
             ))}
           </div>
         )}
 
         {testimonial && (
-          <blockquote className="rounded-r-lg border-primary border-l-4 bg-muted/30 py-2 pl-4">
-            <p className={'mb-2 text-muted-foreground italic'}>"{testimonial.quote}"</p>
+          <blockquote className={`rounded-r-lg border-primary border-l-4 bg-muted/30 ${padding.yCompact} pl-4`}>
+            <p className={`mb-2 ${muted.default} italic`}>"{testimonial.quote}"</p>
             <footer className="text-sm">
-              <cite className={'font-semibold not-italic'}>{testimonial.author}</cite>
+              <cite className={`${weight.semibold} not-italic`}>{testimonial.author}</cite>
               {testimonial.role && (
-                <span className="text-muted-foreground">, {testimonial.role}</span>
+                <span className={muted.default}>, {testimonial.role}</span>
               )}
             </footer>
           </blockquote>
@@ -225,18 +225,18 @@ function FeatureGridVariant(props: FeatureGridProps) {
 
   return (
     <section itemScope={true} itemType="https://schema.org/ItemList" className="my-8">
-      <div className="mb-6">
-        <h2 className={'mb-2 font-bold text-2xl'} itemProp="name">
+      <div className={marginBottom.comfortable}>
+        <h2 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`} itemProp="name">
           {title}
         </h2>
         {description && (
-          <p className="text-muted-foreground" itemProp="description">
+          <p className={muted.default} itemProp="description">
             {description}
           </p>
         )}
       </div>
 
-      <div className={`grid grid-cols-1 ${gridCols[columns || 3]} gap-6`}>
+      <div className={`grid grid-cols-1 ${gridCols[columns || 3]} ${gap.relaxed}`}>
         {validFeatures.map((feature, index) => (
           <Card
             key={feature.title}
@@ -263,7 +263,7 @@ function FeatureGridVariant(props: FeatureGridProps) {
               >
                 <span
                   className={
-                    'bg-linear-to-r from-foreground to-foreground/70 bg-clip-text font-semibold text-transparent'
+                    'bg-linear-to-r from-foreground to-foreground/70 bg-clip-text ${weight.semibold} text-transparent'
                   }
                 >
                   {feature.title}
@@ -280,7 +280,7 @@ function FeatureGridVariant(props: FeatureGridProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className={'relative z-10'}>
-              <p itemProp="description" className="text-muted-foreground leading-relaxed">
+              <p itemProp="description" className={`${muted.default} leading-relaxed`}>
                 {feature.description}
               </p>
             </CardContent>
@@ -326,17 +326,17 @@ function TLDRVariant(props: TLDRSummaryProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p itemProp="abstract" className="mb-4 text-muted-foreground leading-relaxed">
+        <p itemProp="abstract" className={`${marginBottom.default} ${muted.default} leading-relaxed`}>
           {content}
         </p>
 
         {keyPoints && keyPoints.length > 0 && (
           <div>
-            <h4 className="mb-2 font-semibold">Key Takeaways:</h4>
-            <ul className="space-y-1">
+            <h4 className={`${marginBottom.tight} ${weight.semibold}`}>Key Takeaways:</h4>
+            <ul className={spaceY.tight}>
               {keyPoints.map((point) => (
-                <li key={point} className={'flex items-start gap-2 text-sm'}>
-                  <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+                <li key={point} className={`${row.compact} ${size.sm}`}>
+                  <CheckCircle className={`${marginTop.micro} h-4 w-4 shrink-0 text-green-500`} />
                   <span>{point}</span>
                 </li>
               ))}
@@ -360,12 +360,12 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
     <blockquote
       itemScope={true}
       itemType="https://schema.org/Quotation"
-      className="my-8 rounded-r-lg border-primary border-l-4 bg-muted/30 p-6"
+      className={`my-8 rounded-r-lg border-primary border-l-4 bg-muted/30 ${padding.comfortable}`}
     >
-      <p itemProp="text" className="mb-4 text-lg italic leading-relaxed">
+      <p itemProp="text" className={`${marginBottom.default} ${size.lg} italic leading-relaxed`}>
         "{quote}"
       </p>
-      <footer className="flex items-center gap-4">
+      <footer className={cluster.comfortable}>
         {imageUrl && (
           <Avatar className="h-12 w-12">
             <AvatarImage src={imageUrl} alt={author} />
@@ -374,11 +374,11 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
         )}
         <div itemProp="author" itemScope={true} itemType="https://schema.org/Person">
           <cite className="not-italic">
-            <span itemProp="name" className="font-semibold text-foreground">
+            <span itemProp="name" className={`${weight.semibold} text-foreground`}>
               {author}
             </span>
             {(role || company) && (
-              <span className="text-muted-foreground">
+              <span className={muted.default}>
                 {role && <span itemProp="jobTitle">, {role}</span>}
                 {company && (
                   <span itemProp="worksFor">
@@ -437,24 +437,24 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
         {description && <CardDescription itemProp="description">{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <div className={`grid gap-4 ${columns === 2 ? 'md:grid-cols-2' : ''}`}>
+        <div className={`grid ${gap.comfortable} ${columns === 2 ? 'md:grid-cols-2' : ''}`}>
           {validItems.map((item, index) => (
             <div
               key={`${item.label}-${index}`}
               itemScope={true}
               itemType="https://schema.org/PropertyValue"
-              className="flex flex-col gap-2 rounded-lg border bg-card/50 p-3 sm:flex-row sm:items-start sm:gap-4"
+              className={`${stack.compact} ${radius.lg} border bg-card/50 ${padding.compact} sm:flex-row sm:items-start sm:${gap.comfortable}`}
             >
               <div className="sm:w-1/3">
-                <dt itemProp="name" className={`font-medium ${muted.default} text-sm`}>
+                <dt itemProp="name" className={`${weight.medium} ${muted.sm}`}>
                   {item.label}
                 </dt>
               </div>
               <div className="sm:w-2/3">
-                <dd itemProp="value" className="mb-1 font-semibold text-foreground">
+                <dd itemProp="value" className={`${marginBottom.micro} ${weight.semibold} text-foreground`}>
                   {item.value}
                 </dd>
-                {item.description && <p className={`${muted.default} text-sm`}>{item.description}</p>}
+                {item.description && <p className={`${muted.sm}`}>{item.description}</p>}
               </div>
             </div>
           ))}
@@ -496,12 +496,12 @@ function ContentTabsVariant(props: ContentTabsProps) {
   return (
     <section itemScope={true} itemType="https://schema.org/ItemList" className="my-8">
       {title && (
-        <div className="mb-6">
-          <h3 className={'mb-2 font-bold text-xl'} itemProp="name">
+        <div className={marginBottom.comfortable}>
+          <h3 className={`mb-2 ${weight.bold} ${size.xl}`} itemProp="name">
             {title}
           </h3>
           {description && (
-            <p className="text-muted-foreground" itemProp="description">
+            <p className={muted.default} itemProp="description">
               {description}
             </p>
           )}
@@ -510,7 +510,7 @@ function ContentTabsVariant(props: ContentTabsProps) {
 
       <Tabs defaultValue={firstValue} className="w-full">
         <TabsList
-          className={'grid h-auto w-full grid-cols-2 gap-1 p-1 lg:grid-cols-3 xl:grid-cols-4'}
+          className={'grid h-auto w-full grid-cols-2 ${gap.tight} ${padding.micro} lg:grid-cols-3 xl:grid-cols-4'}
         >
           {validItems.map((item) => (
             <TabsTrigger
@@ -527,13 +527,13 @@ function ContentTabsVariant(props: ContentTabsProps) {
           <TabsContent
             key={item.value}
             value={item.value}
-            className="mt-4"
+            className={marginTop.default}
             itemScope={true}
             itemType="https://schema.org/ListItem"
           >
             <div
               itemProp="description"
-              className="prose prose-neutral dark:prose-invert max-w-none"
+              className={`prose prose-neutral dark:prose-invert ${maxWidth.none}`}
             >
               {item.content}
             </div>

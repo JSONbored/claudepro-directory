@@ -9,7 +9,7 @@ import { createMFAChallenge, enrollTOTPFactor, verifyMFAChallenge } from '@heycl
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
-import { iconLeading, iconSize } from '@heyclaude/web-runtime/design-system';
+import { iconLeading, iconSize, cluster, spaceY, muted, helper  , padding , gap , radius , size } from '@heyclaude/web-runtime/design-system';
 import { errorToasts, successToasts } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -176,7 +176,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className={cluster.compact}>
             <Shield className={iconSize.sm} />
             Enable Two-Factor Authentication
           </DialogTitle>
@@ -188,15 +188,15 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
         </DialogHeader>
 
         {error && (
-          <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-destructive text-sm">
+          <div className={`${cluster.compact} rounded-md bg-destructive/10 ${padding.compact} ${helper.destructive}`}>
             <AlertCircle className={iconSize.sm} />
             <span>{error}</span>
           </div>
         )}
 
         {step === 'enroll' && (
-          <div className="space-y-4">
-            <div className="text-muted-foreground text-sm">
+          <div className={spaceY.comfortable}>
+            <div className={muted.sm}>
               Click &quot;Start Setup&quot; to generate a QR code. Scan it with an authenticator app
               like Google Authenticator, Authy, or 1Password.
             </div>
@@ -214,9 +214,9 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
         )}
 
         {step === 'verify' && qrCode && (
-          <div className="space-y-4">
-            <div className="flex flex-col items-center gap-4">
-              <div className="rounded-lg border bg-background p-4">
+          <div className={spaceY.comfortable}>
+            <div className={`flex flex-col items-center ${gap.comfortable}`}>
+              <div className={`${radius.lg} border bg-background ${padding.default}`}>
                 {qrCode && (
                   <Image
                     src={qrCode}
@@ -229,7 +229,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
                 )}
               </div>
               {secret && (
-                <div className="w-full space-y-2">
+                <div className={`w-full ${spaceY.compact}`}>
                   <Label htmlFor="secret" className="text-xs">
                     Or enter this secret manually:
                   </Label>
@@ -237,14 +237,14 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
                     id="secret"
                     value={secret}
                     readOnly={true}
-                    className="font-mono text-xs"
+                    className={`font-mono ${size.xs}`}
                     onClick={(e) => (e.target as HTMLInputElement).select()}
                   />
                 </div>
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className={spaceY.compact}>
               <Label htmlFor="verify-code">Enter 6-digit code</Label>
               <Input
                 id="verify-code"
@@ -259,7 +259,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
                   setError(null);
                 }}
                 placeholder="000000"
-                className="text-center font-mono text-lg tracking-widest"
+                className={`text-center font-mono ${size.lg} tracking-widest`}
                 disabled={loading}
               />
             </div>

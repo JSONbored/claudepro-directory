@@ -16,6 +16,7 @@
  */
 
 import { AlertCircle, AlertTriangle, CheckCircle, Info } from '@heyclaude/web-runtime/icons';
+import { cluster, marginTop, iconSize, muted, weight, spaceY , row } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
@@ -104,7 +105,7 @@ export function AnimatedFormField({
             exit={{ scale: 0, rotate: 180 }}
             transition={TOKENS.animations.spring.bouncy}
           >
-            <CheckCircle className="h-5 w-5" style={{ color: TOKENS.colors.success.text }} />
+            <CheckCircle className={iconSize.md} style={{ color: TOKENS.colors.success.text }} />
           </motion.div>
         );
       case 'invalid':
@@ -115,7 +116,7 @@ export function AnimatedFormField({
             exit={{ scale: 0 }}
             transition={TOKENS.animations.spring.snappy}
           >
-            <AlertCircle className="h-5 w-5" style={{ color: TOKENS.colors.error.text }} />
+            <AlertCircle className={iconSize.md} style={{ color: TOKENS.colors.error.text }} />
           </motion.div>
         );
       case 'warning':
@@ -126,7 +127,7 @@ export function AnimatedFormField({
             exit={{ scale: 0 }}
             transition={TOKENS.animations.spring.snappy}
           >
-            <AlertTriangle className="h-5 w-5" style={{ color: TOKENS.colors.warning.text }} />
+            <AlertTriangle className={iconSize.md} style={{ color: TOKENS.colors.warning.text }} />
           </motion.div>
         );
       default:
@@ -169,14 +170,14 @@ export function AnimatedFormField({
 
   return (
     <motion.div
-      className={cn('space-y-2', className)}
+      className={cn(spaceY.compact, className)}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={TOKENS.animations.spring.smooth}
     >
       {/* Label Row */}
       <div className="flex items-center justify-between">
-        <Label htmlFor={id} className="flex items-center gap-1.5">
+        <Label htmlFor={id} className={cluster.snug}>
           <span>{label}</span>
           {required && (
             <span className="text-accent-primary" style={{ color: TOKENS.colors.accent.primary }}>
@@ -194,7 +195,7 @@ export function AnimatedFormField({
                 ? 'text-warning'
                 : currentLength >= maxLength
                   ? 'text-error'
-                  : 'text-muted-foreground'
+                  : muted.default
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -241,39 +242,39 @@ export function AnimatedFormField({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={TOKENS.animations.spring.smooth}
-            className="flex items-start gap-2"
+            className={`${row.compact}`}
           >
             {/* Icon for messages */}
             {messageType === 'error' && (
               <AlertCircle
-                className="mt-0.5 h-4 w-4 shrink-0"
+                className={`${marginTop.micro} h-4 w-4 shrink-0`}
                 style={{ color: TOKENS.colors.error.text }}
               />
             )}
             {messageType === 'warning' && (
               <AlertTriangle
-                className="mt-0.5 h-4 w-4 shrink-0"
+                className={`${marginTop.micro} h-4 w-4 shrink-0`}
                 style={{ color: TOKENS.colors.warning.text }}
               />
             )}
             {messageType === 'success' && (
               <CheckCircle
-                className="mt-0.5 h-4 w-4 shrink-0"
+                className={`${marginTop.micro} h-4 w-4 shrink-0`}
                 style={{ color: TOKENS.colors.success.text }}
               />
             )}
             {messageType === 'help' && (
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+              <Info className={`${marginTop.micro} h-4 w-4 shrink-0 ${muted.default}`} />
             )}
 
             {/* Message Text */}
             <span
               className={cn(
                 'text-sm',
-                messageType === 'error' && 'font-medium',
-                messageType === 'warning' && 'font-medium',
-                messageType === 'success' && 'font-medium',
-                messageType === 'help' && 'text-muted-foreground'
+                messageType === 'error' && weight.medium,
+                messageType === 'warning' && weight.medium,
+                messageType === 'success' && weight.medium,
+                messageType === 'help' && muted.default
               )}
               style={{
                 color:

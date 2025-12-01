@@ -41,7 +41,7 @@
  */
 
 import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@heyclaude/web-runtime/icons';
-import { between, cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, iconSize, spaceY, weight, muted, size, padding } from '@heyclaude/web-runtime/design-system';
 import { cn, DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -212,15 +212,15 @@ export function ExamplesArrayInput({
   const examplesJson = JSON.stringify(examplesForSubmission);
 
   return (
-    <div className="space-y-4">
+    <div className={spaceY.comfortable}>
       {/* Hidden input for form submission */}
       <input type="hidden" name={name} value={examplesJson} />
 
       {/* Header */}
       <div className={between.center}>
         <div>
-          <Label className="font-semibold text-base">Usage Examples (optional)</Label>
-          <p className={cn('text-sm', 'text-muted-foreground', 'mt-1')}>
+          <Label className={`${weight.semibold} ${size.base}`}>Usage Examples (optional)</Label>
+          <p className={cn('text-sm', muted.default, 'mt-1')}>
             Add code examples to help users understand how to use this configuration. Max{' '}
             {maxExamples} examples.
           </p>
@@ -239,13 +239,13 @@ export function ExamplesArrayInput({
       </div>
 
       {/* Examples List */}
-      <div className="space-y-3">
+      <div className={spaceY.default}>
         {examples.length === 0 && (
           <Card className="border-dashed">
             <CardContent className="py-8">
-              <div className="space-y-2 text-center">
-                <Code className="mx-auto h-8 w-8 text-muted-foreground" />
-                <p className={cn('text-sm', 'text-muted-foreground')}>
+              <div className={`${spaceY.compact} text-center`}>
+                <Code className={`mx-auto h-8 w-8 ${muted.default}`} />
+                <p className={cn('text-sm', muted.default)}>
                   No examples added yet. Click "Add Example" to get started.
                 </p>
               </div>
@@ -284,7 +284,7 @@ export function ExamplesArrayInput({
                     variant="ghost"
                     size="sm"
                     onClick={() => removeExample(index)}
-                    className={`${cluster.compact} p-1`}
+                    className={`${cluster.compact} ${padding.micro}`}
                     title="Remove example"
                   >
                     <Trash className={iconSize.sm} />
@@ -296,9 +296,9 @@ export function ExamplesArrayInput({
               </CardHeader>
 
               {isExpanded && (
-                <CardContent className="space-y-4">
+                <CardContent className={spaceY.comfortable}>
                   {/* Title */}
-                  <div className="space-y-2">
+                  <div className={spaceY.compact}>
                     <Label htmlFor={titleId}>
                       Example Title <span className="text-destructive">*</span>
                     </Label>
@@ -314,7 +314,7 @@ export function ExamplesArrayInput({
                   </div>
 
                   {/* Language */}
-                  <div className="space-y-2">
+                  <div className={spaceY.compact}>
                     <Label htmlFor={languageId}>
                       Language <span className="text-destructive">*</span>
                     </Label>
@@ -338,7 +338,7 @@ export function ExamplesArrayInput({
                   </div>
 
                   {/* Code */}
-                  <div className="space-y-2">
+                  <div className={spaceY.compact}>
                     <Label htmlFor={codeId}>
                       Code <span className="text-destructive">*</span>
                     </Label>
@@ -347,17 +347,17 @@ export function ExamplesArrayInput({
                       value={example.code}
                       onChange={(e) => updateExample(index, 'code', e.target.value)}
                       placeholder="export default { ... }"
-                      className={`${DIMENSIONS.INPUT_LG} font-mono text-sm`}
+                      className={`${DIMENSIONS.INPUT_LG} font-mono ${size.sm}`}
                       maxLength={10000}
                       required={true}
                     />
-                    <p className={cn('text-xs', 'text-muted-foreground')}>
+                    <p className={cn('text-xs', muted.default)}>
                       {example.code.length} / 10,000 characters
                     </p>
                   </div>
 
                   {/* Description */}
-                  <div className="space-y-2">
+                  <div className={spaceY.compact}>
                     <Label htmlFor={descriptionId}>Description (optional)</Label>
                     <Textarea
                       id={descriptionId}
@@ -367,7 +367,7 @@ export function ExamplesArrayInput({
                       className={DIMENSIONS.INPUT_SM}
                       maxLength={500}
                     />
-                    <p className={cn('text-xs', 'text-muted-foreground')}>
+                    <p className={cn('text-xs', muted.default)}>
                       {(example.description || '').length} / 500 characters
                     </p>
                   </div>

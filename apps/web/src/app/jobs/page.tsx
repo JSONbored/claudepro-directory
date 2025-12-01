@@ -7,7 +7,7 @@ import { Constants } from '@heyclaude/database-types';
 import  { type JobsFilterResult } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getFilteredJobs } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, grid, muted, absolute } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, grid, muted, absolute, animate, spaceY, marginBottom, iconLeading, iconSize, weight, radius ,size , padding , gap , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Clock,
@@ -37,7 +37,13 @@ import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 /**
  * Dynamic Rendering Required
  *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ * Jobs page is always dynamic because:
+ * 1. Accepts search params for filtering (type, location, remote)
+ * 2. Results depend on user-provided query parameters
+ * 3. Job listings change frequently
+ *
+ * Note: revalidate is NOT used when dynamic = 'force-dynamic'
+ * Data caching is handled at the data layer (CACHE_TTL.jobs = 1800s)
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
@@ -49,18 +55,9 @@ const NewsletterCTAVariant = dynamicImport(
       default: module_.NewsletterCTAVariant,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
 );
-
-/**
- * ISR: 15 minutes (900s) - Jobs update frequently but don't need real-time freshness
- *
- * Hybrid Rendering Strategy:
- * - Base job list (no filters) uses ISR with 15min revalidation
- * - Filtered queries bypass cache (uncached SSR) for real-time results
- */
-export const revalidate = 900;
 
 /**
  * Streaming Jobs Count Badge
@@ -85,7 +82,7 @@ async function JobsCountBadge() {
   }
   return (
     <UnifiedBadge variant="base" style="secondary">
-      <Briefcase className="mr-1 h-3 w-3" />
+      <Briefcase className={iconLeading.xs} />
       {totalJobs} Jobs Available
     </UnifiedBadge>
   );
@@ -215,16 +212,16 @@ async function JobsListSection({
   if (total_count === 0) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center py-24">
-          <div className="mb-6 rounded-full bg-accent/10 p-4">
-            <Briefcase className="h-12 w-12 text-muted-foreground" />
+        <CardContent className={`flex flex-col items-center justify-center ${padding.yXl}`}>
+          <div className={`${marginBottom.comfortable} rounded-full bg-accent/10 ${padding.default}`}>
+            <Briefcase className={`h-12 w-12 ${muted.default}`} />
           </div>
-          <h3 className="mb-4 font-bold text-2xl">No Jobs Available Yet</h3>
-          <p className="mb-8 max-w-md text-center text-muted-foreground leading-relaxed">
+          <h3 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>No Jobs Available Yet</h3>
+          <p className={`${marginBottom.relaxed} ${maxWidth.md} text-center ${muted.default} leading-relaxed`}>
             We're building our jobs board! Soon you'll find amazing opportunities with companies
             working on the future of AI. Be the first to know when new positions are posted.
           </p>
-          <div className="flex gap-4">
+          <div className={`flex ${gap.comfortable}`}>
             <Button asChild>
               <Link href={ROUTES.PARTNER}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -243,10 +240,10 @@ async function JobsListSection({
   if (jobs.length === 0) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <Briefcase className="mb-4 h-16 w-16 text-muted-foreground" />
-          <h3 className="mb-2 font-semibold text-xl">No Jobs Found</h3>
-          <p className="mb-6 max-w-md text-center text-muted-foreground">
+        <CardContent className={`flex flex-col items-center justify-center ${padding.yHero}`}>
+          <Briefcase className={`${marginBottom.default} h-16 w-16 ${muted.default}`} />
+          <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No Jobs Found</h3>
+          <p className={`${marginBottom.comfortable} ${maxWidth.md} text-center ${muted.default}`}>
             No jobs match your current filters. Try adjusting your search criteria.
           </p>
           <Button variant="outline" asChild>
@@ -261,14 +258,14 @@ async function JobsListSection({
     <>
       <div className={between.center}>
         <div>
-          <h2 className="font-bold text-2xl">
+          <h2 className={`${weight.bold} ${size['2xl']}`}>
             {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'} Found
           </h2>
-          <p className="text-muted-foreground">Showing all available positions</p>
+          <p className={muted.default}>Showing all available positions</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-2`}>
         {jobs.map((job) => (
           <JobCard key={job.slug} job={job} />
         ))}
@@ -374,29 +371,29 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${minHeight.screen} bg-background`}>
       <section className="relative overflow-hidden border-b border-border">
-        <div className="container mx-auto px-4 py-20">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 flex justify-center">
-              <div className="rounded-full bg-accent/10 p-3">
+        <div className={`container mx-auto ${padding.xDefault} py-20`}>
+          <div className={`mx-auto ${maxWidth['3xl']}`}>
+            <div className={`${marginBottom.comfortable} flex justify-center`}>
+              <div className={`rounded-full bg-accent/10 ${padding.compact}`}>
                 <Briefcase className="h-8 w-8 text-primary" />
               </div>
             </div>
 
-            <h1 className="mb-4 font-bold text-4xl tracking-tight sm:text-5xl">AI Jobs Board</h1>
+            <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']} tracking-tight sm:text-5xl`}>AI Jobs Board</h1>
 
-            <p className="mx-auto mt-4 max-w-xl text-muted-foreground text-lg">
+            <p className={`mx-auto mt-4 ${maxWidth.xl} ${muted.lg}`}>
               Discover opportunities with companies building the future of artificial intelligence.
               From startups to industry giants, find your perfect role.
             </p>
 
-            <div className="mb-8 flex flex-wrap justify-center gap-2">
+            <div className={`${marginBottom.relaxed} flex flex-wrap justify-center ${gap.compact}`}>
               <Suspense
                 fallback={
                   <UnifiedBadge variant="base" style="secondary">
-                    <Briefcase className="mr-1 h-3 w-3" />
-                    <span className="inline-block h-4 w-16 animate-pulse rounded bg-muted/40" />
+                    <Briefcase className={iconLeading.xs} />
+                    <span className={`inline-block h-4 w-16 ${animate.pulse} rounded bg-muted/40`} />
                   </UnifiedBadge>
                 }
               >
@@ -412,7 +409,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
             <Button variant="outline" size="sm" asChild>
               <Link href={ROUTES.PARTNER} className={cluster.compact}>
-                <Plus className="h-3 w-3" />
+                <Plus className={iconSize.xs} />
                 Post a Job
               </Link>
             </Button>
@@ -424,11 +421,11 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       <section className="px-4 pb-8">
         <div className="container mx-auto">
           <Card className="card-gradient glow-effect">
-            <CardContent className="space-y-4 p-6">
+            <CardContent className={`${spaceY.comfortable} ${padding.comfortable}`}>
               <form method="GET" action="/jobs" className={grid.responsive4}>
                   <div className="relative">
                     <Search
-                      className={`${absolute.topHalfLeft} -translate-y-1/2 h-4 w-4 transform text-muted-foreground`}
+                      className={`${absolute.topHalfLeft} -translate-y-1/2 h-4 w-4 transform ${muted.default}`}
                     />
                     <Input
                       id={searchInputId}
@@ -542,8 +539,8 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   (employment ?? '') !== 'any' ||
                   (experience ?? '') !== 'any' ||
                   sort !== 'newest' ||
-                  remote) ? <div className="flex flex-wrap gap-2 mt-4 border-border border-t pt-4">
-                    <span className={`${muted.default} text-sm`}>Active filters:</span>
+                  remote) ? <div className={`flex flex-wrap ${gap.compact} mt-4 border-border border-t pt-4`}>
+                    <span className={`${muted.sm}`}>Active filters:</span>
                     {searchQuery ? <UnifiedBadge variant="base" style="secondary">
                         Search: {searchQuery}
                         <Link
@@ -622,19 +619,19 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
           </div>
         </section>
 
-      <section className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
-          <div className="space-y-8">
+      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+        <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-[1fr_320px]`}>
+          <div className={spaceY.loose}>
             <Suspense
               fallback={
                 <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-24">
-                    <div className="mb-6 rounded-full bg-accent/10 p-4">
-                      <Briefcase className="h-12 w-12 text-muted-foreground" />
+                  <CardContent className={`flex flex-col items-center justify-center ${padding.yXl}`}>
+                    <div className={`${marginBottom.comfortable} rounded-full bg-accent/10 ${padding.default}`}>
+                      <Briefcase className={`h-12 w-12 ${muted.default}`} />
                     </div>
-                    <h3 className="mb-4 font-bold text-2xl">Loading Jobs...</h3>
+                    <h3 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>Loading Jobs...</h3>
                     <p
-                      className="mb-8 max-w-md text-center text-muted-foreground leading-relaxed"
+                      className={`${marginBottom.relaxed} ${maxWidth.md} text-center ${muted.default} leading-relaxed`}
                     >
                       Fetching the latest job listings...
                     </p>
@@ -655,7 +652,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </Suspense>
           </div>
 
-          <aside className="w-full space-y-6 lg:sticky lg:top-24 lg:h-fit">
+          <aside className={`w-full ${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}>
             <JobsPromo />
             <JobAlertsCard
               defaultCategory={category ?? 'all'}
@@ -666,7 +663,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         </div>
       </section>
 
-      <section className="container mx-auto px-4 py-12">
+      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

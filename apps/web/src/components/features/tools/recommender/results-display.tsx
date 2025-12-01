@@ -22,7 +22,7 @@ import {
   Sparkles,
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
-import { between, cluster, iconLeading, iconSize, absolute } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, iconLeading, iconSize, absolute, spaceY, muted, marginBottom, marginTop, weight ,size , padding , gap , row , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { BookmarkButton } from '@heyclaude/web-runtime/ui';
@@ -151,20 +151,20 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   const categories = ['all', ...new Set((results ?? []).map((r) => r.category).filter(Boolean))];
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-4 text-center">
-        <div className="flex items-center justify-center gap-2">
+    <div className={spaceY.loose}>
+      <div className={`${spaceY.comfortable} text-center`}>
+        <div className={`flex items-center justify-center ${gap.compact}`}>
           <Sparkles className={`${iconSize.lg} text-primary`} />
-          <h1 className="font-bold text-3xl md:text-4xl">Your Personalized Recommendations</h1>
+          <h1 className={`${weight.bold} ${size['3xl']} md:${size['4xl']}`}>Your Personalized Recommendations</h1>
         </div>
 
-        <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+        <p className={`mx-auto ${maxWidth['2xl']} ${muted.lg}`}>
           Based on your preferences, we found{' '}
           <strong>{total_matches ?? 0} matching configurations</strong>. Here are the top{' '}
           {results?.length ?? 0} best fits for your needs.
         </p>
 
-        <div className={'flex-wrap items-center justify-center gap-3'}>
+        <div className={'flex-wrap items-center justify-center ${gap.default}'}>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
             <TrendingUp className={iconLeading.xs} />
             {(summary?.avg_match_score ?? 0).toFixed(0)}% Avg Match
@@ -178,13 +178,13 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </UnifiedBadge>
         </div>
 
-        <div className={'flex-wrap items-center justify-center gap-3'}>
+        <div className={'flex-wrap items-center justify-center ${gap.default}'}>
           <Button
             variant="default"
             size="sm"
             onClick={handleSaveAll}
             disabled={isPending}
-            className="gap-2"
+            className={`${gap.compact}`}
           >
             <Bookmark className={iconSize.sm} />
             {isPending ? 'Saving...' : 'Save All to Library'}
@@ -193,13 +193,13 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             variant="outline"
             size="sm"
             onClick={() => setShowShareModal(true)}
-            className="gap-2"
+            className={`${gap.compact}`}
           >
             <Share2 className={iconSize.sm} />
             Share Results
           </Button>
           <Button variant="outline" size="sm" asChild={true}>
-            <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className="gap-2">
+            <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className={`${gap.compact}`}>
               <RefreshCw className={iconSize.sm} />
               Start Over
             </Link>
@@ -209,7 +209,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
       <Collapsible open={showRefinePanel} onOpenChange={setShowRefinePanel}>
         <CollapsibleTrigger asChild={true}>
-          <Button variant="ghost" size="sm" className="w-full gap-2">
+          <Button variant="ghost" size="sm" className={`w-full ${gap.compact}`}>
             <Settings className={iconSize.sm} />
             Adjust Preferences
             <ChevronDown
@@ -218,18 +218,18 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Card className="mt-4">
+          <Card className={marginTop.default}>
             <CardHeader>
               <CardTitle className="text-lg">Refine Your Results</CardTitle>
               <CardDescription>
                 Adjust these settings to fine-tune your recommendations
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
+            <CardContent className={spaceY.relaxed}>
+              <div className={spaceY.compact}>
                 <div className={between.center}>
-                  <span className="font-medium text-sm">Minimum Match Score</span>
-                  <span className="text-muted-foreground text-sm">{minScore}%</span>
+                  <span className={`${weight.medium} ${size.sm}`}>Minimum Match Score</span>
+                  <span className={muted.sm}>{minScore}%</span>
                 </div>
                 <Slider
                   value={[minScore]}
@@ -240,15 +240,15 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   className="w-full"
                   aria-label="Minimum match score"
                 />
-                <p className="text-muted-foreground text-xs">
+                <p className={`${muted.default} ${size.xs}`}>
                   Only show configurations with at least {minScore}% match
                 </p>
               </div>
 
-              <div className="space-y-2">
+              <div className={spaceY.compact}>
                 <div className={between.center}>
-                  <span className="font-medium text-sm">Maximum Results</span>
-                  <span className="text-muted-foreground text-sm">{maxResults}</span>
+                  <span className={`${weight.medium} ${size.sm}`}>Maximum Results</span>
+                  <span className={muted.sm}>{maxResults}</span>
                 </div>
                 <Slider
                   value={[maxResults]}
@@ -259,16 +259,16 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   className="w-full"
                   aria-label="Maximum number of results"
                 />
-                <p className="text-muted-foreground text-xs">
+                <p className={`${muted.default} ${size.xs}`}>
                   Show up to {maxResults} recommendations
                 </p>
               </div>
 
               <div className="pt-4">
-                <Separator className="mb-4" />
-                <div className={`${between.center} text-sm`}>
-                  <span className="text-muted-foreground">Showing results:</span>
-                  <span className="font-medium">
+                <Separator className={marginBottom.default} />
+                <div className={`${between.center} ${size.sm}`}>
+                  <span className={muted.default}>Showing results:</span>
+                  <span className={weight.medium}>
                     {filteredResults.length} of {results?.length ?? 0}
                   </span>
                 </div>
@@ -284,22 +284,22 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           <CardDescription>We matched configurations based on these preferences</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+          <div className={`grid ${gap.default} sm:grid-cols-2 md:grid-cols-3`}>
             <div>
-              <span className="font-medium text-sm">Use Case</span>
-              <p className="mt-1 text-muted-foreground text-sm capitalize">
+              <span className={`${weight.medium} ${size.sm}`}>Use Case</span>
+              <p className={`${marginTop.tight} ${muted.sm} capitalize`}>
                 {String(answers.useCase).replace('-', ' ')}
               </p>
             </div>
             <div>
-              <span className="font-medium text-sm">Experience Level</span>
-              <p className="mt-1 text-muted-foreground text-sm capitalize">
+              <span className={`${weight.medium} ${size.sm}`}>Experience Level</span>
+              <p className={`${marginTop.tight} ${muted.sm} capitalize`}>
                 {String(answers.experienceLevel)}
               </p>
             </div>
             <div>
-              <span className="font-medium text-sm">Tool Preferences</span>
-              <p className="mt-1 text-muted-foreground text-sm">
+              <span className={`${weight.medium} ${size.sm}`}>Tool Preferences</span>
+              <p className={`${marginTop.tight} ${muted.sm}`}>
                 {Array.isArray(answers.toolPreferences) ? answers.toolPreferences.join(', ') : ''}
               </p>
             </div>
@@ -307,8 +307,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               Array.isArray(answers.p_integrations) &&
               answers.p_integrations.length > 0 && (
                 <div>
-                  <span className="font-medium text-sm">Integrations</span>
-                  <p className="mt-1 text-muted-foreground text-sm">
+                  <span className={`${weight.medium} ${size.sm}`}>Integrations</span>
+                  <p className={`${marginTop.tight} ${muted.sm}`}>
                     {answers.p_integrations.join(', ')}
                   </p>
                 </div>
@@ -317,16 +317,16 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               Array.isArray(answers.p_focus_areas) &&
               answers.p_focus_areas.length > 0 && (
                 <div>
-                  <span className="font-medium text-sm">Focus Areas</span>
-                  <p className="mt-1 text-muted-foreground text-sm">
+                  <span className={`${weight.medium} ${size.sm}`}>Focus Areas</span>
+                  <p className={`${marginTop.tight} ${muted.sm}`}>
                     {answers.p_focus_areas.join(', ')}
                   </p>
                 </div>
               )}
             {answers.teamSize && (
               <div>
-                <span className="font-medium text-sm">Team Size</span>
-                <p className="mt-1 text-muted-foreground text-sm capitalize">
+                <span className={`${weight.medium} ${size.sm}`}>Team Size</span>
+                <p className={`${marginTop.tight} ${muted.sm} capitalize`}>
                   {String(answers.teamSize)}
                 </p>
               </div>
@@ -350,8 +350,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           })}
         </TabsList>
 
-        <TabsContent value={selectedCategory} className="mt-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <TabsContent value={selectedCategory} className={marginTop.comfortable}>
+          <div className={`grid ${gap.relaxed} md:grid-cols-2 lg:grid-cols-3`}>
             {filteredResults
               .filter(
                 (
@@ -399,7 +399,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   if (score >= 90) return 'text-green-500';
                   if (score >= 75) return 'text-blue-500';
                   if (score >= 60) return 'text-yellow-500';
-                  return 'text-muted-foreground';
+                  return muted.default;
                 };
                 const getMatchGradient = (score: number) => {
                   if (score >= 90) return 'from-green-500/20 to-transparent';
@@ -417,7 +417,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                             <UnifiedBadge
                               variant="base"
                               style="secondary"
-                              className={`${getMatchScoreColor(matchScore)} px-3 py-1 font-bold text-base`}
+                              className={`${getMatchScoreColor(matchScore)} ${padding.xCompact} ${padding.yMicro} ${weight.bold} ${size.base}`}
                             >
                               <Sparkles className={iconLeading.xs} />
                               {matchScore}%
@@ -472,19 +472,19 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         renderContent={() => (
                           <>
                             <div
-                              className="flex items-start gap-2 mb-3 rounded-lg bg-accent/50 p-3"
+                              className={`${row.compact} mb-3 ${radius.lg} bg-accent/50 ${padding.compact}`}
                             >
                               <Info
-                                className="h-4 w-4 text-primary mt-0.5 shrink-0"
+                                className={`h-4 w-4 text-primary ${marginTop.micro} shrink-0`}
                               />
                               <div>
-                                <p className="font-medium text-sm">Why recommended:</p>
-                                <p className="text-muted-foreground text-sm">{primaryReason}</p>
+                                <p className={`${weight.medium} ${size.sm}`}>Why recommended:</p>
+                                <p className={muted.sm}>{primaryReason}</p>
                               </div>
                             </div>
 
                             {reasons.length > 1 && (
-                              <div className="flex flex-wrap gap-1">
+                              <div className={`flex flex-wrap ${gap.tight}`}>
                                 {reasons.slice(1, 4).map((reason) => (
                                   <UnifiedBadge
                                     key={`${result.slug}-${reason.message}`}
@@ -503,10 +503,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="group -mx-4 -mb-4 mt-2 w-full"
+                            className={`group -mx-4 -mb-4 ${marginTop.compact} w-full`}
                             asChild={true}
                           >
-                            <span className="flex items-center justify-center gap-2">
+                            <span className={`flex items-center justify-center ${gap.compact}`}>
                               View Details
                               <ArrowRight
                                 className={`${iconSize.sm} transition-transform group-hover:translate-x-1`}
@@ -524,8 +524,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
           {filteredResults.length === 0 && (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center py-8">
-                <p className="text-muted-foreground">No results in this category</p>
+              <CardContent className={`flex flex-col items-center justify-center ${padding.yRelaxed}`}>
+                <p className={muted.default}>No results in this category</p>
               </CardContent>
             </Card>
           )}
@@ -539,14 +539,14 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             What's Next?
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground text-sm">
+        <CardContent className={spaceY.comfortable}>
+          <p className={muted.sm}>
             Ready to start using these configurations? Click any card to view detailed setup
             instructions, examples, and documentation.
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className={`flex flex-wrap ${gap.default}`}>
             <Button asChild={true}>
-              <Link href="/" className="gap-2">
+              <Link href="/" className={`${gap.compact}`}>
                 Browse All Configs
                 <ArrowRight className={iconSize.sm} />
               </Link>

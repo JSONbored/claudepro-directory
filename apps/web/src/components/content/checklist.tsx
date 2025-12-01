@@ -6,7 +6,7 @@
  */
 
 import { AlertTriangle, BookOpen, CheckCircle } from '@heyclaude/web-runtime/icons';
-import { between, cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, iconSize, hoverBg, transition, spaceY, marginBottom, marginTop, muted, weight, radius ,size , padding , row } from '@heyclaude/web-runtime/design-system';
 import type { ChecklistProps } from '@heyclaude/web-runtime/types/component.types';
 import React from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -55,7 +55,7 @@ export function Checklist(props: ChecklistProps) {
     validItems.length > 0 ? Math.round((checkedItems.size / validItems.length) * 100) : 0;
 
   const priorityColors = {
-    critical: 'text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/20 px-2 py-0.5 rounded',
+    critical: 'text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/20 ${padding.xTight} ${padding.yHair} rounded',
     high: 'text-red-600 dark:text-red-400',
     medium: 'text-yellow-600 dark:text-yellow-400',
     low: 'text-green-600 dark:text-green-400',
@@ -82,7 +82,7 @@ export function Checklist(props: ChecklistProps) {
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
+        <div className={marginBottom.default}>
           <div className={'h-2 w-full rounded-full bg-muted'}>
             <div
               className={'h-2 rounded-full bg-primary transition-all duration-300'}
@@ -90,20 +90,20 @@ export function Checklist(props: ChecklistProps) {
             />
           </div>
         </div>
-        <div className="space-y-3">
+        <div className={spaceY.default}>
           {validItems.map((item, index) => (
             <div
               key={`${item.task}-${index}`}
               itemScope={true}
               itemType="https://schema.org/ListItem"
               className={
-                'flex items-start gap-3 rounded-lg bg-muted/30 p-3 transition-colors hover:bg-muted/50'
+                `${row.default} ${radius.lg} bg-muted/30 ${padding.compact} ${transition.colors} ${hoverBg.muted}`
               }
             >
               <button
                 type="button"
                 onClick={() => toggleItem(index)}
-                className="mt-0.5 shrink-0"
+                className={`${marginTop.micro} shrink-0`}
                 aria-label={`Mark ${item.task} as ${checkedItems.has(index) ? 'incomplete' : 'complete'}`}
               >
                 <div
@@ -122,18 +122,18 @@ export function Checklist(props: ChecklistProps) {
                 <div className={cluster.compact}>
                   <span
                     itemProp="name"
-                    className={`font-medium ${checkedItems.has(index) ? 'text-muted-foreground line-through' : ''}`}
+                    className={`${weight.medium} ${checkedItems.has(index) ? `${muted.default} line-through` : ''}`}
                   >
                     {item.task}
                   </span>
                   {item.priority && (
-                    <span className={`font-medium text-xs ${priorityColors[item.priority]}`}>
+                    <span className={`${weight.medium} ${size.xs} ${priorityColors[item.priority]}`}>
                       {item.priority.toUpperCase()}
                     </span>
                   )}
                 </div>
                 {item.description && (
-                  <p className="mt-1 text-muted-foreground text-sm" itemProp="description">
+                  <p className={`${marginTop.tight} ${muted.sm}`} itemProp="description">
                     {item.description}
                   </p>
                 )}

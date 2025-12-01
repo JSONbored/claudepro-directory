@@ -15,6 +15,7 @@ import {
   ROUTES,
 } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, ExternalLink, Github, Heart, Rss, Sparkles } from '@heyclaude/web-runtime/icons';
+import { cluster, iconSize, spaceY, marginBottom, marginTop, muted, link as linkStyle, label, weight  , gap , padding } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -121,13 +122,13 @@ function FooterComponent() {
 
   return (
     <footer className="border-border/50 border-t bg-background">
-      <div className="container mx-auto px-4 py-10 lg:py-12">
+      <div className={`container mx-auto ${padding.xDefault} ${padding.ySpacious} lg:py-12`}>
         {/* Main footer content - Two section layout */}
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_2.5fr] lg:gap-16">
+        <div className={`grid grid-cols-1 ${gap.section} lg:grid-cols-[1.5fr_2.5fr] lg:gap-16`}>
           
           {/* Left section - Brand & Social */}
           <motion.div
-            className="space-y-6"
+            className={spaceY.relaxed}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -139,12 +140,12 @@ function FooterComponent() {
             </div>
             
             {/* Description */}
-            <p className="max-w-sm text-muted-foreground text-sm leading-relaxed">
+            <p className={`max-w-sm ${muted.sm} leading-relaxed`}>
               {APP_CONFIG.description}
             </p>
 
             {/* Social links */}
-            <div className="flex items-center gap-4">
+            <div className={cluster.comfortable}>
               {[
                 { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
                 { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
@@ -154,10 +155,10 @@ function FooterComponent() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
+                  className={`${muted.default} transition-colors hover:text-foreground`}
                   aria-label={social.label}
                 >
-                  <social.icon className="h-5 w-5" />
+                  <social.icon className={iconSize.md} />
                 </Link>
               ))}
               <ThemeToggle />
@@ -169,14 +170,14 @@ function FooterComponent() {
               style="outline"
               className="border-accent/20 bg-accent/5 text-accent"
             >
-              <ExternalLink className="mr-1.5 h-3 w-3" />
+              <ExternalLink className={`mr-1.5 ${iconSize.xs}`} />
               Open Source
             </UnifiedBadge>
           </motion.div>
 
           {/* Right section - Navigation grid */}
           <motion.div
-            className="grid grid-cols-2 gap-8 sm:grid-cols-4"
+            className={`grid grid-cols-2 ${gap.loose} sm:grid-cols-4`}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -184,13 +185,13 @@ function FooterComponent() {
           >
             {/* Browse column */}
             <div>
-              <h3 className="mb-4 font-semibold text-foreground text-sm">Browse</h3>
+              <h3 className={`${marginBottom.default} ${label.sectionHeader}`}>Browse</h3>
               <ul className="space-y-2.5">
                 {browseLinks.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-muted-foreground text-sm transition-colors hover:text-foreground"
+                      className={linkStyle.mutedSm}
                     >
                       {link.label}
                     </Link>
@@ -201,13 +202,13 @@ function FooterComponent() {
 
             {/* Resources column */}
             <div>
-              <h3 className="mb-4 font-semibold text-foreground text-sm">Resources</h3>
+              <h3 className={`${marginBottom.default} ${label.sectionHeader}`}>Resources</h3>
               <ul className="space-y-2.5">
                 {resourceLinks.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="inline-flex items-center gap-1.5 text-muted-foreground text-sm transition-colors hover:text-foreground"
+                      className={`inline-${cluster.snug} ${linkStyle.mutedSm}`}
                     >
                       {link.icon && <link.icon className="h-3.5 w-3.5" />}
                       <span>{link.label}</span>
@@ -219,13 +220,13 @@ function FooterComponent() {
 
             {/* Support column */}
             <div>
-              <h3 className="mb-4 font-semibold text-foreground text-sm">Support</h3>
+              <h3 className={`${marginBottom.default} ${label.sectionHeader}`}>Support</h3>
               <ul className="space-y-2.5">
                 {supportLinks.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-muted-foreground text-sm transition-colors hover:text-foreground"
+                      className={linkStyle.mutedSm}
                     >
                       {link.label}
                     </Link>
@@ -236,13 +237,13 @@ function FooterComponent() {
 
             {/* Legal column */}
             <div>
-              <h3 className="mb-4 font-semibold text-foreground text-sm">Legal</h3>
+              <h3 className={`${marginBottom.default} ${label.sectionHeader}`}>Legal</h3>
               <ul className="space-y-2.5">
                 {legalLinks.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-muted-foreground text-sm transition-colors hover:text-foreground"
+                      className={linkStyle.mutedSm}
                     >
                       {link.label}
                     </Link>
@@ -255,30 +256,30 @@ function FooterComponent() {
 
         {/* Bottom bar - Modern divider and layout */}
         <motion.div
-          className="mt-12 border-border/30 border-t pt-8"
+          className={`${marginTop.section} border-border/30 border-t pt-8`}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
         >
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+          <div className={`flex flex-col items-center justify-between ${gap.comfortable} md:flex-row`}>
             {/* Left - Copyright with heart */}
-            <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+            <div className={`${cluster.snug} ${muted.sm}`}>
               <span>© {currentYear}</span>
               <span className="text-border">•</span>
               <span>Made with</span>
-              <Heart className="h-3.5 w-3.5 fill-red-500/80 text-red-500/80" />
+              <Heart className={`${iconSize.sm} fill-red-500/80 text-red-500/80`} />
               <span>by</span>
               <Link 
                 href="/consulting" 
-                className="font-medium text-foreground underline-offset-4 hover:underline"
+                className={`${weight.medium} text-foreground underline-offset-4 hover:underline`}
               >
                 JSONbored
               </Link>
             </div>
 
             {/* Right - Status badge */}
-            <div className="flex items-center gap-4">
+            <div className={cluster.comfortable}>
               {mounted && (
                 <iframe
                   src={`${EXTERNAL_SERVICES.betterstack.status}/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}

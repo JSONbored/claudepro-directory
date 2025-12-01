@@ -5,7 +5,7 @@ import {
   getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, iconSize, submissionBadge  } from '@heyclaude/web-runtime/design-system';
+import { between, iconSize, submissionBadge, spaceY, muted, marginBottom, marginTop, iconLeading, weight ,size  , gap , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UnifiedBadge, Button ,
@@ -222,10 +222,10 @@ export default async function SubmissionsPage() {
       timestamp: new Date().toISOString(),
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>Please sign in to view and manage your submissions.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -273,7 +273,7 @@ export default async function SubmissionsPage() {
 
   if (hasError) {
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <div className="text-destructive">Failed to load submissions. Please try again later.</div>
       </div>
     );
@@ -321,7 +321,7 @@ export default async function SubmissionsPage() {
 
     return (
       <UnifiedBadge variant="base" style="outline" className={colorClass}>
-        <Icon className="mr-1 h-3 w-3" />
+        <Icon className={iconLeading.xs} />
         {variant.label}
       </UnifiedBadge>
     );
@@ -381,11 +381,11 @@ export default async function SubmissionsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div className={between.center}>
         <div>
-          <h1 className="mb-2 font-bold text-3xl">My Submissions</h1>
-          <p className="text-muted-foreground">
+          <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>My Submissions</h1>
+          <p className={muted.default}>
             {submissions.length} {submissions.length === 1 ? 'submission' : 'submissions'}
           </p>
         </div>
@@ -399,10 +399,10 @@ export default async function SubmissionsPage() {
 
       {submissions.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center py-12">
-            <Send className="mb-4 h-12 w-12 text-muted-foreground" />
-            <h3 className="mb-2 font-semibold text-xl">No submissions yet</h3>
-            <p className="mb-4 max-w-md text-center text-muted-foreground">
+          <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
+            <Send className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No submissions yet</h3>
+            <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
               Share your Claude configurations with the community! Your contributions help everyone
               build better AI workflows.
             </p>
@@ -415,7 +415,7 @@ export default async function SubmissionsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className={`grid ${gap.comfortable}`}>
           {submissions.map((submission, index) => (
             <SubmissionCard
               key={submission.id ?? `submission-${index}`}
@@ -440,13 +440,13 @@ export default async function SubmissionsPage() {
       {/* Info Card */}
       <Card className="border-blue-500/20 bg-blue-500/5">
         <CardContent className="pt-6">
-          <div className="flex gap-3">
+          <div className={`flex ${gap.default}`}>
             <GitPullRequest
               className={`${iconSize.md} text-blue-600 mt-0.5 shrink-0`}
             />
             <div className="flex-1">
-              <p className="font-medium text-blue-400 text-sm">How it works</p>
-              <p className="mt-1 text-muted-foreground text-sm">
+              <p className={`${weight.medium} text-blue-400 ${size.sm}`}>How it works</p>
+              <p className={`${marginTop.tight} ${muted.sm}`}>
                 When you submit a configuration, we automatically create a Pull Request on GitHub.
                 Our team reviews it for quality, security, and accuracy. Once approved and merged,
                 your contribution goes live for everyone to use!

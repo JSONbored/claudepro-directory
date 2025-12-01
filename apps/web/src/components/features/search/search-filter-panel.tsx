@@ -13,7 +13,7 @@
  * - Apply/Clear actions
  */
 
-import { between, cluster } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, transition, hoverBg, spaceY, srOnly, weight ,size  , gap , padding  } from '@heyclaude/web-runtime/design-system';
 import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { memo, useId } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -86,15 +86,15 @@ function SearchFilterPanelComponent({
 
   return (
     <section
-      className={'space-y-4 rounded-lg border border-border/50 bg-card/30 p-4 md:space-y-6 md:p-6'}
+      className={'${spaceY.comfortable} ${radius.lg} border border-border/50 bg-card/30 ${padding.default} md:${spaceY.relaxed} md:p-6'}
     >
       {/* Main Filters */}
-      <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
-        <legend className="sr-only">Filter by category, author, and date range</legend>
+      <fieldset className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 md:gap-6 lg:grid-cols-3`}>
+        <legend className={srOnly.default}>Filter by category, author, and date range</legend>
 
         {/* Category Filter */}
         {availableCategories.length > 0 && (
-          <div className="space-y-2">
+          <div className={spaceY.compact}>
             <Label htmlFor={categorySelectId}>Category</Label>
             <Select
               value={filters.category || 'all'}
@@ -124,7 +124,7 @@ function SearchFilterPanelComponent({
 
         {/* Author Filter */}
         {availableAuthors.length > 0 && (
-          <div className="space-y-2">
+          <div className={spaceY.compact}>
             <Label htmlFor={authorSelectId}>Author</Label>
             <Select
               value={filters.author || 'all'}
@@ -153,7 +153,7 @@ function SearchFilterPanelComponent({
         )}
 
         {/* Date Range */}
-        <div className="space-y-2">
+        <div className={spaceY.compact}>
           <Label htmlFor={dateRangeSelectId}>Date Range</Label>
           <Select
             value={filters.dateRange || 'all'}
@@ -180,11 +180,11 @@ function SearchFilterPanelComponent({
       </fieldset>
 
       {/* Popularity Slider */}
-      <fieldset className="space-y-2">
-        <legend className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+      <fieldset className={spaceY.compact}>
+        <legend className={`${weight.medium} ${size.sm} leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}>
           Popularity Range ({filters.popularity?.[0] || 0} - {filters.popularity?.[1] || 100})
         </legend>
-        <div className="px-2 py-4">
+        <div className={`px-2 ${padding.yDefault}`}>
           <Slider
             value={filters.popularity || [0, 100]}
             onValueChange={(value) => onFilterChange('popularity', value as [number, number])}
@@ -201,11 +201,11 @@ function SearchFilterPanelComponent({
 
       {/* Tags - Organized in Scrollable Area */}
       {availableTags.length > 0 && (
-        <fieldset className="space-y-3">
+        <fieldset className={spaceY.default}>
           <div className={'border-border/50 border-t pt-3'} />
           <div>
             <div className={`${between.center} mb-3`}>
-              <legend className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <legend className={`${weight.medium} ${size.sm} leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}>
                 Tags
               </legend>
               {filters.tags && filters.tags.length > 0 && (
@@ -220,10 +220,10 @@ function SearchFilterPanelComponent({
               )}
             </div>
             <ScrollArea
-              className={'h-40 w-full rounded-md border border-border/50 p-4 md:h-48'}
+              className={'h-40 w-full rounded-md border border-border/50 ${padding.default} md:h-48'}
               aria-label="Select tags to filter by"
             >
-              <div className="flex flex-wrap gap-2">
+              <div className={`flex flex-wrap ${gap.compact}`}>
                 {availableTags.map((tag) => (
                   <button
                     key={tag}
@@ -237,12 +237,12 @@ function SearchFilterPanelComponent({
                     aria-pressed={filters.tags?.includes(tag)}
                     aria-label={`${filters.tags?.includes(tag) ? 'Remove' : 'Add'} ${tag} tag filter`}
                     type="button"
-                    className="cursor-pointer transition-all duration-200"
+                    className={`cursor-pointer ${transition.default}`}
                   >
                     <UnifiedBadge
                       variant="base"
                       style={filters.tags?.includes(tag) ? 'default' : 'outline'}
-                      className="hover:bg-accent/10"
+                      className={hoverBg.default}
                     >
                       {tag}
                     </UnifiedBadge>
@@ -257,7 +257,7 @@ function SearchFilterPanelComponent({
       {/* Action Buttons */}
       {showActions && (
         <fieldset className={'flex items-center justify-between border-border/50 border-t pt-6'}>
-          <legend className="sr-only">Filter actions</legend>
+          <legend className={srOnly.default}>Filter actions</legend>
           <Button
             variant="ghost"
             onClick={onClearFilters}

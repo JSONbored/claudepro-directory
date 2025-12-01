@@ -135,7 +135,27 @@ export interface CompanySearchResult {
   slug: null | string;
 }
 
-async function fetchCompanySearchResults(
+/**
+ * Custom error class to signal that we should NOT cache this result.
+ * By throwing inside unstable_cache, Next.js won't cache the error state.
+ */
+class CompanySearchError extends Error {
+  constructor(
+    message: string,
+    public readonly originalError: unknown
+  ) {
+    super(message);
+    this.name = 'CompanySearchError';
+  }
+}
+
+/**
+ * Internal function that performs company search.
+ * 
+ * CRITICAL: This function throws on error instead of returning empty array,
+ * to prevent caching of error states when used inside unstable_cache.
+ */
+async function fetchCompanySearchResultsInternal(
   query: string,
   limit: number
 ): Promise<CompanySearchResult[]> {
@@ -161,42 +181,65 @@ async function fetchCompanySearchResults(
       },
       {
         operation: 'fetchCompanySearchResults',
-        logger: requestLogger, // Use child logger to avoid passing requestId/operation repeatedly
-        requestId, // Pass requestId for return value
+        logger: requestLogger,
+        requestId,
         logMeta: { query, limit },
-        logLevel: 'info', // Log all operations for observability
+        logLevel: 'info',
       }
     );
     
     return result;
   } catch (error) {
-    // trackPerformance already logs the error, but we log again with context about fallback behavior
-    const normalized = normalizeError(error, 'Company search failed, returning empty results');
-    requestLogger.warn('Company search failed, returning empty results', {
+    // CRITICAL: Throw error instead of returning empty array to prevent caching
+    const normalized = normalizeError(error, 'Company search failed');
+    requestLogger.warn('Company search failed, will use empty results (not cached)', {
       err: normalized,
       query,
       limit,
-      fallbackStrategy: 'empty-array',
     });
-    return [];
+    throw new CompanySearchError('Company search failed', error);
   }
 }
 
+/**
+ * Search for companies by query string.
+ * 
+ * CRITICAL: Uses throw-outside-cache pattern to prevent caching of error states.
+ * - Success: Results are cached for the configured TTL
+ * - Error: Throws CompanySearchError which is caught OUTSIDE the cache, returning [] without caching
+ * - Short query (<2 chars): Returns [] immediately (not cached, intentional)
+ */
 export async function searchCompanies(query: string, limit = 10): Promise<CompanySearchResult[]> {
   const trimmed = query.trim();
   if (trimmed.length < 2) {
     return [];
   }
 
-  const normalized = trimmed.toLowerCase();
+  const normalizedQuery = trimmed.toLowerCase();
   const ttl = getCacheTtl('cache.company_search.ttl_seconds');
 
-  return unstable_cache(
-    () => fetchCompanySearchResults(trimmed, limit),
-    [`company-search-${normalized}-${limit}`],
-    {
-      revalidate: ttl,
-      tags: ['company-search'],
+  try {
+    return await unstable_cache(
+      () => fetchCompanySearchResultsInternal(normalizedQuery, limit),
+      [`company-search-${normalizedQuery}-${limit}`],
+      {
+        revalidate: ttl,
+        tags: ['company-search'],
+      }
+    )();
+  } catch (error) {
+    // Handle errors OUTSIDE the cache - return empty array without caching it
+    if (error instanceof CompanySearchError) {
+      // Already logged inside, just return fallback (not cached)
+      return [];
     }
-  )();
+    // Unexpected error - log and return empty
+    logger.error('Unexpected company search error', normalizeError(error, 'Unexpected company search error'), {
+      operation: 'searchCompanies',
+      module: 'data/companies',
+      query: trimmed,
+      limit,
+    });
+    return [];
+  }
 }

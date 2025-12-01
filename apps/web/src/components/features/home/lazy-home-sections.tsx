@@ -1,3 +1,4 @@
+import { spaceY, marginBottom , gap , padding , radius } from '@heyclaude/web-runtime/design-system';
 import dynamic from 'next/dynamic';
 import { FeaturedSectionSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
 
@@ -19,7 +20,7 @@ export const LazyFeaturedSections = dynamic(
     })),
   {
     loading: () => (
-      <div className="mb-16 space-y-16">
+      <div className={`${marginBottom.hero} space-y-16`}>
         {/* 5 featured categories + 1 jobs section */}
         {[...Array(6)].map((_, i) => (
           <FeaturedSectionSkeleton key={`featured-loading-${i + 1}`} />
@@ -43,9 +44,9 @@ export const LazyTabsSection = dynamic(
     })),
   {
     loading: () => (
-      <div className="space-y-8">
+      <div className={spaceY.loose}>
         {/* Tabs skeleton */}
-        <div className="flex gap-2 rounded-lg bg-muted p-1">
+        <div className={`flex ${gap.compact} ${radius.lg} bg-muted ${padding.micro}`}>
           {[...Array(7)].map((_, i) => (
             <Skeleton key={`tab-skeleton-${i + 1}`} size="lg" width="3xl" className="flex-1" />
           ))}

@@ -15,6 +15,7 @@
  */
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
+import { cluster, marginBottom, marginTop, muted, weight, radius ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { motion } from 'motion/react';
@@ -55,14 +56,14 @@ export function ProgressIndicator({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 flex items-center justify-between rounded-lg border border-border/50 bg-background-secondary p-3"
+          className={`${marginBottom.default} flex items-center justify-between ${radius.lg} border border-border/50 bg-background-secondary ${padding.compact}`}
           style={{
             borderColor: TOKENS.colors.border.light,
             backgroundColor: TOKENS.colors.background.secondary,
           }}
         >
-          <span className="text-muted-foreground text-sm">Form Completion</span>
-          <div className="flex items-center gap-2">
+          <span className={muted.sm}>Form Completion</span>
+          <div className={cluster.compact}>
             <div className="h-2 w-32 overflow-hidden rounded-full bg-background">
               <motion.div
                 className="h-full rounded-full"
@@ -81,7 +82,7 @@ export function ProgressIndicator({
                 }}
               />
             </div>
-            <span className="min-w-[3ch] text-right font-semibold text-sm">{qualityScore}%</span>
+            <span className={`min-w-[3ch] text-right ${weight.semibold} ${size.sm}`}>{qualityScore}%</span>
           </div>
         </motion.div>
       )}
@@ -139,8 +140,8 @@ export function ProgressIndicator({
               ) : (
                 <span
                   className={cn(
-                    'font-semibold text-sm',
-                    step.isCurrent ? 'text-accent-primary' : 'text-muted-foreground'
+                    `${weight.semibold} ${size.sm}`,
+                    step.isCurrent ? 'text-accent-primary' : muted.default
                   )}
                 >
                   {step.number}
@@ -150,7 +151,7 @@ export function ProgressIndicator({
               {/* Tooltip on hover */}
               {step.description && step.isAccessible && (
                 <div
-                  className="-top-12 -translate-x-1/2 pointer-events-none absolute left-1/2 z-50 whitespace-nowrap rounded-md px-3 py-1.5 text-xs opacity-0 transition-opacity group-hover:opacity-100"
+                  className={`-top-12 -translate-x-1/2 pointer-events-none absolute left-1/2 z-50 whitespace-nowrap rounded-md ${padding.xCompact} ${padding.ySnug} ${size.xs} opacity-0 transition-opacity group-hover:opacity-100`}
                   style={{
                     backgroundColor: TOKENS.colors.background.elevated,
                     border: `1px solid ${TOKENS.colors.border.medium}`,
@@ -166,8 +167,8 @@ export function ProgressIndicator({
             <div className="ml-3 flex-1">
               <div
                 className={cn(
-                  'font-medium text-sm',
-                  step.isCurrent ? 'text-foreground' : 'text-muted-foreground'
+                  `${weight.medium} ${size.sm}`,
+                  step.isCurrent ? 'text-foreground' : muted.default
                 )}
               >
                 {step.label}
@@ -200,7 +201,7 @@ export function ProgressIndicator({
       </div>
 
       {/* Step Indicators - Mobile (Compact) */}
-      <div className="flex items-center justify-center gap-2 md:hidden">
+      <div className={`flex items-center justify-center ${gap.compact} md:hidden`}>
         {steps.map((step) => (
           <button
             key={step.id}
@@ -233,8 +234,8 @@ export function ProgressIndicator({
             ) : (
               <span
                 className={cn(
-                  'font-semibold text-xs',
-                  step.isCurrent ? 'text-accent-primary' : 'text-muted-foreground'
+                  `${weight.semibold} ${size.xs}`,
+                  step.isCurrent ? 'text-accent-primary' : muted.default
                 )}
               >
                 {step.number}
@@ -245,11 +246,11 @@ export function ProgressIndicator({
       </div>
 
       {/* Current Step Label - Mobile Only */}
-      <div className="mt-4 text-center md:hidden">
-        <div className="font-medium text-foreground text-sm">
+      <div className={`${marginTop.default} text-center md:hidden`}>
+        <div className={`${weight.medium} text-foreground ${size.sm}`}>
           {steps.find((s) => s.isCurrent)?.label || 'Step'}
         </div>
-        <div className="mt-1 text-muted-foreground text-xs">
+        <div className={`${marginTop.tight} ${muted.default} ${size.xs}`}>
           Step {currentStep} of {steps.length}
         </div>
       </div>

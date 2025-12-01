@@ -15,6 +15,7 @@
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
+import { stack, iconSize, animate, marginTop, muted ,size  , padding , weight } from '@heyclaude/web-runtime/design-system';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -296,9 +297,9 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.2 }}
               className={cn(
-                'mb-3 flex flex-col gap-2',
+                'mb-3', stack.compact,
                 // Mobile: Horizontal row above main button
-                'max-md:mb-2 max-md:flex-row max-md:flex-wrap max-md:justify-center max-md:gap-2',
+                'max-md:mb-2 max-md:flex-row max-md:flex-wrap max-md:justify-center max-md:${gap.compact}',
                 // Mobile expanded: card background
                 'max-md:rounded-2xl max-md:bg-card/95 max-md:p-3 max-md:shadow-lg max-md:backdrop-blur-md'
               )}
@@ -335,7 +336,7 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
               'hover:bg-accent/90',
               'focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background',
               // Pulse animation for first visit
-              showPulse && 'animate-pulse'
+              showPulse && animate.pulse
             )}
             aria-label={isExpanded ? 'Close quick actions (press F or Escape)' : 'Open quick actions (press F)'}
             aria-expanded={isExpanded}
@@ -350,7 +351,7 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
                 damping: 25,
               }}
             >
-              <MainIcon className="h-6 w-6" aria-hidden="true" />
+              <MainIcon className={iconSize.lg} aria-hidden="true" />
             </motion.div>
 
             {/* Notification badge */}
@@ -363,7 +364,7 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
                   stiffness: 500,
                   damping: 20,
                 }}
-                className="-right-1 -top-1 absolute flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 font-bold text-[10px] text-destructive-foreground shadow-md"
+                className={`-right-1 -top-1 absolute flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive ${padding.xMicro} ${weight.bold} text-[10px] text-destructive-foreground shadow-md`}
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </motion.span>
@@ -383,10 +384,10 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="mt-2 text-center text-muted-foreground text-xs max-md:hidden"
+              className={`${marginTop.compact} text-center ${muted.default} ${size.xs} max-md:hidden`}
             >
-              Press <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">F</kbd> or{' '}
-              <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">Esc</kbd> to close
+              Press <kbd className={`rounded bg-muted ${padding.xSnug} ${padding.yHair} font-mono text-[10px]`}>F</kbd> or{' '}
+              <kbd className={`rounded bg-muted ${padding.xSnug} ${padding.yHair} font-mono text-[10px]`}>Esc</kbd> to close
             </motion.p>
           )}
         </AnimatePresence>

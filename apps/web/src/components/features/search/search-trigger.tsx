@@ -1,6 +1,6 @@
 'use client';
 
-import { iconSize, groupHover } from '@heyclaude/web-runtime/design-system';
+import { iconSize, groupHover, cluster, border, radius, transition, srOnly, muted, padding, size as textSize , gap , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { Search } from '@heyclaude/web-runtime/icons';
 import { Button } from '@heyclaude/web-runtime/ui';
 
@@ -37,9 +37,9 @@ export function SearchTrigger({
   className = '',
 }: SearchTriggerProps) {
   const sizeClasses = {
-    sm: 'h-8 px-3 text-xs',
-    md: 'h-10 px-4 text-sm',
-    lg: 'h-12 px-6 text-base',
+    sm: `h-8 ${padding.xCompact} ${textSize.xs}`,
+    md: `h-10 ${padding.xDefault} ${textSize.sm}`,
+    lg: `h-12 ${padding.xComfortable} ${textSize.base}`,
   };
 
   if (variant === 'minimal') {
@@ -47,16 +47,15 @@ export function SearchTrigger({
       <button
         type="button"
         onClick={onClick}
-        className={`group flex w-full max-w-md cursor-pointer items-center gap-3 rounded-lg border border-border bg-background px-4 py-2.5 text-muted-foreground transition-colors hover:border-border/80 hover:text-foreground ${className}
-        `}
+        className={`group flex w-full ${maxWidth.md} cursor-pointer items-center ${gap.default} ${radius.lg} ${border.default} bg-background ${padding.xDefault} ${padding.yTight} ${muted.default} ${transition.colors} hover:border-border/80 hover:text-foreground ${className}`}
       >
         <Search
-          className={`${iconSize.sm} text-muted-foreground ${groupHover.accent}`}
+          className={`${iconSize.sm} ${muted.default} ${groupHover.accent}`}
         />
-        <span className={'flex-1 text-left text-sm'}>Search content...</span>
+        <span className={`flex-1 text-left ${textSize.sm}`}>Search content...</span>
         {showShortcut && (
-          <div className={'flex items-center gap-1 text-xs'}>
-            <kbd className={'rounded border bg-muted px-1.5 py-0.5 text-xs'}>⌘K</kbd>
+          <div className={`${cluster.tight} ${textSize.xs}`}>
+            <kbd className={`rounded border bg-muted ${padding.xSnug} ${padding.yHair} ${textSize.xs}`}>⌘K</kbd>
           </div>
         )}
       </button>
@@ -66,10 +65,10 @@ export function SearchTrigger({
   return (
     <Button variant={variant} onClick={onClick} className={`${sizeClasses[size]} ${className}`}>
       <Search className={iconSize.sm} />
-      <span className="sr-only">Search</span>
+      <span className={srOnly.default}>Search</span>
       {showShortcut && size !== 'sm' && (
-        <div className={'ml-2 flex items-center gap-1'}>
-          <kbd className={'hidden rounded border bg-muted px-1.5 py-0.5 text-xs sm:inline-block'}>
+        <div className={`ml-2 ${cluster.tight}`}>
+          <kbd className={`hidden rounded border bg-muted ${padding.xSnug} ${padding.yHair} ${textSize.xs} sm:inline-block`}>
             ⌘K
           </kbd>
         </div>

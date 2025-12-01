@@ -20,6 +20,7 @@ const UnifiedSearch = dynamic(
 );
 
 import type { Database } from '@heyclaude/database-types';
+import { spaceY, marginBottom, weight, muted ,size  , gap , padding } from '@heyclaude/web-runtime/design-system';
 import type { UnifiedSearchFilters } from '@heyclaude/web-runtime';
 import { searchUnifiedClient } from '@heyclaude/web-runtime/data';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
@@ -481,7 +482,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
   );
 
   return (
-    <div className="space-y-8">
+    <div className={spaceY.loose}>
       {/* Unified Search & Filters */}
       <ErrorBoundary>
         <UnifiedSearch
@@ -523,25 +524,25 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
           />
         </ErrorBoundary>
       ) : (
-        <div className="rounded-3xl border border-border/60 bg-card/40 p-8 text-center shadow-inner">
+        <div className={`rounded-3xl border border-border/60 bg-card/40 ${padding.relaxed} text-center shadow-inner`}>
           {(() => {
             const IconComponent = ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
             return (
               <IconComponent
-                className="mx-auto mb-4 h-16 w-16 text-muted-foreground/50"
+                className={`mx-auto mb-4 h-16 w-16 ${muted.default}/50`}
                 aria-hidden="true"
               />
             );
           })()}
-          <h2 className="mb-2 font-semibold text-lg">No {title.toLowerCase()} found</h2>
-          <p className="mb-6 text-muted-foreground">
+          <h2 className={`${marginBottom.tight} ${weight.semibold} ${size.lg}`}>No {title.toLowerCase()} found</h2>
+          <p className={`${marginBottom.comfortable} ${muted.default}`}>
             Try a suggested filter or explore popular configurations from this week.
           </p>
 
           {quickFiltersAvailable && (
-            <div className="mb-6 space-y-2">
-              <p className="text-muted-foreground text-xs uppercase tracking-wide">Quick filters</p>
-              <div className="flex flex-wrap justify-center gap-2">
+            <div className={`${marginBottom.comfortable} ${spaceY.compact}`}>
+              <p className={`${muted.default} ${size.xs} uppercase tracking-wide`}>Quick filters</p>
+              <div className={`flex flex-wrap justify-center ${gap.compact}`}>
                 {resolvedQuickTagOptions.map((tag) => (
                   <Button
                     key={`tag-${tag}`}
@@ -580,8 +581,8 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
           )}
 
           {visibleFallbackSuggestions.length > 0 && (
-            <div className="space-y-3 text-left">
-              <p className="text-muted-foreground text-xs uppercase tracking-wide">
+            <div className={`${spaceY.default} text-left`}>
+              <p className={`${muted.default} ${size.xs} uppercase tracking-wide`}>
                 Trending &nbsp;•&nbsp; Suggested picks
               </p>
               <ErrorBoundary>

@@ -31,7 +31,7 @@ import {
   getChangelogEntryBySlug,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, spaceY, muted, weight ,size  , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, Separator   } from '@heyclaude/web-runtime/ui';
@@ -204,30 +204,30 @@ export default async function ChangelogEntryPage({
       {/* Structured Data - Pre-generated schemas from database */}
       <StructuredData route={`/changelog/${entry.slug}`} />
 
-      <article className="container max-w-4xl space-y-8 py-8">
+      <article className={`container ${maxWidth['4xl']} ${spaceY.loose} ${padding.yRelaxed}`}>
         {/* Navigation */}
         <NavLink
           href={ROUTES.CHANGELOG}
-          className="inline-flex items-center gap-2 text-muted-foreground text-sm"
+          className={`inline-${cluster.compact} ${muted.sm}`}
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className={iconSize.sm} />
           <span>Back to Changelog</span>
         </NavLink>
 
         {/* Header */}
-        <header className="space-y-4 pb-6">
-          <div className={`${cluster.default} text-muted-foreground text-sm`}>
-            <Calendar className="h-4 w-4" />
+        <header className={`${spaceY.comfortable} pb-6`}>
+          <div className={`${cluster.default} ${muted.sm}`}>
+            <Calendar className={iconSize.sm} />
             <time dateTime={entry.release_date}>
               {formatChangelogDate(entry.release_date)}
             </time>
           </div>
 
-          <h1 className="font-bold text-4xl tracking-tight">{entry.title}</h1>
+          <h1 className={`${weight.bold} ${size['4xl']} tracking-tight`}>{entry.title}</h1>
 
           {/* Canonical URL */}
-          <div className={`${cluster.compact} text-sm`}>
-            <span className="text-muted-foreground">Permanent link:</span>
+          <div className={`${cluster.compact} ${size.sm}`}>
+            <span className={muted.default}>Permanent link:</span>
             <a
               href={canonicalUrl}
               className="truncate text-primary transition-colors hover:text-primary/80"

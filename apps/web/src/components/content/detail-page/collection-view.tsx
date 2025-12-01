@@ -32,7 +32,7 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { getCategoryConfigs, getContentBySlug } from '@heyclaude/web-runtime/data';
 import { AlertTriangle, CheckCircle } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, spaceY, marginBottom, marginTop, muted, weight ,size , gap , row } from '@heyclaude/web-runtime/design-system';
 import { Suspense } from 'react';
 import { ConfigCard } from '@heyclaude/web-runtime/ui';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
@@ -153,7 +153,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       {prerequisites && prerequisites.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
+            <CardTitle className={`${cluster.compact} ${size.xl}`}>
               <AlertTriangle
                 className={`${iconSize.md} text-yellow-500`}
                 aria-hidden="true"
@@ -162,14 +162,14 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
+            <ul className={spaceY.compact}>
               {prerequisites.map((prereq: string) => (
-                <li key={prereq} className="flex items-start gap-2">
+                <li key={prereq} className={`${row.compact}`}>
                   <CheckCircle
-                    className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0"
+                    className={`h-4 w-4 ${muted.default} mt-0.5 shrink-0`}
                     aria-hidden="true"
                   />
-                  <span className="text-muted-foreground text-sm">{prereq}</span>
+                  <span className={muted.sm}>{prereq}</span>
                 </li>
               ))}
             </ul>
@@ -179,29 +179,29 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
 
       {/* What's Included Section - Embedded ConfigCards */}
       <div>
-        <h2 className="mb-6 font-bold text-2xl text-foreground">
+        <h2 className={`${marginBottom.comfortable} ${weight.bold} ${size['2xl']} text-foreground`}>
           What's Included ({validItems.length} {validItems.length === 1 ? 'item' : 'items'})
         </h2>
 
         <Suspense
           fallback={
-            <output className="space-y-6" aria-busy="true" aria-label="Loading collection items">
+            <output className={spaceY.relaxed} aria-busy="true" aria-label="Loading collection items">
               <Skeleton size="xl" width="3xl" className="h-48" />
               <Skeleton size="xl" width="3xl" className="h-48" />
               <Skeleton size="xl" width="3xl" className="h-48" />
             </output>
           }
         >
-          <div className="space-y-8">
+          <div className={spaceY.loose}>
             {(Object.entries(itemsByCategory) as [string, ItemWithData[]][]).map(
               ([category, items]) => (
                 <div key={category}>
-                  <h3 className="mb-4 font-semibold text-foreground text-lg">
+                  <h3 className={`${marginBottom.default} ${weight.semibold} text-foreground ${size.lg}`}>
                     {categoryConfigs[category as keyof typeof categoryConfigs]?.pluralTitle ||
                       category}{' '}
                     ({items.length})
                   </h3>
-                  <div className="grid gap-4 sm:grid-cols-1">
+                  <div className={`grid ${gap.comfortable} sm:grid-cols-1`}>
                     {items.map((item: ItemWithData) =>
                       item?.data ? (
                         <ConfigCard
@@ -227,18 +227,18 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             <CardTitle className="text-xl">Recommended Installation Order</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="space-y-2">
+            <ol className={spaceY.compact}>
               {installationOrder.map((slug: string, index: number) => {
                 const item = validItems.find((i: ItemWithData) => i?.slug === slug);
                 return (
-                  <li key={slug} className="flex items-start gap-3">
+                  <li key={slug} className={`${row.default}`}>
                     <span
-                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm"
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 ${weight.semibold} text-primary ${size.sm}`}
                       aria-hidden="true"
                     >
                       {index + 1}
                     </span>
-                    <span className="mt-0.5 text-foreground text-sm">
+                    <span className={`${marginTop.micro} text-foreground ${size.sm}`}>
                       {item?.data?.title || slug}
                     </span>
                   </li>
@@ -256,7 +256,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             <CardTitle className="text-xl">Compatibility</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
+            <div className={`grid grid-cols-2 ${gap.comfortable}`}>
               <div className={cluster.compact}>
                 {compatibility.claudeDesktop ? (
                   <CheckCircle
@@ -269,7 +269,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                     aria-hidden="true"
                   />
                 )}
-                <span className="text-muted-foreground text-sm">
+                <span className={muted.sm}>
                   Claude Desktop {compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
                 </span>
               </div>
@@ -285,7 +285,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                     aria-hidden="true"
                   />
                 )}
-                <span className="text-muted-foreground text-sm">
+                <span className={muted.sm}>
                   Claude Code {compatibility.claudeCode ? '(Supported)' : '(Not Supported)'}
                 </span>
               </div>

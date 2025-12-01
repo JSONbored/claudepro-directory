@@ -63,6 +63,8 @@ export const muted = {
   default: 'text-muted-foreground',
   /** Small muted */
   sm: 'text-sm text-muted-foreground',
+  /** Small muted with relaxed line height (for descriptions) */
+  smRelaxed: 'text-sm text-muted-foreground leading-relaxed',
   /** Extra small muted */
   xs: 'text-xs text-muted-foreground',
   /** Large muted */
@@ -81,6 +83,10 @@ export const label = {
   default: 'text-sm font-medium text-foreground',
   /** Small label */
   sm: 'text-sm font-medium',
+  /** Small semibold label */
+  semibold: 'text-sm font-semibold',
+  /** Small semibold foreground (for section headers) */
+  sectionHeader: 'text-sm font-semibold text-foreground',
   /** Required label (use with ::after for asterisk) */
   required: 'text-sm font-medium text-foreground after:content-["*"] after:ml-0.5 after:text-error',
 } as const;
@@ -91,8 +97,10 @@ export const label = {
 export const helper = {
   /** Default helper text */
   default: 'text-xs text-muted-foreground',
-  /** Error message */
+  /** Error message (red-500) */
   error: 'text-sm text-red-500',
+  /** Destructive error (uses theme destructive token) */
+  destructive: 'text-sm text-destructive',
   /** Success message */
   success: 'text-sm text-green-500',
   /** Warning message */
@@ -174,6 +182,11 @@ export const size = {
   '2xl': 'text-2xl',
   '3xl': 'text-3xl',
   '4xl': 'text-4xl',
+  '5xl': 'text-5xl',
+  '6xl': 'text-6xl',
+  '7xl': 'text-7xl',
+  '8xl': 'text-8xl',
+  '9xl': 'text-9xl',
 } as const;
 
 /**
@@ -212,6 +225,28 @@ export const truncate = {
   lines3: 'line-clamp-3',
   /** 4-line clamp */
   lines4: 'line-clamp-4',
+} as const;
+
+/**
+ * Whitespace utilities.
+ */
+export const whitespace = {
+  /** Normal whitespace handling */
+  normal: 'whitespace-normal',
+  /** Prevent wrapping */
+  nowrap: 'whitespace-nowrap',
+  /** Preserve whitespace and newlines */
+  pre: 'whitespace-pre',
+  /** Preserve whitespace but wrap lines */
+  preLine: 'whitespace-pre-line',
+  /** Preserve all whitespace and wrap */
+  preWrap: 'whitespace-pre-wrap',
+  /** Break words at any character */
+  breakAll: 'break-all',
+  /** Break only at word boundaries */
+  breakWords: 'break-words',
+  /** Don't break words */
+  breakNormal: 'break-normal',
 } as const;
 
 // =============================================================================

@@ -26,6 +26,7 @@ import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
+import { iconSize, spaceY, cluster, marginBottom, marginTop, muted, weight ,size  , gap , padding , row , radius } from '@heyclaude/web-runtime/design-system';
 import { useFieldHighlight, useFormTracking, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
@@ -867,7 +868,7 @@ export default function WizardSubmissionPage() {
 
         {/* Social Proof Bar - Bottom of wizard */}
         {Object.keys(socialProofStats).length > 0 && (
-          <div className="mt-8 flex justify-center">
+          <div className={`${marginTop.relaxed} flex justify-center`}>
             <SocialProofBar stats={socialProofStats} />
           </div>
         )}
@@ -887,7 +888,7 @@ function StepTypeSelection({
   selected: SubmissionContentType;
 }) {
   return (
-    <div className="space-y-8">
+    <div className={spaceY.loose}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -898,15 +899,15 @@ function StepTypeSelection({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className="mb-4 inline-flex"
+          className={`${marginBottom.default} inline-flex`}
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className="font-bold text-3xl text-foreground">Choose Your Submission Type</h2>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Choose Your Submission Type</h2>
+        <p className={`${marginTop.compact} ${muted.lg}`}>
           What would you like to share with the community?
         </p>
-        <div className="mt-4 flex justify-center">
+        <div className={`${marginTop.default} flex justify-center`}>
           <StepSocialProof step={1} />
         </div>
       </motion.div>
@@ -961,7 +962,7 @@ function StepBasicInfo({
   }, [data.description]);
 
   return (
-    <div className="space-y-8">
+    <div className={spaceY.loose}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -972,12 +973,12 @@ function StepBasicInfo({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className="mb-4 inline-flex"
+          className={`${marginBottom.default} inline-flex`}
         >
           <FileText className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className="font-bold text-3xl text-foreground">Tell us about it</h2>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Tell us about it</h2>
+        <p className={`${marginTop.compact} ${muted.lg}`}>
           Give your submission a clear name and description
         </p>
       </motion.div>
@@ -993,7 +994,7 @@ function StepBasicInfo({
             borderColor: TOKENS.colors.border.light,
           }}
         >
-          <CardContent className="space-y-6 pt-6">
+          <CardContent className={`${spaceY.relaxed} pt-6`}>
             <AnimatedFormField
               label="Name"
               id="wizard-name"
@@ -1080,19 +1081,19 @@ function StepBasicInfo({
               id="wizard-thumbnail"
               helpText="Upload an image to generate an optimized thumbnail for your submission"
             >
-              <div className="space-y-4">
+              <div className={spaceY.comfortable}>
                 {/* File Input */}
-                <div className="flex items-center gap-4">
+                <div className={cluster.comfortable}>
                   <label
                     htmlFor="thumbnail-upload"
-                    className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed px-4 py-3 transition-colors hover:bg-accent/50"
+                    className={`flex cursor-pointer items-center ${gap.compact} ${radius.lg} border border-dashed ${padding.xDefault} ${padding.yCompact} transition-colors hover:bg-accent/50`}
                     style={{
                       borderColor: TOKENS.colors.border.light,
                       ...(isUploadingThumbnail && { opacity: 0.6, pointerEvents: 'none' }),
                     }}
                   >
-                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                    <span className="font-medium text-sm">
+                    <ImageIcon className={`h-5 w-5 ${muted.default}`} />
+                    <span className={`${weight.medium} ${size.sm}`}>
                       {isUploadingThumbnail ? 'Generating thumbnail...' : 'Choose image'}
                     </span>
                     <input
@@ -1124,7 +1125,7 @@ function StepBasicInfo({
                       className="relative inline-block"
                     >
                       <div
-                        className="relative h-32 w-32 overflow-hidden rounded-lg border"
+                        className={`relative h-32 w-32 overflow-hidden ${radius.lg} border`}
                         style={{ borderColor: TOKENS.colors.border.light }}
                       >
                         <Image
@@ -1143,7 +1144,7 @@ function StepBasicInfo({
                         className="-right-2 -top-2 absolute flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm"
                         disabled={isUploadingThumbnail}
                       >
-                        <X className="h-4 w-4" />
+                        <X className={iconSize.sm} />
                       </motion.button>
                     </motion.div>
                   ) : null}
@@ -1179,7 +1180,7 @@ function StepConfiguration({
 }) {
   const hasTemplates = templates && templates.length > 0;
   return (
-    <div className="space-y-8">
+    <div className={spaceY.loose}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1190,15 +1191,15 @@ function StepConfiguration({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className="mb-4 inline-flex"
+          className={`${marginBottom.default} inline-flex`}
         >
           <Code className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className="font-bold text-3xl text-foreground">Configuration Details</h2>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Configuration Details</h2>
+        <p className={`${marginTop.compact} ${muted.lg}`}>
           Type-specific settings for your {submissionType}
         </p>
-        <div className="mt-4 flex justify-center">
+        <div className={`${marginTop.default} flex justify-center`}>
           <StepSocialProof step={3} />
         </div>
       </motion.div>
@@ -1240,7 +1241,7 @@ function StepConfiguration({
             borderColor: TOKENS.colors.border.light,
           }}
         >
-          <CardContent className="space-y-6 pt-6">
+          <CardContent className={`${spaceY.relaxed} pt-6`}>
             {submissionType === SUBMISSION_TYPE_AGENTS && (
               <>
                 <AnimatedFormField
@@ -1263,7 +1264,7 @@ function StepConfiguration({
                   />
                 </AnimatedFormField>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className={`grid ${gap.comfortable} sm:grid-cols-2`}>
                   <AnimatedFormField
                     label="Temperature"
                     id="wizard-temperature"
@@ -1452,7 +1453,7 @@ function StepExamplesTags({
   };
 
   return (
-    <div className="space-y-8">
+    <div className={spaceY.loose}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1463,15 +1464,15 @@ function StepExamplesTags({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className="mb-4 inline-flex"
+          className={`${marginBottom.default} inline-flex`}
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className="font-bold text-3xl text-foreground">Examples & Tags</h2>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Examples & Tags</h2>
+        <p className={`${marginTop.compact} ${muted.lg}`}>
           Help others understand and discover your submission
         </p>
-        <div className="mt-4 flex justify-center">
+        <div className={`${marginTop.default} flex justify-center`}>
           <StepSocialProof step={4} />
         </div>
       </motion.div>
@@ -1480,7 +1481,7 @@ function StepExamplesTags({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...TOKENS.animations.spring.smooth, delay: 0.1 }}
-        className="space-y-6"
+        className={spaceY.relaxed}
       >
         {/* Examples Section */}
         <Card
@@ -1490,18 +1491,18 @@ function StepExamplesTags({
           }}
         >
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Code className="h-5 w-5" />
+            <CardTitle className={cluster.compact}>
+              <Code className={iconSize.md} />
               Usage Examples
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm">
+          <CardContent className={spaceY.comfortable}>
+            <p className={muted.sm}>
               Add examples to show how your configuration is used
             </p>
 
             {/* Add Example Input */}
-            <div className="flex gap-2">
+            <div className={`flex ${gap.compact}`}>
               <Input
                 value={newExample}
                 onChange={(event) => setNewExample(event.target.value)}
@@ -1522,14 +1523,14 @@ function StepExamplesTags({
                   backgroundColor: TOKENS.colors.accent.primary,
                 }}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className={iconSize.sm} />
               </Button>
             </div>
 
             {/* Examples List */}
             <AnimatePresence mode="popLayout">
               {data.examples.length > 0 ? (
-                <div className="space-y-2">
+                <div className={spaceY.compact}>
                   {data.examples.map((example, index) => {
                     // Use example content as stable key (examples should be unique)
                     const exampleKey = `example-${example}`;
@@ -1540,14 +1541,14 @@ function StepExamplesTags({
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.9 }}
                         transition={TOKENS.animations.spring.snappy}
-                        className="group flex items-start gap-3 rounded-lg border p-3 transition-all hover:border-accent-primary/50"
+                        className={`group ${row.default} ${radius.lg} border ${padding.compact} transition-all hover:border-accent-primary/50`}
                         style={{
                           backgroundColor: TOKENS.colors.background.primary,
                           borderColor: TOKENS.colors.border.default,
                         }}
                       >
                         <div
-                          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-bold text-xs"
+                          className={`${marginTop.micro} flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${weight.bold} ${size.xs}`}
                           style={{
                             backgroundColor: `${TOKENS.colors.accent.primary}20`,
                             color: TOKENS.colors.accent.primary,
@@ -1555,18 +1556,18 @@ function StepExamplesTags({
                         >
                           {index + 1}
                         </div>
-                        <span className="flex-1 text-sm leading-relaxed">{example}</span>
+                        <span className={`flex-1 ${size.sm} leading-relaxed`}>{example}</span>
                         <motion.button
                           type="button"
                           onClick={() => removeExample(index)}
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="shrink-0 rounded-full p-1 opacity-0 transition-all group-hover:opacity-100"
+                          className={`shrink-0 rounded-full ${padding.micro} opacity-0 transition-all group-hover:opacity-100`}
                           style={{
                             color: TOKENS.colors.error.text,
                           }}
                         >
-                          <X className="h-4 w-4" />
+                          <X className={iconSize.sm} />
                         </motion.button>
                       </motion.div>
                     );
@@ -1576,13 +1577,13 @@ function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="rounded-lg border border-dashed p-8 text-center"
+                  className={`${radius.lg} border border-dashed ${padding.relaxed} text-center`}
                   style={{
                     borderColor: TOKENS.colors.border.light,
                   }}
                 >
-                  <Code className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-                  <p className="text-muted-foreground text-sm">
+                  <Code className={`mx-auto mb-3 h-10 w-10 ${muted.default}`} />
+                  <p className={muted.sm}>
                     No examples yet. Add some to help users understand!
                   </p>
                 </motion.div>
@@ -1605,21 +1606,21 @@ function StepExamplesTags({
           }}
         >
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Tag className="h-5 w-5" />
+            <CardTitle className={cluster.compact}>
+              <Tag className={iconSize.md} />
               Tags
-              <span className="ml-auto font-normal text-muted-foreground text-sm">
+              <span className={`ml-auto font-normal ${muted.sm}`}>
                 {data.tags.length} tags
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm">
+          <CardContent className={spaceY.comfortable}>
+            <p className={muted.sm}>
               Add tags to help users discover your submission
             </p>
 
             {/* Add Tag Input */}
-            <div className="flex gap-2">
+            <div className={`flex ${gap.compact}`}>
               <Input
                 value={newTag}
                 onChange={(event) => setNewTag(event.target.value)}
@@ -1638,12 +1639,12 @@ function StepExamplesTags({
                   type="button"
                   onClick={addTag}
                   disabled={!newTag.trim()}
-                  className="gap-2"
+                  className={`${gap.compact}`}
                   style={{
                     backgroundColor: TOKENS.colors.accent.primary,
                   }}
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className={iconSize.sm} />
                   Add
                 </Button>
               </motion.div>
@@ -1652,7 +1653,7 @@ function StepExamplesTags({
             {/* Tags List */}
             <AnimatePresence mode="popLayout">
               {data.tags.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <div className={`flex flex-wrap ${gap.compact}`}>
                   {data.tags.map((tag) => {
                     // Use tag content as key (tags should be unique)
                     const tagKey = `tag-${tag}`;
@@ -1667,7 +1668,7 @@ function StepExamplesTags({
                       >
                         <Badge
                           variant="secondary"
-                          className="group gap-1.5 pr-1 text-sm"
+                          className={`group ${gap.snug} pr-1 ${size.sm}`}
                           style={{
                             backgroundColor: `${TOKENS.colors.accent.primary}15`,
                             borderColor: `${TOKENS.colors.accent.primary}30`,
@@ -1683,9 +1684,9 @@ function StepExamplesTags({
                                 removeTag(tagIndex);
                               }
                             }}
-                            className="ml-1 rounded-full p-0.5 transition-colors hover:bg-accent-primary/20"
+                            className={`ml-1 rounded-full ${padding.hair} transition-colors hover:bg-accent-primary/20`}
                           >
-                            <X className="h-3 w-3" />
+                            <X className={iconSize.xs} />
                           </button>
                         </Badge>
                       </motion.div>
@@ -1696,13 +1697,13 @@ function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="rounded-lg border border-dashed p-6 text-center"
+                  className={`${radius.lg} border border-dashed ${padding.comfortable} text-center`}
                   style={{
                     borderColor: TOKENS.colors.border.light,
                   }}
                 >
-                  <Tag className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-                  <p className="text-muted-foreground text-sm">
+                  <Tag className={`mx-auto mb-2 h-8 w-8 ${muted.default}`} />
+                  <p className={muted.sm}>
                     No tags yet. Add tags to improve discoverability!
                   </p>
                 </motion.div>

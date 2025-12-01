@@ -25,7 +25,7 @@ import type {
   FormFieldConfig,
   GridColumn,
 } from '@heyclaude/web-runtime/types/component.types';
-import { iconSize, stack, absolute } from '@heyclaude/web-runtime/design-system';
+import { iconSize, stack, absolute, muted ,size  , padding } from '@heyclaude/web-runtime/design-system';
 import { getResponsiveGridClass } from '@heyclaude/web-runtime/ui';
 import { Input } from '@heyclaude/web-runtime/ui';
 import { Label } from '@heyclaude/web-runtime/ui';
@@ -80,7 +80,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
         <div className="relative">
           {iconPosition === 'left' && (
             <div
-              className={`${absolute.topHalfLeft} -translate-y-1/2 text-muted-foreground`}
+              className={`${absolute.topHalfLeft} -translate-y-1/2 ${muted.default}`}
             >
               <Icon className={iconSize.sm} />
             </div>
@@ -95,7 +95,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
           />
           {iconPosition === 'right' && (
             <div
-              className={`${absolute.topHalfRight} -translate-y-1/2 text-muted-foreground`}
+              className={`${absolute.topHalfRight} -translate-y-1/2 ${muted.default}`}
             >
               <Icon className={iconSize.sm} />
             </div>
@@ -110,7 +110,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
           defaultValue={field.defaultValue}
         />
       )}
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText && <p className={`${muted.default} ${size.xs}`}>{field.helpText}</p>}
     </div>
   );
 }
@@ -137,7 +137,7 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
 
   const fieldId = `${formId}-${field.name}`;
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
-  const monoClass = field.monospace ? 'font-mono text-sm' : '';
+  const monoClass = field.monospace ? 'font-mono ${size.sm}' : '';
 
   return (
     <div className={`${stack.compact} ${gridClass}`}>
@@ -151,7 +151,7 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
         defaultValue={field.defaultValue}
         className={`${monoClass} resize-y`}
       />
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText && <p className={`${muted.default} ${size.xs}`}>{field.helpText}</p>}
     </div>
   );
 }
@@ -189,7 +189,7 @@ function NumberFieldRenderer({ field, formId }: FieldRendererProps) {
         placeholder={field.placeholder}
         required={field.required}
       />
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText && <p className={`${muted.default} ${size.xs}`}>{field.helpText}</p>}
     </div>
   );
 }
@@ -221,7 +221,7 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
         name={field.name}
         required={field.required}
         defaultValue={field.defaultValue}
-        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+        className={`flex h-10 w-full rounded-md border border-input bg-background ${padding.xCompact} ${padding.yCompact} ${size.sm}`}
       >
         {field.options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -229,7 +229,7 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
           </option>
         ))}
       </select>
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText && <p className={`${muted.default} ${size.xs}`}>{field.helpText}</p>}
     </div>
   );
 }

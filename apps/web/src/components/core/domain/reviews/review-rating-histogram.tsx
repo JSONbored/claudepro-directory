@@ -3,7 +3,7 @@
  * Shows average rating and distribution across 1-5 stars
  */
 
-import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, marginBottom, muted, weight ,size  , padding } from '@heyclaude/web-runtime/design-system';
 import { Star } from '@heyclaude/web-runtime/icons';
 import type { ReviewHistogramProps } from '@heyclaude/web-runtime/types/component.types';
 import {
@@ -60,12 +60,12 @@ export function ReviewRatingHistogram({
 
   if (totalReviews === 0) {
     return (
-      <Card className="bg-muted/50 p-6">
+      <Card className={`bg-muted/50 ${padding.comfortable}`}>
         <div className="text-center">
           <div className={`${cluster.compact} mb-2 justify-center`}>
-            <Star className={`${iconSize.xl} text-muted-foreground/30`} aria-hidden="true" />
+            <Star className={`${iconSize.xl} ${muted.default}/30`} aria-hidden="true" />
           </div>
-          <p className="text-muted-foreground text-sm">No reviews yet. Be the first to review!</p>
+          <p className={muted.sm}>No reviews yet. Be the first to review!</p>
         </div>
       </Card>
     );
@@ -74,21 +74,21 @@ export function ReviewRatingHistogram({
   return (
     <Card className="p-6">
       {/* Header: Average Rating */}
-      <div className="mb-6">
+      <div className={marginBottom.comfortable}>
         <div className={`${cluster.default} mb-2`}>
-          <div className="font-bold text-4xl">{averageRating.toFixed(1)}</div>
+          <div className={`${weight.bold} ${size['4xl']}`}>{averageRating.toFixed(1)}</div>
           <div className={cluster.tight}>
             <StarDisplay rating={averageRating} size="md" />
           </div>
         </div>
-        <p className="text-muted-foreground text-sm">
+        <p className={muted.sm}>
           Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
         </p>
       </div>
 
       {/* Chart: Rating Distribution */}
       <div>
-        <h3 className="mb-3 font-semibold text-sm">Rating Distribution</h3>
+        <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.sm}`}>Rating Distribution</h3>
         <ChartContainer height="200px" className="w-full">
           <HorizontalBarChart
             data={chartData}

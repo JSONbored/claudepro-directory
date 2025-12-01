@@ -2,6 +2,8 @@
  * QuestionCard - Form layout wrapper for quiz questions with optional required indicator
  */
 
+import { spaceY, cluster, marginTop, muted, helper, weight ,size } from '@heyclaude/web-runtime/design-system';
+
 interface QuestionCardProps {
   question: string;
   description?: string;
@@ -11,17 +13,17 @@ interface QuestionCardProps {
 
 export function QuestionCard({ question, description, required, children }: QuestionCardProps) {
   return (
-    <div className="space-y-4">
+    <div className={spaceY.comfortable}>
       <div>
-        <h3 className="flex items-center gap-2 font-semibold text-lg">
+        <h3 className={`${cluster.compact} ${weight.semibold} ${size.lg}`}>
           {question}
           {required && (
-            <span className="text-destructive text-sm" title="Required">
+            <span className={helper.destructive} title="Required">
               *
             </span>
           )}
         </h3>
-        {description && <p className="mt-1 text-muted-foreground text-sm">{description}</p>}
+        {description && <p className={`${marginTop.tight} ${muted.sm}`}>{description}</p>}
       </div>
       {children}
     </div>

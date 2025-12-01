@@ -10,6 +10,7 @@ import {
   getSearchFacets,
   searchContent, getHomepageCategoryIds 
 } from '@heyclaude/web-runtime/data';
+import { marginBottom, weight , size  , gap , padding } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
 import { Suspense } from 'react';
@@ -272,11 +273,11 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
   });
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 font-bold text-4xl">
+    <main className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
+      <h1 className={`${marginBottom.relaxed} ${weight.bold} ${size['4xl']}`}>
         {query ? `Search: "${query}"` : 'Search Claude Code Directory'}
       </h1>
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
+      <div className={`grid ${gap.loose} xl:grid-cols-[minmax(0,1fr)_18rem]`}>
         <Suspense
           fallback={
             <ContentSearchClient

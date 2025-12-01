@@ -5,7 +5,7 @@
 
 import { highlightCodeEdge } from '@heyclaude/web-runtime/data';
 import { Zap } from '@heyclaude/web-runtime/icons';
-import { iconSize } from '@heyclaude/web-runtime/design-system';
+import { iconSize, spaceY, cluster, marginBottom, muted, weight, size } from '@heyclaude/web-runtime/design-system';
 import type { StepByStepGuideProps } from '@heyclaude/web-runtime/types/component.types';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -40,24 +40,24 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
 
   return (
     <section itemScope={true} itemType="https://schema.org/HowTo" className="my-8">
-      <div className="mb-6">
-        <h2 className={'mb-2 font-bold text-2xl'} itemProp="name">
+      <div className={marginBottom.comfortable}>
+        <h2 className={`mb-2 ${weight.bold} ${size['2xl']}`} itemProp="name">
           {title}
         </h2>
         {description && (
-          <p className={'mb-4 text-muted-foreground'} itemProp="description">
+          <p className={`mb-4 ${muted.default}`} itemProp="description">
             {description}
           </p>
         )}
         {totalTime && (
-          <div className={'flex items-center gap-2 text-muted-foreground text-sm'}>
+          <div className={`${cluster.compact} ${muted.sm}`}>
             <Zap className={iconSize.sm} />
             <span itemProp="totalTime">Total time: {totalTime}</span>
           </div>
         )}
       </div>
 
-      <div className="space-y-8">
+      <div className={spaceY.loose}>
         {highlightedSteps.map((step, index) => {
           const isLastStep = index === highlightedSteps.length - 1;
           return (
@@ -77,14 +77,14 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                 className="border-2 border-primary/20 bg-linear-to-br from-card via-card/80 to-transparent transition-all duration-300 hover:shadow-2xl"
               >
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-4" itemProp="name">
+                  <CardTitle className={cluster.comfortable} itemProp="name">
                     <div className="relative">
                       <div
                         className={
                           'flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-primary/70 shadow-lg'
                         }
                       >
-                        <span className={'font-bold text-base text-primary-foreground'}>
+                        <span className={`${weight.bold} ${size.base} text-primary-foreground`}>
                           {index + 1}
                         </span>
                       </div>
@@ -94,7 +94,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                         }
                       />
                     </div>
-                    <span className={'font-bold text-xl'}>{step.title}</span>
+                    <span className={`${weight.bold} ${size.xl}`}>{step.title}</span>
                     {step.time && (
                       <UnifiedBadge
                         variant="base"
@@ -108,13 +108,13 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                 </CardHeader>
                 <CardContent className="pl-14">
                   {(step.content || step.description) && (
-                    <div itemProp="text" className={'mb-6 text-base leading-relaxed'}>
+                    <div itemProp="text" className={'mb-6 ${size.base} leading-relaxed'}>
                       {(step.content as React.ReactNode) || (step.description as React.ReactNode)}
                     </div>
                   )}
 
                   {step.highlightedHtml && step.code && (
-                    <div className="mb-6">
+                    <div className={marginBottom.comfortable}>
                       <ProductionCodeBlock
                         html={step.highlightedHtml}
                         code={step.code}

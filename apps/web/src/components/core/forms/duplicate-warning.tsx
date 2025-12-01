@@ -1,7 +1,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { iconSize } from '@heyclaude/web-runtime/design-system';
+import { iconSize, muted } from '@heyclaude/web-runtime/design-system';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { motion } from 'motion/react';
@@ -107,7 +107,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
   if (checking) {
     return (
       <motion.div
-        className={'text-muted-foreground text-sm'}
+        className={muted.sm}
         animate={{ opacity: [1, 0.5, 1] }}
         transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
       >
@@ -125,7 +125,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
       <AlertTriangle className={`${iconSize.sm} text-yellow-400`} />
       <AlertTitle className="text-yellow-400">Suggestion</AlertTitle>
       <AlertDescription>
-        <p className={'text-muted-foreground text-sm'}>{warning}</p>
+        <p className={muted.sm}>{warning}</p>
       </AlertDescription>
     </Alert>
   );

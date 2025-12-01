@@ -31,3 +31,4 @@ export * from '../actions/add-bookmark.generated.ts';
 export * from '../actions/remove-bookmark.generated.ts';
 export * from '../actions/unlink-oauth-provider.generated.ts';
 export * from '../actions/mfa.ts';
+export * from '../actions/voting.ts';

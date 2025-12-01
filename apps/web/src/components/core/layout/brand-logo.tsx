@@ -10,6 +10,7 @@
 'use client';
 
 import { cn, RESPONSIVE_PATTERNS } from '@heyclaude/web-runtime/ui';
+import { weight } from '@heyclaude/web-runtime/design-system';
 import { HighlightText } from '@heyclaude/web-runtime/ui';
 
 interface HeyClaudeLogoProps {
@@ -67,7 +68,7 @@ export function HeyClaudeLogo({
       inView={inView}
       transition={{ duration, ease: 'easeOut' }}
       className={cn(
-        'font-bold tracking-tight',
+        `${weight.bold} tracking-tight`,
         // Force solid orange color - uses ! prefix to override HighlightText defaults
         'bg-accent!',
         sizeClasses[size],

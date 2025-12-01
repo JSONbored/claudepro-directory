@@ -1,4 +1,5 @@
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { padding , minHeight } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 
 import { NotFoundEmpty } from '@/src/components/primitives/feedback/empty-state';
@@ -15,7 +16,7 @@ export const revalidate = false;
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className={`flex ${minHeight.screen} items-center justify-center bg-background ${padding.xDefault}`}>
       <NotFoundEmpty />
     </div>
   );

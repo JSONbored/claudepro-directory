@@ -3,6 +3,7 @@ import {
   getAuthenticatedUser,
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
+import { spaceY, muted, marginBottom, iconSize, weight , size , cluster } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
@@ -101,16 +102,16 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
   });
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div>
         <Link href={`/account/library/${slug}`}>
-          <Button variant="ghost" className="mb-4 flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
+          <Button variant="ghost" className={`${marginBottom.default} ${cluster.compact}`}>
+            <ArrowLeft className={iconSize.sm} />
             Back to Collection
           </Button>
         </Link>
-        <h1 className="mb-2 font-bold text-3xl">Edit Collection</h1>
-        <p className="text-muted-foreground">Update your collection details and settings</p>
+        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>Edit Collection</h1>
+        <p className={muted.default}>Update your collection details and settings</p>
       </div>
 
       <Card>

@@ -16,6 +16,7 @@
  */
 
 import { Bot, Brain, Code, FileCode, Sparkles, Terminal, Zap } from '@heyclaude/web-runtime/icons';
+import { cluster, muted, marginBottom, marginTop, iconSize, weight ,size  , gap  , radius } from '@heyclaude/web-runtime/design-system';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
@@ -110,7 +111,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
     <div className={cn('w-full', className)}>
       {/* Grid of Type Cards */}
       <motion.div
-        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        className={`grid ${gap.comfortable} sm:grid-cols-2 lg:grid-cols-3`}
         initial="hidden"
         animate="visible"
         variants={{
@@ -142,7 +143,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
               className={cn(
-                'group relative overflow-hidden rounded-xl border-2 p-6 text-left transition-all',
+                'group relative overflow-hidden rounded-xl border-2 ${padding.comfortable} text-left transition-all',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                 isSelected
                   ? 'border-accent-primary bg-accent-primary/10'
@@ -179,9 +180,9 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
               {/* Content */}
               <div className="relative z-10">
                 {/* Icon and Badge */}
-                <div className="mb-4 flex items-start justify-between">
+                <div className={`${marginBottom.default} flex items-start justify-between`}>
                   <motion.div
-                    className="flex h-12 w-12 items-center justify-center rounded-lg"
+                    className={`flex h-12 w-12 items-center justify-center ${radius.lg}`}
                     style={{
                       backgroundColor: `${card.color}20`,
                     }}
@@ -192,7 +193,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                     transition={TOKENS.animations.spring.bouncy}
                   >
                     <Icon
-                      className="h-6 w-6"
+                      className={iconSize.lg}
                       style={{
                         color: card.color,
                       }}
@@ -231,7 +232,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                 {/* Label */}
                 <h3
                   className={cn(
-                    'mb-2 font-semibold text-lg transition-colors',
+                    'mb-2 ${weight.semibold} ${size.lg} transition-colors',
                     isSelected
                       ? 'text-accent-primary'
                       : 'text-foreground group-hover:text-accent-primary'
@@ -244,7 +245,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                 </h3>
 
                 {/* Description */}
-                <p className="mb-3 text-muted-foreground text-sm leading-relaxed">
+                <p className={`${marginBottom.compact} ${muted.smRelaxed}`}>
                   {card.description}
                 </p>
 
@@ -253,7 +254,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                   {card.examples.slice(0, 2).map((example, index) => (
                     <motion.div
                       key={example}
-                      className="flex items-center gap-2 text-xs"
+                      className={`${cluster.compact} ${size.xs}`}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{
                         opacity: isHovered || isSelected ? 1 : 0.6,
@@ -270,7 +271,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                           backgroundColor: card.color,
                         }}
                       />
-                      <span className="text-muted-foreground">{example}</span>
+                      <span className={muted.default}>{example}</span>
                     </motion.div>
                   ))}
                 </div>
@@ -295,7 +296,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
 
       {/* Helper Text */}
       <motion.p
-        className="mt-6 text-center text-muted-foreground text-sm"
+        className={`${marginTop.comfortable} text-center ${muted.sm}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
@@ -313,7 +314,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
 export function CompactTypeSelection({ selected, onSelect, className }: TypeSelectionCardsProps) {
   return (
     <div className={cn('w-full', className)}>
-      <div className="grid gap-2">
+      <div className={`grid ${gap.compact}`}>
         {TYPE_CARDS.map((card) => {
           const Icon = card.icon;
           const isSelected = selected === card.type;
@@ -325,7 +326,7 @@ export function CompactTypeSelection({ selected, onSelect, className }: TypeSele
               onClick={() => onSelect(card.type)}
               whileTap={{ scale: 0.98 }}
               className={cn(
-                'flex items-center gap-3 rounded-lg border p-3 text-left transition-all',
+                '${cluster.default} ${radius.lg} border ${padding.compact} text-left transition-all',
                 isSelected
                   ? 'border-accent-primary bg-accent-primary/10'
                   : 'border-border bg-background-secondary hover:border-accent-primary/50'
@@ -340,13 +341,13 @@ export function CompactTypeSelection({ selected, onSelect, className }: TypeSele
               }}
             >
               <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                className={`flex h-10 w-10 shrink-0 items-center justify-center ${radius.lg}`}
                 style={{
                   backgroundColor: `${card.color}20`,
                 }}
               >
                 <Icon
-                  className="h-5 w-5"
+                  className={iconSize.md}
                   style={{
                     color: card.color,
                   }}
@@ -354,14 +355,14 @@ export function CompactTypeSelection({ selected, onSelect, className }: TypeSele
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="font-medium text-sm">{card.label}</div>
-                <div className="truncate text-muted-foreground text-xs">{card.description}</div>
+                <div className={`${weight.medium} ${size.sm}`}>{card.label}</div>
+                <div className={`truncate ${muted.default} ${size.xs}`}>{card.description}</div>
               </div>
 
               {isSelected && (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="shrink-0">
                   <svg
-                    className="h-5 w-5"
+                    className={iconSize.md}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

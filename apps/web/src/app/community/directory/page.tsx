@@ -1,5 +1,6 @@
 import  { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
+import { marginBottom, muted, weight , size  , gap , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
@@ -123,17 +124,17 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
     }));
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
       {/* Header */}
-      <div className="mx-auto mb-12 max-w-3xl text-center">
-        <h1 className="mb-4 font-bold text-4xl">Community Directory</h1>
-        <p className="text-lg text-muted-foreground">
+      <div className={`mx-auto ${marginBottom.section} ${maxWidth['3xl']} text-center`}>
+        <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']}`}>Community Directory</h1>
+        <p className={muted.lg}>
           Connect with Claude Code contributors, power users, and community experts
         </p>
       </div>
 
       {/* Two-column layout: Main content + Sidebar */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
+      <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-4`}>
         {/* Main Content - User Grid */}
         <div className="lg:col-span-3">
           <ProfileSearchClient users={allUsers} />

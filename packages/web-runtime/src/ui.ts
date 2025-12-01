@@ -57,3 +57,5 @@ export * from './ui/components/feedback/star-display.tsx';
 export * from './ui/components/display/horizontal-bar-chart.tsx';
 export * from './ui/components/navigation/breadcrumbs.tsx';
 export * from './ui/components/theme/theme-toggle.tsx';
+export * from './ui/components/voting/index.ts';
+export * from './ui/components/indicators/index.ts';

@@ -1,6 +1,7 @@
 'use client';
 
 import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
@@ -27,7 +28,7 @@ export function SimpleCopyButton({
   showIcon = true,
   onCopySuccess,
   ariaLabel,
-  iconClassName = 'h-4 w-4',
+  iconClassName = iconSize.sm,
   variant = 'default',
   size = 'default',
   className,

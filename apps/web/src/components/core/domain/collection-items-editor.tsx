@@ -16,7 +16,7 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { isValidCategory, logClientWarning, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, stack, spaceY, muted, weight, radius ,size , padding  } from '@heyclaude/web-runtime/design-system';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -223,18 +223,18 @@ export function CollectionItemManager({
   };
 
   return (
-    <div className="space-y-4">
+    <div className={spaceY.comfortable}>
       {/* Add Item Section */}
-      <div className={'flex items-end gap-2 pb-4'}>
+      <div className={'flex items-end ${gap.compact} pb-4'}>
         <div className="flex-1">
-          <div className={'mb-2 block font-medium text-sm'}>Add Bookmark to Collection</div>
+          <div className={'mb-2 block ${weight.medium} ${size.sm}'}>Add Bookmark to Collection</div>
           <Select value={selectedBookmarkId} onValueChange={setSelectedBookmarkId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a bookmark to add" />
             </SelectTrigger>
             <SelectContent>
               {availableToAdd.length === 0 ? (
-                <div className="p-2 text-muted-foreground text-sm">
+                <div className={`p-2 ${muted.sm}`}>
                   All bookmarks have been added
                 </div>
               ) : (
@@ -266,24 +266,24 @@ export function CollectionItemManager({
 
       {/* Items List */}
       {items.length === 0 ? (
-        <div className="rounded-lg border border-dashed py-12 text-center">
-          <p className={'text-muted-foreground'}>
+        <div className={`${radius.lg} border border-dashed ${padding.ySection} text-center`}>
+          <p className={muted.default}>
             No items in this collection yet. Add bookmarks above to get started.
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className={spaceY.compact}>
           {items.map((item: CollectionItem, index: number) => (
             <div
               key={item.id}
-              className={`${cluster.default} rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50`}
+              className={`${cluster.default} ${radius.lg} border bg-card ${padding.compact} transition-colors hover:bg-accent/50`}
             >
               {/* Order Controls */}
-              <div className="flex flex-col gap-1">
+              <div className={stack.tight}>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${iconSize.lg} p-0`}
+                  className={`${iconSize.lg} ${padding.none}`}
                   onClick={() => handleMoveUp(index)}
                   disabled={index === 0 || isPending}
                   aria-label="Move up"
@@ -293,7 +293,7 @@ export function CollectionItemManager({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${iconSize.lg} p-0`}
+                  className={`${iconSize.lg} ${padding.none}`}
                   onClick={() => handleMoveDown(index)}
                   disabled={index === items.length - 1 || isPending}
                   aria-label="Move down"
@@ -303,7 +303,7 @@ export function CollectionItemManager({
               </div>
 
               {/* Order Number */}
-              <div className="w-8 text-center font-medium text-muted-foreground text-sm">
+              <div className={`w-8 text-center ${weight.medium} ${muted.sm}`}>
                 #{index + 1}
               </div>
 
@@ -313,9 +313,9 @@ export function CollectionItemManager({
                   <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                     {item.content_type}
                   </UnifiedBadge>
-                  <span className="font-medium text-sm">{item.content_slug}</span>
+                  <span className={`${weight.medium} ${size.sm}`}>{item.content_slug}</span>
                 </div>
-                {item.notes && <p className={'mt-1 text-muted-foreground text-xs'}>{item.notes}</p>}
+                {item.notes && <p className={'mt-1 ${muted.default} ${size.xs}'}>{item.notes}</p>}
               </div>
 
               {/* Actions */}
@@ -327,7 +327,7 @@ export function CollectionItemManager({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`${iconSize.xl} p-0`}
+                      className={`${iconSize.xl} ${padding.none}`}
                       onClick={() => window.open(safeContentUrl, '_blank')}
                       aria-label="View item"
                     >
@@ -338,7 +338,7 @@ export function CollectionItemManager({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${iconSize.xl} p-0 text-destructive hover:text-destructive`}
+                  className={`${iconSize.xl} ${padding.none} text-destructive hover:text-destructive`}
                   onClick={() => handleRemove(item.id)}
                   disabled={isPending}
                   aria-label="Remove item"

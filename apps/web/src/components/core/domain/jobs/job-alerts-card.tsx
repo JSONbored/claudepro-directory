@@ -1,7 +1,7 @@
 'use client';
 
 import { Constants } from '@heyclaude/database-types';
-import { cluster, muted } from '@heyclaude/web-runtime/design-system';
+import { cluster, muted, spaceY, helper  } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -98,13 +98,13 @@ export function JobAlertsCard({
     <Card className="border-border/60">
       <CardHeader>
         <CardTitle className="text-xl">Job alerts</CardTitle>
-        <p className="text-muted-foreground text-sm">
+        <p className={muted.sm}>
           Get email updates when new AI roles match your preferences.
         </p>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="space-y-2">
+        <form className={spaceY.comfortable} onSubmit={handleSubmit}>
+          <div className={spaceY.compact}>
             <label className="text-sm" htmlFor="job-alert-email">
               Email
             </label>
@@ -119,8 +119,8 @@ export function JobAlertsCard({
             />
           </div>
 
-          <div className={cn('grid gap-3', 'sm:grid-cols-2')}>
-            <div className="space-y-2">
+          <div className={cn('grid ${gap.default}', 'sm:grid-cols-2')}>
+            <div className={spaceY.compact}>
               <label className="text-sm" htmlFor="job-alert-category">
                 Category preference
               </label>
@@ -138,7 +138,7 @@ export function JobAlertsCard({
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className={spaceY.compact}>
               <label className="text-sm" htmlFor="job-alert-experience">
                 Experience level
               </label>
@@ -157,7 +157,7 @@ export function JobAlertsCard({
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className={spaceY.compact}>
             <label className="text-sm" htmlFor="job-alert-remote">
               Location preference
             </label>
@@ -180,7 +180,7 @@ export function JobAlertsCard({
           </div>
 
           {error && (
-            <p id="job-alert-error" className="text-destructive text-sm">
+            <p id="job-alert-error" className={helper.destructive}>
               {error}
             </p>
           )}

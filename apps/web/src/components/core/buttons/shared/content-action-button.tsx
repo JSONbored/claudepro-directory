@@ -2,6 +2,7 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import { useLoggedAsync, useButtonSuccess } from '@heyclaude/web-runtime/hooks';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
@@ -128,7 +129,7 @@ export function ContentActionButton({
           animate={isSuccess ? { scale: [1, 1.2, 1] } : {}}
           transition={{ duration: 0.3 }}
         >
-          <DisplayIcon className="h-4 w-4" />
+          <DisplayIcon className={iconSize.sm} />
         </motion.div>
       )}
       {label}

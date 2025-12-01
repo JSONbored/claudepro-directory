@@ -6,7 +6,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { ChevronDown, FileText } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, weight  , padding   } from '@heyclaude/web-runtime/design-system';
 import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -72,10 +72,10 @@ export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps)
           <DropdownMenuItem
             key={template.id}
             onClick={() => onSelect(template)}
-            className="cursor-pointer flex-col items-start py-3"
+            className={`cursor-pointer flex-col items-start ${padding.yCompact}`}
           >
-            <div className="font-medium">{template.name}</div>
-            <div className={'mt-0.5 text-muted-foreground text-xs'}>{template.description}</div>
+            <div className={weight.medium}>{template.name}</div>
+            <div className={'mt-0.5 ${muted.default} ${size.xs}'}>{template.description}</div>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

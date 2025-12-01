@@ -1,7 +1,7 @@
 import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { marginBottom, padding, stack } from '@heyclaude/web-runtime/design-system';
+import { marginBottom, padding, stack, muted, weight , size , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { NavLink  } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 
@@ -35,17 +35,17 @@ export default function TermsPage() {
   const channels = getContactChannels();
 
   return (
-    <div className={`container mx-auto max-w-4xl ${padding.xDefault} py-8 sm:py-12`}>
-      <div className="prose prose-invert max-w-none">
-        <h1 className={`${marginBottom.comfortable} font-bold text-3xl sm:text-4xl`}>
+    <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
+      <div className={`prose prose-invert ${maxWidth.none}`}>
+        <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>
           Terms of Service
         </h1>
-        <p className={`${marginBottom.relaxed} text-muted-foreground`}>
+        <p className={`${marginBottom.relaxed} ${muted.default}`}>
           Last updated: {lastUpdated}
         </p>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} font-semibold text-2xl`}>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
             1. Acceptance of Terms
           </h2>
           <p className={marginBottom.default}>
@@ -56,7 +56,7 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} font-semibold text-2xl`}>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
             2. Use of Service
           </h2>
           <p className={marginBottom.default}>
@@ -76,7 +76,7 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} font-semibold text-2xl`}>3. User Content</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>3. User Content</h2>
           <p className={marginBottom.default}>
             You retain ownership of content you submit to {APP_CONFIG.name}. By submitting content,
             you grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, modify,
@@ -91,7 +91,7 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} font-semibold text-2xl`}>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
             4. Intellectual Property
           </h2>
           <p className={marginBottom.default}>
@@ -102,7 +102,7 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} font-semibold text-2xl`}>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
             5. Account Termination
           </h2>
           <p className={marginBottom.default}>
@@ -113,7 +113,7 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} font-semibold text-2xl`}>6. Disclaimers</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>6. Disclaimers</h2>
           <p className={marginBottom.default}>
             The service is provided "AS IS" and "AS AVAILABLE" without warranties of any kind,
             either express or implied, including but not limited to implied warranties of
@@ -126,7 +126,7 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} font-semibold text-2xl`}>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
             7. Limitation of Liability
           </h2>
           <p className={marginBottom.default}>
@@ -137,7 +137,7 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} font-semibold text-2xl`}>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
             8. Indemnification
           </h2>
           <p className={marginBottom.default}>
@@ -148,7 +148,7 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} font-semibold text-2xl`}>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
             9. Changes to Terms
           </h2>
           <p className={marginBottom.default}>
@@ -160,7 +160,7 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} font-semibold text-2xl`}>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
             10. Governing Law
           </h2>
           <p className={marginBottom.default}>
@@ -170,7 +170,7 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} font-semibold text-2xl`}>11. Contact Us</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>11. Contact Us</h2>
           <p className={marginBottom.default}>
             If you have questions about these Terms of Service, please{' '}
             <NavLink href={`mailto:${channels.email}`} external>

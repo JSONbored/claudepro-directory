@@ -5,7 +5,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { iconSize } from '@heyclaude/web-runtime/design-system';
+import { iconSize, cluster, marginBottom, weight, muted ,size , padding , gap , radius } from '@heyclaude/web-runtime/design-system';
 import { getContentItemUrl, isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
@@ -187,17 +187,17 @@ export function RelatedContentClient({
       aria-label="Related content"
     >
       {showTitle && (
-        <div className="mb-8 rounded-xl border border-primary/20 bg-linear-to-r from-primary/5 to-primary/10 p-4 sm:p-6">
-          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="shrink-0 rounded-lg bg-primary/10 p-2">
+        <div className={`${marginBottom.relaxed} rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 ${padding.default} sm:p-6`}>
+          <div className={`flex flex-col items-start justify-between ${gap.comfortable} sm:flex-row sm:items-center`}>
+            <div className={`${cluster.default} sm:${gap.comfortable}`}>
+              <div className={`shrink-0 ${radius.lg} bg-primary/10 ${padding.tight}`}>
                 <Sparkles className={`${iconSize.md} text-primary sm:h-6 sm:w-6`} />
               </div>
               <div className="min-w-0">
-                <h2 className="mb-1 font-bold text-foreground text-xl sm:text-2xl" itemProp="name">
+                <h2 className={`${marginBottom.micro} ${weight.bold} text-foreground ${size.xl} sm:${size['2xl']}`} itemProp="name">
                   {title}
                 </h2>
-                <p className="text-muted-foreground text-xs sm:text-sm">
+                <p className={`${muted.default} ${size.xs} sm:text-sm`}>
                   Intelligently curated based on your current content
                 </p>
               </div>
@@ -205,7 +205,7 @@ export function RelatedContentClient({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="shrink-0imary/30 bg-primary/10 px-2 py-1 font-medium text-primary text-xs sm:px-3 sm:text-sm"
+              className={`shrink-0imary/30 bg-primary/10 ${padding.xTight} ${padding.yMicro} ${weight.medium} text-primary ${size.xs} sm:px-3 sm:text-sm`}
             >
               AI Powered
             </UnifiedBadge>
@@ -240,9 +240,9 @@ export function RelatedContentClient({
               compactMode={true}
               ariaLabel={`Related: ${relatedItem.title}`}
               renderTopBadges={() => (
-                <div className="flex w-full items-center justify-between gap-2">
+                <div className={`flex w-full items-center justify-between ${gap.compact}`}>
                   <UnifiedBadge
-                    className={`${categoryBadge} shrink-0 border px-2 py-1 font-medium text-xs sm:px-3 sm:text-sm`}
+                    className={`${categoryBadge} shrink-0 border ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.xs} sm:px-3 sm:text-sm`}
                     variant="base"
                     style="secondary"
                   >
@@ -252,7 +252,7 @@ export function RelatedContentClient({
                     <UnifiedBadge
                       variant="base"
                       style={matchBadge.variant}
-                      className="shrink-0 border px-1.5 py-1 font-medium text-2xs sm:px-2 sm:text-xs"
+                      className={`shrink-0 border ${padding.xSnug} ${padding.yMicro} ${weight.medium} text-2xs sm:px-2 sm:text-xs`}
                     >
                       {matchBadge.label}
                     </UnifiedBadge>

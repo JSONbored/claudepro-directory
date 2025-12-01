@@ -7,7 +7,7 @@
 
 import { AlertTriangle, Info } from '@heyclaude/web-runtime/icons';
 import type { ErrorTableProps } from '@heyclaude/web-runtime/types/component.types';
-import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, muted    } from '@heyclaude/web-runtime/design-system';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import {
   Card,
@@ -60,10 +60,10 @@ export function ErrorTable(props: ErrorTableProps) {
           <table className="w-full">
             <thead className="border-b bg-muted/30">
               <tr>
-                <th className={'p-4 text-left font-medium'}>Error Code</th>
-                <th className={'p-4 text-left font-medium'}>Severity</th>
-                <th className={'p-4 text-left font-medium'}>Message</th>
-                <th className={'p-4 text-left font-medium'}>Solution</th>
+                <th className={'p-4 text-left ${weight.medium}'}>Error Code</th>
+                <th className={'p-4 text-left ${weight.medium}'}>Severity</th>
+                <th className={'p-4 text-left ${weight.medium}'}>Message</th>
+                <th className={'p-4 text-left ${weight.medium}'}>Solution</th>
               </tr>
             </thead>
             <tbody>
@@ -72,7 +72,7 @@ export function ErrorTable(props: ErrorTableProps) {
                   key={error.code}
                   className={`border-b last:border-0 ${index % 2 === 0 ? 'bg-muted/10' : ''}`}
                 >
-                  <td className={'p-4 font-mono text-sm'}>{error.code}</td>
+                  <td className={'p-4 font-mono ${size.sm}'}>{error.code}</td>
                   <td className="p-4">
                     <UnifiedBadge
                       variant="base"
@@ -85,8 +85,8 @@ export function ErrorTable(props: ErrorTableProps) {
                       </span>
                     </UnifiedBadge>
                   </td>
-                  <td className={'p-4 text-sm'}>{error.message}</td>
-                  <td className={'p-4 text-muted-foreground text-sm'}>{error.solution}</td>
+                  <td className={'p-4 ${size.sm}'}>{error.message}</td>
+                  <td className={`p-4 ${muted.sm}`}>{error.solution}</td>
                 </tr>
               ))}
             </tbody>

@@ -28,7 +28,7 @@ type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSection = ContentRow['metadata'];
 
-import { changelogBadge } from '@heyclaude/web-runtime/design-system';
+import { changelogBadge, weight, gap, padding, maxWidth } from '@heyclaude/web-runtime/design-system';
 import { SanitizedHTML } from './sanitized-html';
 
 /**
@@ -89,16 +89,16 @@ export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps
     nonEmptyCategories.push('Security' as Database['public']['Enums']['changelog_category']);
 
   return (
-    <article className={'max-w-none space-y-6'}>
+    <article className={'max-w-none ${spaceY.relaxed}'}>
       {/* Category Badges */}
       {nonEmptyCategories.length > 0 && (
-        <div className="flex flex-wrap gap-2 py-2">
+        <div className={`flex flex-wrap ${gap.compact} ${padding.yCompact}`}>
           {nonEmptyCategories.map((category) => (
             <UnifiedBadge
               key={category}
               variant="base"
               style="outline"
-              className={`${changelogBadge[category as keyof typeof changelogBadge]} font-medium`}
+              className={`${changelogBadge[category as keyof typeof changelogBadge]} ${weight.medium}`}
             >
               {category}
             </UnifiedBadge>
@@ -108,12 +108,12 @@ export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps
 
       {/* Main Content - Rendered as JSON Sections */}
       {metadataSections && metadataSections.length > 0 ? (
-        <div className="prose prose-slate dark:prose-invert max-w-none">
+        <div className={`prose prose-slate dark:prose-invert ${maxWidth.none}`}>
           <JSONSectionRenderer sections={metadataSections} />
         </div>
       ) : (
         // Fallback for entries without sections (shouldn't happen after build)
-        <div className="prose prose-slate dark:prose-invert max-w-none">
+        <div className={`prose prose-slate dark:prose-invert ${maxWidth.none}`}>
           <TrustedHTML html={entry.content} />
         </div>
       )}

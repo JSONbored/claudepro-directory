@@ -7,6 +7,7 @@
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@heyclaude/web-runtime/icons';
 import { ANIMATION_CONSTANTS, cn, toasts } from '@heyclaude/web-runtime/ui';
+import { weight ,size    } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 
@@ -72,7 +73,7 @@ export function OAuthProviderButton({
       onClick={handleSignIn}
       disabled={loading}
       className={cn(
-        'flex flex-col items-center gap-4 px-6',
+        'flex flex-col items-center ${gap.comfortable} ${padding.xComfortable}',
         loading && 'cursor-wait opacity-60',
         className
       )}
@@ -99,7 +100,7 @@ export function OAuthProviderButton({
       </div>
 
       {/* Label below */}
-      <span className="font-medium text-foreground text-sm">
+      <span className={`${weight.medium} text-foreground ${size.sm}`}>
         {loading ? 'Signing in...' : config.label}
       </span>
     </button>

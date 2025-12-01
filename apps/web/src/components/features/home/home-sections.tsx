@@ -15,7 +15,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
-import { cluster, iconSize, groupHover } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, groupHover, marginTop, weight ,size , padding , gap , radius  , maxWidth } from '@heyclaude/web-runtime/design-system';
 import type {
   DisplayableContent,
   FilterState,
@@ -396,8 +396,8 @@ function HomePageClientComponent({
   return (
     <>
       {/* Search Section */}
-      <section className={'container mx-auto px-4 pt-8 pb-12'}>
-        <div className={'mx-auto max-w-4xl'}>
+      <section className={`container mx-auto ${padding.xDefault} pt-8 pb-12`}>
+        <div className={`mx-auto ${maxWidth['4xl']}`}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
             onSearch={handleSearch}
@@ -421,14 +421,14 @@ function HomePageClientComponent({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <div className="flex gap-3 px-4 pb-2">
+                <div className={`flex ${gap.default} ${padding.xDefault} pb-2`}>
                   {categoryStatsConfig.slice(0, 5).map(({ categoryId, icon: Icon, delay }) => {
                     const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
 
                     return (
                       <Link key={categoryId} href={categoryRoute}>
                         <motion.div
-                          className="flex min-w-fit items-center gap-2 whitespace-nowrap rounded-lg border border-border/40 bg-card/50 px-4 py-2.5 backdrop-blur-sm"
+                          className={`flex min-w-fit items-center ${gap.compact} whitespace-nowrap ${radius.lg} border border-border/40 bg-card/50 ${padding.xDefault} py-2.5 backdrop-blur-sm`}
                           whileTap={{ scale: 0.95 }}
                           transition={springDefault}
                         >
@@ -436,7 +436,7 @@ function HomePageClientComponent({
                             className={`${iconSize.sm} shrink-0 text-accent`}
                             aria-hidden="true"
                           />
-                          <span className="font-medium text-sm">
+                          <span className={`${weight.medium} ${size.sm}`}>
                             <NumberTicker
                               value={
                                 typeof stats[categoryId] === 'number'
@@ -456,7 +456,7 @@ function HomePageClientComponent({
               {/* Desktop Stats - Full layout (unchanged) */}
               <div
                 className={
-                  'mt-6 hidden flex-wrap justify-center gap-2 text-muted-foreground text-xs md:flex lg:gap-3 lg:text-sm'
+                  'mt-6 hidden flex-wrap justify-center ${gap.compact} ${muted.default} ${size.xs} md:flex lg:gap-3 lg:text-sm'
                 }
               >
                 {categoryStatsConfig.map(({ categoryId, icon: Icon, displayText, delay }) => {
@@ -471,7 +471,7 @@ function HomePageClientComponent({
                       aria-label={`View all ${displayText}`}
                     >
                       <motion.div
-                        className={`${cluster.snug} cursor-pointer rounded-md border border-transparent px-2 py-1 transition-colors`}
+                        className={`${cluster.snug} cursor-pointer rounded-md border border-transparent ${padding.xTight} ${padding.yMicro} transition-colors`}
                         whileHover={{
                           scale: 1.05,
                           y: -2,
@@ -506,12 +506,12 @@ function HomePageClientComponent({
               </div>
             </>
           ) : (
-            <HomepageStatsSkeleton className="mt-6" />
+            <HomepageStatsSkeleton className={marginTop.comfortable} />
           )}
         </div>
       </section>
 
-      <section className={'container mx-auto px-4 pb-16'}>
+      <section className={'container mx-auto ${padding.xDefault} pb-16'}>
         {/* Search Results Section - TanStack Virtual */}
         <LazySearchSection
           isSearching={isSearching}

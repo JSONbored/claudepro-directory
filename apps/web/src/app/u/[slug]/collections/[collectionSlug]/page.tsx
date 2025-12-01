@@ -10,7 +10,7 @@ import {
   getAuthenticatedUser,
   getPublicCollectionDetail,
 } from '@heyclaude/web-runtime/data';
-import { between, cluster } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , row , minHeight } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, UnifiedBadge, Button ,
@@ -172,7 +172,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   const { user: profileUser, collection, items, is_owner } = collectionData;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${minHeight.screen} bg-background`}>
       {/* Track view - non-blocking */}
       <Pulse
         variant="view"
@@ -183,12 +183,12 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           collection_slug: collectionSlug,
         }}
       />
-      <div className="container mx-auto px-4 py-12">
-        <div className="space-y-6">
+      <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+        <div className={spaceY.relaxed}>
           {/* Navigation */}
           <Link href={`/u/${slug}`}>
             <Button variant="ghost" className={cluster.compact}>
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className={iconSize.sm} />
               Back to {profileUser?.name ?? slug}'s Profile
             </Button>
           </Link>
@@ -197,7 +197,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <div>
             <div className={`${between.center} mb-2`}>
               <div className={cluster.compact}>
-                <h1 className="font-bold text-3xl">{collection?.name ?? 'Untitled Collection'}</h1>
+                <h1 className={`${weight.bold} ${size['3xl']}`}>{collection?.name ?? 'Untitled Collection'}</h1>
                 <UnifiedBadge variant="base" style="outline">
                   Public
                 </UnifiedBadge>
@@ -209,9 +209,9 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                 </Link> : null}
             </div>
 
-            {collection?.description ? <p className="max-w-3xl text-muted-foreground">{collection.description}</p> : null}
+            {collection?.description ? <p className={`max-w-3xl ${muted.default}`}>{collection.description}</p> : null}
 
-            <div className="mt-2 text-muted-foreground text-sm">
+            <div className={`${marginTop.compact} ${muted.sm}`}>
               Created by <NavLink href={`/u/${slug}`}>{profileUser?.name ?? slug}</NavLink> •{' '}
               {collection?.item_count ?? 0} {(collection?.item_count ?? 0) === 1 ? 'item' : 'items'}{' '}
               • {collection?.view_count ?? 0} views
@@ -220,16 +220,16 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
           {/* Collection Items */}
           <div>
-            <h2 className="mb-4 font-semibold text-xl">Items in this Collection</h2>
+            <h2 className={`${marginBottom.default} ${weight.semibold} ${size.xl}`}>Items in this Collection</h2>
 
             {!items || items.length === 0 ? (
               <Card>
-                <CardContent className="flex flex-col items-center py-12">
-                  <p className="text-muted-foreground">This collection is empty</p>
+                <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
+                  <p className={muted.default}>This collection is empty</p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-4">
+              <div className={`grid ${gap.comfortable}`}>
                 {items
                   .filter(
                     (
@@ -246,8 +246,8 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                   .map((item, index) => (
                     <Card key={item.id}>
                       <CardHeader>
-                        <div className="flex items-start gap-4">
-                          <div className="w-8 font-bold text-2xl text-muted-foreground/50">
+                        <div className={`${row.comfortable}`}>
+                          <div className={`w-8 ${weight.bold} ${size['2xl']} ${muted.default}/50`}>
                             {index + 1}
                           </div>
                           <div className="flex-1">
@@ -257,7 +257,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                               </UnifiedBadge>
                               <CardTitle className="text-lg">{item.content_slug}</CardTitle>
                             </div>
-                            {item.notes ? <CardDescription className="mt-2">{item.notes}</CardDescription> : null}
+                            {item.notes ? <CardDescription className={marginTop.compact}>{item.notes}</CardDescription> : null}
                           </div>
                           {(() => {
                             const safeLink = getSafeContentLink({
@@ -271,7 +271,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                                   size="sm"
                                   className={cluster.compact}
                                 >
-                                  <ExternalLink className="h-4 w-4" />
+                                  <ExternalLink className={iconSize.sm} />
                                   View
                                 </Button>
                               </Link>
@@ -282,7 +282,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                                 className={cluster.compact}
                                 disabled
                               >
-                                <ExternalLink className="h-4 w-4" />
+                                <ExternalLink className={iconSize.sm} />
                                 View
                               </Button>
                             );
@@ -297,29 +297,29 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
           {/* Stats */}
           <Separator className="my-6" />
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className={`grid ${gap.comfortable} sm:grid-cols-3`}>
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="font-medium text-sm">Total Items</CardTitle>
+                <CardTitle className={`${weight.medium} ${size.sm}`}>Total Items</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-bold text-2xl">{collection?.item_count ?? 0}</div>
+                <div className={`${weight.bold} ${size['2xl']}`}>{collection?.item_count ?? 0}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="font-medium text-sm">Views</CardTitle>
+                <CardTitle className={`${weight.medium} ${size.sm}`}>Views</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-bold text-2xl">{collection?.view_count ?? 0}</div>
+                <div className={`${weight.bold} ${size['2xl']}`}>{collection?.view_count ?? 0}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="font-medium text-sm">Created</CardTitle>
+                <CardTitle className={`${weight.medium} ${size.sm}`}>Created</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-medium text-base">
+                <div className={`${weight.medium} ${size.base}`}>
                   {collection?.created_at
                     ? new Date(collection.created_at).toLocaleDateString('en-US', {
                         month: 'long',

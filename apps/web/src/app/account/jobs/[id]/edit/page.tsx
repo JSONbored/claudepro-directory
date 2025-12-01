@@ -6,6 +6,7 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import  { type CreateJobInput } from '@heyclaude/web-runtime';
 import { updateJob } from '@heyclaude/web-runtime/actions';
+import { spaceY, muted, marginBottom, weight , size  , padding } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
@@ -209,12 +210,12 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
   const hasInvalidData = !(isValidJobType(job.type) && isValidJobCategory(job.category));
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div>
-        <h1 className="mb-2 font-bold text-3xl tracking-tight">Edit Job Listing</h1>
-        <p className="text-muted-foreground">Update your job posting details</p>
+        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']} tracking-tight`}>Edit Job Listing</h1>
+        <p className={muted.default}>Update your job posting details</p>
       </div>
-      {hasInvalidData ? <div className="rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">
+      {hasInvalidData ? <div className={`rounded-md bg-yellow-50 ${padding.default} dark:bg-yellow-900/20`}>
           <p className="text-sm text-yellow-800 dark:text-yellow-200">
             Some fields contain invalid data and couldn't be loaded. Please review and update.
           </p>

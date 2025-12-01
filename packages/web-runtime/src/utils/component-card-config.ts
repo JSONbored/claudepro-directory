@@ -12,7 +12,7 @@ export type ComponentCardConfig = {
   showBookmark: boolean;
   showViewCount: boolean;
   showCopyCount: boolean;
-  showRating: boolean;
+  showUseCount: boolean;
 };
 
 export const DEFAULT_COMPONENT_CARD_CONFIG: ComponentCardConfig = {
@@ -20,7 +20,7 @@ export const DEFAULT_COMPONENT_CARD_CONFIG: ComponentCardConfig = {
   showBookmark: true,
   showViewCount: true,
   showCopyCount: true,
-  showRating: true,
+  showUseCount: true,
 };
 
 /**
@@ -32,7 +32,7 @@ export const DEFAULT_COMPONENT_CARD_CONFIG: ComponentCardConfig = {
  * @param record - Configuration record (or `null`). Reads these keys if present:
  *                 `cards.show_copy_button`, `cards.show_bookmark`,
  *                 `cards.show_view_count`, `cards.show_copy_count`,
- *                 `cards.show_rating`.
+ *                 `cards.show_use_count`.
  * @returns A ComponentCardConfig where each flag is the boolean value from the
  *          record when present and a boolean, or the corresponding default
  *          from DEFAULT_COMPONENT_CARD_CONFIG otherwise.
@@ -64,9 +64,9 @@ export function mapComponentCardConfig(
       record['cards.show_copy_count' as string],
       DEFAULT_COMPONENT_CARD_CONFIG.showCopyCount
     ),
-    showRating: coerce(
-      record['cards.show_rating' as string],
-      DEFAULT_COMPONENT_CARD_CONFIG.showRating
+    showUseCount: coerce(
+      record['cards.show_use_count' as string],
+      DEFAULT_COMPONENT_CARD_CONFIG.showUseCount
     ),
   };
 }

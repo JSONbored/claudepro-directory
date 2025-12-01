@@ -9,7 +9,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { cluster, between, iconSize, iconLeading, buttonGhost, sticky } from '@heyclaude/web-runtime/design-system';
+import { cluster, between, iconSize, iconLeading, buttonGhost, sticky, weight ,size , padding } from '@heyclaude/web-runtime/design-system';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, DiscordIcon } from '@heyclaude/web-runtime/icons';
 import {
@@ -108,7 +108,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
       />
 
       <motion.header
-        className={`${sticky.top} z-50 w-full px-3 pt-1 pb-3 will-change-transform contain-layout`}
+        className={`${sticky.top} z-50 w-full ${padding.xCompact} pt-1 pb-3 will-change-transform contain-layout`}
         style={{ opacity: navOpacity }}
       >
         <div className="container mx-auto">
@@ -159,7 +159,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                   >
                     <Bookmark className={iconSize.xs} />
                     {pinCount > 0 && (
-                      <span className="-right-1 -top-1 absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-semibold text-[10px] text-primary-foreground">
+                      <span className={`-right-1 -top-1 absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-primary ${padding.xMicro} ${weight.semibold} text-[10px] text-primary-foreground`}>
                         {pinCount > 99 ? '99+' : pinCount}
                       </span>
                     )}
@@ -174,7 +174,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                           asChild={true}
                           variant="outline"
                           size="sm"
-                          className="hidden text-xs md:flex"
+                          className={`hidden ${size.xs} md:flex`}
                         >
                           <Link href={link.href} prefetch={true}>
                             {ActionIcon && <ActionIcon className={iconLeading.xs} />}
@@ -188,13 +188,13 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                     variant="ghost"
                     size="sm"
                     onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                    className={`hidden md:flex text-sm font-medium ${buttonGhost.icon}`}
+                    className={`hidden md:flex ${size.sm} ${weight.medium} ${buttonGhost.icon}`}
                     aria-label="Join our Discord community"
                   >
                     <DiscordIcon className={iconSize.xs} />
                   </Button>
 
-                  <GitHubStarsButton className="hidden text-xs md:flex" />
+                  <GitHubStarsButton className={`hidden ${size.xs} md:flex`} />
 
                   <UserMenu className={'hidden md:flex'} />
 

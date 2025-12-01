@@ -1,7 +1,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { iconSize, responsive, stack } from '@heyclaude/web-runtime/design-system';
+import { iconSize, responsive, stack, cluster, helper, weight ,size , padding } from '@heyclaude/web-runtime/design-system';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { Mail } from '@heyclaude/web-runtime/icons';
@@ -66,7 +66,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
               required={true}
               disabled={isSubmitting}
               className={cn(
-                `${DIMENSIONS.BUTTON_LG} min-w-0 px-5 text-base`,
+                `${DIMENSIONS.BUTTON_LG} min-w-0 ${padding.xMedium} ${size.base}`,
                 'border-border/40 bg-background/95 backdrop-blur-sm',
                 'transition-all duration-200 ease-out',
                 'focus:border-accent/50 focus:ring-2 focus:ring-accent/20',
@@ -89,8 +89,8 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             disabled={isSubmitting || !email.trim()}
             size="lg"
             className={cn(
-              `${DIMENSIONS.BUTTON_LG} shrink-0 whitespace-nowrap px-8`,
-              'bg-linear-to-r from-accent via-accent to-primary font-semibold text-accent-foreground',
+              `${DIMENSIONS.BUTTON_LG} shrink-0 whitespace-nowrap ${padding.xRelaxed}`,
+              `bg-linear-to-r from-accent via-accent to-primary ${weight.semibold} text-accent-foreground`,
               'shadow-md transition-all duration-200 ease-out',
               'hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:shadow-lg',
               'active:scale-[0.98]',
@@ -102,7 +102,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             {isSubmitting ? (
               <InlineSpinner size="sm" message="Subscribing..." />
             ) : (
-              <span className="flex items-center gap-2">
+              <span className={cluster.compact}>
                 {NEWSLETTER_CTA_CONFIG.buttonText}
                 <Mail className={iconSize.sm} aria-hidden="true" />
               </span>
@@ -112,7 +112,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
         {error && (
           <p
             id={errorId}
-            className="slide-in-from-top-1 fade-in animate-in text-destructive text-sm"
+            className={`slide-in-from-top-1 fade-in animate-in ${helper.destructive}`}
             role="alert"
           >
             {error}

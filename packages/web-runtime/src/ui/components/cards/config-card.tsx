@@ -59,7 +59,7 @@ import { Button } from '../button.tsx';
 import { BookmarkButton } from '../buttons/bookmark-button.tsx';
 import { SimpleCopyButton } from '../buttons/simple-copy-button.tsx';
 import { BorderBeam } from '../animation/border-beam.tsx';
-import { ReviewRatingCompact } from '../feedback/review-rating-compact.tsx';
+import { UseCountBadgeCompact } from '../voting/use-count-badge.tsx';
 import {
   Award,
   ExternalLink,
@@ -67,12 +67,14 @@ import {
   FileJson,
   Github,
   Layers,
+  Pencil,
   Pin,
   PinOff,
   Sparkles,
 } from '../../../icons.tsx';
 import type { ConfigCardProps, ContentItem } from '../../../types/component.types.ts';
 import { SEMANTIC_COLORS } from '../../colors.ts';
+import { ContentIndicators } from '../indicators/content-indicators.tsx';
 // Design System imports
 import { cluster } from '../../../design-system/styles/layout.ts';
 import { iconSize, iconLeading } from '../../../design-system/styles/icons.ts';
@@ -93,6 +95,12 @@ import {
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
+// GitHub repository URL for suggest edit feature
+const GITHUB_REPO_URL = 'https://github.com/JSONbored/claudepro-directory';
+
+// Categories that should not have the "Suggest Edit" button
+const NON_EDITABLE_CATEGORIES = ['jobs', 'changelog'] as const;
+
 // Types are now exported from their respective modules:
 // - ComponentCardConfig from hooks/use-component-card-config.tsx
 // - UsePinboardReturn from hooks/use-pinboard.ts
@@ -101,7 +109,7 @@ import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 // Component prop types are now exported from their respective modules:
 // - SimpleCopyButton props from ui/components/buttons/simple-copy-button.tsx
 // - BorderBeam props from ui/components/animation/border-beam.tsx
-// - ReviewRatingCompact props from ui/components/feedback/review-rating-compact.tsx
+// - UseCountBadgeCompact props from ui/components/voting/use-count-badge.tsx
 
 /**
  * ConfigCard props (no longer needs app-specific components - uses web-runtime directly)
@@ -518,9 +526,14 @@ export const ConfigCard = memo(
       // Auto-enable border beam for featured items if not explicitly set
       const shouldShowBeam = showBorderBeam !== undefined ? showBorderBeam : isFeatured;
 
-      // Extract rating metadata
-      const ratingData = (item as { _rating?: { average: number; count: number } })._rating;
-      const hasRating = ratingData && ratingData.count > 0;
+      // Extract use_count for "I use this" badge
+      const useCount = 'use_count' in item && typeof item.use_count === 'number' ? item.use_count : 0;
+      const hasUseCount = useCount > 0;
+
+      // Extract dates for freshness indicators
+      const dateAdded = 'date_added' in item && typeof item.date_added === 'string' ? item.date_added : null;
+      const updatedAt = 'updated_at' in item && typeof item.updated_at === 'string' ? item.updated_at : null;
+      const itemSource = 'source' in item ? item.source as Database['public']['Enums']['content_source'] | null : null;
 
       // Extract collection-specific metadata
       const isCollection = item.category === Constants.public.Enums.content_category[8]; // 'collections'
@@ -569,6 +582,17 @@ export const ConfigCard = memo(
         useViewTransitions,
         ...(item.slug ? { viewTransitionSlug: item.slug } : {}),
         onBeforeNavigate: handleCardClickPulse,
+        // Freshness and source indicators
+        renderIndicators: () => (
+          <ContentIndicators
+            dateAdded={dateAdded}
+            updatedAt={updatedAt}
+            source={itemSource}
+            showFreshness={true}
+            showSource={true}
+            size="sm"
+          />
+        ),
         renderTopBadges: () => {
           const rawCategory = item.category ?? Constants.public.Enums.content_category[0];
           const category: Database['public']['Enums']['content_category'] = isValidCategory(
@@ -678,24 +702,9 @@ export const ConfigCard = memo(
         },
         renderMetadataBadges: () => (
           <>
-            {/* Rating badge */}
-            {cardConfig.showRating && hasRating && ratingData && (
-              <button
-                type="button"
-                onClick={(e) => e.stopPropagation()}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.stopPropagation();
-                  }
-                }}
-                className="cursor-default border-0 bg-transparent p-0"
-              >
-                <ReviewRatingCompact
-                  average={ratingData.average}
-                  count={ratingData.count}
-                  size="sm"
-                />
-              </button>
+            {/* "I use this" count badge */}
+            {cardConfig.showUseCount && hasUseCount && (
+              <UseCountBadgeCompact count={useCount} />
             )}
           </>
         ),
@@ -797,6 +806,65 @@ export const ConfigCard = memo(
                 <ExternalLink className={iconSize.xs} aria-hidden="true" />
               </Button>
             )}
+
+            {/* Suggest Edit button - only for user-editable content categories */}
+            {item.slug &&
+              cardCategory &&
+              !NON_EDITABLE_CATEGORIES.includes(
+                cardCategory as (typeof NON_EDITABLE_CATEGORIES)[number]
+              ) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`${buttonSize.iconSm} ${buttonGhost.icon}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    
+                    // Build GitHub issue URL with pre-filled parameters
+                    const issueTitle = encodeURIComponent(`[Edit Suggestion]: ${displayTitle || item.slug}`);
+                    const issueBody = encodeURIComponent(
+                      `## Edit Suggestion for ${displayTitle || item.slug}\n\n` +
+                      `**Category:** ${cardCategory}\n` +
+                      `**Slug:** ${item.slug}\n` +
+                      `**URL:** ${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}\n\n` +
+                      `### Suggested Changes\n\n` +
+                      `<!-- Please describe what you'd like to change about this content -->\n\n` +
+                      `### Reason for Change\n\n` +
+                      `<!-- Why should this change be made? -->\n`
+                    );
+                    const issueLabels = encodeURIComponent('content-edit,community');
+                    const editUrl = `${GITHUB_REPO_URL}/issues/new?title=${issueTitle}&body=${issueBody}&labels=${issueLabels}`;
+                    
+                    window.open(editUrl, '_blank', 'noopener,noreferrer');
+                    
+                    // Track the suggest edit click
+                    pulse
+                      .click({
+                        category: cardCategory,
+                        slug: item.slug!,
+                        metadata: {
+                          action: 'suggest_edit',
+                          link_type: 'github_issue',
+                          target_url: editUrl,
+                        },
+                      })
+                      .catch((error) => {
+                        logUnhandledPromise('ConfigCard: suggest edit click pulse failed', error, {
+                          category: cardCategory,
+                          slug: item.slug ?? undefined,
+                        });
+                      });
+                    
+                    toasts.raw.success('Opening GitHub', {
+                      description: 'Suggest changes via a GitHub issue.',
+                    });
+                  }}
+                  aria-label={`Suggest edit for ${displayTitle}`}
+                  title="Suggest an edit"
+                >
+                  <Pencil className={iconSize.xs} aria-hidden="true" />
+                </Button>
+              )}
 
             {/* Bookmark button */}
             {cardConfig.showBookmark && (

@@ -4,6 +4,7 @@ import {
   getUserBookmarksForCollections,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { iconSize, cluster, spaceY, muted, marginBottom, weight , size } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
@@ -70,16 +71,16 @@ export default async function NewCollectionPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button variant="ghost" className="mb-4 flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
+          <Button variant="ghost" className={`mb-4 ${cluster.compact}`}>
+            <ArrowLeft className={iconSize.sm} />
             Back to Library
           </Button>
         </Link>
-        <h1 className="mb-2 font-bold text-3xl">Create Collection</h1>
-        <p className="text-muted-foreground">Organize your bookmarks into a custom collection</p>
+        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>Create Collection</h1>
+        <p className={muted.default}>Organize your bookmarks into a custom collection</p>
       </div>
 
       <Card>

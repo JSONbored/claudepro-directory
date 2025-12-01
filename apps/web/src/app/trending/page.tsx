@@ -6,6 +6,7 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getTrendingPageData } from '@heyclaude/web-runtime/data';
+import { animate, marginBottom, iconLeading, muted, weight, radius , size  , gap , padding , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import  { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
@@ -27,7 +28,7 @@ const NewsletterCTAVariant = dynamicImport(
       default: module_.NewsletterCTAVariant,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
 );
 
@@ -121,44 +122,44 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   const pageTitleId = 'trending-page-title';
 
   return (
-    <div className="min-h-screen bg-background">
-      <section className="relative overflow-hidden px-4 py-24" aria-labelledby={pageTitleId}>
+    <div className={`${minHeight.screen} bg-background`}>
+      <section className={`relative overflow-hidden ${padding.xDefault} ${padding.yXl}`} aria-labelledby={pageTitleId}>
         <div className="container mx-auto text-center">
-          <div className="mx-auto max-w-3xl">
+          <div className={`mx-auto ${maxWidth['3xl']}`}>
             <UnifiedBadge
               variant="base"
               style="outline"
-              className="mb-6 border-accent/20 bg-accent/5 text-accent"
+              className={`${marginBottom.comfortable} border-accent/20 bg-accent/5 text-accent`}
             >
               <TrendingUp className="mr-1 h-3 w-3 text-accent" aria-hidden="true" />
               Trending
             </UnifiedBadge>
 
-            <h1 id={pageTitleId} className="mb-6 font-bold text-4xl md:text-6xl">
+            <h1 id={pageTitleId} className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:text-6xl`}>
               Trending Configurations
             </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
+            <p className={`mx-auto mt-6 ${maxWidth['2xl']} ${muted.lg}`}>
               Discover the most popular and trending Claude configurations in our community. Stay up
               to date with what developers are using and loving.
             </p>
 
-            <ul className="flex flex-wrap gap-2 list-none justify-center">
+            <ul className={`flex flex-wrap ${gap.compact} list-none justify-center`}>
               <li>
                 <UnifiedBadge variant="base" style="secondary">
-                  <Clock className="mr-1 h-3 w-3" aria-hidden="true" />
+                  <Clock className={iconLeading.xs} aria-hidden="true" />
                   Real-time updates
                 </UnifiedBadge>
               </li>
               <li>
                 <UnifiedBadge variant="base" style="secondary">
-                  <Star className="mr-1 h-3 w-3" aria-hidden="true" />
+                  <Star className={iconLeading.xs} aria-hidden="true" />
                   Based on views
                 </UnifiedBadge>
               </li>
               <li>
                 <UnifiedBadge variant="base" style="secondary">
-                  <Users className="mr-1 h-3 w-3" aria-hidden="true" />
+                  <Users className={iconLeading.xs} aria-hidden="true" />
                   {trendingDisplay.length} total configs
                 </UnifiedBadge>
               </li>
@@ -168,7 +169,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
       </section>
 
       <section
-        className="container mx-auto px-4 py-16"
+        className={`container mx-auto ${padding.xDefault} ${padding.yHero}`}
         aria-label="Trending configurations content"
       >
         <Suspense fallback={null}>
@@ -182,7 +183,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
         </Suspense>
       </section>
 
-      <section className="container mx-auto px-4 py-12">
+      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
             <NewsletterCTAVariant

@@ -9,6 +9,7 @@ import type { Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { spaceY , gap } from '@heyclaude/web-runtime/design-system';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTransition } from 'react';
@@ -151,7 +152,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className={spaceY.relaxed}>
       <FormField
         variant="input"
         label="Name"
@@ -227,7 +228,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         description="Press Enter or click Add"
       />
 
-      <div className="space-y-4 pt-2">
+      <div className={`${spaceY.comfortable} pt-2`}>
         <ToggleField
           label="Public profile"
           description="Allow others to view your profile"
@@ -245,7 +246,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         />
       </div>
 
-      <div className="flex gap-3 pt-4">
+      <div className={`flex ${gap.default} pt-4`}>
         <Button type="submit" disabled={isPending || !isDirty}>
           {isPending ? 'Saving...' : 'Save Changes'}
         </Button>

@@ -24,6 +24,7 @@ import {
   Users,
   Zap,
 } from '@heyclaude/web-runtime/icons';
+import { stack, iconSize, cluster, animate, spaceY, muted, weight ,size  , gap , padding , row , radius } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
@@ -98,11 +99,11 @@ export function TemplateGallery({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={TOKENS.animations.spring.smooth}
-      className={cn('space-y-6', className)}
+      className={cn(spaceY.relaxed, className)}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className={cluster.default}>
           <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
@@ -116,15 +117,15 @@ export function TemplateGallery({
             <Sparkles className={cn('h-5 w-5', TOKENS.colors.accent)} />
           </motion.div>
           <div>
-            <h3 className="font-semibold text-lg">Popular Templates</h3>
-            <p className="text-muted-foreground text-sm">
+            <h3 className={`${weight.semibold} ${size.lg}`}>Popular Templates</h3>
+            <p className={muted.sm}>
               Start with proven examples from the community
             </p>
           </div>
         </div>
 
         {/* Template count badge */}
-        <Badge variant="secondary" className="gap-1.5">
+        <Badge variant="secondary" className={`${gap.snug}`}>
           <TrendingUp className="h-3.5 w-3.5" />
           {filteredTemplates.length} available
         </Badge>
@@ -132,7 +133,7 @@ export function TemplateGallery({
 
       {/* Category tabs (if multiple categories exist) */}
       {categories.length > 1 && (
-        <div className="flex flex-wrap gap-2">
+        <div className={`flex flex-wrap ${gap.compact}`}>
           <Button
             variant={selectedCategory === null ? 'default' : 'outline'}
             size="sm"
@@ -157,7 +158,7 @@ export function TemplateGallery({
 
       {/* Templates grid */}
       <AnimatePresence mode="popLayout">
-        <motion.div layout={true} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div layout={true} className={`grid ${gap.comfortable} sm:grid-cols-2 lg:grid-cols-3`}>
           {filteredTemplates.map((template, index) => (
             <TemplateCard
               key={template.id}
@@ -174,10 +175,10 @@ export function TemplateGallery({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-xl border border-dashed p-12 text-center"
+          className={`rounded-xl border border-dashed ${padding.section} text-center`}
         >
-          <Sparkles className="mx-auto mb-3 h-12 w-12 text-muted-foreground/50" />
-          <p className="text-muted-foreground">No templates found for this category.</p>
+          <Sparkles className={`mx-auto mb-3 h-12 w-12 ${muted.default}/50`} />
+          <p className={muted.default}>No templates found for this category.</p>
         </motion.div>
       )}
     </motion.div>
@@ -255,16 +256,16 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
         onClick={onApply}
       >
         {/* Badges overlay */}
-        <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+        <div className={`absolute top-3 right-3 z-10 ${stack.snug}`}>
           {stats.featured && (
             <Badge
               variant="secondary"
               className={cn(
-                'gap-1 border-amber-500/50 bg-amber-500/10',
+                '${gap.tight} border-amber-500/50 bg-amber-500/10',
                 'text-amber-300 shadow-sm'
               )}
             >
-              <Star className="h-3 w-3 fill-current" />
+              <Star className={`${iconSize.xs} fill-current`} />
               Featured
             </Badge>
           )}
@@ -272,11 +273,11 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
             <Badge
               variant="secondary"
               className={cn(
-                'gap-1 border-purple-500/50 bg-purple-500/10',
+                '${gap.tight} border-purple-500/50 bg-purple-500/10',
                 'text-purple-300 shadow-sm'
               )}
             >
-              <Sparkles className="h-3 w-3" />
+              <Sparkles className={iconSize.xs} />
               Popular
             </Badge>
           )}
@@ -284,18 +285,18 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
             <Badge
               variant="secondary"
               className={cn(
-                'gap-1 border-green-500/50 bg-green-500/10',
+                '${gap.tight} border-green-500/50 bg-green-500/10',
                 'text-green-300 shadow-sm'
               )}
             >
-              <TrendingUp className="h-3 w-3" />
+              <TrendingUp className={iconSize.xs} />
               Trending
             </Badge>
           )}
         </div>
 
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-start justify-between gap-2 text-base">
+          <CardTitle className={`flex items-start justify-between ${gap.compact} ${size.base}`}>
             <span className="line-clamp-2">{template.name}</span>
             <motion.div
               animate={{
@@ -309,22 +310,22 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className={spaceY.comfortable}>
           {/* Description */}
           {template.description && (
-            <p className="line-clamp-2 text-muted-foreground text-sm">{template.description}</p>
+            <p className={`line-clamp-2 ${muted.sm}`}>{template.description}</p>
           )}
 
           {/* Tags */}
           {tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className={`flex flex-wrap ${gap.snug}`}>
               {tags.slice(0, 3).map((tag: string) => (
-                <Badge key={tag} variant="outline" className="h-6 text-xs">
+                <Badge key={tag} variant="outline" className={`h-6 ${size.xs}`}>
                   {tag}
                 </Badge>
               ))}
               {tags.length > 3 && (
-                <Badge variant="outline" className="h-6 text-xs">
+                <Badge variant="outline" className={`h-6 ${size.xs}`}>
                   +{tags.length - 3}
                 </Badge>
               )}
@@ -334,8 +335,8 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
           {/* Stats bar */}
           <div className="flex items-center justify-between border-t pt-3">
             {/* Usage count and rating */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <div className={cluster.default}>
+              <div className={`${cluster.snug} ${muted.default} ${size.xs}`}>
                 <Users className="h-3.5 w-3.5" />
                 <span>
                   {stats.usageCount > 0
@@ -346,7 +347,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
                 </span>
               </div>
               {stats.averageRating && stats.averageRating > 0 && (
-                <div className="flex items-center gap-1 text-amber-400 text-xs">
+                <div className={`${cluster.tight} text-amber-400 ${size.xs}`}>
                   <Star className="h-3 w-3 fill-current" />
                   <span>{stats.averageRating.toFixed(1)}</span>
                 </div>
@@ -358,7 +359,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
               size="sm"
               variant="ghost"
               className={cn(
-                'h-7 gap-1.5 px-2 text-xs',
+                'h-7 ${gap.snug} ${padding.xTight} ${size.xs}',
                 'text-amber-500 hover:bg-amber-500/10 hover:text-amber-400'
               )}
               onClick={(e) => {
@@ -449,7 +450,7 @@ export function TemplateQuickSelect({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={TOKENS.animations.spring.smooth}
-      className={cn('space-y-3', className)}
+      className={cn(spaceY.default, className)}
     >
       {/* Onboarding Tooltip */}
       {showOnboarding && (
@@ -461,9 +462,9 @@ export function TemplateQuickSelect({
         >
           <Alert className="border-amber-500/50 bg-amber-500/10">
             <Info className="h-4 w-4 text-amber-500" />
-            <AlertDescription className="flex items-start justify-between gap-3">
+            <AlertDescription className={`flex items-start justify-between ${gap.default}`}>
               <span className="text-sm">
-                <strong className="font-semibold">💡 Pro tip:</strong> Save time by starting with a
+                <strong className={weight.semibold}>💡 Pro tip:</strong> Save time by starting with a
                 proven template. Click any template below to auto-fill your form with best
                 practices.
               </span>
@@ -471,7 +472,7 @@ export function TemplateQuickSelect({
                 variant="ghost"
                 size="sm"
                 onClick={handleDismissOnboarding}
-                className="h-6 px-2 text-xs hover:bg-amber-500/20"
+                className={`h-6 ${padding.xTight} ${size.xs} hover:bg-amber-500/20`}
               >
                 Got it
               </Button>
@@ -480,23 +481,23 @@ export function TemplateQuickSelect({
         </motion.div>
       )}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className={cluster.compact}>
           <Sparkles className={cn('h-4 w-4', TOKENS.colors.accent)} />
-          <span className="font-medium text-sm">Quick Start Templates</span>
+          <span className={`${weight.medium} ${size.sm}`}>Quick Start Templates</span>
         </div>
         {hasMore && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setExpanded(!expanded)}
-            className="h-7 text-xs"
+            className={`h-7 ${size.xs}`}
           >
             {expanded ? 'Show Less' : `View All (${allTemplates.length})`}
           </Button>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className={spaceY.compact}>
         <AnimatePresence mode="popLayout">
           {displayTemplates.map((template, index) => (
             <motion.button
@@ -511,7 +512,7 @@ export function TemplateQuickSelect({
               }}
               onClick={() => onApplyTemplate(template)}
               className={cn(
-                'flex w-full items-start gap-3 rounded-lg border p-3',
+                'flex w-full items-start ${gap.default} ${radius.lg} border ${padding.compact}',
                 'text-left transition-all duration-200',
                 'hover:border-amber-500/50 hover:bg-accent/50',
                 'group'
@@ -520,14 +521,14 @@ export function TemplateQuickSelect({
               <CheckCircle
                 className={cn(
                   'mt-0.5 h-4 w-4 shrink-0',
-                  'text-muted-foreground transition-colors',
+                  `${muted.default} transition-colors`,
                   'group-hover:text-amber-500'
                 )}
               />
-              <div className="min-w-0 flex-1 space-y-1">
-                <div className="line-clamp-1 font-medium text-sm">{template.name}</div>
+              <div className={`min-w-0 flex-1 ${spaceY.tight}`}>
+                <div className={`line-clamp-1 ${weight.medium} ${size.sm}`}>{template.name}</div>
                 {template.description && (
-                  <div className="line-clamp-1 text-muted-foreground text-xs">
+                  <div className={`line-clamp-1 ${muted.default} ${size.xs}`}>
                     {template.description}
                   </div>
                 )}
@@ -552,18 +553,18 @@ export function TemplateQuickSelect({
  */
 export function TemplateQuickSelectSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn('space-y-3', className)}>
-      <div className="flex items-center gap-2">
-        <div className="h-4 w-4 animate-pulse rounded bg-muted" />
-        <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+    <div className={cn(spaceY.default, className)}>
+      <div className={cluster.compact}>
+        <div className={`h-4 w-4 ${animate.pulse} rounded bg-muted`} />
+        <div className={`h-4 w-32 ${animate.pulse} rounded bg-muted`} />
       </div>
-      <div className="space-y-2">
+      <div className={spaceY.compact}>
         {[1, 2, 3].map((i) => (
-          <div key={i} className="flex items-start gap-3 rounded-lg border p-3">
-            <div className="mt-0.5 h-4 w-4 animate-pulse rounded-full bg-muted" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
-              <div className="h-3 w-full animate-pulse rounded bg-muted" />
+          <div key={i} className={`${row.default} ${radius.lg} border ${padding.compact}`}>
+            <div className={`mt-0.5 h-4 w-4 ${animate.pulse} rounded-full bg-muted`} />
+            <div className={`flex-1 ${spaceY.compact}`}>
+              <div className={`h-4 w-3/4 ${animate.pulse} rounded bg-muted`} />
+              <div className={`h-3 w-full ${animate.pulse} rounded bg-muted`} />
             </div>
           </div>
         ))}

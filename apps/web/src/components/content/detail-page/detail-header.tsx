@@ -4,6 +4,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { marginBottom  , padding } from '@heyclaude/web-runtime/design-system';
 import type {
   ContentItem,
   UnifiedCategoryConfig,
@@ -49,12 +50,12 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
 
   return (
     <div className={'border-border border-b bg-code/50 backdrop-blur-sm'}>
-      <div className="container mx-auto px-4 py-8">
+      <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
         {/* Breadcrumbs - minimal navigation trail */}
         <Breadcrumbs
           categoryLabel={categoryLabel}
           currentTitle={displayTitle}
-          className="mb-2"
+          className={marginBottom.tight}
         />
 
         {/* Client component for back button and actions */}

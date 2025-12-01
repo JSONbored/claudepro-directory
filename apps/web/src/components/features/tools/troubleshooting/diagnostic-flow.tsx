@@ -7,7 +7,7 @@
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import type { DiagnosticFlowProps } from '@heyclaude/web-runtime/types/component.types';
-import { cluster, iconSize, muted } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, muted, spaceY, weight ,size , gap } from '@heyclaude/web-runtime/design-system';
 import React from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -84,11 +84,11 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className={spaceY.comfortable}>
           {path.length > 0 && (
-            <div className={`${muted.default} text-sm`}>
-              <p className={'mb-2 font-medium'}>Diagnostic Path:</p>
-              <ol className={'list-inside list-decimal space-y-1'}>
+            <div className={`${muted.sm}`}>
+              <p className={'mb-2 ${weight.medium}'}>Diagnostic Path:</p>
+              <ol className={'list-inside list-decimal ${spaceY.tight}'}>
                 {path.map((step) => (
                   <li key={step}>{step}</li>
                 ))}
@@ -99,22 +99,22 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
           <Card className="bg-muted/30">
             <CardContent className="pt-6">
               {isComplete ? (
-                <div className="space-y-4">
+                <div className={spaceY.comfortable}>
                   <div
                     className={`${cluster.compact} text-green-600 dark:text-green-400`}
                   >
                     <CheckCircle className={iconSize.md} />
-                    <p className="font-medium">Solution Found:</p>
+                    <p className={weight.medium}>Solution Found:</p>
                   </div>
-                  <p className="text-muted-foreground">{currentStepData?.solution}</p>
+                  <p className={muted.default}>{currentStepData?.solution}</p>
                   <Button onClick={reset} variant="outline">
                     Start Over
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <p className={'font-medium text-lg'}>{currentStepData?.question}</p>
-                  <div className="flex gap-4">
+                <div className={spaceY.comfortable}>
+                  <p className={`${weight.medium} ${size.lg}`}>{currentStepData?.question}</p>
+                  <div className={`flex ${gap.comfortable}`}>
                     <Button onClick={() => handleAnswer('yes')} variant="default">
                       Yes
                     </Button>

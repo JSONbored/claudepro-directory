@@ -1,10 +1,19 @@
 'use client';
 
+/**
+ * Changelog List Client Component
+ * 
+ * Client-side component that handles category filtering and displays
+ * changelog entries using the animated timeline design.
+ */
+
 import type { Database } from '@heyclaude/database-types';
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
+import { spaceY, marginTop, muted  , padding } from '@heyclaude/web-runtime/design-system';
 import { useState } from 'react';
+
 import { CategoryFilter } from '@/src/components/features/changelog/changelog-category-filter';
-import { ChangelogStickyEntry } from '@/src/components/features/changelog/changelog-sticky-entry';
+import { ChangelogTimeline } from '@/src/components/features/changelog/changelog-timeline';
 import { Tabs, TabsContent } from '@heyclaude/web-runtime/ui';
 
 type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
@@ -42,6 +51,7 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
     'All' | Database['public']['Enums']['changelog_category']
   >('All');
 
+  // Filter entries based on active category
   const filteredEntries =
     activeCategory === 'All'
       ? entries
@@ -52,13 +62,33 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
           return Array.isArray(categoryChanges) && categoryChanges.length > 0;
         });
 
+  // Map to timeline-compatible format with validated paths
+  const timelineEntries = filteredEntries
+    .filter((entry) => {
+      const path = getSafeChangelogPath(entry.slug);
+      return path !== null && isValidInternalPath(path);
+    })
+    .map((entry) => ({
+      slug: entry.slug,
+      title: entry.title,
+      tldr: entry.tldr,
+      release_date: entry.release_date,
+      changes: entry.changes as Record<string, unknown> | null,
+    }));
+
+  // Safe path getter for timeline
+  const getTargetPath = (slug: string): string => {
+    const path = getSafeChangelogPath(slug);
+    return path ?? `/changelog/${slug}`;
+  };
+
   return (
     <Tabs
       value={activeCategory}
       onValueChange={(value) =>
         setActiveCategory(value as 'All' | Database['public']['Enums']['changelog_category'])
       }
-      className="space-y-6"
+      className={spaceY.relaxed}
     >
       <CategoryFilter
         activeCategory={activeCategory}
@@ -66,26 +96,19 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
         categoryCounts={categoryCounts}
       />
 
-      <TabsContent value={activeCategory} className="mt-6">
-        {filteredEntries.length === 0 ? (
-          <output className="flex items-center justify-center py-12" aria-live="polite">
-            <p className="text-lg text-muted-foreground">
+      <TabsContent value={activeCategory} className={marginTop.comfortable}>
+        {timelineEntries.length === 0 ? (
+          <output className={`flex items-center justify-center ${padding.ySection}`} aria-live="polite">
+            <p className={muted.lg}>
               No changelog entries found for {activeCategory.toLowerCase()} category.
             </p>
           </output>
         ) : (
-          <div className="space-y-12 md:space-y-20">
-            {filteredEntries.map((entry) => {
-              const targetPath = getSafeChangelogPath(entry.slug);
-              if (!targetPath) return null;
-              if (!isValidInternalPath(targetPath)) return null;
-              const validatedPath: string = targetPath;
-
-              return (
-                <ChangelogStickyEntry key={entry.slug} entry={entry} targetPath={validatedPath} />
-              );
-            })}
-          </div>
+          <ChangelogTimeline
+            entries={timelineEntries}
+            getTargetPath={getTargetPath}
+            className="ml-1"
+          />
         )}
       </TabsContent>
     </Tabs>

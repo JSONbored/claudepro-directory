@@ -45,10 +45,9 @@ import {
   FileText,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
-import { iconLeading, badge } from '@heyclaude/web-runtime/design-system';
+import { iconLeading, badge, cluster, hoverText, spaceY, marginBottom, weight, muted, radius ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
 import type { ContentItem, CopyType } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
-import { hoverText } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
@@ -59,6 +58,7 @@ import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard
 import { Button } from '@heyclaude/web-runtime/ui';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { usePinboard } from '@heyclaude/web-runtime/hooks';
+import { UseThisButton } from '@heyclaude/web-runtime/ui';
 
 /**
  * Determine copy type based on content item structure
@@ -397,13 +397,13 @@ export function DetailHeaderActions({
       <motion.div
         whileHover={{ x: -2 }}
         whileTap={{ scale: 0.97 }}
-        className="mb-4 inline-block"
+        className={`${marginBottom.default} inline-block`}
       >
         <Button
           variant="ghost"
           size="sm"
           onClick={() => router.back()}
-          className={`text-muted-foreground ${hoverText.foreground} -ml-2`}
+          className={`${muted.default} ${hoverText.foreground} -ml-2`}
         >
           <ArrowLeft className={iconLeading.sm} />
           Back
@@ -411,15 +411,15 @@ export function DetailHeaderActions({
       </motion.div>
 
       {/* Two-column hero layout for desktop */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px] lg:gap-10">
+      <div className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-[1fr_300px] lg:gap-10`}>
         {/* Left column - Content info */}
-        <div className="space-y-4">
+        <div className={spaceY.comfortable}>
           {/* Badges - inline */}
-          <div className="flex items-center gap-2">
+          <div className={cluster.compact}>
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={`${badge.default} font-medium`}
+              className={`${badge.default} ${weight.medium}`}
             >
               {typeName}
             </UnifiedBadge>
@@ -429,18 +429,18 @@ export function DetailHeaderActions({
           </div>
 
           {/* Title - larger and more prominent */}
-          <h1 className="font-bold text-3xl tracking-tight lg:text-4xl">{displayTitle}</h1>
+          <h1 className={`${weight.bold} ${size['3xl']} tracking-tight lg:${size['4xl']}`}>{displayTitle}</h1>
 
           {/* Description - larger line height for readability */}
           {contentItem.description && (
-            <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground lg:text-xl">
+            <p className={`max-w-2xl ${size.lg} leading-relaxed ${muted.default} lg:text-xl`}>
               {contentItem.description}
             </p>
           )}
         </div>
 
         {/* Right column - Actions sidebar (sticky on desktop) */}
-        <aside className="space-y-3 rounded-lg border border-border/50 bg-card/50 p-4 lg:sticky lg:top-24 lg:self-start">
+        <aside className={`${spaceY.default} ${radius.lg} border border-border/50 bg-card/50 ${padding.default} lg:sticky lg:top-24 lg:self-start`}>
           {/* Primary CTA - Full width */}
           {(!(primaryAction.type === 'download') || hasDownloadAvailable) && (
             <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.01 }}>
@@ -470,7 +470,7 @@ export function DetailHeaderActions({
           )}
 
           {/* Secondary actions row */}
-          <div className="flex flex-wrap gap-2">
+          <div className={`flex flex-wrap ${gap.compact}`}>
             <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
               <Button
                 variant={pinned ? 'secondary' : 'outline'}
@@ -507,11 +507,25 @@ export function DetailHeaderActions({
             />
           </div>
 
+          {/* "I use this" engagement button - only for votable categories */}
+          {category !== Constants.public.Enums.content_category[9] && // 'jobs'
+           category !== Constants.public.Enums.content_category[10] && // 'changelog'
+           contentItem.slug && (
+            <UseThisButton
+              slug={contentItem.slug}
+              category={category}
+              initialCount={'use_count' in contentItem && typeof contentItem.use_count === 'number' ? contentItem.use_count : 0}
+              size="default"
+              showCount={true}
+              className="w-full"
+            />
+          )}
+
           {/* View Pinboard link */}
           <Button
             variant="ghost"
             size="sm"
-            className="w-full justify-start text-muted-foreground"
+            className={`w-full justify-start ${muted.default}`}
             onClick={openPinboardDrawer}
           >
             <Bookmark className={iconLeading.sm} />
@@ -522,7 +536,7 @@ export function DetailHeaderActions({
           {hasContent && (
             <>
               <div className="border-border/50 border-t" />
-              <div className="flex flex-wrap gap-2">
+              <div className={`flex flex-wrap ${gap.compact}`}>
                 <motion.div
                   whileTap={{ scale: 0.97 }}
                   animate={copied ? { scale: [1, 1.05, 1] } : {}}
@@ -580,7 +594,7 @@ export function DetailHeaderActions({
               </div>
 
               {/* Download/Export row */}
-              <div className="flex flex-wrap gap-2">
+              <div className={`flex flex-wrap ${gap.compact}`}>
                 {(() => {
                   const safeCategory = sanitizePathSegment(category);
                   const safeSlug = sanitizePathSegment(contentItem.slug);
@@ -656,7 +670,7 @@ export function DetailHeaderActions({
           {secondaryActions && secondaryActions.length > 0 && (
             <>
               <div className="border-border/50 border-t" />
-              <div className="flex flex-wrap gap-2">
+              <div className={`flex flex-wrap ${gap.compact}`}>
                 {secondaryActions.map((action) => (
                   <Button
                     key={action.label}

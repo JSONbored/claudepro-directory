@@ -5,7 +5,7 @@
  * Shows placeholder cards matching the layout of ChangelogCard components.
  */
 
-import { cluster } from '@heyclaude/web-runtime/design-system';
+import { cluster, spaceY, marginBottom , padding , gap , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { PageHeaderSkeleton, Skeleton  } from '@heyclaude/web-runtime/ui';
 
 
@@ -24,10 +24,10 @@ import { PageHeaderSkeleton, Skeleton  } from '@heyclaude/web-runtime/ui';
  */
 export default function ChangelogLoading() {
   return (
-    <div className="container max-w-6xl space-y-8 py-8">
+    <div className={`container ${maxWidth['6xl']} ${spaceY.loose} ${padding.yRelaxed}`}>
       {/* Header Skeleton */}
-      <div className="space-y-4">
-        <Skeleton size="sm" width="xs" className="mb-4" />
+      <div className={spaceY.comfortable}>
+        <Skeleton size="sm" width="xs" className={marginBottom.default} />
         <PageHeaderSkeleton />
         <div className={cluster.relaxed}>
           <Skeleton size="sm" width="lg" />
@@ -36,23 +36,23 @@ export default function ChangelogLoading() {
       </div>
 
       {/* Category Filter Skeleton */}
-      <div className="grid w-full gap-1 lg:w-auto lg:grid-flow-col">
+      <div className={`grid w-full ${gap.tight} lg:w-auto lg:grid-flow-col`}>
         {Array.from({ length: 7 }).map((_, index) => (
           <Skeleton key={`tab-${index + 1}`} size="lg" width="lg" rounded="md" />
         ))}
       </div>
 
       {/* Changelog Cards Skeleton */}
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={`changelog-skeleton-${index + 1}`} className="rounded-lg border bg-card p-6">
-            <div className="mb-3 flex items-center gap-2">
+          <div key={`changelog-skeleton-${index + 1}`} className={`${radius.lg} border bg-card ${padding.comfortable}`}>
+            <div className={`${marginBottom.compact} ${cluster.compact}`}>
               <Skeleton size="sm" width="xs" />
               <Skeleton size="sm" width="sm" />
             </div>
-            <Skeleton size="lg" width="2/3" className="mb-2" />
-            <Skeleton size="sm" width="3xl" className="mb-4" />
-            <div className="flex flex-wrap gap-2">
+            <Skeleton size="lg" width="2/3" className={marginBottom.tight} />
+            <Skeleton size="sm" width="3xl" className={marginBottom.default} />
+            <div className={`flex flex-wrap ${gap.compact}`}>
               <Skeleton size="sm" width="xs" rounded="full" />
               <Skeleton size="sm" width="xs" rounded="full" />
               <Skeleton size="sm" width="xs" rounded="full" />

@@ -4,7 +4,7 @@
  * Horizontal scroll with first 5 nav items
  */
 
-import { cluster, absolute } from '@heyclaude/web-runtime/design-system';
+import { cluster, absolute, weight ,size , padding } from '@heyclaude/web-runtime/design-system';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
@@ -28,7 +28,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative px-2 py-1 text-xs font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} no-underline ${
+    className: `group relative ${padding.xTight} ${padding.yMicro} ${size.xs} ${weight.medium} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} no-underline ${
       active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground'
     } ${className}`,
     ...(active && { 'aria-current': 'page' as const }),
@@ -79,7 +79,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
       transition={{ duration: 0.3, ease: 'easeOut' }}
       aria-label="Tablet navigation"
     >
-      <div className={`flex ${cluster.tight} px-2`}>
+      <div className={`flex ${cluster.tight} ${padding.xTight}`}>
         {PRIMARY_NAVIGATION.slice(0, 5).map((link, index) => (
           <motion.div
             key={link.href}
@@ -91,7 +91,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
             <NavLink
               href={link.href}
               isActive={isActive}
-              className="whitespace-nowrap px-3 py-2 text-xs"
+              className={`whitespace-nowrap ${padding.xCompact} ${padding.yCompact} ${size.xs}`}
             >
               {link.label}
             </NavLink>
@@ -101,7 +101,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
           variant="ghost"
           size="sm"
           onClick={onMobileMenuOpen}
-          className="whitespace-nowrap text-xs"
+          className={`whitespace-nowrap ${size.xs}`}
           aria-label="Open more navigation options"
         >
           More

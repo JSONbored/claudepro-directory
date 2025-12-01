@@ -1,7 +1,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { responsive } from '@heyclaude/web-runtime/design-system';
+import { responsive, spaceY, marginTop, muted ,size } from '@heyclaude/web-runtime/design-system';
 import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
@@ -171,15 +171,15 @@ export function NewsletterModal({
           <SheetDescription>{NEWSLETTER_CTA_CONFIG.description}</SheetDescription>
         </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div className="space-y-2">
+        <form onSubmit={handleSubmit} className={`${marginTop.comfortable} ${spaceY.comfortable}`}>
+          <div className={spaceY.compact}>
             <Input
               type="email"
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
-              className="h-12 text-base"
+              className={`h-12 ${size.base}`}
               autoComplete="email"
               aria-label="Email address"
               required={true}
@@ -209,7 +209,7 @@ export function NewsletterModal({
           </div>
         </form>
 
-        <p className="mt-4 text-center text-muted-foreground text-xs">
+        <p className={`${marginTop.default} text-center ${muted.default} ${size.xs}`}>
           By subscribing, you agree to receive updates about Claude tools and resources.
         </p>
       </SheetContent>

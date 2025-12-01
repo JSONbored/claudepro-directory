@@ -5,7 +5,7 @@
 
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@heyclaude/web-runtime/icons';
 import type { MetricsDisplayProps } from '@heyclaude/web-runtime/types/component.types';
-import { cluster, grid, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cluster, grid, iconSize, marginBottom, muted, weight ,size    , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 
 /**
@@ -45,7 +45,7 @@ function BadgeDelta({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs',
+        'inline-${cluster.tight} rounded-full ${padding.xTight} ${padding.yHair} ${size.xs}',
         colorClass,
         className
       )}
@@ -87,14 +87,14 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
   return (
     <section itemScope={true} itemType="https://schema.org/Dataset" className="my-12">
       {(title || description) && (
-        <div className="mb-8 text-center">
+        <div className={`${marginBottom.relaxed} text-center`}>
           {title && (
-            <h3 className={'mb-3 font-semibold text-foreground text-xl'} itemProp="name">
+            <h3 className={`mb-3 ${weight.semibold} text-foreground ${size.xl}`} itemProp="name">
               {title}
             </h3>
           )}
           {description && (
-            <p className={'mx-auto max-w-3xl text-lg text-muted-foreground'} itemProp="description">
+            <p className={`mx-auto ${maxWidth['3xl']} ${muted.lg}`} itemProp="description">
               {description}
             </p>
           )}
@@ -122,20 +122,18 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
             <div
               key={`${metricLabel}-${metricValue}`}
               className={cn(
-                'rounded-lg border bg-linear-to-br p-6 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl',
+                '${radius.lg} border bg-linear-to-br ${padding.comfortable} backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl',
                 gradientClass
               )}
             >
               {/* Metric Label */}
-              <p className="font-medium text-muted-foreground text-sm uppercase tracking-wide">
+              <p className={`${weight.medium} ${muted.sm} uppercase tracking-wide`}>
                 {metricLabel}
               </p>
 
               {/* Metric Value */}
               <p
-                className={
-                  'mt-2 bg-linear-to-r from-foreground to-muted-foreground bg-clip-text font-bold text-3xl text-transparent'
-                }
+                className={`mt-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text ${weight.bold} ${size['3xl']} text-transparent`}
               >
                 {metricValue}
               </p>
@@ -143,8 +141,8 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
               {/* Change indicator */}
               {metricChange && (
                 <div className={cn('mt-4', cluster.compact)}>
-                  <BadgeDelta deltaType={deltaType} className="font-semibold" />
-                  <span className="font-medium text-muted-foreground text-sm">{metricChange}</span>
+                  <BadgeDelta deltaType={deltaType} className={weight.semibold} />
+                  <span className={`${weight.medium} ${muted.sm}`}>{metricChange}</span>
                 </div>
               )}
             </div>

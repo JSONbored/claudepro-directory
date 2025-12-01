@@ -11,7 +11,7 @@ import {
   getAuthenticatedUser,
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
-import { between, card, cluster, muted } from '@heyclaude/web-runtime/design-system';
+import { between, card, cluster, muted, iconSize, spaceY, marginBottom, marginTop, weight ,size  , gap , padding , row , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, UnifiedBadge,
@@ -117,9 +117,10 @@ interface UserProfilePageProperties {
 }
 
 /**
- * Cache forever - fully static generation without revalidation
+ * ISR: 30 minutes (1800s) - Matches CACHE_TTL.user_profile
+ * User profiles can change (bio, contributions, collections), so periodic revalidation is needed.
  */
-export const revalidate = false;
+export const revalidate = 1800;
 
 /**
  * Create metadata for the user profile page.
@@ -219,12 +220,12 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
   const { follower_count, following_count } = stats ?? {};
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${minHeight.screen} bg-background`}>
       {/* Hero/Profile Header */}
       <section className="relative">
-        <div className="container mx-auto px-4">
+        <div className={`container mx-auto ${padding.xDefault}`}>
           <div className="flex items-start justify-between pt-12">
-            <div className="flex items-start gap-4">
+            <div className={`${row.comfortable}`}>
               {profile?.image ? (
                 <Image
                   src={profile.image}
@@ -235,25 +236,25 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                   priority
                 />
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-background bg-accent font-bold text-2xl">
+                <div className={`flex h-24 w-24 items-center justify-center rounded-full border-4 border-background bg-accent ${weight.bold} ${size['2xl']}`}>
                   {(profile?.name ?? slug).charAt(0).toUpperCase()}
                 </div>
               )}
 
-              <div className="mt-4">
-                <h1 className="font-bold text-3xl">
+              <div className={marginTop.default}>
+                <h1 className={`${weight.bold} ${size['3xl']}`}>
                   {sanitizeDisplayText(profile?.name ?? slug, slug)}
                 </h1>
                 {(() => {
                   const sanitizedBio = profile?.bio ? sanitizeDisplayText(profile.bio, '') : '';
                   return sanitizedBio ? (
-                    <p className="mt-2 max-w-2xl text-sm">{sanitizedBio}</p>
+                    <p className={`${marginTop.compact} ${maxWidth['2xl']} ${size.sm}`}>{sanitizedBio}</p>
                   ) : null;
                 })()}
 
-                <div className="mt-3 flex items-center gap-4 text-sm">
+                <div className={`${marginTop.compact} ${cluster.comfortable} ${size.sm}`}>
                   <div className={cluster.tight}>
-                    <Users className="h-4 w-4" />
+                    <Users className={iconSize.sm} />
                     {follower_count ?? 0} followers
                   </div>
                   <span>•</span>
@@ -266,7 +267,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         external
                         className={cluster.tight}
                       >
-                        <Globe className="h-4 w-4" />
+                        <Globe className={iconSize.sm} />
                         Website
                       </NavLink>
                     </> : null}
@@ -284,30 +285,30 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
       </section>
 
       {/* Content */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+        <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-3`}>
           {/* Stats sidebar */}
-          <div className="space-y-4">
+          <div className={spaceY.comfortable}>
             {/* Quick Stats Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Activity Stats</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className={spaceY.default}>
                 <div className={between.center}>
-                  <span className={`${muted.default} text-sm`}>Contributions</span>
+                  <span className={`${muted.sm}`}>Contributions</span>
                   <UnifiedBadge variant="base" style="secondary">
                     {contributions?.length ?? 0}
                   </UnifiedBadge>
                 </div>
                 <div className={between.center}>
-                  <span className={`${muted.default} text-sm`}>Collections</span>
+                  <span className={`${muted.sm}`}>Collections</span>
                   <UnifiedBadge variant="base" style="secondary">
                     {collections?.length ?? 0}
                   </UnifiedBadge>
                 </div>
                 <div className={between.center}>
-                  <span className={`${muted.default} text-sm`}>Member since</span>
+                  <span className={`${muted.sm}`}>Member since</span>
                   <span className="text-sm">
                     {profile?.created_at
                       ? new Date(profile.created_at).toLocaleDateString('en-US', {
@@ -322,20 +323,20 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
           </div>
 
           {/* Main content */}
-          <div className="space-y-6 md:col-span-2">
+          <div className={`${spaceY.relaxed} md:col-span-2`}>
             {/* Public Collections */}
             <div>
-              <h2 className="mb-4 font-bold text-2xl">Public Collections</h2>
+              <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>Public Collections</h2>
 
               {!collections || collections.length === 0 ? (
                 <Card>
-                  <CardContent className="flex flex-col items-center py-12">
-                    <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <p className="text-muted-foreground">No public collections yet</p>
+                  <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
+                    <FolderOpen className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+                    <p className={muted.default}>No public collections yet</p>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className={`grid ${gap.comfortable} sm:grid-cols-2`}>
                   {collections
                     .filter(
                       (
@@ -370,13 +371,13 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                             </CardHeader>
                             <CardContent>
                               <div
-                                className={`${between.center} text-sm`}
+                                className={`${between.center} ${size.sm}`}
                               >
-                                <span className="text-muted-foreground">
+                                <span className={muted.default}>
                                   {collection.item_count ?? 0}{' '}
                                   {(collection.item_count ?? 0) === 1 ? 'item' : 'items'}
                                 </span>
-                                <span className="text-muted-foreground">
+                                <span className={muted.default}>
                                   {collection.view_count ?? 0} views
                                 </span>
                               </div>
@@ -391,8 +392,8 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
 
             {/* Content Contributions */}
             {contributions && contributions.length > 0 ? <div>
-                <h2 className="mb-4 font-bold text-2xl">Contributions</h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>Contributions</h2>
+                <div className={`grid ${gap.comfortable} sm:grid-cols-2 lg:grid-cols-3`}>
                   {contributions
                     .filter(
                       (
@@ -422,7 +423,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         <Card key={item.id} className={card.interactive}>
                           <NavLink href={safeContentUrl}>
                             <CardHeader>
-                              <div className="mb-2 flex items-center justify-between">
+                              <div className={`${marginBottom.tight} flex items-center justify-between`}>
                                 <UnifiedBadge variant="base" style="secondary" className="text-xs">
                                   {item.content_type}
                                 </UnifiedBadge>
@@ -431,13 +432,13 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                                   </UnifiedBadge> : null}
                               </div>
                               <CardTitle className="text-base">{item.name}</CardTitle>
-                              <CardDescription className="line-clamp-2 text-xs">
+                              <CardDescription className={`line-clamp-2 ${size.xs}`}>
                                 {item.description}
                               </CardDescription>
                             </CardHeader>
                             <CardContent>
                               <div
-                                className="flex items-center gap-2 text-muted-foreground text-xs"
+                                className={`${cluster.compact} ${muted.xs}`}
                               >
                                 <span>{item.view_count ?? 0} views</span>
                                 <span>•</span>

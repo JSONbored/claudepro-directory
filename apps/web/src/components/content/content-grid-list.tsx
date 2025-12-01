@@ -1,6 +1,22 @@
+import type { Database } from '@heyclaude/database-types';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { ExternalLink, HelpCircle } from '@heyclaude/web-runtime/icons';
-import { cluster, iconLeading, iconSize, emptyCard } from '@heyclaude/web-runtime/design-system';
+import { Bookmark, Copy, ExternalLink, Eye, HelpCircle, Layers } from '@heyclaude/web-runtime/icons';
+import {
+  cluster,
+  iconLeading,
+  iconSize,
+  emptyCard,
+  marginBottom,
+  marginTop,
+  spaceY,
+  muted,
+  weight,
+  size,
+  gap,
+  padding,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import type {
   ContentListServerProps,
   DisplayableContent,
@@ -15,6 +31,31 @@ import { NewsletterCTAVariant } from '@/src/components/features/growth/newslette
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
+import {
+  AnimatedStatsRow,
+  aggregateContentStats,
+  CategoryTagStrip,
+} from '@/src/components/features/category';
+import { NewContentBadge } from '@/src/components/features/indicators';
+
+type ContentCategory = Database['public']['Enums']['content_category'];
+
+// Categories that support enhanced hero features
+const ENHANCED_HERO_CATEGORIES: readonly ContentCategory[] = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+] as const;
+
+function isEnhancedCategory(category: string): category is ContentCategory {
+  return ENHANCED_HERO_CATEGORIES.includes(category as ContentCategory);
+}
 
 /**
  * Renders the hero section for a content list page including title, description, icon, badges, and a submit action.
@@ -25,6 +66,7 @@ import { Button } from '@heyclaude/web-runtime/ui';
  * @param props.icon - Name of the icon to display in the decorative icon area.
  * @param props.items - Array of content items; used to derive default badges (e.g., item count).
  * @param props.badges - Optional custom badges to display; if empty, a default set is shown.
+ * @param props.category - The content category for themed styling and tag extraction.
  * @returns The hero section JSX element for the content list page.
  *
  * @see ContentListServer
@@ -37,71 +79,176 @@ function ContentHeroSection<T extends DisplayableContent>({
   icon,
   items,
   badges = [],
-}: Pick<ContentListServerProps<T>, 'title' | 'description' | 'icon' | 'items' | 'badges'>) {
+  category,
+}: Pick<ContentListServerProps<T>, 'title' | 'description' | 'icon' | 'items' | 'badges'> & {
+  category?: string;
+}) {
   const pageTitleId = useId();
+
+  // Check if this category supports enhanced features
+  const isEnhanced = category && isEnhancedCategory(category);
+
+  // For enhanced categories, we replace "Production Ready" with a dynamic NewContentBadge
   const displayBadges =
     badges.length > 0
       ? badges
       : [
           { icon: 'sparkles', text: `${items.length} ${title} Available` },
           { text: 'Community Driven' },
-          { text: 'Production Ready' },
+          // Third badge is rendered separately as NewContentBadge for enhanced categories
+          ...(isEnhanced ? [] : [{ text: 'Production Ready' }]),
         ];
 
+  // Aggregate real stats from items (safely cast to expected shape)
+  const aggregated = aggregateContentStats(
+    items as Array<{
+      view_count?: number | null;
+      bookmark_count?: number | null;
+      copy_count?: number | null;
+      use_count?: number | null;
+    }>
+  );
+
+  // Build stats for AnimatedStatsRow (only show if we have meaningful data)
+  const hasStats = aggregated.totalViews > 0 || aggregated.totalBookmarks > 0;
+  const stats = hasStats
+    ? [
+        {
+          label: title,
+          value: items.length,
+          icon: <Layers className={iconSize.md} />,
+        },
+        {
+          label: 'Total Views',
+          value: aggregated.totalViews,
+          icon: <Eye className={iconSize.md} />,
+        },
+        {
+          label: 'Bookmarks',
+          value: aggregated.totalBookmarks,
+          icon: <Bookmark className={iconSize.md} />,
+        },
+        ...(aggregated.totalCopies > 100
+          ? [
+              {
+                label: 'Copies',
+                value: aggregated.totalCopies,
+                icon: <Copy className={iconSize.md} />,
+              },
+            ]
+          : []),
+      ]
+    : [];
+
   return (
-    <section className={emptyCard.default} aria-labelledby={pageTitleId}>
-      <div className={'container mx-auto px-4 py-20'}>
-        <div className={'mx-auto max-w-3xl text-center'}>
-          <div className={'mb-6 flex justify-center'}>
-            <div className={'rounded-full bg-accent/10 p-3'} aria-hidden="true">
-              {(() => {
-                const IconComponent =
-                  ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
-                return <IconComponent className={`${iconSize.xl} text-primary`} />;
-              })()}
+    <section className="relative overflow-hidden" aria-labelledby={pageTitleId}>
+      {/* Ambient background effects */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-accent/5 blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-muted/20 blur-3xl" />
+      </div>
+
+      <div className={emptyCard.default}>
+        <div className={`container mx-auto ${padding.xDefault} ${padding.yHero} md:py-20`}>
+          <div className={`mx-auto ${maxWidth['4xl']}`}>
+            {/* Animated icon container */}
+            <div className={`${marginBottom.comfortable} flex justify-center`}>
+              <div className="relative">
+                <div className="absolute inset-0 animate-pulse rounded-full bg-accent/20 blur-xl" />
+                <div
+                  className={`relative rounded-full bg-gradient-to-br from-accent/20 to-primary/20 ${padding.default} backdrop-blur-sm`}
+                  aria-hidden="true"
+                >
+                  {(() => {
+                    const IconComponent =
+                      ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
+                    return <IconComponent className={`${iconSize.xl} text-primary`} />;
+                  })()}
+                </div>
+              </div>
             </div>
+
+            {/* Title with gradient */}
+            <h1
+              id={pageTitleId}
+              className={`${marginBottom.default} bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text ${weight.bold} ${size['4xl']} tracking-tight text-transparent sm:text-5xl`}
+            >
+              {title}
+            </h1>
+
+            {/* Description */}
+            <p className={`mx-auto ${marginTop.default} ${maxWidth.xl} ${muted.lg}`}>
+              {description}
+            </p>
+
+            {/* Badges */}
+            <ul
+              className={`${marginTop.comfortable} ${marginBottom.comfortable} flex list-none flex-wrap justify-center ${gap.compact}`}
+            >
+              {displayBadges.map((badge, idx) => (
+                <li key={badge.text || `badge-${idx}`}>
+                  <UnifiedBadge variant="base" style={idx === 0 ? 'secondary' : 'outline'}>
+                    {badge.icon &&
+                      (() => {
+                        if (typeof badge.icon === 'string') {
+                          const BadgeIconComponent =
+                            ICON_NAME_MAP[badge.icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
+                          return (
+                            <BadgeIconComponent className={iconLeading.xs} aria-hidden="true" />
+                          );
+                        }
+                        return null;
+                      })()}
+                    {badge.text}
+                  </UnifiedBadge>
+                </li>
+              ))}
+              {/* Dynamic "New" badge for enhanced categories - replaces "Production Ready" */}
+              {isEnhanced && (
+                <li>
+                  <NewContentBadge
+                    items={items as Array<{ date_added?: string | null; updated_at?: string | null }>}
+                    fallbackText="Production Ready"
+                  />
+                </li>
+              )}
+            </ul>
+
+            {/* Submit button */}
+            <Button variant="outline" size="sm" asChild={true}>
+              <Link
+                href={ROUTES.SUBMIT}
+                className={cluster.compact}
+                aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
+              >
+                <ExternalLink className={iconSize.xs} aria-hidden="true" />
+                Submit {title.slice(0, -1)}
+              </Link>
+            </Button>
           </div>
 
-          <h1 id={pageTitleId} className="mb-4 font-bold text-4xl tracking-tight sm:text-5xl">
-            {title}
-          </h1>
+          {/* Enhanced hero features for supported categories */}
+          {isEnhanced && (
+            <div className={`mx-auto ${maxWidth['4xl']} ${spaceY.loose} ${marginTop.relaxed}`}>
+              {/* Animated stats row */}
+              {stats.length > 0 && (
+                <AnimatedStatsRow
+                  stats={stats}
+                  category={category}
+                  className={`mx-auto ${maxWidth['3xl']}`}
+                />
+              )}
 
-          <p className="mx-auto mt-4 max-w-xl text-muted-foreground text-lg">{description}</p>
-
-          <ul className={'mb-8 flex list-none flex-wrap justify-center gap-2'}>
-            {displayBadges.map((badge, idx) => (
-              <li key={badge.text || `badge-${idx}`}>
-                <UnifiedBadge variant="base" style={idx === 0 ? 'secondary' : 'outline'}>
-                  {badge.icon &&
-                    (() => {
-                      if (typeof badge.icon === 'string') {
-                        const BadgeIconComponent =
-                          ICON_NAME_MAP[badge.icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
-                        return (
-                          <BadgeIconComponent
-                            className={iconLeading.xs}
-                            aria-hidden="true"
-                          />
-                        );
-                      }
-                      return null;
-                    })()}
-                  {badge.text}
-                </UnifiedBadge>
-              </li>
-            ))}
-          </ul>
-
-          <Button variant="outline" size="sm" asChild={true}>
-            <Link
-              href={ROUTES.SUBMIT}
-              className={cluster.compact}
-              aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
-            >
-              <ExternalLink className={iconSize.xs} aria-hidden="true" />
-              Submit {title.slice(0, -1)}
-            </Link>
-          </Button>
+              {/* Category tag strip */}
+              <CategoryTagStrip
+                items={items}
+                category={category}
+                maxTags={8}
+                className={`mx-auto ${maxWidth['2xl']}`}
+              />
+            </div>
+          )}
         </div>
       </div>
     </section>
@@ -110,9 +257,9 @@ function ContentHeroSection<T extends DisplayableContent>({
 
 function ContentSearchSkeleton() {
   return (
-    <div className={'w-full space-y-4'}>
+    <div className={`w-full ${spaceY.comfortable}`}>
       <Skeleton size="xl" width="3xl" />
-      <div className={'flex justify-end gap-2'}>
+      <div className={`flex justify-end ${gap.compact}`}>
         <Skeleton size="lg" width="sm" />
         <Skeleton size="lg" width="xs" />
       </div>
@@ -153,7 +300,7 @@ export function ContentListServer<T extends DisplayableContent>({
   category,
 }: ContentListServerProps<T>) {
   return (
-    <div className={'min-h-screen bg-background'}>
+    <div className={`${minHeight.screen} bg-background`}>
       {/* Hero Section - Rendered immediately on server */}
       <ContentHeroSection
         title={title}
@@ -161,10 +308,11 @@ export function ContentListServer<T extends DisplayableContent>({
         icon={icon}
         items={items}
         badges={badges}
+        category={type}
       />
 
-      <section className="container mx-auto px-4 py-12" aria-label={`${title} content and search`}>
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
+      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`} aria-label={`${title} content and search`}>
+        <div className={`grid ${gap.loose} xl:grid-cols-[minmax(0,1fr)_18rem]`}>
           <div>
             <Suspense fallback={<ContentSearchSkeleton />}>
               <ContentSearchClient
@@ -186,7 +334,7 @@ export function ContentListServer<T extends DisplayableContent>({
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) with fade-in animation */}
-      <section className={'container mx-auto px-4 py-12'}>
+      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
             <NewsletterCTAVariant source="content_page" variant="hero" category={type} />

@@ -13,6 +13,9 @@ import {
   muted,
   padding,
   stack,
+  weight,
+  size,
+  row,
 } from '@heyclaude/web-runtime/design-system';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Check, TrendingUp } from '@heyclaude/web-runtime/icons';
@@ -47,7 +50,7 @@ export function JobsPromo() {
         <CardContent className={cn(stack.default, padding.comfortable)}>
           {/* Hook with honest growth story */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-            <h3 className={cn(marginBottom.tight, 'font-bold text-xl leading-tight')}>
+            <h3 className={cn(marginBottom.tight, `${weight.bold} ${size.xl} leading-tight`)}>
               Hire Claude Developers
             </h3>
             <p className={cn(muted.default, 'text-sm')}>
@@ -59,7 +62,7 @@ export function JobsPromo() {
           <motion.div
             className={cn(
               stack.compact,
-              'rounded-lg border bg-card/50',
+              '${radius.lg} border bg-card/50',
               padding.compact
             )}
             initial={{ opacity: 0, scale: 0.95 }}
@@ -69,7 +72,7 @@ export function JobsPromo() {
             <div className={cn(between.center, 'text-sm')}>
               <span className={muted.default}>Active community</span>
               <motion.span
-                className="font-semibold"
+                className={weight.semibold}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
@@ -82,7 +85,7 @@ export function JobsPromo() {
               <motion.span
                 className={cn(
                   cluster.tight,
-                  'font-semibold',
+                  weight.semibold,
                   'text-green-600'
                 )}
                 initial={{ opacity: 0, x: -10 }}
@@ -104,7 +107,7 @@ export function JobsPromo() {
             ].map((text, i) => (
               <motion.div
                 key={text}
-                className="flex items-start gap-2"
+                className={`${row.compact}`}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + i * 0.1 }}

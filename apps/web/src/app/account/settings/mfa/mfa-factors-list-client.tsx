@@ -1,6 +1,6 @@
 'use client';
 
-import { iconLeading } from '@heyclaude/web-runtime/design-system';
+import { iconLeading, spaceY } from '@heyclaude/web-runtime/design-system';
 import { Shield } from '@heyclaude/web-runtime/icons';
 import { Button  } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
@@ -29,7 +29,7 @@ export function MFAFactorsListClient() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className={spaceY.comfortable}>
       <div className="flex justify-end">
         <Button onClick={() => setEnrollDialogOpen(true)}>
           <Shield className={iconLeading.sm} />

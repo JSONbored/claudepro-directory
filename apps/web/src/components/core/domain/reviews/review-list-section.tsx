@@ -12,7 +12,7 @@ import {
   logUnhandledPromise,
 } from '@heyclaude/web-runtime/core';
 import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';
-import { between, cluster, buttonGhost } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, buttonGhost, spaceY, muted, marginTop, weight ,size  , padding } from '@heyclaude/web-runtime/design-system';
 import type { ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
@@ -166,7 +166,7 @@ export function ReviewListSection({
   };
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       {/* Aggregate Rating + Histogram */}
       {aggregateRating?.count && aggregateRating.count > 0 && aggregateRating.distribution && (
         <ReviewRatingHistogram
@@ -184,16 +184,16 @@ export function ReviewListSection({
 
       {/* Sort Controls */}
       <div className={between.center}>
-        <h3 className="font-semibold text-lg">Reviews ({aggregateRating?.count ?? 0})</h3>
+        <h3 className={`${weight.semibold} ${size.lg}`}>Reviews ({aggregateRating?.count ?? 0})</h3>
         <div className={cluster.compact}>
-          <Label htmlFor={sortSelectId} className="text-muted-foreground text-sm">
+          <Label htmlFor={sortSelectId} className={muted.sm}>
             Sort by:
           </Label>
           <select
             id={sortSelectId}
             value={sortBy}
             onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-            className="rounded border px-2 py-1 text-sm"
+            className={`rounded border ${padding.xTight} ${padding.yMicro} ${size.sm}`}
           >
             <option value="recent">Most Recent</option>
             <option value="helpful">Most Helpful</option>
@@ -206,15 +206,15 @@ export function ReviewListSection({
       {/* Reviews List */}
       {isLoading && page === 1 ? (
         <div className="py-8 text-center">
-          <p className="text-muted-foreground">Loading reviews...</p>
+          <p className={muted.default}>Loading reviews...</p>
         </div>
       ) : (reviews ?? []).length === 0 ? (
-        <Card className="bg-muted/50 p-8 text-center">
-          <Star className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" aria-hidden="true" />
-          <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
+        <Card className={`bg-muted/50 ${padding.relaxed} text-center`}>
+          <Star className={`mx-auto mb-3 h-12 w-12 ${muted.default}/30`} aria-hidden="true" />
+          <p className={muted.default}>No reviews yet. Be the first to review!</p>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className={spaceY.comfortable}>
           {(reviews ?? []).map((review) => (
             <ReviewCardItem
               key={review.id ?? ''}
@@ -318,17 +318,17 @@ function ReviewCardItem({
       disableNavigation={true}
       ariaLabel={`Review by ${review.user.name ?? 'Anonymous'}`}
       renderContent={() => (
-        <div className="space-y-3">
+        <div className={spaceY.default}>
           {/* Rating + Date */}
           <div className={between.center}>
             <div className={cluster.tight}>
               <StarDisplay rating={review.rating ?? 0} size="sm" />
-              <span className="ml-1 text-muted-foreground text-xs">
+              <span className={`ml-1 ${muted.default} ${size.xs}`}>
                 {(review.rating ?? 0).toFixed(1)}
               </span>
             </div>
             {review.created_at && (
-              <time className="text-muted-foreground text-xs" dateTime={review.created_at}>
+              <time className={`${muted.default} ${size.xs}`} dateTime={review.created_at}>
                 {formatDistanceToNow(new Date(review.created_at))} ago
               </time>
             )}
@@ -337,12 +337,12 @@ function ReviewCardItem({
           {/* Review Text */}
           {reviewText && (
             <div>
-              <p className="whitespace-pre-wrap text-foreground text-sm">{displayText}</p>
+              <p className={`whitespace-pre-wrap text-foreground ${size.sm}`}>{displayText}</p>
               {needsTruncation && (
                 <button
                   type="button"
                   onClick={() => setShowFullText(!showFullText)}
-                  className="mt-1 text-primary text-xs hover:underline"
+                  className={`${marginTop.tight} text-primary ${size.xs} hover:underline`}
                 >
                   {showFullText ? 'Show less' : 'Read more'}
                 </button>

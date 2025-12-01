@@ -10,7 +10,7 @@ import {
   getUserJobById,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, jobStatusBadge  } from '@heyclaude/web-runtime/design-system';
+import { between, jobStatusBadge, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , radius } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UnifiedBadge, Button ,
@@ -148,10 +148,10 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
       section: 'job-data-fetch',
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Job analytics unavailable</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Job analytics unavailable</CardTitle>
             <CardDescription>
               We couldn&apos;t load analytics for this job. It may not exist or you may not have
               access.
@@ -181,9 +181,9 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
   });
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div>
-        <Button variant="ghost" size="sm" asChild className="mb-4">
+        <Button variant="ghost" size="sm" asChild className={marginBottom.default}>
           <Link href={ROUTES.ACCOUNT_JOBS}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Jobs
@@ -191,8 +191,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
         </Button>
         <div className={between.center}>
           <div>
-            <h1 className="mb-2 font-bold text-3xl">Job Analytics</h1>
-            <p className="text-muted-foreground">{job.title}</p>
+            <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>Job Analytics</h1>
+            <p className={muted.default}>{job.title}</p>
           </div>
           {job.slug ? <Button variant="outline" asChild>
               <Link href={`${ROUTES.JOBS}/${job.slug}`}>
@@ -213,30 +213,30 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className={`grid grid-cols-2 ${gap.comfortable} ${size.sm}`}>
             <div>
-              <p className="text-muted-foreground">Company</p>
-              <p className="font-medium">{job.company}</p>
+              <p className={muted.default}>Company</p>
+              <p className={weight.medium}>{job.company}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Location</p>
-              <p className="font-medium">{job.location ?? 'Not specified'}</p>
+              <p className={muted.default}>Location</p>
+              <p className={weight.medium}>{job.location ?? 'Not specified'}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Plan</p>
-              <p className="font-medium capitalize">{job.plan}</p>
+              <p className={muted.default}>Plan</p>
+              <p className={`${weight.medium} capitalize`}>{job.plan}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Type</p>
-              <p className="font-medium capitalize">{job.type}</p>
+              <p className={muted.default}>Type</p>
+              <p className={`${weight.medium} capitalize`}>{job.type}</p>
             </div>
             {job.posted_at ? <div>
-                <p className="text-muted-foreground">Posted</p>
-                <p className="font-medium">{formatRelativeDate(job.posted_at)}</p>
+                <p className={muted.default}>Posted</p>
+                <p className={weight.medium}>{formatRelativeDate(job.posted_at)}</p>
               </div> : null}
             {job.expires_at ? <div>
-                <p className="text-muted-foreground">Expires</p>
-                <p className="font-medium">{formatRelativeDate(job.expires_at)}</p>
+                <p className={muted.default}>Expires</p>
+                <p className={weight.medium}>{formatRelativeDate(job.expires_at)}</p>
               </div> : null}
           </div>
         </CardContent>
@@ -278,9 +278,9 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
           <CardTitle>Performance Insights</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className={spaceY.comfortable}>
             {viewCount === 0 && (
-              <div className="rounded-lg bg-muted/50 p-4">
+              <div className={`${radius.lg} bg-muted/50 ${padding.default}`}>
                 <p className="text-sm">
                   Your job listing hasn't received any views yet. Try sharing it on social media or
                   updating the description to make it more discoverable.
@@ -289,11 +289,11 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
             )}
 
             {viewCount > 0 && clickCount === 0 && (
-              <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-4">
+              <div className={`${radius.lg} border border-yellow-500/20 bg-yellow-500/10 ${padding.default}`}>
                 <p className="text-sm text-yellow-400">
                   Your listing is getting views but no clicks. Consider:
                 </p>
-                <ul className="mt-2 ml-4 list-disc text-sm text-yellow-400">
+                <ul className={`${marginTop.compact} ml-4 list-disc ${size.sm} text-yellow-400`}>
                   <li>Making the job title more descriptive</li>
                   <li>Highlighting competitive benefits</li>
                   <li>Adding salary information</li>
@@ -302,16 +302,16 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
             )}
 
             {Number.parseFloat(ctr) > 5 && (
-              <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-4">
-                <p className="text-green-400 text-sm">
+              <div className={`${radius.lg} border border-green-500/20 bg-green-500/10 ${padding.default}`}>
+                <p className={`text-green-400 ${size.sm}`}>
                   Great performance! Your CTR of {ctr}% is above average. Keep it up!
                 </p>
               </div>
             )}
 
-            <div className="text-muted-foreground text-sm">
-              <p className="mb-2 font-medium">Tips to improve visibility:</p>
-              <ul className="ml-4 list-disc space-y-1">
+            <div className={muted.sm}>
+              <p className={`${marginBottom.tight} ${weight.medium}`}>Tips to improve visibility:</p>
+              <ul className={`ml-4 list-disc ${spaceY.tight}`}>
                 <li>Use clear, descriptive job titles</li>
                 <li>Include relevant technologies in tags</li>
                 <li>Specify remote/hybrid work options</li>

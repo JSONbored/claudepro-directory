@@ -3,7 +3,7 @@
  * Allows users to manage their multi-factor authentication settings
  */
 
-import { iconSize } from '@heyclaude/web-runtime/design-system';
+import { iconSize, spaceY, cluster, marginTop, muted, weight , size } from '@heyclaude/web-runtime/design-system';
 import { Shield } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
@@ -68,17 +68,17 @@ export default async function MFASettingsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div>
-        <h1 className="font-bold text-3xl">Two-Factor Authentication</h1>
-        <p className="mt-2 text-muted-foreground">
+        <h1 className={`${weight.bold} ${size['3xl']}`}>Two-Factor Authentication</h1>
+        <p className={`${marginTop.compact} ${muted.default}`}>
           Add an extra layer of security to your account with two-factor authentication.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className={cluster.compact}>
             <Shield className={iconSize.sm} />
             MFA Factors
           </CardTitle>
@@ -96,7 +96,7 @@ export default async function MFASettingsPage() {
           <CardTitle>How it works</CardTitle>
           <CardDescription>Learn about two-factor authentication</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2 text-muted-foreground text-sm">
+        <CardContent className={`${spaceY.compact} ${muted.sm}`}>
           <p>
             • Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password,
             etc.)

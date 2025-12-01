@@ -18,8 +18,7 @@ import type { Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Award, ExternalLink, Users } from '@heyclaude/web-runtime/icons';
-import { badge, buttonGhost, iconSize, iconWrapper } from '@heyclaude/web-runtime/design-system';
-import { memberBadge } from '@heyclaude/web-runtime/design-system';
+import { badge, buttonGhost, iconSize, iconWrapper, marginTop, muted, weight, size, memberBadge , padding , gap } from '@heyclaude/web-runtime/design-system';
 import { memo } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { BaseCard } from '@heyclaude/web-runtime/ui';
@@ -165,28 +164,28 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
       showAuthor={false}
       compactMode={variant === 'compact'}
       renderHeader={() => (
-        <div className="flex flex-col items-center gap-3 text-center">
+        <div className={`flex flex-col items-center ${gap.default} text-center`}>
           {/* Avatar */}
           <Avatar className="h-16 w-16 ring-2 ring-accent/20 ring-offset-2 ring-offset-background">
             {user.image && (
               <AvatarImage src={user.image} alt={`${username}'s avatar`} className="object-cover" />
             )}
-            <AvatarFallback className="bg-accent/10 font-semibold text-accent text-lg">
+            <AvatarFallback className={`bg-accent/10 ${weight.semibold} text-accent ${size.lg}`}>
               {initials}
             </AvatarFallback>
           </Avatar>
 
           {/* Username */}
           <div className="w-full min-w-0">
-            <h3 className="truncate font-semibold text-base">{username}</h3>
+            <h3 className={`truncate ${weight.semibold} ${size.base}`}>{username}</h3>
             {user.work && (
-              <p className="mt-0.5 truncate text-muted-foreground text-sm">{user.work}</p>
+              <p className={`${marginTop.micro} truncate ${muted.sm}`}>{user.work}</p>
             )}
           </div>
         </div>
       )}
       renderTopBadges={() => (
-        <div className="flex flex-wrap items-center justify-center gap-1.5">
+        <div className={`flex flex-wrap items-center justify-center ${gap.snug}`}>
           {/* Member type badge */}
           <UnifiedBadge
             variant="base"
@@ -216,7 +215,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="h-7 gap-1.5 border-primary/20 bg-primary/10 font-medium text-primary"
+              className={`h-7 ${gap.snug} border-primary/20 bg-primary/10 ${weight.medium} text-primary`}
             >
               <Award className={iconSize.xs} aria-hidden="true" />
               <span className={badge.default}>{user.total_contributions}</span>
@@ -228,7 +227,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="h-7 gap-1.5 border-border bg-muted/50 font-medium text-foreground"
+              className={`h-7 ${gap.snug} border-border bg-muted/50 ${weight.medium} text-foreground`}
             >
               <Users className={iconSize.xs} aria-hidden="true" />
               <span className={badge.default}>{user.followers_count}</span>
@@ -332,7 +331,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-7 gap-1.5 px-2 text-xs ${buttonGhost.icon}`}
+                className={`h-7 ${gap.snug} ${padding.xTight} ${size.xs} ${buttonGhost.icon}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   window.location.href = safeProfileUrl;

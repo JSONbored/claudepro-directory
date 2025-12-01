@@ -10,6 +10,7 @@ import type { Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import type { TabbedDetailLayoutProps } from '@heyclaude/web-runtime/types/component.types';
+import { hoverBg, marginTop, spaceY  , padding } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
@@ -126,9 +127,9 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
       {/* Sticky tab bar */}
-      <div className="-mx-4 sticky top-16 z-10 border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
+      <div className={`-mx-4 sticky top-16 z-10 border-b bg-background/95 ${padding.xDefault} backdrop-blur supports-backdrop-filter:bg-background/60`}>
         <div className="container mx-auto">
-          <TabsList className="h-auto w-full justify-start rounded-none border-0 bg-transparent p-0">
+          <TabsList className={`h-auto w-full justify-start rounded-none border-0 bg-transparent ${padding.none}`}>
             {tabs.map((tab) => {
               const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
               const label = isMobile && tab.mobileLabel ? tab.mobileLabel : tab.label;
@@ -138,9 +139,9 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
                   key={tab.id}
                   value={tab.id}
                   className={cn(
-                    'relative rounded-none border-transparent border-b-2 px-4 py-3',
+                    'relative rounded-none border-transparent border-b-2 ${padding.xDefault} ${padding.yCompact}',
                     'data-[state=active]:border-primary data-[state=active]:bg-transparent',
-                    'hover:bg-muted/50',
+                    hoverBg.muted,
                     // Mobile optimization
                     'text-sm md:text-base',
                     'min-w-20 md:min-w-[100px]'
@@ -156,7 +157,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
 
       {/* Tab content - all rendered in DOM for SEO, with swipe gesture support */}
       <div
-        className="container mx-auto px-4 py-8"
+        className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -165,7 +166,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
           <TabsContent
             key={tab.id}
             value={tab.id}
-            className="mt-0 space-y-8"
+            className={`${marginTop.none} ${spaceY.loose}`}
             // Keep in DOM but hide when not active (SEO)
             forceMount={true}
             hidden={activeTab !== tab.id}

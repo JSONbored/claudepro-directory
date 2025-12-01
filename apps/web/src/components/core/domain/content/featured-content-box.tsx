@@ -14,7 +14,7 @@ import type {
   FAQProps,
   InfoBoxProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { between, cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, iconSize, border, spaceY, muted, marginBottom, marginTop, weight ,size   , row } from '@heyclaude/web-runtime/design-system';
 import { cn, INFOBOX_COLORS, INFOBOX_ICON_COLORS } from '@heyclaude/web-runtime/ui';
 import { useCallback, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
@@ -115,19 +115,19 @@ function AccordionBox(props: AccordionVariant) {
   return (
     <section className="my-8" aria-label={title || 'Accordion section'}>
       {title && (
-        <div className="mb-6">
-          <h3 className="mb-2 font-bold text-xl">{title}</h3>
-          {description && <p className="text-muted-foreground">{description}</p>}
+        <div className={marginBottom.comfortable}>
+          <h3 className={`${marginBottom.tight} ${weight.bold} ${size.xl}`}>{title}</h3>
+          {description && <p className={muted.default}>{description}</p>}
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className={spaceY.compact}>
         {validItems.map((item, index) => (
           <Card
             key={`accordion-item-${index}-${item.title}`}
             itemScope={true}
             itemType="https://schema.org/Question"
-            className="border border-border"
+            className={border.default}
           >
             <button
               type="button"
@@ -141,12 +141,12 @@ function AccordionBox(props: AccordionVariant) {
                   <div className="ml-4 shrink-0">
                     {openItems.has(index) ? (
                       <ChevronUp
-                        className={`${iconSize.sm} text-muted-foreground transition-transform`}
+                        className={`${iconSize.sm} ${muted.default} transition-transform`}
                         aria-hidden="true"
                       />
                     ) : (
                       <ChevronDown
-                        className={`${iconSize.sm} text-muted-foreground transition-transform`}
+                        className={`${iconSize.sm} ${muted.default} transition-transform`}
                         aria-hidden="true"
                       />
                     )}
@@ -190,26 +190,26 @@ function FAQBox(props: FAQVariant) {
   }
 
   return (
-    <section className="my-8 space-y-6">
-      <div className="mb-6">
-        <h2 className="mb-2 font-bold text-2xl">{title}</h2>
-        {description && <p className="text-muted-foreground">{description}</p>}
+    <section className={`my-8 ${spaceY.relaxed}`}>
+      <div className={marginBottom.comfortable}>
+        <h2 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`}>{title}</h2>
+        {description && <p className={muted.default}>{description}</p>}
       </div>
 
-      <div className="space-y-4">
+      <div className={spaceY.comfortable}>
         {validQuestions.map((faq) => (
-          <Card key={faq.question} className="border border-border bg-code/50 backdrop-blur-sm">
+          <Card key={faq.question} className={`${border.default} bg-code/50 backdrop-blur-sm`}>
             <CardHeader>
-              <CardTitle className="flex items-start gap-3 font-semibold text-lg">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                  <span className="font-bold text-primary text-sm">Q</span>
+              <CardTitle className={`${row.default} ${weight.semibold} ${size.lg}`}>
+                <div className={`${marginTop.micro} flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10`}>
+                  <span className={`${weight.bold} text-primary ${size.sm}`}>Q</span>
                 </div>
                 {faq.question}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="pl-9">
-                <div className="text-muted-foreground leading-relaxed">{faq.answer}</div>
+                <div className={`${muted.default} leading-relaxed`}>{faq.answer}</div>
               </div>
             </CardContent>
           </Card>
@@ -250,17 +250,17 @@ function InfoBoxComponent(props: InfoBoxVariant) {
     <div
       itemScope={true}
       itemType="https://schema.org/Note"
-      className={cn('my-6 rounded-r-lg border-l-4 p-6', INFOBOX_COLORS[variantKey])}
+      className={cn('my-6 rounded-r-lg border-l-4 ${padding.comfortable}', INFOBOX_COLORS[variantKey])}
     >
       {title && (
         <div className={cn(cluster.compact, 'mb-3')}>
           {iconMap[currentVariant]}
-          <h4 className="font-semibold text-foreground" itemProp="name">
+          <h4 className={`${weight.semibold} text-foreground`} itemProp="name">
             {title}
           </h4>
         </div>
       )}
-      <div itemProp="text" className="text-muted-foreground leading-relaxed">
+      <div itemProp="text" className={`${muted.default} leading-relaxed`}>
         {children}
       </div>
     </div>
@@ -284,7 +284,7 @@ function CalloutComponent(props: CalloutVariant) {
 
   return (
     <Alert className="my-6">
-      <div className="flex items-start gap-3">
+      <div className={`${row.default}`}>
         {type === 'info' && <Info className={iconSize.sm} />}
         {type === 'warning' && <AlertTriangle className={iconSize.sm} />}
         {type === 'error' && <AlertTriangle className={iconSize.sm} />}
@@ -292,7 +292,7 @@ function CalloutComponent(props: CalloutVariant) {
         {type === 'tip' && <Zap className={iconSize.sm} />}
         <div className="flex-1">
           {title && <AlertTitle>{title}</AlertTitle>}
-          <AlertDescription className="mt-2">{children}</AlertDescription>
+          <AlertDescription className={marginTop.compact}>{children}</AlertDescription>
         </div>
       </div>
     </Alert>

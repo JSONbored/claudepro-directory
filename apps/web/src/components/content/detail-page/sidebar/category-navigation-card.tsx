@@ -58,7 +58,7 @@
  */
 
 import { nonEmptyString } from '@heyclaude/shared-runtime';
-import { between, iconSize } from '@heyclaude/web-runtime/design-system';
+import { between, iconSize, transition, hoverBg, marginTop, weight, muted, radius ,size , padding } from '@heyclaude/web-runtime/design-system';
 import type { LucideIcon } from '@heyclaude/web-runtime/icons';
 import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
@@ -118,7 +118,7 @@ export function CategoryNavigationCard({
   // Database CHECK constraint validates structure - no runtime validation needed
   return (
     <TooltipProvider delayDuration={300}>
-      <div className={`${between.center} px-1`}>
+      <div className={`${between.center} ${padding.xMicro}`}>
         {Object.entries(categories).map(([key, info]) => {
           const Icon = info.icon;
           const isActive = currentCategory === key;
@@ -128,18 +128,18 @@ export function CategoryNavigationCard({
               <TooltipTrigger asChild={true}>
                 <Link
                   href={`${basePath}/${key}`}
-                  className={`rounded-lg p-2 transition-all duration-200 ${
+                  className={`${radius.lg} ${padding.tight} ${transition.default} ${
                     isActive
                       ? info.activeColor || 'bg-primary/10 text-primary'
-                      : `text-muted-foreground ${info.color || 'hover:bg-muted/50 hover:text-primary'}`
+                      : `${muted.default} ${info.color || `${hoverBg.muted} hover:text-primary`}`
                   }`}
                 >
                   <Icon className={iconSize.sm} />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className={`${DIMENSIONS.TOOLTIP_MAX} text-xs`}>
-                <div className="font-semibold">{info.label}</div>
-                <div className="mt-0.5 text-muted-foreground">{info.description}</div>
+              <TooltipContent side="bottom" className={`${DIMENSIONS.TOOLTIP_MAX} ${size.xs}`}>
+                <div className={weight.semibold}>{info.label}</div>
+                <div className={`${marginTop.micro} ${muted.default}`}>{info.description}</div>
               </TooltipContent>
             </Tooltip>
           );

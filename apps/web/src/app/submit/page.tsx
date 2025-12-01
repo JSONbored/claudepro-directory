@@ -10,7 +10,7 @@ import {
   getSubmissionDashboard,
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
-import { cluster, iconSize, muted } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, muted, animate, weight, radius ,size  , gap , padding , spaceY , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
@@ -32,7 +32,7 @@ const NewsletterCTAVariant = dynamicImport(
       default: module_.NewsletterCTAVariant,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
 );
 
@@ -42,12 +42,12 @@ const DEFAULT_CONTENT_CATEGORY = Constants.public.Enums.content_category[0]; // 
 /**
  * Rendering & Caching
  *
- * This page uses server-side data fetching with edge-cached data and incremental static
- * regeneration (`revalidate = 86400`), plus per-request logging for observability.
+ * ISR: 15 minutes (900s) - Matches CACHE_TTL.submission_dashboard
+ * Recent submissions and activity stats need to be reasonably fresh.
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#revalidate
  */
-export const revalidate = 86_400;
+export const revalidate = 900;
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -312,43 +312,43 @@ export default async function SubmitPage() {
     });
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">
+    <div className={`container mx-auto ${maxWidth['7xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
       {/* Hero Header with animations */}
       <SubmitPageHero stats={stats} />
 
-      <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
+      <div className={`grid items-start ${gap.relaxed} lg:grid-cols-[2fr_1fr] lg:gap-8`}>
         <div className="w-full min-w-0">
           <SubmitFormClient formConfig={formConfig} templates={templates} />
         </div>
 
-        <aside className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
+        <aside className={`w-full ${spaceY.comfortable} sm:${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}>
           {/* Job Promo Card - Priority #1 */}
           <JobsPromo />
 
           {/* Stats Card - 3-column grid */}
           <Card>
             <CardHeader>
-              <CardTitle className={cn(cluster.compact, 'font-medium text-sm')}>
+              <CardTitle className={cn(cluster.compact, `${weight.medium} ${size.sm}`)}>
                 <TrendingUp aria-hidden="true" className={iconSize.sm} />
                 Community Stats
               </CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-3 gap-2">
+            <CardContent className={`grid grid-cols-3 ${gap.compact}`}>
               {/* Total */}
-              <div className={cn('rounded-lg p-3 text-center', 'bg-blue-500/10')}>
-                <div className="font-bold text-2xl text-blue-400">{stats.total}</div>
+              <div className={cn('${radius.lg} ${padding.compact} text-center', 'bg-blue-500/10')}>
+                <div className={`${weight.bold} ${size['2xl']} text-blue-400`}>{stats.total}</div>
                 <div className={cn(muted.default, 'text-xs')}>Total</div>
               </div>
 
               {/* Pending */}
-              <div className={cn('rounded-lg p-3 text-center', 'bg-yellow-500/10')}>
-                <div className="font-bold text-2xl text-yellow-400">{stats.pending}</div>
+              <div className={cn('${radius.lg} ${padding.compact} text-center', 'bg-yellow-500/10')}>
+                <div className={`${weight.bold} ${size['2xl']} text-yellow-400`}>{stats.pending}</div>
                 <div className={cn(muted.default, 'text-xs')}>Pending</div>
               </div>
 
               {/* This Week */}
-              <div className={cn('rounded-lg p-3 text-center', 'bg-green-500/10')}>
-                <div className="font-bold text-2xl text-green-400">{stats.merged_this_week}</div>
+              <div className={cn('${radius.lg} ${padding.compact} text-center', 'bg-green-500/10')}>
+                <div className={`${weight.bold} ${size['2xl']} text-green-400`}>{stats.merged_this_week}</div>
                 <div className={cn(muted.default, 'text-xs')}>This Week</div>
               </div>
             </CardContent>
@@ -371,7 +371,7 @@ export default async function SubmitPage() {
       </div>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className="container mx-auto px-4 py-12">
+      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

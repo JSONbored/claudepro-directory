@@ -6,6 +6,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/web-runtime/core';
+import { hoverBg, transition, spaceY, marginBottom, marginTop, muted, weight, radius ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
 import { useEffect, useState } from 'react';
 import { Checklist } from '@/src/components/content/checklist';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
@@ -404,11 +405,11 @@ function render_section(section: Section, index: number): React.ReactNode {
     case 'code_group':
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
-          <div className="overflow-hidden rounded-lg border">
+          {section.title && <h3 className={`${marginBottom.default} ${weight.semibold} ${size.lg}`}>{section.title}</h3>}
+          <div className={`overflow-hidden ${radius.lg} border`}>
             {section.tabs.map((tab: CodeTab, idx: number) => (
               <details key={`${tab.label}-${idx}`} className="border-b last:border-0">
-                <summary className="cursor-pointer px-4 py-3 font-medium hover:bg-muted/50">
+                <summary className={`cursor-pointer ${padding.xDefault} ${padding.yCompact} ${weight.medium} ${hoverBg.muted}`}>
                   {tab.label} {tab.filename && `• ${tab.filename}`}
                 </summary>
                 <div className="p-4">
@@ -540,14 +541,14 @@ function render_section(section: Section, index: number): React.ReactNode {
     case 'tabs':
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
+          {section.title && <h3 className={`${marginBottom.default} ${weight.semibold} ${size.lg}`}>{section.title}</h3>}
           {section.description && (
-            <p className="mb-4 text-muted-foreground">{section.description}</p>
+            <p className={`${marginBottom.default} ${muted.default}`}>{section.description}</p>
           )}
-          <div className="overflow-hidden rounded-lg border">
+          <div className={`overflow-hidden ${radius.lg} border`}>
             {section.items.map((item: TabItem, idx: number) => (
               <details key={`${item.value}-${idx}`} className="border-b last:border-0">
-                <summary className="cursor-pointer px-4 py-3 font-medium hover:bg-muted/50">
+                <summary className={`cursor-pointer ${padding.xDefault} ${padding.yCompact} ${weight.medium} ${hoverBg.muted}`}>
                   {item.label}
                 </summary>
                 <TrustedHTML html={item.content} className="p-4" />
@@ -596,16 +597,16 @@ function render_section(section: Section, index: number): React.ReactNode {
     case 'steps':
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
-          <div className="space-y-6">
+          {section.title && <h3 className={`${marginBottom.default} ${weight.semibold} ${size.lg}`}>{section.title}</h3>}
+          <div className={spaceY.relaxed}>
             {section.steps.map((step: StepItem) => (
               <div key={step.number} className="border-primary border-l-4 pl-6">
-                <h4 className="mb-2 font-semibold text-lg">
+                <h4 className={`${marginBottom.tight} ${weight.semibold} ${size.lg}`}>
                   Step {step.number}: {step.title}
                 </h4>
-                <p className="mb-4 text-muted-foreground">{step.description}</p>
+                <p className={`${marginBottom.default} ${muted.default}`}>{step.description}</p>
                 {step.timeEstimate && (
-                  <p className="mb-2 text-muted-foreground text-sm">⏱️ {step.timeEstimate}</p>
+                  <p className={`${marginBottom.tight} ${muted.sm}`}>⏱️ {step.timeEstimate}</p>
                 )}
                 {step.code && (
                   <ProductionCodeBlock
@@ -615,7 +616,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                   />
                 )}
                 {step.notes && (
-                  <p className="mt-2 text-muted-foreground text-sm italic">{step.notes}</p>
+                  <p className={`${marginTop.compact} ${muted.sm} italic`}>{step.notes}</p>
                 )}
               </div>
             ))}
@@ -645,12 +646,12 @@ function render_section(section: Section, index: number): React.ReactNode {
     case 'related_content':
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
+          {section.title && <h3 className={`${marginBottom.default} ${weight.semibold} ${size.lg}`}>{section.title}</h3>}
           {section.description && (
-            <p className="mb-4 text-muted-foreground">{section.description}</p>
+            <p className={`${marginBottom.default} ${muted.default}`}>{section.description}</p>
           )}
           {section.resources && section.resources.length > 0 && (
-            <div className="grid gap-4">
+            <div className={`grid ${gap.comfortable}`}>
               {section.resources.map((r: ResourceItem) => {
                 // Defensive defaulting: infer external flag from URL pattern if not provided
                 // Prevents silent link disabling when external flag is undefined but URL is clearly external
@@ -677,12 +678,12 @@ function render_section(section: Section, index: number): React.ReactNode {
                   return (
                     <div
                       key={resourceKey}
-                      className="rounded-lg border p-4 opacity-50"
+                      className={`${radius.lg} border ${padding.default} opacity-50`}
                       title="Invalid or unsafe URL - cannot display link"
                     >
-                      <h4 className="mb-1 font-semibold">{r.title}</h4>
-                      <p className="mb-2 text-muted-foreground text-sm">{r.description}</p>
-                      <span className="text-destructive text-xs uppercase">
+                      <h4 className={`${marginBottom.micro} ${weight.semibold}`}>{r.title}</h4>
+                      <p className={`${marginBottom.tight} ${muted.sm}`}>{r.description}</p>
+                      <span className={`text-destructive ${size.xs} uppercase`}>
                         {r.type} • Invalid URL
                       </span>
                     </div>
@@ -697,11 +698,11 @@ function render_section(section: Section, index: number): React.ReactNode {
                     href={safeUrl}
                     target={isExternal ? '_blank' : undefined}
                     rel={isExternal ? 'noopener noreferrer' : undefined}
-                    className="rounded-lg border p-4 transition-colors hover:bg-muted/50"
+                    className={`${radius.lg} border ${padding.default} ${transition.colors} ${hoverBg.muted}`}
                   >
-                    <h4 className="mb-1 font-semibold">{r.title}</h4>
-                    <p className="mb-2 text-muted-foreground text-sm">{r.description}</p>
-                    <span className="text-primary text-xs uppercase">{r.type}</span>
+                    <h4 className={`${marginBottom.micro} ${weight.semibold}`}>{r.title}</h4>
+                    <p className={`${marginBottom.tight} ${muted.sm}`}>{r.description}</p>
+                    <span className={`text-primary ${size.xs} uppercase`}>{r.type}</span>
                   </a>
                 );
               })}
@@ -723,7 +724,7 @@ export function JSONSectionRenderer({ sections }: JSONSectionRendererProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className={spaceY.loose}>
       {sections_array.map((section, index) => render_section(section, index))}
     </div>
   );

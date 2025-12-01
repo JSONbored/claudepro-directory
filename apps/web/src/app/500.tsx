@@ -8,7 +8,7 @@
 'use client';
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { responsive } from '@heyclaude/web-runtime/design-system';
+import { responsive, muted, marginBottom, weight, size  , padding , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { AlertCircle, Home, RefreshCw } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
@@ -48,16 +48,16 @@ export default function ServerError() {
   }, []);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-lg p-8 text-center">
-        <div className="mb-6">
-          <div className="mb-4 flex justify-center">
-            <div className="rounded-full bg-destructive/10 p-3">
+    <div className={`flex ${minHeight.screen} items-center justify-center bg-background ${padding.xDefault}`}>
+      <Card className={`w-full ${maxWidth.lg} ${padding.relaxed} text-center`}>
+        <div className={marginBottom.comfortable}>
+          <div className={`${marginBottom.default} flex justify-center`}>
+            <div className={`rounded-full bg-destructive/10 ${padding.compact}`}>
               <AlertCircle className="h-12 w-12 text-destructive" aria-hidden="true" />
             </div>
           </div>
-          <h1 className="mb-2 font-bold text-2xl">Server Error</h1>
-          <p className="text-muted-foreground">
+          <h1 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`}>Server Error</h1>
+          <p className={muted.default}>
             We encountered an error while processing your request. Our team has been notified and is working on a fix.
           </p>
         </div>

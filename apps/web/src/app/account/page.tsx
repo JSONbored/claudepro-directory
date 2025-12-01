@@ -7,7 +7,7 @@ import {
   getContentDetailCore,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster } from '@heyclaude/web-runtime/design-system';
+import { cluster, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding } from '@heyclaude/web-runtime/design-system';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import  { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
@@ -67,10 +67,10 @@ export default async function AccountDashboard() {
       section: 'authentication',
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>Please sign in to view your dashboard.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -126,10 +126,10 @@ export default async function AccountDashboard() {
       section: 'dashboard-bundle',
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Dashboard unavailable</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Dashboard unavailable</CardTitle>
             <CardDescription>
               We couldn&apos;t load your account data. Please refresh the page or try again later.
             </CardDescription>
@@ -263,14 +263,14 @@ export default async function AccountDashboard() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {profile?.name ?? 'User'}!</p>
+        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>Dashboard</h1>
+        <p className={muted.default}>Welcome back, {profile?.name ?? 'User'}!</p>
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-3`}>
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Bookmarks</CardTitle>
@@ -278,9 +278,9 @@ export default async function AccountDashboard() {
           <CardContent>
             <div className={cluster.compact}>
               <Bookmark className="h-5 w-5 text-primary" />
-              <span className="font-bold text-3xl">{bookmarkCount ?? 0}</span>
+              <span className={`${weight.bold} ${size['3xl']}`}>{bookmarkCount ?? 0}</span>
             </div>
-            <p className="mt-2 text-muted-foreground text-xs">Saved items</p>
+            <p className={`${marginTop.compact} ${muted.xs}`}>Saved items</p>
           </CardContent>
         </Card>
 
@@ -292,13 +292,13 @@ export default async function AccountDashboard() {
             <UnifiedBadge
               variant="base"
               style={profile?.tier === 'pro' ? 'default' : 'secondary'}
-              className="mt-2"
+              className={marginTop.compact}
             >
               {profile?.tier
                 ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
                 : 'Free'}
             </UnifiedBadge>
-            <p className="mt-2 text-muted-foreground text-xs">Membership level</p>
+            <p className={`${marginTop.compact} ${muted.xs}`}>Membership level</p>
           </CardContent>
         </Card>
 
@@ -309,9 +309,9 @@ export default async function AccountDashboard() {
           <CardContent>
             <div className={cluster.compact}>
               <Calendar className="h-5 w-5 text-primary" />
-              <span className="font-bold text-3xl">{accountAge}</span>
+              <span className={`${weight.bold} ${size['3xl']}`}>{accountAge}</span>
             </div>
-            <p className="mt-2 text-muted-foreground text-xs">Days active</p>
+            <p className={`${marginTop.compact} ${muted.xs}`}>Days active</p>
           </CardContent>
         </Card>
       </div>
@@ -322,7 +322,7 @@ export default async function AccountDashboard() {
           <CardTitle>Quick Actions</CardTitle>
           <CardDescription>Common tasks and features</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className={spaceY.default}>
           {resumeBookmarkHref ? <QuickActionRow
               title="Resume latest bookmark"
               description="Continue where you left off"
@@ -341,7 +341,7 @@ export default async function AccountDashboard() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+      <div className={`grid ${gap.relaxed} lg:grid-cols-[2fr_1fr]`}>
         <Card>
           <CardHeader>
             <CardTitle>Recently Saved</CardTitle>
@@ -361,9 +361,9 @@ export default async function AccountDashboard() {
             <CardTitle>Recommended next</CardTitle>
             <CardDescription>Suggestions based on your saved tags</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className={spaceY.comfortable}>
             {recommendations.length > 0 ? (
-              <ul className="space-y-3">
+              <ul className={spaceY.default}>
                 {recommendations.map((item) => {
                   const firstTag = ensureStringArray(item.tags)[0];
                   const itemHref = `/${item.category}/${item.slug}`;
@@ -373,22 +373,22 @@ export default async function AccountDashboard() {
                   return (
                     <li
                       key={`${item.category}-${item.slug}`}
-                      className="rounded-xl border border-border/60 bg-muted/20 p-3"
+                      className={`rounded-xl border border-border/60 bg-muted/20 ${padding.compact}`}
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className={`flex items-start justify-between ${gap.default}`}>
                         <div>
-                          <p className="font-semibold">{item.title}</p>
-                          {item.description ? <p className="line-clamp-2 text-muted-foreground text-sm">
+                          <p className={weight.semibold}>{item.title}</p>
+                          {item.description ? <p className={`line-clamp-2 ${muted.sm}`}>
                               {item.description}
                             </p> : null}
                         </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <NavLink href={itemHref} className="font-medium text-sm">
+                        <div className={`flex flex-col items-end ${gap.compact}`}>
+                          <NavLink href={itemHref} className={`${weight.medium} ${size.sm}`}>
                             Explore →
                           </NavLink>
                           {similarHref ? <NavLink
                               href={similarHref}
-                              className="text-muted-foreground text-xs hover:text-foreground"
+                              className={`${muted.default} ${size.xs} hover:text-foreground`}
                             >
                               Explore similar →
                             </NavLink> : null}
@@ -399,7 +399,7 @@ export default async function AccountDashboard() {
                 })}
               </ul>
             ) : (
-              <p className="text-muted-foreground text-sm">
+              <p className={muted.sm}>
                 Start bookmarking configs to receive personalized recommendations.
               </p>
             )}
@@ -420,12 +420,12 @@ function QuickActionRow({
   title: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-border/50 p-3">
+    <div className={`flex items-center justify-between ${gap.comfortable} rounded-xl border border-border/50 ${padding.compact}`}>
       <div>
-        <p className="font-medium">{title}</p>
-        <p className="text-muted-foreground text-sm">{description}</p>
+        <p className={weight.medium}>{title}</p>
+        <p className={muted.sm}>{description}</p>
       </div>
-      <NavLink href={href} className="font-semibold text-sm">
+      <NavLink href={href} className={`${weight.semibold} ${size.sm}`}>
         Open →
       </NavLink>
     </div>
@@ -442,12 +442,12 @@ function QuickActionRow({
  */
 function EmptyRecentlySavedState() {
   return (
-    <div className="rounded-2xl border border-border/70 border-dashed p-6 text-center">
-      <p className="font-medium">No saved configs yet</p>
-      <p className="text-muted-foreground text-sm">
+    <div className={`rounded-2xl border border-border/70 border-dashed ${padding.comfortable} text-center`}>
+      <p className={weight.medium}>No saved configs yet</p>
+      <p className={muted.sm}>
         Browse the directory and bookmark your favorite configurations to see them here.
       </p>
-      <NavLink href={ROUTES.HOME} className="mt-4 inline-flex font-semibold">
+      <NavLink href={ROUTES.HOME} className={`${marginTop.default} inline-flex ${weight.semibold}`}>
         Explore directory →
       </NavLink>
     </div>

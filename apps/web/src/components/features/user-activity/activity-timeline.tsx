@@ -9,6 +9,7 @@ import { Card, CardContent } from '@heyclaude/web-runtime/ui';
 type Activity = Database['public']['CompositeTypes']['user_activity_timeline_item'];
 
 import { logger } from '@heyclaude/web-runtime/core';
+import { spaceY, muted, marginTop, weight, iconSize  , padding , row } from '@heyclaude/web-runtime/design-system';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 
 interface ActivityTimelineProps {
@@ -26,7 +27,7 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
   if (!displayActivities || displayActivities.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
+        <CardContent className={`py-12 text-center ${muted.default}`}>
           No activity yet
         </CardContent>
       </Card>
@@ -34,7 +35,7 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className={spaceY.default}>
       {displayActivities
         .filter(
           (
@@ -73,14 +74,14 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
 
           return (
             <Card key={activity.id} className="transition-colors hover:bg-accent/5">
-              <CardContent className="flex items-start gap-3 p-4">
-                <Icon className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
+              <CardContent className={`${row.default} ${padding.default}`}>
+                <Icon className={`${marginTop.tight} ${iconSize.md} shrink-0 ${muted.default}`} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm">
-                    <span className="text-muted-foreground">{config.label}</span>{' '}
-                    <span className="font-medium">{title}</span>
+                    <span className={muted.default}>{config.label}</span>{' '}
+                    <span className={weight.medium}>{title}</span>
                   </p>
-                  <p className="mt-1 text-muted-foreground text-xs">
+                  <p className={`${marginTop.tight} ${muted.xs}`}>
                     {new Date(activity.created_at).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',

@@ -528,25 +528,41 @@ export const getActivityTimeline = authedAction
     return data;
   });
 
+/**
+ * Get user OAuth identities directly from Supabase Auth API.
+ * 
+ * IMPORTANT: This uses the official `supabase.auth.getUserIdentities()` method
+ * instead of the custom RPC, because the RPC may not have access to auth.identities.
+ */
 export const getUserIdentities = authedAction
   .metadata({ actionName: 'getUserIdentities', category: 'user' })
   .inputSchema(z.void())
-  .action(async ({ ctx }) => {
-    const { fetchCached } = await import('../cache/fetch-cached.ts');
-    const data = await fetchCached(
-      (client: SupabaseClient<Database>) =>
-        new AccountService(client).getUserIdentities({ p_user_id: ctx.userId }),
-      {
-        keyParts: ['user-identities', ctx.userId],
-        tags: ['users', `user-${ctx.userId}`],
-        ttlKey: 'cache.user_stats.ttl_seconds',
-        useAuth: true,
-        fallback: { identities: [] },
-        logMeta: { namespace: 'user-actions' },
-      }
-    );
-
-    return data;
+  .action(async () => {
+    const { createSupabaseServerClient } = await import('../supabase/server.ts');
+    const supabase = await createSupabaseServerClient();
+    
+    // Use the official Supabase Auth API to get identities
+    const { data, error } = await supabase.auth.getUserIdentities();
+    
+    if (error) {
+      const authError = new Error(error.message);
+      logger.error('getUserIdentities failed', authError, {
+        errorCode: error.code,
+      });
+      throw authError;
+    }
+    
+    // Transform to match the expected format
+    const identities = data?.identities ?? [];
+    
+    return {
+      identities: identities.map((identity) => ({
+        provider: identity.provider as Database['public']['Enums']['oauth_provider'] | null,
+        email: (identity.identity_data?.['email'] as string | undefined) ?? null,
+        created_at: identity.created_at ?? null,
+        last_sign_in_at: identity.last_sign_in_at ?? null,
+      })),
+    };
   });
 
 // Removed unlinkOAuthProvider - migrated
