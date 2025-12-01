@@ -162,7 +162,7 @@
     "server-only": "^0.0.1",
     "tailwindcss": "^4.1.17",
     "ts-prune": "^0.10.3",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "turbo": "^2.6.1",
     "typescript": "5.9.3",
     "typescript-eslint": "^8.48.0",
