@@ -9,7 +9,7 @@ import {
   getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, jobStatusBadge  } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, jobStatusBadge, iconSize, spaceY, muted, marginBottom, marginTop, iconLeading, weight, radius ,size , padding , gap , maxWidth } from '@heyclaude/web-runtime/design-system';
 import {
   BarChart,
   Briefcase,
@@ -171,10 +171,10 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
       timestamp: new Date().toISOString(),
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>Please sign in to manage your job listings.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -223,10 +223,10 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
 
   if (fetchError) {
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Job listings unavailable</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Job listings unavailable</CardTitle>
             <CardDescription>
               We couldn&apos;t load your job dashboard. Please refresh or try again later.
             </CardDescription>
@@ -356,18 +356,18 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   };
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       {paymentStatus === 'success' && (
         <Alert className="border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-200/30 dark:bg-emerald-950/40 dark:text-emerald-100">
           <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
           <AlertTitle>Payment confirmed</AlertTitle>
-          <AlertDescription className="space-y-1 text-sm">
+          <AlertDescription className={`${spaceY.tight} ${size.sm}`}>
             <p>
               {paymentJob?.title
                 ? `${paymentJob.title} is now live.`
                 : 'Your job listing is now live.'}
             </p>
-            <p className="text-emerald-900/80 text-xs sm:text-sm dark:text-emerald-100/80">
+            <p className={`text-emerald-900/80 ${size.xs} sm:text-sm dark:text-emerald-100/80`}>
               {paymentAlertPlanLabel} • {paymentAlertTierLabel}
               {paymentAlertPrice ? ` • ${paymentAlertPrice}` : ''}
               {paymentAlertRenewal ? ` • ${paymentAlertRenewal}` : ''}
@@ -377,8 +377,8 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
       )}
       <div className={between.center}>
         <div>
-          <h1 className="mb-2 font-bold text-3xl">My Job Listings</h1>
-          <p className="text-muted-foreground">
+          <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>My Job Listings</h1>
+          <p className={muted.default}>
             {jobs.length} {jobs.length === 1 ? 'listing' : 'listings'}
           </p>
         </div>
@@ -392,10 +392,10 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
 
       {jobs.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center py-12">
-            <Briefcase className="mb-4 h-12 w-12 text-muted-foreground" />
-            <h3 className="mb-2 font-semibold text-xl">No job listings yet</h3>
-            <p className="mb-4 max-w-md text-center text-muted-foreground">
+          <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
+            <Briefcase className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No job listings yet</h3>
+            <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
               Post your first job listing to reach talented developers in the Claude community
             </p>
             <Button asChild>
@@ -407,7 +407,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className={`grid ${gap.comfortable}`}>
           {jobs.map((job) => {
             const summary = billingSummaryMap.get(job.id);
             const planLabel = resolvePlanLabel(summary?.plan ?? job.plan);
@@ -456,7 +456,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                         </UnifiedBadge>
                         {getPlanBadge(job.plan, job.tier)}
                       </div>
-                      <CardTitle className="mt-2">{job.title}</CardTitle>
+                      <CardTitle className={marginTop.compact}>{job.title}</CardTitle>
                       <CardDescription>
                         {job.company} • {job.location ?? 'Remote'} • {job.type}
                       </CardDescription>
@@ -465,22 +465,22 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                 </CardHeader>
 
                 <CardContent>
-                  <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
+                  <div className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}>
                     <div className={cluster.tight}>
-                      <Eye className="h-4 w-4" />
+                      <Eye className={iconSize.sm} />
                       {job.view_count ?? 0} views
                     </div>
                     {job.posted_at ? <div>Posted {formatRelativeDate(job.posted_at)}</div> : null}
                     {job.expires_at ? <div>Expires {formatRelativeDate(job.expires_at)}</div> : null}
                   </div>
-                  {showBillingCard ? <div className="mb-4 rounded-lg border border-muted border-dashed bg-muted/20 p-3 text-xs sm:text-sm">
+                  {showBillingCard ? <div className={`${marginBottom.default} ${radius.lg} border border-muted border-dashed bg-muted/20 ${padding.compact} ${size.xs} sm:text-sm`}>
                       <div className={between.center}>
-                        <span className="font-semibold text-foreground">Billing</span>
+                        <span className={`${weight.semibold} text-foreground`}>Billing</span>
                         <UnifiedBadge variant="base" style="outline" className="capitalize">
                           {planLabel} • {tierLabel}
                         </UnifiedBadge>
                       </div>
-                      <div className="mt-2 space-y-1 text-muted-foreground">
+                      <div className={`${marginTop.compact} ${spaceY.tight} ${muted.default}`}>
                         {planPriceLabel ? <p>Price: {planPriceLabel}</p> : null}
                         {renewalCopy ? <p>{renewalCopy}</p> : null}
                         {paymentCopy ? <p>{paymentCopy}</p> : null}
@@ -490,21 +490,21 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                   <div className={cluster.compact}>
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/account/jobs/${job.id}/edit`}>
-                        <Edit className="mr-1 h-3 w-3" />
+                        <Edit className={iconLeading.xs} />
                         Edit
                       </Link>
                     </Button>
 
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/account/jobs/${job.id}/analytics`}>
-                        <BarChart className="mr-1 h-3 w-3" />
+                        <BarChart className={iconLeading.xs} />
                         Analytics
                       </Link>
                     </Button>
 
                     {job.slug ? <Button variant="ghost" size="sm" asChild>
                         <Link href={`/jobs/${job.slug}`}>
-                          <ExternalLink className="mr-1 h-3 w-3" />
+                          <ExternalLink className={iconLeading.xs} />
                           View
                         </Link>
                       </Button> : null}

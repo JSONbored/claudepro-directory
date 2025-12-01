@@ -20,7 +20,7 @@
  */
 
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
-import { iconSize, iconLeading } from '@heyclaude/web-runtime/design-system';
+import { iconSize, iconLeading, marginTop, muted, weight ,size , padding } from '@heyclaude/web-runtime/design-system';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   Activity,
@@ -124,7 +124,7 @@ export function UserMenu({ className }: UserMenuProps) {
           asChild={true}
           variant="ghost"
           size="sm"
-          className="border-accent/20 bg-accent/10 font-medium text-accent text-xs hover:bg-accent hover:text-white"
+          className={`border-accent/20 bg-accent/10 ${weight.medium} text-accent ${size.xs} hover:bg-accent hover:text-white`}
         >
           <Link href="/login" aria-label="Get started - Sign in with GitHub">
             <UserIcon className={iconLeading.xs} />
@@ -159,12 +159,12 @@ export function UserMenu({ className }: UserMenuProps) {
           >
             <Button
               variant="ghost"
-              className="relative h-8 w-8 rounded-full p-0 hover:ring-2 hover:ring-accent/30"
+              className={`relative h-8 w-8 rounded-full ${padding.none} hover:ring-2 hover:ring-accent/30`}
               aria-label={`User menu for ${displayName}`}
             >
               <Avatar className={iconSize.xl}>
                 {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName || 'User avatar'} />}
-                <AvatarFallback className="bg-accent/20 font-semibold text-accent text-sm">
+                <AvatarFallback className={`bg-accent/20 ${weight.semibold} text-accent ${size.sm}`}>
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -180,8 +180,8 @@ export function UserMenu({ className }: UserMenuProps) {
           {/* User Info */}
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col">
-              <p className="font-medium text-sm leading-none">{displayName}</p>
-              <p className="mt-1 text-muted-foreground text-xs leading-none">{user.email}</p>
+              <p className={`${weight.medium} ${size.sm} leading-none`}>{displayName}</p>
+              <p className={`${marginTop.tight} ${muted.default} ${size.xs} leading-none`}>{user.email}</p>
             </div>
           </DropdownMenuLabel>
 

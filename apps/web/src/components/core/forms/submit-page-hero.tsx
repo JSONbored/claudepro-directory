@@ -7,7 +7,7 @@
 'use client';
 
 import { CheckCircle, Clock, Send, Sparkles, Users } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, marginBottom, muted, padding, stack } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, marginBottom, muted, padding, stack, weight ,size , gap } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { BorderBeam } from '@heyclaude/web-runtime/ui';
@@ -93,7 +93,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
       {/* BorderBeam animation for visual interest */}
       <BorderBeam size={250} duration={20} colorFrom="#9333ea" colorTo="#a855f7" borderWidth={1} />
 
-      <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_auto]">
+      <div className={`relative z-10 grid ${gap.relaxed} lg:grid-cols-[1fr_auto]`}>
         {/* Left: Content */}
         <div className={stack.default}>
           {/* Badge */}
@@ -110,18 +110,18 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
               <motion.div variants={iconVariants}>
                 <Sparkles className={cn(iconSize.sm, 'text-primary')} />
               </motion.div>
-              <span className="font-medium text-primary">Community Contributions</span>
+              <span className={`${weight.medium} text-primary`}>Community Contributions</span>
             </div>
           </motion.div>
 
           {/* Title */}
-          <motion.h1 className="font-bold text-4xl lg:text-5xl" variants={itemVariants}>
+          <motion.h1 className={`${weight.bold} ${size['4xl']} lg:text-5xl`} variants={itemVariants}>
             Share Your Configuration
           </motion.h1>
 
           {/* Description */}
           <motion.p
-            className={cn('max-w-2xl text-lg', muted.default)}
+            className={cn('max-w-2xl ${size.lg}', muted.default)}
             variants={itemVariants}
           >
             Contribute to the largest Claude configuration library. No JSON formatting required - we
@@ -130,7 +130,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
           {/* Feature badges */}
           <motion.div
-            className={cn('flex flex-wrap items-center gap-3', `${muted.default} text-sm`)}
+            className={cn('flex flex-wrap items-center ${gap.default}', `${muted.sm}`)}
             variants={itemVariants}
           >
             <div className={cluster.snug}>

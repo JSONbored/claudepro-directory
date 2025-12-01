@@ -6,7 +6,7 @@
  */
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
-import { between, cluster, iconSize, absolute } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, iconSize, absolute, spaceY, weight ,size  } from '@heyclaude/web-runtime/design-system';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 
 interface QuizProgressProps {
@@ -38,17 +38,17 @@ export function QuizProgress({
   percentComplete,
 }: QuizProgressProps) {
   return (
-    <div className="space-y-3">
+    <div className={spaceY.default}>
       {/* Question counter */}
       <div className={between.center}>
         <div className={cluster.compact}>
-          <span className="font-medium text-sm">Progress</span>
+          <span className={`${weight.medium} ${size.sm}`}>Progress</span>
           <UnifiedBadge variant="base" style="secondary">
             {currentQuestion} / {totalQuestions}
           </UnifiedBadge>
         </div>
         {percentComplete === 100 && (
-          <div className={`${cluster.compact} text-primary text-sm`}>
+          <div className={`${cluster.compact} text-primary ${size.sm}`}>
             <CheckCircle className={iconSize.sm} />
             <span>Complete!</span>
           </div>
@@ -73,12 +73,12 @@ export function QuizProgress({
         {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((step) => (
           <div
             key={step}
-            className={`flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs transition-colors ${
+            className={`flex h-8 w-8 items-center justify-center rounded-full ${weight.medium} ${size.xs} transition-colors ${
               step < currentQuestion
                 ? 'bg-primary text-primary-foreground'
                 : step === currentQuestion
                   ? 'border-2 border-primary bg-primary/20 text-primary'
-                  : 'bg-muted text-muted-foreground'
+                  : 'bg-muted ${muted.default}'
             }`}
             title={`Question ${step}${step < currentQuestion ? ' (completed)' : step === currentQuestion ? ' (current)' : ''}`}
           >

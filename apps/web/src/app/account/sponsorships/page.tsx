@@ -4,7 +4,7 @@ import {
   getUserSponsorships,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, muted } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, muted, spaceY, marginBottom, marginTop, iconLeading, iconSize, weight ,size , gap } from '@heyclaude/web-runtime/design-system';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UnifiedBadge, Button ,
@@ -83,10 +83,10 @@ export default async function SponsorshipsPage() {
       timestamp: new Date().toISOString(),
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>Please sign in to manage your sponsorship campaigns.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -115,7 +115,7 @@ export default async function SponsorshipsPage() {
       section: 'sponsorships-data-fetch',
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <div className="text-destructive">Failed to load sponsorships. Please try again later.</div>
       </div>
     );
@@ -124,11 +124,11 @@ export default async function SponsorshipsPage() {
   if (sponsorships.length === 0) {
     userLogger.info('SponsorshipsPage: user has no sponsorships');
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <div className={between.center}>
           <div>
-            <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
-            <p className="text-muted-foreground">No active campaigns yet</p>
+            <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>Sponsorships</h1>
+            <p className={muted.default}>No active campaigns yet</p>
           </div>
           <Button variant="outline" asChild>
             <Link href={ROUTES.PARTNER}>
@@ -138,7 +138,7 @@ export default async function SponsorshipsPage() {
           </Button>
         </div>
         <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
+          <CardContent className={`py-12 text-center ${muted.default}`}>
             You haven't launched any sponsorship campaigns yet.
           </CardContent>
         </Card>
@@ -155,11 +155,11 @@ export default async function SponsorshipsPage() {
   const activeCount = orderedSponsorships.filter((s) => isSponsorshipActive(s, now)).length;
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div className={between.center}>
         <div>
-          <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
-          <p className="text-muted-foreground">
+          <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>Sponsorships</h1>
+          <p className={muted.default}>
             {activeCount} active {activeCount === 1 ? 'campaign' : 'campaigns'}
           </p>
         </div>
@@ -171,7 +171,7 @@ export default async function SponsorshipsPage() {
         </Button>
       </div>
 
-      <div className="grid gap-4">
+      <div className={`grid ${gap.comfortable}`}>
         {orderedSponsorships.map((sponsorship) => {
           const isActive = isSponsorshipActive(sponsorship, now);
 
@@ -207,7 +207,7 @@ export default async function SponsorshipsPage() {
                           Limit Reached
                         </UnifiedBadge> : null}
                     </div>
-                    <CardTitle className="mt-2">
+                    <CardTitle className={marginTop.compact}>
                       {sponsorship.content_type} - ID: {sponsorship.content_id}
                     </CardTitle>
                     <CardDescription>
@@ -217,7 +217,7 @@ export default async function SponsorshipsPage() {
                   </div>
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/account/sponsorships/${sponsorship.id}/analytics`}>
-                      <BarChart className="mr-1 h-3 w-3" />
+                      <BarChart className={iconLeading.xs} />
                       Analytics
                     </Link>
                   </Button>
@@ -226,38 +226,38 @@ export default async function SponsorshipsPage() {
 
               <CardContent>
                 {/* Quick stats */}
-                <div className="mb-4 grid grid-cols-3 gap-4">
+                <div className={`${marginBottom.default} grid grid-cols-3 ${gap.comfortable}`}>
                   <div>
                     <div
-                      className={`${cluster.tight} mb-1 text-muted-foreground text-xs`}
+                      className={`${cluster.tight} mb-1 ${muted.xs}`}
                     >
-                      <Eye className="h-3 w-3" />
+                      <Eye className={iconSize.xs} />
                       Impressions
                     </div>
-                    <div className="font-bold text-2xl">{impressionCount.toLocaleString()}</div>
-                    {sponsorship.impression_limit ? <div className={`${muted.default} text-xs`}>
+                    <div className={`${weight.bold} ${size['2xl']}`}>{impressionCount.toLocaleString()}</div>
+                    {sponsorship.impression_limit ? <div className={`${muted.default} ${size.xs}`}>
                         of {sponsorship.impression_limit.toLocaleString()}
                       </div> : null}
                   </div>
 
                   <div>
                     <div
-                      className={`${cluster.tight} mb-1 text-muted-foreground text-xs`}
+                      className={`${cluster.tight} mb-1 ${muted.xs}`}
                     >
-                      <MousePointer className="h-3 w-3" />
+                      <MousePointer className={iconSize.xs} />
                       Clicks
                     </div>
-                    <div className="font-bold text-2xl">{clickCount.toLocaleString()}</div>
+                    <div className={`${weight.bold} ${size['2xl']}`}>{clickCount.toLocaleString()}</div>
                   </div>
 
                   <div>
                     <div
-                      className={`${cluster.tight} mb-1 text-muted-foreground text-xs`}
+                      className={`${cluster.tight} mb-1 ${muted.xs}`}
                     >
-                      <BarChart className="h-3 w-3" />
+                      <BarChart className={iconSize.xs} />
                       CTR
                     </div>
-                    <div className="font-bold text-2xl">{ctr}%</div>
+                    <div className={`${weight.bold} ${size['2xl']}`}>{ctr}%</div>
                   </div>
                 </div>
 

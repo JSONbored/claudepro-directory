@@ -1,5 +1,6 @@
 'use client';
 
+import { gap } from '@heyclaude/web-runtime/design-system';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import { ConfigCard } from '@heyclaude/web-runtime/ui';
 
@@ -9,7 +10,7 @@ interface RecentlySavedGridProps {
 
 export function RecentlySavedGrid({ items }: RecentlySavedGridProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className={`grid ${gap.comfortable} md:grid-cols-2`}>
       {items.map((item) => {
         const slug = (item as { slug?: string | null }).slug ?? undefined;
         const category = (item as { category?: string | null }).category ?? 'agents';

@@ -1,7 +1,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, muted ,size } from '@heyclaude/web-runtime/design-system';
 import * as Icons from '@heyclaude/web-runtime/icons';
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
@@ -79,7 +79,7 @@ export function NavigationCommandMenu({
     // Type guard: check if it's a valid React component
     if (typeof Icon === 'function') {
       const IconComponent = Icon as React.ComponentType<{ className?: string }>;
-      return <IconComponent className={`${iconSize.sm} shrink-0 text-muted-foreground`} />;
+      return <IconComponent className={`${iconSize.sm} shrink-0 ${muted.default}`} />;
     }
     return null;
   };
@@ -97,7 +97,7 @@ export function NavigationCommandMenu({
             <span>{item.title}</span>
             {item.description && (
               <span
-                className="text-muted-foreground text-xs transition-colors group-hover:text-accent"
+                className={`${muted.default} ${size.xs} transition-colors group-hover:text-accent`}
               >
                 {item.description}
               </span>

@@ -7,7 +7,7 @@
 
 import { logger } from '@heyclaude/web-runtime/core';
 import { Facebook, Linkedin, Mail, Share2, Twitter } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, spaceY , gap } from '@heyclaude/web-runtime/design-system';
 import { SimpleCopyButton } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -64,7 +64,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className={spaceY.comfortable}>
           {/* Copy link */}
           <div className={cluster.compact}>
             <Input
@@ -89,8 +89,8 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           </div>
 
           {/* Social share buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" size="sm" asChild={true} className="gap-2">
+          <div className={`grid grid-cols-2 ${gap.default}`}>
+            <Button variant="outline" size="sm" asChild={true} className={`${gap.compact}`}>
               <a
                 href={shareLinks.twitter}
                 target="_blank"
@@ -104,7 +104,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild={true} className="gap-2">
+            <Button variant="outline" size="sm" asChild={true} className={`${gap.compact}`}>
               <a
                 href={shareLinks.linkedin}
                 target="_blank"
@@ -118,7 +118,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild={true} className="gap-2">
+            <Button variant="outline" size="sm" asChild={true} className={`${gap.compact}`}>
               <a
                 href={shareLinks.facebook}
                 target="_blank"
@@ -132,7 +132,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild={true} className="gap-2">
+            <Button variant="outline" size="sm" asChild={true} className={`${gap.compact}`}>
               <a
                 href={shareLinks.email}
                 onClick={() => {

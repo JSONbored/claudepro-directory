@@ -10,7 +10,7 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Mail, X } from '@heyclaude/web-runtime/icons';
-import { between, iconSize, stack, fixed, absolute } from '@heyclaude/web-runtime/design-system';
+import { between, iconSize, stack, fixed, absolute, cluster, muted, weight ,size  , gap , padding , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -136,22 +136,22 @@ export function NewsletterFooterBar({
       <div
         className={`${absolute.topFull} h-px bg-linear-to-r from-transparent via-(--color-accent)/30 to-transparent`}
       />
-      <div className="container mx-auto px-4 py-6 md:py-4">
+      <div className={`container mx-auto ${padding.xDefault} ${padding.yComfortable} md:py-4`}>
         {/* Desktop layout */}
-        <div className="mx-auto hidden max-w-5xl items-center justify-between gap-6 md:flex">
-          <div className="flex shrink-0 items-center gap-3">
-            <div className="rounded-lg border border-accent/20 bg-accent/10 p-2.5">
+        <div className={`mx-auto hidden ${maxWidth['5xl']} items-center justify-between ${gap.relaxed} md:flex`}>
+          <div className={`flex shrink-0 items-center ${gap.default}`}>
+            <div className={`${radius.lg} border border-accent/20 bg-accent/10 ${padding.between}`}>
               <Mail className={`${iconSize.md} text-accent`} aria-hidden="true" />
             </div>
             <div>
-              <p className="font-semibold text-base text-foreground">
+              <p className={`${weight.semibold} ${size.base} text-foreground`}>
                 {ctaVariant === 'aggressive'
                   ? "⚡ Don't miss out!"
                   : ctaVariant === 'social_proof'
                     ? '✨ Join 12,000+ Claude builders'
                     : NEWSLETTER_CTA_CONFIG.headline}
               </p>
-              <p className="text-muted-foreground text-sm">
+              <p className={muted.sm}>
                 {ctaVariant === 'aggressive'
                   ? 'Get weekly AI updates before everyone else'
                   : ctaVariant === 'social_proof'
@@ -160,7 +160,7 @@ export function NewsletterFooterBar({
               </p>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-3">
+          <div className={`flex shrink-0 items-center ${gap.default}`}>
             <NewsletterForm source={source} className={DIMENSIONS.MIN_W_NEWSLETTER_FORM_LG} />
             {dismissible && (
               <Button
@@ -179,9 +179,9 @@ export function NewsletterFooterBar({
         {/* Mobile layout */}
         <div className={`${stack.default} md:hidden`}>
           <div className={between.center}>
-            <div className="flex items-center gap-2">
+            <div className={cluster.compact}>
               <Mail className={`${iconSize.sm} shrink-0`} aria-hidden="true" />
-              <p className="font-medium text-foreground text-sm">
+              <p className={`${weight.medium} text-foreground ${size.sm}`}>
                 {ctaVariant === 'aggressive'
                   ? "⚡ Don't miss out!"
                   : ctaVariant === 'social_proof'

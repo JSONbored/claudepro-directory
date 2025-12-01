@@ -4,7 +4,7 @@
  * Handles full dropdown menus with descriptions
  */
 
-import { cluster, grid, iconSize, iconWrapper, flexItemText, marginBottom, absolute } from '@heyclaude/web-runtime/design-system';
+import { cluster, grid, iconSize, iconWrapper, flexItemText, marginBottom, absolute, hoverBg, transition, spaceY, weight, muted, radius ,size , padding , gap , row } from '@heyclaude/web-runtime/design-system';
 import { Briefcase, ChevronDown, Handshake, Users } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
@@ -39,7 +39,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative px-2 py-1 text-xs font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} no-underline ${
+    className: `group relative ${padding.xTight} ${padding.yMicro} ${size.xs} ${weight.medium} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} no-underline ${
       active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground'
     } ${className}`,
     ...(active && { 'aria-current': 'page' as const }),
@@ -86,7 +86,7 @@ interface NavigationDesktopProps {
 export function NavigationDesktop({ isActive, onCommandPaletteOpen }: NavigationDesktopProps) {
   return (
     <nav
-      className={`hidden xl:flex ${cluster.compact} text-xs`}
+      className={`hidden xl:flex ${cluster.compact} ${size.xs}`}
       aria-label="Primary navigation"
     >
       {PRIMARY_NAVIGATION.map((link) => {
@@ -97,7 +97,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
               <DropdownMenuTrigger asChild={true}>
                 <button
                   type="button"
-                  className={`group relative flex items-center px-2 py-1 font-medium text-sm ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+                  className={`group relative flex items-center ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.sm} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
                   aria-label={`Open ${link.label} menu`}
                 >
                   <span className="relative">
@@ -110,7 +110,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                   <ChevronDown className="ml-1 h-2.5 w-2.5" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className={`${DIMENSIONS.DROPDOWN_LG} p-3`}>
+              <DropdownMenuContent align="start" className={`${DIMENSIONS.DROPDOWN_LG} ${padding.compact}`}>
                 <div className={grid.cols2}>
                   {link.children.map((child) => {
                     const ChildIcon = child.icon;
@@ -119,19 +119,19 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                         <Link
                           href={child.href}
                           prefetch={true}
-                          className="group flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-accent/10"
+                          className={`group ${row.default} ${radius.lg} ${padding.tight} ${transition.colors} ${hoverBg.default}`}
                         >
                           {ChildIcon && (
                             <div className={`${iconWrapper.sm} bg-muted/50`}>
                               <ChildIcon
-                                className={`${iconSize.xs} text-muted-foreground`}
+                                className={`${iconSize.xs} ${muted.default}`}
                                 aria-hidden="true"
                               />
                             </div>
                           )}
                           <div className={flexItemText}>
                             <div
-                              className={`${cluster.snug} w-full truncate font-medium text-sm`}
+                              className={`${cluster.snug} w-full truncate ${weight.medium} ${size.sm}`}
                             >
                               {child.label}
                               {child.isNew && (
@@ -142,7 +142,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                               )}
                             </div>
                             {child.description && (
-                              <div className="line-clamp-1 text-[11px] text-muted-foreground">
+                              <div className={`line-clamp-1 text-[11px] ${muted.default}`}>
                                 {child.description}
                               </div>
                             )}
@@ -176,7 +176,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
         <DropdownMenuTrigger asChild={true}>
           <button
             type="button"
-            className={`group relative flex items-center px-2 py-1 font-medium text-sm ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+            className={`group relative flex items-center ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.sm} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
             aria-label="Open additional navigation menu"
           >
             <span className="relative">
@@ -189,12 +189,12 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
             <ChevronDown className="ml-1 h-2.5 w-2.5" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className={`${DIMENSIONS.DROPDOWN_XL} p-4`}>
+        <DropdownMenuContent align="end" className={`${DIMENSIONS.DROPDOWN_XL} ${padding.default}`}>
           {/* 2-column grid for quick links */}
-          <div className={`${marginBottom.tight} grid grid-cols-2 gap-4`}>
+          <div className={`${marginBottom.tight} grid grid-cols-2 ${gap.comfortable}`}>
             {SECONDARY_NAVIGATION.map((group) => (
-              <div key={group.heading} className="space-y-2">
-                <DropdownMenuLabel className="px-2 py-1 font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
+              <div key={group.heading} className={spaceY.compact}>
+                <DropdownMenuLabel className={`px-2 ${padding.yMicro} ${weight.semibold} text-[10px] ${muted.default} uppercase tracking-wider`}>
                   {group.heading}
                 </DropdownMenuLabel>
                 <DropdownMenuGroup className="space-y-0.5">
@@ -205,20 +205,20 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                         <Link
                           href={link.href}
                           prefetch={true}
-                          className="group flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-accent/10"
+                          className={`group ${row.default} ${radius.lg} ${padding.tight} ${transition.colors} ${hoverBg.default}`}
                         >
                           {IconComponent && (
                             <div className={`${iconWrapper.sm} bg-muted/50`}>
                               <IconComponent
-                                className={`${iconSize.xs} text-muted-foreground`}
+                                className={`${iconSize.xs} ${muted.default}`}
                                 aria-hidden="true"
                               />
                             </div>
                           )}
                           <div className={flexItemText}>
-                            <div className="w-full truncate font-medium text-sm">{link.label}</div>
+                            <div className={`w-full truncate ${weight.medium} ${size.sm}`}>{link.label}</div>
                             {link.description && (
-                              <div className="line-clamp-1 text-[11px] text-muted-foreground">
+                              <div className={`line-clamp-1 text-[11px] ${muted.default}`}>
                                 {link.description}
                               </div>
                             )}
@@ -238,35 +238,35 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
             <Link
               href="/community"
               prefetch={true}
-              className="group flex flex-col items-center gap-2 rounded-lg p-3 transition-colors hover:bg-accent/10"
+              className={`group flex flex-col items-center ${gap.compact} ${radius.lg} ${padding.compact} ${transition.colors} ${hoverBg.default}`}
             >
               <Users
-                className={`${iconSize.sm} text-muted-foreground transition-colors group-hover:text-accent`}
+                className={`${iconSize.sm} ${muted.default} transition-colors group-hover:text-accent`}
                 aria-hidden="true"
               />
-              <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
+              <div className={`${weight.medium} text-foreground ${size.sm} transition-colors group-hover:text-accent`}>
                 Community
               </div>
             </Link>
-            <Link href="/partner" prefetch={true} className="group flex flex-col items-center gap-2 rounded-lg p-3 transition-colors hover:bg-accent/10">
+            <Link href="/partner" prefetch={true} className={`group flex flex-col items-center ${gap.compact} ${radius.lg} ${padding.compact} ${transition.colors} ${hoverBg.default}`}>
               <Handshake
-                className={`${iconSize.sm} text-muted-foreground transition-colors group-hover:text-accent`}
+                className={`${iconSize.sm} ${muted.default} transition-colors group-hover:text-accent`}
                 aria-hidden="true"
               />
-              <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
+              <div className={`${weight.medium} text-foreground ${size.sm} transition-colors group-hover:text-accent`}>
                 Partner Program
               </div>
             </Link>
             <Link
               href="/consulting"
               prefetch={true}
-              className="group flex flex-col items-center gap-2 rounded-lg p-3 transition-colors hover:bg-accent/10"
+              className={`group flex flex-col items-center ${gap.compact} ${radius.lg} ${padding.compact} ${transition.colors} ${hoverBg.default}`}
             >
               <Briefcase
-                className={`${iconSize.sm} text-muted-foreground transition-colors group-hover:text-accent`}
+                className={`${iconSize.sm} ${muted.default} transition-colors group-hover:text-accent`}
                 aria-hidden="true"
               />
-              <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
+              <div className={`${weight.medium} text-foreground ${size.sm} transition-colors group-hover:text-accent`}>
                 Consulting
               </div>
             </Link>

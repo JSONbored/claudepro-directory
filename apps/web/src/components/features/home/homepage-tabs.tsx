@@ -6,6 +6,7 @@ import { getHomepageConfigBundle } from '@heyclaude/web-runtime/config/static-co
 import { type UnifiedCategoryConfig } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
+import { stack, spaceY, muted, weight, size  , gap , padding } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { type FC, memo, useEffect, useMemo, useState } from 'react';
@@ -73,9 +74,9 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   const trendingSlugs = useMemo(() => getTrendingSlugs(filteredResults, 6), [filteredResults]);
 
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
+    <Tabs value={activeTab} onValueChange={onTabChange} className={spaceY.loose}>
       {/* Tabs with horizontal scroll on mobile/tablet */}
-      <TabsList className="scrollbar-hide w-full gap-1 overflow-x-auto lg:grid lg:w-auto lg:auto-cols-fr lg:grid-flow-col">
+      <TabsList className={`scrollbar-hide w-full ${gap.tight} overflow-x-auto lg:grid lg:w-auto lg:auto-cols-fr lg:grid-flow-col`}>
         <div className="flex min-w-max lg:contents lg:min-w-0">
           {tabCategories.map((tab) => {
             let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
@@ -91,7 +92,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               <motion.div key={tab} whileTap={{ scale: 0.95 }} transition={springDefault}>
                 <TabsTrigger
                   value={tab}
-                  className="whitespace-nowrap px-3 text-xs sm:px-4 sm:text-sm"
+                  className={`whitespace-nowrap ${padding.xCompact} ${size.xs} sm:px-4 sm:text-sm`}
                 >
                   {displayName}
                 </TabsTrigger>
@@ -109,7 +110,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
             : categoryConfigs[tab]?.pluralTitle?.toLowerCase() || tab;
 
         return (
-          <TabsContent key={tab} value={tab} className="space-y-6">
+          <TabsContent key={tab} value={tab} className={spaceY.relaxed}>
             <UnifiedCardGrid
               items={filteredResults}
               variant="normal"
@@ -126,7 +127,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
                 return (
                   <div className="relative h-full">
                     {(showNew || showTrending) && (
-                      <div className="pointer-events-none absolute top-3 left-3 z-10 flex flex-col gap-2">
+                      <div className={`pointer-events-none absolute top-3 left-3 z-10 ${stack.compact}`}>
                         {showNew && (
                           <UnifiedBadge
                             variant="base"
@@ -163,16 +164,16 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
       })}
 
       {/* Community tab with custom content */}
-      <TabsContent value="community" className="space-y-6">
+      <TabsContent value="community" className={spaceY.relaxed}>
         <div className={'mb-8 text-center'}>
-          <h3 className={'mb-2 font-bold text-2xl'}>Featured Contributors</h3>
-          <p className="text-muted-foreground">
+          <h3 className={`mb-2 ${weight.bold} ${size['2xl']}`}>Featured Contributors</h3>
+          <p className={muted.default}>
             Meet the experts creating amazing Claude configurations
           </p>
         </div>
 
         <div className="text-center">
-          <p className={'mb-6 text-lg text-muted-foreground'}>
+          <p className={`mb-6 ${muted.lg}`}>
             Coming soon! Featured contributors who create amazing Claude configurations.
           </p>
         </div>

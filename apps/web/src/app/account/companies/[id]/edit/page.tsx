@@ -9,6 +9,7 @@ import {
   getUserCompanyById,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { spaceY, muted, marginBottom, weight , size } from '@heyclaude/web-runtime/design-system';
 import {
   generateRequestId,
   logger,
@@ -102,10 +103,10 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
 
   if (hasError) {
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Company unavailable</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Company unavailable</CardTitle>
             <CardDescription>
               We couldn&apos;t load this company. Please try again later.
             </CardDescription>
@@ -135,10 +136,10 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
   });
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Edit Company</h1>
-        <p className="text-muted-foreground">Update your company profile information</p>
+        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>Edit Company</h1>
+        <p className={muted.default}>Update your company profile information</p>
       </div>
 
       <CompanyForm mode="edit" initialData={company} />

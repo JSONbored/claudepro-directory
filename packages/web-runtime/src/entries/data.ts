@@ -33,6 +33,7 @@ export * from '../data/content/paginated.ts';
 export * from '../data/content/reviews.ts';
 export * from '../data/content/homepage.ts';
 export * from '../data/search/facets.ts';
+export * from '../data/tags.ts';
 export * from '../data/changelog.ts';
 export * from '../data/forms/submission-form-fields.ts';
 export * from '../data/layout.ts';

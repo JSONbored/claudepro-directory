@@ -6,7 +6,7 @@
  */
 
 import { getSocialLinks, logClientWarning, logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { iconSize } from '@heyclaude/web-runtime/design-system';
+import { iconSize, weight  } from '@heyclaude/web-runtime/design-system';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Github } from '@heyclaude/web-runtime/icons';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
@@ -104,12 +104,12 @@ export function GitHubStarsButton({
       size={size}
       onClick={handleClick}
       disabled={disabled}
-      className={cn('gap-2', className)}
+      className={cn('${gap.compact}', className)}
       aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}`}
     >
       <Github className={iconSize.sm} aria-hidden="true" />
       {typeof stars === 'number' && (
-        <span className="font-medium tabular-nums">{stars.toLocaleString()}</span>
+        <span className={`${weight.medium} tabular-nums`}>{stars.toLocaleString()}</span>
       )}
     </Button>
   );

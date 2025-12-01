@@ -10,7 +10,7 @@ import {
   getUserSettings,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between } from '@heyclaude/web-runtime/design-system';
+import { between, spaceY, cluster, muted, marginBottom, weight ,size , gap } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Button ,
   Card,
@@ -78,10 +78,10 @@ export default async function SettingsPage() {
       timestamp: new Date().toISOString(),
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>Please sign in to manage your account settings.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -118,10 +118,10 @@ export default async function SettingsPage() {
 
   if (!settingsData) {
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Settings</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Settings</CardTitle>
             <CardDescription>
               We couldn&apos;t load your account settings. Please refresh or try again later.
             </CardDescription>
@@ -177,18 +177,18 @@ export default async function SettingsPage() {
       new Error('Profile missing from response')
     );
     return (
-      <div className="space-y-6">
-        <h1 className="font-bold text-3xl">Settings</h1>
+      <div className={spaceY.relaxed}>
+        <h1 className={`${weight.bold} ${size['3xl']}`}>Settings</h1>
         <p className="text-destructive">Unable to load profile. Please try again later.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Settings</h1>
-        <p className="text-muted-foreground">Manage your account settings and preferences</p>
+        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>Settings</h1>
+        <p className={muted.default}>Manage your account settings and preferences</p>
       </div>
 
       {/* Profile Information */}
@@ -217,15 +217,15 @@ export default async function SettingsPage() {
           <CardTitle>Account Details</CardTitle>
           <CardDescription>Your account information</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <CardContent className={spaceY.comfortable}>
+          <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-2`}>
             <div>
-              <p className="font-medium text-sm">Email</p>
-              <p className="text-muted-foreground">{user.email}</p>
+              <p className={`${weight.medium} ${size.sm}`}>Email</p>
+              <p className={muted.default}>{user.email}</p>
             </div>
             <div>
-              <p className="font-medium text-sm">Member Since</p>
-              <p className="text-muted-foreground">
+              <p className={`${weight.medium} ${size.sm}`}>Member Since</p>
+              <p className={muted.default}>
                 {profile.created_at
                   ? new Date(profile.created_at).toLocaleDateString('en-US', {
                       year: 'numeric',
@@ -246,8 +246,8 @@ export default async function SettingsPage() {
             Synced from {user.app_metadata.provider === 'github' ? 'GitHub' : 'Google'}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {userData?.image && typeof userData.image === 'string' ? <div className="flex items-center gap-4">
+        <CardContent className={spaceY.comfortable}>
+          {userData?.image && typeof userData.image === 'string' ? <div className={cluster.comfortable}>
               <Image
                 src={userData.image}
                 alt={`${userData.name ?? 'User'}'s avatar`}

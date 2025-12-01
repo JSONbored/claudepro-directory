@@ -5,7 +5,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { iconSize, muted } from '@heyclaude/web-runtime/design-system';
+import { iconSize, muted, spaceY, cluster  , padding , gap , size } from '@heyclaude/web-runtime/design-system';
 import {
   createCompany,
   getCompanyByIdAction,
@@ -208,7 +208,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   };
 
   return (
-    <div className="space-y-2">
+    <div className={spaceY.compact}>
       <Label htmlFor={buttonId}>
         Company <span className="text-destructive">*</span>
       </Label>
@@ -222,22 +222,22 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
             className="w-full justify-between"
           >
             {selectedCompany ? (
-              <span className="flex items-center gap-2">
+              <span className={cluster.compact}>
                 <Building2 className={iconSize.sm} />
                 {selectedCompany.name}
               </span>
             ) : (
-              <span className="text-muted-foreground">
+              <span className={muted.sm}>
                 {defaultCompanyName || 'Select or create company...'}
               </span>
             )}
             <Search className={`${iconSize.sm} opacity-50`} />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[400px] p-0" align="start">
+        <PopoverContent className={`w-[400px] ${padding.none}`} align="start">
           {showCreateForm ? (
-            <form onSubmit={handleCreate} className="space-y-3 p-4">
-              <div className="space-y-2">
+            <form onSubmit={handleCreate} className={`${spaceY.default} ${padding.default}`}>
+              <div className={spaceY.compact}>
                 <Label htmlFor={nameInputId}>Company Name</Label>
                 <Input
                   id={nameInputId}
@@ -247,7 +247,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                   defaultValue={searchQuery}
                 />
               </div>
-              <div className="space-y-2">
+              <div className={spaceY.compact}>
                 <Label htmlFor={websiteInputId}>Website (Optional)</Label>
                 <Input
                   id={websiteInputId}
@@ -256,7 +256,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                   placeholder="https://company.com"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className={`flex ${gap.compact}`}>
                 <Button type="submit" size="sm" className="flex-1">
                   Create
                 </Button>
@@ -274,7 +274,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
               </div>
             </form>
           ) : (
-            <div className="space-y-2 p-2">
+            <div className={`${spaceY.compact} ${padding.tight}`}>
               <Input
                 placeholder="Search companies..."
                 value={searchQuery}
@@ -282,15 +282,15 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                 className="h-9"
               />
               {isSearching ? (
-                <p className={`${muted.default} text-sm px-2 py-4`}>Searching...</p>
+                <p className={`${muted.sm} ${padding.xTight} ${padding.yDefault}`}>Searching...</p>
               ) : companies.length > 0 ? (
-                <div className="max-h-[200px] space-y-1 overflow-y-auto">
+                <div className={`max-h-[200px] ${spaceY.tight} overflow-y-auto`}>
                   {companies.map((company) => (
                     <button
                       key={company.id}
                       type="button"
                       onClick={() => handleSelect(company)}
-                      className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-accent"
+                      className={`flex w-full items-center ${gap.compact} rounded-md ${padding.xTight} ${padding.yCompact} text-left ${size.sm} hover:bg-accent`}
                     >
                       <Building2 className={iconSize.sm} />
                       <span>{company.name}</span>
@@ -298,7 +298,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                   ))}
                 </div>
               ) : searchQuery.length >= 2 ? (
-                <p className={`${muted.default} text-sm px-2 py-4`}>No companies found</p>
+                <p className={`${muted.sm} ${padding.xTight} ${padding.yDefault}`}>No companies found</p>
               ) : null}
               <Button
                 type="button"

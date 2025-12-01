@@ -3,6 +3,7 @@
  */
 
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
+import { spaceY, muted, marginBottom, weight , size } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import  { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
@@ -40,10 +41,10 @@ export default async function NewCompanyPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Create Company</h1>
-        <p className="text-muted-foreground">
+        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>Create Company</h1>
+        <p className={muted.default}>
           Add a new company profile to post jobs and showcase your organization
         </p>
       </div>

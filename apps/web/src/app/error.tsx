@@ -1,7 +1,7 @@
 'use client';
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { responsive } from '@heyclaude/web-runtime/design-system';
+import { responsive, muted, marginBottom, marginTop, weight ,size , padding , gap , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { Button, Card } from '@heyclaude/web-runtime/ui';
@@ -53,23 +53,23 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-lg p-8 text-center">
-        <div className="mb-6">
-          <div className="mb-4 flex justify-center">
-            <div className="rounded-full bg-destructive/10 p-3">
+    <div className={`flex ${minHeight.screen} items-center justify-center bg-background ${padding.xDefault}`}>
+      <Card className={`w-full ${maxWidth.lg} ${padding.relaxed} text-center`}>
+        <div className={marginBottom.comfortable}>
+          <div className={`${marginBottom.default} flex justify-center`}>
+            <div className={`rounded-full bg-destructive/10 ${padding.compact}`}>
               <AlertCircle className="h-12 w-12 text-destructive" aria-hidden="true" />
             </div>
           </div>
-          <h1 className="mb-2 font-bold text-2xl">Something went wrong</h1>
-          <p className="text-muted-foreground">
+          <h1 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`}>Something went wrong</h1>
+          <p className={muted.default}>
             An unexpected error occurred. We've logged the issue and will investigate it shortly.
           </p>
         </div>
 
-        {isDevelopment && error.message ? <div className="mb-6 rounded-md bg-muted p-4 text-left">
-            <p className="font-mono text-destructive text-xs">{error.message}</p>
-            {error.digest ? <p className="mt-2 font-mono text-muted-foreground text-xs">Digest: {error.digest}</p> : null}
+        {isDevelopment && error.message ? <div className={`${marginBottom.comfortable} rounded-md bg-muted ${padding.default} text-left`}>
+            <p className={`font-mono text-destructive ${size.xs}`}>{error.message}</p>
+            {error.digest ? <p className={`${marginTop.compact} font-mono ${muted.xs}`}>Digest: {error.digest}</p> : null}
           </div> : null}
 
         <div className={responsive.smRowGap}>
@@ -85,9 +85,9 @@ export default function ErrorBoundary({
           </Link>
         </div>
 
-        <div className="mt-8 text-muted-foreground text-sm">
-          <p className="mb-2">Or explore:</p>
-          <div className="flex flex-wrap gap-2 justify-center">
+        <div className={`${marginTop.relaxed} ${muted.sm}`}>
+          <p className={marginBottom.tight}>Or explore:</p>
+          <div className={`flex flex-wrap ${gap.compact} justify-center`}>
             <Link href={ROUTES.AGENTS} className="hover:text-primary">
               Agents
             </Link>

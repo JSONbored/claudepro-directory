@@ -10,7 +10,7 @@ import {
   getUserLibrary,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, iconSize, hoverBg, transition, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
 import {
   Bookmark as BookmarkIcon,
   ExternalLink,
@@ -75,10 +75,10 @@ export default async function LibraryPage() {
       section: 'authentication',
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>Please sign in to view your library.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -124,10 +124,10 @@ export default async function LibraryPage() {
 
   if (!data) {
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">My Library</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>My Library</CardTitle>
             <CardDescription>
               Unable to load your library right now. Please refresh or try again later.
             </CardDescription>
@@ -167,54 +167,54 @@ export default async function LibraryPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div className={between.center}>
         <div>
-          <h1 className="mb-2 font-bold text-3xl">My Library</h1>
-          <p className="text-muted-foreground">
+          <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>My Library</h1>
+          <p className={muted.default}>
             {bookmarkCount} bookmarks • {collectionCount} collections
           </p>
         </div>
         <Link href={ROUTES.ACCOUNT_LIBRARY_NEW}>
           <Button className={cluster.compact}>
-            <Plus className="h-4 w-4" />
+            <Plus className={iconSize.sm} />
             New Collection
           </Button>
         </Link>
       </div>
 
       <Tabs defaultValue="bookmarks" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className={`grid w-full ${maxWidth.md} grid-cols-2`}>
           <TabsTrigger value="bookmarks" className={cluster.compact}>
-            <BookmarkIcon className="h-4 w-4" />
+            <BookmarkIcon className={iconSize.sm} />
             Bookmarks ({bookmarkCount})
           </TabsTrigger>
           <TabsTrigger
             value={Constants.public.Enums.content_category[8]} // 'collections'
             className={cluster.compact}
           >
-            <FolderOpen className="h-4 w-4" />
+            <FolderOpen className={iconSize.sm} />
             Collections ({collectionCount})
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="bookmarks" className="space-y-4">
+        <TabsContent value="bookmarks" className={spaceY.comfortable}>
           {bookmarks.length === 0 ? (
             <Card>
-              <CardContent className="flex flex-col items-center py-12">
-                <BookmarkIcon className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 font-semibold text-xl">No bookmarks yet</h3>
-                <p className="max-w-md text-center text-muted-foreground">
+              <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
+                <BookmarkIcon className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+                <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No bookmarks yet</h3>
+                <p className={`max-w-md text-center ${muted.default}`}>
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
-                <NavLink href="/" className="mt-4">
+                <NavLink href="/" className={marginTop.default}>
                   Browse Directory →
                 </NavLink>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4">
+            <div className={`grid ${gap.comfortable}`}>
               {bookmarks.map((bookmark) => (
                 <Card key={bookmark.id}>
                   <CardHeader>
@@ -226,18 +226,18 @@ export default async function LibraryPage() {
                           </UnifiedBadge>
                           <CardTitle className="text-lg">{bookmark.content_slug}</CardTitle>
                         </div>
-                        {bookmark.notes ? <CardDescription className="mt-2">{bookmark.notes}</CardDescription> : null}
+                        {bookmark.notes ? <CardDescription className={marginTop.compact}>{bookmark.notes}</CardDescription> : null}
                       </div>
                       <NavLink
                         href={`/${bookmark.content_type}/${bookmark.content_slug}`}
                         className="hover:text-primary/80"
                       >
-                        <ExternalLink className="h-4 w-4" />
+                        <ExternalLink className={iconSize.sm} />
                       </NavLink>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-xs">
+                    <p className={`${muted.default} ${size.xs}`}>
                       Saved{' '}
                       {bookmark.created_at
                         ? new Date(bookmark.created_at).toLocaleDateString()
@@ -252,29 +252,29 @@ export default async function LibraryPage() {
 
         <TabsContent
           value={Constants.public.Enums.content_category[8]} // 'collections'
-          className="space-y-4"
+          className={spaceY.comfortable}
         >
           {collections.length === 0 ? (
             <Card>
-              <CardContent className="flex flex-col items-center py-12">
-                <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 font-semibold text-xl">No collections yet</h3>
-                <p className="mb-4 max-w-md text-center text-muted-foreground">
+              <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
+                <FolderOpen className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+                <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No collections yet</h3>
+                <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
                   Organize your bookmarks into custom collections! Group related configurations
                   together and share them with others.
                 </p>
                 <Link href={ROUTES.ACCOUNT_LIBRARY_NEW}>
                   <Button className={cluster.compact}>
-                    <Plus className="h-4 w-4" />
+                    <Plus className={iconSize.sm} />
                     Create Your First Collection
                   </Button>
                 </Link>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className={`grid ${gap.comfortable} sm:grid-cols-2`}>
               {collections.map((collection) => (
-                <Card key={collection.id} className="cursor-pointer transition-all duration-200 hover:bg-muted/50 hover:shadow-md">
+                <Card key={collection.id} className={`cursor-pointer ${transition.default} ${hoverBg.muted} hover:shadow-md`}>
                   <Link href={`/account/library/${collection.slug}`}>
                     <CardHeader>
                       <div className="flex items-start justify-between">
@@ -286,7 +286,7 @@ export default async function LibraryPage() {
                               </UnifiedBadge> : null}
                           </div>
                           <CardTitle className="text-lg">{collection.name}</CardTitle>
-                          {collection.description ? <CardDescription className="mt-2 line-clamp-2">
+                          {collection.description ? <CardDescription className={`${marginTop.compact} line-clamp-2`}>
                               {collection.description}
                             </CardDescription> : null}
                         </div>
@@ -294,10 +294,10 @@ export default async function LibraryPage() {
                     </CardHeader>
                     <CardContent>
                       <div className={between.center}>
-                        <p className="text-muted-foreground text-xs">
+                        <p className={`${muted.default} ${size.xs}`}>
                           {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'}
                         </p>
-                        <p className="text-muted-foreground text-xs">
+                        <p className={`${muted.default} ${size.xs}`}>
                           {collection.view_count} views
                         </p>
                       </div>

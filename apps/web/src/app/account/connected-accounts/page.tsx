@@ -1,6 +1,7 @@
 import { getUserIdentities } from '@heyclaude/web-runtime';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { spaceY, muted, marginBottom, weight , size } from '@heyclaude/web-runtime/design-system';
 import {
   generateRequestId,
   logger,
@@ -57,10 +58,10 @@ export default async function ConnectedAccountsPage() {
       outcome: 'unauthenticated',
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>Please sign in to manage your connected accounts.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -101,8 +102,8 @@ export default async function ConnectedAccountsPage() {
 
   const pageHeader = (
     <div>
-      <h1 className="mb-2 font-bold text-3xl">Connected Accounts</h1>
-      <p className="text-muted-foreground">Manage your OAuth provider connections</p>
+      <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>Connected Accounts</h1>
+      <p className={muted.default}>Manage your OAuth provider connections</p>
     </div>
   );
 
@@ -124,11 +125,11 @@ export default async function ConnectedAccountsPage() {
     });
 
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         {pageHeader}
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Connected accounts unavailable</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Connected accounts unavailable</CardTitle>
             <CardDescription>{errorMessage}</CardDescription>
           </CardHeader>
           <CardContent>
@@ -141,7 +142,7 @@ export default async function ConnectedAccountsPage() {
     );
   }
 
-  const identities = result.data.identities ?? [];
+  const identities = result.data.identities;
   if (identities.length === 0) {
     userLogger.info('ConnectedAccountsPage: no OAuth identities found', {
       section: 'identities-data-fetch',
@@ -155,7 +156,7 @@ export default async function ConnectedAccountsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       {pageHeader}
 
       <Card>

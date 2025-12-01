@@ -208,7 +208,7 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
         Skip to main content
       </a>
       <PinboardDrawerProvider>
-        <div className={'flex min-h-screen flex-col bg-background'}>
+        <div className={'flex ${minHeight.screen} flex-col bg-background'}>
           {announcement && <AnnouncementBannerClient announcement={announcement} />}
           <Navigation hideCreateButton={useFloatingActionBar} navigationData={navigationData} />
           <main id="main-content" className="flex-1">

@@ -20,7 +20,7 @@ import {
   X,
 } from '@heyclaude/web-runtime/icons';
 import type { FilterState, UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
-import { iconSize, absolute } from '@heyclaude/web-runtime/design-system';
+import { iconSize, absolute, radius, cluster, hoverBg, spaceY, marginBottom, muted, srOnly, weight ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useId, useState } from 'react';
@@ -62,7 +62,7 @@ function getCategoryFromPathname(
 export type { FilterState };
 
 const SearchErrorFallback = () => (
-  <div className="p-4 text-center text-muted-foreground">Error loading search</div>
+  <div className={`p-4 text-center ${muted.default}`}>Error loading search</div>
 );
 
 /**
@@ -314,8 +314,8 @@ function UnifiedSearchComponent({
 
   return (
     <ErrorBoundary fallback={SearchErrorFallback}>
-      <search className={cn('w-full space-y-4', className)}>
-        <div className="space-y-3">
+      <search className={cn('w-full ${spaceY.comfortable}', className)}>
+        <div className={spaceY.default}>
           <div className="relative">
             <div
               className={`-translate-y-1/2 pointer-events-none ${absolute.topHalf} left-4 z-10`}
@@ -330,7 +330,7 @@ function UnifiedSearchComponent({
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               placeholder={placeholder}
               className={
-                'h-14 w-full border-border/50 bg-card/50 pr-4 pl-12 text-base backdrop-blur-sm transition-smooth focus:border-accent/50 focus:bg-card'
+                'h-14 w-full border-border/50 bg-card/50 pr-4 pl-12 ${size.base} backdrop-blur-sm transition-smooth focus:border-accent/50 focus:bg-card'
               }
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
@@ -341,12 +341,12 @@ function UnifiedSearchComponent({
           {showPresetRail && (
             <section
               aria-labelledby={presetSectionLabelId}
-              className="rounded-lg border border-border/60 bg-card/40 p-3"
+              className={`${radius.lg} border border-border/60 bg-card/40 ${padding.compact}`}
             >
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div className={`${marginBottom.compact} flex flex-wrap items-center justify-between ${gap.default}`}>
                 <p
                   id={presetSectionLabelId}
-                  className="font-semibold text-muted-foreground text-xs uppercase tracking-wide"
+                  className={`${weight.semibold} ${muted.default} ${size.xs} uppercase tracking-wide`}
                 >
                   Saved searches
                 </p>
@@ -357,7 +357,7 @@ function UnifiedSearchComponent({
                     type="button"
                     onClick={onSavePresetRequest}
                     disabled={savePresetButtonDisabled}
-                    className="gap-2 text-xs sm:text-sm"
+                    className={`${gap.compact} ${size.xs} sm:text-sm`}
                   >
                     <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>Save current filters</span>
@@ -365,21 +365,21 @@ function UnifiedSearchComponent({
                 )}
               </div>
               {hasSavedSearches ? (
-                <ul className="flex flex-wrap gap-2" aria-live="polite">
+                <ul className={`flex flex-wrap ${gap.compact}`} aria-live="polite">
                   {savedSearchPresets.map((preset) => (
                     <li
                       key={preset.id}
-                      className="flex items-center gap-1 rounded-full border border-border/60 bg-background/80 px-2 py-1"
+                      className={`${cluster.tight} rounded-full border border-border/60 bg-background/80 ${padding.xTight} ${padding.yMicro}`}
                     >
                       <button
                         type="button"
                         onClick={() => handlePresetSelect(preset.id)}
                         disabled={!canSelectSavedSearches}
                         className={cn(
-                          'flex items-center gap-2 rounded-full px-2 py-1 font-medium text-xs transition-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 sm:text-sm',
+                          `${cluster.compact} rounded-full ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.xs} transition-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 sm:text-sm`,
                           canSelectSavedSearches
-                            ? 'text-foreground hover:bg-accent/10'
-                            : 'cursor-not-allowed text-muted-foreground opacity-70'
+                            ? `text-foreground ${hoverBg.default}`
+                            : 'cursor-not-allowed ${muted.default} opacity-70'
                         )}
                         title={
                           preset.query
@@ -399,19 +399,19 @@ function UnifiedSearchComponent({
                             event.stopPropagation();
                             handlePresetRemove(preset.id);
                           }}
-                          className="rounded-full p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+                          className={`rounded-full ${padding.micro} ${muted.default} transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60`}
                           aria-label={`Remove preset ${preset.label}`}
                         >
-                          <X className="h-3 w-3" aria-hidden="true" />
+                          <X className={iconSize.xs} aria-hidden="true" />
                         </button>
                       )}
                     </li>
                   ))}
                 </ul>
               ) : presetsLoading ? (
-                <p className="text-muted-foreground text-sm">Loading saved searches…</p>
+                <p className={muted.sm}>Loading saved searches…</p>
               ) : (
-                <p className="text-muted-foreground text-sm">
+                <p className={muted.sm}>
                   No saved searches yet. Use “Save current filters” to store your favorite combos.
                 </p>
               )}
@@ -419,7 +419,7 @@ function UnifiedSearchComponent({
           )}
 
           {showFilters && (
-            <div className={'flex justify-end gap-2'}>
+            <div className={'flex justify-end ${gap.compact}'}>
               <Select
                 value={filters.sort || 'trending'}
                 onValueChange={(value) => handleSortChange(value as FilterState['sort'])}
@@ -428,7 +428,7 @@ function UnifiedSearchComponent({
                 <SelectTrigger
                   id={sortSelectId}
                   className={
-                    'h-10 w-auto border-border bg-background px-4 transition-smooth hover:bg-accent/10'
+                    `h-10 w-auto border-border bg-background ${padding.xDefault} transition-smooth ${hoverBg.default}`
                   }
                   aria-label="Sort configurations"
                 >
@@ -447,7 +447,7 @@ function UnifiedSearchComponent({
                 size="default"
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className={cn(
-                  'h-10 gap-2 px-4 transition-smooth',
+                  'h-10 ${gap.compact} ${padding.xDefault} transition-smooth',
                   isFilterOpen && 'border-accent bg-accent/10'
                 )}
                 aria-expanded={isFilterOpen}
@@ -460,7 +460,7 @@ function UnifiedSearchComponent({
                   <UnifiedBadge
                     variant="base"
                     style="secondary"
-                    className="ml-1 h-5 px-1.5 py-0"
+                    className={`ml-1 h-5 ${padding.xSnug} py-0`}
                     aria-label={`${activeFilterCount} active filters`}
                   >
                     {activeFilterCount}
@@ -477,12 +477,12 @@ function UnifiedSearchComponent({
         </div>
 
         <div
-          className={'text-muted-foreground text-sm'}
+          className={muted.sm}
           id={searchResultsId}
           aria-live="polite"
           aria-atomic="true"
         >
-          {announcement && <span className="sr-only">{announcement}</span>}
+          {announcement && <span className={srOnly.default}>{announcement}</span>}
           {localSearchQuery && resultCount > 0 && (
             <span aria-hidden="true">
               {resultCount} {resultCount === 1 ? 'result' : 'results'} found

@@ -1,3 +1,4 @@
+import { spaceY, marginBottom, radius, padding, row , gap , minHeight } from '@heyclaude/web-runtime/design-system';
 import { getSkeletonKeys, Skeleton  } from '@heyclaude/web-runtime/ui';
 
 
@@ -17,24 +18,24 @@ const CODE_LINE_KEYS = getSkeletonKeys(8);
  */
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${minHeight.screen} bg-background`}>
       {/* Header */}
       <div className="border-border/50 border-b bg-card/30">
-        <div className="container mx-auto px-4 py-8">
+        <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
           {/* Back button */}
-          <Skeleton size="sm" width="sm" className="mb-6" />
+          <Skeleton size="sm" width="sm" className={marginBottom.comfortable} />
 
           {/* Title section */}
-          <div className="mb-6 flex items-start gap-4">
+          <div className={`${marginBottom.comfortable} ${row.comfortable}`}>
             <Skeleton size="xl" width="xs" className="shrink-0" />
-            <div className="flex-1 space-y-4">
+            <div className={`flex-1 ${spaceY.comfortable}`}>
               <Skeleton size="xl" width="3/4" />
               <Skeleton size="md" width="3xl" />
             </div>
           </div>
 
           {/* Metadata badges */}
-          <div className="flex flex-wrap gap-2">
+          <div className={`flex flex-wrap ${gap.compact}`}>
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />
@@ -43,12 +44,12 @@ export default function Loading() {
       </div>
 
       {/* Content with sidebar */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+        <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-3`}>
           {/* Main content */}
-          <div className="space-y-6 lg:col-span-2">
+          <div className={`${spaceY.relaxed} lg:col-span-2`}>
             {/* Content card */}
-            <div className="space-y-4 rounded-lg border p-6">
+            <div className={`${spaceY.comfortable} ${radius.lg} border ${padding.comfortable}`}>
               <Skeleton size="md" width="3xl" />
               <Skeleton size="sm" width="3xl" />
               <Skeleton size="sm" width="3xl" />
@@ -56,9 +57,9 @@ export default function Loading() {
             </div>
 
             {/* Code block skeleton */}
-            <div className="space-y-4 rounded-lg border p-6">
+            <div className={`${spaceY.comfortable} ${radius.lg} border ${padding.comfortable}`}>
               <Skeleton size="sm" width="sm" />
-              <div className="space-y-2">
+              <div className={spaceY.compact}>
                 {Array.from({ length: 8 }, (_, index) => {
                   const width: '2/3' | '3xl' = index % 3 === 0 ? '2/3' : '3xl';
                   return <Skeleton key={CODE_LINE_KEYS[index]} size="sm" width={width} />;
@@ -68,8 +69,8 @@ export default function Loading() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
-            <div className="space-y-4 rounded-lg border p-6">
+          <div className={spaceY.relaxed}>
+            <div className={`${spaceY.comfortable} ${radius.lg} border ${padding.comfortable}`}>
               <Skeleton size="md" width="sm" />
               <Skeleton size="sm" width="3xl" />
               <Skeleton size="sm" width="3xl" />

@@ -20,7 +20,7 @@
  */
 
 import { X } from '@heyclaude/web-runtime/icons';
-import { between, cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, iconSize, spaceY, muted ,size  , gap  } from '@heyclaude/web-runtime/design-system';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -211,7 +211,7 @@ export function ListItemManager(props: ListItemManagerProps) {
   const showMinError = minItems && items.length < minItems && items.length > 0;
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn(spaceY.compact, className)}>
       {/* Label */}
       <Label>{label}</Label>
 
@@ -236,11 +236,11 @@ export function ListItemManager(props: ListItemManagerProps) {
       </div>
 
       {/* Description */}
-      {description && <p className="text-muted-foreground text-xs">{description}</p>}
+      {description && <p className={`${muted.default} ${size.xs}`}>{description}</p>}
 
       {/* Counter */}
       {showCounter && maxItems && (
-        <p className="text-muted-foreground text-xs">
+        <p className={`${muted.default} ${size.xs}`}>
           {items.length}/{maxItems} {label.toLowerCase()} {items.length === 1 ? 'item' : 'items'}
         </p>
       )}
@@ -250,13 +250,13 @@ export function ListItemManager(props: ListItemManagerProps) {
         <>
           {/* Badge variant */}
           {props.variant === 'badge' && (
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className={`flex flex-wrap ${gap.compact} mt-3`}>
               {items.map((item, index) => (
                 <UnifiedBadge
                   key={item}
                   variant="base"
                   style={props.badgeStyle || 'secondary'}
-                  className="gap-1 pr-1"
+                  className={`${gap.tight} pr-1`}
                 >
                   {item}
                   <button
@@ -275,14 +275,14 @@ export function ListItemManager(props: ListItemManagerProps) {
 
           {/* List variant */}
           {props.variant === 'list' && (
-            <div className="space-y-2">
+            <div className={spaceY.compact}>
               {items.map((item, index) => {
                 // Generate stable key from item content hash
                 const itemKey = `item-${item.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)}-${item.length}`;
                 return (
                   <div
                     key={itemKey}
-                    className={cn(between.center, 'rounded border p-2')}
+                    className={cn(between.center, 'rounded border ${padding.tight}')}
                   >
                     <span className="text-sm">{item}</span>
                     <Button
@@ -303,7 +303,7 @@ export function ListItemManager(props: ListItemManagerProps) {
 
           {/* Custom variant */}
           {props.variant === 'custom' && (
-            <div className="space-y-2">
+            <div className={spaceY.compact}>
               {items.map((item, index) => props.renderItem(item, index, () => handleRemove(index)))}
             </div>
           )}
@@ -312,21 +312,21 @@ export function ListItemManager(props: ListItemManagerProps) {
 
       {/* Min items error */}
       {showMinError && (
-        <p className="text-destructive text-xs">
+        <p className={`text-destructive ${size.xs}`}>
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       )}
 
       {/* Custom error message */}
       {errorMessage && (
-        <p className="text-destructive text-xs" role="alert">
+        <p className={`text-destructive ${size.xs}`} role="alert">
           {errorMessage}
         </p>
       )}
 
       {/* Empty state message for required fields */}
       {minItems && items.length === 0 && (
-        <p className="text-destructive text-xs">
+        <p className={`text-destructive ${size.xs}`}>
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       )}

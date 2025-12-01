@@ -12,10 +12,14 @@ import type { SearchFilterOptions } from '@heyclaude/web-runtime/types/component
 import { HomePageClient } from '@/src/components/features/home/home-sections';
 
 /**
- * Homepage Content Server Component
+ * Homepage Content Data Fetcher
  *
- * OPTIMIZATION: Fetches homepage data inside Suspense boundary for streaming SSR
- * This allows the hero section and search facets to stream immediately while content loads
+ * CACHING: This calls getHomepageData which is:
+ * 1. Wrapped with React's cache() - deduplicated within the same request
+ * 2. Uses fetchCached with unstable_cache - cached across requests
+ * 
+ * When called from HomepageContentServer (inside Suspense), the data is likely
+ * already in React's cache from the parent page component's fetch.
  */
 async function HomepageContentData() {
   // Generate single requestId for this component

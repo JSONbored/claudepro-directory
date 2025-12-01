@@ -12,7 +12,7 @@ import { getContentCount } from "../content/index.ts";
 const DESCRIPTION_FALLBACK =
   'Open-source directory of Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.';
 
-const HERO_DEFAULTS = {
+const HERO_DEFAULTS: VisitorStats = {
   monthlyVisitors: 3000,
   monthlyPageViews: 16_000,
 };
@@ -36,74 +36,113 @@ interface VercelAnalyticsResponse {
   };
 }
 
-const getVisitorStats = unstable_cache(
-  async (): Promise<VisitorStats> => {
-    // Create request-scoped child logger - do not mutate shared logger in cached function
-    const requestId = generateRequestId();
-    const requestLogger = logger.child({
-      requestId,
+/**
+ * Custom error class to signal that we should NOT cache this result.
+ * By throwing inside unstable_cache, Next.js won't cache the error state.
+ */
+class VisitorStatsError extends Error {
+  constructor(
+    message: string,
+    public readonly originalError: unknown
+  ) {
+    super(message);
+    this.name = 'VisitorStatsError';
+  }
+}
+
+/**
+ * Get visitor stats from Vercel Analytics API.
+ * 
+ * CRITICAL: This uses a throw-outside-cache pattern to prevent caching of error states.
+ * - Success: Data is cached for 1 hour
+ * - Error: Throws VisitorStatsError which is caught OUTSIDE the cache, returning defaults without caching
+ * - Missing credentials: Returns defaults (this IS cached, which is intentional since credentials won't appear mid-request)
+ */
+async function getVisitorStats(): Promise<VisitorStats> {
+  try {
+    return await unstable_cache(
+      async (): Promise<VisitorStats> => {
+        // Create request-scoped child logger - do not mutate shared logger in cached function
+        const requestId = generateRequestId();
+        const requestLogger = logger.child({
+          requestId,
+          operation: 'getVisitorStats',
+          module: 'data/marketing/site',
+        });
+
+        const { trackPerformance } = await import('../../utils/performance-metrics.ts');
+        
+        // Missing credentials is a config issue, not a transient error - safe to cache defaults
+        if (!(VERCEL_ANALYTICS_TOKEN && VERCEL_PROJECT_ID)) {
+          requestLogger.debug('Vercel Analytics credentials not configured, using defaults');
+          return HERO_DEFAULTS;
+        }
+
+        const now = Date.now();
+        const to = new Date(now);
+        const from = new Date(now - 30 * 24 * 60 * 60 * 1000);
+
+        const url = new URL(`https://api.vercel.com/v2/insights/${VERCEL_PROJECT_ID}/analytics`);
+        url.searchParams.set('from', from.toISOString());
+        url.searchParams.set('to', to.toISOString());
+
+        try {
+          const { result } = await trackPerformance(
+            async () => {
+              const response = await fetch(url.toString(), {
+                headers: {
+                  Authorization: `Bearer ${VERCEL_ANALYTICS_TOKEN}`,
+                },
+                next: { revalidate: 3600 },
+              });
+
+              if (!response.ok) {
+                throw new Error(`Vercel analytics error: ${response.status} ${response.statusText}`);
+              }
+
+              const data = (await response.json()) as VercelAnalyticsResponse;
+              return {
+                monthlyVisitors: Number(data.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
+                monthlyPageViews: Number(data.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
+              };
+            },
+            {
+              operation: 'getVisitorStats',
+              logger: requestLogger,
+              requestId,
+              logMeta: { source: 'vercel-analytics-api' },
+              logLevel: 'info',
+            }
+          );
+          
+          return result;
+        } catch (error) {
+          // CRITICAL: Throw error instead of returning fallback to prevent caching
+          const normalized = normalizeError(error, 'Visitor stats fetch failed');
+          requestLogger.warn('Visitor stats fetch failed, will use defaults (not cached)', {
+            err: normalized,
+            source: 'vercel-analytics-api',
+          });
+          throw new VisitorStatsError('Visitor stats fetch failed', error);
+        }
+      },
+      ['marketing-visitor-stats'],
+      { revalidate: 3600, tags: ['marketing-visitor-stats'] }
+    )();
+  } catch (error) {
+    // Handle errors OUTSIDE the cache - return fallback without caching it
+    if (error instanceof VisitorStatsError) {
+      // Already logged inside, just return fallback (not cached)
+      return HERO_DEFAULTS;
+    }
+    // Unexpected error - log and return fallback
+    logger.error('Unexpected visitor stats error', normalizeError(error, 'Unexpected visitor stats error'), {
       operation: 'getVisitorStats',
       module: 'data/marketing/site',
     });
-
-    const { trackPerformance } = await import('../../utils/performance-metrics.ts');
-    
-    if (!(VERCEL_ANALYTICS_TOKEN && VERCEL_PROJECT_ID)) {
-      return HERO_DEFAULTS;
-    }
-
-    const now = Date.now();
-    const to = new Date(now);
-    const from = new Date(now - 30 * 24 * 60 * 60 * 1000);
-
-    const url = new URL(`https://api.vercel.com/v2/insights/${VERCEL_PROJECT_ID}/analytics`);
-    url.searchParams.set('from', from.toISOString());
-    url.searchParams.set('to', to.toISOString());
-
-    try {
-      const { result } = await trackPerformance(
-        async () => {
-          const response = await fetch(url.toString(), {
-            headers: {
-              Authorization: `Bearer ${VERCEL_ANALYTICS_TOKEN}`,
-            },
-            next: { revalidate: 3600 },
-          });
-
-          if (!response.ok) {
-            throw new Error(`Vercel analytics error: ${response.status} ${response.statusText}`);
-          }
-
-          const data = (await response.json()) as VercelAnalyticsResponse;
-          return {
-            monthlyVisitors: Number(data.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
-            monthlyPageViews: Number(data.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
-          };
-        },
-        {
-          operation: 'getVisitorStats',
-          logger: requestLogger, // Use child logger to avoid passing requestId/operation repeatedly
-          requestId, // Pass requestId for return value
-          logMeta: { source: 'vercel-analytics-api' },
-          logLevel: 'info',
-        }
-      );
-      
-      return result;
-    } catch (error) {
-      // trackPerformance logs performance metrics, but we need explicit error logging
-      const normalized = normalizeError(error, 'Visitor stats fetch failed, using defaults');
-      requestLogger.warn('Visitor stats fetch failed, using defaults', {
-        err: normalized,
-        source: 'vercel-analytics-api',
-        fallbackStrategy: 'defaults',
-      });
-      return HERO_DEFAULTS;
-    }
-  },
-  ['marketing-visitor-stats'],
-  { revalidate: 3600, tags: ['marketing-visitor-stats'] }
-);
+    return HERO_DEFAULTS;
+  }
+}
 
 const getConfigurationCountCached = cache(async () => getContentCount());
 

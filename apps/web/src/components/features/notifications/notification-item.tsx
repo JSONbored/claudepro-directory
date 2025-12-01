@@ -5,7 +5,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { iconSize } from '@heyclaude/web-runtime/design-system';
+import { iconSize, weight, muted ,size  , gap   , spaceY } from '@heyclaude/web-runtime/design-system';
 import { Bell, X } from '@heyclaude/web-runtime/icons';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -46,21 +46,21 @@ export function NotificationItem({ notification }: NotificationItemProps) {
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.2 }}
       className={
-        'relative rounded-lg border border-border/50 bg-card p-4 shadow-sm transition-shadow duration-200 hover:shadow-md'
+        'relative ${radius.lg} border border-border/50 bg-card ${padding.default} shadow-sm transition-shadow duration-200 hover:shadow-md'
       }
     >
       <button
         type="button"
         onClick={handleDismiss}
         className={
-          'absolute top-2 right-2 rounded-md p-1 text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-accent'
+          'absolute top-2 right-2 rounded-md ${padding.micro} ${muted.default} transition-colors duration-150 hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-accent'
         }
         aria-label="Dismiss notification"
       >
         <X className={iconSize.sm} />
       </button>
 
-      <div className="flex gap-3 pr-6">
+      <div className={`flex ${gap.default} pr-6`}>
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
             notification.type === 'announcement'
@@ -72,9 +72,9 @@ export function NotificationItem({ notification }: NotificationItemProps) {
           <Bell className={iconSize.md} />
         </div>
 
-        <div className="flex-1 space-y-1">
-          <h4 className="font-medium text-foreground text-sm">{notification.title}</h4>
-          <p className="text-muted-foreground text-xs leading-relaxed">{notification.message}</p>
+        <div className={`flex-1 ${spaceY.tight}`}>
+          <h4 className={`${weight.medium} text-foreground ${size.sm}`}>{notification.title}</h4>
+          <p className={`${muted.default} ${size.xs} leading-relaxed`}>{notification.message}</p>
 
           {notification.action_label && (
             <div className="pt-2">

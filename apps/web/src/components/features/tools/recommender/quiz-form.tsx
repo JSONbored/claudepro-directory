@@ -10,6 +10,7 @@ import { Constants } from '@heyclaude/database-types';
 import { getQuizConfigurationAction } from '@heyclaude/web-runtime/actions';
 import { generateConfigRecommendations, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { spaceY, cluster, between, iconLeading, iconSize, muted, marginTop, helper, weight, radius ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';
@@ -75,7 +76,6 @@ function mapQuizConfigToQuestions(config: QuizConfigurationResult | null): QuizQ
 }
 
 import { ArrowLeft, ArrowRight, Sparkles } from '@heyclaude/web-runtime/icons';
-import { between, cluster, iconLeading, iconSize } from '@heyclaude/web-runtime/design-system';
 import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
 import { InlineSpinner } from '@heyclaude/web-runtime/ui';
 import { QuestionCard } from './question-card';
@@ -295,7 +295,7 @@ export function QuizForm() {
 
   if (!quizConfig) {
     return (
-      <div className="flex items-center justify-center p-12">
+      <div className={`flex items-center justify-center ${padding.section}`}>
         <InlineSpinner size="lg" />
       </div>
     );
@@ -322,7 +322,7 @@ export function QuizForm() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <QuizProgress
         currentQuestion={currentQuestion}
         totalQuestions={totalQuestions}
@@ -332,13 +332,13 @@ export function QuizForm() {
       <Card className="relative overflow-hidden">
         <CardHeader>
           <CardTitle className={cluster.compact}>
-            <span className="text-muted-foreground text-sm">
+            <span className={muted.sm}>
               Question {currentQuestion} of {totalQuestions}
             </span>
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className={spaceY.relaxed}>
           {currentQuestionData.id === 'review' ? (
             <QuestionCard
               question={currentQuestionData.question}
@@ -346,57 +346,57 @@ export function QuizForm() {
                 description: currentQuestionData.description,
               })}
             >
-              <div className="space-y-4">
-                <div className="space-y-2 rounded-lg bg-muted p-4">
+              <div className={spaceY.comfortable}>
+                <div className={`${spaceY.compact} ${radius.lg} bg-muted ${padding.default}`}>
                   <div>
-                    <span className="font-medium">Use Case:</span>{' '}
-                    <span className="text-muted-foreground">
+                    <span className={weight.medium}>Use Case:</span>{' '}
+                    <span className={muted.default}>
                       {answers.useCase?.replace('-', ' ')}
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium">Experience:</span>{' '}
-                    <span className="text-muted-foreground">{answers.experienceLevel}</span>
+                    <span className={weight.medium}>Experience:</span>{' '}
+                    <span className={muted.default}>{answers.experienceLevel}</span>
                   </div>
                   <div>
-                    <span className="font-medium">Tool Preferences:</span>{' '}
-                    <span className="text-muted-foreground">
+                    <span className={weight.medium}>Tool Preferences:</span>{' '}
+                    <span className={muted.default}>
                       {answers.toolPreferences?.join(', ')}
                     </span>
                   </div>
                   {answers.p_integrations && answers.p_integrations.length > 0 && (
                     <div>
-                      <span className="font-medium">Integrations:</span>{' '}
-                      <span className="text-muted-foreground">
+                      <span className={weight.medium}>Integrations:</span>{' '}
+                      <span className={muted.default}>
                         {answers.p_integrations.join(', ')}
                       </span>
                     </div>
                   )}
                   {answers.p_focus_areas && answers.p_focus_areas.length > 0 && (
                     <div>
-                      <span className="font-medium">Focus Areas:</span>{' '}
-                      <span className="text-muted-foreground">
+                      <span className={weight.medium}>Focus Areas:</span>{' '}
+                      <span className={muted.default}>
                         {answers.p_focus_areas.join(', ')}
                       </span>
                     </div>
                   )}
                   {answers.teamSize && (
                     <div>
-                      <span className="font-medium">Team Size:</span>{' '}
-                      <span className="text-muted-foreground">{answers.teamSize}</span>
+                      <span className={weight.medium}>Team Size:</span>{' '}
+                      <span className={muted.default}>{answers.teamSize}</span>
                     </div>
                   )}
                 </div>
 
                 <Card className="border-primary/20 bg-primary/5">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
+                    <CardTitle className={`${cluster.compact} ${size.lg}`}>
                       <Sparkles className={`${iconSize.md} text-primary`} />
                       What happens next?
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="space-y-2 text-muted-foreground text-sm">
+                    <ul className={`${spaceY.compact} ${muted.sm}`}>
                       <li>? We'll analyze 147+ configurations</li>
                       <li>? Match them to your specific needs</li>
                       <li>? Show you the top 8-10 best fits</li>
@@ -415,7 +415,7 @@ export function QuizForm() {
               })}
             >
               <div
-                className={`grid gap-3 ${currentQuestionData.options.length > 3 ? 'sm:grid-cols-2' : ''}`}
+                className={`grid ${gap.default} ${currentQuestionData.options.length > 3 ? 'sm:grid-cols-2' : ''}`}
               >
                 {currentQuestionData.options.map((option) => {
                   if (!fieldKey) return null;
@@ -443,7 +443,7 @@ export function QuizForm() {
                         }
                       }}
                       disabled={!canSelect}
-                      className={`rounded-lg border-2 p-4 text-left transition-all ${
+                      className={`${radius.lg} border-2 ${padding.default} text-left transition-all ${
                         isSelected
                           ? 'border-primary bg-primary/5'
                           : canSelect
@@ -451,14 +451,14 @@ export function QuizForm() {
                             : 'cursor-not-allowed border-border opacity-50'
                       }`}
                     >
-                      <div className="font-medium">{option.label}</div>
-                      <div className="mt-1 text-muted-foreground text-sm">{option.description}</div>
+                      <div className={weight.medium}>{option.label}</div>
+                      <div className={`${marginTop.tight} ${muted.sm}`}>{option.description}</div>
                     </button>
                   );
                 })}
               </div>
               {fieldKey && errors[fieldKey] && (
-                <p className="mt-2 text-destructive text-sm">{errors[fieldKey]}</p>
+                <p className={`${marginTop.compact} ${helper.destructive}`}>{errors[fieldKey]}</p>
               )}
             </QuestionCard>
           )}

@@ -11,6 +11,7 @@
  */
 
 import { Award, CheckCircle, Sparkles, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
+import { cluster, muted, weight, radius ,size    } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { motion } from 'motion/react';
@@ -37,14 +38,14 @@ export function SocialProofBadge({
         animate={{ opacity: 1, scale: 1 }}
         transition={TOKENS.animations.spring.smooth}
         className={cn(
-          'flex items-center gap-2 rounded-lg border border-purple-500/30',
-          'bg-purple-500/10 px-3 py-2',
+          `${cluster.compact} ${radius.lg} border border-purple-500/30`,
+          'bg-purple-500/10 ${padding.xCompact} ${padding.yCompact}',
           className
         )}
       >
         <Award className="h-4 w-4 text-purple-400" />
         <div className="flex flex-col">
-          <span className="font-medium text-purple-300 text-xs">Top Contributors</span>
+          <span className={`${weight.medium} text-purple-300 ${size.xs}`}>Top Contributors</span>
           {names.length > 0 && (
             <span className="text-[10px] text-purple-400/80">
               {names.slice(0, 2).join(', ')}
@@ -61,14 +62,14 @@ export function SocialProofBadge({
         animate={{ opacity: 1, x: 0 }}
         transition={TOKENS.animations.spring.smooth}
         className={cn(
-          'flex items-center gap-2 rounded-lg border border-blue-500/30',
-          'bg-blue-500/10 px-3 py-2',
+          `${cluster.compact} ${radius.lg} border border-blue-500/30`,
+          'bg-blue-500/10 ${padding.xCompact} ${padding.yCompact}',
           className
         )}
       >
         <TrendingUp className="h-4 w-4 text-blue-400" />
         <div className="flex flex-col">
-          <span className="font-medium text-blue-300 text-xs">{count} submissions</span>
+          <span className={`${weight.medium} text-blue-300 ${size.xs}`}>{count} submissions</span>
           <span className="text-[10px] text-blue-400/80">this week</span>
         </div>
       </motion.div>
@@ -80,14 +81,14 @@ export function SocialProofBadge({
         animate={{ opacity: 1, scale: 1 }}
         transition={TOKENS.animations.spring.bouncy}
         className={cn(
-          'flex items-center gap-2 rounded-lg border border-green-500/30',
-          'bg-green-500/10 px-3 py-2',
+          `${cluster.compact} ${radius.lg} border border-green-500/30`,
+          'bg-green-500/10 ${padding.xCompact} ${padding.yCompact}',
           className
         )}
       >
         <CheckCircle className="h-4 w-4 text-green-400" />
         <div className="flex flex-col">
-          <span className="font-medium text-green-300 text-xs">{percentage}% approved</span>
+          <span className={`${weight.medium} text-green-300 ${size.xs}`}>{percentage}% approved</span>
           <span className="text-[10px] text-green-400/80">success rate</span>
         </div>
       </motion.div>
@@ -99,13 +100,13 @@ export function SocialProofBadge({
         animate={{ opacity: 1, y: 0 }}
         transition={TOKENS.animations.spring.smooth}
         className={cn(
-          'flex items-center gap-2 rounded-lg border border-amber-500/30',
-          'bg-amber-500/10 px-3 py-2',
+          `${cluster.compact} ${radius.lg} border border-amber-500/30`,
+          'bg-amber-500/10 ${padding.xCompact} ${padding.yCompact}',
           className
         )}
       >
         <Users className="h-4 w-4 text-amber-400" />
-        <span className="font-medium text-amber-300 text-xs">
+        <span className={`${weight.medium} text-amber-300 ${size.xs}`}>
           Join {count.toLocaleString()} users
         </span>
       </motion.div>
@@ -134,7 +135,7 @@ export function SocialProofBar({ stats, className }: SocialProofBarProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={TOKENS.animations.spring.smooth}
-      className={cn('flex flex-wrap items-center gap-2', className)}
+      className={cn('flex flex-wrap items-center ${gap.compact}', className)}
     >
       {stats.contributors && stats.contributors.count > 0 && (
         <SocialProofBadge
@@ -184,12 +185,12 @@ export function InlineSocialProof({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={TOKENS.animations.spring.smooth}
-      className={cn('inline-flex items-center gap-1.5 text-muted-foreground text-xs', className)}
+      className={cn(`inline-${cluster.snug} ${muted.default} ${size.xs}`, className)}
     >
       {icons[icon]}
       <span>
         {text}
-        {subtext && <span className="text-muted-foreground/60"> {subtext}</span>}
+        {subtext && <span className={`${muted.default}/60`}> {subtext}</span>}
       </span>
     </motion.div>
   );

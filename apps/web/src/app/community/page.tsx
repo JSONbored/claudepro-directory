@@ -1,6 +1,6 @@
 import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, grid } from '@heyclaude/web-runtime/design-system';
+import { cluster, grid, animate, spaceY, muted, marginBottom, weight, radius , size  , gap , padding , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
 import {
   Github,
   Layers,
@@ -28,7 +28,7 @@ const NewsletterCTAVariant = dynamicImport(
       default: module_.NewsletterCTAVariant,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
 );
 
@@ -38,13 +38,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Dynamic Rendering Required
+ * Rendering & Caching
  *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ * ISR: 30 minutes (1800s) - Matches CACHE_TTL.community
+ * Community stats (top contributors, member count) need periodic refreshes.
  *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#revalidate
  */
-export const revalidate = 86_400;
+export const revalidate = 1800;
 
 function formatStatValue(value: null | number | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '0';
@@ -150,28 +151,28 @@ export default async function CommunityPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${minHeight.screen} bg-background`}>
       {/* Hero Section */}
-      <section className="relative overflow-hidden px-4 py-24">
+      <section className={`relative overflow-hidden ${padding.xDefault} ${padding.yXl}`}>
         <div className="container mx-auto text-center">
-          <div className="mx-auto max-w-3xl">
+          <div className={`mx-auto ${maxWidth['3xl']}`}>
             <UnifiedBadge
               variant="base"
               style="outline"
-              className="mb-6 border-accent/20 bg-accent/5 text-accent"
+              className={`${marginBottom.comfortable} border-accent/20 bg-accent/5 text-accent`}
             >
               <Users className="mr-1 h-3 w-3 text-accent" />
               Community
             </UnifiedBadge>
 
-            <h1 className="mb-6 font-bold text-4xl md:text-6xl">Join the Claude Community</h1>
+            <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:text-6xl`}>Join the Claude Community</h1>
 
-            <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground leading-relaxed">
+            <p className={`mx-auto mb-8 ${maxWidth['2xl']} ${muted.lg}`}>
               Connect with developers and AI enthusiasts building with Claude. Share your
               configurations, learn from the community, and contribute to our open-source directory.
             </p>
 
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className={`flex flex-wrap justify-center ${gap.comfortable}`}>
               {channels.github ? <Button size="lg" asChild>
                   <a href={channels.github} target="_blank" rel="noopener noreferrer">
                     <Github className="mr-2 h-5 w-5" />
@@ -195,7 +196,7 @@ export default async function CommunityPage() {
       </section>
 
       {/* Community Stats */}
-      <section className="px-4 py-16">
+      <section className={`px-4 ${padding.yHero}`}>
         <div className="container mx-auto">
           <div className={grid.responsive3}>
             {statCards.map(({ icon: Icon, title, value, description }) => (
@@ -207,8 +208,8 @@ export default async function CommunityPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="font-bold text-3xl">{value}</div>
-                  <p className="text-muted-foreground">{description}</p>
+                  <div className={`${weight.bold} ${size['3xl']}`}>{value}</div>
+                  <p className={muted.default}>{description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -217,29 +218,29 @@ export default async function CommunityPage() {
       </section>
 
       {/* Contributing Section */}
-      <section className="px-4 py-16">
+      <section className={`px-4 ${padding.yHero}`}>
         <div className="container mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">How to Contribute</CardTitle>
+              <CardTitle className={`${size['2xl']}`}>How to Contribute</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className={spaceY.comfortable}>
               <div>
-                <h3 className="mb-2 font-semibold">1. Fork the Repository</h3>
-                <p className="text-muted-foreground">
+                <h3 className={`${marginBottom.tight} ${weight.semibold}`}>1. Fork the Repository</h3>
+                <p className={muted.default}>
                   Start by forking our GitHub repository and cloning it to your local machine.
                 </p>
               </div>
               <div>
-                <h3 className="mb-2 font-semibold">2. Add Your Configuration</h3>
-                <p className="text-muted-foreground">
+                <h3 className={`${marginBottom.tight} ${weight.semibold}`}>2. Add Your Configuration</h3>
+                <p className={muted.default}>
                   Create a new JSON file with your Claude configuration in the appropriate content
                   directory.
                 </p>
               </div>
               <div>
-                <h3 className="mb-2 font-semibold">3. Submit a Pull Request</h3>
-                <p className="text-muted-foreground">
+                <h3 className={`${marginBottom.tight} ${weight.semibold}`}>3. Submit a Pull Request</h3>
+                <p className={muted.default}>
                   Submit a pull request with your contribution. Our team will review it promptly.
                 </p>
               </div>
@@ -254,7 +255,7 @@ export default async function CommunityPage() {
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className="container mx-auto px-4 py-12">
+      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

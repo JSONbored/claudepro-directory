@@ -110,6 +110,28 @@ export const wrap = {
 } as const;
 
 /**
+ * Standalone gap utility for adding spacing to any flex/grid container.
+ * Use when you need gap without the full cluster/stack pattern.
+ * 
+ * NOTE: Scale matches cluster/stack semantics (not padding).
+ * - gap.compact = gap-2 (same as cluster.compact)
+ * - gap.default = gap-3 (same as cluster.default)
+ */
+export const gap = {
+  none: 'gap-0',
+  micro: 'gap-0.5',
+  tight: 'gap-1',
+  snug: 'gap-1.5',
+  compact: 'gap-2',
+  default: 'gap-3',
+  comfortable: 'gap-4',
+  relaxed: 'gap-6',
+  loose: 'gap-8',
+  section: 'gap-10',
+  hero: 'gap-12',
+} as const;
+
+/**
  * Responsive flex patterns (column on mobile, row on larger screens).
  */
 export const responsive = {
@@ -241,29 +263,53 @@ export const spaceX = {
  * Padding patterns.
  */
 export const padding = {
+  // All-sides padding (complete scale)
   none: 'p-0',
+  hair: 'p-0.5',
   micro: 'p-1',
+  snug: 'p-1.5',
   tight: 'p-2',
+  between: 'p-2.5',
   compact: 'p-3',
   default: 'p-4',
+  medium: 'p-5',
   comfortable: 'p-6',
   relaxed: 'p-8',
+  spacious: 'p-10',
+  section: 'p-12',
+  hero: 'p-16',
   
-  // X-axis
+  // X-axis (horizontal) - complete scale
+  xNone: 'px-0',
+  xHair: 'px-0.5',
+  xMicro: 'px-1',
+  xSnug: 'px-1.5',
   xTight: 'px-2',
   xCompact: 'px-3',
   xDefault: 'px-4',
+  xMedium: 'px-5',
   xComfortable: 'px-6',
   xRelaxed: 'px-8',
+  xSpacious: 'px-12',
+  xHero: 'px-16',
   
-  // Y-axis
-  yMicro: 'py-0.5',
-  yTight: 'py-1',
-  yCompact: 'py-2',
+  // Y-axis (vertical) - complete scale
+  yNone: 'py-0',
+  yHair: 'py-0.5',
+  yMicro: 'py-1',
+  ySnug: 'py-1.5',
+  yTight: 'py-2',
+  yCompact: 'py-3',
   yDefault: 'py-4',
+  yMedium: 'py-5',
   yComfortable: 'py-6',
   yRelaxed: 'py-8',
+  ySpacious: 'py-10',
   ySection: 'py-12',
+  yLargish: 'py-14',
+  yHero: 'py-16',
+  yLarge: 'py-20',
+  yXl: 'py-24',
 } as const;
 
 /**
@@ -292,6 +338,162 @@ export const marginTop = {
   default: 'mt-4',
   comfortable: 'mt-6',
   relaxed: 'mt-8',
+  section: 'mt-12',
+  hero: 'mt-16',
+} as const;
+
+// =============================================================================
+// WIDTH UTILITIES
+// =============================================================================
+
+/**
+ * Width utilities for common patterns.
+ * For icon widths, use iconSize.* instead.
+ * 
+ * Philosophy: Only include semantic sizes that communicate intent.
+ * One-off pixel values should remain as inline Tailwind classes.
+ */
+export const width = {
+  // Semantic widths
+  auto: 'w-auto',
+  full: 'w-full',
+  screen: 'w-screen',
+  min: 'w-min',
+  max: 'w-max',
+  fit: 'w-fit',
+  
+  // Fractional widths (for grid/flex children)
+  half: 'w-1/2',
+  third: 'w-1/3',
+  twoThirds: 'w-2/3',
+  quarter: 'w-1/4',
+  threeQuarters: 'w-3/4',
+} as const;
+
+// =============================================================================
+// HEIGHT UTILITIES
+// =============================================================================
+
+/**
+ * Height utilities for common patterns.
+ * For icon heights, use iconSize.* instead.
+ */
+export const height = {
+  // Semantic heights
+  auto: 'h-auto',
+  full: 'h-full',
+  screen: 'h-screen',
+  svh: 'h-svh',
+  dvh: 'h-dvh',
+  min: 'h-min',
+  max: 'h-max',
+  fit: 'h-fit',
+} as const;
+
+// =============================================================================
+// SIZE UTILITIES (combined width + height)
+// =============================================================================
+
+/**
+ * Square size utilities for elements that need equal width and height.
+ * For icons, prefer iconSize.* which includes these plus semantic names.
+ */
+export const squareSize = {
+  // Touch target sizes (accessibility)
+  touchSm: 'h-8 w-8',    // 32px - minimum touch target
+  touchMd: 'h-10 w-10',  // 40px - comfortable touch target
+  touchLg: 'h-11 w-11',  // 44px - Apple's recommended minimum
+  touchXl: 'h-12 w-12',  // 48px - Google's recommended minimum
+  
+  // Avatar sizes
+  avatarXs: 'h-6 w-6',   // 24px
+  avatarSm: 'h-8 w-8',   // 32px
+  avatarMd: 'h-10 w-10', // 40px
+  avatarLg: 'h-12 w-12', // 48px
+  avatarXl: 'h-16 w-16', // 64px
+  avatar2xl: 'h-20 w-20', // 80px
+  avatar3xl: 'h-24 w-24', // 96px
+} as const;
+
+// =============================================================================
+// MAX-WIDTH UTILITIES
+// =============================================================================
+
+/**
+ * Max-width constraints.
+ */
+export const maxWidth = {
+  none: 'max-w-none',
+  xs: 'max-w-xs',
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-xl',
+  '2xl': 'max-w-2xl',
+  '3xl': 'max-w-3xl',
+  '4xl': 'max-w-4xl',
+  '5xl': 'max-w-5xl',
+  '6xl': 'max-w-6xl',
+  '7xl': 'max-w-7xl',
+  full: 'max-w-full',
+  prose: 'max-w-prose',
+  screenSm: 'max-w-screen-sm',
+  screenMd: 'max-w-screen-md',
+  screenLg: 'max-w-screen-lg',
+  screenXl: 'max-w-screen-xl',
+  screen2xl: 'max-w-screen-2xl',
+} as const;
+
+// =============================================================================
+// MIN-HEIGHT UTILITIES
+// =============================================================================
+
+/**
+ * Min-height constraints.
+ */
+export const minHeight = {
+  0: 'min-h-0',
+  full: 'min-h-full',
+  screen: 'min-h-screen',
+  svh: 'min-h-svh',
+  dvh: 'min-h-dvh',
+  /** Common min-heights */
+  sm: 'min-h-[200px]',
+  md: 'min-h-[300px]',
+  lg: 'min-h-[400px]',
+  xl: 'min-h-[500px]',
+} as const;
+
+// =============================================================================
+// SCROLL UTILITIES
+// =============================================================================
+
+/**
+ * Scroll behavior utilities.
+ */
+export const scroll = {
+  /** Smooth scrolling */
+  smooth: 'scroll-smooth',
+  /** Auto scrolling */
+  auto: 'scroll-auto',
+  /** Overflow utilities */
+  overflowAuto: 'overflow-auto',
+  overflowHidden: 'overflow-hidden',
+  overflowScroll: 'overflow-scroll',
+  overflowXAuto: 'overflow-x-auto',
+  overflowYAuto: 'overflow-y-auto',
+  overflowXHidden: 'overflow-x-hidden',
+  overflowYHidden: 'overflow-y-hidden',
+  /** Hide scrollbar but allow scroll */
+  hideScrollbar: 'scrollbar-hide',
+  /** Scroll snap */
+  snapX: 'snap-x',
+  snapY: 'snap-y',
+  snapMandatory: 'snap-mandatory',
+  snapProximity: 'snap-proximity',
+  snapStart: 'snap-start',
+  snapCenter: 'snap-center',
+  snapEnd: 'snap-end',
 } as const;
 
 // =============================================================================

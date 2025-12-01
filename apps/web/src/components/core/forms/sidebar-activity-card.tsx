@@ -8,7 +8,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { CheckCircle, Clock, Lightbulb } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, muted, padding, stack } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, muted, padding, stack, marginTop ,size , row , spaceY  } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -74,7 +74,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
 
         <CardContent className={padding.comfortable}>
           {/* Recent Submissions Tab */}
-          <TabsContent value="recent" className="mt-0">
+          <TabsContent value="recent" className={marginTop.none}>
             <motion.div
               initial="hidden"
               animate="visible"
@@ -82,7 +82,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
               className={stack.snug}
             >
               {recentMerged.length === 0 ? (
-                <p className={cn(`${muted.default} text-sm`, 'py-4 text-center')}>
+                <p className={cn(`${muted.sm}`, 'py-4 text-center')}>
                   No recent submissions yet
                 </p>
               ) : (
@@ -90,23 +90,23 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
                   <div
                     key={submission.id}
                     className={cn(
-                      'flex items-start gap-2',
+                      '${row.compact}',
                       'border-border/50 border-b pb-3 last:border-0 last:pb-0'
                     )}
                   >
                     <CheckCircle
-                      className={cn('mt-0.5 shrink-0', iconSize.sm, 'text-green-600')}
+                      className={cn(marginTop.micro, 'shrink-0', iconSize.sm, 'text-green-600')}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className={cn('truncate font-medium text-sm')}>
+                      <p className={cn('truncate ${weight.medium} ${size.sm}')}>
                         {submission.content_name}
                       </p>
-                      <div className={cn(cluster.compact, 'mt-1 flex-wrap')}>
+                      <div className={cn(cluster.compact, marginTop.tight, 'flex-wrap')}>
                         <UnifiedBadge variant="base" style="outline" className="text-xs">
                           {typeLabels[submission.content_type]}
                         </UnifiedBadge>
                         {submission.user && (
-                          <span className={`${muted.default} text-xs`}>
+                          <span className={`${muted.default} ${size.xs}`}>
                             by{' '}
                             <NavLink href={`/u/${submission.user.slug}`}>
                               @{submission.user.name}
@@ -114,7 +114,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
                           </span>
                         )}
                       </div>
-                      <p className={cn('mt-1', `${muted.default} text-xs`)}>
+                      <p className={cn(marginTop.tight, `${muted.default} ${size.xs}`)}>
                         {submission.merged_at_formatted || submission.merged_at}
                       </p>
                     </div>
@@ -125,13 +125,13 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
           </TabsContent>
 
           {/* Tips Tab */}
-          <TabsContent value="tips" className="mt-0">
+          <TabsContent value="tips" className={marginTop.none}>
             <motion.div initial="hidden" animate="visible" variants={tabContentVariants}>
-              <ul className="list-none space-y-2">
+              <ul className={`list-none ${spaceY.compact}`}>
                 {tips.map((tip) => (
-                  <li key={tip} className="flex items-start gap-2">
-                    <span className="mt-0.5 text-blue-400 text-xs">•</span>
-                    <span className={`${muted.default} text-xs`}>{tip}</span>
+                  <li key={tip} className={`${row.compact}`}>
+                    <span className={`${marginTop.micro} text-blue-400 ${size.xs}`}>•</span>
+                    <span className={`${muted.default} ${size.xs}`}>{tip}</span>
                   </li>
                 ))}
               </ul>

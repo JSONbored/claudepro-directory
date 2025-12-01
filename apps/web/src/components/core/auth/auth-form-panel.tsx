@@ -6,6 +6,7 @@
 
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
+import { marginBottom, marginTop, muted, weight , size , gap } from '@heyclaude/web-runtime/design-system';
 
 interface AuthFormPanelProps {
   title?: string;
@@ -23,18 +24,18 @@ export function AuthFormPanel({
   return (
     <div className="w-full">
       <motion.div
-        className="mb-12"
+        className={marginBottom.section}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <h2 className="mb-4 text-center font-bold text-3xl">{title}</h2>
-        <p className="text-center text-muted-foreground text-sm">{description}</p>
+        <h2 className={`${marginBottom.default} text-center ${weight.bold} ${size['3xl']}`}>{title}</h2>
+        <p className={`text-center ${muted.sm}`}>{description}</p>
       </motion.div>
 
       {/* Icon grid - 3 columns */}
       <motion.div
-        className="flex items-center justify-center gap-4"
+        className={`flex items-center justify-center ${gap.comfortable}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.5 }}
@@ -44,7 +45,7 @@ export function AuthFormPanel({
 
       {afterContent && (
         <motion.div
-          className="mt-8"
+          className={marginTop.relaxed}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.6 }}

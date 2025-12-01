@@ -1,7 +1,7 @@
 'use client';
 
 import { createReview, updateReview } from '@heyclaude/web-runtime/actions';
-import { between, cluster } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, spaceY, marginBottom, marginTop, helper, muted ,size } from '@heyclaude/web-runtime/design-system';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import {
   MAX_REVIEW_LENGTH,
@@ -137,13 +137,13 @@ export function ReviewForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className={spaceY.comfortable}>
       {/* Star Rating Input */}
       <div>
-        <Label htmlFor="rating" className="mb-2 block">
+        <Label htmlFor="rating" className={`${marginBottom.tight} block`}>
           Your Rating <span className="text-destructive">*</span>
         </Label>
-        <div className="mt-2">
+        <div className={marginTop.compact}>
           <ReviewRatingInteractive
             value={rating}
             onChange={setRating}
@@ -154,10 +154,10 @@ export function ReviewForm({
           />
         </div>
         {rating === 0 && !showRatingError && (
-          <p className="mt-1 text-muted-foreground text-xs">Click a star to rate</p>
+          <p className={`${marginTop.tight} ${muted.default} ${size.xs}`}>Click a star to rate</p>
         )}
         {showRatingError && (
-          <p id={ratingErrorId} className="mt-1 text-destructive text-sm" role="alert">
+          <p id={ratingErrorId} className={`${marginTop.tight} ${helper.destructive}`} role="alert">
             Please select a star rating before submitting
           </p>
         )}
@@ -165,8 +165,8 @@ export function ReviewForm({
 
       {/* Review Text */}
       <div>
-        <Label htmlFor={textareaId} className="mb-2 block">
-          Your Review <span className="font-normal text-muted-foreground text-xs">(optional)</span>
+        <Label htmlFor={textareaId} className={`${marginBottom.tight} block`}>
+          Your Review <span className={`font-normal ${muted.default} ${size.xs}`}>(optional)</span>
         </Label>
         <Textarea
           id={textareaId}
@@ -180,16 +180,16 @@ export function ReviewForm({
           {...(hasTextError ? { errorId: textareaErrorId } : {})}
         />
         {hasTextError && (
-          <p id={textareaErrorId} className="mt-1 text-destructive text-sm" role="alert">
+          <p id={textareaErrorId} className={`${marginTop.tight} ${helper.destructive}`} role="alert">
             Review text cannot exceed {MAX_REVIEW_LENGTH} characters
           </p>
         )}
-        <div className={`${between.center} mt-1`}>
-          <p className="text-muted-foreground text-xs">
+        <div className={`${between.center} ${marginTop.tight}`}>
+          <p className={`${muted.default} ${size.xs}`}>
             Help others by sharing details about your experience
           </p>
           <p
-            className={`text-xs ${charactersRemaining < 100 ? 'text-destructive' : 'text-muted-foreground'}`}
+            className={`text-xs ${charactersRemaining < 100 ? 'text-destructive' : muted.default}`}
           >
             {charactersRemaining} characters remaining
           </p>

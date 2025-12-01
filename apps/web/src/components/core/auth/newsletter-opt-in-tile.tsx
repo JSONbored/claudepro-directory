@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@heyclaude/web-runtime/ui';
+import { stack, cluster, responsive, weight, muted ,size  , gap , padding } from '@heyclaude/web-runtime/design-system';
 import type { CheckedState } from '@radix-ui/react-checkbox';
 import { motion } from 'motion/react';
 import { useId } from 'react';
@@ -66,29 +67,29 @@ export function NewsletterOptInTile({
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.99 }}
       className={cn(
-        'group relative w-full overflow-hidden rounded-2xl border p-6 text-left transition-all duration-300',
+        'group relative w-full overflow-hidden rounded-2xl border ${padding.comfortable} text-left transition-all duration-300',
         'bg-linear-to-br from-card/80 via-card/60 to-card/30 backdrop-blur-xl',
         checked
           ? 'border-accent/70 shadow-[0_10px_40px_-20px_rgba(255,138,76,0.8)]'
           : 'border-white/10 hover:border-accent/40 hover:shadow-[0_10px_40px_-20px_rgba(255,138,76,0.6)]'
       )}
     >
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 font-semibold text-white/90 text-xs">
+      <div className={stack.relaxed}>
+        <div className={stack.default}>
+          <div className={cluster.default + ' flex-wrap'}>
+            <span className={`inline-flex items-center rounded-full bg-white/10 ${padding.xCompact} ${padding.yMicro} ${weight.semibold} text-white/90 ${size.xs}`}>
               {badgeLabel}
             </span>
           </div>
           <div>
-            <p className="font-semibold text-foreground text-xl">{resolvedHeadline}</p>
+            <p className={`${weight.semibold} text-foreground ${size.xl}`}>{resolvedHeadline}</p>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className={responsive.smRowBetween}>
           <label
             htmlFor={checkboxId}
-            className="flex cursor-pointer items-center gap-3 font-medium text-foreground text-sm"
+            className={`flex cursor-pointer items-center ${gap.default} ${weight.medium} text-foreground ${size.sm}`}
             onClick={(event) => event.stopPropagation()}
             onKeyDown={(event) => event.stopPropagation()}
             onKeyUp={(event) => event.stopPropagation()}
@@ -101,7 +102,7 @@ export function NewsletterOptInTile({
             />
             Send me the weekly Claude upgrade drop
           </label>
-          <span className="text-muted-foreground text-xs">{resolvedSafetyCopy}</span>
+          <span className={`${muted.default} ${size.xs}`}>{resolvedSafetyCopy}</span>
         </div>
       </div>
       <div

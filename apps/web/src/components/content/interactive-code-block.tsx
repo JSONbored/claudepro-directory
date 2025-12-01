@@ -25,7 +25,7 @@ import {
   Share2,
   Twitter,
 } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, codeBlock } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, codeBlock, border, radius, muted  , padding , gap , weight , size } from '@heyclaude/web-runtime/design-system';
 import {
   copyScreenshotToClipboard,
   copyShareLink,
@@ -129,7 +129,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
+      className={`absolute right-0 top-full z-50 mt-2 w-56 ${radius.lg} ${border.default} bg-card/95 ${padding.tight} shadow-xl backdrop-blur-md`}
       onMouseLeave={onMouseLeave}
     >
       {/* Twitter Share */}
@@ -151,7 +151,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           })}
           onClick={() => onShare('twitter')}
         >
-          <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
+          <div className={`flex w-full items-center ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} ${size.sm} transition-all hover:bg-accent/15`}>
             <div className={`${codeBlock.socialIconWrapper} bg-[#1DA1F2]/20`}>
               <Twitter className={`${iconSize.xs} text-[#1DA1F2]`} />
             </div>
@@ -180,7 +180,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           summary={`Check out this ${category} resource on claudepro.directory`}
           onClick={() => onShare('linkedin')}
         >
-          <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
+          <div className={`flex w-full items-center ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} ${size.sm} transition-all hover:bg-accent/15`}>
             <div className={`${codeBlock.socialIconWrapper} bg-[#0A66C2]/20`}>
               <Linkedin className={`${iconSize.xs} text-[#0A66C2]`} />
             </div>
@@ -193,7 +193,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
       <button
         type="button"
         onClick={() => onShare('copy_link')}
-        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-foreground text-sm transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]"
+        className={`flex w-full items-center ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} text-foreground ${size.sm} transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]`}
       >
         <div className={`${codeBlock.socialIconWrapper} bg-accent/20`}>
           <Copy className={iconSize.xs} />
@@ -596,7 +596,7 @@ export function ProductionCodeBlock({
               {isCopied ? (
                 <Check className={`${iconSize.xs} text-green-500`} />
               ) : (
-                <Copy className={`${iconSize.xs} text-muted-foreground`} />
+                <Copy className={`${iconSize.xs} ${muted.default}`} />
               )}
             </motion.button>
 
@@ -612,7 +612,7 @@ export function ProductionCodeBlock({
 
             {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' && (
-              <div className="px-2 py-0.5 font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
+              <div className={`px-2 ${padding.yHair} ${weight.semibold} text-[10px] ${muted.default} uppercase tracking-wider`}>
                 {language}
               </div>
             )}
@@ -623,14 +623,14 @@ export function ProductionCodeBlock({
       {/* Code block container - Polar-style clean design */}
       <div
         ref={codeBlockRef}
-        className="relative overflow-hidden rounded-lg border border-border transition-[height] duration-300 ease-in-out"
+        className={`relative overflow-hidden ${radius.lg} ${border.default} transition-[height] duration-300 ease-in-out`}
         style={{
           height: needsCollapse && !isExpanded ? maxHeight : 'auto',
         }}
       >
         {/* Top-right action buttons + badge (when no filename header) */}
         {!filename && (
-          <div className="absolute right-4 top-4 z-20 flex items-center gap-1">
+          <div className={`absolute right-4 top-4 z-20 ${cluster.tight}`}>
             {/* Screenshot button */}
             <motion.button
               type="button"
@@ -677,7 +677,7 @@ export function ProductionCodeBlock({
               {isCopied ? (
                 <Check className={`${iconSize.xs} text-green-500`} />
               ) : (
-                <Copy className={`${iconSize.xs} text-muted-foreground`} />
+                <Copy className={`${iconSize.xs} ${muted.default}`} />
               )}
             </motion.button>
 
@@ -693,7 +693,7 @@ export function ProductionCodeBlock({
 
             {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' && (
-              <div className="px-2 py-0.5 font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
+              <div className={`px-2 ${padding.yHair} ${weight.semibold} text-[10px] ${muted.default} uppercase tracking-wider`}>
                 {language}
               </div>
             )}
@@ -722,7 +722,7 @@ export function ProductionCodeBlock({
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex w-full items-center justify-center gap-1.5 border-border/40 border-t py-2 text-muted-foreground text-xs transition-colors hover:text-foreground"
+          className={`flex w-full items-center justify-center ${gap.snug} border-border/40 border-t ${padding.yCompact} ${muted.default} ${size.xs} transition-colors hover:text-foreground`}
         >
           <ChevronDown 
             className={`h-3.5 w-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}

@@ -18,6 +18,7 @@ import {
   Tag,
   X,
 } from '@heyclaude/web-runtime/icons';
+import { iconSize, cluster, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , row , radius } from '@heyclaude/web-runtime/design-system';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
@@ -86,7 +87,7 @@ export function StepExamplesTags({
   );
 
   return (
-    <div className="space-y-8">
+    <div className={spaceY.loose}>
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -98,12 +99,12 @@ export function StepExamplesTags({
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className="mb-4 inline-flex"
+          className={`${marginBottom.default} inline-flex`}
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className="font-bold text-3xl text-foreground">Examples & Tags</h2>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Examples & Tags</h2>
+        <p className={`${marginTop.compact} ${muted.lg}`}>
           Help users discover and understand your submission
         </p>
       </motion.div>
@@ -121,21 +122,21 @@ export function StepExamplesTags({
           }}
         >
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Code className="h-5 w-5" />
+            <CardTitle className={cluster.compact}>
+              <Code className={iconSize.md} />
               Usage Examples
-              <span className="ml-auto font-normal text-muted-foreground text-sm">
+              <span className={`ml-auto font-normal ${muted.sm}`}>
                 {data.examples.length} / 10
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm">
+          <CardContent className={spaceY.comfortable}>
+            <p className={muted.sm}>
               Add examples to show how your configuration is used
             </p>
 
             {/* Add Example Input */}
-            <div className="flex gap-2">
+            <div className={`flex ${gap.compact}`}>
               <Input
                 value={newExample}
                 onChange={(e) => setNewExample(e.target.value)}
@@ -154,12 +155,12 @@ export function StepExamplesTags({
                   type="button"
                   onClick={addExample}
                   disabled={!newExample.trim() || data.examples.length >= 10}
-                  className="gap-2"
+                  className={`${gap.compact}`}
                   style={{
                     backgroundColor: TOKENS.colors.accent.primary,
                   }}
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className={iconSize.sm} />
                   Add
                 </Button>
               </motion.div>
@@ -168,7 +169,7 @@ export function StepExamplesTags({
             {/* Examples List */}
             <AnimatePresence mode="popLayout">
               {data.examples.length > 0 ? (
-                <div className="space-y-2">
+                <div className={spaceY.compact}>
                   {data.examples.map((example, index) => {
                     // Create stable key from example content
                     const exampleKey = `example-${index}-${example.slice(0, 20)}`;
@@ -179,14 +180,14 @@ export function StepExamplesTags({
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.9 }}
                         transition={TOKENS.animations.spring.snappy}
-                        className="group flex items-start gap-3 rounded-lg border p-3 transition-all hover:border-accent-primary/50"
+                        className={`group ${row.default} ${radius.lg} border ${padding.compact} transition-all hover:border-accent-primary/50`}
                         style={{
                           backgroundColor: TOKENS.colors.background.primary,
                           borderColor: TOKENS.colors.border.default,
                         }}
                       >
                         <div
-                          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-bold text-xs"
+                          className={`${marginTop.micro} flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${weight.bold} ${size.xs}`}
                           style={{
                             backgroundColor: `${TOKENS.colors.accent.primary}20`,
                             color: TOKENS.colors.accent.primary,
@@ -194,18 +195,18 @@ export function StepExamplesTags({
                         >
                           {index + 1}
                         </div>
-                        <span className="flex-1 text-sm leading-relaxed">{example}</span>
+                        <span className={`flex-1 ${size.sm} leading-relaxed`}>{example}</span>
                         <motion.button
                           type="button"
                           onClick={() => removeExample(index)}
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="shrink-0 rounded-full p-1 opacity-0 transition-all group-hover:opacity-100"
+                          className={`shrink-0 rounded-full ${padding.micro} opacity-0 transition-all group-hover:opacity-100`}
                           style={{
                             color: TOKENS.colors.error.text,
                           }}
                         >
-                          <X className="h-4 w-4" />
+                          <X className={iconSize.sm} />
                         </motion.button>
                       </motion.div>
                     );
@@ -215,13 +216,13 @@ export function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="rounded-lg border border-dashed p-8 text-center"
+                  className={`${radius.lg} border border-dashed ${padding.relaxed} text-center`}
                   style={{
                     borderColor: TOKENS.colors.border.light,
                   }}
                 >
-                  <Code className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-                  <p className="text-muted-foreground text-sm">
+                  <Code className={`mx-auto mb-3 h-10 w-10 ${muted.default}`} />
+                  <p className={muted.sm}>
                     No examples yet. Add some to help users understand!
                   </p>
                 </motion.div>
@@ -244,21 +245,21 @@ export function StepExamplesTags({
           }}
         >
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Tag className="h-5 w-5" />
+            <CardTitle className={cluster.compact}>
+              <Tag className={iconSize.md} />
               Tags
-              <span className="ml-auto font-normal text-muted-foreground text-sm">
+              <span className={`ml-auto font-normal ${muted.sm}`}>
                 {data.tags.length} tags
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm">
+          <CardContent className={spaceY.comfortable}>
+            <p className={muted.sm}>
               Add tags to help users discover your submission
             </p>
 
             {/* Add Tag Input */}
-            <div className="flex gap-2">
+            <div className={`flex ${gap.compact}`}>
               <Input
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
@@ -277,12 +278,12 @@ export function StepExamplesTags({
                   type="button"
                   onClick={addTag}
                   disabled={!newTag.trim()}
-                  className="gap-2"
+                  className={`${gap.compact}`}
                   style={{
                     backgroundColor: TOKENS.colors.accent.primary,
                   }}
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className={iconSize.sm} />
                   Add
                 </Button>
               </motion.div>
@@ -291,7 +292,7 @@ export function StepExamplesTags({
             {/* Tags List */}
             <AnimatePresence mode="popLayout">
               {data.tags.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <div className={`flex flex-wrap ${gap.compact}`}>
                   {data.tags.map((tag) => {
                     // Use tag content as key (tags should be unique)
                     const tagKey = `tag-${tag}`;
@@ -306,7 +307,7 @@ export function StepExamplesTags({
                       >
                         <Badge
                           variant="secondary"
-                          className="group gap-1.5 pr-1 text-sm"
+                          className={`group ${gap.snug} pr-1 ${size.sm}`}
                           style={{
                             backgroundColor: `${TOKENS.colors.accent.primary}15`,
                             borderColor: `${TOKENS.colors.accent.primary}30`,
@@ -322,9 +323,9 @@ export function StepExamplesTags({
                                 removeTag(tagIndex);
                               }
                             }}
-                            className="ml-1 rounded-full p-0.5 transition-colors hover:bg-accent-primary/20"
+                            className={`ml-1 rounded-full ${padding.hair} transition-colors hover:bg-accent-primary/20`}
                           >
-                            <X className="h-3 w-3" />
+                            <X className={iconSize.xs} />
                           </button>
                         </Badge>
                       </motion.div>
@@ -335,13 +336,13 @@ export function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="rounded-lg border border-dashed p-6 text-center"
+                  className={`${radius.lg} border border-dashed ${padding.comfortable} text-center`}
                   style={{
                     borderColor: TOKENS.colors.border.light,
                   }}
                 >
-                  <Tag className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-                  <p className="text-muted-foreground text-sm">
+                  <Tag className={`mx-auto mb-2 h-8 w-8 ${muted.default}`} />
+                  <p className={muted.sm}>
                     No tags yet. Add tags to improve discoverability!
                   </p>
                 </motion.div>
@@ -381,7 +382,7 @@ export function StepReviewSubmit({
           : { label: 'Needs Work', color: TOKENS.colors.error.text };
 
   return (
-    <div className="relative space-y-8">
+    <div className={`relative ${spaceY.loose}`}>
       {/* Celebration Overlay */}
       <AnimatePresence>
         {showCelebration && (
@@ -416,8 +417,8 @@ export function StepReviewSubmit({
                   style={{ color: TOKENS.colors.accent.primary }}
                 />
               </motion.div>
-              <h2 className="mb-3 font-bold text-4xl">Submission Complete!</h2>
-              <p className="text-lg text-muted-foreground">Your contribution is on its way 🎉</p>
+              <h2 className={`${marginBottom.compact} ${weight.bold} ${size['4xl']}`}>Submission Complete!</h2>
+              <p className={muted.lg}>Your contribution is on its way 🎉</p>
 
               {/* Confetti Effect */}
               {[...Array(12)].map((_, i) => {
@@ -466,12 +467,12 @@ export function StepReviewSubmit({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className="mb-4 inline-flex"
+          className={`${marginBottom.default} inline-flex`}
         >
           <Eye className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className="font-bold text-3xl text-foreground">Review & Submit</h2>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Review & Submit</h2>
+        <p className={`${marginTop.compact} ${muted.lg}`}>
           Double-check everything looks good before submitting
         </p>
       </motion.div>
@@ -490,12 +491,12 @@ export function StepReviewSubmit({
         >
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="mb-3 text-muted-foreground text-sm">Submission Quality</p>
+              <p className={`${marginBottom.compact} ${muted.sm}`}>Submission Quality</p>
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={TOKENS.animations.spring.bouncy}
-                className="mb-4 inline-flex"
+                className={`${marginBottom.default} inline-flex`}
               >
                 <div className="relative">
                   {/* Circular Progress */}
@@ -531,7 +532,7 @@ export function StepReviewSubmit({
                   {/* Score Text */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <motion.span
-                      className="font-bold text-3xl"
+                      className={`${weight.bold} ${size['3xl']}`}
                       style={{ color: qualityLevel.color }}
                       initial={{ opacity: 0, scale: 0 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -543,7 +544,7 @@ export function StepReviewSubmit({
                       {qualityScore}%
                     </motion.span>
                     <motion.span
-                      className="text-muted-foreground text-xs"
+                      className={`${muted.default} ${size.xs}`}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.7 }}
@@ -563,7 +564,7 @@ export function StepReviewSubmit({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...TOKENS.animations.spring.smooth, delay: 0.2 }}
-        className="grid gap-4 sm:grid-cols-2"
+        className={`grid ${gap.comfortable} sm:grid-cols-2`}
       >
         {/* Basic Info Summary */}
         <Card
@@ -573,23 +574,23 @@ export function StepReviewSubmit({
           }}
         >
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Edit className="h-4 w-4" />
+            <CardTitle className={`${cluster.compact} ${size.base}`}>
+              <Edit className={iconSize.sm} />
               Basic Info
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm">
+          <CardContent className={`${spaceY.default} ${size.sm}`}>
             <div>
-              <span className="text-muted-foreground">Type:</span>
-              <p className="font-medium">{data.submission_type}</p>
+              <span className={muted.default}>Type:</span>
+              <p className={weight.medium}>{data.submission_type}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Name:</span>
-              <p className="font-medium">{data.name}</p>
+              <span className={muted.default}>Name:</span>
+              <p className={weight.medium}>{data.name}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Author:</span>
-              <p className="font-medium">{data.author}</p>
+              <span className={muted.default}>Author:</span>
+              <p className={weight.medium}>{data.author}</p>
             </div>
           </CardContent>
         </Card>
@@ -602,23 +603,23 @@ export function StepReviewSubmit({
           }}
         >
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="h-4 w-4" />
+            <CardTitle className={`${cluster.compact} ${size.base}`}>
+              <Sparkles className={iconSize.sm} />
               Details
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm">
+          <CardContent className={`${spaceY.default} ${size.sm}`}>
             <div>
-              <span className="text-muted-foreground">Examples:</span>
-              <p className="font-medium">{data.examples.length} added</p>
+              <span className={muted.default}>Examples:</span>
+              <p className={weight.medium}>{data.examples.length} added</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Tags:</span>
-              <p className="font-medium">{data.tags.length} tags</p>
+              <span className={muted.default}>Tags:</span>
+              <p className={weight.medium}>{data.tags.length} tags</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Config Fields:</span>
-              <p className="font-medium">{Object.keys(data.type_specific).length} fields</p>
+              <span className={muted.default}>Config Fields:</span>
+              <p className={weight.medium}>{Object.keys(data.type_specific).length} fields</p>
             </div>
           </CardContent>
         </Card>
@@ -640,7 +641,7 @@ export function StepReviewSubmit({
             <CardTitle className="text-base">Description</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed">{data.description}</p>
+            <p className={`whitespace-pre-wrap ${size.sm} leading-relaxed`}>{data.description}</p>
           </CardContent>
         </Card>
       </motion.div>
@@ -656,7 +657,7 @@ export function StepReviewSubmit({
             type="button"
             onClick={onSubmit}
             disabled={isSubmitting || qualityScore < 40}
-            className="group relative w-full gap-3 py-6 text-lg"
+            className={`group relative w-full ${gap.default} ${padding.yComfortable} ${size.lg}`}
             size="lg"
             style={{
               backgroundColor: TOKENS.colors.accent.primary,
@@ -673,7 +674,7 @@ export function StepReviewSubmit({
                     ease: 'linear',
                   }}
                 >
-                  <Clock className="h-5 w-5" />
+                  <Clock className={iconSize.md} />
                 </motion.div>
                 Submitting...
               </>
@@ -690,7 +691,7 @@ export function StepReviewSubmit({
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-3 text-center text-muted-foreground text-sm"
+            className={`${marginTop.compact} text-center ${muted.sm}`}
           >
             Complete more fields to reach the minimum quality threshold
           </motion.p>

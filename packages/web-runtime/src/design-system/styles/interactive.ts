@@ -172,12 +172,59 @@ export const link = {
   accent: 'text-accent hover:text-accent-hover transition-colors duration-200',
   /** Muted link */
   muted: 'text-muted-foreground hover:text-foreground transition-colors duration-200',
+  /** Small muted link (for footers, captions) */
+  mutedSm: 'text-sm text-muted-foreground hover:text-foreground transition-colors',
   /** Primary link */
   primary: 'text-primary hover:text-primary-hover transition-colors duration-200',
   /** Nav link with underline animation */
   navUnderline: 'group relative inline-block',
   /** Nav link underline span */
   navUnderlineSpan: 'absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 w-0 group-hover:w-full',
+} as const;
+
+// =============================================================================
+// CURSOR UTILITIES
+// =============================================================================
+
+/**
+ * Cursor style utilities.
+ */
+export const cursor = {
+  /** Default arrow cursor */
+  default: 'cursor-default',
+  /** Pointer/hand cursor for clickable elements */
+  pointer: 'cursor-pointer',
+  /** Move cursor for draggable elements */
+  move: 'cursor-move',
+  /** Text selection cursor */
+  text: 'cursor-text',
+  /** Wait/loading cursor */
+  wait: 'cursor-wait',
+  /** Progress cursor (loading but interactive) */
+  progress: 'cursor-progress',
+  /** Not allowed cursor for disabled elements */
+  notAllowed: 'cursor-not-allowed',
+  /** Grab cursor for draggable elements */
+  grab: 'cursor-grab',
+  /** Grabbing cursor for actively dragged elements */
+  grabbing: 'cursor-grabbing',
+  /** Help cursor */
+  help: 'cursor-help',
+  /** Zoom in cursor */
+  zoomIn: 'cursor-zoom-in',
+  /** Zoom out cursor */
+  zoomOut: 'cursor-zoom-out',
+  /** Crosshair cursor for precision selection */
+  crosshair: 'cursor-crosshair',
+  /** None/hidden cursor */
+  none: 'cursor-none',
+  /** Resize cursors */
+  resizeCol: 'cursor-col-resize',
+  resizeRow: 'cursor-row-resize',
+  resizeN: 'cursor-n-resize',
+  resizeE: 'cursor-e-resize',
+  resizeS: 'cursor-s-resize',
+  resizeW: 'cursor-w-resize',
 } as const;
 
 // =============================================================================

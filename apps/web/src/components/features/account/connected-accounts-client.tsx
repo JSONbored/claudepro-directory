@@ -14,7 +14,7 @@ import {
   GithubBrandIcon,
   GoogleBrandIcon,
 } from '@heyclaude/web-runtime/icons';
-import { iconSize } from '@heyclaude/web-runtime/design-system';
+import { iconSize, spaceY, cluster, marginBottom, marginTop, muted, weight, radius ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
 import { errorToasts, successToasts } from '@heyclaude/web-runtime/ui';
 import { type ComponentType, useState, useTransition } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -138,7 +138,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
   };
 
   return (
-    <div className="space-y-4">
+    <div className={spaceY.comfortable}>
       {availableProviders.map(([provider, config]) => {
         const identity = identities.find(
           (i): i is NonNullable<typeof i> & { provider: string } =>
@@ -150,24 +150,24 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         return (
           <div
             key={provider}
-            className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-accent/5"
+            className={`flex items-center justify-between ${radius.lg} border ${padding.default} transition-colors hover:bg-accent/5`}
           >
-            <div className="flex items-center gap-4">
-              <div className="rounded-full border bg-accent/5 p-3">
+            <div className={cluster.comfortable}>
+              <div className={`rounded-full border bg-accent/5 ${padding.compact}`}>
                 <IconComponent className={iconSize.lg} />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-medium">{config.label}</h3>
+                <div className={cluster.compact}>
+                  <h3 className={weight.medium}>{config.label}</h3>
                   {isConnected && (
-                    <UnifiedBadge variant="base" style="default" className="gap-1">
+                    <UnifiedBadge variant="base" style="default" className={`${gap.tight}`}>
                       <CheckCircle className={iconSize.xs} />
                       Connected
                     </UnifiedBadge>
                   )}
                 </div>
                 {identity && (
-                  <div className="mt-1 text-muted-foreground text-sm">
+                  <div className={`${marginTop.tight} ${muted.sm}`}>
                     <p>{identity.email ?? 'No email'}</p>
                     <p className="text-xs">
                       {identity.last_sign_in_at
@@ -206,9 +206,9 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         );
       })}
 
-      <div className="mt-6 rounded-lg border bg-muted/30 p-4">
-        <h4 className="mb-2 font-medium text-sm">How it works</h4>
-        <ul className="space-y-1 text-muted-foreground text-sm">
+      <div className={`${marginTop.comfortable} ${radius.lg} border bg-muted/30 ${padding.default}`}>
+        <h4 className={`${marginBottom.tight} ${weight.medium} ${size.sm}`}>How it works</h4>
+        <ul className={`${spaceY.tight} ${muted.sm}`}>
           <li>• Link multiple OAuth providers to your account</li>
           <li>• Sign in with any connected provider to access the same account</li>
           <li>• Your data stays unified across all login methods</li>
@@ -220,7 +220,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
       <Dialog open={unlinkDialogOpen} onOpenChange={setUnlinkDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className={cluster.compact}>
               <AlertTriangle className="text-destructive" />
               Unlink {providerToUnlink && PROVIDER_CONFIG[providerToUnlink]?.label} Account?
             </DialogTitle>

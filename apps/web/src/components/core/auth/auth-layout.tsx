@@ -8,6 +8,7 @@
 
 'use client';
 
+import { padding , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 
@@ -41,12 +42,12 @@ const cardBorderStyle = {
  */
 export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAuthLayoutProps) {
   return (
-    <div className="relative min-h-screen min-h-dvh overflow-hidden bg-background">
+    <div className={`relative ${minHeight.screen} ${minHeight.dvh} overflow-hidden bg-background`}>
       {/* Desktop: Side-by-side layout - both sides vertically centered */}
-      <div className="hidden min-h-screen min-h-dvh lg:grid lg:grid-cols-2">
+      <div className={`hidden ${minHeight.screen} ${minHeight.dvh} lg:grid lg:grid-cols-2`}>
         {/* Left: Brand content - centered */}
         <motion.div
-          className="flex min-h-screen min-h-dvh items-center justify-center px-12 xl:px-16"
+          className={`flex ${minHeight.screen} ${minHeight.dvh} items-center justify-center ${padding.xSpacious} xl:px-16`}
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
@@ -55,9 +56,9 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
         </motion.div>
 
         {/* Right: Auth card - centered with Claude orange accent */}
-        <div className="flex min-h-screen min-h-dvh items-center justify-center px-8">
+        <div className={`flex ${minHeight.screen} ${minHeight.dvh} items-center justify-center ${padding.xRelaxed}`}>
           <motion.div
-            className="w-full max-w-md rounded-2xl bg-card p-10 shadow-2xl xl:p-12"
+            className={`w-full ${maxWidth.md} rounded-2xl bg-card ${padding.spacious} shadow-2xl xl:p-12`}
             style={cardBorderStyle}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -69,10 +70,10 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
       </div>
 
       {/* Mobile: Stacked layout */}
-      <div className="flex min-h-screen min-h-dvh flex-col lg:hidden">
+      <div className={`flex ${minHeight.screen} ${minHeight.dvh} flex-col lg:hidden`}>
         {mobileHeader}
-        <div className="flex flex-1 items-center justify-center p-6">
-          <div className="w-full max-w-md rounded-2xl bg-card p-8" style={cardBorderStyle}>
+        <div className={`flex flex-1 items-center justify-center ${padding.comfortable}`}>
+          <div className={`w-full ${maxWidth.md} rounded-2xl bg-card ${padding.relaxed}`} style={cardBorderStyle}>
             {authPanel}
           </div>
         </div>

@@ -1,7 +1,7 @@
 import  { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { stack } from '@heyclaude/web-runtime/design-system';
+import { stack, size, maxWidth } from '@heyclaude/web-runtime/design-system';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
@@ -82,14 +82,14 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
   });
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className={`w-full ${maxWidth.md}`}>
       <CardHeader className="text-center">
         <div
           className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
         >
           <AlertCircle className="h-6 w-6 text-destructive" />
         </div>
-        <CardTitle className="text-2xl">Authentication Error</CardTitle>
+        <CardTitle className={`${size['2xl']}`}>Authentication Error</CardTitle>
         <CardDescription>
           There was a problem signing you in. This could be due to an invalid or expired link.
         </CardDescription>

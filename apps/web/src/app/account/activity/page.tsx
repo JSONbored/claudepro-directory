@@ -1,7 +1,7 @@
 import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight , size , gap } from '@heyclaude/web-runtime/design-system';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
@@ -70,10 +70,10 @@ export default async function ActivityPage() {
       section: 'authentication',
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>
               Please sign in to view your contribution history and activity metrics.
             </CardDescription>
@@ -136,10 +136,10 @@ export default async function ActivityPage() {
   // Only show global fallback when both fail
   if (!(hasSummary || hasTimeline)) {
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Activity unavailable</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Activity unavailable</CardTitle>
             <CardDescription>
               We couldn&apos;t load your activity data. Please refresh or try again later.
             </CardDescription>
@@ -170,15 +170,15 @@ export default async function ActivityPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       {/* Header */}
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Activity</h1>
-        <p className="text-muted-foreground">Your contribution history and community activity</p>
+        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>Activity</h1>
+        <p className={muted.default}>Your contribution history and community activity</p>
       </div>
 
       {/* Stats Overview - only render if summary is available */}
-      {hasSummary ? <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {hasSummary ? <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-2`}>
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Submissions</CardTitle>
@@ -186,11 +186,11 @@ export default async function ActivityPage() {
             <CardContent>
               <div className={cluster.compact}>
                 <GitPullRequest className={`${iconSize.md} text-blue-600`} />
-                <span className="font-bold text-2xl">
+                <span className={`${weight.bold} ${size['2xl']}`}>
                   {summary.merged_submissions}/{summary.total_submissions}
                 </span>
               </div>
-              <p className="mt-1 text-muted-foreground text-xs">Merged</p>
+              <p className={`${marginTop.tight} ${muted.xs}`}>Merged</p>
             </CardContent>
           </Card>
         </div> : null}
@@ -216,7 +216,7 @@ export default async function ActivityPage() {
             <CardDescription>Unable to load activity timeline</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-sm">
+            <p className={muted.sm}>
               There was an error loading your activity timeline. Please try refreshing the page.
             </p>
           </CardContent>

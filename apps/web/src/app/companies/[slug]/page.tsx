@@ -7,7 +7,7 @@
 import  { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, muted } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, muted, iconSize, spaceY, marginBottom, marginTop, weight ,size  , gap , padding , row , radius , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building,
@@ -195,58 +195,58 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
     <>
       <StructuredData route={`/companies/${slug}`} />
 
-      <div className="min-h-screen bg-background">
+      <div className={`${minHeight.screen} bg-background`}>
         {/* Company Header */}
         <section className="relative border-border border-b">
-          <div className="container mx-auto px-4 py-12">
-            <div className="flex items-start gap-6">
+          <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+            <div className={`${row.relaxed}`}>
               {company.logo ? (
                 <Image
                   src={company.logo}
                   alt={`${company.name} logo`}
                   width={96}
                   height={96}
-                  className="h-24 w-24 rounded-lg border-4 border-background object-cover"
+                  className={`h-24 w-24 ${radius.lg} border-4 border-background object-cover`}
                   priority
                 />
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-lg border-4 border-background bg-accent font-bold text-2xl">
+                <div className={`flex h-24 w-24 items-center justify-center ${radius.lg} border-4 border-background bg-accent ${weight.bold} ${size['2xl']}`}>
                   <Building className="h-12 w-12" />
                 </div>
               )}
 
               <div className="flex-1">
                 <div className={cluster.default}>
-                  <h1 className="font-bold text-3xl">{company.name}</h1>
+                  <h1 className={`${weight.bold} ${size['3xl']}`}>{company.name}</h1>
                   {company.featured ? <UnifiedBadge variant="base" style="default">
                       Featured
                     </UnifiedBadge> : null}
                 </div>
 
-                {company.description ? <p className="mt-2 max-w-3xl text-muted-foreground">{company.description}</p> : null}
+                {company.description ? <p className={`${marginTop.compact} ${maxWidth['3xl']} ${muted.default}`}>{company.description}</p> : null}
 
-                <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
+                <div className={`${marginTop.default} flex flex-wrap items-center ${gap.comfortable} ${size.sm}`}>
                   <SafeWebsiteLink
                     url={company.website}
                     className={`${cluster.tight} text-accent hover:text-accent-hover transition-colors duration-200`}
                   >
-                    <Globe className="h-4 w-4" />
+                    <Globe className={iconSize.sm} />
                     Website
                   </SafeWebsiteLink>
 
                   {company.industry ? <div className={cluster.tight}>
-                      <TrendingUp className="h-4 w-4" />
+                      <TrendingUp className={iconSize.sm} />
                       {company.industry}
                     </div> : null}
 
                   {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
                   {company.size ? <div className={cluster.tight}>
-                      <Users className="h-4 w-4" />
+                      <Users className={iconSize.sm} />
                       {company.size}
                     </div> : null}
 
                   {company.using_cursor_since ? <div className={cluster.tight}>
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className={iconSize.sm} />
                       Using Claude since{' '}
                       {new Date(company.using_cursor_since).toLocaleDateString('en-US', {
                         month: 'short',
@@ -260,22 +260,22 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
         </section>
 
         {/* Content */}
-        <section className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
+        <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+          <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-[1fr_320px]`}>
             {/* Main content - Active jobs */}
-            <div className="space-y-6">
+            <div className={spaceY.relaxed}>
               <div className={between.center}>
-                <h2 className="font-bold text-2xl">
+                <h2 className={`${weight.bold} ${size['2xl']}`}>
                   Active Positions ({active_jobs?.length ?? 0})
                 </h2>
               </div>
 
               {!active_jobs || active_jobs.length === 0 ? (
                 <Card>
-                  <CardContent className="flex flex-col items-center py-16">
-                    <Briefcase className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <h3 className="mb-2 font-semibold text-xl">No Active Positions</h3>
-                    <p className="mb-6 max-w-md text-center text-muted-foreground">
+                  <CardContent className={`flex flex-col items-center ${padding.yHero}`}>
+                    <Briefcase className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+                    <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No Active Positions</h3>
+                    <p className={`${marginBottom.comfortable} ${maxWidth.md} text-center ${muted.default}`}>
                       This company doesn't have any job openings at the moment. Check back later!
                     </p>
                     <Link href={ROUTES.JOBS}>
@@ -286,7 +286,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-2`}>
                   {active_jobs
                     .filter((job): job is typeof job & {
                       click_count: number;
@@ -350,45 +350,45 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
             </div>
 
             {/* Sidebar - Company stats */}
-            <aside className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
+            <aside className={`${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}>
               <Card>
                 <CardHeader>
                   <CardTitle>Company Stats</CardTitle>
                   <CardDescription>Hiring activity and engagement</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className={spaceY.comfortable}>
                   <div className={between.center}>
-                    <span className={`${muted.default} text-sm`}>Total Jobs Posted</span>
-                    <span className="font-semibold">{stats?.total_jobs ?? 0}</span>
+                    <span className={`${muted.sm}`}>Total Jobs Posted</span>
+                    <span className={weight.semibold}>{stats?.total_jobs ?? 0}</span>
                   </div>
 
                   <div className={between.center}>
-                    <span className={`${muted.default} text-sm`}>Active Openings</span>
-                    <span className="font-semibold text-green-600">{stats?.active_jobs ?? 0}</span>
+                    <span className={`${muted.sm}`}>Active Openings</span>
+                    <span className={`${weight.semibold} text-green-600`}>{stats?.active_jobs ?? 0}</span>
                   </div>
 
                   {stats && (stats.remote_jobs ?? 0) > 0 ? <div className={between.center}>
-                      <span className={`${muted.default} text-sm`}>Remote Positions</span>
-                      <span className="font-semibold">{stats.remote_jobs ?? 0}</span>
+                      <span className={`${muted.sm}`}>Remote Positions</span>
+                      <span className={weight.semibold}>{stats.remote_jobs ?? 0}</span>
                     </div> : null}
 
                   {stats?.avg_salary_min ? <div className={between.center}>
-                      <span className={`${muted.default} text-sm`}>Avg. Salary</span>
-                      <span className="font-semibold">
+                      <span className={`${muted.sm}`}>Avg. Salary</span>
+                      <span className={weight.semibold}>
                         ${(stats.avg_salary_min / 1000).toFixed(0)}k+
                       </span>
                     </div> : null}
 
                   <div className={between.center}>
-                    <span className={`${muted.default} text-sm`}>Total Views</span>
-                    <span className="font-semibold">
+                    <span className={`${muted.sm}`}>Total Views</span>
+                    <span className={weight.semibold}>
                       {(stats?.total_views ?? 0).toLocaleString()}
                     </span>
                   </div>
 
                   {stats?.latest_job_posted_at ? <div className={between.center}>
-                      <span className={`${muted.default} text-sm`}>Latest Posting</span>
-                      <span className="font-semibold text-sm">
+                      <span className={`${muted.sm}`}>Latest Posting</span>
+                      <span className={`${weight.semibold} ${size.sm}`}>
                         {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -405,7 +405,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   <CardTitle className="text-lg">Interested in joining?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className={`${muted.default} text-sm mb-4`}>
+                  <p className={`${muted.sm} mb-4`}>
                     {company.website
                       ? 'Visit their website to learn more about the company and culture.'
                       : 'Check back regularly for new opportunities!'}

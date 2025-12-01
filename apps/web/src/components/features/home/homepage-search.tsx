@@ -8,7 +8,7 @@
  * Uses infinite scroll for optimal performance with large result sets
  */
 
-import { between, emptyCard } from '@heyclaude/web-runtime/design-system';
+import { between, emptyCard, muted, marginBottom, weight ,size } from '@heyclaude/web-runtime/design-system';
 import { Search } from '@heyclaude/web-runtime/icons';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import { type FC, memo } from 'react';
@@ -32,11 +32,11 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
   if (!isSearching) return null;
 
   return (
-    <div className="mb-16">
+    <div className={marginBottom.hero}>
       <div className={`${between.center} mb-8`}>
-        <h2 className={'font-bold text-2xl'}>
+        <h2 className={`${weight.bold} ${size['2xl']}`}>
           Search Results
-          <span className={'ml-2 text-muted-foreground'}>({filteredResults.length} found)</span>
+          <span className={'ml-2 ${muted.default}'}>({filteredResults.length} found)</span>
         </h2>
         <Button variant="outline" onClick={onClearSearch} className="text-sm">
           Clear Search
@@ -64,9 +64,9 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
         />
       ) : (
         <div className={emptyCard.default}>
-          <Search className={'mx-auto mb-4 h-12 w-12 text-muted-foreground/50'} />
-          <h3 className={'mb-2 font-semibold text-lg'}>No results found</h3>
-          <p className="text-muted-foreground">
+          <Search className={'mx-auto mb-4 h-12 w-12 ${muted.default}/50'} />
+          <h3 className={'mb-2 ${weight.semibold} ${size.lg}'}>No results found</h3>
+          <p className={muted.default}>
             Try different keywords or browse our featured content below
           </p>
         </div>

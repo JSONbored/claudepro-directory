@@ -5,6 +5,7 @@
  */
 
 import { Clock, Star, TrendingUp } from '@heyclaude/web-runtime/icons';
+import { spaceY, marginBottom, weight, size, maxWidth } from '@heyclaude/web-runtime/design-system';
 import type { TrendingContentProps } from '@heyclaude/web-runtime/types/component.types';
 import { useId } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -63,9 +64,9 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
   };
 
   return (
-    <Tabs defaultValue="trending" className="space-y-8">
+    <Tabs defaultValue="trending" className={spaceY.loose}>
       <TabsList
-        className="mx-auto grid w-full max-w-md grid-cols-3"
+        className={`mx-auto grid w-full ${maxWidth.md} grid-cols-3`}
         role="tablist"
         aria-label="Trending content categories"
       >
@@ -93,12 +94,12 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
           <TabsContent
             key={config.value}
             value={config.value}
-            className="space-y-8"
+            className={spaceY.loose}
             role="tabpanel"
             aria-labelledby={headingId}
           >
             <div>
-              <h2 id={headingId} className="mb-4 font-bold text-2xl">
+              <h2 id={headingId} className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>
                 {config.heading}
               </h2>
               <UnifiedCardGrid

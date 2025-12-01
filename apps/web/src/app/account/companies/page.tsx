@@ -11,7 +11,7 @@ import {
   getUserCompanies,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, iconSize, spaceY, muted, marginBottom, marginTop, iconLeading, weight ,size  , gap , padding , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building2,
@@ -106,10 +106,10 @@ export default async function CompaniesPage() {
       section: 'authentication',
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>Please sign in to manage your companies.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -162,10 +162,10 @@ export default async function CompaniesPage() {
 
   if (hasError) {
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Companies unavailable</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Companies unavailable</CardTitle>
             <CardDescription>
               We couldn&apos;t load your companies. Please refresh the page or try again later.
             </CardDescription>
@@ -193,11 +193,11 @@ export default async function CompaniesPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div className={between.center}>
         <div>
-          <h1 className="mb-2 font-bold text-3xl">My Companies</h1>
-          <p className="text-muted-foreground">
+          <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>My Companies</h1>
+          <p className={muted.default}>
             {companies.length} {companies.length === 1 ? 'company' : 'companies'}
           </p>
         </div>
@@ -211,10 +211,10 @@ export default async function CompaniesPage() {
 
       {companies.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center py-12">
-            <Building2 className="mb-4 h-12 w-12 text-muted-foreground" />
-            <h3 className="mb-2 font-semibold text-xl">No companies yet</h3>
-            <p className="mb-4 max-w-md text-center text-muted-foreground">
+          <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
+            <Building2 className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No companies yet</h3>
+            <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
               Create a company profile to showcase your organization and post job listings
             </p>
             <Button asChild>
@@ -226,7 +226,7 @@ export default async function CompaniesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className={`grid ${gap.comfortable}`}>
           {companies
             .filter(
               (
@@ -245,13 +245,13 @@ export default async function CompaniesPage() {
                 <Card key={company.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div className="flex flex-1 items-start gap-4">
+                      <div className={`flex flex-1 items-start ${gap.comfortable}`}>
                         {(() => {
                           // Validate logo URL is safe (should be from Supabase storage or trusted domain)
                           if (!company.logo) {
                             return (
-                              <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
-                                <Building2 className="h-8 w-8 text-muted-foreground" />
+                              <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
+                                <Building2 className={`h-8 w-8 ${muted.default}`} />
                               </div>
                             );
                           }
@@ -260,8 +260,8 @@ export default async function CompaniesPage() {
                             // Only allow HTTPS
                             if (parsed.protocol !== 'https:') {
                               return (
-                                <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
-                                  <Building2 className="h-8 w-8 text-muted-foreground" />
+                                <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
+                                  <Building2 className={`h-8 w-8 ${muted.default}`} />
                                 </div>
                               );
                             }
@@ -283,8 +283,8 @@ export default async function CompaniesPage() {
                               isAwsS3;
                             if (!isTrustedSource) {
                               return (
-                                <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
-                                  <Building2 className="h-8 w-8 text-muted-foreground" />
+                                <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
+                                  <Building2 className={`h-8 w-8 ${muted.default}`} />
                                 </div>
                               );
                             }
@@ -294,14 +294,14 @@ export default async function CompaniesPage() {
                                 alt={`${company.name} logo`}
                                 width={64}
                                 height={64}
-                                className="h-16 w-16 rounded-lg border object-cover"
+                                className={`h-16 w-16 ${radius.lg} border object-cover`}
                                 priority={index === 0}
                               />
                             );
                           } catch {
                             return (
-                              <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
-                                <Building2 className="h-8 w-8 text-muted-foreground" />
+                              <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
+                                <Building2 className={`h-8 w-8 ${muted.default}`} />
                               </div>
                             );
                           }
@@ -313,7 +313,7 @@ export default async function CompaniesPage() {
                                 Featured
                               </UnifiedBadge> : null}
                           </div>
-                          <CardDescription className="mt-1">
+                          <CardDescription className={marginTop.tight}>
                             {company.description ?? 'No description provided'}
                           </CardDescription>
                           {(() => {
@@ -360,9 +360,9 @@ export default async function CompaniesPage() {
                                 href={validatedUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mt-2 inline-flex items-center gap-1 text-sm text-accent hover:underline"
+                                className={`${marginTop.compact} inline-${cluster.tight} ${size.sm} text-accent hover:underline`}
                               >
-                                <ExternalLink className="h-3 w-3" />
+                                <ExternalLink className={iconSize.xs} />
                                 {displayText}
                               </a>
                             );
@@ -373,18 +373,18 @@ export default async function CompaniesPage() {
                   </CardHeader>
 
                   <CardContent>
-                    <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
+                    <div className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}>
                       <div className={cluster.tight}>
-                        <Briefcase className="h-4 w-4" />
+                        <Briefcase className={iconSize.sm} />
                         {company.stats?.active_jobs ?? 0} active job
                         {(company.stats?.active_jobs ?? 0) === 1 ? '' : 's'}
                       </div>
                       <div className={cluster.tight}>
-                        <Eye className="h-4 w-4" />
+                        <Eye className={iconSize.sm} />
                         {(company.stats?.total_views ?? 0).toLocaleString()} views
                       </div>
                       {company.stats?.latest_job_posted_at ? <div className={cluster.tight}>
-                          <Calendar className="h-4 w-4" />
+                          <Calendar className={iconSize.sm} />
                           Last job posted {formatRelativeDate(company.stats.latest_job_posted_at)}
                         </div> : null}
                     </div>
@@ -392,14 +392,14 @@ export default async function CompaniesPage() {
                     <div className={cluster.compact}>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`${ROUTES.ACCOUNT_COMPANIES}/${company.id}/edit`}>
-                          <Edit className="mr-1 h-3 w-3" />
+                          <Edit className={iconLeading.xs} />
                           Edit
                         </Link>
                       </Button>
 
                       <Button variant="ghost" size="sm" asChild>
                         <Link href={`/companies/${company.slug}`}>
-                          <ExternalLink className="mr-1 h-3 w-3" />
+                          <ExternalLink className={iconLeading.xs} />
                           View Profile
                         </Link>
                       </Button>

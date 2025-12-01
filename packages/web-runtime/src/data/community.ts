@@ -1,7 +1,7 @@
 'use server';
 
 import { CommunityService } from '@heyclaude/data-layer';
-import { Constants, type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
 import {
@@ -118,6 +118,14 @@ export async function getCommunityDirectory(options: {
   }
 }
 
+/**
+ * Get a public user profile by slug.
+ * 
+ * IMPORTANT: This is a PUBLIC endpoint - uses anonymous Supabase client.
+ * - When viewerId is provided, is_following status is included in the response
+ * - The RPC function handles privacy checks internally
+ * - Uses useAuth: false because profiles are public data
+ */
 export async function getPublicUserProfile(input: {
   slug: string;
   viewerId?: string;
@@ -140,7 +148,9 @@ export async function getPublicUserProfile(input: {
         keyParts: viewerId ? ['user-profile', slug, 'viewer', viewerId] : ['user-profile', slug],
         tags: ['users', `user-${slug}`],
         ttlKey: 'cache.user_profile.ttl_seconds',
-        useAuth: true,
+        // CRITICAL: Use anonymous client for public profiles
+        // The RPC handles privacy internally via p_viewer_id
+        useAuth: false,
         fallback: null,
         logMeta: { slug, hasViewer: Boolean(viewerId) },
       }
@@ -155,6 +165,13 @@ export async function getPublicUserProfile(input: {
   }
 }
 
+/**
+ * Get a public collection's details by user slug and collection slug.
+ * 
+ * IMPORTANT: This is a PUBLIC endpoint - uses anonymous Supabase client.
+ * - Public collections are viewable by anyone
+ * - The RPC function handles privacy checks internally
+ */
 export async function getPublicCollectionDetail(input: {
   collectionSlug: string;
   userSlug: string;
@@ -179,9 +196,10 @@ export async function getPublicCollectionDetail(input: {
         keyParts: viewerId
           ? ['collection-detail', userSlug, collectionSlug, 'viewer', viewerId]
           : ['collection-detail', userSlug, collectionSlug],
-        tags: [Constants.public.Enums.content_category[7] as string, `collection-${collectionSlug}`, `user-${userSlug}`], // 'collections'
+        tags: ['user-collections', `collection-${collectionSlug}`, `user-${userSlug}`],
         ttlKey: 'cache.content_list.ttl_seconds',
-        useAuth: true,
+        // CRITICAL: Use anonymous client for public collections
+        useAuth: false,
         fallback: null,
         logMeta: {
           slug: userSlug,

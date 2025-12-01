@@ -39,9 +39,15 @@ import {
   iconLeading,
   iconSize,
   marginBottom,
+  marginTop,
   muted,
   responsive,
   stack,
+  weight,
+  size,
+  gap,
+  padding,
+  radius,
 } from '@heyclaude/web-runtime/design-system';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
@@ -475,7 +481,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         >
           <Card className={'mb-6 border-green-500/20 bg-green-500/5'}>
             <CardContent className={'pt-6'}>
-              <div className="flex flex-col items-start gap-3 sm:flex-row">
+              <div className={`flex flex-col items-start ${gap.default} sm:flex-row`}>
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
@@ -487,7 +493,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                 </motion.div>
                 <div className="min-w-0 flex-1">
                   <motion.p
-                    className="font-semibold text-green-600 text-lg dark:text-green-400"
+                    className={`${weight.semibold} text-green-600 ${size.lg} dark:text-green-400`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
@@ -495,7 +501,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     Submission Successful! 🎉
                   </motion.p>
                   <motion.p
-                    className={'mt-1 text-muted-foreground text-sm'}
+                    className={`${marginTop.tight} ${muted.sm}`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
@@ -503,7 +509,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     {submissionResult.message}
                   </motion.p>
                   <motion.p
-                    className={'mt-1 text-muted-foreground text-xs'}
+                    className={'mt-1 ${muted.default} ${size.xs}'}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
@@ -529,7 +535,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           theme="primary"
           showBorderBeam={false}
         >
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className={`grid ${gap.comfortable} sm:grid-cols-2`}>
             <div className={stack.compact}>
               <Label htmlFor={`${formId}-type`}>Content Type *</Label>
               <div className="relative">
@@ -549,7 +555,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   }}
                   required={true}
                   className={
-                    'flex h-10 w-full rounded-md border border-input bg-background py-2 pr-3 pl-10 text-sm'
+                    'flex h-10 w-full rounded-md border border-input bg-background ${padding.yCompact} pr-3 pl-10 ${size.sm}'
                   }
                 >
                   {SUBMISSION_CONTENT_TYPES.map((type) => (
@@ -582,7 +588,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
             <div className={stack.compact}>
               <div className={between.center}>
                 <Label htmlFor={`${formId}-name`}>{nameFieldConfig.label}</Label>
-                <span className={cn(`${muted.default} text-xs`, 'font-medium')}>
+                <span className={cn(`${muted.default} ${size.xs}`, weight.medium)}>
                   {name.length}/100
                 </span>
               </div>
@@ -608,7 +614,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   </motion.div>
                 )}
               </div>
-              <p className={`${muted.default} text-xs`}>
+              <p className={`${muted.default} ${size.xs}`}>
                 {nameFieldConfig.helpText ?? 'A clear, descriptive name for your configuration'}
               </p>
               <DuplicateWarning contentType={contentType} name={name} />
@@ -626,7 +632,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     Preview
                   </TabsTrigger>
                 </TabsList>
-                <TabsContent value="write" className="mt-2">
+                <TabsContent value="write" className={marginTop.compact}>
                   <Textarea
                     id={`${formId}-description`}
                     name="description"
@@ -637,15 +643,15 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     rows={6}
                     className="resize-y font-sans"
                   />
-                  <p className={cn(`${muted.default} text-xs`, marginBottom.micro)}>
+                  <p className={cn(`${muted.default} ${size.xs}`, marginBottom.micro)}>
                     Supports markdown formatting (bold, italic, lists, links, code blocks)
                   </p>
                 </TabsContent>
-                <TabsContent value="preview" className="mt-2">
+                <TabsContent value="preview" className={marginTop.compact}>
                   <div
                     className={cn(
-                      'min-h-[150px] rounded-md border border-input bg-background p-4',
-                      'prose prose-sm dark:prose-invert max-w-none'
+                      'min-h-[150px] rounded-md border border-input bg-background ${padding.default}',
+                      'prose prose-sm dark:prose-invert ${maxWidth.none}'
                     )}
                   >
                     {description ? (
@@ -736,12 +742,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         </motion.div>
 
         {/* Info Box */}
-        <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3 sm:p-4">
-          <div className={`${cluster.compact} sm:gap-3`}>
+        <div className={`${radius.lg} border border-blue-500/20 bg-blue-500/10 ${padding.compact} sm:p-4`}>
+          <div className={`${cluster.compact} sm:${gap.default}`}>
             <Github className="h-5 w-5 text-blue-400 mt-0.5 shrink-0" />
             <div className="min-w-0 flex-1">
-              <p className={'font-medium text-blue-400 text-sm'}>How it works</p>
-              <p className={'mt-1 text-muted-foreground text-sm'}>
+              <p className={`${weight.medium} text-blue-400 ${size.sm}`}>How it works</p>
+              <p className={`${marginTop.tight} ${muted.sm}`}>
                 We'll automatically create a Pull Request with your submission. Our team reviews for
                 quality and accuracy, then merges it to make your contribution live!
               </p>

@@ -16,7 +16,7 @@
 import type { ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
 import { normalizeHeadings, type NormalizedHeading } from '@heyclaude/web-runtime/utils/heading-normalization';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { focusRing } from '@heyclaude/web-runtime/design-system';
+import { focusRing, marginBottom, weight, muted ,size  } from '@heyclaude/web-runtime/design-system';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface SidebarTocProps {
@@ -148,7 +148,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
   return (
     <nav className={cn('py-2', className)} aria-label="On this page">
       {/* Header - Supabase style uppercase */}
-      <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+      <p className={`${marginBottom.compact} ${weight.medium} ${muted.default} ${size.xs} uppercase tracking-wider`}>
         On this page
       </p>
 
@@ -165,9 +165,9 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
                   focusRing.default,
-                  'group relative w-full py-1.5 text-left text-[13px] leading-snug transition-colors',
+                  'group relative w-full ${padding.ySnug} text-left text-[13px] leading-snug transition-colors',
                   'hover:text-foreground',
-                  isActive ? 'text-foreground' : 'text-muted-foreground'
+                  isActive ? 'text-foreground' : muted.default
                 )}
                 style={{
                   paddingLeft: `${0.75 + depthOffset * 0.75}rem`,

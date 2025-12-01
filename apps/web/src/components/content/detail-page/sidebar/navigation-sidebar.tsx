@@ -18,7 +18,7 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Copy, ExternalLink, Github, Thermometer } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, iconLeading, muted, categoryBadge } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, iconLeading, muted, categoryBadge, hoverBg, transition, border, radius, spaceY, weight ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { getDisplayTitle } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
@@ -183,18 +183,18 @@ export const DetailSidebar = memo(function DetailSidebar({
   });
 
   if (customRenderer) {
-    return <div className="space-y-6">{customRenderer(item, relatedItems, router)}</div>;
+    return <div className={spaceY.relaxed}>{customRenderer(item, relatedItems, router)}</div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       {/* Resources Card */}
       {!!(showGitHubLink || hasDocumentationUrl) && (
         <Card>
           <CardHeader>
             <CardTitle>Resources</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={spaceY.default}>
             {showGitHubLink && githubUrl && (
               <Button
                 variant="outline"
@@ -291,14 +291,14 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardHeader>
             <CardTitle>{`${config.typeName} Details`}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className={spaceY.comfortable}>
             {contentItem.category && (
               <div>
-                <h4 className={'mb-1 font-medium'}>Category</h4>
+                <h4 className={'mb-1 ${weight.medium}'}>Category</h4>
                 <UnifiedBadge
                   variant="base"
                   style="default"
-                  className={`font-medium text-xs ${
+                  className={`${weight.medium} ${size.xs} ${
                     categoryBadge[contentItem.category as CategoryType] ||
                     categoryBadge.default
                   }`}
@@ -324,14 +324,14 @@ export const DetailSidebar = memo(function DetailSidebar({
               }
               return (
                 <div>
-                  <h4 className={'mb-1 font-medium'}>Temperature</h4>
+                  <h4 className={'mb-1 ${weight.medium}'}>Temperature</h4>
                   <div className={cluster.compact}>
                     <Thermometer className={`${iconSize.xs} text-orange-500`} />
                     <UnifiedBadge
                       variant="base"
                       style="outline"
                       className={
-                        'border-orange-500/30 bg-orange-500/10 font-medium text-orange-600 text-xs'
+                        'border-orange-500/30 bg-orange-500/10 ${weight.medium} text-orange-600 ${size.xs}'
                       }
                     >
                       {String(config.temperature)}
@@ -343,8 +343,8 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasPackage && packageName && (
               <div>
-                <h4 className={'mb-1 font-medium'}>Package</h4>
-                <UnifiedBadge variant="base" style="outline" className="font-mono text-xs">
+                <h4 className={'mb-1 ${weight.medium}'}>Package</h4>
+                <UnifiedBadge variant="base" style="outline" className={`font-mono ${size.xs}`}>
                   {packageName}
                 </UnifiedBadge>
               </div>
@@ -352,8 +352,8 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasAuth && (
               <div>
-                <h4 className={'mb-1 font-medium'}>Authentication</h4>
-                <p className={`${muted.default} text-sm`}>
+                <h4 className={'mb-1 ${weight.medium}'}>Authentication</h4>
+                <p className={`${muted.sm}`}>
                   {(metadata['requiresAuth'] as boolean) ? 'Required' : 'Not required'}
                 </p>
               </div>
@@ -361,8 +361,8 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasPermissions && permissions.length > 0 && (
               <div>
-                <h4 className={'mb-1 font-medium'}>Permissions</h4>
-                <div className="flex flex-wrap gap-1">
+                <h4 className={'mb-1 ${weight.medium}'}>Permissions</h4>
+                <div className={`flex flex-wrap ${gap.tight}`}>
                   {permissions.map((perm) => (
                     <UnifiedBadge key={perm} variant="base" style="outline" className="text-xs">
                       {perm}
@@ -374,7 +374,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasSource && 'source' in contentItem && contentItem.source && (
               <div>
-                <h4 className={'mb-1 font-medium'}>Source</h4>
+                <h4 className={'mb-1 ${weight.medium}'}>Source</h4>
                 <UnifiedBadge variant="base" style="outline">
                   {contentItem.source}
                 </UnifiedBadge>
@@ -389,19 +389,19 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className={spaceY.compact}>
             {quickActions.map((action) => (
               <Button
                 key={action.key}
                 variant="secondary"
-                className="w-full justify-start gap-3 text-left"
+                className={`w-full justify-start ${gap.default} text-left`}
                 onClick={action.onClick}
               >
                 <Copy className={iconLeading.sm} />
                 <div className="text-left">
-                  <div className="font-medium text-sm">{action.label}</div>
+                  <div className={`${weight.medium} ${size.sm}`}>{action.label}</div>
                   {action.description && (
-                    <p className="text-muted-foreground text-xs">{action.description}</p>
+                    <p className={`${muted.default} ${size.xs}`}>{action.description}</p>
                   )}
                 </div>
               </Button>
@@ -416,7 +416,7 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardHeader>
             <CardTitle>{`Related ${config.typeName}s`}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={spaceY.default}>
             {relatedItems.slice(0, 5).map((relatedItem) => {
               const relatedCategory =
                 'category' in relatedItem &&
@@ -463,10 +463,10 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <Link
                   key={relatedSlug}
                   href={validatedUrl}
-                  className="flex items-center justify-between w-full cursor-pointer rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50"
+                  className={`flex items-center justify-between w-full cursor-pointer ${radius.lg} ${border.default} ${padding.compact} text-left ${transition.colors} ${hoverBg.muted}`}
                 >
                   <div className={'min-w-0 flex-1'}>
-                    <h4 className="truncate font-medium text-sm">
+                    <h4 className={`truncate ${weight.medium} ${size.sm}`}>
                       {getDisplayTitle({
                         title:
                           'title' in relatedItem && typeof relatedItem.title === 'string'
@@ -476,13 +476,13 @@ export const DetailSidebar = memo(function DetailSidebar({
                         category: relatedCategory,
                       })}
                     </h4>
-                    <p className="truncate text-muted-foreground text-xs">
+                    <p className={`truncate ${muted.default} ${size.xs}`}>
                       {'description' in relatedItem && typeof relatedItem.description === 'string'
                         ? relatedItem.description
                         : ''}
                     </p>
                   </div>
-                  <ExternalLink className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <ExternalLink className={`ml-2 h-4 w-4 shrink-0 ${muted.default}`} />
                 </Link>
               );
             })}

@@ -6,7 +6,7 @@ import type { Database } from '@heyclaude/database-types';
 import { trackMissingData } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
-import { between, iconSize } from '@heyclaude/web-runtime/design-system';
+import { between, iconSize, stack, cluster, weight , size , gap , muted } from '@heyclaude/web-runtime/design-system';
 import type {
   DisplayableContent,
   UnifiedCategoryConfig,
@@ -55,8 +55,8 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
     return (
       <div>
         <div className={`${between.center} mb-8`}>
-          <h2 className={'font-bold text-2xl'}>{title}</h2>
-          <Link href={href} className="flex items-center gap-2 text-accent hover:underline">
+          <h2 className={`${weight.bold} ${size['2xl']}`}>{title}</h2>
+          <Link href={href} className={`${cluster.compact} text-accent hover:underline`}>
             View all <ExternalLink className={iconSize.sm} />
           </Link>
         </div>
@@ -70,7 +70,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             return (
               <div className="relative h-full">
                 {(showNew || showTrending) && (
-                  <div className="pointer-events-none absolute top-3 left-3 z-10 flex flex-col gap-2">
+                  <div className={`pointer-events-none absolute top-3 left-3 z-10 ${stack.compact}`}>
                     {showNew && (
                       <UnifiedBadge
                         variant="base"
@@ -135,7 +135,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
   return (
     <div className={'mb-16 space-y-16'}>
       {featuredCategories.length === 0 && (
-        <div className="py-8 text-center text-muted-foreground">
+        <div className={`py-8 text-center ${muted.default}`}>
           No featured categories available.
         </div>
       )}
@@ -171,15 +171,15 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
       {featuredJobs.length > 0 && (
         <div>
           <div className={`${between.center} mb-8`}>
-            <h2 className={'font-bold text-2xl'}>Featured Jobs</h2>
+            <h2 className={`${weight.bold} ${size['2xl']}`}>Featured Jobs</h2>
             <Link
               href={ROUTES.JOBS}
-              className="flex items-center gap-2 text-accent hover:underline"
+              className={`${cluster.compact} text-accent hover:underline`}
             >
               View all <ExternalLink className={iconSize.sm} />
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-2 lg:grid-cols-3`}>
             {featuredJobs.slice(0, 6).map((job) => (
               <JobCard key={job.slug} job={job} />
             ))}

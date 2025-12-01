@@ -15,6 +15,7 @@ import {
 import {
   getCategoryConfig,
 } from '@heyclaude/web-runtime/data';
+import { marginBottom, marginTop, muted, weight, size, spaceY  , gap , padding , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { 
   highlightCode,
   detectLanguage,
@@ -866,11 +867,11 @@ export async function UnifiedDetailPage({
   // Handle case where config is not found - AFTER ALL HOOKS
   if (!config) {
     return (
-      <div className={'min-h-screen bg-background'}>
-        <div className="container mx-auto px-4 py-8">
+      <div className={`${minHeight.screen} bg-background`}>
+        <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
           <div className="text-center">
-            <h1 className="mb-4 font-bold text-2xl">Configuration Not Found</h1>
-            <p className="mb-6 text-muted-foreground">
+            <h1 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>Configuration Not Found</h1>
+            <p className={`${marginBottom.comfortable} ${muted.default}`}>
               No configuration found for content type: {item.category}
             </p>
           </div>
@@ -908,7 +909,7 @@ export async function UnifiedDetailPage({
     };
 
     return (
-      <div className={'min-h-screen bg-background'}>
+      <div className={`${minHeight.screen} bg-background`}>
         <DetailHeader displayTitle={displayTitle} item={item} config={serializableConfig as typeof config} />
         {viewCountPromise ? (
           <Suspense
@@ -927,10 +928,10 @@ export async function UnifiedDetailPage({
 
         {/* Main content with sidebar */}
         <div
-          className="container mx-auto px-4 py-8"
+          className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}
           style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
         >
-          <div id="detail-main-content" className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div id="detail-main-content" className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-3`}>
             {/* Primary content */}
             <div className="lg:col-span-2">
               <TabbedDetailLayout
@@ -943,7 +944,7 @@ export async function UnifiedDetailPage({
             </div>
 
             {/* Sidebars - TOC + Related content + Recently Viewed */}
-            <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+            <aside className={`${spaceY.relaxed} lg:sticky lg:top-24 lg:self-start`}>
               {/* On This Page - Supabase-style minimal TOC */}
               {headingMetadata && headingMetadata.length >= 2 && (
                 <SidebarToc headings={headingMetadata} />
@@ -989,7 +990,7 @@ export async function UnifiedDetailPage({
           </div>
         </div>
 
-        <div className="container mx-auto px-4 pb-8">
+        <div className={`container mx-auto ${padding.xDefault} pb-8`}>
           <NewsletterScrollTrigger
             source="content_page"
             {...(item.category ? { category: item.category } : {})}
@@ -1009,7 +1010,7 @@ export async function UnifiedDetailPage({
   };
 
   return (
-    <div className={'min-h-screen bg-background'}>
+    <div className={`${minHeight.screen} bg-background`}>
       {/* Header - Client component for interactivity */}
       <DetailHeader displayTitle={displayTitle} item={item} config={serializableConfig as typeof config} />
 
@@ -1030,7 +1031,7 @@ export async function UnifiedDetailPage({
       )}
 
       {shouldRenderQuickActionsBar && (
-        <div className="container mx-auto px-4 pt-4">
+        <div className={`container mx-auto ${padding.xDefault} pt-4`}>
           <DetailQuickActionsBar
             item={contentItem}
             metadata={metadata}
@@ -1043,12 +1044,12 @@ export async function UnifiedDetailPage({
 
       {/* Main content */}
       <div
-        className="container mx-auto px-4 py-8"
+        className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}
         style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
       >
-        <div id="detail-main-content" className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div id="detail-main-content" className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-3`}>
           {/* Primary content */}
-          <div className="space-y-8 lg:col-span-2">
+          <div className={`${spaceY.loose} lg:col-span-2`}>
             {/* COLLECTIONS: Render collection-specific sections */}
             {collectionSections}
 
@@ -1111,10 +1112,10 @@ export async function UnifiedDetailPage({
                     
                     // Render grouped sections
                     return groupedSections.map((section, sectionIndex) => (
-                      <div key={`content-section-${sectionIndex}`} className="space-y-4">
+                      <div key={`content-section-${sectionIndex}`} className={spaceY.comfortable}>
                         {/* Render markdown context before the section */}
                         {section.markdownBefore && (
-                          <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                          <div className={`prose prose-sm dark:prose-invert ${maxWidth.none} ${muted.default}`}>
                             <p>{section.markdownBefore}</p>
                           </div>
                         )}
@@ -1271,7 +1272,7 @@ export async function UnifiedDetailPage({
 
             {/* Reviews & Ratings Section */}
             {isValidCategory(item.category) && item.category && item.slug && (
-              <div className="mt-12 border-t pt-12">
+              <div className={`${marginTop.section} border-t pt-12`}>
                 <ReviewListSection contentType={item.category} contentSlug={item.slug} />
               </div>
             )}
@@ -1284,7 +1285,7 @@ export async function UnifiedDetailPage({
           </div>
 
           {/* Sidebars - TOC + Related content + Recently Viewed */}
-          <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+          <aside className={`${spaceY.relaxed} lg:sticky lg:top-24 lg:self-start`}>
             {/* On This Page - Supabase-style minimal TOC */}
             {shouldRenderDetailToc && headingMetadata && headingMetadata.length >= 2 && (
               <SidebarToc headings={headingMetadata} />

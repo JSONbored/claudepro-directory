@@ -4,7 +4,7 @@
 
 import { Constants } from '@heyclaude/database-types';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , row , radius , minHeight } from '@heyclaude/web-runtime/design-system';
 import {
   ArrowLeft,
   Building2,
@@ -33,10 +33,13 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
  * Returns canonicalized URL or null if invalid
  */
 /**
- * ISR: 2 hours (7200s) - Job postings are relatively stable
+ * ISR: 30 minutes (1800s) - Matches CACHE_TTL.jobs_detail
+ * Job postings need reasonably fresh data for status/applicant updates
  */
-export const revalidate = 7200;
-export const dynamicParams = true; /**
+export const revalidate = 1800;
+export const dynamicParams = true;
+
+/**
  * Validate and sanitize an external website URL for safe use in href attributes.
  *
  * Accepts a string URL and returns a canonicalized href when the URL is allowed:
@@ -299,10 +302,10 @@ export default async function JobPage({ params }: PageProps) {
       />
       <StructuredData route={`/jobs/${slug}`} />
 
-      <div className="min-h-screen bg-background">
+      <div className={`${minHeight.screen} bg-background`}>
         <div className="border-border/50 border-b bg-card/30">
-          <div className="container mx-auto px-4 py-8">
-            <Button variant="ghost" asChild className="mb-6">
+          <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
+            <Button variant="ghost" asChild className={marginBottom.comfortable}>
               <Link href={ROUTES.JOBS}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Jobs
@@ -310,40 +313,40 @@ export default async function JobPage({ params }: PageProps) {
             </Button>
 
             <div className="max-w-4xl">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="rounded-lg bg-accent/10 p-3">
+              <div className={`${row.comfortable} mb-6`}>
+                <div className={`${radius.lg} bg-accent/10 ${padding.compact}`}>
                   <Building2 className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h1 className="mb-2 font-bold text-3xl">{job.title}</h1>
-                  <p className="text-muted-foreground text-xl">{job.company}</p>
+                  <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>{job.title}</h1>
+                  <p className={`${muted.default} ${size.xl}`}>{job.company}</p>
                 </div>
               </div>
 
-              <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
+              <div className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}>
                 <div className={cluster.tight}>
-                  <MapPin className="h-4 w-4" />
+                  <MapPin className={iconSize.sm} />
                   <span>{job.location}</span>
                 </div>
                 <div className={cluster.tight}>
-                  <DollarSign className="h-4 w-4" />
+                  <DollarSign className={iconSize.sm} />
                   <span>{job.salary ?? 'Competitive'}</span>
                 </div>
                 <div className={cluster.tight}>
-                  <Clock className="h-4 w-4" />
+                  <Clock className={iconSize.sm} />
                   <span>{job.type}</span>
                 </div>
                 <div className={cluster.tight}>
-                  <Users className="h-4 w-4" />
+                  <Users className={iconSize.sm} />
                   <span>{job.category}</span>
                 </div>
                 <div className={cluster.tight}>
-                  <Calendar className="h-4 w-4" />
+                  <Calendar className={iconSize.sm} />
                   <span>Posted {job.posted_at}</span>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className={`flex flex-wrap ${gap.compact}`}>
                 {tags.map((skill: string) => (
                   <UnifiedBadge key={skill} variant="base" style="secondary">
                     {skill}
@@ -354,15 +357,15 @@ export default async function JobPage({ params }: PageProps) {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="space-y-8 lg:col-span-2">
+        <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+          <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-3`}>
+            <div className={`${spaceY.loose} lg:col-span-2`}>
               <Card>
                 <CardHeader>
                   <CardTitle>About this role</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{job.description}</p>
+                  <p className={muted.default}>{job.description}</p>
                 </CardContent>
               </Card>
 
@@ -371,10 +374,10 @@ export default async function JobPage({ params }: PageProps) {
                   <CardTitle>Requirements</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2">
+                  <ul className={spaceY.compact}>
                     {requirements.map((request: string) => (
-                      <li key={request} className="flex items-start gap-3">
-                        <span className="mt-1 text-accent">•</span>
+                      <li key={request} className={`${row.default}`}>
+                        <span className={`${marginTop.tight} text-accent`}>•</span>
                         <span>{request}</span>
                       </li>
                     ))}
@@ -388,10 +391,10 @@ export default async function JobPage({ params }: PageProps) {
                     <CardTitle>Benefits</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="space-y-2">
+                    <ul className={spaceY.compact}>
                       {benefits.map((benefit: string) => (
-                        <li key={benefit} className="flex items-start gap-3">
-                          <span className="mt-1 text-green-500">✓</span>
+                        <li key={benefit} className={`${row.default}`}>
+                          <span className={`${marginTop.tight} text-green-500`}>✓</span>
                           <span>{benefit}</span>
                         </li>
                       ))}
@@ -401,13 +404,13 @@ export default async function JobPage({ params }: PageProps) {
               )}
             </div>
 
-            <div className="space-y-6">
+            <div className={spaceY.relaxed}>
               {/* Apply Actions */}
               <Card>
                 <CardHeader>
                   <CardTitle>Apply for this position</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className={spaceY.compact}>
                   {(() => {
                     const safeJobLink = getSafeWebsiteUrl(job.link);
                     if (!safeJobLink) return null;
@@ -445,20 +448,20 @@ export default async function JobPage({ params }: PageProps) {
                 <CardHeader>
                   <CardTitle>Job Details</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className={`${cluster.compact} text-sm`}>
-                    <Clock className="h-4 w-4 text-muted-foreground" />
+                <CardContent className={spaceY.compact}>
+                  <div className={`${cluster.compact} ${size.sm}`}>
+                    <Clock className={`h-4 w-4 ${muted.default}`} />
                     <span>
                       {(job.type ?? 'Unknown').charAt(0).toUpperCase() +
                         (job.type ?? 'Unknown').slice(1)}
                     </span>
                   </div>
-                  <div className={`${cluster.compact} text-sm`}>
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <div className={`${cluster.compact} ${size.sm}`}>
+                    <MapPin className={`h-4 w-4 ${muted.default}`} />
                     <span>{job.remote ? 'Remote Available' : 'On-site'}</span>
                   </div>
-                  <div className={`${cluster.compact} text-sm`}>
-                    <Users className="h-4 w-4 text-muted-foreground" />
+                  <div className={`${cluster.compact} ${size.sm}`}>
+                    <Users className={`h-4 w-4 ${muted.default}`} />
                     <span>
                       {(job.category ?? 'General').charAt(0).toUpperCase() +
                         (job.category ?? 'General').slice(1)}

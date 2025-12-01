@@ -5,6 +5,7 @@
  * Shows placeholder content matching the layout of the detail page.
  */
 
+import { spaceY, cluster, marginBottom , padding , gap , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { Skeleton, Separator  } from '@heyclaude/web-runtime/ui';
 
 
@@ -21,14 +22,14 @@ import { Skeleton, Separator  } from '@heyclaude/web-runtime/ui';
  */
 export default function ChangelogEntryLoading() {
   return (
-    <article className="container max-w-4xl space-y-8 py-8">
+    <article className={`container ${maxWidth['4xl']} ${spaceY.loose} ${padding.yRelaxed}`}>
       {/* Back Navigation Skeleton */}
       <Skeleton size="sm" width="xs" />
 
       {/* Header Skeleton */}
-      <header className="space-y-4 pb-6">
+      <header className={`${spaceY.comfortable} pb-6`}>
         {/* Date */}
-        <div className="flex items-center gap-3">
+        <div className={cluster.default}>
           <Skeleton size="sm" width="xs" />
           <Skeleton size="sm" width="sm" />
         </div>
@@ -37,7 +38,7 @@ export default function ChangelogEntryLoading() {
         <Skeleton size="xl" width="3/4" />
 
         {/* Canonical URL */}
-        <div className="flex items-center gap-2">
+        <div className={cluster.compact}>
           <Skeleton size="sm" width="xs" />
           <Skeleton size="sm" width="2xl" />
         </div>
@@ -46,22 +47,22 @@ export default function ChangelogEntryLoading() {
       <Separator className="my-6" />
 
       {/* Content Skeleton */}
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         {/* TL;DR Box */}
-        <div className="rounded-lg border p-4">
-          <Skeleton size="sm" width="xs" className="mb-2" />
+        <div className={`${radius.lg} border ${padding.default}`}>
+          <Skeleton size="sm" width="xs" className={marginBottom.tight} />
           <Skeleton size="sm" width="3xl" />
         </div>
 
         {/* Category Badges */}
-        <div className="flex flex-wrap gap-2">
+        <div className={`flex flex-wrap ${gap.compact}`}>
           {Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={`category-${index + 1}`} size="sm" width="xs" rounded="full" />
           ))}
         </div>
 
         {/* Content Paragraphs */}
-        <div className="space-y-4">
+        <div className={spaceY.comfortable}>
           <Skeleton size="md" width="3xl" />
           <Skeleton size="sm" width="3xl" />
           <Skeleton size="sm" width="5/6" />
@@ -70,9 +71,9 @@ export default function ChangelogEntryLoading() {
         </div>
 
         {/* Section Headers */}
-        <div className="space-y-6">
+        <div className={spaceY.relaxed}>
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={`section-${index + 1}`} className="space-y-3">
+            <div key={`section-${index + 1}`} className={spaceY.default}>
               <Skeleton size="lg" width="sm" />
               <Skeleton size="sm" width="3xl" />
               <Skeleton size="sm" width="5/6" />

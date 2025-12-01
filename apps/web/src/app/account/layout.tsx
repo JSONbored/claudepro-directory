@@ -3,7 +3,7 @@
  * Uses Suspense for non-blocking sidebar data fetching.
  */
 
-import { cluster } from '@heyclaude/web-runtime/design-system';
+import { cluster  , gap , padding , minHeight } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import Link from 'next/link';
@@ -85,22 +85,22 @@ export default async function AccountLayout({ children }: { children: React.Reac
   const userImageMetadata = avatarUrl ?? picture ?? null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b px-4 py-4">
+    <div className={`${minHeight.screen} bg-background`}>
+      <div className={`border-b ${padding.xDefault} ${padding.yDefault}`}>
         <div className="container mx-auto flex items-center justify-between">
           <div className={`${cluster.compact} group`}>
             <Link href="/" className="transition-colors-smooth group-hover:text-accent">
               ← Back to Directory
             </Link>
           </div>
-          <div className="flex items-center gap-4">
+          <div className={cluster.comfortable}>
             <AuthSignOutButton />
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+      <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
+        <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-4`}>
           {/* Sidebar with Suspense - data fetching doesn't block page navigation */}
           <Suspense fallback={<AccountSidebarSkeleton />}>
             <AccountSidebar

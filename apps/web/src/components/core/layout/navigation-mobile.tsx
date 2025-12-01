@@ -7,7 +7,7 @@
 'use client';
 
 import { getContactChannels } from '@heyclaude/web-runtime/core';
-import { grid, iconSize, absolute } from '@heyclaude/web-runtime/design-system';
+import { grid, iconSize, absolute, hoverBg, transition, border, radius, spaceY, muted, srOnly, weight ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
 import {
@@ -43,7 +43,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative px-2 py-1 text-xs font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} no-underline ${
+    className: `group relative ${padding.xTight} ${padding.yMicro} ${size.xs} ${weight.medium} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} no-underline ${
       active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground'
     } ${className}`,
     ...(active && { 'aria-current': 'page' as const }),
@@ -127,11 +127,11 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
           transition={springDefault}
         />
 
-        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+        <SheetTitle className={srOnly.default}>Navigation Menu</SheetTitle>
         <div className={'flex h-full flex-col pt-8'}>
           {/* Header with Motion.dev fade-in */}
           <motion.div
-            className={'flex items-center px-1 pb-8'}
+            className={'flex items-center ${padding.xMicro} pb-8'}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
@@ -141,7 +141,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
 
           {/* Main Navigation - Staggered animations */}
           <div className={'flex-1 overflow-y-auto'}>
-            <nav className={'space-y-3 px-3'} aria-label="Primary navigation">
+            <nav className={'${spaceY.default} ${padding.xCompact}'} aria-label="Primary navigation">
               {/* Action Links (Submit Config) - Prominent position */}
               {ACTION_LINKS.map((link, index) => {
                 const ActionIcon = link.icon;
@@ -155,9 +155,9 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                     <Link
                       href={link.href}
                       onClick={() => onOpenChange(false)}
-                      className={`flex w-full items-center justify-center rounded-xl border-2 border-accent bg-accent px-5 py-4 font-semibold text-accent-foreground text-base ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/90 active:scale-[0.97]`}
+                      className={`flex w-full items-center justify-center rounded-xl border-2 border-accent bg-accent ${padding.xMedium} ${padding.yDefault} ${weight.semibold} text-accent-foreground ${size.base} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/90 active:scale-[0.97]`}
                     >
-                      {ActionIcon && <ActionIcon className="mr-2 h-5 w-5 shrink-0" />}
+                      {ActionIcon && <ActionIcon className={`mr-2 ${iconSize.md} shrink-0`} />}
                       <span>{link.label}</span>
                     </Link>
                   </motion.div>
@@ -179,9 +179,9 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                       href={link.href}
                       isActive={isActive}
                       onClick={() => onOpenChange(false)}
-                      className={`flex w-full items-center rounded-xl border border-border bg-card px-5 py-4 font-medium text-base ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/50 hover:bg-accent/10 active:scale-[0.97]`}
+                      className={`flex w-full items-center ${radius.xl} ${border.default} bg-card ${padding.xMedium} ${padding.yDefault} ${weight.medium} ${size.base} ${transition.default} hover:border-accent/50 ${hoverBg.default} active:scale-[0.97]`}
                     >
-                      {IconComponent && <IconComponent className="mr-3 h-5 w-5 shrink-0" />}
+                      {IconComponent && <IconComponent className={`mr-3 ${iconSize.md} shrink-0`} />}
                       <span>{link.label}</span>
                       {link.isNew && (
                         <UnifiedBadge
@@ -200,7 +200,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                 className={'mt-4 border-border/30 border-t pt-6'}
                 aria-label="Secondary navigation"
               >
-                <div className="space-y-3">
+                <div className={spaceY.default}>
                   {SECONDARY_NAVIGATION.flatMap((group) => group.links).map((link, index) => {
                     const IconComponent = link.icon;
                     return (
@@ -216,9 +216,9 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                           href={link.href}
                           isActive={isActive}
                           onClick={() => onOpenChange(false)}
-                          className={`flex w-full items-center rounded-xl border border-border/40 bg-card/50 px-5 py-4 font-medium text-muted-foreground text-sm ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/30 hover:bg-accent/5 hover:text-foreground active:scale-[0.98]`}
+                          className={`flex w-full items-center rounded-xl border border-border/40 bg-card/50 ${padding.xMedium} ${padding.yDefault} ${weight.medium} ${muted.sm} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/30 hover:bg-accent/5 hover:text-foreground active:scale-[0.98]`}
                         >
-                          {IconComponent && <IconComponent className="mr-3 h-4 w-4 shrink-0" />}
+                          {IconComponent && <IconComponent className={`mr-3 ${iconSize.sm} shrink-0`} />}
                           <span>{link.label}</span>
                         </NavLink>
                       </motion.div>
@@ -236,7 +236,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <div className={`${grid.cols3} gap-4 px-4`}>
+            <div className={`${grid.cols3} ${gap.comfortable} ${padding.xDefault}`}>
               {[
                 {
                   icon: DiscordIcon,

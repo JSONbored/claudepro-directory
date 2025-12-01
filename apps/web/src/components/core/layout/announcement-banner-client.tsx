@@ -1,7 +1,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { cluster, iconSize } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, weight  , padding } from '@heyclaude/web-runtime/design-system';
 import {
   AlertTriangle,
   ArrowRight,
@@ -103,14 +103,14 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
       aria-label="Site announcement"
       aria-live="polite"
       aria-atomic="true"
-      className="relative z-60 hidden w-full px-3 pt-2 pb-2 md:block"
+      className={`relative z-60 hidden w-full ${padding.xCompact} pt-2 pb-2 md:block`}
     >
       {/* Rounded pill container */}
       <div className="container mx-auto">
         <div
           className={`rounded-full border border-accent/20 bg-accent/10 shadow-sm backdrop-blur-sm ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} hover:border-accent/30 hover:shadow-md motion-reduce:transition-none`}
         >
-          <div className="px-4 py-2 md:px-6 md:py-2.5">
+          <div className={`px-4 ${padding.yCompact} md:px-6 md:py-2.5`}>
             <div className="flex flex-col items-center justify-between sm:flex-row">
               {/* Announcement Content */}
               <Announcement
@@ -118,12 +118,12 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                 className={'flex-1 border-none bg-transparent shadow-none'}
               >
                 {announcement.tag && (
-                  <AnnouncementTag className={'shrink-0 font-bold text-[9px] sm:text-xs'}>
+                  <AnnouncementTag className={'shrink-0 ${weight.bold} text-[9px] sm:text-xs'}>
                     {announcement.tag}
                   </AnnouncementTag>
                 )}
 
-                <AnnouncementTitle className="font-semibold text-[11px] text-foreground sm:text-sm">
+                <AnnouncementTitle className={`${weight.semibold} text-[11px] text-foreground sm:text-sm`}>
                   {announcement.href ? (
                     <Link
                       href={announcement.href}

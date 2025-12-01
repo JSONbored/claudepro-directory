@@ -178,6 +178,8 @@ export type UnifiedBadgeProps =
       onRemove?: () => void;
       className?: string;
       children?: React.ReactNode; // Optional children for highlighted content
+      /** Optional href to make tag a link (e.g., /tags/[tag]) */
+      href?: string;
     }
   | {
       /** New indicator (animated dot with optional tooltip) */
@@ -353,31 +355,63 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   if (props.variant === 'tag') {
     const handleClick = props.onClick ? () => props.onClick?.() : undefined;
 
+    // Common class names for tag badges
+    const baseTagClasses = cn(
+      'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
+      'cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent hover:shadow-md hover:shadow-primary/20',
+      props.className
+    );
+
+    const activeTagClasses = cn(
+      `inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs ${transition.default}`,
+      'cursor-pointer bg-accent text-accent-foreground shadow-lg shadow-primary/25',
+      props.className
+    );
+
+    const tagContent = (
+      <>
+        {props.children || props.tag}
+        {props.onRemove && (
+          <button
+            type="button"
+            className="ml-1 hover:opacity-80"
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onRemove?.();
+            }}
+            aria-label={`Remove ${props.tag}`}
+          >
+            ×
+          </button>
+        )}
+      </>
+    );
+
+    // If href is provided, render as a link
+    if (props.href) {
+      // Dynamic import is not ideal here, so we use a regular anchor tag
+      // The consuming component can wrap with Next.js Link if needed
+      return (
+        <BadgeWrapper springDefault={springDefault}>
+          <a
+            href={props.href}
+            className={props.isActive ? activeTagClasses : baseTagClasses}
+            onClick={handleClick}
+          >
+            {tagContent}
+          </a>
+        </BadgeWrapper>
+      );
+    }
+
     if (props.isActive) {
       return (
         <button
           type="button"
-          className={cn(
-            `inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs ${transition.default}`,
-            'cursor-pointer bg-accent text-accent-foreground shadow-lg shadow-primary/25',
-            props.className
-          )}
+          className={activeTagClasses}
           onClick={handleClick}
         >
-          {props.children || props.tag}
-          {props.onRemove && (
-            <button
-              type="button"
-              className="ml-1 hover:opacity-80"
-              onClick={(e) => {
-                e.stopPropagation();
-                props.onRemove?.();
-              }}
-              aria-label={`Remove ${props.tag}`}
-            >
-              ×
-            </button>
-          )}
+          {tagContent}
         </button>
       );
     }
@@ -386,27 +420,10 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <button
           type="button"
-          className={cn(
-            'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
-            'cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent hover:shadow-md hover:shadow-primary/20',
-            props.className
-          )}
+          className={baseTagClasses}
           onClick={handleClick}
         >
-          {props.children || props.tag}
-          {props.onRemove && (
-            <button
-              type="button"
-              className="ml-1 hover:opacity-80"
-              onClick={(e) => {
-                e.stopPropagation();
-                props.onRemove?.();
-              }}
-              aria-label={`Remove ${props.tag}`}
-            >
-              ×
-            </button>
-          )}
+          {tagContent}
         </button>
       </BadgeWrapper>
     );

@@ -12,6 +12,7 @@
  */
 
 import type { SharePlatform } from '@heyclaude/web-runtime/core';
+import { iconSize , gap } from '@heyclaude/web-runtime/design-system';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
 import {
   ChevronDown,
@@ -141,33 +142,33 @@ export function ShareMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <motion.div whileTap={{ scale: 0.97 }}>
-          <Button variant={variant} className="min-w-0 gap-2">
-            <Share2 className="h-4 w-4" />
+          <Button variant={variant} className={`min-w-0 ${gap.compact}`}>
+            <Share2 className={iconSize.sm} />
             <span>{label}</span>
-            {showChevron && <ChevronDown className="h-3 w-3 opacity-50" />}
+            {showChevron && <ChevronDown className={`${iconSize.xs} opacity-50`} />}
           </Button>
         </motion.div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         {/* Social platforms */}
-        <DropdownMenuItem onClick={shareToTwitter} className="gap-2">
-          <Twitter className="h-4 w-4" />
+        <DropdownMenuItem onClick={shareToTwitter} className={`${gap.compact}`}>
+          <Twitter className={iconSize.sm} />
           <span>Share on X</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={shareToLinkedIn} className="gap-2">
-          <Linkedin className="h-4 w-4" />
+        <DropdownMenuItem onClick={shareToLinkedIn} className={`${gap.compact}`}>
+          <Linkedin className={iconSize.sm} />
           <span>Share on LinkedIn</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={shareViaEmail} className="gap-2">
-          <Mail className="h-4 w-4" />
+        <DropdownMenuItem onClick={shareViaEmail} className={`${gap.compact}`}>
+          <Mail className={iconSize.sm} />
           <span>Share via Email</span>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 
         {/* Copy link */}
-        <DropdownMenuItem onClick={copyLink} className="gap-2">
-          <Copy className="h-4 w-4" />
+        <DropdownMenuItem onClick={copyLink} className={`${gap.compact}`}>
+          <Copy className={iconSize.sm} />
           <span>Copy Link</span>
         </DropdownMenuItem>
 
@@ -175,8 +176,8 @@ export function ShareMenu({
         {hasNativeShare && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleNativeShare} className="gap-2">
-              <Share2 className="h-4 w-4" />
+            <DropdownMenuItem onClick={handleNativeShare} className={`${gap.compact}`}>
+              <Share2 className={iconSize.sm} />
               <span>More options...</span>
             </DropdownMenuItem>
           </>

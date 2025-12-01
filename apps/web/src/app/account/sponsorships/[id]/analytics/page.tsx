@@ -5,7 +5,7 @@ import {
   getSponsorshipAnalytics,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, absolute } from '@heyclaude/web-runtime/design-system';
+import { cluster, absolute, spaceY, muted, weight ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UnifiedBadge, Button ,
   Card,
@@ -77,10 +77,10 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
       section: 'authentication',
     });
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>Please sign in to view sponsorship analytics.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -177,14 +177,14 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   }
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       {/* Header */}
       <div>
         <div className={cluster.compact}>
           <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
-          <h1 className="font-bold text-3xl">Sponsorship Analytics</h1>
+          <h1 className={`${weight.bold} ${size['3xl']}`}>Sponsorship Analytics</h1>
         </div>
-        <p className="text-muted-foreground">
+        <p className={muted.default}>
           Detailed performance metrics for your sponsored content
         </p>
       </div>
@@ -232,34 +232,34 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardTitle>Campaign Details</CardTitle>
           <CardDescription>Current sponsorship configuration</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <CardContent className={spaceY.comfortable}>
+          <div className={`grid grid-cols-2 ${gap.comfortable}`}>
             <div>
-              <p className="font-medium text-sm">Content Type</p>
-              <p className="text-muted-foreground">{sponsorship.content_type}</p>
+              <p className={`${weight.medium} ${size.sm}`}>Content Type</p>
+              <p className={muted.default}>{sponsorship.content_type}</p>
             </div>
 
             <div>
-              <p className="font-medium text-sm">Content ID</p>
-              <p className="font-mono text-muted-foreground text-xs">{sponsorship.content_id}</p>
+              <p className={`${weight.medium} ${size.sm}`}>Content ID</p>
+              <p className={`font-mono ${muted.default} ${size.xs}`}>{sponsorship.content_id}</p>
             </div>
 
             <div>
-              <p className="font-medium text-sm">Start Date</p>
-              <p className="text-muted-foreground">
+              <p className={`${weight.medium} ${size.sm}`}>Start Date</p>
+              <p className={muted.default}>
                 {new Date(sponsorship.start_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className="font-medium text-sm">End Date</p>
-              <p className="text-muted-foreground">
+              <p className={`${weight.medium} ${size.sm}`}>End Date</p>
+              <p className={muted.default}>
                 {new Date(sponsorship.end_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className="font-medium text-sm">Status</p>
+              <p className={`${weight.medium} ${size.sm}`}>Status</p>
               <div className={cluster.compact}>
                 <UnifiedBadge variant="base" style={sponsorship.active ? 'default' : 'outline'}>
                   {sponsorship.active ? 'Active' : 'Inactive'}
@@ -268,7 +268,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             </div>
 
             <div>
-              <p className="font-medium text-sm">Tier</p>
+              <p className={`${weight.medium} ${size.sm}`}>Tier</p>
               <div>
                 <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
               </div>
@@ -284,7 +284,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardDescription>Last 30 days</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className={spaceY.compact}>
             {Array.from({ length: 30 }).map((_, index) => {
               const date = new Date();
               date.setDate(date.getDate() - (29 - index));
@@ -294,11 +294,11 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
               const maxImpressions = Math.max(...impressionsMap.values(), 1);
 
               return (
-                <div key={dayKey} className="grid grid-cols-12 items-center gap-2">
-                  <div className="col-span-2 text-muted-foreground text-xs">
+                <div key={dayKey} className={`grid grid-cols-12 items-center ${gap.compact}`}>
+                  <div className={`col-span-2 ${muted.default} ${size.xs}`}>
                     {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
-                  <div className="col-span-10 grid grid-cols-2 gap-1">
+                  <div className={`col-span-10 grid grid-cols-2 ${gap.tight}`}>
                     {/* Impressions bar */}
                     <div className="relative h-8 overflow-hidden rounded bg-muted">
                       <div
@@ -306,7 +306,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                         style={{ width: `${(impressions / maxImpressions) * 100}%` }}
                       />
                       <div
-                        className={`${absolute.inset} flex items-center px-2 text-xs`}
+                        className={`${absolute.inset} flex items-center ${padding.xTight} ${size.xs}`}
                       >
                         {impressions > 0 && `${impressions} views`}
                       </div>
@@ -318,7 +318,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                         style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
                       />
                       <div
-                        className={`${absolute.inset} flex items-center px-2 text-xs`}
+                        className={`${absolute.inset} flex items-center ${padding.xTight} ${size.xs}`}
                       >
                         {clicks > 0 && `${clicks} clicks`}
                       </div>
@@ -338,7 +338,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardDescription>Improve your campaign performance</CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-2 text-sm">
+          <ul className={`${spaceY.compact} ${size.sm}`}>
             <li>• CTR above 2% is excellent for sponsored content</li>
             <li>• Featured tier gets 3x more impressions than promoted</li>
             <li>• Premium tier includes newsletter promotion for extra reach</li>

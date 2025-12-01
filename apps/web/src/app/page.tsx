@@ -1,7 +1,16 @@
-/** Homepage consuming homepageConfigs for runtime-tunable categories */
+/**
+ * Homepage - Streaming SSR with React Cache Deduplication
+ * 
+ * CACHING ARCHITECTURE:
+ * - React's cache() deduplicates getHomepageData calls within the same request
+ * - unstable_cache provides cross-request caching in fetchCached
+ * - Multiple component calls to getHomepageData are efficient due to deduplication
+ * - ISR revalidation at 1 hour matches CACHE_TTL.homepage
+ */
 
 import  { type Database } from '@heyclaude/database-types';
 import { trackRPCFailure } from '@heyclaude/web-runtime/core';
+import { animate, radius , minHeight } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
@@ -27,15 +36,19 @@ const NewsletterCTAVariant = dynamicImport(
       default: module_.NewsletterCTAVariant,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
 );
 
 /**
- * Dynamic Rendering Required
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * Rendering & Caching
+ * 
+ * ISR: 1 hour (3600s) - Matches CACHE_TTL.homepage
+ * Homepage data (featured content, member count, stats) is cached for 1 hour.
+ * 
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#revalidate
  */
-export const revalidate = 1800;
+export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/');
@@ -49,10 +62,13 @@ interface HomePageProperties {
 
 /**
  * Top Contributors Server Component
- * Fetches top contributors data for the homepage
+ * 
+ * NOTE: This calls getHomepageData which is deduplicated via React's cache()
+ * The data is already fetched in the main page component, so this is a cache hit.
  */
 async function TopContributorsServer() {
   const categoryIds = getHomepageCategoryIds;
+  // React's cache() ensures this is deduplicated with the main page's call
   const homepageResult = await getHomepageData(categoryIds).catch((error: unknown) => {
     trackRPCFailure('get_homepage_optimized', error, {
       section: 'top-contributors',
@@ -90,22 +106,22 @@ async function TopContributorsServer() {
 }
 
 /**
- * OPTIMIZATION: Streaming SSR Homepage
+ * Streaming SSR Homepage Architecture
  *
- * The homepage is now split into streaming Suspense boundaries:
- * 1. Hero section - streams immediately (no data fetching)
- * 2. Search facets - streams in parallel (non-blocking)
- * 3. Homepage content - streams when ready (non-blocking)
- * 4. Top contributors - lazy loaded below fold
+ * Data Flow:
+ * 1. Main page fetches homepage data (member count for hero)
+ * 2. Hero section renders with member count
+ * 3. HomepageContentServer streams (uses React-cached getHomepageData - cache hit)
+ * 4. TopContributorsServer lazy loads (uses React-cached getHomepageData - cache hit)
  *
- * This improves TTFB by ~50% (200-300ms → 100-150ms) by allowing
- * the hero section to render immediately while other data loads.
+ * This architecture:
+ * - Improves TTFB by ~50% (hero renders immediately)
+ * - Uses React cache() for request-level deduplication
+ * - Uses unstable_cache for cross-request caching
+ * - Errors are NOT cached (fixed in fetch-cached.ts)
  */
 export default async function HomePage({ searchParams }: HomePageProperties) {
-  // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
-  // Create request-scoped child logger
   const reqLogger = logger.child({
     requestId,
     operation: 'HomePage',
@@ -114,46 +130,64 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
   });
 
   await searchParams;
-
   reqLogger.info('HomePage: rendering homepage');
 
-  // Fetch member count for hero (lightweight, can be done in parallel with other data)
-  // We'll use a default value for the hero and update it when content loads
+  // Fetch homepage data - React's cache() ensures subsequent calls are deduplicated
   const categoryIds = getHomepageCategoryIds;
-  const homepageResultPromise = getHomepageData(categoryIds).catch((error: unknown) => {
+  const homepageResult = await getHomepageData(categoryIds).catch((error: unknown) => {
     trackRPCFailure('get_homepage_optimized', error, {
       section: 'hero',
       categoryIds: categoryIds.length,
-      purpose: 'member-count',
     });
     return null;
   });
 
-  // Get member count for hero (non-blocking, can use default if slow)
-  const homepageResult = await homepageResultPromise;
   const memberCount = homepageResult?.member_count ?? 0;
 
-  // Fetch search facets in parallel (non-blocking, streams separately)
+  // Count items added in last 7 days for "new this week" indicator
+  const newThisWeekCount = (() => {
+    // Early return if no homepage data
+    if (!homepageResult) return 0;
+    
+    const content = homepageResult.content as undefined | { categoryData?: Record<string, Array<{ date_added?: string }>> };
+    if (!content?.categoryData) return 0;
+
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    let count = 0;
+
+    for (const items of Object.values(content.categoryData)) {
+      if (Array.isArray(items)) {
+        count += items.filter((item) => {
+          const dateAdded = item.date_added;
+          if (!dateAdded) return false;
+          return new Date(dateAdded).getTime() > cutoff;
+        }).length;
+      }
+    }
+    return count;
+  })();
+
+  // Start search facets fetch (streams in parallel)
   const searchFiltersPromise = HomepageSearchFacetsServer();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${minHeight.screen} bg-background`}>
       <div className="relative overflow-hidden">
-        {/* Hero section - streams immediately (no data fetching) */}
-        <HomepageHeroServer memberCount={memberCount} />
+        {/* Hero - renders with member count from initial fetch */}
+        <HomepageHeroServer memberCount={memberCount} newThisWeekCount={newThisWeekCount} />
 
         <LazySection>
           <RecentlyViewedRail />
         </LazySection>
 
-        {/* Homepage content - streams when ready (non-blocking) */}
+        {/* Content - uses React-cached getHomepageData (cache hit) */}
         <div className="relative">
           <Suspense fallback={<HomePageLoading />}>
             <HomepageContentServerWrapper searchFiltersPromise={searchFiltersPromise} />
           </Suspense>
         </div>
 
-        {/* Top contributors - lazy loaded below fold */}
+        {/* Top contributors - lazy loaded, uses React-cached getHomepageData (cache hit) */}
         <LazySection rootMargin="0px 0px -500px 0px">
           <Suspense fallback={null}>
             <TopContributorsServer />

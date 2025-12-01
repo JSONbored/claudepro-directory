@@ -6,6 +6,7 @@
 
 import Cal, { getCalApi } from '@calcom/embed-react';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { border, radius, spaceY, marginBottom, muted, weight ,size , padding , gap , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -30,27 +31,27 @@ export function ConsultingClient() {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8 sm:px-6 sm:py-16">
+    <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed} sm:px-6 sm:py-16`}>
       {/* Centered Note with Card Background */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-        className="mx-auto mb-8 max-w-2xl sm:mb-16"
+        className={`mx-auto mb-8 ${maxWidth['2xl']}`}
       >
-        <div className="overflow-hidden rounded-lg border border-border bg-card/50 p-6 shadow-sm backdrop-blur-sm sm:p-8">
-          <div className="mb-8 space-y-4 text-center sm:mb-12 sm:space-y-6">
-            <h1 className="font-bold text-3xl tracking-tight sm:text-4xl md:text-5xl">
+        <div className={`overflow-hidden ${radius.lg} ${border.default} bg-card/50 ${padding.comfortable} shadow-sm backdrop-blur-sm sm:p-8`}>
+          <div className={`${marginBottom.relaxed} ${spaceY.comfortable} text-center sm:${marginBottom.section} sm:${spaceY.relaxed}`}>
+            <h1 className={`${weight.bold} ${size['3xl']} tracking-tight sm:${size['4xl']} md:text-5xl`}>
               Let's Build Something Together
             </h1>
-            <p className="mx-auto max-w-xl text-base text-muted-foreground leading-relaxed sm:text-lg">
+            <p className={`mx-auto ${maxWidth.xl} ${size.base} ${muted.default} leading-relaxed sm:text-lg`}>
               I'm <strong className="text-foreground">ghost (JSONbored)</strong> — a
               multi-disciplined engineer who's spent years building infrastructure, applications,
               and systems that actually work.
             </p>
           </div>
 
-          <div className="space-y-6 text-muted-foreground text-sm leading-relaxed sm:space-y-8 sm:text-base">
+          <div className={`${spaceY.relaxed} ${muted.smRelaxed} sm:${spaceY.loose} sm:text-base`}>
             <p>
               <strong className="text-foreground">What I do:</strong> Full-stack development,
               blockchain infrastructure, network engineering, systems administration, DevOps, AI/LLM
@@ -91,11 +92,11 @@ export function ConsultingClient() {
               fit or not.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-4 text-xs sm:gap-4 sm:text-sm">
+            <div className={`flex flex-wrap items-center justify-center ${gap.default} pt-4 ${size.xs} sm:${gap.comfortable} sm:text-sm`}>
               <a href="mailto:ghost@zeronode.sh" className="link-accent-underline">
                 ghost@zeronode.sh
               </a>
-              <span className="text-muted-foreground/50">•</span>
+              <span className={`${muted.default}/50`}>•</span>
               <a
                 href="https://github.com/jsonbored"
                 target="_blank"
@@ -104,7 +105,7 @@ export function ConsultingClient() {
               >
                 GitHub
               </a>
-              <span className="text-muted-foreground/50">•</span>
+              <span className={`${muted.default}/50`}>•</span>
               <Link href="/" className="link-accent-underline">
                 Claude Pro Directory
               </Link>
@@ -118,12 +119,12 @@ export function ConsultingClient() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
-        className="mx-auto max-w-4xl"
+        className={`mx-auto ${maxWidth['4xl']}`}
       >
-        <h2 className="mb-6 text-center font-bold text-2xl sm:mb-8 sm:text-3xl">
+        <h2 className={`${marginBottom.comfortable} text-center ${weight.bold} ${size['2xl']} sm:${marginBottom.relaxed} sm:${size['3xl']}`}>
           Book Your Free Discovery Call
         </h2>
-        <div className="overflow-hidden rounded-lg border border-border bg-card/50 p-4 shadow-sm backdrop-blur-sm sm:p-6">
+        <div className={`overflow-hidden ${radius.lg} ${border.default} bg-card/50 ${padding.default} shadow-sm backdrop-blur-sm sm:p-6`}>
           <Cal
             calLink="jsonbored/heyclaude-consult"
             config={{

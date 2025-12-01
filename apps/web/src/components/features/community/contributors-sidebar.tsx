@@ -14,7 +14,7 @@
 
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { Award, Medal, TrendingUp } from '@heyclaude/web-runtime/icons';
-import { between, iconSize, sticky } from '@heyclaude/web-runtime/design-system';
+import { between, iconSize, sticky, cluster, transition, hoverBg, spaceY, muted, radius ,size , padding , weight } from '@heyclaude/web-runtime/design-system';
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
@@ -133,18 +133,18 @@ export interface ContributorsSidebarProps {
  */
 function ContributorsSidebarComponent({ topContributors, newMembers }: ContributorsSidebarProps) {
   return (
-    <aside className={`${sticky.top4} space-y-6`}>
+    <aside className={`${sticky.top4} ${spaceY.relaxed}`}>
       {/* Trending Contributors */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-2">
+          <div className={cluster.compact}>
             <TrendingUp className={`${iconSize.sm} text-accent`} />
             <CardTitle className="text-sm">Trending Contributors</CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className={spaceY.default}>
           {topContributors.slice(0, 5).map((contributor, index) => {
-            const slug = contributor.slug || 'unknown';
+            const slug = contributor.slug || `unknown-${index}`;
             const safeUrl = getSafeUserProfileUrl(slug);
             // Don't render if slug is invalid or unsafe
             if (!safeUrl) return null;
@@ -161,7 +161,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
               <Link
                 key={slug}
                 href={validatedUrl}
-                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
+                className={`${cluster.default} ${radius.lg} ${padding.tight} ${transition.colors} ${hoverBg.muted}`}
               >
                 <div className="relative shrink-0">
                   {contributor.image ? (
@@ -173,12 +173,12 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent font-bold text-sm">
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-accent ${weight.bold} ${size.sm}`}>
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
                   {index < 3 && (
-                    <div className="-bottom-1 -right-1 absolute rounded-full bg-background p-1">
+                    <div className={`-bottom-1 -right-1 absolute rounded-full bg-background ${padding.micro}`}>
                       <Medal
                         className={`h-3 w-3 ${
                           index === 0
@@ -192,9 +192,9 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-sm">{displayName}</p>
+                  <p className={`truncate ${weight.medium} ${size.sm}`}>{displayName}</p>
                   {contributor.total_contributions !== undefined && (
-                    <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                    <div className={`${cluster.tight} ${muted.default} ${size.xs}`}>
                       <Award className={iconSize.xs} />
                       <span>{contributor.total_contributions} contributions</span>
                     </div>
@@ -212,9 +212,9 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
           <CardHeader>
             <CardTitle className="text-sm">New Members</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {newMembers.slice(0, 5).map((member) => {
-              const slug = member.slug || 'unknown';
+          <CardContent className={spaceY.default}>
+            {newMembers.slice(0, 5).map((member, index) => {
+              const slug = member.slug || `unknown-member-${index}`;
               const safeUrl = getSafeUserProfileUrl(slug);
               // Don't render if slug is invalid or unsafe
               if (!safeUrl) return null;
@@ -231,7 +231,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                 <Link
                   key={slug}
                   href={validatedUrl}
-                  className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
+                  className={`${cluster.default} ${radius.lg} ${padding.tight} ${transition.colors} ${hoverBg.muted}`}
                 >
                   {member.image ? (
                     <Image
@@ -242,14 +242,14 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       className={`${iconSize.xl} shrink-0 rounded-full object-cover`}
                     />
                   ) : (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-xs">
+                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent ${weight.bold} ${size.xs}`}>
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-sm">{displayName}</p>
+                    <p className={`truncate ${weight.medium} ${size.sm}`}>{displayName}</p>
                     {member.work && (
-                      <p className="truncate text-muted-foreground text-xs">{member.work}</p>
+                      <p className={`truncate ${muted.default} ${size.xs}`}>{member.work}</p>
                     )}
                   </div>
                 </Link>
@@ -264,9 +264,9 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
         <CardHeader>
           <CardTitle className="text-sm">Community Stats</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className={spaceY.compact}>
           <div className={between.center}>
-            <span className="text-muted-foreground text-xs">Total Members</span>
+            <span className={`${muted.default} ${size.xs}`}>Total Members</span>
             <UnifiedBadge variant="base" style="secondary" className="text-xs">
               {topContributors.length + newMembers.length}
             </UnifiedBadge>

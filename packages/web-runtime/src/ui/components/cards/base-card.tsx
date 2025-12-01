@@ -157,6 +157,15 @@ export interface BaseCardProps {
   renderTopBadges?: () => ReactNode;
 
   /**
+   * Custom render function for content indicators
+   * (e.g., freshness dot, source badge, "new" badge)
+   * Rendered in top-right corner of the card.
+   * 
+   * Use this to pass ContentIndicators with dateAdded, updatedAt, and isNew props.
+   */
+  renderIndicators?: () => ReactNode;
+
+  /**
    * Custom render function for content section
    * Used by review cards for expandable text
    */
@@ -287,6 +296,8 @@ export const BaseCard = memo(
     ariaLabel,
     renderHeader,
     renderTopBadges,
+    renderIndicators,
+    // Note: dateAdded, updatedAt, isNewSinceLastVisit are available via renderIndicators prop
     renderContent,
     renderMetadataBadges,
     renderActions,
@@ -392,23 +403,29 @@ export const BaseCard = memo(
                   )}
                 </div>
 
-                {/* Source badge (right side of header) */}
-                {source && (
+                {/* Right side: Indicators and Source badge */}
+                {(renderIndicators || source) && (
                   <div className={`ml-2 ${cluster.tight}`}>
-                    <UnifiedBadge
-                      variant="source"
-                      source={
-                        source as
-                          | 'official'
-                          | 'partner'
-                          | 'community'
-                          | 'verified'
-                          | 'experimental'
-                          | 'other'
-                      }
-                    >
-                      {source.charAt(0).toUpperCase() + source.slice(1)}
-                    </UnifiedBadge>
+                    {/* Content indicators (freshness, new badge) */}
+                    {renderIndicators?.()}
+
+                    {/* Source badge */}
+                    {source && (
+                      <UnifiedBadge
+                        variant="source"
+                        source={
+                          source as
+                            | 'official'
+                            | 'partner'
+                            | 'community'
+                            | 'verified'
+                            | 'experimental'
+                            | 'other'
+                        }
+                      >
+                        {source.charAt(0).toUpperCase() + source.slice(1)}
+                      </UnifiedBadge>
+                    )}
                   </div>
                 )}
               </div>
@@ -428,19 +445,21 @@ export const BaseCard = memo(
                   // Use highlighted tag if available, otherwise use original
                   const highlightedTag = highlightedTags?.[index];
                   const tagToRender = highlightedTag?.highlighted;
+                  // Generate tag page href
+                  const tagHref = `/tags/${encodeURIComponent(tag)}`;
                   // UnifiedBadge tag variant renders props.tag, but we can override with children
                   // If we have highlighted content, render it as children
                   if (tagToRender && typeof tagToRender !== 'string') {
                     // For highlighted tags, we need to render the ReactNode
                     // UnifiedBadge will use children if provided, otherwise props.tag
                     return (
-                      <UnifiedBadge key={tag} variant="tag" tag={tag}>
+                      <UnifiedBadge key={tag} variant="tag" tag={tag} href={tagHref}>
                         {tagToRender}
                       </UnifiedBadge>
                     );
                   }
-                  // No highlighting - use default rendering
-                  return <UnifiedBadge key={tag} variant="tag" tag={tag} />;
+                  // No highlighting - use default rendering with link
+                  return <UnifiedBadge key={tag} variant="tag" tag={tag} href={tagHref} />;
                 })}
                 {overflowCount > 0 && (
                   <UnifiedBadge

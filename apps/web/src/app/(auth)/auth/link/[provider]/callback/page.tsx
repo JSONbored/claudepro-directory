@@ -7,7 +7,7 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
-import { iconSize, stack } from '@heyclaude/web-runtime/design-system';
+import { iconSize, stack, muted, padding, minHeight, maxWidth } from '@heyclaude/web-runtime/design-system';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
 import {
@@ -196,16 +196,16 @@ export default function OAuthLinkCallbackPage({
 
   if (status === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className={`flex ${minHeight.screen} items-center justify-center ${padding.default}`}>
+        <Card className={`w-full ${maxWidth.md}`}>
           <CardHeader className="text-center">
             <CardTitle>Linking Account</CardTitle>
             <CardDescription>
               Please wait while we redirect you to {provider ?? 'the provider'}...
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex items-center justify-center py-8">
-            <Loader2 className={`${iconSize.xl} animate-spin text-muted-foreground`} />
+          <CardContent className={`flex items-center justify-center ${padding.yRelaxed}`}>
+            <Loader2 className={`${iconSize.xl} animate-spin ${muted.default}`} />
           </CardContent>
         </Card>
       </div>
@@ -214,8 +214,8 @@ export default function OAuthLinkCallbackPage({
 
   // status can only be 'error' at this point (TypeScript narrows the type)
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className={`flex ${minHeight.screen} items-center justify-center ${padding.default}`}>
+      <Card className={`w-full ${maxWidth.md}`}>
         <CardHeader className="text-center">
           <div
             className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"

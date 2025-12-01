@@ -11,6 +11,7 @@ import {
   normalizeError,
 } from '@heyclaude/web-runtime/core';
 import { createWebAppContextWithIdClient } from '@heyclaude/web-runtime/logging/client';
+import { spaceY, marginTop, muted, weight ,size  , gap , padding } from '@heyclaude/web-runtime/design-system';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { Component, type ReactNode } from 'react';
 import { Terminal } from '@heyclaude/web-runtime/ui';
@@ -52,21 +53,21 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <Terminal className="relative flex min-h-[500px] flex-col">
-          <div className="flex flex-1 items-center justify-center p-8">
-            <div className="max-w-md space-y-4 text-center">
+          <div className={`flex flex-1 items-center justify-center ${padding.relaxed}`}>
+            <div className={`max-w-md ${spaceY.comfortable} text-center`}>
               <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
-              <div className="space-y-2">
-                <h3 className="font-semibold text-lg">Terminal Error</h3>
-                <p className="text-muted-foreground text-sm">
+              <div className={spaceY.compact}>
+                <h3 className={`${weight.semibold} ${size.lg}`}>Terminal Error</h3>
+                <p className={muted.sm}>
                   Something went wrong with the interactive terminal.
                   {this.state.error?.message && (
-                    <span className="mt-2 block font-mono text-destructive text-xs">
+                    <span className={`${marginTop.compact} block font-mono text-destructive ${size.xs}`}>
                       {this.state.error.message}
                     </span>
                   )}
                 </p>
               </div>
-              <div className="flex justify-center gap-2">
+              <div className={`flex justify-center ${gap.compact}`}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -80,7 +81,7 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
                   Refresh Page
                 </Button>
               </div>
-              <p className="text-muted-foreground text-xs">
+              <p className={`${muted.default} ${size.xs}`}>
                 You can still use the contact options below.
               </p>
             </div>

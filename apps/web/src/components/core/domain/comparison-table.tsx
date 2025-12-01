@@ -5,7 +5,7 @@
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import type { ComparisonTableProps } from '@heyclaude/web-runtime/types/component.types';
-import { iconSize } from '@heyclaude/web-runtime/design-system';
+import { iconSize, muted  } from '@heyclaude/web-runtime/design-system';
 import {
   Card,
   CardContent,
@@ -49,7 +49,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
       return value ? (
         <CheckCircle className={`${iconSize.md} text-green-500`} />
       ) : (
-        <span className="text-muted-foreground">—</span>
+        <span className={muted.default}>—</span>
       );
     }
     return value;
@@ -68,9 +68,9 @@ export function ComparisonTable(props: ComparisonTableProps) {
           <table className="w-full">
             <thead className="border-b">
               <tr>
-                <th className={'p-4 text-left font-medium'}>Feature</th>
+                <th className={'p-4 text-left ${weight.medium}'}>Feature</th>
                 {headers.map((header) => (
-                  <th key={header} className={'p-4 text-left font-medium'}>
+                  <th key={header} className={'p-4 text-left ${weight.medium}'}>
                     {header}
                   </th>
                 ))}
@@ -79,7 +79,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
             <tbody>
               {validItems.map((item) => (
                 <tr key={item.feature} className="border-b last:border-0">
-                  <td className={'p-4 font-medium'}>{item.feature}</td>
+                  <td className={'p-4 ${weight.medium}'}>{item.feature}</td>
                   <td className="p-4">{renderOptionCell(item.option1)}</td>
                   <td className="p-4">{renderOptionCell(item.option2)}</td>
                   {headers.length >= 3 && (

@@ -1,6 +1,7 @@
 'use client';
 
 import { Sparkles } from '@heyclaude/web-runtime/icons';
+import { cluster, marginBottom, muted, weight ,size  , gap , padding  } from '@heyclaude/web-runtime/design-system';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -37,7 +38,7 @@ export function DetailQuickActionsBar({
 
   return (
     <section
-      className={cn('sticky top-16 z-20 mb-8 space-y-3', className)}
+      className={cn('sticky top-16 z-20 mb-8 ${spaceY.default}', className)}
       aria-label="Quick actions"
     >
       <a
@@ -46,26 +47,26 @@ export function DetailQuickActionsBar({
       >
         Skip quick actions
       </a>
-      <div className="rounded-2xl border border-border/60 bg-card/80 p-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
-        <div className="mb-2 flex items-center justify-between gap-3 text-muted-foreground text-xs uppercase tracking-wide">
-          <div className="flex items-center gap-2">
+      <div className={`rounded-2xl border border-border/60 bg-card/80 ${padding.compact} shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60`}>
+        <div className={`${marginBottom.tight} flex items-center justify-between ${gap.default} ${muted.default} ${size.xs} uppercase tracking-wide`}>
+          <div className={cluster.compact}>
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Quick actions</span>
           </div>
-          <span className="font-semibold text-muted-foreground/80">{quickActions.length}</span>
+          <span className={`${weight.semibold} ${muted.default}/80`}>{quickActions.length}</span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className={`flex flex-wrap ${gap.compact}`}>
           {quickActions.map((action) => (
             <Button
               key={action.key}
               type="button"
               variant="secondary"
               size="sm"
-              className="grow basis-[10rem] justify-center gap-2 whitespace-nowrap"
+              className={`grow basis-[10rem] justify-center ${gap.compact} whitespace-nowrap`}
               onClick={action.onClick}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-primary/70" aria-hidden="true" />
-              <span className="font-semibold text-sm">{action.label}</span>
+              <span className={`${weight.semibold} ${size.sm}`}>{action.label}</span>
             </Button>
           ))}
         </div>

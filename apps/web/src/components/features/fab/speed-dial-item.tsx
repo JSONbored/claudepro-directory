@@ -17,6 +17,7 @@
 'use client';
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { iconSize } from '@heyclaude/web-runtime/design-system';
 import type { SpeedDialAction } from '@heyclaude/web-runtime/types/component.types';
 import { motion } from 'motion/react';
 import { NotificationBadge } from '@/src/components/features/notifications/notification-badge';
@@ -68,7 +69,7 @@ export function SpeedDialItem({
       aria-label={label}
       type="button"
     >
-      <Icon className="h-5 w-5" aria-hidden="true" />
+      <Icon className={iconSize.md} aria-hidden="true" />
 
       {/* Badge indicator (notification count) - only show for notifications action */}
       {badge !== undefined && badge > 0 && label === 'Notifications' && (

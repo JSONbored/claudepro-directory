@@ -1,6 +1,6 @@
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, grid } from '@heyclaude/web-runtime/design-system';
+import { between, grid, animate, marginBottom, muted, iconLeading, iconSize, weight, radius ,size  , gap , padding , row , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building,
@@ -28,15 +28,15 @@ const NewsletterCTAVariant = dynamicImport(
       default: module_.NewsletterCTAVariant,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
 );
 
 /**
- * ISR: 24 hours (86400s) - Companies list updates infrequently
- * Uses ISR instead of force-dynamic for better performance and SEO
+ * ISR: 30 minutes (1800s) - Matches CACHE_TTL.company_list
+ * Company listings should reflect new companies and updates promptly.
  */
-export const revalidate = 86_400;
+export const revalidate = 1800;
 
 /**
  * Validate and sanitize external website URL for safe use in href attributes
@@ -141,26 +141,26 @@ export default async function CompaniesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${minHeight.screen} bg-background`}>
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border">
-        <div className="container mx-auto px-4 py-20">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 flex justify-center">
-              <div className="rounded-full bg-accent/10 p-3">
+        <div className={`container mx-auto ${padding.xDefault} py-20`}>
+          <div className={`mx-auto ${maxWidth['3xl']}`}>
+            <div className={`${marginBottom.comfortable} flex justify-center`}>
+              <div className={`rounded-full bg-accent/10 ${padding.compact}`}>
                 <Building className="h-8 w-8 text-primary" />
               </div>
             </div>
 
-            <h1 className="mb-4 font-bold text-4xl tracking-tight sm:text-5xl">Companies Directory</h1>
+            <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']} tracking-tight sm:text-5xl`}>Companies Directory</h1>
 
-            <p className="mx-auto mt-4 max-w-xl text-muted-foreground text-lg">
+            <p className={`mx-auto mt-4 ${maxWidth.xl} ${muted.default} ${size.lg}`}>
               Discover companies building the future with Claude and Cursor
             </p>
 
-            <div className="mb-8 flex justify-center gap-2">
+            <div className={`${marginBottom.relaxed} flex justify-center ${gap.compact}`}>
               <UnifiedBadge variant="base" style="secondary">
-                <Building className="mr-1 h-3 w-3" />
+                <Building className={iconLeading.xs} />
                 {companies.length} Companies
               </UnifiedBadge>
               <UnifiedBadge variant="base" style="outline">
@@ -179,13 +179,13 @@ export default async function CompaniesPage() {
       </section>
 
       {/* Companies Grid */}
-      <section className="container mx-auto px-4 py-12">
+      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
         {companies.length === 0 ? (
           <Card>
-            <CardContent className="flex flex-col items-center py-12">
-              <Building className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 font-semibold text-xl">No companies yet</h3>
-              <p className="mb-4 max-w-md text-center text-muted-foreground">
+            <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
+              <Building className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+              <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No companies yet</h3>
+              <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
                 Be the first company to join the directory!
               </p>
               <Button asChild>
@@ -202,19 +202,19 @@ export default async function CompaniesPage() {
               <Card key={company.id} className="card-gradient transition-all duration-200 hover:shadow-lg">
                 {company.featured ? <div className="-top-2 -right-2 absolute z-10">
                     <UnifiedBadge variant="base" className="bg-accent text-accent-foreground">
-                      <Star className="mr-1 h-3 w-3" />
+                      <Star className={iconLeading.xs} />
                       Featured
                     </UnifiedBadge>
                   </div> : null}
 
                   <CardHeader>
-                  <div className="flex items-start gap-3">
+                  <div className={`${row.default}`}>
                     {(() => {
                       // Validate logo URL is safe (from trusted sources only)
                       if (!company.logo) {
                         return (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-accent">
-                            <Building className="h-6 w-6 text-muted-foreground" />
+                          <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
+                            <Building className={`h-6 w-6 ${muted.default}`} />
                           </div>
                         );
                       }
@@ -223,8 +223,8 @@ export default async function CompaniesPage() {
                         // Only allow HTTPS
                         if (parsed.protocol !== 'https:') {
                           return (
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-accent">
-                              <Building className="h-6 w-6 text-muted-foreground" />
+                            <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
+                              <Building className={`h-6 w-6 ${muted.default}`} />
                             </div>
                           );
                         }
@@ -245,8 +245,8 @@ export default async function CompaniesPage() {
                           isAwsS3;
                         if (!isTrustedSource) {
                           return (
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-accent">
-                              <Building className="h-6 w-6 text-muted-foreground" />
+                            <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
+                              <Building className={`h-6 w-6 ${muted.default}`} />
                             </div>
                           );
                         }
@@ -256,14 +256,14 @@ export default async function CompaniesPage() {
                             alt={`${company.name} logo`}
                             width={48}
                             height={48}
-                            className="h-12 w-12 rounded-lg object-cover"
+                            className={`h-12 w-12 ${radius.lg} object-cover`}
                             priority={index < 6}
                           />
                         );
                       } catch {
                         return (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-accent">
-                            <Building className="h-6 w-6 text-muted-foreground" />
+                          <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
+                            <Building className={`h-6 w-6 ${muted.default}`} />
                           </div>
                         );
                       }
@@ -283,21 +283,21 @@ export default async function CompaniesPage() {
                 </CardHeader>
 
                 <CardContent>
-                  {company.description ? <p className="mb-4 line-clamp-2 text-muted-foreground text-sm">
+                  {company.description ? <p className={`${marginBottom.default} line-clamp-2 ${muted.sm}`}>
                       {company.description}
                     </p> : null}
 
                   {/* Job Statistics from RPC/data layer (getCompanyProfile RPC) */}
-                  {company.stats && (company.stats.active_jobs ?? 0) > 0 ? <div className="mb-4 flex flex-wrap gap-2">
+                  {company.stats && (company.stats.active_jobs ?? 0) > 0 ? <div className={`${marginBottom.default} flex flex-wrap ${gap.compact}`}>
                       <UnifiedBadge variant="base" style="secondary" className="text-xs">
-                        <Briefcase className="mr-1 h-3 w-3" />
+                        <Briefcase className={iconLeading.xs} />
                         {company.stats.active_jobs ?? 0} Active{' '}
                         {(company.stats.active_jobs ?? 0) === 1 ? 'Job' : 'Jobs'}
                       </UnifiedBadge>
 
                       {(company.stats.total_views ?? 0) > 0 && (
                         <UnifiedBadge variant="base" style="outline" className="text-xs">
-                          <TrendingUp className="mr-1 h-3 w-3" />
+                          <TrendingUp className={iconLeading.xs} />
                           {(company.stats.total_views ?? 0).toLocaleString()} views
                         </UnifiedBadge>
                       )}
@@ -326,7 +326,7 @@ export default async function CompaniesPage() {
                       return (
                         <Button variant="ghost" size="sm" asChild>
                           <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-3 w-3" />
+                            <ExternalLink className={iconSize.xs} />
                           </a>
                         </Button>
                       );
@@ -340,7 +340,7 @@ export default async function CompaniesPage() {
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className="container mx-auto px-4 py-12">
+      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

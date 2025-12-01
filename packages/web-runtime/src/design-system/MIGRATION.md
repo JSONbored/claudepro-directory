@@ -22,7 +22,7 @@ packages/web-runtime/src/design-system/
 ├── MIGRATION.md             # This file
 └── styles/
     ├── index.ts             # Re-exports all style utilities
-    ├── layout.ts            # stack, cluster, grid, container
+    ├── layout.ts            # stack, cluster, grid, container, spaceY, spaceX
     ├── typography.ts        # heading, body, label, muted
     ├── cards.ts             # card, cardPadding, cardHover
     ├── forms.ts             # input, formLabel, formButton
@@ -30,7 +30,10 @@ packages/web-runtime/src/design-system/
     ├── badges.ts            # statusBadge, categoryBadge, etc.
     ├── icons.ts             # iconSize, iconColor, iconWrapper
     ├── interactive.ts       # hoverBg, focusRing, transition
-    └── position.ts          # absolute, fixed, sticky, overflow
+    ├── position.ts          # absolute, fixed, sticky, overflow
+    ├── radius.ts            # radius, radiusTop, radiusBottom, radiusComposite
+    ├── animation.ts         # animate, animateIn, animateEffect, animateDuration
+    └── borders.ts           # border, borderTop, borderBottom, borderCard, divider
 ```
 
 ## Migration Examples
@@ -198,3 +201,108 @@ className={cn(
 | `ANIMATION_CONSTANTS.*` | `animation.*` from tokens |
 | `BADGE_COLORS.status.*` | `statusBadge.*` |
 | `BADGE_COLORS.category.*` | `categoryBadge.*` |
+
+---
+
+## New Utilities (v2)
+
+### Border Radius
+
+```tsx
+// ❌ OLD - Inline Tailwind
+className="rounded-lg"
+className="rounded-xl"
+className="rounded-full"
+
+// ✅ NEW - Design system utilities
+import { radius, radiusComposite } from '@heyclaude/web-runtime/design-system/styles';
+
+className={radius.lg}           // rounded-lg
+className={radius.xl}           // rounded-xl
+className={radius.full}         // rounded-full
+className={radiusComposite.card}    // rounded-lg (semantic)
+className={radiusComposite.button}  // rounded-md (semantic)
+className={radiusComposite.badge}   // rounded-full (semantic)
+```
+
+### Animations
+
+```tsx
+// ❌ OLD - Inline Tailwind
+className="animate-spin"
+className="animate-pulse"
+className="animate-fade-in"
+
+// ✅ NEW - Design system utilities
+import { animate, animateIn, animateEffect, animateDuration } from '@heyclaude/web-runtime/design-system/styles';
+
+className={animate.spin}           // animate-spin
+className={animate.pulse}          // animate-pulse
+className={animateIn.fade}         // animate-fade-in
+className={animateIn.slideUp}      // animate-slide-up
+className={animateEffect.shimmer}  // animate-shimmer
+className={cn(animateIn.fade, animateDuration.slow)}  // Combined
+```
+
+### Borders
+
+```tsx
+// ❌ OLD - Inline Tailwind
+className="border border-border"
+className="border-b border-border/50"
+className="border-2 border-accent"
+
+// ✅ NEW - Design system utilities
+import { border, borderBottom, borderCard, divider } from '@heyclaude/web-runtime/design-system/styles';
+
+className={border.default}         // border border-border
+className={borderBottom.light}     // border-b border-border/50
+className={borderCard.selected}    // border-2 border-accent
+className={divider.spaced}         // border-t border-border my-4
+```
+
+### Spacing (space-y, space-x)
+
+```tsx
+// ❌ OLD - Inline Tailwind
+className="space-y-4"
+className="space-x-2"
+
+// ✅ NEW - Design system utilities
+import { spaceY, spaceX } from '@heyclaude/web-runtime/design-system/styles';
+
+className={spaceY.comfortable}  // space-y-4
+className={spaceX.compact}      // space-x-2
+```
+
+---
+
+## Inline Tailwind Migration Reference
+
+| Inline Pattern | Design System Utility |
+|----------------|----------------------|
+| `flex flex-col` | `stack.none` |
+| `flex flex-col gap-2` | `stack.compact` |
+| `flex flex-col gap-3` | `stack.default` |
+| `flex flex-col gap-4` | `stack.comfortable` |
+| `flex flex-col gap-6` | `stack.relaxed` |
+| `flex items-center` | `cluster.none` |
+| `flex items-center gap-2` | `cluster.compact` |
+| `flex items-center gap-3` | `cluster.default` |
+| `flex items-center gap-4` | `cluster.comfortable` |
+| `h-4 w-4` | `iconSize.sm` |
+| `h-5 w-5` | `iconSize.md` |
+| `h-6 w-6` | `iconSize.lg` |
+| `h-8 w-8` | `iconSize.xl` |
+| `space-y-2` | `spaceY.compact` |
+| `space-y-4` | `spaceY.comfortable` |
+| `space-y-6` | `spaceY.relaxed` |
+| `rounded-md` | `radius.md` |
+| `rounded-lg` | `radius.lg` |
+| `rounded-xl` | `radius.xl` |
+| `rounded-full` | `radius.full` |
+| `transition-all duration-200` | `transition.default` |
+| `transition-colors` | `transition.colors` |
+| `hover:bg-accent/10` | `hoverBg.default` |
+| `border border-border` | `border.default` |
+| `border-b border-border` | `borderBottom.default` |

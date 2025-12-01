@@ -16,6 +16,7 @@
  */
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { iconSize, marginTop, muted, weight ,size  , gap , padding  , maxWidth } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ArrowRight, Save, X } from '@heyclaude/web-runtime/icons';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
@@ -162,7 +163,7 @@ export function WizardLayout({
 
   return (
     <div
-      className={cn('relative min-h-screen', className)}
+      className={cn('relative ${minHeight.screen}', className)}
       style={{
         backgroundColor: TOKENS.colors.background.primary,
       }}
@@ -175,18 +176,18 @@ export function WizardLayout({
           borderColor: TOKENS.colors.border.light,
         }}
       >
-        <div className="container mx-auto max-w-4xl px-4 py-4">
+        <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yDefault}`}>
           <div className="flex items-center justify-between">
             {/* Exit Button */}
-            <Button type="button" variant="ghost" size="sm" onClick={handleExit} className="gap-2">
-              <X className="h-4 w-4" />
+            <Button type="button" variant="ghost" size="sm" onClick={handleExit} className={`${gap.compact}`}>
+              <X className={iconSize.sm} />
               <span className="hidden sm:inline">Exit</span>
             </Button>
 
             {/* Title */}
             <div className="flex-1 text-center">
-              <h1 className="font-semibold text-lg">Submit Configuration</h1>
-              <p className="text-muted-foreground text-sm">
+              <h1 className={`${weight.semibold} ${size.lg}`}>Submit Configuration</h1>
+              <p className={muted.sm}>
                 {steps[currentStep - 1]?.label || 'Loading...'}
               </p>
             </div>
@@ -198,15 +199,15 @@ export function WizardLayout({
               size="sm"
               onClick={handleSave}
               disabled={isSaving || !onSave}
-              className="gap-2"
+              className={`${gap.compact}`}
             >
-              <Save className="h-4 w-4" />
+              <Save className={iconSize.sm} />
               <span className="hidden sm:inline">{isSaving ? 'Saving...' : saveLabel}</span>
             </Button>
           </div>
 
           {/* Progress Indicator */}
-          <div className="mt-4">
+          <div className={marginTop.default}>
             <ProgressIndicator
               steps={steps}
               currentStep={currentStep}
@@ -218,7 +219,7 @@ export function WizardLayout({
       </header>
 
       {/* Main Content with Step Transition */}
-      <main className="container mx-auto max-w-4xl px-4 py-8">
+      <main className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
@@ -241,22 +242,22 @@ export function WizardLayout({
           borderColor: TOKENS.colors.border.light,
         }}
       >
-        <div className="container mx-auto max-w-4xl px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
+        <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yDefault}`}>
+          <div className={`flex items-center justify-between ${gap.comfortable}`}>
             {/* Previous Button */}
             <Button
               type="button"
               variant="outline"
               onClick={handlePrevious}
               disabled={!canGoPrevious || currentStep === 1}
-              className="gap-2"
+              className={`${gap.compact}`}
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className={iconSize.sm} />
               {previousLabel}
             </Button>
 
             {/* Step Indicator (Mobile) */}
-            <div className="text-center text-muted-foreground text-sm md:hidden">
+            <div className={`text-center ${muted.sm} md:hidden`}>
               {currentStep} / {steps.length}
             </div>
 
@@ -265,7 +266,7 @@ export function WizardLayout({
               type="button"
               onClick={handleNext}
               disabled={!canGoNext || isNavigating}
-              className="gap-2"
+              className={`${gap.compact}`}
             >
               {isNavigating ? (
                 'Loading...'
@@ -274,16 +275,16 @@ export function WizardLayout({
               ) : (
                 <>
                   {nextLabel || 'Next'}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className={iconSize.sm} />
                 </>
               )}
             </Button>
           </div>
 
           {/* Help Text */}
-          <div className="mt-3 text-center text-muted-foreground text-xs">
+          <div className={`${marginTop.compact} text-center ${muted.default} ${size.xs}`}>
             <kbd
-              className="rounded border px-1.5 py-0.5 font-mono text-xs"
+              className={`rounded border ${padding.xSnug} ${padding.yHair} font-mono ${size.xs}`}
               style={{
                 borderColor: TOKENS.colors.border.default,
                 backgroundColor: TOKENS.colors.background.secondary,
@@ -293,7 +294,7 @@ export function WizardLayout({
             </kbd>{' '}
             to save draft •{' '}
             <kbd
-              className="rounded border px-1.5 py-0.5 font-mono text-xs"
+              className={`rounded border ${padding.xSnug} ${padding.yHair} font-mono ${size.xs}`}
               style={{
                 borderColor: TOKENS.colors.border.default,
                 backgroundColor: TOKENS.colors.background.secondary,

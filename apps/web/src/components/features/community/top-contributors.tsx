@@ -13,7 +13,7 @@
  */
 
 import { Users } from '@heyclaude/web-runtime/icons';
-import { iconSize } from '@heyclaude/web-runtime/design-system';
+import { iconSize, cluster, weight , size  , gap , padding } from '@heyclaude/web-runtime/design-system';
 import { memo } from 'react';
 import {
   ProfileCard,
@@ -48,13 +48,13 @@ function TopContributorsComponent({
   }
 
   return (
-    <section className="container mx-auto px-4 py-12">
-      <div className="mb-6 flex items-center gap-3">
+    <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+      <div className={`mb-6 ${cluster.default}`}>
         <Users className={`${iconSize.lg} text-accent`} />
-        <h2 className="font-bold text-2xl">{title}</h2>
+        <h2 className={`${weight.bold} ${size['2xl']}`}>{title}</h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6`}>
         {displayedContributors.map((contributor) => (
           <ProfileCard
             key={contributor.slug}

@@ -1,6 +1,6 @@
 'use client';
 
-import { padding } from '@heyclaude/web-runtime/design-system';
+import { padding, border, radius, marginBottom, muted, weight ,size , minHeight } from '@heyclaude/web-runtime/design-system';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { useEffect } from 'react';
 
@@ -38,16 +38,16 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <div className="flex min-h-screen flex-col items-center justify-center p-4 font-sans">
-          <div className="max-w-md rounded-lg border border-border bg-card p-8 text-center">
-            <h2 className="mb-4 font-bold text-2xl text-destructive">Application Error</h2>
-            <p className="mb-6 text-muted-foreground">
+        <div className={`flex ${minHeight.screen} flex-col items-center justify-center ${padding.default} font-sans`}>
+          <div className={`max-w-md ${radius.lg} ${border.default} bg-card ${padding.relaxed} text-center`}>
+            <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']} text-destructive`}>Application Error</h2>
+            <p className={`${marginBottom.comfortable} ${muted.default}`}>
               A critical error occurred. Please refresh the page or try again later.
             </p>
             <button
               type="button"
               onClick={reset}
-              className={`cursor-pointer rounded-md border-none bg-primary ${padding.xDefault} text-base text-primary-foreground transition-colors hover:bg-primary/90`}
+              className={`cursor-pointer rounded-md border-none bg-primary ${padding.xDefault} ${size.base} text-primary-foreground transition-colors hover:bg-primary/90`}
             >
               Reset Application
             </button>

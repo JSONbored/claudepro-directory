@@ -4,7 +4,7 @@ import {
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, spaceY, muted, marginTop, weight ,size , gap } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UnifiedBadge, SimpleCopyButton,
@@ -105,10 +105,10 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
 
   if (hasError) {
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Collection unavailable</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Collection unavailable</CardTitle>
             <CardDescription>
               We couldn&apos;t load this collection. Please try again later.
             </CardDescription>
@@ -147,12 +147,12 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     : null;
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       {/* Header */}
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
           <Button variant="ghost" className={`mb-4 ${cluster.compact}`}>
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className={iconSize.sm} />
             Back to Library
           </Button>
         </Link>
@@ -160,13 +160,13 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className={`${cluster.compact} mb-2`}>
-              <h1 className="font-bold text-3xl">{collection.name}</h1>
+              <h1 className={`${weight.bold} ${size['3xl']}`}>{collection.name}</h1>
               {collection.is_public ? <UnifiedBadge variant="base" style="outline" className="text-xs">
                   Public
                 </UnifiedBadge> : null}
             </div>
-            {collection.description ? <p className="text-muted-foreground">{collection.description}</p> : null}
-            <div className="mt-2 text-muted-foreground text-sm">
+            {collection.description ? <p className={muted.default}>{collection.description}</p> : null}
+            <div className={`${marginTop.compact} ${muted.sm}`}>
               {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
               {collection.view_count} views
             </div>
@@ -184,7 +184,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
               /> : null}
             <Link href={`/account/library/${slug}/edit`}>
               <Button variant="outline" size="sm" className={cluster.compact}>
-                <Edit className="h-4 w-4" />
+                <Edit className={iconSize.sm} />
                 Edit
               </Button>
             </Link>
@@ -210,29 +210,29 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       </Card>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className={`grid ${gap.comfortable} sm:grid-cols-3`}>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="font-medium text-sm">Total Items</CardTitle>
+            <CardTitle className={`${weight.medium} ${size.sm}`}>Total Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">{collection.item_count}</div>
+            <div className={`${weight.bold} ${size['2xl']}`}>{collection.item_count}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="font-medium text-sm">Views</CardTitle>
+            <CardTitle className={`${weight.medium} ${size.sm}`}>Views</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">{collection.view_count}</div>
+            <div className={`${weight.bold} ${size['2xl']}`}>{collection.view_count}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="font-medium text-sm">Visibility</CardTitle>
+            <CardTitle className={`${weight.medium} ${size.sm}`}>Visibility</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">{collection.is_public ? 'Public' : 'Private'}</div>
+            <div className={`${weight.bold} ${size['2xl']}`}>{collection.is_public ? 'Public' : 'Private'}</div>
           </CardContent>
         </Card>
       </div>
