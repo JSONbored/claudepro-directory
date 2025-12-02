@@ -41,8 +41,22 @@
  */
 
 import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@heyclaude/web-runtime/icons';
-import { between, cluster, iconSize, spaceY, weight, muted, size, padding } from '@heyclaude/web-runtime/design-system';
-import { cn, DIMENSIONS } from '@heyclaude/web-runtime/ui';
+import {
+  between,
+  border,
+  cluster,
+  flexGrow,
+  iconSize,
+  marginTop,
+  muted,
+  padding,
+  size,
+  spaceY,
+  transition,
+  weight,
+  inputHeight,
+} from '@heyclaude/web-runtime/design-system';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -215,7 +229,7 @@ export function ExamplesArrayInput({
       <div className={between.center}>
         <div>
           <Label className={`${weight.semibold} ${size.base}`}>Usage Examples (optional)</Label>
-          <p className={cn('text-sm', muted.default, 'mt-1')}>
+          <p className={cn(size.sm, muted.default, marginTop.tight)}>
             Add code examples to help users understand how to use this configuration. Max{' '}
             {maxExamples} examples.
           </p>
@@ -236,11 +250,11 @@ export function ExamplesArrayInput({
       {/* Examples List */}
       <div className={spaceY.default}>
         {examples.length === 0 && (
-          <Card className="border-dashed">
+          <Card className={border.dashed}>
             <CardContent className="py-8">
               <div className={`${spaceY.compact} text-center`}>
-                <Code className={`mx-auto h-8 w-8 ${muted.default}`} />
-                <p className={cn('text-sm', muted.default)}>
+                <Code className={`mx-auto ${iconSize.xl} ${muted.default}`} />
+                <p className={cn(size.sm, muted.default)}>
                   No examples added yet. Click "Add Example" to get started.
                 </p>
               </div>
@@ -263,14 +277,14 @@ export function ExamplesArrayInput({
                   <button
                     type="button"
                     onClick={() => toggleExpanded(index)}
-                    className={`${cluster.compact} flex-1 text-left transition-opacity hover:opacity-70`}
+                    className={`${cluster.compact} ${flexGrow['1']} text-left ${transition.opacity} hover:opacity-70`}
                   >
                     {isExpanded ? (
                       <ChevronUp className={iconSize.sm} />
                     ) : (
                       <ChevronDown className={iconSize.sm} />
                     )}
-                    <CardTitle className="text-base">
+                    <CardTitle className={size.base}>
                       {example.title || `Example ${index + 1}`}
                     </CardTitle>
                   </button>
@@ -342,11 +356,11 @@ export function ExamplesArrayInput({
                       value={example.code}
                       onChange={(e) => updateExample(index, 'code', e.target.value)}
                       placeholder="export default { ... }"
-                      className={`${DIMENSIONS.INPUT_LG} font-mono ${size.sm}`}
+                      className={`${inputHeight.lg} font-mono ${size.sm}`}
                       maxLength={10000}
                       required={true}
                     />
-                    <p className={cn('text-xs', muted.default)}>
+                    <p className={cn(size.xs, muted.default)}>
                       {example.code.length} / 10,000 characters
                     </p>
                   </div>
@@ -359,10 +373,10 @@ export function ExamplesArrayInput({
                       value={example.description || ''}
                       onChange={(e) => updateExample(index, 'description', e.target.value)}
                       placeholder="Explain what this example demonstrates..."
-                      className={DIMENSIONS.INPUT_SM}
+                      className={inputHeight.sm}
                       maxLength={500}
                     />
-                    <p className={cn('text-xs', muted.default)}>
+                    <p className={cn(size.xs, muted.default)}>
                       {(example.description || '').length} / 500 characters
                     </p>
                   </div>

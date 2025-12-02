@@ -7,7 +7,20 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
-import { iconSize, stack, muted, padding, minHeight, maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  maxWidth,
+  minHeight,
+  muted,
+  padding,
+  radius,
+  stack,
+  textColor,
+} from '@heyclaude/web-runtime/design-system';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
 import {
@@ -196,7 +209,7 @@ export default function OAuthLinkCallbackPage({
 
   if (status === 'loading') {
     return (
-      <div className={`flex ${minHeight.screen} items-center justify-center ${padding.default}`}>
+      <div className={`flex ${minHeight.screen} ${alignItems.center} ${justify.center} ${padding.default}`}>
         <Card className={`w-full ${maxWidth.md}`}>
           <CardHeader className="text-center">
             <CardTitle>Linking Account</CardTitle>
@@ -204,7 +217,7 @@ export default function OAuthLinkCallbackPage({
               Please wait while we redirect you to {provider ?? 'the provider'}...
             </CardDescription>
           </CardHeader>
-          <CardContent className={`flex items-center justify-center ${padding.yRelaxed}`}>
+          <CardContent className={`flex ${alignItems.center} ${justify.center} ${padding.yRelaxed}`}>
             <Loader2 className={`${iconSize.xl} animate-spin ${muted.default}`} />
           </CardContent>
         </Card>
@@ -214,13 +227,13 @@ export default function OAuthLinkCallbackPage({
 
   // status can only be 'error' at this point (TypeScript narrows the type)
   return (
-    <div className={`flex ${minHeight.screen} items-center justify-center ${padding.default}`}>
+    <div className={`flex ${minHeight.screen} ${alignItems.center} ${justify.center} ${padding.default}`}>
       <Card className={`w-full ${maxWidth.md}`}>
         <CardHeader className="text-center">
           <div
-            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
+            className={`mx-auto ${marginBottom.default} flex ${iconSize['3xl']} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['destructive/10']}`}
           >
-            <AlertCircle className={`${iconSize.lg} text-destructive`} />
+            <AlertCircle className={`${iconSize.lg} ${textColor.destructive}`} />
           </div>
           <CardTitle>Account Linking Failed</CardTitle>
           <CardDescription>

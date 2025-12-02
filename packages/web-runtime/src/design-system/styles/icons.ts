@@ -14,25 +14,61 @@
 /**
  * Icon size classes.
  */
+/**
+ * Icon size classes for semantic icon sizing.
+ * 
+ * @migration Replaces inline `h-X w-X` patterns for icons
+ * @example
+ * // ❌ OLD: className="h-4 w-4"
+ * // ✅ NEW: className={iconSize.sm}
+ * 
+ * @see {@link iconLeading} - For icons with margin-right
+ * @see {@link iconTrailing} - For icons with margin-left
+ */
+/**
+ * Icon size classes for semantic icon sizing.
+ * 
+ * @migration Replaces inline `h-X w-X` patterns for icons
+ * @example
+ * // ❌ OLD: className="h-4 w-4"
+ * // ✅ NEW: className={iconSize.sm}
+ * // ❌ OLD: className="h-6 w-6"
+ * // ✅ NEW: className={iconSize.lg}
+ * 
+ * @see {@link iconLeading} - For icons with margin-right
+ * @see {@link iconTrailing} - For icons with margin-left
+ */
 export const iconSize = {
-  /** 8px - Indicator dot */
+  /** h-2 w-2 - 8px - Indicator dot */
   indicator: 'h-2 w-2',
-  /** 12px - Extra small */
+  /** h-2.5 w-2.5 - 10px - Extra extra small (dropdown chevrons) */
+  xxs: 'h-2.5 w-2.5',
+  /** h-3 w-3 - 12px - Extra small */
   xs: 'h-3 w-3',
-  /** 14px - Between xs and sm */
+  /** h-3.5 w-3.5 - 14px - Between xs and sm */
   xsPlus: 'h-3.5 w-3.5',
-  /** 16px - Small (default for inline) */
+  /** h-4 w-4 - 16px - Small (default for inline icons) */
   sm: 'h-4 w-4',
-  /** 20px - Medium */
+  /** h-5 w-5 - 20px - Medium */
   md: 'h-5 w-5',
-  /** 24px - Large */
+  /** h-6 w-6 - 24px - Large */
   lg: 'h-6 w-6',
-  /** 32px - Extra large */
+  /** h-7 w-7 - 28px - Large plus (OAuth buttons) */
+  lgPlus: 'h-7 w-7',
+  /** h-8 w-8 - 32px - Extra large */
   xl: 'h-8 w-8',
-  /** 40px - 2XL */
+  /** h-10 w-10 - 40px - 2XL (hero decorative icons) */
   '2xl': 'h-10 w-10',
-  /** 48px - 3XL */
+  /** h-12 w-12 - 48px - 3XL (hero decorative icons) */
   '3xl': 'h-12 w-12',
+  /** h-16 w-16 - 64px - 4XL (large hero/empty state icons) */
+  '4xl': 'h-16 w-16',
+  /** h-20 w-20 - 80px - 5XL (extra large decorative) */
+  '5xl': 'h-20 w-20',
+  /** h-24 w-24 - 96px - 6XL (hero section decorative) */
+  '6xl': 'h-24 w-24',
+  /** h-32 w-32 - 128px - Hero (massive decorative icons) */
+  hero: 'h-32 w-32',
 } as const;
 
 // =============================================================================

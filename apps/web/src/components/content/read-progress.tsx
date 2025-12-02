@@ -22,6 +22,7 @@
  * @module components/content/read-progress
  */
 
+import { bgColor } from '@heyclaude/web-runtime/design-system';
 import { motion, useScroll, useSpring } from 'motion/react';
 import { useEffect, useState } from 'react';
 
@@ -46,7 +47,7 @@ export interface ReadProgressProps {
 
   /**
    * Z-index for stacking context
-   * @default 51 (above navigation at z-50)
+   * @default 51 (above navigation)
    */
   zIndex?: number;
 
@@ -63,6 +64,7 @@ export interface ReadProgressProps {
 
 export function ReadProgress({
   position = 'below-nav',
+  color = 'accent',
   height = 5,
   zIndex = 51,
   springConfig = {
@@ -147,9 +149,16 @@ export function ReadProgress({
     return { bottom: 0 };
   };
 
+  // Map color prop to design-system token
+  const colorClass = {
+    accent: bgColor.accent,
+    primary: bgColor.primary,
+    foreground: bgColor.muted,
+  }[color];
+
   return (
     <motion.div
-      className="pointer-events-none fixed origin-left bg-accent"
+      className={`pointer-events-none fixed origin-left ${colorClass}`}
       style={{
         ...getPositionStyle(),
         height: `${height}px`,

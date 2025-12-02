@@ -35,7 +35,8 @@ export interface AuthSignOutButtonProps extends ButtonStyleProps {
  * @param variant - Visual variant of the button (e.g., 'ghost', 'solid').
  * @param className - Additional CSS classes applied to the button.
  * @param disabled - When `true`, the button is non-interactive.
- * @param scope - Scope of the sign-out operation: `'global'` signs out this session, `'local'` signs out the current device, `'others'` signs out other sessions.
+ * @param scope - Scope of the sign-out operation: `'global'` terminates all sessions for the user,
+ *   `'local'` terminates only the current session, `'others'` terminates all sessions except the current one.
  * @returns A JSX element for the sign-out button.
  *
  * @see createSupabaseBrowserClient

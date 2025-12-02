@@ -5,15 +5,16 @@
  * Follows existing [category]/[slug]/page.tsx pattern with ISR.
  *
  * Architecture:
- * - Server component with ISR (10-minute revalidation)
- * - Static generation for all entries at build time
+ * - Server component with ISR (2-hour revalidation)
+ * - Static generation for top 20 entries at build time (most recent)
+ * - Older entries served via ISR on first request
  * - SEO-optimized with metadata and structured data
  * - View tracking integration
  *
  * Performance:
- * - ISR: 600s (10 minutes) for fresh content
+ * - ISR: 7200s (2 hours) for stable changelog content
  * - Database-cached entry loading
- * - Static params generation
+ * - Static params generation (top 20)
  *
  * Production Standards:
  * - Type-safe with Next.js 15.5.4
@@ -31,7 +32,20 @@ import {
   getChangelogEntryBySlug,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, spaceY, muted, weight ,size  , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  gap,
+  iconSize,
+  maxWidth,
+  muted,
+  padding,
+  size,
+  spaceY,
+  textColor,
+  tracking,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, Separator   } from '@heyclaude/web-runtime/ui';
@@ -125,7 +139,7 @@ export async function generateMetadata({
  * Render the changelog detail page for a given entry slug.
  *
  * Fetches the changelog entry by slug, initializes a request-scoped logger, and returns the full page UI
- * including read progress, view tracking, structured data, meta (canonical) link, and rendered changelog content.
+ * including read progress, view, tracking, structured data, meta (canonical) link, and rendered changelog content.
  *
  * @param params - An object containing the route params; must resolve to `{ slug: string }`.
  * @returns The rendered React element for the changelog entry page.
@@ -189,7 +203,7 @@ export default async function ChangelogEntryPage({
         {/* Navigation */}
         <NavLink
           href={ROUTES.CHANGELOG}
-          className={`inline-${cluster.compact} ${muted.sm}`}
+          className={`inline-flex items-center ${gap.compact} ${muted.sm}`}
         >
           <ArrowLeft className={iconSize.sm} />
           <span>Back to Changelog</span>
@@ -204,14 +218,14 @@ export default async function ChangelogEntryPage({
             </time>
           </div>
 
-          <h1 className={`${weight.bold} ${size['4xl']} tracking-tight`}>{entry.title}</h1>
+          <h1 className={`${weight.bold} ${size['4xl']} ${tracking.tight}`}>{entry.title}</h1>
 
           {/* Canonical URL */}
           <div className={`${cluster.compact} ${size.sm}`}>
             <span className={muted.default}>Permanent link:</span>
             <a
               href={canonicalUrl}
-              className="truncate text-primary transition-colors hover:text-primary/80"
+              className={`truncate ${textColor.primary} ${transition.colors} hover:text-primary/80`}
             >
               {canonicalUrl}
             </a>

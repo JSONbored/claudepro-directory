@@ -3,7 +3,16 @@
  * Uses Suspense for non-blocking sidebar data fetching.
  */
 
-import { cluster  , gap , padding , minHeight } from '@heyclaude/web-runtime/design-system';
+import {
+  alignItems,
+  bgColor,
+  borderBottom,
+  cluster,
+  gap,
+  justify,
+  minHeight,
+  padding,
+} from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import Link from 'next/link';
@@ -85,9 +94,9 @@ export default async function AccountLayout({ children }: { children: React.Reac
   const userImageMetadata = avatarUrl ?? picture ?? null;
 
   return (
-    <div className={`${minHeight.screen} bg-background`}>
-      <div className={`border-b ${padding.xDefault} ${padding.yDefault}`}>
-        <div className="container mx-auto flex items-center justify-between">
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
+      <div className={`${borderBottom.default} ${padding.xDefault} ${padding.yDefault}`}>
+        <div className={`container mx-auto flex ${alignItems.center} ${justify.between}`}>
           <div className={`${cluster.compact} group`}>
             <Link href="/" className="transition-colors-smooth group-hover:text-accent">
               ← Back to Directory

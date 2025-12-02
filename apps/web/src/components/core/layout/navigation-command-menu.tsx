@@ -1,7 +1,17 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { cluster, iconSize, muted ,size } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  cursor,
+  flexDir,
+  flexGrow,
+  iconSize,
+  alignItems,
+  muted,
+  size,
+  transition,
+} from '@heyclaude/web-runtime/design-system';
 import * as Icons from '@heyclaude/web-runtime/icons';
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
@@ -29,7 +39,7 @@ interface NavigationCommandMenuProps {
 /**
  * Renders a searchable command-palette for site navigation and toggles open/closed with the keyboard shortcut ⌘/Ctrl+K.
  *
- * Renders groups for primary, secondary, and action navigation items, maps item icons and descriptions, and navigates via Next.js router when an item is selected.
+ * Renders groups for primary, secondary, and action navigation, items, maps item icons and descriptions, and navigates via Next.js router when an item is selected.
  *
  * @param open - If provided, controls the open state externally (controlled component).
  * @param onOpenChange - Optional callback invoked with the new open state when the palette is opened or closed.
@@ -79,7 +89,7 @@ export function NavigationCommandMenu({
     // Type guard: check if it's a valid React component
     if (typeof Icon === 'function') {
       const IconComponent = Icon as React.ComponentType<{ className?: string }>;
-      return <IconComponent className={`${iconSize.sm} shrink-0 ${muted.default}`} />;
+      return <IconComponent className={`${iconSize.sm} ${flexGrow.shrink0} ${muted.default}`} />;
     }
     return null;
   };
@@ -90,14 +100,14 @@ export function NavigationCommandMenu({
     if (!item.path) return null;
     const path = item.path; // Type narrowing: path is now definitely string
     return (
-      <CommandItem key={path} onSelect={() => handleSelect(path)} className="group cursor-pointer">
+      <CommandItem key={path} onSelect={() => handleSelect(path)} className={`group ${cursor.pointer}`}>
         <span className={cluster.compact}>
           {getIcon(item.icon_name)}
-          <div className="flex flex-col items-start">
+          <div className={`flex ${flexDir.col} ${alignItems.start}`}>
             <span>{item.title}</span>
             {item.description && (
               <span
-                className={`${muted.default} ${size.xs} transition-colors group-hover:text-accent`}
+                className={`${muted.default} ${size.xs} ${transition.colors} group-hover:text-accent`}
               >
                 {item.description}
               </span>

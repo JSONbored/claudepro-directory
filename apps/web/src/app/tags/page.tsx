@@ -31,7 +31,22 @@ import {
   padding,
   radius,
   maxWidth,
+  iconSize,
   minHeight,
+  zLayer,
+  backdrop,
+  bgColor,
+  bgGradient,
+  gradientFrom,
+  gradientTo,
+  gradientVia,
+  textColor,
+  justify,
+  borderColor,
+  flexWrap,
+  overflow,
+  tracking,
+  squareSize,
 } from '@heyclaude/web-runtime/design-system';
 import { Tag, Sparkles, TrendingUp, Layers } from '@heyclaude/web-runtime/icons';
 import {
@@ -99,12 +114,12 @@ export default async function TagsIndexPage() {
   }));
 
   return (
-    <div className={`relative ${minHeight.screen} overflow-hidden bg-background`}>
+    <div className={`relative ${minHeight.screen} ${overflow.hidden} ${bgColor.background}`}>
       {/* Ambient background effects */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-accent/5 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-muted/30 blur-3xl" />
+      <div className={`pointer-events-none absolute inset-0 -z-10 ${overflow.hidden}`}>
+        <div className={`absolute -left-40 -top-40 ${squareSize.heroLg} ${radius.full} ${bgColor['accent/5']} blur-3xl`} />
+        <div className={`absolute -bottom-40 -right-40 ${squareSize.heroXl} ${radius.full} ${bgColor['primary/5']} blur-3xl`} />
+        <div className={`absolute left-1/2 top-1/3 ${squareSize.hero} -translate-x-1/2 ${radius.full} ${bgColor['muted/30']} blur-3xl`} />
       </div>
 
       {/* Hero Section */}
@@ -112,42 +127,42 @@ export default async function TagsIndexPage() {
         <div className={`container mx-auto ${padding.xDefault} py-20`}>
           <div className={`mx-auto ${maxWidth['3xl']}`}>
             {/* Animated icon */}
-            <div className={`${marginBottom.comfortable} flex justify-center`}>
+            <div className={`${marginBottom.comfortable} flex ${justify.center}`}>
               <div className="relative">
-                <div className="absolute inset-0 animate-pulse rounded-full bg-accent/20 blur-xl" />
-                <div className={`relative rounded-full bg-gradient-to-br from-accent/20 to-primary/20 ${padding.default} backdrop-blur-sm`}>
-                  <Tag className="h-12 w-12 text-primary" />
+                <div className={`absolute inset-0 animate-pulse ${radius.full} ${bgColor['accent/20']} blur-xl`} />
+                <div className={`relative ${radius.full} ${bgGradient.toBR} ${gradientFrom.accent20} ${gradientTo.primary20} ${padding.default} ${backdrop.sm}`}>
+                  <Tag className={`${iconSize['3xl']} ${textColor.primary}`} />
                 </div>
               </div>
             </div>
 
             <h1
               id="tags-title"
-              className={`${marginBottom.default} bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text ${weight.bold} ${size['4xl']} tracking-tight text-transparent sm:text-5xl md:text-6xl`}
+              className={`${marginBottom.default} ${bgGradient.toR} ${gradientFrom.foreground} ${gradientVia.foreground} ${gradientTo.mutedForeground} bg-clip-text ${weight.bold} ${size['4xl']} ${tracking.tight} ${textColor.transparent} sm:${size['5xl']} md:${size['6xl']}`}
             >
               Explore by Topic
             </h1>
 
             <p className={`mx-auto ${marginTop.default} ${maxWidth.xl} ${muted.lg}`}>
               Discover{' '}
-              <span className={`${weight.semibold} text-foreground`}>{tags.length} topics</span>{' '}
+              <span className={`${weight.semibold} ${textColor.foreground}`}>{tags.length} topics</span>{' '}
               across{' '}
-              <span className={`${weight.semibold} text-foreground`}>
+              <span className={`${weight.semibold} ${textColor.foreground}`}>
                 {totalItems.toLocaleString()} resources
               </span>
               . Find exactly what you need, organized by what matters to you.
             </p>
 
-            <ul className={`${marginTop.comfortable} flex list-none flex-wrap justify-center ${gap.compact}`}>
+            <ul className={`${marginTop.comfortable} flex list-none ${flexWrap.wrap} ${justify.center} ${gap.compact}`}>
               <li>
                 <UnifiedBadge variant="base" style="secondary">
-                  <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                  <Sparkles className={`mr-1.5 ${iconSize.xsPlus}`} />
                   {tags.length} Tags
                 </UnifiedBadge>
               </li>
               <li>
                 <UnifiedBadge variant="base" style="outline">
-                  <Layers className="mr-1.5 h-3.5 w-3.5" />
+                  <Layers className={`mr-1.5 ${iconSize.xsPlus}`} />
                   Community Curated
                 </UnifiedBadge>
               </li>
@@ -159,8 +174,8 @@ export default async function TagsIndexPage() {
       {/* Main Content */}
       <div className={`container mx-auto ${padding.xDefault} pb-16`}>
         {tags.length === 0 ? (
-          <Card className={`bg-muted/50 ${padding.section} text-center`}>
-            <Tag className={`mx-auto mb-4 h-16 w-16 ${muted.default}/20`} />
+          <Card className={`${bgColor['muted/50']} ${padding.section} text-center`}>
+            <Tag className={`mx-auto ${marginBottom.default} ${iconSize['4xl']} ${muted.default}/20`} />
             <p className={muted.lg}>No tags found.</p>
           </Card>
         ) : (
@@ -168,8 +183,8 @@ export default async function TagsIndexPage() {
             {/* Featured Tags Section */}
             <section aria-labelledby="featured-tags-title">
               <div className={`${marginBottom.comfortable} ${cluster.default}`}>
-                <div className={`${radius.lg} bg-primary/10 ${padding.tight}`}>
-                  <TrendingUp className="h-5 w-5 text-primary" />
+                <div className={`${radius.lg} ${bgColor['primary/10']} ${padding.tight}`}>
+                  <TrendingUp className={`${iconSize.md} ${textColor.primary}`} />
                 </div>
                 <div>
                   <h2 id="featured-tags-title" className={`${weight.semibold} ${size.xl}`}>
@@ -186,8 +201,8 @@ export default async function TagsIndexPage() {
             {/* Interactive Tag Cloud Section */}
             <section aria-labelledby="all-tags-title">
               <div className={`${marginBottom.comfortable} ${cluster.default}`}>
-                <div className={`${radius.lg} bg-accent/10 ${padding.tight}`}>
-                  <Tag className="h-5 w-5 text-accent" />
+                <div className={`${radius.lg} ${bgColor['accent/10']} ${padding.tight}`}>
+                  <Tag className={`${iconSize.md} ${textColor.accent}`} />
                 </div>
                 <div>
                   <h2 id="all-tags-title" className={`${weight.semibold} ${size.xl}`}>
@@ -200,14 +215,14 @@ export default async function TagsIndexPage() {
               </div>
 
               {/* Animated Tag Cloud */}
-              <div className={`relative rounded-2xl border border-border/30 bg-gradient-to-br from-background via-background to-muted/10 ${padding.relaxed} md:p-12`}>
+              <div className={`relative ${radius['2xl']} border ${borderColor['border/30']} ${bgGradient.toBR} ${gradientFrom.background} ${gradientVia.background} ${gradientTo.muted10} ${padding.relaxed} md:${padding.section}`}>
                 {/* Inner glow effect */}
-                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-accent/5 via-transparent to-primary/5" />
+                <div className={`pointer-events-none absolute inset-0 ${radius['2xl']} ${bgGradient.toBR} ${gradientFrom.accent5} ${gradientVia.transparent} ${gradientTo.primary5}`} />
 
                 <AnimatedTagCloud
                   tags={tagCloudItems}
                   maxTags={100}
-                  className="relative z-10 min-h-[400px]"
+                  className={`relative ${zLayer.raised} min-h-[400px]`}
                 />
               </div>
             </section>

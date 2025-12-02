@@ -1,10 +1,17 @@
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, hoverBg, transition, spaceY, marginBottom, marginTop, muted, iconSize, weight, radius ,size , padding , gap , row , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { cluster, hoverBg, transition, spaceY, marginBottom, marginTop, muted, iconSize, weight, radius ,size , padding , gap , row , maxWidth, bgColor,
+  textColor,
+  borderColor,
+  cursor,
+  justify,
+  flexGrow,
+} from '@heyclaude/web-runtime/design-system';
 import {
   BookOpen,
   Code,
   FileText,
   HelpCircle,
+  type IconComponent,
   MessageSquare,
   Search,
 } from '@heyclaude/web-runtime/icons';
@@ -21,7 +28,7 @@ export const revalidate = false;
 const helpTopics = [
   {
     title: 'Getting Started',
-    icon: BookOpen,
+    icon: BookOpen as IconComponent,
     description: 'Learn the basics of using ClaudePro Directory',
     links: [
       { label: 'Browse Configurations', href: '/agents' },
@@ -31,7 +38,7 @@ const helpTopics = [
   },
   {
     title: 'Submit Content',
-    icon: FileText,
+    icon: FileText as IconComponent,
     description: 'Share your configurations with the community',
     links: [
       { label: 'Submission Guidelines', href: '/submit' },
@@ -41,7 +48,7 @@ const helpTopics = [
   },
   {
     title: 'Using Configurations',
-    icon: Code,
+    icon: Code as IconComponent,
     description: 'How to implement and customize configurations',
     links: [
       { label: 'Agent Setup', href: '/agents' },
@@ -52,7 +59,7 @@ const helpTopics = [
   },
   {
     title: 'Account & Settings',
-    icon: HelpCircle,
+    icon: HelpCircle as IconComponent,
     description: 'Manage your account and preferences',
     links: [
       { label: 'Profile Settings', href: '/auth/signin' },
@@ -131,7 +138,7 @@ export default function HelpPage() {
             <Card key={topic.title}>
               <CardHeader>
                 <CardTitle className={`${cluster.compact} ${size.base}`}>
-                  <topic.icon className="h-5 w-5 text-accent" />
+                  <topic.icon className={`${iconSize.md} ${textColor.accent}`} />
                   {topic.title}
                 </CardTitle>
               </CardHeader>
@@ -160,13 +167,13 @@ export default function HelpPage() {
             <Card key={item.question}>
               <CardHeader>
                 <CardTitle className={`${row.compact} ${size.lg}`}>
-                  <HelpCircle className={`${marginTop.micro} h-5 w-5 shrink-0 text-accent`} />
+                  <HelpCircle className={`${marginTop.micro} ${iconSize.md} ${flexGrow.shrink0} ${textColor.accent}`} />
                   {item.question}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className={`${marginBottom.compact} ${muted.default}`}>{item.answer}</p>
-                {item.link ? <NavLink href={item.link.href} className={`inline-${cluster.tight}`}>
+                {item.link ? <NavLink href={item.link.href} className={`inline-flex ${cluster.tight}`}>
                     {item.link.label} →
                   </NavLink> : null}
               </CardContent>
@@ -181,10 +188,10 @@ export default function HelpPage() {
         <div className={`grid ${gap.comfortable} md:grid-cols-3`}>
           <Link href="/search" className="block">
             <HoverCard variant="strong">
-              <Card className="h-full cursor-pointer">
+              <Card className={`h-full ${cursor.pointer}`}>
                 <CardContent className="pt-6">
                   <div className={`${marginBottom.micro} ${cluster.default}`}>
-                    <Search className="h-6 w-6 text-accent" />
+                    <Search className={`${iconSize.lg} ${textColor.accent}`} />
                     <h3 className={weight.semibold}>Search</h3>
                   </div>
                   <p className={muted.sm}>Find configurations and resources</p>
@@ -195,10 +202,10 @@ export default function HelpPage() {
 
           <Link href="/guides" className="block">
             <HoverCard variant="strong">
-              <Card className="h-full cursor-pointer">
+              <Card className={`h-full ${cursor.pointer}`}>
                 <CardContent className="pt-6">
                   <div className={`${marginBottom.micro} ${cluster.default}`}>
-                    <BookOpen className="h-6 w-6 text-accent" />
+                    <BookOpen className={`${iconSize.lg} ${textColor.accent}`} />
                     <h3 className={weight.semibold}>Guides</h3>
                   </div>
                   <p className={muted.sm}>Browse tutorials and how-tos</p>
@@ -209,10 +216,10 @@ export default function HelpPage() {
 
           <Link href="/contact" className="block">
             <HoverCard variant="strong">
-              <Card className="h-full cursor-pointer">
+              <Card className={`h-full ${cursor.pointer}`}>
                 <CardContent className="pt-6">
                   <div className={`${marginBottom.micro} ${cluster.default}`}>
-                    <MessageSquare className="h-6 w-6 text-accent" />
+                    <MessageSquare className={`${iconSize.lg} ${textColor.accent}`} />
                     <h3 className={weight.semibold}>Contact Support</h3>
                   </div>
                   <p className={muted.sm}>Get help from our team</p>
@@ -224,22 +231,22 @@ export default function HelpPage() {
       </section>
 
       {/* Still Need Help */}
-      <Card className="border-accent/20 bg-accent/5">
+      <Card className={`border-accent/20 ${bgColor['accent/5']}`}>
         <CardContent className="pt-6">
           <div className="text-center">
             <h2 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>Still need help?</h2>
             <p className={`${marginBottom.default} ${muted.default}`}>Our community is here to assist you</p>
-            <div className={`flex justify-center ${gap.comfortable}`}>
+            <div className={`flex ${justify.center} ${gap.comfortable}`}>
               <NavLink
                 href="/contact"
-                className={`inline-${cluster.compact} ${radius.lg} bg-accent ${padding.xCompact} ${padding.yCompact} text-accent-foreground transition-colors hover:bg-accent/90`}
+                className={`inline-flex ${cluster.compact} ${radius.lg} ${bgColor.accent} ${padding.xCompact} ${padding.yCompact} ${textColor.accentForeground} ${transition.colors} hover:bg-accent/90`}
               >
                 <MessageSquare className={iconSize.sm} />
                 Contact Us
               </NavLink>
               <Link
                 href="/community"
-                className={`${cluster.compact} ${radius.lg} border border-accent/20 ${padding.xCompact} ${padding.yCompact} ${transition.colors} ${hoverBg.default}`}
+                className={`${cluster.compact} ${radius.lg} border ${borderColor['accent/20']} ${padding.xCompact} ${padding.yCompact} ${transition.colors} ${hoverBg.default}`}
               >
                 Join Community
               </Link>

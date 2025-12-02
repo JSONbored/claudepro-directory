@@ -17,7 +17,11 @@ import { logger, normalizeError } from '../../../entries/core.ts';
 import { toasts } from '../../../client/toast.ts';
 import { CheckCircle, Zap } from '../../../icons.tsx';
 import { Button } from '../button.tsx';
-import { cluster } from '../../../design-system/styles/layout.ts';
+import { cluster, gap } from '../../../design-system/styles/layout.ts';
+import { iconSize } from '../../../design-system/styles/icons.ts';
+import { size as textSize } from '../../../design-system/styles/typography.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
+import { shadow, shadowColor } from '../../../design-system/styles/effects.ts';
 
 // Session ID management for anonymous voting
 function getOrCreateSessionId(): string {
@@ -148,15 +152,15 @@ export function UseThisButton({
   }, [voted, count, slug, category]);
 
   const sizeClasses = {
-    sm: 'h-7 px-2.5 text-xs gap-1.5',
-    default: 'h-9 px-3 text-sm gap-2',
-    lg: 'h-11 px-4 text-base gap-2.5',
+    sm: `h-7 px-2.5 ${textSize.xs} ${gap.snug}`,
+    default: `h-9 px-3 ${textSize.sm} ${gap.compact}`,
+    lg: `h-11 px-4 ${textSize.base} ${gap.compact}`,
   };
 
   const iconSizes = {
-    sm: 'h-3.5 w-3.5',
-    default: 'h-4 w-4',
-    lg: 'h-5 w-5',
+    sm: iconSize.xsPlus,
+    default: iconSize.sm,
+    lg: iconSize.md,
   };
 
   return (
@@ -168,7 +172,7 @@ export function UseThisButton({
       className={`
         ${sizeClasses[size]}
         ${voted 
-          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 shadow-md shadow-emerald-500/20' 
+          ? `bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 ${shadow.md} ${shadowColor.success}` 
           : 'hover:border-emerald-500/50 hover:text-emerald-600 dark:hover:text-emerald-400'
         }
         transition-all duration-300 ease-out
@@ -209,7 +213,7 @@ export function UseThisButton({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           className={`
             ${voted ? 'bg-white/20' : 'bg-muted'} 
-            px-1.5 py-0.5 rounded-full text-xs font-semibold
+            px-1.5 py-0.5 ${radius.full} ${textSize.xs} font-semibold
             ${voted ? 'text-white' : 'text-muted-foreground'}
           `}
         >

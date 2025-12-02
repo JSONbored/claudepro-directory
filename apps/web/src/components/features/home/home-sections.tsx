@@ -15,7 +15,30 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
-import { cluster, iconSize, groupHover, marginTop, weight ,size , padding , gap , radius  , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  backdrop,
+  bgColor,
+  borderColor,
+  cluster,
+  cursor,
+  flexGrow,
+  flexWrap,
+  gap,
+  groupHover,
+  iconSize,
+  alignItems,
+  justify,
+  marginTop,
+  maxWidth,
+  muted,
+  overflow,
+  padding,
+  radius,
+  size,
+  textColor,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import type {
   DisplayableContent,
   FilterState,
@@ -416,7 +439,7 @@ function HomePageClientComponent({
             <>
               {/* Mobile Stats - Compact horizontal scroll carousel */}
               <motion.div
-                className="scrollbar-hide mt-6 overflow-x-auto md:hidden"
+                className={`scrollbar-hide ${marginTop.comfortable} ${overflow.xAuto} md:hidden`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -428,12 +451,12 @@ function HomePageClientComponent({
                     return (
                       <Link key={categoryId} href={categoryRoute}>
                         <motion.div
-                          className={`flex min-w-fit items-center ${gap.compact} whitespace-nowrap ${radius.lg} border border-border/40 bg-card/50 ${padding.xDefault} py-2.5 backdrop-blur-sm`}
+                          className={`flex min-w-fit ${alignItems.center} ${gap.compact} whitespace-nowrap ${radius.lg} border ${borderColor['border/40']} ${bgColor['card/50']} ${padding.xDefault} py-2.5 ${backdrop.sm}`}
                           whileTap={{ scale: 0.95 }}
                           transition={springDefault}
                         >
                           <Icon
-                            className={`${iconSize.sm} shrink-0 text-accent`}
+                            className={`${iconSize.sm} ${flexGrow.shrink0} ${textColor.accent}`}
                             aria-hidden="true"
                           />
                           <span className={`${weight.medium} ${size.sm}`}>
@@ -456,7 +479,7 @@ function HomePageClientComponent({
               {/* Desktop Stats - Full layout (unchanged) */}
               <div
                 className={
-                  'mt-6 hidden flex-wrap justify-center ${gap.compact} ${muted.default} ${size.xs} md:flex lg:gap-3 lg:text-sm'
+                  `${marginTop.comfortable} hidden ${flexWrap.wrap} ${justify.center} ${gap.compact} ${muted.default} ${size.xs} md:flex lg:${gap.default} lg:${size.sm}`
                 }
               >
                 {categoryStatsConfig.map(({ categoryId, icon: Icon, displayText, delay }) => {
@@ -471,7 +494,7 @@ function HomePageClientComponent({
                       aria-label={`View all ${displayText}`}
                     >
                       <motion.div
-                        className={`${cluster.snug} cursor-pointer rounded-md border border-transparent ${padding.xTight} ${padding.yMicro} transition-colors`}
+                        className={`${cluster.snug} ${cursor.pointer} ${radius.md} border ${borderColor.transparent} ${padding.xTight} ${padding.yMicro} ${transition.colors}`}
                         whileHover={{
                           scale: 1.05,
                           y: -2,
@@ -485,7 +508,7 @@ function HomePageClientComponent({
                         }}
                       >
                         <Icon
-                          className={`${iconSize.sm} transition-colors group-hover:text-accent`}
+                          className={`${iconSize.sm} ${transition.colors} group-hover:text-accent`}
                           aria-hidden="true"
                         />
                         <span className={`transition-colors ${groupHover.accent}`}>
@@ -511,7 +534,7 @@ function HomePageClientComponent({
         </div>
       </section>
 
-      <section className={'container mx-auto ${padding.xDefault} pb-16'}>
+      <section className={`container mx-auto ${padding.xDefault} pb-16`}>
         {/* Search Results Section - TanStack Virtual */}
         <LazySearchSection
           isSearching={isSearching}

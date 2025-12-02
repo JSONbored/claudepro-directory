@@ -1,7 +1,8 @@
 import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, marginBottom, marginTop, muted, weight , size , padding , gap , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, marginBottom, marginTop, muted, weight , size , padding , gap , maxWidth, justify,
+} from '@heyclaude/web-runtime/design-system';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
@@ -75,7 +76,7 @@ export default function ContactPage() {
       {/* Interactive Terminal (Feature Flagged) */}
       {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
       {terminalEnabled && (
-        <div className={`${marginBottom.section} flex justify-center`}>
+        <div className={`${marginBottom.section} flex ${justify.center}`}>
           <div className={`w-full ${maxWidth['4xl']}`}>
             <ContactTerminalErrorBoundary>
               <ContactTerminal />
@@ -86,7 +87,7 @@ export default function ContactPage() {
 
       {/* Traditional Contact Options */}
       {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
-      <div className={terminalEnabled ? 'mt-12' : ''}>
+      <div className={terminalEnabled ? marginTop.section : ''}>
         <h2 className={`${marginBottom.comfortable} text-center ${weight.semibold} ${size['2xl']}`}>
           {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
           {terminalEnabled ? 'Or reach us directly:' : 'Get in Touch'}
@@ -189,20 +190,20 @@ export default function ContactPage() {
       </div>
 
       {/* Additional Information */}
-      <div className={`prose prose-invert mx-auto mt-12 ${maxWidth.none}`}>
+      <div className={`prose prose-invert mx-auto ${marginTop.section} ${maxWidth.none}`}>
         <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>Frequently Asked Questions</h2>
         <p className={marginBottom.default}>
           Before reaching out, you might find answers in our{' '}
           <NavLink href="/help">Help Center</NavLink>.
         </p>
 
-        <h2 className={`${marginTop.relaxed} mb-4 ${weight.semibold} ${size['2xl']}`}>Response Time</h2>
+        <h2 className={`${marginTop.relaxed} ${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>Response Time</h2>
         <p className={marginBottom.default}>
           We typically respond to inquiries within 24-48 hours during business days. For urgent
           matters, please use GitHub Issues or Discord for faster community support.
         </p>
 
-        <h2 className={`${marginTop.relaxed} mb-4 ${weight.semibold} ${size['2xl']}`}>Contributing</h2>
+        <h2 className={`${marginTop.relaxed} ${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>Contributing</h2>
         <p className={marginBottom.default}>
           Interested in contributing to {APP_CONFIG.name}? Check out our{' '}
           <NavLink href="/submit">submission guidelines</NavLink> or{' '}

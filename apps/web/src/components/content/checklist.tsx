@@ -6,7 +6,30 @@
  */
 
 import { AlertTriangle, BookOpen, CheckCircle } from '@heyclaude/web-runtime/icons';
-import { between, cluster, iconSize, hoverBg, transition, spaceY, marginBottom, marginTop, muted, weight, radius ,size , padding , row } from '@heyclaude/web-runtime/design-system';
+import {
+  animateDuration,
+  between,
+  bgColor,
+  borderColor,
+  cluster,
+  flexGrow,
+  hoverBg,
+  hoverBorder,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  muted,
+  padding,
+  radius,
+  row,
+  size,
+  spaceY,
+  textColor,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import type { ChecklistProps } from '@heyclaude/web-runtime/types/component.types';
 import React from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -55,7 +78,7 @@ export function Checklist(props: ChecklistProps) {
     validItems.length > 0 ? Math.round((checkedItems.size / validItems.length) * 100) : 0;
 
   const priorityColors = {
-    critical: 'text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/20 ${padding.xTight} ${padding.yHair} rounded',
+    critical: `text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/20 ${padding.xTight} ${padding.yHair} rounded`,
     high: 'text-red-600 dark:text-red-400',
     medium: 'text-yellow-600 dark:text-yellow-400',
     low: 'text-green-600 dark:text-green-400',
@@ -83,9 +106,9 @@ export function Checklist(props: ChecklistProps) {
       </CardHeader>
       <CardContent>
         <div className={marginBottom.default}>
-          <div className={'h-2 w-full rounded-full bg-muted'}>
+          <div className={`h-2 w-full ${radius.full} ${bgColor.muted}`}>
             <div
-              className={'h-2 rounded-full bg-primary transition-all duration-300'}
+              className={`h-2 ${radius.full} ${bgColor.primary} ${transition.all} ${animateDuration.slow}`}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -97,24 +120,24 @@ export function Checklist(props: ChecklistProps) {
               itemScope={true}
               itemType="https://schema.org/ListItem"
               className={
-                `${row.default} ${radius.lg} bg-muted/30 ${padding.compact} ${transition.colors} ${hoverBg.muted}`
+                `${row.default} ${radius.lg} ${bgColor['muted/30']} ${padding.compact} ${transition.colors} ${hoverBg.muted}`
               }
             >
               <button
                 type="button"
                 onClick={() => toggleItem(index)}
-                className={`${marginTop.micro} shrink-0`}
+                className={`${marginTop.micro} ${flexGrow.shrink0}`}
                 aria-label={`Mark ${item.task} as ${checkedItems.has(index) ? 'incomplete' : 'complete'}`}
               >
                 <div
-                  className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-colors ${
+                  className={`flex ${iconSize.md} ${alignItems.center} ${justify.center} rounded border-2 ${transition.colors} ${
                     checkedItems.has(index)
-                      ? 'border-primary bg-primary'
-                      : 'border-border hover:border-primary'
+                      ? `${borderColor.primary} ${bgColor.primary}`
+                      : `${borderColor.border} ${hoverBorder.primary}`
                   }`}
                 >
                   {checkedItems.has(index) && (
-                    <CheckCircle className={`${iconSize.xs} text-primary-foreground`} />
+                    <CheckCircle className={`${iconSize.xs} ${textColor.primaryForeground}`} />
                   )}
                 </div>
               </button>

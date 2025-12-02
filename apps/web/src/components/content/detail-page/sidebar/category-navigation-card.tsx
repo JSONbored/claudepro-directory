@@ -58,9 +58,10 @@
  */
 
 import { nonEmptyString } from '@heyclaude/shared-runtime';
-import { between, iconSize, transition, hoverBg, marginTop, weight, muted, radius ,size , padding } from '@heyclaude/web-runtime/design-system';
-import type { LucideIcon } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
+import { between, iconSize, transition, hoverBg, marginTop, weight, muted, radius ,size , padding, textColor,
+} from '@heyclaude/web-runtime/design-system';
+import type { IconComponent } from '@heyclaude/web-runtime/icons';
+import { maxWidth } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { z } from 'zod';
 import {
@@ -75,7 +76,7 @@ import {
  */
 const categoryInfoSchema = z.object({
   label: nonEmptyString,
-  icon: z.custom<LucideIcon>(),
+  icon: z.custom<IconComponent>(),
   description: nonEmptyString,
   color: z.string().optional(),
   activeColor: z.string().optional(),
@@ -108,7 +109,6 @@ export type CategoryNavigationCardProps = z.infer<typeof categoryNavigationCardP
  * @see TooltipContent
  * @see between
  * @see iconSize
- * @see DIMENSIONS
  */
 export function CategoryNavigationCard({
   currentCategory,
@@ -130,14 +130,14 @@ export function CategoryNavigationCard({
                   href={`${basePath}/${key}`}
                   className={`${radius.lg} ${padding.tight} ${transition.default} ${
                     isActive
-                      ? info.activeColor || 'bg-primary/10 text-primary'
+                      ? info.activeColor || `bg-primary/10 ${textColor.primary}`
                       : `${muted.default} ${info.color || `${hoverBg.muted} hover:text-primary`}`
                   }`}
                 >
                   <Icon className={iconSize.sm} />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className={`${DIMENSIONS.TOOLTIP_MAX} ${size.xs}`}>
+              <TooltipContent side="bottom" className={`${maxWidth.tooltip} ${size.xs}`}>
                 <div className={weight.semibold}>{info.label}</div>
                 <div className={`${marginTop.micro} ${muted.default}`}>{info.description}</div>
               </TooltipContent>

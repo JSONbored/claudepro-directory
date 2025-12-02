@@ -189,7 +189,7 @@ export function ReviewForm({
             Help others by sharing details about your experience
           </p>
           <p
-            className={`text-xs ${charactersRemaining < 100 ? 'text-destructive' : muted.default}`}
+            className={`${size.xs} ${charactersRemaining < 100 ? 'text-destructive' : muted.default}`}
           >
             {charactersRemaining} characters remaining
           </p>

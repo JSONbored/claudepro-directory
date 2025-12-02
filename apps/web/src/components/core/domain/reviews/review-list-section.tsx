@@ -12,7 +12,8 @@ import {
   logUnhandledPromise,
 } from '@heyclaude/web-runtime/core';
 import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';
-import { between, cluster, buttonGhost, spaceY, muted, marginTop, weight ,size  , padding } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, buttonGhost, iconSize, spaceY, muted, marginBottom, marginTop, weight, size, padding, textColor,
+} from '@heyclaude/web-runtime/design-system';
 import type { ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
@@ -210,7 +211,7 @@ export function ReviewListSection({
         </div>
       ) : (reviews ?? []).length === 0 ? (
         <Card className={`bg-muted/50 ${padding.relaxed} text-center`}>
-          <Star className={`mx-auto mb-3 h-12 w-12 ${muted.default}/30`} aria-hidden="true" />
+          <Star className={`mx-auto ${marginBottom.compact} ${iconSize['3xl']} ${muted.default}/30`} aria-hidden="true" />
           <p className={muted.default}>No reviews yet. Be the first to review!</p>
         </Card>
       ) : (
@@ -293,7 +294,7 @@ function ReviewCardItem({
 
   if (isEditing && isOwnReview) {
     return (
-      <Card className="p-6">
+      <Card className={padding.comfortable}>
         <ReviewForm
           contentType={contentType}
           contentSlug={contentSlug}
@@ -337,12 +338,12 @@ function ReviewCardItem({
           {/* Review Text */}
           {reviewText && (
             <div>
-              <p className={`whitespace-pre-wrap text-foreground ${size.sm}`}>{displayText}</p>
+              <p className={`whitespace-pre-wrap ${textColor.foreground} ${size.sm}`}>{displayText}</p>
               {needsTruncation && (
                 <button
                   type="button"
                   onClick={() => setShowFullText(!showFullText)}
-                  className={`${marginTop.tight} text-primary ${size.xs} hover:underline`}
+                  className={`${marginTop.tight} ${textColor.primary} ${size.xs} hover:underline`}
                 >
                   {showFullText ? 'Show less' : 'Read more'}
                 </button>
@@ -371,7 +372,7 @@ function ReviewCardItem({
                 }}
                 className={buttonGhost.icon}
               >
-                <ThumbsUp className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                <ThumbsUp className={`mr-1 ${iconSize.xsPlus}`} aria-hidden="true" />
                 Helpful ({review.helpful_count ?? 0})
               </Button>
             )}
@@ -385,7 +386,7 @@ function ReviewCardItem({
                   onClick={onEdit}
                   className={buttonGhost.icon}
                 >
-                  <Edit className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                  <Edit className={`mr-1 ${iconSize.xsPlus}`} aria-hidden="true" />
                   Edit
                 </Button>
                 <Button
@@ -394,7 +395,7 @@ function ReviewCardItem({
                   onClick={onDelete}
                   className={`${buttonGhost.icon} text-destructive hover:text-destructive`}
                 >
-                  <Trash className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                  <Trash className={`mr-1 ${iconSize.xsPlus}`} aria-hidden="true" />
                   Delete
                 </Button>
               </>

@@ -1,6 +1,8 @@
 'use client';
 
 import { cn } from '../utils.ts';
+import { squareSize } from '../../design-system/styles/layout.ts';
+import { radius } from '../../design-system/styles/radius.ts';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import type * as React from 'react';
 
@@ -13,7 +15,7 @@ const Avatar = ({
 }) => (
   <AvatarPrimitive.Root
     ref={ref}
-    className={cn('relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full', className)}
+    className={cn(`relative flex ${squareSize.avatarMd} shrink-0 overflow-hidden ${radius.full}`, className)}
     {...props}
   />
 );
@@ -44,7 +46,7 @@ const AvatarFallback = ({
   <AvatarPrimitive.Fallback
     ref={ref}
     className={cn(
-      'flex h-full w-full items-center justify-center rounded-full bg-muted',
+      `flex h-full w-full items-center justify-center ${radius.full} bg-muted`,
       className
     )}
     {...props}

@@ -10,7 +10,7 @@ import {
   getUserSettings,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, spaceY, cluster, muted, marginBottom, weight ,size , gap } from '@heyclaude/web-runtime/design-system';
+import { between, spaceY, cluster, muted, marginBottom, weight ,size , gap , radius, squareSize } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Button ,
   Card,
@@ -253,10 +253,10 @@ export default async function SettingsPage() {
                 alt={`${userData.name ?? 'User'}'s avatar`}
                 width={64}
                 height={64}
-                className="h-16 w-16 rounded-full object-cover"
+                className={`${squareSize.avatarXl} ${radius.full} object-cover`}
               />
               <div>
-                <p className="text-sm">
+                <p className={size.sm}>
                   Synced from {user.app_metadata.provider === 'github' ? 'GitHub' : 'Google'}
                 </p>
                 <RefreshProfileButton

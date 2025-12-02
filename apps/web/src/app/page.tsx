@@ -8,37 +8,31 @@
  * - ISR revalidation at 1 hour matches CACHE_TTL.homepage
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { trackRPCFailure } from '@heyclaude/web-runtime/core';
-import { animate, radius , minHeight } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  minHeight,
+  overflow,
+} from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getHomepageCategoryIds,
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
-import  { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
 import { HomePageLoading } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
+import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { HomepageContentServer } from '@/src/components/features/home/homepage-content-server';
 import { HomepageHeroServer } from '@/src/components/features/home/homepage-hero-server';
 import { HomepageSearchFacetsServer } from '@/src/components/features/home/homepage-search-facets-server';
 import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
-  {
-    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
-  }
-);
 
 /**
  * Rendering & Caching
@@ -171,8 +165,8 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
   const searchFiltersPromise = HomepageSearchFacetsServer();
 
   return (
-    <div className={`${minHeight.screen} bg-background`}>
-      <div className="relative overflow-hidden">
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
+      <div className={`relative ${overflow.hidden}`}>
         {/* Hero - renders with member count from initial fetch */}
         <HomepageHeroServer memberCount={memberCount} newThisWeekCount={newThisWeekCount} />
 

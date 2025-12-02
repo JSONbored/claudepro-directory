@@ -5,7 +5,14 @@
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import type { ComparisonTableProps } from '@heyclaude/web-runtime/types/component.types';
-import { iconSize, muted  } from '@heyclaude/web-runtime/design-system';
+import {
+  borderBottom,
+  iconSize,
+  muted,
+  padding,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Card,
   CardContent,
@@ -47,7 +54,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
     if (value === undefined) return null;
     if (typeof value === 'boolean') {
       return value ? (
-        <CheckCircle className={`${iconSize.md} text-green-500`} />
+        <CheckCircle className={`${iconSize.md} ${textColor.green}`} />
       ) : (
         <span className={muted.default}>—</span>
       );
@@ -63,30 +70,33 @@ export function ComparisonTable(props: ComparisonTableProps) {
           {description && <CardDescription>{description}</CardDescription>}
         </CardHeader>
       )}
-      <CardContent className="p-0">
+      <CardContent className={padding.none}>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b">
+            <thead className={borderBottom.default}>
               <tr>
-                <th className={'p-4 text-left ${weight.medium}'}>Feature</th>
+                <th className={`${padding.default} text-left ${weight.medium}`}>Feature</th>
                 {headers.map((header) => (
-                  <th key={header} className={'p-4 text-left ${weight.medium}'}>
+                  <th key={header} className={`${padding.default} text-left ${weight.medium}`}>
                     {header}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {validItems.map((item) => (
-                <tr key={item.feature} className="border-b last:border-0">
-                  <td className={'p-4 ${weight.medium}'}>{item.feature}</td>
-                  <td className="p-4">{renderOptionCell(item.option1)}</td>
-                  <td className="p-4">{renderOptionCell(item.option2)}</td>
-                  {headers.length >= 3 && (
-                    <td className="p-4">{renderOptionCell(item.option3)}</td>
-                  )}
-                </tr>
-              ))}
+              {validItems.map((item) => {
+                const options = [item.option1, item.option2, item.option3];
+                return (
+                  <tr key={item.feature} className={`${borderBottom.default} last:border-0`}>
+                    <td className={`${padding.default} ${weight.medium}`}>{item.feature}</td>
+                    {headers.map((header, index) => (
+                      <td key={header} className={padding.default}>
+                        {renderOptionCell(options[index])}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

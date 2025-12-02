@@ -15,7 +15,28 @@ import {
   ROUTES,
 } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, ExternalLink, Github, Heart, Rss, Sparkles } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, spaceY, marginBottom, marginTop, muted, link as linkStyle, label, weight  , gap , padding } from '@heyclaude/web-runtime/design-system';
+import {
+  borderTop,
+  cluster,
+  flexDir,
+  gap,
+  iconSize,
+  label,
+  leading,
+  link as linkStyle,
+  marginBottom,
+  marginTop,
+  muted,
+  padding,
+  radius,
+  spaceY,
+  transition,
+  weight,
+  bgColor,
+  justify,
+  textColor,
+  alignItems,
+} from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -121,10 +142,10 @@ function FooterComponent() {
   ];
 
   return (
-    <footer className="border-border/50 border-t bg-background">
+    <footer className={`${borderTop.light} ${bgColor.background}`}>
       <div className={`container mx-auto ${padding.xDefault} ${padding.ySpacious} lg:py-12`}>
         {/* Main footer content - Two section layout */}
-        <div className={`grid grid-cols-1 ${gap.section} lg:grid-cols-[1.5fr_2.5fr] lg:gap-16`}>
+        <div className={`grid grid-cols-1 ${gap.section} lg:grid-cols-[1.5fr_2.5fr] lg:${gap.extra}`}>
           
           {/* Left section - Brand & Social */}
           <motion.div
@@ -140,7 +161,7 @@ function FooterComponent() {
             </div>
             
             {/* Description */}
-            <p className={`max-w-sm ${muted.sm} leading-relaxed`}>
+            <p className={`max-w-sm ${muted.sm} ${leading.relaxed}`}>
               {APP_CONFIG.description}
             </p>
 
@@ -155,7 +176,7 @@ function FooterComponent() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${muted.default} transition-colors hover:text-foreground`}
+                  className={`${muted.default} ${transition.colors} hover:text-foreground`}
                   aria-label={social.label}
                 >
                   <social.icon className={iconSize.md} />
@@ -168,7 +189,7 @@ function FooterComponent() {
             <UnifiedBadge
               variant="base"
               style="outline"
-              className="border-accent/20 bg-accent/5 text-accent"
+              className={`border-accent/20 ${bgColor['accent/5']} ${textColor.accent}`}
             >
               <ExternalLink className={`mr-1.5 ${iconSize.xs}`} />
               Open Source
@@ -210,7 +231,7 @@ function FooterComponent() {
                       href={link.href}
                       className={`inline-${cluster.snug} ${linkStyle.mutedSm}`}
                     >
-                      {link.icon && <link.icon className="h-3.5 w-3.5" />}
+                      {link.icon && <link.icon className={iconSize.xsPlus} />}
                       <span>{link.label}</span>
                     </Link>
                   </li>
@@ -256,23 +277,23 @@ function FooterComponent() {
 
         {/* Bottom bar - Modern divider and layout */}
         <motion.div
-          className={`${marginTop.section} border-border/30 border-t pt-8`}
+          className={`${marginTop.section} ${borderTop.faint} pt-8`}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
         >
-          <div className={`flex flex-col items-center justify-between ${gap.comfortable} md:flex-row`}>
+          <div className={`flex ${flexDir.col} ${alignItems.center} ${justify.between} ${gap.comfortable} md:flex-row`}>
             {/* Left - Copyright with heart */}
             <div className={`${cluster.snug} ${muted.sm}`}>
               <span>© {currentYear}</span>
               <span className="text-border">•</span>
               <span>Made with</span>
-              <Heart className={`${iconSize.sm} fill-red-500/80 text-red-500/80`} />
+              <Heart className={`${iconSize.sm} fill-red-500/80 ${textColor.red}/80`} />
               <span>by</span>
               <Link 
                 href="/consulting" 
-                className={`${weight.medium} text-foreground underline-offset-4 hover:underline`}
+                className={`${weight.medium} ${textColor.foreground} underline-offset-4 hover:underline`}
               >
                 JSONbored
               </Link>
@@ -286,7 +307,7 @@ function FooterComponent() {
                   width="250"
                   height="30"
                   title="System Status"
-                  className="rounded-md"
+                  className={radius.md}
                   loading="lazy"
                   style={{ colorScheme: 'normal', border: 'none', overflow: 'hidden' }}
                 />

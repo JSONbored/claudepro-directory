@@ -49,7 +49,39 @@ import type {
   QuickReferenceProps,
   TLDRSummaryProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { cluster, iconSize, muted, stack, spaceY, marginBottom, marginTop, weight, radius, size, padding, gap, row, maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  animateDuration,
+  bgColor,
+  borderColor,
+  borderLeft,
+  borderTop,
+  cluster,
+  flexGrow,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  leading,
+  marginBottom,
+  marginTop,
+  maxWidth,
+  muted,
+  opacityLevel,
+  overflow,
+  padding,
+  radius,
+  radiusRight,
+  row,
+  shadow,
+  size,
+  spaceY,
+  squareSize,
+  stack,
+  textColor,
+  transition,
+  weight,
+  zLayer,
+} from '@heyclaude/web-runtime/design-system';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { Avatar, AvatarFallback, AvatarImage } from '@heyclaude/web-runtime/ui';
 import {
@@ -123,9 +155,9 @@ function CaseStudyVariant(props: CaseStudyProps) {
   const { company, industry, challenge, solution, results, metrics, testimonial, logo } = props;
 
   return (
-    <Card itemScope={true} itemType="https://schema.org/Article" className={'my-8 overflow-hidden'}>
+    <Card itemScope={true} itemType="https://schema.org/Article" className={`my-8 ${overflow.hidden}`}>
       <CardHeader className="pb-4">
-        <div className={'flex items-start justify-between'}>
+        <div className={`flex ${alignItems.start} ${justify.between}`}>
           <div>
             <CardTitle className={`${size['2xl']}`} itemProp="headline">
               {company} Case Study
@@ -137,7 +169,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
             )}
           </div>
           {logo && (
-            <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} bg-muted`}>
+            <div className={`flex ${iconSize['4xl']} ${alignItems.center} ${justify.center} ${radius.lg} ${bgColor.muted}`}>
               <BookOpen className={`${iconSize.xl} ${muted.default}`} />
             </div>
           )}
@@ -145,25 +177,25 @@ function CaseStudyVariant(props: CaseStudyProps) {
       </CardHeader>
       <CardContent className={spaceY.relaxed}>
         <div>
-          <h4 className={`mb-2 ${weight.semibold} text-destructive`}>Challenge</h4>
+          <h4 className={`${marginBottom.tight} ${weight.semibold} ${textColor.destructive}`}>Challenge</h4>
           <p className={muted.default}>{challenge}</p>
         </div>
 
         <div>
-          <h4 className={`mb-2 ${weight.semibold} text-primary`}>Solution</h4>
+          <h4 className={`${marginBottom.tight} ${weight.semibold} ${textColor.primary}`}>Solution</h4>
           <p className={muted.default}>{solution}</p>
         </div>
 
         <div>
-          <h4 className={`mb-2 ${weight.semibold} text-green-600 dark:text-green-400`}>Results</h4>
+          <h4 className={`${marginBottom.tight} ${weight.semibold} ${textColor.green}`}>Results</h4>
           <p className={muted.default}>{results}</p>
         </div>
 
         {metrics && Array.isArray(metrics) && metrics.length > 0 && (
-          <div className={`grid grid-cols-2 ${gap.comfortable} border-t pt-4 md:grid-cols-3`}>
+          <div className={`grid grid-cols-2 ${gap.comfortable} ${borderTop.default} pt-4 md:grid-cols-3`}>
             {metrics.map((metric) => (
               <div key={metric.label} className="text-center">
-                <p className={`flex items-center justify-center ${gap.tight} ${weight.bold} ${size['2xl']}`}>
+                <p className={`flex ${alignItems.center} ${justify.center} ${gap.tight} ${weight.bold} ${size['2xl']}`}>
                   {metric.value}
                   {metric.trend && (
                     <span
@@ -190,9 +222,9 @@ function CaseStudyVariant(props: CaseStudyProps) {
         )}
 
         {testimonial && (
-          <blockquote className={`rounded-r-lg border-primary border-l-4 bg-muted/30 ${padding.yCompact} pl-4`}>
-            <p className={`mb-2 ${muted.default} italic`}>"{testimonial.quote}"</p>
-            <footer className="text-sm">
+          <blockquote className={`rounded-r-lg ${borderLeft.accentPrimary} ${bgColor['muted/30']} ${padding.yCompact} pl-4`}>
+            <p className={`${marginBottom.tight} ${muted.default} italic`}>"{testimonial.quote}"</p>
+            <footer className={size.sm}>
               <cite className={`${weight.semibold} not-italic`}>{testimonial.author}</cite>
               {testimonial.role && (
                 <span className={muted.default}>, {testimonial.role}</span>
@@ -243,7 +275,7 @@ function FeatureGridVariant(props: FeatureGridProps) {
             itemScope={true}
             itemType="https://schema.org/ListItem"
             className={
-              'group hover:-translate-y-1 relative h-full overflow-hidden border border-border/50 bg-linear-to-br from-card/30 via-card/50 to-card/30 shadow-lg transition-all duration-300 hover:from-card/50 hover:via-card/70 hover:to-card/50 hover:shadow-xl'
+              `group hover:-translate-y-1 relative h-full ${overflow.hidden} border ${borderColor[`border/50`]} bg-linear-to-br from-card/30 via-card/50 to-card/30 ${shadow.lg} ${transition.all} ${animateDuration.slow} hover:from-card/50 hover:via-card/70 hover:to-card/50 hover:${shadow.xl}`
             }
             style={{
               animationDelay: `${index * 50}ms`,
@@ -252,18 +284,18 @@ function FeatureGridVariant(props: FeatureGridProps) {
           >
             <div
               className={
-                'pointer-events-none absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100'
+                `pointer-events-none absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/5 ${opacityLevel[0]} ${transition.opacity} ${animateDuration.slow} group-hover:opacity-100`
               }
             />
 
             <CardHeader>
               <CardTitle
-                className={'relative z-10 flex items-start justify-between'}
+                className={`relative ${zLayer.raised} flex ${alignItems.start} ${justify.between}`}
                 itemProp="name"
               >
                 <span
                   className={
-                    'bg-linear-to-r from-foreground to-foreground/70 bg-clip-text ${weight.semibold} text-transparent'
+                    `bg-linear-to-r from-foreground to-foreground/70 bg-clip-text ${weight.semibold} ${textColor.transparent}`
                   }
                 >
                   {feature.title}
@@ -272,15 +304,15 @@ function FeatureGridVariant(props: FeatureGridProps) {
                   <UnifiedBadge
                     variant="base"
                     style="secondary"
-                    className="ml-2 border-primary/30 bg-linear-to-r from-primary/20 to-primary/30 shadow-sm"
+                    className={`ml-2 ${borderColor['primary/30']} bg-linear-to-r from-primary/20 to-primary/30 ${shadow.sm}`}
                   >
                     {feature.badge}
                   </UnifiedBadge>
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className={'relative z-10'}>
-              <p itemProp="description" className={`${muted.default} leading-relaxed`}>
+            <CardContent className={`relative ${zLayer.raised}`}>
+              <p itemProp="description" className={`${muted.default} ${leading.relaxed}`}>
                 {feature.description}
               </p>
             </CardContent>
@@ -317,16 +349,16 @@ function TLDRVariant(props: TLDRSummaryProps) {
     <Card
       itemScope={true}
       itemType="https://schema.org/Article"
-      className="my-8 border-primary border-l-4 bg-primary/5"
+      className={`my-8 ${borderLeft.accentPrimary} ${bgColor['primary/5']}`}
     >
       <CardHeader>
         <CardTitle className={cluster.compact}>
-          <Zap className={`${iconSize.md} text-primary`} />
+          <Zap className={`${iconSize.md} ${textColor.primary}`} />
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p itemProp="abstract" className={`${marginBottom.default} ${muted.default} leading-relaxed`}>
+        <p itemProp="abstract" className={`${marginBottom.default} ${muted.default} ${leading.relaxed}`}>
           {content}
         </p>
 
@@ -336,7 +368,7 @@ function TLDRVariant(props: TLDRSummaryProps) {
             <ul className={spaceY.tight}>
               {keyPoints.map((point) => (
                 <li key={point} className={`${row.compact} ${size.sm}`}>
-                  <CheckCircle className={`${marginTop.micro} h-4 w-4 shrink-0 text-green-500`} />
+                  <CheckCircle className={`${marginTop.micro} ${iconSize.sm} ${flexGrow.shrink0} ${textColor.green}`} />
                   <span>{point}</span>
                 </li>
               ))}
@@ -360,21 +392,21 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
     <blockquote
       itemScope={true}
       itemType="https://schema.org/Quotation"
-      className={`my-8 rounded-r-lg border-primary border-l-4 bg-muted/30 ${padding.comfortable}`}
+      className={`my-8 ${radiusRight.lg} ${borderLeft.accentPrimary} ${bgColor['muted/30']} ${padding.comfortable}`}
     >
-      <p itemProp="text" className={`${marginBottom.default} ${size.lg} italic leading-relaxed`}>
+      <p itemProp="text" className={`${marginBottom.default} ${size.lg} italic ${leading.relaxed}`}>
         "{quote}"
       </p>
       <footer className={cluster.comfortable}>
         {imageUrl && (
-          <Avatar className="h-12 w-12">
+          <Avatar className={squareSize.avatarLg}>
             <AvatarImage src={imageUrl} alt={author} />
             <AvatarFallback>{author.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
         )}
         <div itemProp="author" itemScope={true} itemType="https://schema.org/Person">
           <cite className="not-italic">
-            <span itemProp="name" className={`${weight.semibold} text-foreground`}>
+            <span itemProp="name" className={`${weight.semibold} ${textColor.foreground}`}>
               {author}
             </span>
             {(role || company) && (
@@ -427,11 +459,11 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
     <Card
       itemScope={true}
       itemType="https://schema.org/Table"
-      className="my-8 border-accent border-l-4 bg-accent/5"
+      className={`my-8 ${borderLeft.accentHighlight} ${bgColor['accent/5']}`}
     >
       <CardHeader>
         <CardTitle className={cluster.compact}>
-          <BookOpen className={`${iconSize.md} text-accent-foreground`} />
+          <BookOpen className={`${iconSize.md} ${textColor.accentForeground}`} />
           {title}
         </CardTitle>
         {description && <CardDescription itemProp="description">{description}</CardDescription>}
@@ -443,7 +475,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
               key={`${item.label}-${index}`}
               itemScope={true}
               itemType="https://schema.org/PropertyValue"
-              className={`${stack.compact} ${radius.lg} border bg-card/50 ${padding.compact} sm:flex-row sm:items-start sm:${gap.comfortable}`}
+              className={`${stack.compact} ${radius.lg} border ${bgColor['card/50']} ${padding.compact} sm:flex-row sm:items-start sm:gap-4`}
             >
               <div className="sm:w-1/3">
                 <dt itemProp="name" className={`${weight.medium} ${muted.sm}`}>
@@ -451,7 +483,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
                 </dt>
               </div>
               <div className="sm:w-2/3">
-                <dd itemProp="value" className={`${marginBottom.micro} ${weight.semibold} text-foreground`}>
+                <dd itemProp="value" className={`${marginBottom.micro} ${weight.semibold} ${textColor.foreground}`}>
                   {item.value}
                 </dd>
                 {item.description && <p className={`${muted.sm}`}>{item.description}</p>}
@@ -483,7 +515,7 @@ function ContentTabsVariant(props: ContentTabsProps) {
     <section itemScope={true} itemType="https://schema.org/ItemList" className="my-8">
       {title && (
         <div className={marginBottom.comfortable}>
-          <h3 className={`mb-2 ${weight.bold} ${size.xl}`} itemProp="name">
+          <h3 className={`${marginBottom.tight} ${weight.bold} ${size.xl}`} itemProp="name">
             {title}
           </h3>
           {description && (
@@ -496,7 +528,7 @@ function ContentTabsVariant(props: ContentTabsProps) {
 
       <Tabs defaultValue={firstValue} className="w-full">
         <TabsList
-          className={'grid h-auto w-full grid-cols-2 ${gap.tight} ${padding.micro} lg:grid-cols-3 xl:grid-cols-4'}
+          className={`grid h-auto w-full grid-cols-2 ${gap.tight} ${padding.micro} lg:grid-cols-3 xl:grid-cols-4`}
         >
           {validItems.map((item) => (
             <TabsTrigger

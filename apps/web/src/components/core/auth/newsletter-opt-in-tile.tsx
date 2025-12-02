@@ -1,7 +1,14 @@
 'use client';
 
 import { cn } from '@heyclaude/web-runtime/ui';
-import { stack, cluster, responsive, weight, muted ,size  , gap , padding } from '@heyclaude/web-runtime/design-system';
+import { stack, cluster, responsive, weight, muted, size, gap, padding, transition, radius, backdrop, textColor,
+  flexWrap,
+  overflow,
+  animateDuration,
+  cursor,
+  opacityLevel,
+  alignItems,
+} from '@heyclaude/web-runtime/design-system';
 import type { CheckedState } from '@radix-ui/react-checkbox';
 import { motion } from 'motion/react';
 import { useId } from 'react';
@@ -67,8 +74,8 @@ export function NewsletterOptInTile({
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.99 }}
       className={cn(
-        'group relative w-full overflow-hidden rounded-2xl border ${padding.comfortable} text-left transition-all duration-300',
-        'bg-linear-to-br from-card/80 via-card/60 to-card/30 backdrop-blur-xl',
+        `group relative w-full ${overflow.hidden} ${radius['2xl']} border ${padding.comfortable} text-left ${transition.all} ${animateDuration.slow}`,
+        `bg-gradient-to-br from-card/80 via-card/60 to-card/30 ${backdrop.xl}`,
         checked
           ? 'border-accent/70 shadow-[0_10px_40px_-20px_rgba(255,138,76,0.8)]'
           : 'border-white/10 hover:border-accent/40 hover:shadow-[0_10px_40px_-20px_rgba(255,138,76,0.6)]'
@@ -76,20 +83,20 @@ export function NewsletterOptInTile({
     >
       <div className={stack.relaxed}>
         <div className={stack.default}>
-          <div className={cluster.default + ' flex-wrap'}>
-            <span className={`inline-flex items-center rounded-full bg-white/10 ${padding.xCompact} ${padding.yMicro} ${weight.semibold} text-white/90 ${size.xs}`}>
+          <div className={`${cluster.default} ${flexWrap.wrap}`}>
+            <span className={`inline-flex ${alignItems.center} ${radius.full} bg-white/10 ${padding.xCompact} ${padding.yMicro} ${weight.semibold} ${textColor.white}/90 ${size.xs}`}>
               {badgeLabel}
             </span>
           </div>
           <div>
-            <p className={`${weight.semibold} text-foreground ${size.xl}`}>{resolvedHeadline}</p>
+            <p className={`${weight.semibold} ${textColor.foreground} ${size.xl}`}>{resolvedHeadline}</p>
           </div>
         </div>
 
         <div className={responsive.smRowBetween}>
           <label
             htmlFor={checkboxId}
-            className={`flex cursor-pointer items-center ${gap.default} ${weight.medium} text-foreground ${size.sm}`}
+            className={`flex ${cursor.pointer} ${alignItems.center} ${gap.default} ${weight.medium} ${textColor.foreground} ${size.sm}`}
             onClick={(event) => event.stopPropagation()}
             onKeyDown={(event) => event.stopPropagation()}
             onKeyUp={(event) => event.stopPropagation()}
@@ -107,7 +114,7 @@ export function NewsletterOptInTile({
       </div>
       <div
         className={cn(
-          'pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100',
+          `pointer-events-none absolute inset-0 ${opacityLevel[0]} ${transition.opacity} ${animateDuration.slow} group-hover:opacity-100`,
           checked ? 'opacity-80' : 'opacity-0'
         )}
         aria-hidden="true"

@@ -5535,11 +5535,15 @@ export default {
         return {
           Literal(node) {
             if (typeof node.value === 'string') {
+              // SECURITY: Check for hardcoded localhost or production URLs
+              // Also check for dangerous URL patterns that could be exploited
+              const value = node.value;
+              
               // Check for hardcoded localhost or production URLs
               if (
-                node.value.startsWith('http://localhost:') ||
-                node.value.startsWith('https://claudepro.directory') ||
-                node.value.startsWith('http://127.0.0.1:')
+                value.startsWith('http://localhost:') ||
+                value.startsWith('https://claudepro.directory') ||
+                value.startsWith('http://127.0.0.1:')
               ) {
                 // Allow if it's in a comment or part of API endpoint pattern
                 const parent = node.parent;
@@ -5552,6 +5556,21 @@ export default {
                   node,
                   messageId: 'hardcodedUrl',
                 });
+              }
+              
+              // SECURITY: Check for dangerous URL schemes that could be exploited
+              // These should be sanitized before use
+              const dangerousSchemes = ['javascript:', 'data:', 'file:', 'vbscript:', 'about:'];
+              const lowerValue = value.toLowerCase();
+              for (const scheme of dangerousSchemes) {
+                if (lowerValue.startsWith(scheme)) {
+                  context.report({
+                    node,
+                    messageId: 'hardcodedUrl',
+                    message: `Potentially dangerous URL scheme detected: ${scheme}. URLs should be validated and sanitized before use.`,
+                  });
+                  break;
+                }
               }
             }
           },

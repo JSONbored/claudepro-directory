@@ -1,11 +1,15 @@
 /**
  * Unified Structured Data - Renders Schema.org JSON-LD from generate_metadata_complete RPC
  * Schemas are serialized with XSS protection client-side
+ * 
+ * Note: Uses native <script> element instead of next/script for JSON-LD because:
+ * 1. JSON-LD needs type="application/ld+json" which next/script doesn't support
+ * 2. Inline structured data is not deferred/loaded like external scripts
+ * 3. Server-rendered JSON-LD is immediately available for crawlers
  */
 
 import { serializeJsonLd } from '@heyclaude/shared-runtime';
 import { getSEOMetadataWithSchemas } from '@heyclaude/web-runtime/data';
-import Script from 'next/script';
 
 interface StructuredDataProps {
   route: string;
@@ -49,15 +53,14 @@ export async function StructuredData({ route }: StructuredDataProps) {
         const uniqueKey = `${schemaType}-${schemaId}`;
 
         return (
-          <Script
+          <script
             key={uniqueKey}
             id={`structured-data-${uniqueKey}`}
             type="application/ld+json"
-            // eslint-disable-next-line jsx-a11y/no-danger -- JSON-LD structured data is serialized with XSS protection via serializeJsonLd
+            // eslint-disable-next-line react/no-danger -- JSON-LD structured data is serialized with XSS protection via serializeJsonLd
             dangerouslySetInnerHTML={{
               __html: serialized,
             }}
-            strategy="afterInteractive"
           />
         );
       })}

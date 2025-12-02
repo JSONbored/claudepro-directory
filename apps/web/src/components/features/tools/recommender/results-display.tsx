@@ -22,7 +22,37 @@ import {
   Sparkles,
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
-import { between, cluster, iconLeading, iconSize, absolute, spaceY, muted, marginBottom, marginTop, weight ,size , padding , gap , row , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  absolute,
+  backdrop,
+  bgColor,
+  between,
+  cluster,
+  flexDir,
+  flexGrow,
+  flexWrap,
+  gap,
+  iconLeading,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  maxWidth,
+  muted,
+  opacityLevel,
+  overflow,
+  padding,
+  radius,
+  row,
+  shadow,
+  size,
+  spaceY,
+  textColor,
+  transition,
+  weight,
+  zLayer,
+} from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { BookmarkButton } from '@heyclaude/web-runtime/ui';
@@ -153,8 +183,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   return (
     <div className={spaceY.loose}>
       <div className={`${spaceY.comfortable} text-center`}>
-        <div className={`flex items-center justify-center ${gap.compact}`}>
-          <Sparkles className={`${iconSize.lg} text-primary`} />
+        <div className={`flex ${alignItems.center} ${justify.center} ${gap.compact}`}>
+          <Sparkles className={`${iconSize.lg} ${textColor.primary}`} />
           <h1 className={`${weight.bold} ${size['3xl']} md:${size['4xl']}`}>Your Personalized Recommendations</h1>
         </div>
 
@@ -164,21 +194,21 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           {results?.length ?? 0} best fits for your needs.
         </p>
 
-        <div className={'flex-wrap items-center justify-center ${gap.default}'}>
-          <UnifiedBadge variant="base" style="secondary" className="text-sm">
+        <div className={`flex flex-wrap ${alignItems.center} ${justify.center} ${gap.default}`}>
+          <UnifiedBadge variant="base" style="secondary" className={size.sm}>
             <TrendingUp className={iconLeading.xs} />
             {(summary?.avg_match_score ?? 0).toFixed(0)}% Avg Match
           </UnifiedBadge>
-          <UnifiedBadge variant="base" style="secondary" className="text-sm">
+          <UnifiedBadge variant="base" style="secondary" className={size.sm}>
             <BarChart className={iconLeading.xs} />
             {(summary?.diversity_score ?? 0).toFixed(0)}% Diversity
           </UnifiedBadge>
-          <UnifiedBadge variant="base" style="outline" className="text-sm">
+          <UnifiedBadge variant="base" style="outline" className={size.sm}>
             Top Category: {summary?.top_category ?? 'General'}
           </UnifiedBadge>
         </div>
 
-        <div className={'flex-wrap items-center justify-center ${gap.default}'}>
+        <div className={`flex flex-wrap ${alignItems.center} ${justify.center} ${gap.default}`}>
           <Button
             variant="default"
             size="sm"
@@ -213,14 +243,14 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             <Settings className={iconSize.sm} />
             Adjust Preferences
             <ChevronDown
-              className={`h-4 w-4 transition-transform ${showRefinePanel ? 'rotate-180' : ''}`}
+              className={`${iconSize.sm} ${transition.transform} ${showRefinePanel ? 'rotate-180' : ''}`}
             />
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <Card className={marginTop.default}>
             <CardHeader>
-              <CardTitle className="text-lg">Refine Your Results</CardTitle>
+              <CardTitle className={size.lg}>Refine Your Results</CardTitle>
               <CardDescription>
                 Adjust these settings to fine-tune your recommendations
               </CardDescription>
@@ -280,7 +310,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
       <Card className="bg-accent/5">
         <CardHeader>
-          <CardTitle className="text-lg">Your Selections</CardTitle>
+          <CardTitle className={size.lg}>Your Selections</CardTitle>
           <CardDescription>We matched configurations based on these preferences</CardDescription>
         </CardHeader>
         <CardContent>
@@ -336,7 +366,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       </Card>
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-        <TabsList className={'h-auto flex-wrap'}>
+        <TabsList className={`h-auto ${flexWrap.wrap}`}>
           {categories.map((category) => {
             const count =
               category === 'all'
@@ -410,7 +440,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
                 return (
                   <div key={result.slug} className="relative">
-                    <div className={`${absolute.topRightOffsetXl} z-10`}>
+                    <div className={`${absolute.topRightOffsetXl} ${zLayer.raised}`}>
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild={true}>
@@ -431,18 +461,18 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </div>
 
                     {rank !== null && rank <= 3 && (
-                      <div className={`${absolute.topLeftOffsetXl} z-10`}>
+                      <div className={`${absolute.topLeftOffsetXl} ${zLayer.raised}`}>
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className="bg-background/80 backdrop-blur-sm"
+                          className={`bg-background/80 ${backdrop.sm}`}
                         >
                           <Award className={iconLeading.xs} />#{rank}
                         </UnifiedBadge>
                       </div>
                     )}
 
-                    <div className={`${absolute.bottomRightOffset} z-10`}>
+                    <div className={`${absolute.bottomRightOffset} ${zLayer.raised}`}>
                       <BookmarkButton
                         contentType={result.category}
                         contentSlug={result.slug}
@@ -451,7 +481,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </div>
 
                     <div
-                      className={`${absolute.inset} bg-linear-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
+                      className={`${absolute.inset} bg-gradient-to-br ${getMatchGradient(matchScore)} pointer-events-none ${opacityLevel[50]}`}
                     />
 
                     <Link href={targetPath}>
@@ -463,7 +493,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         {...(tags.length ? { tags } : {})}
                         maxVisibleTags={4}
                         {...(author ? { author } : {})}
-                        className="relative overflow-hidden transition-all hover:shadow-lg"
+                        className={`relative ${overflow.hidden} ${transition.all} hover:${shadow.lg}`}
                         renderTopBadges={() => (
                           <UnifiedBadge variant="base" style="outline" className="w-fit capitalize">
                             {result.category}
@@ -472,10 +502,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         renderContent={() => (
                           <>
                             <div
-                              className={`${row.compact} mb-3 ${radius.lg} bg-accent/50 ${padding.compact}`}
+                              className={`${row.compact} ${marginBottom.compact} ${radius.lg} ${bgColor['accent/5']} ${padding.compact}`}
                             >
                               <Info
-                                className={`h-4 w-4 text-primary ${marginTop.micro} shrink-0`}
+                                className={`${iconSize.sm} ${textColor.primary} ${marginTop.micro} ${flexGrow.shrink0}`}
                               />
                               <div>
                                 <p className={`${weight.medium} ${size.sm}`}>Why recommended:</p>
@@ -484,13 +514,13 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                             </div>
 
                             {reasons.length > 1 && (
-                              <div className={`flex flex-wrap ${gap.tight}`}>
+                              <div className={`flex ${flexWrap.wrap} ${gap.tight}`}>
                                 {reasons.slice(1, 4).map((reason) => (
                                   <UnifiedBadge
                                     key={`${result.slug}-${reason.message}`}
                                     variant="base"
                                     style="secondary"
-                                    className="text-xs"
+                                    className={size.xs}
                                   >
                                     {reason.message}
                                   </UnifiedBadge>
@@ -503,13 +533,13 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           <Button
                             variant="ghost"
                             size="sm"
-                            className={`group -mx-4 -mb-4 ${marginTop.compact} w-full`}
+                            className={`group -mx-4 ${marginBottom.negativeDefault} ${marginTop.compact} w-full`}
                             asChild={true}
                           >
-                            <span className={`flex items-center justify-center ${gap.compact}`}>
+                            <span className={`flex ${alignItems.center} ${justify.center} ${gap.compact}`}>
                               View Details
                               <ArrowRight
-                                className={`${iconSize.sm} transition-transform group-hover:translate-x-1`}
+                                className={`${iconSize.sm} ${transition.transform} group-hover:translate-x-1`}
                               />
                             </span>
                           </Button>
@@ -524,7 +554,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
           {filteredResults.length === 0 && (
             <Card>
-              <CardContent className={`flex flex-col items-center justify-center ${padding.yRelaxed}`}>
+              <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${justify.center} ${padding.yRelaxed}`}>
                 <p className={muted.default}>No results in this category</p>
               </CardContent>
             </Card>
@@ -532,10 +562,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </TabsContent>
       </Tabs>
 
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className={`border-primary/20 ${bgColor['primary/5']}`}>
         <CardHeader>
           <CardTitle className={cluster.compact}>
-            <Sparkles className={`${iconSize.md} text-primary`} />
+            <Sparkles className={`${iconSize.md} ${textColor.primary}`} />
             What's Next?
           </CardTitle>
         </CardHeader>
@@ -544,7 +574,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             Ready to start using these configurations? Click any card to view detailed setup
             instructions, examples, and documentation.
           </p>
-          <div className={`flex flex-wrap ${gap.default}`}>
+          <div className={`flex ${flexWrap.wrap} ${gap.default}`}>
             <Button asChild={true}>
               <Link href="/" className={`${gap.compact}`}>
                 Browse All Configs

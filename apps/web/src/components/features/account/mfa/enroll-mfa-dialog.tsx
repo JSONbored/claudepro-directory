@@ -9,7 +9,12 @@ import { createMFAChallenge, enrollTOTPFactor, verifyMFAChallenge } from '@heycl
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
-import { iconLeading, iconSize, cluster, spaceY, muted, helper  , padding , gap , radius , size } from '@heyclaude/web-runtime/design-system';
+import { iconLeading, iconSize, cluster, spaceY, muted, helper  , padding , gap , radius , size, flexDir,
+  tracking,
+  bgColor,
+  alignItems,
+  squareSize,
+} from '@heyclaude/web-runtime/design-system';
 import { errorToasts, successToasts } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -190,7 +195,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
         </DialogHeader>
 
         {error && (
-          <div className={`${cluster.compact} rounded-md bg-destructive/10 ${padding.compact} ${helper.destructive}`}>
+          <div className={`${cluster.compact} ${radius.md} ${bgColor['destructive/10']} ${padding.compact} ${helper.destructive}`}>
             <AlertCircle className={iconSize.sm} />
             <span>{error}</span>
           </div>
@@ -217,22 +222,22 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
 
         {step === 'verify' && qrCode && (
           <div className={spaceY.comfortable}>
-            <div className={`flex flex-col items-center ${gap.comfortable}`}>
-              <div className={`${radius.lg} border bg-background ${padding.default}`}>
+            <div className={`flex ${flexDir.col} ${alignItems.center} ${gap.comfortable}`}>
+              <div className={`${radius.lg} border ${bgColor.background} ${padding.default}`}>
                 {qrCode && (
                   <Image
                     src={qrCode}
                     alt="MFA QR Code"
                     width={192}
                     height={192}
-                    className="h-48 w-48"
+                    className={squareSize.avatar6xl}
                     style={{ imageRendering: 'crisp-edges' }}
                   />
                 )}
               </div>
               {secret && (
                 <div className={`w-full ${spaceY.compact}`}>
-                  <Label htmlFor="secret" className="text-xs">
+                  <Label htmlFor="secret" className={size.xs}>
                     Or enter this secret manually:
                   </Label>
                   <Input
@@ -261,7 +266,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
                   setError(null);
                 }}
                 placeholder="000000"
-                className={`text-center font-mono ${size.lg} tracking-widest`}
+                className={`text-center font-mono ${size.lg} ${tracking.widest}`}
                 disabled={loading}
               />
             </div>

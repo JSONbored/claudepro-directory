@@ -4,11 +4,10 @@ import type { Database } from '@heyclaude/database-types';
 import { iconSize, muted } from '@heyclaude/web-runtime/design-system';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
-import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
 
-interface DuplicateWarningProps {
+interface GenericNameWarningProps {
   contentType: Database['public']['Enums']['content_category'];
   name: string;
 }
@@ -36,8 +35,7 @@ function useDebounce<T>(value: T, delay: number): T {
  * Shows a contextual suggestion when a provided name appears generic.
  *
  * Checks the debounced `name` against a short list of common generic names and, when matched,
- * renders a warning Alert recommending a more specific, descriptive name. While the check is
- * running it renders a subtle "Checking for duplicates..." animated message; if no warning is
+ * renders a warning Alert recommending a more specific, descriptive name. If no warning is
  * necessary the component renders `null`.
  *
  * @param props.contentType - Ignored in this component; present for callers that pass a content category.
@@ -48,8 +46,7 @@ function useDebounce<T>(value: T, delay: number): T {
  * @see useDebounce — debounces `name` before performing the check
  * @see Alert, AlertTitle, AlertDescription, AlertTriangle — UI primitives used to render the suggestion
  */
-export function DuplicateWarning({ contentType: _contentType, name }: DuplicateWarningProps) {
-  const [checking, setChecking] = useState(false);
+export function GenericNameWarning({ contentType: _contentType, name }: GenericNameWarningProps) {
   const [warning, setWarning] = useState<string | null>(null);
   const [debounceMs, setDebounceMs] = useState(300);
 
@@ -67,10 +64,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
       return;
     }
 
-    setChecking(true);
-
-    // Simple client-side duplicate detection
-    // Check if name is too generic
+    // Simple client-side generic name detection
     const genericNames = [
       'test',
       'example',
@@ -94,21 +88,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
     } else {
       setWarning(null);
     }
-
-    setChecking(false);
   }, [debouncedName]);
-
-  if (checking) {
-    return (
-      <motion.div
-        className={muted.sm}
-        animate={{ opacity: [1, 0.5, 1] }}
-        transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-      >
-        Checking for duplicates...
-      </motion.div>
-    );
-  }
 
   if (!warning) {
     return null;

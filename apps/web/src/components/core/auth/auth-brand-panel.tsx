@@ -5,12 +5,17 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { marginBottom, muted, weight, size , spaceY , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { marginBottom, muted, weight, size , spaceY , maxWidth, flexDir,
+  tracking,
+  leading,
+  justify,
+  alignItems,
+} from '@heyclaude/web-runtime/design-system';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 
 export function AuthBrandPanel() {
   return (
-    <div className={`flex ${maxWidth['2xl']} flex-col items-start justify-center ${spaceY.loose}`}>
+    <div className={`flex ${maxWidth['2xl']} ${flexDir.col} ${alignItems.start} ${justify.center} ${spaceY.loose}`}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -20,7 +25,7 @@ export function AuthBrandPanel() {
           <HeyClaudeLogo size="xl" inView={true} duration={1.5} />
         </div>
 
-        <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['5xl']} leading-tight tracking-tight lg:${size['6xl']}`}>
+        <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['5xl']} ${leading.tight} ${tracking.tight} lg:${size['6xl']}`}>
           The ultimate Claude
           <br />
           configuration resource

@@ -21,3 +21,4 @@ export * from './borders';
 export * from './category-colors';
 export * from './effects';
 export * from './a11y';
+export * from './colors';

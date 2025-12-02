@@ -8,7 +8,7 @@
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import type { SearchResult } from '../edge/search-client.ts';
-import type { LucideIcon } from '../icons.tsx';
+import type { IconComponent } from '../icons.tsx';
 import type { ReactNode } from 'react';
 import type {
   TabConfig,
@@ -807,7 +807,7 @@ export type ListProps = BaseProps & {
   description: string;
   items: string[];
   category?: Database['public']['Enums']['content_category'];
-  icon?: LucideIcon;
+  icon?: IconComponent;
   dotColor?: string;
 };
 
@@ -816,7 +816,7 @@ export type EnhancedListProps = BaseProps & {
   title: string;
   description?: string;
   items: Array<string | { issue: string; solution: string }>;
-  icon?: LucideIcon;
+  icon?: IconComponent;
   dotColor?: string;
 };
 
@@ -828,7 +828,7 @@ export type CodeProps = BaseProps & {
   code: string;
   language: string;
   filename?: string;
-  icon?: LucideIcon;
+  icon?: IconComponent;
 };
 
 export type CodeGroupProps = BaseProps & {
@@ -842,7 +842,7 @@ export type CodeGroupProps = BaseProps & {
     filename?: string;
     label: string;
   }>;
-  icon?: LucideIcon;
+  icon?: IconComponent;
 };
 
 export type ExamplesProps = BaseProps & {
@@ -857,7 +857,7 @@ export type ExamplesProps = BaseProps & {
   }>;
   title?: string;
   description?: string;
-  icon?: LucideIcon;
+  icon?: IconComponent;
   maxLines?: number;
   showLineNumbers?: boolean;
 };
@@ -937,7 +937,7 @@ export interface SpeedDialAction {
   /** Unique identifier */
   id: string;
   /** Lucide icon component */
-  icon: LucideIcon;
+  icon: IconComponent;
   /** Accessible label */
   label: string;
   /** Click handler */
@@ -957,7 +957,7 @@ export interface SpeedDialAction {
  */
 export interface MainFABConfig {
   /** Icon for main FAB */
-  icon: LucideIcon;
+  icon: IconComponent;
   /** Accessible label */
   label: string;
   /** Click handler */

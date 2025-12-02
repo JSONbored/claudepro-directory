@@ -11,7 +11,12 @@ import {
   getAuthenticatedUser,
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
-import { between, card, cluster, muted, iconSize, spaceY, marginBottom, marginTop, weight ,size  , gap , padding , row , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { between, card, cluster, muted, iconSize, spaceY, marginBottom, marginTop, weight ,size  , gap , padding , row , minHeight , maxWidth , radius, bgColor,
+  alignItems,
+  justify,
+  flexDir,
+  squareSize,
+} from '@heyclaude/web-runtime/design-system';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, UnifiedBadge,
@@ -211,11 +216,11 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
   const { follower_count, following_count } = stats ?? {};
 
   return (
-    <div className={`${minHeight.screen} bg-background`}>
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Hero/Profile Header */}
       <section className="relative">
         <div className={`container mx-auto ${padding.xDefault}`}>
-          <div className="flex items-start justify-between pt-12">
+          <div className={`flex ${alignItems.start} ${justify.between} pt-12`}>
             <div className={`${row.comfortable}`}>
               {profile?.image ? (
                 <Image
@@ -223,11 +228,11 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                   alt={`${sanitizeDisplayText(profile.name ?? slug, slug)}'s profile picture`}
                   width={96}
                   height={96}
-                  className="h-24 w-24 rounded-full border-4 border-background object-cover"
+                  className={`${squareSize.avatar3xl} ${radius.full} border-4 border-background object-cover`}
                   priority
                 />
               ) : (
-                <div className={`flex h-24 w-24 items-center justify-center rounded-full border-4 border-background bg-accent ${weight.bold} ${size['2xl']}`}>
+                <div className={`flex ${squareSize.avatar3xl} ${alignItems.center} ${justify.center} ${radius.full} border-4 border-background ${bgColor.accent} ${weight.bold} ${size['2xl']}`}>
                   {(profile?.name ?? slug).charAt(0).toUpperCase()}
                 </div>
               )}
@@ -283,7 +288,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
             {/* Quick Stats Card */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Activity Stats</CardTitle>
+                <CardTitle className={size.sm}>Activity Stats</CardTitle>
               </CardHeader>
               <CardContent className={spaceY.default}>
                 <div className={between.center}>
@@ -300,7 +305,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                 </div>
                 <div className={between.center}>
                   <span className={`${muted.sm}`}>Member since</span>
-                  <span className="text-sm">
+                  <span className={size.sm}>
                     {profile?.created_at
                       ? new Date(profile.created_at).toLocaleDateString('en-US', {
                           month: 'short',
@@ -321,8 +326,8 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
 
               {!collections || collections.length === 0 ? (
                 <Card>
-                  <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
-                    <FolderOpen className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+                  <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+                    <FolderOpen className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
                     <p className={muted.default}>No public collections yet</p>
                   </CardContent>
                 </Card>
@@ -355,7 +360,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         <Card key={collection.id} className={card.interactive}>
                           <NavLink href={safeCollectionUrl}>
                             <CardHeader>
-                              <CardTitle className="text-lg">{collection.name}</CardTitle>
+                              <CardTitle className={size.lg}>{collection.name}</CardTitle>
                               {collection.description ? <CardDescription className="line-clamp-2">
                                   {collection.description}
                                 </CardDescription> : null}
@@ -414,15 +419,15 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         <Card key={item.id} className={card.interactive}>
                           <NavLink href={safeContentUrl}>
                             <CardHeader>
-                              <div className={`${marginBottom.tight} flex items-center justify-between`}>
-                                <UnifiedBadge variant="base" style="secondary" className="text-xs">
+                              <div className={`${marginBottom.tight} flex ${alignItems.center} ${justify.between}`}>
+                                <UnifiedBadge variant="base" style="secondary" className={size.xs}>
                                   {item.content_type}
                                 </UnifiedBadge>
-                                {item.featured ? <UnifiedBadge variant="base" style="default" className="text-xs">
+                                {item.featured ? <UnifiedBadge variant="base" style="default" className={size.xs}>
                                     Featured
                                   </UnifiedBadge> : null}
                               </div>
-                              <CardTitle className="text-base">{item.name}</CardTitle>
+                              <CardTitle className={size.base}>{item.name}</CardTitle>
                               <CardDescription className={`line-clamp-2 ${size.xs}`}>
                                 {item.description}
                               </CardDescription>

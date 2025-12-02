@@ -1,7 +1,12 @@
 'use client';
 
 import { formatRelativeDate, type JobType, logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { cluster, stack, iconSize, iconLeading, cardHeader, cardBody, badge, marginBottom, jobTypeBadge, muted, weight ,size , gap  } from '@heyclaude/web-runtime/design-system';
+import { cluster, stack, iconSize, iconLeading, cardHeader, cardBody, badge, marginBottom, jobTypeBadge, muted, weight, size, gap, transition, zLayer, shadow, shadowColor, radius, flexWrap,
+  flexDir,
+  justify,
+  textColor,
+  alignItems,
+} from '@heyclaude/web-runtime/design-system';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   Building,
@@ -96,7 +101,7 @@ export function JobCard({ job }: JobCardProps) {
         <HighlightedText
           html={job.description_highlighted}
           fallback={job.description}
-          className={`text-sm ${muted.default}`}
+          className={`${size.sm} ${muted.default}`}
         />
       );
     }
@@ -105,15 +110,15 @@ export function JobCard({ job }: JobCardProps) {
 
   return (
     <Card
-      className={`group relative transition-all hover:shadow-lg hover:border-accent/20 ${
+      className={`group relative ${transition.all} hover:${shadow.lg} hover:border-accent/20 ${
         isFeatured
-          ? 'border-amber-400/50 bg-gradient-to-br from-amber-50/10 to-transparent shadow-amber-500/5'
+          ? `border-amber-400/50 bg-gradient-to-br from-amber-50/10 to-transparent ${shadowColor.amber}`
           : ''
       }`}
     >
       {isFeatured && (
-        <div className="-top-2 -right-2 absolute z-10">
-          <UnifiedBadge variant="base" style="default" className="bg-amber-500 text-white shadow-lg">
+        <div className={`-top-2 -right-2 absolute ${zLayer.raised}`}>
+          <UnifiedBadge variant="base" style="default" className={`bg-amber-500 ${textColor.white} ${shadow.lg}`}>
             <Star className={iconLeading.xs} />
             Featured
           </UnifiedBadge>
@@ -121,22 +126,22 @@ export function JobCard({ job }: JobCardProps) {
       )}
 
       <CardHeader className={cardHeader.default}>
-        <div className={'flex items-start justify-between'}>
+        <div className={`flex ${alignItems.start} ${justify.between}`}>
           <div className="flex-1">
-            <div className={`${cluster.default} mb-2`}>
+            <div className={`${cluster.default} ${marginBottom.tight}`}>
               {job.company_logo && (
                 <Image
                   src={job.company_logo}
                   alt={`${job.company} logo`}
                   width={48}
                   height={48}
-                  className={'${radius.lg} object-cover'}
+                  className={`${radius.lg} object-cover`}
                   loading="lazy"
                 />
               )}
               <div>
                 <CardTitle
-                  className={`${weight.semibold} ${size.xl} transition-colors-smooth group-hover:text-accent`}
+                  className={`${weight.semibold} ${size.xl} ${transition.colors} group-hover:text-accent`}
                 >
                   <Link href={`/jobs/${job.slug}`}>{highlightedTitle}</Link>
                 </CardTitle>
@@ -149,7 +154,7 @@ export function JobCard({ job }: JobCardProps) {
               </div>
             </div>
 
-            <div className={`flex flex-wrap ${gap.default} ${muted.sm}`}>
+            <div className={`flex ${flexWrap.wrap} ${gap.default} ${muted.sm}`}>
               <div className={cluster.tight}>
                 <MapPin className={iconSize.sm} />
                 {job.location}
@@ -169,13 +174,13 @@ export function JobCard({ job }: JobCardProps) {
             </div>
           </div>
 
-          <div className={`flex flex-col items-end ${stack.compact}`}>
+          <div className={`flex ${flexDir.col} ${alignItems.end} ${stack.compact}`}>
             {job.type && (
               <UnifiedBadge
                 variant="base"
                 style="default"
                 className={
-                  jobTypeBadge[job.type as JobType] || 'bg-muted ${muted.default}'
+                  jobTypeBadge[job.type as JobType] || `bg-muted ${muted.default}`
                 }
               >
                 {job.type.replace('-', ' ')}
@@ -194,7 +199,7 @@ export function JobCard({ job }: JobCardProps) {
         <p className={`${marginBottom.comfortable} line-clamp-2`}>{highlightedDescription}</p>
 
         <div className={marginBottom.comfortable}>
-          <div className={`flex flex-wrap ${gap.compact}`}>
+          <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
             {(job.tags || []).slice(0, 4).map((tag: string) => (
               <UnifiedBadge
                 key={tag}

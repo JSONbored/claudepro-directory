@@ -15,7 +15,8 @@ import {
 import {
   getCategoryConfig,
 } from '@heyclaude/web-runtime/data';
-import { marginBottom, marginTop, muted, weight, size, spaceY  , gap , padding , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { borderTop, marginBottom, marginTop, muted, weight, size, spaceY  , gap , padding , minHeight , maxWidth, bgColor,
+} from '@heyclaude/web-runtime/design-system';
 import { 
   highlightCode,
   detectLanguage,
@@ -867,7 +868,7 @@ export async function UnifiedDetailPage({
   // Handle case where config is not found - AFTER ALL HOOKS
   if (!config) {
     return (
-      <div className={`${minHeight.screen} bg-background`}>
+      <div className={`${minHeight.screen} ${bgColor.background}`}>
         <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
           <div className="text-center">
             <h1 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>Configuration Not Found</h1>
@@ -909,7 +910,7 @@ export async function UnifiedDetailPage({
     };
 
     return (
-      <div className={`${minHeight.screen} bg-background`}>
+      <div className={`${minHeight.screen} ${bgColor.background}`}>
         <DetailHeader displayTitle={displayTitle} item={item} config={serializableConfig as typeof config} />
         {viewCountPromise ? (
           <Suspense
@@ -1010,7 +1011,7 @@ export async function UnifiedDetailPage({
   };
 
   return (
-    <div className={`${minHeight.screen} bg-background`}>
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Header - Client component for interactivity */}
       <DetailHeader displayTitle={displayTitle} item={item} config={serializableConfig as typeof config} />
 
@@ -1272,7 +1273,7 @@ export async function UnifiedDetailPage({
 
             {/* Reviews & Ratings Section */}
             {isValidCategory(item.category) && item.category && item.slug && (
-              <div className={`${marginTop.section} border-t pt-12`}>
+              <div className={`${marginTop.section} ${borderTop.default} pt-12`}>
                 <ReviewListSection contentType={item.category} contentSlug={item.slug} />
               </div>
             )}

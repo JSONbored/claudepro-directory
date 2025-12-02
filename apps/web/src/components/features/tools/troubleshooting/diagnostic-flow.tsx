@@ -7,7 +7,8 @@
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import type { DiagnosticFlowProps } from '@heyclaude/web-runtime/types/component.types';
-import { cluster, iconSize, muted, spaceY, weight ,size , gap } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, muted, spaceY, weight, size, gap, textColor, marginBottom,
+} from '@heyclaude/web-runtime/design-system';
 import React from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -87,8 +88,8 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
         <div className={spaceY.comfortable}>
           {path.length > 0 && (
             <div className={`${muted.sm}`}>
-              <p className={'mb-2 ${weight.medium}'}>Diagnostic Path:</p>
-              <ol className={'list-inside list-decimal ${spaceY.tight}'}>
+              <p className={`${marginBottom.tight} ${weight.medium}`}>Diagnostic Path:</p>
+              <ol className={`list-inside list-decimal ${spaceY.tight}`}>
                 {path.map((step) => (
                   <li key={step}>{step}</li>
                 ))}
@@ -101,7 +102,7 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
               {isComplete ? (
                 <div className={spaceY.comfortable}>
                   <div
-                    className={`${cluster.compact} text-green-600 dark:text-green-400`}
+                    className={`${cluster.compact} ${textColor.green} dark:text-green-400`}
                   >
                     <CheckCircle className={iconSize.md} />
                     <p className={weight.medium}>Solution Found:</p>

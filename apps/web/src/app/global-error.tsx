@@ -1,6 +1,21 @@
 'use client';
 
-import { padding, border, radius, marginBottom, muted, weight ,size , minHeight } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  border,
+  alignItems,
+  justify,
+  marginBottom,
+  minHeight,
+  muted,
+  padding,
+  radius,
+  size,
+  textColor,
+  transition,
+  weight,
+  flexDir,
+} from '@heyclaude/web-runtime/design-system';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { useEffect } from 'react';
 
@@ -38,16 +53,16 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <div className={`flex ${minHeight.screen} flex-col items-center justify-center ${padding.default} font-sans`}>
-          <div className={`max-w-md ${radius.lg} ${border.default} bg-card ${padding.relaxed} text-center`}>
-            <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']} text-destructive`}>Application Error</h2>
+        <div className={`flex ${minHeight.screen} ${flexDir.col} ${alignItems.center} ${justify.center} ${padding.default} font-sans`}>
+          <div className={`max-w-md ${radius.lg} ${border.default} ${bgColor.card} ${padding.relaxed} text-center`}>
+            <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']} ${textColor.destructive}`}>Application Error</h2>
             <p className={`${marginBottom.comfortable} ${muted.default}`}>
               A critical error occurred. Please refresh the page or try again later.
             </p>
             <button
               type="button"
               onClick={reset}
-              className={`cursor-pointer rounded-md border-none bg-primary ${padding.xDefault} ${size.base} text-primary-foreground transition-colors hover:bg-primary/90`}
+              className={`cursor-pointer ${radius.md} border-none ${bgColor.primary} ${padding.xDefault} ${size.base} ${textColor.primaryForeground} ${transition.colors} hover:bg-primary/90`}
             >
               Reset Application
             </button>

@@ -10,7 +10,12 @@ import {
   getUserLibrary,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, iconSize, hoverBg, transition, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, iconSize, hoverBg, transition, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , maxWidth, textColor,
+  alignItems,
+  justify,
+  flexDir,
+  shadow,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Bookmark as BookmarkIcon,
   ExternalLink,
@@ -190,7 +195,7 @@ export default async function LibraryPage() {
             Bookmarks ({bookmarkCount})
           </TabsTrigger>
           <TabsTrigger
-            value={Constants.public.Enums.content_category[8]} // 'collections'
+            value={Constants.public.Enums.content_category[8]}
             className={cluster.compact}
           >
             <FolderOpen className={iconSize.sm} />
@@ -201,8 +206,8 @@ export default async function LibraryPage() {
         <TabsContent value="bookmarks" className={spaceY.comfortable}>
           {bookmarks.length === 0 ? (
             <Card>
-              <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
-                <BookmarkIcon className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+              <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+                <BookmarkIcon className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
                 <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No bookmarks yet</h3>
                 <p className={`max-w-md text-center ${muted.default}`}>
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
@@ -218,13 +223,13 @@ export default async function LibraryPage() {
               {bookmarks.map((bookmark) => (
                 <Card key={bookmark.id}>
                   <CardHeader>
-                    <div className="flex items-start justify-between">
+                    <div className={`flex ${alignItems.start} ${justify.between}`}>
                       <div className="flex-1">
                         <div className={cluster.compact}>
                           <UnifiedBadge variant="base" style="outline" className="capitalize">
                             {bookmark.content_type}
                           </UnifiedBadge>
-                          <CardTitle className="text-lg">{bookmark.content_slug}</CardTitle>
+                          <CardTitle className={size.lg}>{bookmark.content_slug}</CardTitle>
                         </div>
                         {bookmark.notes ? <CardDescription className={marginTop.compact}>{bookmark.notes}</CardDescription> : null}
                       </div>
@@ -251,13 +256,13 @@ export default async function LibraryPage() {
         </TabsContent>
 
         <TabsContent
-          value={Constants.public.Enums.content_category[8]} // 'collections'
+          value={Constants.public.Enums.content_category[8]}
           className={spaceY.comfortable}
         >
           {collections.length === 0 ? (
             <Card>
-              <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
-                <FolderOpen className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+              <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+                <FolderOpen className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
                 <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No collections yet</h3>
                 <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
                   Organize your bookmarks into custom collections! Group related configurations
@@ -274,18 +279,18 @@ export default async function LibraryPage() {
           ) : (
             <div className={`grid ${gap.comfortable} sm:grid-cols-2`}>
               {collections.map((collection) => (
-                <Card key={collection.id} className={`cursor-pointer ${transition.default} ${hoverBg.muted} hover:shadow-md`}>
+                <Card key={collection.id} className={`cursor-pointer ${transition.default} ${hoverBg.muted} hover:${shadow.md}`}>
                   <Link href={`/account/library/${collection.slug}`}>
                     <CardHeader>
-                      <div className="flex items-start justify-between">
+                      <div className={`flex ${alignItems.start} ${justify.between}`}>
                         <div className="flex-1">
-                          <div className={`${cluster.compact} mb-2`}>
-                            <Layers className="h-4 w-4 text-primary" />
-                            {collection.is_public ? <UnifiedBadge variant="base" style="outline" className="text-xs">
+                          <div className={`${cluster.compact} ${marginBottom.tight}`}>
+                            <Layers className={`${iconSize.sm} ${textColor.primary}`} />
+                            {collection.is_public ? <UnifiedBadge variant="base" style="outline" className={size.xs}>
                                 Public
                               </UnifiedBadge> : null}
                           </div>
-                          <CardTitle className="text-lg">{collection.name}</CardTitle>
+                          <CardTitle className={size.lg}>{collection.name}</CardTitle>
                           {collection.description ? <CardDescription className={`${marginTop.compact} line-clamp-2`}>
                               {collection.description}
                             </CardDescription> : null}

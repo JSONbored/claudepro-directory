@@ -9,8 +9,8 @@
 
 'use client';
 
-import { cn, RESPONSIVE_PATTERNS } from '@heyclaude/web-runtime/ui';
-import { weight } from '@heyclaude/web-runtime/design-system';
+import { cn } from '@heyclaude/web-runtime/ui';
+import { weight, tracking, responsiveText } from '@heyclaude/web-runtime/design-system';
 import { HighlightText } from '@heyclaude/web-runtime/ui';
 
 interface HeyClaudeLogoProps {
@@ -56,10 +56,10 @@ export function HeyClaudeLogo({
   duration = 1.5,
 }: HeyClaudeLogoProps) {
   const sizeClasses = {
-    sm: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD,
-    md: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_LG,
-    lg: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_XL,
-    xl: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL,
+    sm: responsiveText.md,
+    md: responsiveText.lg,
+    lg: responsiveText.xl,
+    xl: responsiveText['2xl'],
   };
 
   return (
@@ -68,7 +68,7 @@ export function HeyClaudeLogo({
       inView={inView}
       transition={{ duration, ease: 'easeOut' }}
       className={cn(
-        `${weight.bold} tracking-tight`,
+        `${weight.bold} ${tracking.tight}`,
         // Force solid orange color - uses ! prefix to override HighlightText defaults
         'bg-accent!',
         sizeClasses[size],

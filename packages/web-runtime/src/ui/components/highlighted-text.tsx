@@ -20,11 +20,12 @@
  * Usage:
  * ```tsx
  * import { HighlightedText } from '@heyclaude/web-runtime/ui/components/highlighted-text';
+ * import { size } from '@heyclaude/web-runtime/design-system';
  *
  * <HighlightedText
  *   html={searchResult.highlightedTitle}
  *   fallback={searchResult.title}
- *   className="text-lg"
+ *   className={size.lg}
  * />
  * ```
  */

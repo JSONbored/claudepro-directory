@@ -9,7 +9,9 @@ import { Card, CardContent } from '@heyclaude/web-runtime/ui';
 type Activity = Database['public']['CompositeTypes']['user_activity_timeline_item'];
 
 import { logger } from '@heyclaude/web-runtime/core';
-import { spaceY, muted, marginTop, weight, iconSize  , padding , row } from '@heyclaude/web-runtime/design-system';
+import { spaceY, muted, marginTop, weight, iconSize  , padding , row, flexGrow,
+  size,
+} from '@heyclaude/web-runtime/design-system';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 
 interface ActivityTimelineProps {
@@ -75,9 +77,9 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
           return (
             <Card key={activity.id} className="transition-colors hover:bg-accent/5">
               <CardContent className={`${row.default} ${padding.default}`}>
-                <Icon className={`${marginTop.tight} ${iconSize.md} shrink-0 ${muted.default}`} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm">
+                <Icon className={`${marginTop.tight} ${iconSize.md} ${flexGrow.shrink0} ${muted.default}`} />
+                <div className={`min-w-0 ${flexGrow['1']}`}>
+                  <p className={size.sm}>
                     <span className={muted.default}>{config.label}</span>{' '}
                     <span className={weight.medium}>{title}</span>
                   </p>

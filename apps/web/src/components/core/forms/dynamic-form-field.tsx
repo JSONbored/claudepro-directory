@@ -25,7 +25,9 @@ import type {
   FormFieldConfig,
   GridColumn,
 } from '@heyclaude/web-runtime/types/component.types';
-import { iconSize, stack, absolute, muted ,size  , padding } from '@heyclaude/web-runtime/design-system';
+import { iconSize, stack, absolute, muted ,size  , padding , radius, bgColor,
+  borderColor,
+} from '@heyclaude/web-runtime/design-system';
 import { getResponsiveGridClass } from '@heyclaude/web-runtime/ui';
 import { Input } from '@heyclaude/web-runtime/ui';
 import { Label } from '@heyclaude/web-runtime/ui';
@@ -139,7 +141,7 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
 
   const fieldId = `${formId}-${field.name}`;
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
-  const monoClass = field.monospace ? 'font-mono ${size.sm}' : '';
+  const monoClass = field.monospace ? `font-mono ${size.sm}` : '';
 
   return (
     <div className={`${stack.compact} ${gridClass}`}>
@@ -223,7 +225,7 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
         name={field.name}
         required={field.required}
         defaultValue={field.defaultValue}
-        className={`flex h-10 w-full rounded-md border border-input bg-background ${padding.xCompact} ${padding.yCompact} ${size.sm}`}
+        className={`flex h-10 w-full ${radius.md} border ${borderColor.input} ${bgColor.background} ${padding.xCompact} ${padding.yCompact} ${size.sm}`}
       >
         {field.options.map((option) => (
           <option key={option.value} value={option.value}>

@@ -8,7 +8,27 @@
  */
 
 import { Eye, Sparkles, X } from '@heyclaude/web-runtime/icons';
-import { cluster, spaceY, muted, iconSize, weight ,size  , gap , padding } from '@heyclaude/web-runtime/design-system';
+import {
+  backdrop,
+  bgColor,
+  cluster,
+  flexGrow,
+  flexWrap,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  muted,
+  overflow,
+  padding,
+  radius,
+  shadow,
+  size,
+  spaceY,
+  textColor,
+  weight,
+  zLayer,
+} from '@heyclaude/web-runtime/design-system';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
@@ -43,7 +63,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
     >
       <Card className="overflow-hidden">
         <CardHeader className={`${spaceY.tight} pb-3`}>
-          <div className={`flex items-start justify-between ${gap.compact}`}>
+          <div className={`flex ${alignItems.start} ${justify.between} ${gap.compact}`}>
             <CardTitle className={`line-clamp-2 ${size.base}`}>
               {formData.name || 'Untitled Submission'}
             </CardTitle>
@@ -53,13 +73,13 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           </div>
           {qualityScore > 0 && (
             <div className={cluster.compact}>
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+              <div className={`h-1.5 ${flexGrow['1']} ${overflow.hidden} ${radius.full} ${bgColor.muted}`}>
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${qualityScore}%` }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
                   className={cn(
-                    'h-full rounded-full',
+                    `h-full ${radius.full}`,
                     qualityScore >= 80
                       ? 'bg-green-500'
                       : qualityScore >= 60
@@ -80,14 +100,14 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           )}
 
           {formData.tags.length > 0 && (
-            <div className={`flex flex-wrap ${gap.snug}`}>
+            <div className={`flex ${flexWrap.wrap} ${gap.snug}`}>
               {formData.tags.slice(0, 5).map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs">
+                <Badge key={tag} variant="secondary" className={size.xs}>
                   {tag}
                 </Badge>
               ))}
               {formData.tags.length > 5 && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className={size.xs}>
                   +{formData.tags.length - 5}
                 </Badge>
               )}
@@ -112,7 +132,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
       {/* Desktop Sidebar Preview */}
       <div className={cn('hidden lg:block', className)}>
         <div className={spaceY.default}>
-          <div className="flex items-center justify-between">
+          <div className={`flex ${alignItems.center} ${justify.between}`}>
             <h3 className={`${weight.semibold} ${size.sm}`}>Live Preview</h3>
             <Button
               variant="ghost"
@@ -120,7 +140,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
               onClick={() => setIsVisible(!isVisible)}
               className={`h-7 ${padding.xTight}`}
             >
-              {isVisible ? <Eye className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {isVisible ? <Eye className={iconSize.xsPlus} /> : <Eye className={iconSize.xsPlus} />}
             </Button>
           </div>
 
@@ -155,7 +175,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           onClick={() => setIsMobileModalOpen(true)}
           size="sm"
           variant="outline"
-          className={`fixed right-4 bottom-4 z-50 ${gap.compact} shadow-lg`}
+          className={`fixed right-4 bottom-4 ${zLayer.modal} ${gap.compact} ${shadow.lg}`}
         >
           <Eye className={iconSize.sm} />
           Preview
@@ -169,23 +189,23 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsMobileModalOpen(false)}
-                className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+                className={`fixed inset-0 ${zLayer.modal} ${bgColor.overlay} ${backdrop.sm}`}
               />
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 transition={TOKENS.animations.spring.smooth}
-                className="-translate-y-1/2 sm:-translate-x-1/2 fixed inset-x-4 top-1/2 z-50 sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-md"
+                className={`-translate-y-1/2 sm:-translate-x-1/2 fixed inset-x-4 top-1/2 ${zLayer.modal} sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-md`}
               >
                 <div className={spaceY.default}>
-                  <div className="flex items-center justify-between">
-                    <h3 className={`${weight.semibold} ${size.sm} text-white`}>Live Preview</h3>
+                  <div className={`flex ${alignItems.center} ${justify.between}`}>
+                    <h3 className={`${weight.semibold} ${size.sm} ${textColor.white}`}>Live Preview</h3>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsMobileModalOpen(false)}
-                      className={`h-7 ${padding.xTight} text-white hover:bg-white/10`}
+                      className={`h-7 ${padding.xTight} ${textColor.white} hover:bg-white/10`}
                     >
                       <X className={iconSize.sm} />
                     </Button>
@@ -212,7 +232,8 @@ interface PreviewToggleProps {
 
 export function PreviewToggle({ onClick, isVisible, className }: PreviewToggleProps) {
   return (
-    <Button variant="outline" size="sm" onClick={onClick} className={cn('${gap.compact}', className)}>
+    <Button variant="outline" size="sm" onClick={onClick} className={cn(
+  `${gap.compact}`, className)}>
       {isVisible ? <Eye className={iconSize.sm} /> : <Eye className={iconSize.sm} />}
       <span className="hidden sm:inline">{isVisible ? 'Hide' : 'Show'} Preview</span>
     </Button>

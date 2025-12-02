@@ -16,7 +16,14 @@
 import type { ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
 import { normalizeHeadings, type NormalizedHeading } from '@heyclaude/web-runtime/utils/heading-normalization';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { focusRing, marginBottom, weight, muted ,size  } from '@heyclaude/web-runtime/design-system';
+import { focusRing, marginBottom, weight, muted, size, tracking,
+  leading,
+  animateDuration,
+  opacityLevel,
+  transition,
+  padding,
+  radius,
+} from '@heyclaude/web-runtime/design-system';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface SidebarTocProps {
@@ -148,7 +155,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
   return (
     <nav className={cn('py-2', className)} aria-label="On this page">
       {/* Header - Supabase style uppercase */}
-      <p className={`${marginBottom.compact} ${weight.medium} ${muted.default} ${size.xs} uppercase tracking-wider`}>
+      <p className={`${marginBottom.compact} ${weight.medium} ${muted.default} ${size.xs} uppercase ${tracking.wider}`}>
         On this page
       </p>
 
@@ -165,7 +172,10 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
                   focusRing.default,
-                  'group relative w-full ${padding.ySnug} text-left text-[13px] leading-snug transition-colors',
+                  'group relative w-full text-left text-[13px]',
+                  padding.ySnug,
+                  leading.snug,
+                  transition.colors,
                   'hover:text-foreground',
                   isActive ? 'text-foreground' : muted.default
                 )}
@@ -177,10 +187,10 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
                 {/* Left border indicator */}
                 <span
                   className={cn(
-                    'absolute top-0 bottom-0 left-0 w-0.5 rounded-full transition-all duration-200',
+                    `absolute top-0 bottom-0 left-0 w-0.5 ${radius.full} ${transition.all} ${animateDuration.default}`,
                     isActive
-                      ? 'bg-accent opacity-100'
-                      : 'bg-border opacity-0 group-hover:opacity-50'
+                      ? `bg-accent ${opacityLevel[100]}`
+                      : `bg-border ${opacityLevel[0]} group-hover:opacity-50`
                   )}
                   aria-hidden="true"
                 />

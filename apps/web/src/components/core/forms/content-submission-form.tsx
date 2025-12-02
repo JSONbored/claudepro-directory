@@ -48,6 +48,13 @@ import {
   gap,
   padding,
   radius,
+  bgColor,
+  textColor,
+  alignItems,
+  flexDir,
+  flexGrow,
+  borderColor,
+  maxWidth,
 } from '@heyclaude/web-runtime/design-system';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
@@ -72,7 +79,7 @@ type MergedTemplateItem = ContentTemplateItem & {
     : Record<string, unknown>);
 
 import { FormSectionCard } from '@heyclaude/web-runtime/ui';
-import { DuplicateWarning } from './duplicate-warning';
+import { GenericNameWarning } from './duplicate-warning';
 import { ContentTypeFieldRenderer } from './dynamic-form-field';
 import { ExamplesArrayInput } from './examples-array-input';
 import { TemplateSelector } from './template-selector';
@@ -150,7 +157,7 @@ interface SubmitFormClientProps {
  *
  * @see TemplateSelector
  * @see submitContentForReview
- * @see DuplicateWarning
+ * @see GenericNameWarning
  */
 export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProps) {
   /**
@@ -479,21 +486,21 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={springSmooth}
         >
-          <Card className={'mb-6 border-green-500/20 bg-green-500/5'}>
+          <Card className={`${marginBottom.comfortable} border-green-500/20 bg-green-500/5`}>
             <CardContent className={'pt-6'}>
-              <div className={`flex flex-col items-start ${gap.default} sm:flex-row`}>
+              <div className={`flex ${flexDir.col} ${alignItems.start} ${gap.default} sm:flex-row`}>
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ ...springBouncy, delay: 0.2 }}
                 >
                   <CheckCircle
-                    className="h-6 w-6 text-green-500 mt-0.5 shrink-0"
+                    className={`${iconSize.lg} ${textColor.green} ${marginTop.micro} ${flexGrow.shrink0}`}
                   />
                 </motion.div>
-                <div className="min-w-0 flex-1">
+                <div className={`min-w-0 ${flexGrow['1']}`}>
                   <motion.p
-                    className={`${weight.semibold} text-green-600 ${size.lg} dark:text-green-400`}
+                    className={`${weight.semibold} ${textColor.green} ${size.lg} dark:text-green-400`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
@@ -509,7 +516,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     {submissionResult.message}
                   </motion.p>
                   <motion.p
-                    className={'mt-1 ${muted.default} ${size.xs}'}
+                    className={`${marginTop.tight} ${muted.default} ${size.xs}`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
@@ -555,7 +562,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   }}
                   required={true}
                   className={
-                    'flex h-10 w-full rounded-md border border-input bg-background ${padding.yCompact} pr-3 pl-10 ${size.sm}'
+                    `flex h-10 w-full ${radius.md} border ${borderColor.input} ${bgColor.background} ${padding.yCompact} pr-3 pl-10 ${size.sm}`
                   }
                 >
                   {SUBMISSION_CONTENT_TYPES.map((type) => (
@@ -617,7 +624,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
               <p className={`${muted.default} ${size.xs}`}>
                 {nameFieldConfig.helpText ?? 'A clear, descriptive name for your configuration'}
               </p>
-              <DuplicateWarning contentType={contentType} name={name} />
+              <GenericNameWarning contentType={contentType} name={name} />
             </div>
 
             {/* Description Field with Markdown Preview */}
@@ -650,8 +657,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                 <TabsContent value="preview" className={marginTop.compact}>
                   <div
                     className={cn(
-                      'min-h-[150px] rounded-md border border-input bg-background ${padding.default}',
-                      'prose prose-sm dark:prose-invert ${maxWidth.none}'
+                      `min-h-[150px] ${radius.md} border ${borderColor.input} ${bgColor.background} ${padding.default}`,
+                      `prose prose-sm dark:prose-invert ${maxWidth.none}`
                     )}
                   >
                     {description ? (
@@ -716,7 +723,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <Button type="submit" disabled={isPending} className={'w-full flex-1 sm:flex-initial'}>
+          <Button type="submit" disabled={isPending} className={`w-full ${flexGrow['1']} sm:flex-initial`}>
             {isPending ? (
               <>
                 <motion.div
@@ -742,10 +749,10 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         </motion.div>
 
         {/* Info Box */}
-        <div className={`${radius.lg} border border-blue-500/20 bg-blue-500/10 ${padding.compact} sm:p-4`}>
+        <div className={`${radius.lg} border border-blue-500/20 bg-blue-500/10 ${padding.compact} sm:${padding.default}`}>
           <div className={`${cluster.compact} sm:${gap.default}`}>
-            <Github className="h-5 w-5 text-blue-400 mt-0.5 shrink-0" />
-            <div className="min-w-0 flex-1">
+            <Github className={`${iconSize.md} text-blue-400 ${marginTop.micro} ${flexGrow.shrink0}`} />
+            <div className={`min-w-0 ${flexGrow['1']}`}>
               <p className={`${weight.medium} text-blue-400 ${size.sm}`}>How it works</p>
               <p className={`${marginTop.tight} ${muted.sm}`}>
                 We'll automatically create a Pull Request with your submission. Our team reviews for

@@ -9,13 +9,32 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { cluster, between, iconSize, iconLeading, buttonGhost, sticky, weight ,size , padding } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  bgColor,
+  borderColor,
+  buttonGhost,
+  cluster,
+  flexGrow,
+  iconLeading,
+  iconSize,
+  alignItems,
+  justify,
+  padding,
+  radius,
+  shadow,
+  size,
+  sticky,
+  textColor,
+  weight,
+  zLayer,
+  backdrop,
+  transition,
+  paddingResponsive,
+} from '@heyclaude/web-runtime/design-system';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, DiscordIcon } from '@heyclaude/web-runtime/icons';
-import {
-  ANIMATION_CONSTANTS,
-  RESPONSIVE_PATTERNS,
-} from '@heyclaude/web-runtime/ui';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { motion, useScroll, useTransform } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -95,7 +114,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
       {/* Skip to main content link for keyboard navigation (WCAG 2.1 AA) */}
       <a
         href="#main-content"
-        className={`sr-only ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background`}
+        className={`sr-only ${transition.default} focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100 focus:${radius.md} focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground focus:${shadow.lg} focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background`}
       >
         Skip to main content
       </a>
@@ -108,18 +127,25 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
       />
 
       <motion.header
-        className={`${sticky.top} z-50 w-full ${padding.xCompact} pt-1 pb-3 will-change-transform contain-layout`}
+        className={`${sticky.top} ${zLayer.modal} w-full ${padding.xCompact} pt-1 pb-3 will-change-transform contain-layout`}
         style={{ opacity: navOpacity }}
       >
         <div className="container mx-auto">
           <motion.nav
-            className={`rounded-2xl border border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW}`}
+            className={cn(
+              `${radius['2xl']} border`,
+              borderColor['border/50'],
+              bgColor['background/95'],
+              shadow['2xl'],
+              backdrop.xl,
+              transition.slow
+            )}
             style={{ backdropFilter: backdropBlur }}
             aria-label="Main navigation container"
           >
-            <div className={RESPONSIVE_PATTERNS.PADDING_RESPONSIVE_SM}>
+            <div className={paddingResponsive.sm}>
               <div
-                className={`${between.center} transition-[height] ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} will-change-auto ${
+                className={`${between.center} transition-[height] ${transition.slow} will-change-auto ${
                   isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
@@ -127,7 +153,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                 <Link
                   href={ROUTES.HOME}
                   prefetch={true}
-                  className={`${cluster.none} shrink-0 no-underline`}
+                  className={`${cluster.none} ${flexGrow.shrink0} no-underline`}
                   aria-label="heyclaude - Go to homepage"
                 >
                   <motion.div style={{ scale: logoScale }}>
@@ -159,7 +185,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                   >
                     <Bookmark className={iconSize.xs} />
                     {pinCount > 0 && (
-                      <span className={`-right-1 -top-1 absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-primary ${padding.xMicro} ${weight.semibold} text-[10px] text-primary-foreground`}>
+                      <span className={`-right-1 -top-1 absolute flex h-4 min-w-4 ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${padding.xMicro} ${weight.semibold} ${size['2xs']} ${textColor.primaryForeground}`}>
                         {pinCount > 99 ? '99+' : pinCount}
                       </span>
                     )}

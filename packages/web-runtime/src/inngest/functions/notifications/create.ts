@@ -71,9 +71,24 @@ export const createNotification = inngest.createFunction(
     }
 
     // Validate action_href if provided - only allow http(s) protocols
+    // SECURITY: Comprehensive URL validation to prevent XSS and SSRF attacks
     if (action_href) {
       try {
         const url = new URL(action_href);
+        
+        // Reject dangerous protocols (javascript:, data:, file:, etc.)
+        const dangerousProtocols = ['javascript:', 'data:', 'file:', 'vbscript:', 'about:', 'mailto:'];
+        const protocol = url.protocol.toLowerCase();
+        if (dangerousProtocols.includes(protocol)) {
+          logger.warn('Invalid action_href: dangerous protocol detected', {
+            ...logContext,
+            action_href,
+            protocol,
+          });
+          throw new Error('Invalid action_href: dangerous protocol not allowed');
+        }
+        
+        // Only allow http and https protocols
         if (!['http:', 'https:'].includes(url.protocol)) {
           logger.warn('Invalid action_href: only http/https allowed', {
             ...logContext,
@@ -81,8 +96,17 @@ export const createNotification = inngest.createFunction(
           });
           throw new Error('Invalid action_href: only http and https URLs are allowed');
         }
+        
+        // Reject URLs with credentials (username:password@host)
+        if (url.username || url.password) {
+          logger.warn('Invalid action_href: credentials not allowed', {
+            ...logContext,
+            action_href,
+          });
+          throw new Error('Invalid action_href: URLs with credentials are not allowed');
+        }
       } catch (urlError) {
-        if (urlError instanceof Error && urlError.message.includes('only http')) {
+        if (urlError instanceof Error && (urlError.message.includes('only http') || urlError.message.includes('dangerous') || urlError.message.includes('credentials'))) {
           throw urlError; // Re-throw our validation error
         }
         logger.warn('Invalid action_href: invalid URL format', {
@@ -192,9 +216,24 @@ export const broadcastNotification = inngest.createFunction(
     }
 
     // Validate action_href if provided - only allow http(s) protocols
+    // SECURITY: Comprehensive URL validation to prevent XSS and SSRF attacks
     if (action_href) {
       try {
         const url = new URL(action_href);
+        
+        // Reject dangerous protocols (javascript:, data:, file:, etc.)
+        const dangerousProtocols = ['javascript:', 'data:', 'file:', 'vbscript:', 'about:', 'mailto:'];
+        const protocol = url.protocol.toLowerCase();
+        if (dangerousProtocols.includes(protocol)) {
+          logger.warn('Invalid action_href: dangerous protocol detected', {
+            ...logContext,
+            action_href,
+            protocol,
+          });
+          throw new Error('Invalid action_href: dangerous protocol not allowed');
+        }
+        
+        // Only allow http and https protocols
         if (!['http:', 'https:'].includes(url.protocol)) {
           logger.warn('Invalid action_href: only http/https allowed', {
             ...logContext,
@@ -202,8 +241,17 @@ export const broadcastNotification = inngest.createFunction(
           });
           throw new Error('Invalid action_href: only http and https URLs are allowed');
         }
+        
+        // Reject URLs with credentials (username:password@host)
+        if (url.username || url.password) {
+          logger.warn('Invalid action_href: credentials not allowed', {
+            ...logContext,
+            action_href,
+          });
+          throw new Error('Invalid action_href: URLs with credentials are not allowed');
+        }
       } catch (urlError) {
-        if (urlError instanceof Error && urlError.message.includes('only http')) {
+        if (urlError instanceof Error && (urlError.message.includes('only http') || urlError.message.includes('dangerous') || urlError.message.includes('credentials'))) {
           throw urlError; // Re-throw our validation error
         }
         logger.warn('Invalid action_href: invalid URL format', {

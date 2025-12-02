@@ -4,7 +4,10 @@
 
 import { Constants } from '@heyclaude/database-types';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , row , radius , minHeight } from '@heyclaude/web-runtime/design-system';
+import { borderBottom, cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , row , radius , minHeight, bgColor,
+  textColor,
+  flexWrap,
+} from '@heyclaude/web-runtime/design-system';
 import {
   ArrowLeft,
   Building2,
@@ -302,20 +305,20 @@ export default async function JobPage({ params }: PageProps) {
       />
       <StructuredData route={`/jobs/${slug}`} />
 
-      <div className={`${minHeight.screen} bg-background`}>
-        <div className="border-border/50 border-b bg-card/30">
+      <div className={`${minHeight.screen} ${bgColor.background}`}>
+        <div className={`${borderBottom.light} bg-card/30`}>
           <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
             <Button variant="ghost" asChild className={marginBottom.comfortable}>
               <Link href={ROUTES.JOBS}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
+                <ArrowLeft className={`mr-2 ${iconSize.sm}`} />
                 Back to Jobs
               </Link>
             </Button>
 
             <div className="max-w-4xl">
-              <div className={`${row.comfortable} mb-6`}>
-                <div className={`${radius.lg} bg-accent/10 ${padding.compact}`}>
-                  <Building2 className="h-6 w-6 text-primary" />
+              <div className={`${row.comfortable} ${marginBottom.comfortable}`}>
+                <div className={`${radius.lg} ${bgColor['accent/10']} ${padding.compact}`}>
+                  <Building2 className={`${iconSize.lg} ${textColor.primary}`} />
                 </div>
                 <div className="flex-1">
                   <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>{job.title}</h1>
@@ -323,7 +326,7 @@ export default async function JobPage({ params }: PageProps) {
                 </div>
               </div>
 
-              <div className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}>
+              <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
                 <div className={cluster.tight}>
                   <MapPin className={iconSize.sm} />
                   <span>{job.location}</span>
@@ -346,7 +349,7 @@ export default async function JobPage({ params }: PageProps) {
                 </div>
               </div>
 
-              <div className={`flex flex-wrap ${gap.compact}`}>
+              <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
                 {tags.map((skill: string) => (
                   <UnifiedBadge key={skill} variant="base" style="secondary">
                     {skill}
@@ -377,7 +380,7 @@ export default async function JobPage({ params }: PageProps) {
                   <ul className={spaceY.compact}>
                     {requirements.map((request: string) => (
                       <li key={request} className={`${row.default}`}>
-                        <span className={`${marginTop.tight} text-accent`}>•</span>
+                        <span className={`${marginTop.tight} ${textColor.accent}`}>•</span>
                         <span>{request}</span>
                       </li>
                     ))}
@@ -394,7 +397,7 @@ export default async function JobPage({ params }: PageProps) {
                     <ul className={spaceY.compact}>
                       {benefits.map((benefit: string) => (
                         <li key={benefit} className={`${row.default}`}>
-                          <span className={`${marginTop.tight} text-green-500`}>✓</span>
+                          <span className={`${marginTop.tight} ${textColor.green}`}>✓</span>
                           <span>{benefit}</span>
                         </li>
                       ))}
@@ -422,7 +425,7 @@ export default async function JobPage({ params }: PageProps) {
                     return (
                       <Button className="w-full" asChild>
                         <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="mr-2 h-4 w-4" />
+                          <ExternalLink className={`mr-2 ${iconSize.sm}`} />
                           Apply Now
                         </a>
                       </Button>
@@ -434,7 +437,7 @@ export default async function JobPage({ params }: PageProps) {
                     return (
                       <Button variant="outline" className="w-full" asChild>
                         <a href={safeMailtoUrl}>
-                          <Building2 className="mr-2 h-4 w-4" />
+                          <Building2 className={`mr-2 ${iconSize.sm}`} />
                           Contact Company
                         </a>
                       </Button>
@@ -450,18 +453,18 @@ export default async function JobPage({ params }: PageProps) {
                 </CardHeader>
                 <CardContent className={spaceY.compact}>
                   <div className={`${cluster.compact} ${size.sm}`}>
-                    <Clock className={`h-4 w-4 ${muted.default}`} />
+                    <Clock className={`${iconSize.sm} ${muted.default}`} />
                     <span>
                       {(job.type ?? 'Unknown').charAt(0).toUpperCase() +
                         (job.type ?? 'Unknown').slice(1)}
                     </span>
                   </div>
                   <div className={`${cluster.compact} ${size.sm}`}>
-                    <MapPin className={`h-4 w-4 ${muted.default}`} />
+                    <MapPin className={`${iconSize.sm} ${muted.default}`} />
                     <span>{job.remote ? 'Remote Available' : 'On-site'}</span>
                   </div>
                   <div className={`${cluster.compact} ${size.sm}`}>
-                    <Users className={`h-4 w-4 ${muted.default}`} />
+                    <Users className={`${iconSize.sm} ${muted.default}`} />
                     <span>
                       {(job.category ?? 'General').charAt(0).toUpperCase() +
                         (job.category ?? 'General').slice(1)}

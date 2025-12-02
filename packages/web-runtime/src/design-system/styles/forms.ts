@@ -65,9 +65,39 @@ export const input = {
  * Textarea sizing.
  */
 export const textarea = {
+  /** min-h-[80px] - Small textarea */
   sm: 'min-h-[80px]',
+  /** min-h-[120px] - Medium textarea */
   md: 'min-h-[120px]',
+  /** min-h-[150px] - Large textarea */
   lg: 'min-h-[150px]',
+} as const;
+
+/**
+ * Input field height sizing.
+ * For multiline text inputs and content areas.
+ */
+export const inputHeight = {
+  /** min-h-[80px] - Small input area */
+  sm: 'min-h-[80px]',
+  /** min-h-[100px] - Medium input area */
+  md: 'min-h-[100px]',
+  /** min-h-[150px] - Large input area */
+  lg: 'min-h-[150px]',
+} as const;
+
+/**
+ * Input/form minimum width constraints.
+ */
+export const inputMinWidth = {
+  /** min-w-[200px] - Standard input */
+  default: 'min-w-[200px]',
+  /** min-w-[320px] - Newsletter form */
+  newsletter: 'min-w-[320px]',
+  /** min-w-[360px] - Large newsletter form */
+  newsletterLg: 'min-w-[360px]',
+  /** min-w-[400px] - Modal/popover inputs */
+  modal: 'min-w-[400px]',
 } as const;
 
 // =============================================================================

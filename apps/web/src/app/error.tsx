@@ -1,7 +1,25 @@
 'use client';
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { responsive, muted, marginBottom, marginTop, weight ,size , padding , gap , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  maxWidth,
+  minHeight,
+  muted,
+  padding,
+  radius,
+  responsive,
+  size,
+  textColor,
+  weight,
+  flexWrap,
+} from '@heyclaude/web-runtime/design-system';
 import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { Button, Card } from '@heyclaude/web-runtime/ui';
@@ -53,12 +71,12 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className={`flex ${minHeight.screen} items-center justify-center bg-background ${padding.xDefault}`}>
+    <div className={`flex ${minHeight.screen} ${alignItems.center} ${justify.center} ${bgColor.background} ${padding.xDefault}`}>
       <Card className={`w-full ${maxWidth.lg} ${padding.relaxed} text-center`}>
         <div className={marginBottom.comfortable}>
-          <div className={`${marginBottom.default} flex justify-center`}>
-            <div className={`rounded-full bg-destructive/10 ${padding.compact}`}>
-              <AlertCircle className="h-12 w-12 text-destructive" aria-hidden="true" />
+          <div className={`${marginBottom.default} flex ${justify.center}`}>
+            <div className={`${radius.full} ${bgColor['destructive/10']} ${padding.compact}`}>
+              <AlertCircle className={`${iconSize['3xl']} ${textColor.destructive}`} aria-hidden="true" />
             </div>
           </div>
           <h1 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`}>Something went wrong</h1>
@@ -67,19 +85,19 @@ export default function ErrorBoundary({
           </p>
         </div>
 
-        {isDevelopment && error.message ? <div className={`${marginBottom.comfortable} rounded-md bg-muted ${padding.default} text-left`}>
-            <p className={`font-mono text-destructive ${size.xs}`}>{error.message}</p>
+        {isDevelopment && error.message ? <div className={`${marginBottom.comfortable} ${radius.md} ${bgColor.muted} ${padding.default} text-left`}>
+            <p className={`font-mono ${textColor.destructive} ${size.xs}`}>{error.message}</p>
             {error.digest ? <p className={`${marginTop.compact} font-mono ${muted.xs}`}>Digest: {error.digest}</p> : null}
           </div> : null}
 
         <div className={responsive.smRowGap}>
           <Button onClick={reset} size="lg">
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <RefreshCw className={`mr-2 ${iconSize.sm}`} />
             Try Again
           </Button>
           <Link href={ROUTES.HOME}>
             <Button variant="outline" size="lg">
-              <Home className="mr-2 h-4 w-4" />
+              <Home className={`mr-2 ${iconSize.sm}`} />
               Back to Home
             </Button>
           </Link>
@@ -87,7 +105,7 @@ export default function ErrorBoundary({
 
         <div className={`${marginTop.relaxed} ${muted.sm}`}>
           <p className={marginBottom.tight}>Or explore:</p>
-          <div className={`flex flex-wrap ${gap.compact} justify-center`}>
+          <div className={`flex ${flexWrap.wrap} ${gap.compact} ${justify.center}`}>
             <Link href={ROUTES.AGENTS} className="hover:text-primary">
               Agents
             </Link>
@@ -97,7 +115,7 @@ export default function ErrorBoundary({
             </Link>
             <span>•</span>
             <Link href={ROUTES.GUIDES} className="hover:text-primary">
-              <Search className="mr-1 inline h-3 w-3" />
+              <Search className={`mr-1 inline ${iconSize.xs}`} />
               Guides
             </Link>
           </div>

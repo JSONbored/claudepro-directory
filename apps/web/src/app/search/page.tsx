@@ -10,7 +10,13 @@ import {
   getSearchFacets,
   searchContent, getHomepageCategoryIds 
 } from '@heyclaude/web-runtime/data';
-import { marginBottom, weight , size  , gap , padding } from '@heyclaude/web-runtime/design-system';
+import {
+  gap,
+  marginBottom,
+  padding,
+  size,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
 import { Suspense } from 'react';

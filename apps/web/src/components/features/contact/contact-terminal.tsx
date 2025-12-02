@@ -21,7 +21,31 @@ import {
   trackTerminalFormSubmissionAction,
 } from '@heyclaude/web-runtime/actions';
 import { logger, logUnhandledPromise, normalizeError } from '@heyclaude/web-runtime/core';
-import { animate, spaceY, cluster, marginBottom, marginTop, helper, iconSize, cursor, weight, muted ,size , gap  , radius } from '@heyclaude/web-runtime/design-system';
+import {
+  animate,
+  bgColor,
+  borderTop,
+  cluster,
+  cursor,
+  flexDir,
+  flexGrow,
+  gap,
+  helper,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  muted,
+  overflow,
+  radius,
+  row,
+  shadow,
+  size,
+  spaceY,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Check, X } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
@@ -430,14 +454,14 @@ export function ContactTerminal() {
   // Loading state
   if (isLoading) {
     return (
-      <Terminal className="relative flex min-h-[500px] flex-col">
-        <div className="flex flex-1 items-center justify-center">
+      <Terminal className={`relative flex min-h-[500px] ${flexDir.col}`}>
+        <div className={`flex ${flexGrow['1']} ${alignItems.center} ${justify.center}`}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className={`${spaceY.compact} text-center`}
           >
-            <div className={`${animate.pulse} text-primary ${size.sm}`}>Loading terminal...</div>
+            <div className={`${animate.pulse} ${textColor.primary} ${size.sm}`}>Loading terminal...</div>
             <div className={`${muted.default} ${size.xs}`}>Initializing commands</div>
           </motion.div>
         </div>
@@ -448,14 +472,14 @@ export function ContactTerminal() {
   // Error state
   if (loadError) {
     return (
-      <Terminal className="relative flex min-h-[500px] flex-col">
-        <div className="flex flex-1 items-center justify-center">
+      <Terminal className={`relative flex min-h-[500px] ${flexDir.col}`}>
+        <div className={`flex ${flexGrow['1']} ${alignItems.center} ${justify.center}`}>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className={`${spaceY.comfortable} text-center`}
           >
-            <X className="mx-auto h-8 w-8 text-destructive" />
+            <X className={`mx-auto ${iconSize.xl} ${textColor.destructive}`} />
             <div className={spaceY.compact}>
               <div className={`${weight.medium} ${helper.destructive}`}>{loadError}</div>
               <Button
@@ -481,9 +505,9 @@ export function ContactTerminal() {
 
   return (
     <>
-      <Terminal className="relative flex min-h-[500px] flex-col">
+      <Terminal className={`relative flex min-h-[500px] ${flexDir.col}`}>
         {/* Output History */}
-        <div className={`${marginBottom.default} min-h-0 flex-1 overflow-y-auto`}>
+        <div className={`${marginBottom.default} min-h-0 ${flexGrow['1']} ${overflow.yAuto}`}>
           <AnimatePresence>
             {output.map((line, index) => (
               <motion.div
@@ -492,10 +516,10 @@ export function ContactTerminal() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, delay: index * 0.03 }}
                 className={cn(
-                  '${row.compact}',
+                  `${row.compact}`,
                   line.type === 'error' && 'text-destructive',
                   line.type === 'success' && 'text-green-500',
-                  line.type === 'command' && `${weight.semibold} text-primary`
+                  line.type === 'command' && `${weight.semibold} ${textColor.primary}`
                 )}
               >
                 {line.icon && <span className={marginTop.micro}>{line.icon}</span>}
@@ -514,8 +538,8 @@ export function ContactTerminal() {
         <div className="relative">
           {/* Suggestions Dropdown */}
           {showSuggestions && filteredCommands.length > 0 && (
-            <div className="absolute right-0 bottom-full left-0 mb-2">
-              <Command className={`${radius.lg} border bg-popover shadow-lg`}>
+            <div className={`absolute right-0 bottom-full left-0 ${marginBottom.tight}`}>
+              <Command className={`${radius.lg} border bg-popover ${shadow.lg}`}>
                 <CommandList className="max-h-[200px]">
                   <CommandEmpty>No commands found.</CommandEmpty>
                   <CommandGroup heading="Suggestions">
@@ -526,8 +550,8 @@ export function ContactTerminal() {
                         onSelect={() => handleSuggestionSelect(cmd.text)}
                         className={cursor.pointer}
                       >
-                        <div className={`flex w-full items-center ${gap.compact}`}>
-                          <span className={`font-mono text-primary ${size.xs}`}>$</span>
+                        <div className={`flex w-full ${alignItems.center} ${gap.compact}`}>
+                          <span className={`font-mono ${textColor.primary} ${size.xs}`}>$</span>
                           <span className={`${weight.medium} ${size.sm}`}>{cmd.text}</span>
                           {cmd.description && (
                             <span className={`ml-auto truncate ${muted.default} ${size.xs}`}>
@@ -544,8 +568,8 @@ export function ContactTerminal() {
           )}
 
           {/* Input Prompt */}
-          <div className={`${cluster.compact} border-border border-t pt-4`}>
-            <span className={`${weight.semibold} text-primary ${size.sm}`}>$</span>
+          <div className={`${cluster.compact} ${borderTop.default} pt-4`}>
+            <span className={`${weight.semibold} ${textColor.primary} ${size.sm}`}>$</span>
             <input
               ref={inputRef}
               type="text"
@@ -553,10 +577,10 @@ export function ContactTerminal() {
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleSubmit}
               placeholder="Type a command or start typing for suggestions..."
-              className={`flex-1 border-none bg-transparent ${size.sm} outline-none placeholder:${muted.default}/50 focus:ring-0`}
+              className={`flex-1 border-none ${bgColor.transparent} ${size.sm} outline-none placeholder:text-muted-foreground/50 focus:ring-0`}
               autoFocus={true}
             />
-            {input && <span className={`${muted.default}/50 ${size.xs}`}>Press Enter ⏎</span>}
+            {input && <span className={`text-muted-foreground/50 ${size.xs}`}>Press Enter ⏎</span>}
           </div>
         </div>
       </Terminal>
@@ -610,7 +634,7 @@ export function ContactTerminal() {
               />
             </div>
 
-            <div className={`flex justify-end ${gap.compact}`}>
+            <div className={`flex ${justify.end} ${gap.compact}`}>
               <Button
                 type="button"
                 variant="outline"

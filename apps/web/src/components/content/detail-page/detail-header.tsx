@@ -4,7 +4,8 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
-import { marginBottom  , padding } from '@heyclaude/web-runtime/design-system';
+import { borderBottom, marginBottom, padding, backdrop,
+} from '@heyclaude/web-runtime/design-system';
 import type {
   ContentItem,
   UnifiedCategoryConfig,
@@ -49,7 +50,7 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
   const categoryLabel = config.typeName.endsWith('s') ? config.typeName : `${config.typeName}s`;
 
   return (
-    <div className={'border-border border-b bg-code/50 backdrop-blur-sm'}>
+    <div className={`${borderBottom.default} bg-code/50 ${backdrop.sm}`}>
       <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
         {/* Breadcrumbs - minimal navigation trail */}
         <Breadcrumbs

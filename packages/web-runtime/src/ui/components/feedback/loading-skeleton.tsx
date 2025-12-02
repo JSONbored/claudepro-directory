@@ -31,7 +31,9 @@
 import { cn } from '../../utils.ts';
 // Design System imports
 import { absolute } from '../../../design-system/styles/position.ts';
-import { stack, cluster, wrap, grid, between } from '../../../design-system/styles/layout.ts';
+import { stack, cluster, wrap, grid, between, gap, padding, marginBottom, squareSize } from '../../../design-system/styles/layout.ts';
+import { size } from '../../../design-system/styles/typography.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -65,12 +67,12 @@ const skeletonVariants = cva('relative overflow-hidden bg-muted rounded', {
       '5/6': 'w-5/6',
     },
     rounded: {
-      none: 'rounded-none',
-      sm: 'rounded-sm',
-      md: 'rounded',
-      lg: 'rounded-lg',
-      xl: 'rounded-xl',
-      full: 'rounded-full',
+      none: radius.none,
+      sm: radius.sm,
+      md: radius.default,
+      lg: radius.lg,
+      xl: radius.xl,
+      full: radius.full,
     },
   },
   defaultVariants: {
@@ -130,7 +132,7 @@ function LoadingSkeleton() {
   return (
     <div className={'flex min-h-screen items-center justify-center'}>
       <div className={stack.comfortable + ' items-center'}>
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <div className={`${squareSize.avatarLg} animate-spin ${radius.full} border-4 border-primary border-t-transparent`} />
         <p className="text-muted-foreground">Loading...</p>
       </div>
     </div>
@@ -139,8 +141,8 @@ function LoadingSkeleton() {
 
 function PageHeaderSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('mb-8', className)} {...props}>
-      <Skeleton size="lg" width="lg" className="mb-4" />
+    <div className={cn(marginBottom.relaxed, className)} {...props}>
+      <Skeleton size="lg" width="lg" className={marginBottom.default} />
       <Skeleton size="sm" width="2xl" />
     </div>
   );
@@ -148,10 +150,10 @@ function PageHeaderSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDi
 
 function ConfigCardSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('rounded-lg border bg-card p-6', className)} {...props}>
-      <Skeleton size="md" width="3/4" className="mb-3" />
-      <Skeleton size="sm" width="3xl" className="mb-2" />
-      <Skeleton size="sm" width="5/6" className="mb-4" />
+    <div className={cn(`${radius.lg} border bg-card ${padding.comfortable}`, className)} {...props}>
+      <Skeleton size="md" width="3/4" className={marginBottom.compact} />
+      <Skeleton size="sm" width="3xl" className={marginBottom.compact} />
+      <Skeleton size="sm" width="5/6" className={marginBottom.default} />
       <div className={cluster.compact}>
         <Skeleton size="sm" width="xs" rounded="full" />
         <Skeleton size="sm" width="xs" rounded="full" />
@@ -210,7 +212,7 @@ function ContentListSkeleton({
       {[...Array(count)].map((_, i) => (
         <motion.div
           key={`content-skeleton-${i + 1}`}
-          className="rounded-lg border p-4"
+          className={`${radius.lg} border ${padding.default}`}
           initial={stagger ? { opacity: 0, x: -20 } : false}
           animate={stagger ? { opacity: 1, x: 0 } : {}}
           transition={
@@ -223,9 +225,9 @@ function ContentListSkeleton({
               : {}
           }
         >
-          <div className={'mb-3 flex items-start justify-between'}>
+          <div className={`${marginBottom.compact} flex items-start justify-between`}>
             <div className="flex-1">
-              <Skeleton size="md" width="2/3" className="mb-2" />
+              <Skeleton size="md" width="2/3" className={marginBottom.compact} />
               <Skeleton size="sm" width="3xl" />
             </div>
             <Skeleton size="sm" width="xs" rounded="full" />
@@ -243,7 +245,7 @@ function ContentListSkeleton({
 
 function SearchBarSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('mb-6 flex gap-4', className)} {...props}>
+    <div className={cn(`${marginBottom.relaxed} flex ${gap.comfortable}`, className)} {...props}>
       <Skeleton size="lg" width="3xl" />
       <Skeleton size="lg" width="lg" />
     </div>
@@ -259,14 +261,14 @@ function FilterBarSkeleton({
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('space-y-6 rounded-lg border border-border/50 bg-card/30 p-6', className)}
+      className={cn(`space-y-6 ${radius.lg} border border-border/50 bg-card/30 ${padding.comfortable}`, className)}
       {...props}
     >
       <div className={between.center}>
         <Skeleton size="md" width="lg" />
         <Skeleton size="sm" width="sm" />
       </div>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-2 lg:grid-cols-4`}>
         {[...Array(4)].map((_, i) => (
           <motion.div
             key={`filter-skeleton-${i + 1}`}
@@ -324,9 +326,9 @@ function TableSkeleton({
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('rounded-lg border', className)} {...props}>
-      <div className="border-b p-4">
-        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+    <div className={cn(`${radius.lg} border`, className)} {...props}>
+      <div className={`border-b ${padding.default}`}>
+        <div className={`grid ${gap.comfortable}`} style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
           {[...Array(columns)].map((_, i) => (
             <Skeleton key={`header-${i + 1}`} size="sm" width="sm" />
           ))}
@@ -335,7 +337,7 @@ function TableSkeleton({
       {[...Array(rows)].map((_, rowIndex) => (
         <motion.div
           key={`row-${rowIndex + 1}`}
-          className="border-b p-4 last:border-b-0"
+          className={`border-b ${padding.default} last:border-b-0`}
           initial={stagger ? { opacity: 0, x: -10 } : false}
           animate={stagger ? { opacity: 1, x: 0 } : {}}
           transition={
@@ -348,7 +350,7 @@ function TableSkeleton({
               : {}
           }
         >
-          <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+          <div className={`grid ${gap.comfortable}`} style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
             {[...Array(columns)].map((_, colIndex) => (
               <Skeleton key={`cell-${rowIndex + 1}-${colIndex + 1}`} size="sm" width="md" />
             ))}
@@ -430,7 +432,7 @@ function HomepageStatsSkeleton({
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex-wrap justify-center gap-4 text-xs lg:gap-6 lg:text-sm', className)}
+      className={cn(`flex-wrap justify-center ${gap.comfortable} ${size.xs} lg:${gap.relaxed} lg:${size.sm}`, className)}
       {...props}
     >
       {[...Array(7)].map((_, i) => (

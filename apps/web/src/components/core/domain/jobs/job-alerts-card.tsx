@@ -1,7 +1,7 @@
 'use client';
 
 import { Constants } from '@heyclaude/database-types';
-import { cluster, muted, spaceY, helper  } from '@heyclaude/web-runtime/design-system';
+import { borderColor, cluster, muted, spaceY, helper, gap, size } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -95,9 +95,9 @@ export function JobAlertsCard({
   };
 
   return (
-    <Card className="border-border/60">
+    <Card className={borderColor['border/60']}>
       <CardHeader>
-        <CardTitle className="text-xl">Job alerts</CardTitle>
+        <CardTitle className={size.xl}>Job alerts</CardTitle>
         <p className={muted.sm}>
           Get email updates when new AI roles match your preferences.
         </p>
@@ -105,7 +105,7 @@ export function JobAlertsCard({
       <CardContent>
         <form className={spaceY.comfortable} onSubmit={handleSubmit}>
           <div className={spaceY.compact}>
-            <label className="text-sm" htmlFor="job-alert-email">
+            <label className={size.sm} htmlFor="job-alert-email">
               Email
             </label>
             <Input
@@ -119,9 +119,10 @@ export function JobAlertsCard({
             />
           </div>
 
-          <div className={cn('grid ${gap.default}', 'sm:grid-cols-2')}>
+          <div className={cn(
+  `grid ${gap.default}`, 'sm:grid-cols-2')}>
             <div className={spaceY.compact}>
-              <label className="text-sm" htmlFor="job-alert-category">
+              <label className={size.sm} htmlFor="job-alert-category">
                 Category preference
               </label>
               <Select value={category} onValueChange={setCategory} name="preferred_category">
@@ -139,7 +140,7 @@ export function JobAlertsCard({
             </div>
 
             <div className={spaceY.compact}>
-              <label className="text-sm" htmlFor="job-alert-experience">
+              <label className={size.sm} htmlFor="job-alert-experience">
                 Experience level
               </label>
               <Select value={experience} onValueChange={setExperience} name="preferred_experience">
@@ -158,7 +159,7 @@ export function JobAlertsCard({
           </div>
 
           <div className={spaceY.compact}>
-            <label className="text-sm" htmlFor="job-alert-remote">
+            <label className={size.sm} htmlFor="job-alert-remote">
               Location preference
             </label>
             <Select
@@ -194,7 +195,7 @@ export function JobAlertsCard({
             </Button>
           </div>
 
-          <p className={cn(muted.default, 'text-xs', 'leading-snug')}>
+          <p className={cn(muted.default, size.xs, 'leading-snug')}>
             We only send relevant AI roles. Unsubscribe anytime.
           </p>
         </form>

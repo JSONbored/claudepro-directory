@@ -2,7 +2,7 @@ import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/c
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { marginBottom, padding, stack, muted, weight , size , maxWidth } from '@heyclaude/web-runtime/design-system';
-import { NavLink  } from '@heyclaude/web-runtime/ui';
+import { cn, NavLink } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 
 
@@ -37,7 +37,7 @@ export default function TermsPage() {
   return (
     <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
       <div className={`prose prose-invert ${maxWidth.none}`}>
-        <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>
+        <h1 className={cn(marginBottom.comfortable, weight.bold, size['3xl'], `sm:${size['4xl']}`)}>
           Terms of Service
         </h1>
         <p className={`${marginBottom.relaxed} ${muted.default}`}>
@@ -172,7 +172,7 @@ export default function TermsPage() {
         <section className={marginBottom.relaxed}>
           <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>11. Contact Us</h2>
           <p className={marginBottom.default}>
-            If you have questions about these Terms of Service, please{' '}
+            If you have questions about these Terms of Service, please email us at{' '}
             <NavLink href={`mailto:${channels.email}`} external>
               {channels.email}
             </NavLink>{' '}

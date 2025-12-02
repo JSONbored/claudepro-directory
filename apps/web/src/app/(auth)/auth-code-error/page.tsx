@@ -1,7 +1,18 @@
 import  { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { stack, size, maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  maxWidth,
+  radius,
+  size,
+  stack,
+  textColor,
+} from '@heyclaude/web-runtime/design-system';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
@@ -85,9 +96,9 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
     <Card className={`w-full ${maxWidth.md}`}>
       <CardHeader className="text-center">
         <div
-          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
+          className={`mx-auto ${marginBottom.default} flex ${iconSize['3xl']} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['destructive/10']}`}
         >
-          <AlertCircle className="h-6 w-6 text-destructive" />
+          <AlertCircle className={`${iconSize.lg} ${textColor.destructive}`} />
         </div>
         <CardTitle className={`${size['2xl']}`}>Authentication Error</CardTitle>
         <CardDescription>

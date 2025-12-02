@@ -4,11 +4,17 @@
  * Horizontal scroll with first 5 nav items
  */
 
-import { cluster, absolute, weight ,size , padding } from '@heyclaude/web-runtime/design-system';
 import {
-  ANIMATION_CONSTANTS,
-  DIMENSIONS,
-} from '@heyclaude/web-runtime/ui';
+  cluster,
+  absolute,
+  weight,
+  size,
+  padding,
+  overflow,
+  bgColor,
+  height,
+  transition,
+} from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { PrefetchLink } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -28,7 +34,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative ${padding.xTight} ${padding.yMicro} ${size.xs} ${weight.medium} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} no-underline ${
+    className: `group relative ${padding.xTight} ${padding.yMicro} ${size.xs} ${weight.medium} ${transition.default} no-underline ${
       active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground'
     } ${className}`,
     ...(active && { 'aria-current': 'page' as const }),
@@ -43,7 +49,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       <span className="relative inline-block">
         {children}
         <span
-          className={`${absolute.bottomLeft} ${DIMENSIONS.UNDERLINE} bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} ${
+          className={`${absolute.bottomLeft} ${height.underline} ${bgColor.accent} ${transition.slow} ${
             active ? 'w-full' : 'w-0 group-hover:w-full'
           }`}
           aria-hidden="true"
@@ -73,7 +79,7 @@ interface NavigationTabletProps {
 export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTabletProps) {
   return (
     <motion.nav
-      className="scrollbar-hide hidden snap-x snap-mandatory overflow-x-auto md:flex xl:hidden"
+      className={`scrollbar-hide hidden snap-x snap-mandatory ${overflow.xAuto} md:flex xl:hidden`}
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}

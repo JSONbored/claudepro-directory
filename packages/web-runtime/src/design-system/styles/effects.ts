@@ -35,6 +35,11 @@ export const shadow = {
 
 /**
  * Colored shadow utilities (for glows and accents).
+ * 
+ * @migration Replaces inline `shadow-*` color Tailwind classes
+ * @example
+ * // ❌ OLD: className="shadow-accent/20"
+ * // ✅ NEW: className={shadowColor.accent}
  */
 export const shadowColor = {
   /** Accent glow */
@@ -47,6 +52,24 @@ export const shadowColor = {
   success: 'shadow-green-500/20',
   /** Warning glow */
   warning: 'shadow-yellow-500/20',
+  /** Info glow */
+  info: 'shadow-blue-500/20',
+  /** Black shadow (for depth) */
+  black: 'shadow-black/10',
+  /** Black stronger shadow */
+  blackStrong: 'shadow-black/20',
+  /** Red glow */
+  red: 'shadow-red-500/20',
+  /** Purple glow */
+  purple: 'shadow-purple-500/20',
+  /** Amber glow */
+  amber: 'shadow-amber-500/20',
+  /** Emerald glow (stronger opacity) */
+  emerald: 'shadow-emerald-500/50',
+  /** Blue glow (stronger opacity) */
+  blue: 'shadow-blue-500/50',
+  /** Orange glow (stronger opacity) */
+  orange: 'shadow-orange-500/50',
 } as const;
 
 // =============================================================================
@@ -56,28 +79,49 @@ export const shadowColor = {
 /**
  * Z-index layers for stacking context.
  * Use semantic names instead of arbitrary numbers.
+ * 
+ * @migration Replaces inline `z-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="z-10"
+ * // ✅ NEW: className={zLayer.raised}
+ * // ❌ OLD: className="z-50"
+ * // ✅ NEW: className={zLayer.modal}
  */
 export const zLayer = {
-  /** Below everything (backgrounds) */
+  /** Below everything (backgrounds) - z-[-1] */
   behind: 'z-[-1]',
-  /** Base layer */
+  /** Base layer - z-0 */
   base: 'z-0',
-  /** Slightly elevated (cards, dropdowns) */
+  /** Slightly elevated (cards, dropdowns) - z-10 */
   raised: 'z-10',
-  /** Sticky elements */
-  sticky: 'z-20',
-  /** Fixed elements (headers, footers) */
-  fixed: 'z-30',
-  /** Overlays (modals backdrop) */
+  /** Above raised (floating elements) - z-20 */
+  above: 'z-20',
+  /** Sticky elements - z-30 */
+  sticky: 'z-30',
+  /** Fixed elements (headers, footers) - z-40 */
+  fixed: 'z-40',
+  /** Overlays (modals backdrop) - z-40 */
   overlay: 'z-40',
-  /** Modal content */
+  /** Modal content - z-50 */
   modal: 'z-50',
-  /** Popovers and tooltips */
+  /** Popovers and tooltips - z-60 */
   popover: 'z-[60]',
-  /** Toast notifications */
+  /** Toast notifications - z-70 */
   toast: 'z-[70]',
-  /** Maximum (dev tools, critical UI) */
+  /** Maximum (dev tools, critical UI) - z-100 */
   max: 'z-[100]',
+  
+  // Numeric aliases for direct mapping
+  /** z-10 */
+  10: 'z-10',
+  /** z-20 */
+  20: 'z-20',
+  /** z-30 */
+  30: 'z-30',
+  /** z-40 */
+  40: 'z-40',
+  /** z-50 */
+  50: 'z-50',
 } as const;
 
 // =============================================================================
@@ -227,4 +271,112 @@ export const blur = {
   xl: 'blur-xl',
   '2xl': 'blur-2xl',
   '3xl': 'blur-3xl',
+} as const;
+
+// =============================================================================
+// OUTLINE UTILITIES
+// =============================================================================
+
+/**
+ * Outline utilities for focus states and borders without affecting layout.
+ * 
+ * @migration Replaces inline `outline-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="outline-none"
+ * // ✅ NEW: className={outline.none}
+ * // ❌ OLD: className="outline outline-2 outline-offset-2"
+ * // ✅ NEW: className={outline.ring}
+ * 
+ * @see {@link focusRing} in interactive.ts - For focus ring patterns
+ */
+export const outline = {
+  /** outline-none - Remove outline */
+  none: 'outline-none',
+  /** outline - Default outline */
+  default: 'outline',
+  /** outline-dashed */
+  dashed: 'outline-dashed',
+  /** outline-dotted */
+  dotted: 'outline-dotted',
+  /** outline-double */
+  double: 'outline-double',
+} as const;
+
+/**
+ * Outline width utilities.
+ * 
+ * @migration Replaces inline `outline-*` width Tailwind classes
+ */
+export const outlineWidth = {
+  /** outline-0 */
+  0: 'outline-0',
+  /** outline-1 */
+  1: 'outline-1',
+  /** outline-2 */
+  2: 'outline-2',
+  /** outline-4 */
+  4: 'outline-4',
+  /** outline-8 */
+  8: 'outline-8',
+} as const;
+
+/**
+ * Outline offset utilities.
+ * 
+ * @migration Replaces inline `outline-offset-*` Tailwind classes
+ */
+export const outlineOffset = {
+  /** outline-offset-0 */
+  0: 'outline-offset-0',
+  /** outline-offset-1 */
+  1: 'outline-offset-1',
+  /** outline-offset-2 */
+  2: 'outline-offset-2',
+  /** outline-offset-4 */
+  4: 'outline-offset-4',
+  /** outline-offset-8 */
+  8: 'outline-offset-8',
+} as const;
+
+/**
+ * Outline color utilities.
+ * 
+ * @migration Replaces inline outline color Tailwind classes
+ */
+export const outlineColor = {
+  /** outline-transparent */
+  transparent: 'outline-transparent',
+  /** outline-current */
+  current: 'outline-current',
+  /** outline-inherit */
+  inherit: 'outline-inherit',
+  /** Primary color outline */
+  primary: 'outline-primary',
+  /** Accent color outline */
+  accent: 'outline-accent',
+  /** Destructive color outline */
+  destructive: 'outline-destructive',
+  /** Ring color (for focus states) */
+  ring: 'outline-ring',
+} as const;
+
+/**
+ * Combined outline patterns for common use cases.
+ * 
+ * @migration Replaces common inline outline pattern combinations
+ * @example
+ * // ❌ OLD: className="outline outline-2 outline-offset-2 outline-ring"
+ * // ✅ NEW: className={outlinePattern.focusRing}
+ */
+export const outlinePattern = {
+  /** Standard focus ring outline */
+  focusRing: 'outline outline-2 outline-offset-2 outline-ring',
+  /** Subtle focus outline */
+  focusSubtle: 'outline outline-1 outline-ring/50',
+  /** Error state outline */
+  error: 'outline outline-2 outline-destructive',
+  /** Success state outline */
+  success: 'outline outline-2 outline-green-500',
+  /** Selection outline */
+  selected: 'outline outline-2 outline-accent',
 } as const;

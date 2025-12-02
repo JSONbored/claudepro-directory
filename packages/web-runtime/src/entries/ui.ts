@@ -113,7 +113,7 @@ export {
   ListTree,
   X,
 } from '../icons.tsx';
-export type { LucideIcon } from '../icons.tsx';
+export type { IconComponent } from '../icons.tsx';
 export * from '../skeleton-keys.ts';
 export * from '../client/toast.ts';
 export * from '../client/share.ts';

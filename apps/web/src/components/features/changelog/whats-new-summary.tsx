@@ -11,16 +11,26 @@
 
 import type { Database } from '@heyclaude/database-types';
 import {
+  animateDuration,
+  bgColor,
   cluster,
-  spaceY,
-  muted,
-  weight,
-  iconSize,
-  radius,
-  marginTop,
-  size,
-  padding,
+  flexWrap,
   gap,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  muted,
+  overflow,
+  padding,
+  radius,
+  size,
+  spaceY,
+  textColor,
+  transition,
+  weight,
+  squareSize,
 } from '@heyclaude/web-runtime/design-system';
 import {
   Sparkles,
@@ -189,7 +199,8 @@ export function WhatsNewSummary({
   return (
     <motion.div
       ref={ref}
-      className={cn('relative overflow-hidden', className)}
+      className={cn(
+  `relative ${overflow.hidden}`, className)}
       initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -198,22 +209,22 @@ export function WhatsNewSummary({
       <div
         className={cn(
           `${radius.xl} border bg-gradient-to-br from-card via-card to-accent/5`,
-          'relative ${padding.comfortable} md:p-8'
+          `relative ${padding.comfortable} md:${padding.relaxed}`
         )}
       >
         {/* Decorative gradient blur */}
-        <div className="pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full bg-accent/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
+        <div className={`pointer-events-none absolute -right-20 -top-20 ${squareSize.avatar5xl} ${radius.full} ${bgColor['accent/10']} blur-3xl`} />
+        <div className={`pointer-events-none absolute -bottom-20 -left-20 ${squareSize.avatar5xl} ${radius.full} ${bgColor['primary/10']} blur-3xl`} />
 
         {/* Header */}
         <div className={`relative ${spaceY.comfortable}`}>
           <div className={cluster.default}>
             <motion.div
-              className={`flex items-center justify-center rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 ${padding.tight}`}
+              className={`flex ${alignItems.center} ${justify.center} ${radius.full} bg-gradient-to-br from-amber-500/20 to-orange-500/20 ${padding.tight}`}
               animate={{ rotate: [0, 5, -5, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <Sparkles className={`${iconSize.md} text-amber-500`} />
+              <Sparkles className={`${iconSize.md} ${textColor.amber}`} />
             </motion.div>
             <div>
               <h2 className={`${weight.bold} ${size.xl}`}>What&apos;s New This Week</h2>
@@ -225,7 +236,7 @@ export function WhatsNewSummary({
           </div>
 
           {/* Category breakdown */}
-          <div className={`flex flex-wrap ${gap.compact}`}>
+          <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
             {activeCategories.map(([category, count], index) => {
               const config = CATEGORY_CONFIG[category];
               const Icon = config.icon;
@@ -235,7 +246,7 @@ export function WhatsNewSummary({
                   key={category}
                   className={cn(
                     `${radius.lg} ${cluster.tight}`,
-                    'border ${padding.xCompact} ${padding.ySnug}',
+                    `border ${padding.xCompact} ${padding.ySnug}`,
                     config.bgColor
                   )}
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -247,7 +258,7 @@ export function WhatsNewSummary({
                   transition={{ delay: 0.1 + index * 0.05, duration: 0.3 }}
                 >
                   <Icon className={cn(iconSize.xs, config.color)} />
-                  <span className={`text-sm ${weight.medium}`}>{count}</span>
+                  <span className={`${size.sm} ${weight.medium}`}>{count}</span>
                   <span className={muted.xs}>{config.label}</span>
                 </motion.div>
               );
@@ -270,10 +281,10 @@ export function WhatsNewSummary({
               <div
                 className={cn(
                   `${radius.lg} border bg-background/50 ${padding.default}`,
-                  'transition-all duration-200 hover:border-primary/30 hover:bg-background'
+                  `transition-all ${animateDuration.default} hover:border-primary/30 hover:bg-background`
                 )}
               >
-                <div className={`${cluster.tight} ${muted.xs} mb-2`}>
+                <div className={`${cluster.tight} ${muted.xs} ${marginBottom.tight}`}>
                   <Calendar className={iconSize.xs} />
                   <time dateTime={featuredEntry.release_date}>
                     {new Date(featuredEntry.release_date).toLocaleDateString(
@@ -288,14 +299,14 @@ export function WhatsNewSummary({
                   <span>Latest</span>
                 </div>
 
-                <div className={`flex items-center justify-between ${gap.comfortable}`}>
+                <div className={`flex ${alignItems.center} ${justify.between} ${gap.comfortable}`}>
                   <h3
-                    className={`${weight.semibold} ${size.base} group-hover:text-primary transition-colors line-clamp-1`}
+                    className={`${weight.semibold} ${size.base} group-hover:text-primary ${transition.colors} line-clamp-1`}
                   >
                     {featuredEntry.title}
                   </h3>
                   <motion.div
-                    className="shrink-0 text-primary"
+                    className={`shrink-0 ${textColor.primary}`}
                     animate={{ x: [0, 4, 0] }}
                     transition={{
                       duration: 1.5,

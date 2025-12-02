@@ -1,4 +1,5 @@
-import { spaceY, marginBottom , gap , padding , radius } from '@heyclaude/web-runtime/design-system';
+import { spaceY, marginBottom , gap , padding , radius, bgColor,
+} from '@heyclaude/web-runtime/design-system';
 import dynamic from 'next/dynamic';
 import { FeaturedSectionSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
 
@@ -46,7 +47,7 @@ export const LazyTabsSection = dynamic(
     loading: () => (
       <div className={spaceY.loose}>
         {/* Tabs skeleton */}
-        <div className={`flex ${gap.compact} ${radius.lg} bg-muted ${padding.micro}`}>
+        <div className={`flex ${gap.compact} ${radius.lg} ${bgColor.muted} ${padding.micro}`}>
           {[...Array(7)].map((_, i) => (
             <Skeleton key={`tab-skeleton-${i + 1}`} size="lg" width="3xl" className="flex-1" />
           ))}

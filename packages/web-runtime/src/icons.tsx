@@ -2,7 +2,13 @@
  * Centralized Icon Exports shared across runtimes.
  */
 
-import type { CSSProperties } from 'react';
+import type { ComponentType, CSSProperties, SVGProps } from 'react';
+
+/**
+ * Strict icon component type that doesn't contain `any`.
+ * Use this instead of `LucideIcon` from lucide-react.
+ */
+export type IconComponent = ComponentType<SVGProps<SVGSVGElement> & { className?: string }>;
 import {
   Activity,
   AlertCircle,
@@ -69,7 +75,6 @@ import {
   ListTree,
   Loader2,
   LogOut,
-  type LucideIcon,
   Mail,
   MapPin,
   Maximize2,
@@ -254,7 +259,6 @@ export {
   ListTree,
 };
 
-export type { LucideIcon };
 
 export const DiscordIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor" role="img" aria-label="Discord">
@@ -322,7 +326,7 @@ export const LogoIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const FORM_ICON_MAP: Record<string, LucideIcon> = {
+const FORM_ICON_MAP = {
   BookOpen,
   Code,
   ExternalLink,
@@ -335,9 +339,9 @@ const FORM_ICON_MAP: Record<string, LucideIcon> = {
   Tag,
   Tags,
   Terminal,
-};
+} as const;
 
-export function resolveFormIcon(iconName?: string): LucideIcon | undefined {
+export function resolveFormIcon(iconName?: string): IconComponent | undefined {
   if (!iconName) return undefined;
-  return FORM_ICON_MAP[iconName];
+  return FORM_ICON_MAP[iconName as keyof typeof FORM_ICON_MAP];
 }

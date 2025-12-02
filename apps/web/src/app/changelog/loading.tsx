@@ -5,7 +5,9 @@
  * Shows placeholder cards matching the layout of ChangelogCard components.
  */
 
-import { cluster, spaceY, marginBottom , padding , gap , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { cluster, spaceY, marginBottom , padding , gap , radius , maxWidth, bgColor,
+  flexWrap,
+} from '@heyclaude/web-runtime/design-system';
 import { PageHeaderSkeleton, Skeleton  } from '@heyclaude/web-runtime/ui';
 
 
@@ -45,14 +47,14 @@ export default function ChangelogLoading() {
       {/* Changelog Cards Skeleton */}
       <div className={spaceY.relaxed}>
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={`changelog-skeleton-${index + 1}`} className={`${radius.lg} border bg-card ${padding.comfortable}`}>
+          <div key={`changelog-skeleton-${index + 1}`} className={`${radius.lg} border ${bgColor.card} ${padding.comfortable}`}>
             <div className={`${marginBottom.compact} ${cluster.compact}`}>
               <Skeleton size="sm" width="xs" />
               <Skeleton size="sm" width="sm" />
             </div>
             <Skeleton size="lg" width="2/3" className={marginBottom.tight} />
             <Skeleton size="sm" width="3xl" className={marginBottom.default} />
-            <div className={`flex flex-wrap ${gap.compact}`}>
+            <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
               <Skeleton size="sm" width="xs" rounded="full" />
               <Skeleton size="sm" width="xs" rounded="full" />
               <Skeleton size="sm" width="xs" rounded="full" />

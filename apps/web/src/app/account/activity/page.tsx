@@ -1,7 +1,8 @@
 import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight , size , gap } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight , size , gap, textColor,
+} from '@heyclaude/web-runtime/design-system';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
@@ -181,11 +182,11 @@ export default async function ActivityPage() {
       {hasSummary ? <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-2`}>
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Submissions</CardTitle>
+              <CardTitle className={size.sm}>Submissions</CardTitle>
             </CardHeader>
             <CardContent>
               <div className={cluster.compact}>
-                <GitPullRequest className={`${iconSize.md} text-blue-600`} />
+                <GitPullRequest className={`${iconSize.md} ${textColor.blue}`} />
                 <span className={`${weight.bold} ${size['2xl']}`}>
                   {summary.merged_submissions}/{summary.total_submissions}
                 </span>

@@ -2,7 +2,7 @@ import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { marginBottom, muted, weight , size  , padding , spaceY , maxWidth } from '@heyclaude/web-runtime/design-system';
-import { NavLink } from '@heyclaude/web-runtime/ui';
+import { cn, NavLink } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 
 
@@ -22,7 +22,7 @@ export default function PrivacyPage() {
   return (
     <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
       <div className={`prose prose-invert ${maxWidth.none}`}>
-        <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>Privacy Policy</h1>
+        <h1 className={cn(marginBottom.comfortable, weight.bold, size['3xl'], `sm:${size['4xl']}`)}>Privacy Policy</h1>
         <p className={`${marginBottom.relaxed} ${muted.default}`}>Last updated: {lastUpdated}</p>
 
         <section className={marginBottom.relaxed}>

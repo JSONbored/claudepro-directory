@@ -6,7 +6,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/web-runtime/core';
-import { hoverBg, transition, spaceY, marginBottom, marginTop, muted, weight, radius ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
+import { borderBottom, borderLeft, hoverBg, transition, spaceY, marginBottom, marginTop, muted, weight, radius ,size , padding , gap , opacityLevel } from '@heyclaude/web-runtime/design-system';
 import { useEffect, useState } from 'react';
 import { Checklist } from '@/src/components/content/checklist';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
@@ -408,11 +408,11 @@ function render_section(section: Section, index: number): React.ReactNode {
           {section.title && <h3 className={`${marginBottom.default} ${weight.semibold} ${size.lg}`}>{section.title}</h3>}
           <div className={`overflow-hidden ${radius.lg} border`}>
             {section.tabs.map((tab: CodeTab, idx: number) => (
-              <details key={`${tab.label}-${idx}`} className="border-b last:border-0">
+              <details key={`${tab.label}-${idx}`} className={`${borderBottom.default} last:border-0`}>
                 <summary className={`cursor-pointer ${padding.xDefault} ${padding.yCompact} ${weight.medium} ${hoverBg.muted}`}>
                   {tab.label} {tab.filename && `• ${tab.filename}`}
                 </summary>
-                <div className="p-4">
+                <div className={padding.default}>
                   <ProductionCodeBlock
                     html={tab.html || ''}
                     code={tab.code}
@@ -547,11 +547,11 @@ function render_section(section: Section, index: number): React.ReactNode {
           )}
           <div className={`overflow-hidden ${radius.lg} border`}>
             {section.items.map((item: TabItem, idx: number) => (
-              <details key={`${item.value}-${idx}`} className="border-b last:border-0">
+              <details key={`${item.value}-${idx}`} className={`${borderBottom.default} last:border-0`}>
                 <summary className={`cursor-pointer ${padding.xDefault} ${padding.yCompact} ${weight.medium} ${hoverBg.muted}`}>
                   {item.label}
                 </summary>
-                <TrustedHTML html={item.content} className="p-4" />
+                <TrustedHTML html={item.content} className={padding.default} />
               </details>
             ))}
           </div>
@@ -600,7 +600,7 @@ function render_section(section: Section, index: number): React.ReactNode {
           {section.title && <h3 className={`${marginBottom.default} ${weight.semibold} ${size.lg}`}>{section.title}</h3>}
           <div className={spaceY.relaxed}>
             {section.steps.map((step: StepItem) => (
-              <div key={step.number} className="border-primary border-l-4 pl-6">
+              <div key={step.number} className={`${borderLeft.accentPrimary} pl-6`}>
                 <h4 className={`${marginBottom.tight} ${weight.semibold} ${size.lg}`}>
                   Step {step.number}: {step.title}
                 </h4>
@@ -678,7 +678,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                   return (
                     <div
                       key={resourceKey}
-                      className={`${radius.lg} border ${padding.default} opacity-50`}
+                      className={`${radius.lg} border ${padding.default} ${opacityLevel[50]}`}
                       title="Invalid or unsafe URL - cannot display link"
                     >
                       <h4 className={`${marginBottom.micro} ${weight.semibold}`}>{r.title}</h4>

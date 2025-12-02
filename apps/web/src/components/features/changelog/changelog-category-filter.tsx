@@ -6,8 +6,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { size, padding, cluster , gap } from '@heyclaude/web-runtime/design-system';
-import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
+import { size, padding, cluster, gap, justify, minWidth } from '@heyclaude/web-runtime/design-system';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
 
@@ -31,7 +30,7 @@ export function CategoryFilter({ activeCategory, categoryCounts }: CategoryFilte
           <UnifiedBadge
             variant="base"
             style={activeCategory === category ? 'default' : 'secondary'}
-            className={`ml-1 h-5 ${DIMENSIONS.MIN_W_BADGE} justify-center ${padding.xSnug} ${size.xs}`}
+            className={`ml-1 h-5 ${minWidth.badge} ${justify.center} ${padding.xSnug} ${size.xs}`}
           >
             {categoryCounts[category] || 0}
           </UnifiedBadge>

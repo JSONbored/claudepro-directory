@@ -5,7 +5,27 @@
 
 import { highlightCodeEdge } from '@heyclaude/web-runtime/data';
 import { Zap } from '@heyclaude/web-runtime/icons';
-import { iconSize, spaceY, cluster, marginBottom, muted, weight, size } from '@heyclaude/web-runtime/design-system';
+import {
+  animateDuration,
+  borderColor,
+  cluster,
+  iconSize,
+  leading,
+  marginBottom,
+  muted,
+  opacityLevel,
+  size,
+  spaceY,
+  transition,
+  weight,
+  bgColor,
+  justify,
+  textColor,
+  alignItems,
+  flexGrow,
+  radius,
+  shadow,
+} from '@heyclaude/web-runtime/design-system';
 import type { StepByStepGuideProps } from '@heyclaude/web-runtime/types/component.types';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -41,11 +61,11 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
   return (
     <section itemScope={true} itemType="https://schema.org/HowTo" className="my-8">
       <div className={marginBottom.comfortable}>
-        <h2 className={`mb-2 ${weight.bold} ${size['2xl']}`} itemProp="name">
+        <h2 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`} itemProp="name">
           {title}
         </h2>
         {description && (
-          <p className={`mb-4 ${muted.default}`} itemProp="description">
+          <p className={`${marginBottom.default} ${muted.default}`} itemProp="description">
             {description}
           </p>
         )}
@@ -74,23 +94,23 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
               <Card
                 itemScope={true}
                 itemType="https://schema.org/HowToStep"
-                className="border-2 border-primary/20 bg-linear-to-br from-card via-card/80 to-transparent transition-all duration-300 hover:shadow-2xl"
+                className={`border-2 ${borderColor['primary/20']} bg-linear-to-br from-card via-card/80 to-transparent ${transition.all} ${animateDuration.slow} hover:${shadow['2xl']}`}
               >
                 <CardHeader>
                   <CardTitle className={cluster.comfortable} itemProp="name">
                     <div className="relative">
                       <div
                         className={
-                          'flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-primary/70 shadow-lg'
+                          `flex ${iconSize['2xl']} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} bg-linear-to-br from-primary to-primary/70 ${shadow.lg}`
                         }
                       >
-                        <span className={`${weight.bold} ${size.base} text-primary-foreground`}>
+                        <span className={`${weight.bold} ${size.base} ${textColor.primaryForeground}`}>
                           {index + 1}
                         </span>
                       </div>
                       <div
                         className={
-                          'absolute inset-0 animate-ping rounded-full bg-primary opacity-20'
+                          `absolute inset-0 animate-ping ${radius.full} ${bgColor.primary} ${opacityLevel[20]}`
                         }
                       />
                     </div>
@@ -99,7 +119,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                       <UnifiedBadge
                         variant="base"
                         style="secondary"
-                        className="ml-auto border-primary/30 bg-primary/10 text-primary"
+                        className={`ml-auto ${borderColor['primary/30']} ${bgColor['primary/10']} ${textColor.primary}`}
                       >
                         ⏱ {step.time}
                       </UnifiedBadge>
@@ -108,7 +128,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                 </CardHeader>
                 <CardContent className="pl-14">
                   {(step.content || step.description) && (
-                    <div itemProp="text" className={'mb-6 ${size.base} leading-relaxed'}>
+                    <div itemProp="text" className={`${marginBottom.comfortable} ${size.base} ${leading.relaxed}`}>
                       {(step.content as React.ReactNode) || (step.description as React.ReactNode)}
                     </div>
                   )}

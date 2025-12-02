@@ -30,11 +30,13 @@
  */
 
 import { usePrefetchOnHover } from '../../../hooks/use-prefetch-on-hover.ts';
-import Link from 'next/link';
-import type { ComponentProps } from 'react';
+import Link, { type LinkProps } from 'next/link';
+import type { AnchorHTMLAttributes, ReactNode } from 'react';
 import type { UrlObject } from 'url';
 
-export interface PrefetchLinkProps extends ComponentProps<typeof Link> {
+export interface PrefetchLinkProps
+  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps>,
+    LinkProps {
   /**
    * Hover delay before prefetch (ms)
    * @default 300
@@ -46,6 +48,11 @@ export interface PrefetchLinkProps extends ComponentProps<typeof Link> {
    * @default false
    */
   disablePrefetch?: boolean;
+
+  /**
+   * Child elements to render inside the link
+   */
+  children?: ReactNode;
 }
 
 /**

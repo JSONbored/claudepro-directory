@@ -30,8 +30,9 @@
  * ```
  */
 
-import { ANIMATION_CONSTANTS, DIMENSIONS } from '../../constants.ts';
 import { absolute } from '../../../design-system/styles/position.ts';
+import { height } from '../../../design-system/styles/layout.ts';
+import { transition } from '../../../design-system/styles/interactive.ts';
 import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
 import Link from 'next/link';
@@ -138,7 +139,7 @@ export function NavLink({
     <span className="relative inline-block">
       {children}
       <span
-        className={`${absolute.bottomLeft} ${DIMENSIONS.UNDERLINE} bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} ${
+        className={`${absolute.bottomLeft} ${height.underline} bg-accent ${transition.slow} ${
           active ? 'w-full' : 'w-0 group-hover:w-full'
         }`}
         aria-hidden="true"

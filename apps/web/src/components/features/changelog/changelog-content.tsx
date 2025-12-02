@@ -28,7 +28,15 @@ type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSection = ContentRow['metadata'];
 
-import { changelogBadge, weight, gap, padding, maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  changelogBadge,
+  flexWrap,
+  gap,
+  maxWidth,
+  padding,
+  spaceY,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { SanitizedHTML } from './sanitized-html';
 
 /**
@@ -89,10 +97,10 @@ export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps
     nonEmptyCategories.push('Security' as Database['public']['Enums']['changelog_category']);
 
   return (
-    <article className={'max-w-none ${spaceY.relaxed}'}>
+    <article className={`max-w-none ${spaceY.relaxed}`}>
       {/* Category Badges */}
       {nonEmptyCategories.length > 0 && (
-        <div className={`flex flex-wrap ${gap.compact} ${padding.yCompact}`}>
+        <div className={`flex ${flexWrap.wrap} ${gap.compact} ${padding.yCompact}`}>
           {nonEmptyCategories.map((category) => (
             <UnifiedBadge
               key={category}

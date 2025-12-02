@@ -7,20 +7,26 @@
 
 import {
   between,
+  bgColor,
+  borderColor,
   cluster,
+  flexGrow,
   iconSize,
+  leading,
   marginBottom,
+  marginTop,
   muted,
   padding,
+  radius,
+  row,
+  size,
   stack,
   weight,
-  size,
-  row,
 } from '@heyclaude/web-runtime/design-system';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Check, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '@heyclaude/web-runtime/ui';
 import { Card, CardContent } from '@heyclaude/web-runtime/ui';
@@ -42,20 +48,22 @@ import { Card, CardContent } from '@heyclaude/web-runtime/ui';
  * @see https://www.framer.com/motion/ (motion animations used)
  */
 export function JobsPromo() {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
+      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
     >
-      <Card className="overflow-hidden border-accent/20">
+      <Card className={cn('overflow-hidden', borderColor['accent/20'])}>
         <CardContent className={cn(stack.default, padding.comfortable)}>
           {/* Hook with honest growth story */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-            <h3 className={cn(marginBottom.tight, `${weight.bold} ${size.xl} leading-tight`)}>
+            <h3 className={cn(marginBottom.tight, weight.bold, size.xl, leading.tight)}>
               Hire Claude Developers
             </h3>
-            <p className={cn(muted.default, 'text-sm')}>
+            <p className={cn(muted.default, size.sm)}>
               Growing community of AI engineers actively building with Claude
             </p>
           </motion.div>
@@ -64,14 +72,16 @@ export function JobsPromo() {
           <motion.div
             className={cn(
               stack.compact,
-              '${radius.lg} border bg-card/50',
+              radius.lg,
+              'border',
+              bgColor['card/50'],
               padding.compact
             )}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
           >
-            <div className={cn(between.center, 'text-sm')}>
+            <div className={cn(between.center, size.sm)}>
               <span className={muted.default}>Active community</span>
               <motion.span
                 className={weight.semibold}
@@ -82,7 +92,7 @@ export function JobsPromo() {
                 1,700/month
               </motion.span>
             </div>
-            <div className={cn(between.center, 'text-sm')}>
+            <div className={cn(between.center, size.sm)}>
               <span className={muted.default}>Growth rate</span>
               <motion.span
                 className={cn(
@@ -109,15 +119,15 @@ export function JobsPromo() {
             ].map((text, i) => (
               <motion.div
                 key={text}
-                className={`${row.compact}`}
+                className={row.compact}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + i * 0.1 }}
               >
                 <Check
-                  className={cn('mt-0.5 shrink-0', iconSize.sm, 'text-accent')}
+                  className={cn(marginTop.micro, flexGrow.shrink0, iconSize.sm, 'text-accent')}
                 />
-                <span className="text-sm">{text}</span>
+                <span className={size.sm}>{text}</span>
               </motion.div>
             ))}
           </div>
@@ -137,7 +147,7 @@ export function JobsPromo() {
 
           {/* Soft trust signal */}
           <motion.p
-            className={cn('text-center', muted.default, 'text-xs')}
+            className={cn('text-center', muted.default, size.xs)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}

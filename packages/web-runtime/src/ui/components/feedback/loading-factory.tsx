@@ -10,7 +10,10 @@
  */
 
 // Design System imports
-import { grid, stack, cluster, padding, marginBottom } from '../../../design-system/styles/layout.ts';
+import { grid, stack, cluster, padding, marginBottom, gap } from '../../../design-system/styles/layout.ts';
+import { iconSize } from '../../../design-system/styles/icons.ts';
+import { size as textSize } from '../../../design-system/styles/typography.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
 import { getSkeletonKeys } from '../../../skeleton-keys.ts';
 import {
   ConfigCardSkeleton,
@@ -56,7 +59,7 @@ const SKELETON_CONFIGS: Record<string, SkeletonConfig> = {
   grid2: {
     cardsPerRow: 2,
     totalCards: 6,
-    gridClass: 'grid grid-cols-1 md:grid-cols-2 gap-6',
+    gridClass: `grid grid-cols-1 md:grid-cols-2 ${gap.relaxed}`,
   },
   // List view (changelog, activity)
   list: {
@@ -144,7 +147,7 @@ export function DetailPageLoading() {
           <div className={`${stack.loose} lg:col-span-2`}>
             {/* Content card */}
             <div
-              className={`${stack.comfortable} rounded-lg border ${padding.comfortable}`}
+              className={`${stack.comfortable} ${radius.lg} border ${padding.comfortable}`}
             >
               <Skeleton size="md" width="3xl" />
               <Skeleton size="sm" width="3xl" />
@@ -154,7 +157,7 @@ export function DetailPageLoading() {
 
             {/* Code block skeleton */}
             <div
-              className={`${stack.comfortable} rounded-lg border ${padding.comfortable}`}
+              className={`${stack.comfortable} ${radius.lg} border ${padding.comfortable}`}
             >
               <Skeleton size="sm" width="sm" />
               <div className={stack.tight}>
@@ -168,7 +171,7 @@ export function DetailPageLoading() {
           {/* Sidebar */}
           <div className={stack.loose}>
             <div
-              className={`${stack.comfortable} rounded-lg border ${padding.comfortable}`}
+              className={`${stack.comfortable} ${radius.lg} border ${padding.comfortable}`}
             >
               <Skeleton size="md" width="sm" />
               <Skeleton size="sm" width="3xl" />
@@ -216,7 +219,7 @@ export function GuideDetailLoading() {
         <div className={`grid grid-cols-1 ${cluster.loose} lg:grid-cols-3`}>
           <div className={`${stack.loose} lg:col-span-2`}>
             <div
-              className={`${stack.comfortable} rounded-lg border ${padding.comfortable}`}
+              className={`${stack.comfortable} ${radius.lg} border ${padding.comfortable}`}
             >
               {Array.from({ length: 12 }).map((_, i) => (
                 <Skeleton key={KEYS_12[i]} size="sm" width={i % 4 === 0 ? '2/3' : '3xl'} />
@@ -225,7 +228,7 @@ export function GuideDetailLoading() {
           </div>
           <div className={stack.loose}>
             <div
-              className={`${stack.comfortable} rounded-lg border ${padding.comfortable}`}
+              className={`${stack.comfortable} ${radius.lg} border ${padding.comfortable}`}
             >
               <Skeleton size="md" width="sm" />
               {Array.from({ length: 3 }).map((_, i) => (
@@ -349,9 +352,9 @@ export function InlineSpinner({
   className?: string;
 }) {
   const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-6 w-6',
-    lg: 'h-8 w-8',
+    sm: iconSize.sm,
+    md: iconSize.lg,
+    lg: iconSize.xl,
   };
 
   const borderClasses = {
@@ -361,13 +364,13 @@ export function InlineSpinner({
   };
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={`flex items-center ${gap.compact} ${className}`}>
       <output
-        className={`${sizeClasses[size]} ${borderClasses[size]} animate-spin rounded-full border-primary border-t-transparent`}
+        className={`${sizeClasses[size]} ${borderClasses[size]} animate-spin ${radius.full} border-primary border-t-transparent`}
         aria-label={message || 'Loading'}
         aria-live="polite"
       />
-      {message && <span className="text-muted-foreground text-sm">{message}</span>}
+      {message && <span className={`text-muted-foreground ${textSize.sm}`}>{message}</span>}
     </div>
   );
 }
@@ -456,7 +459,7 @@ export function createCategoryLoading(config: CategoryLoadingConfig = {}) {
 
         {/* Filter bar (optional) */}
         {showFilters && (
-          <div className={`${marginBottom.comfortable} flex flex-wrap gap-2`}>
+          <div className={`${marginBottom.comfortable} flex flex-wrap ${gap.compact}`}>
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="sm" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />

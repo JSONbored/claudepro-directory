@@ -1,7 +1,8 @@
 import  { type Database } from '@heyclaude/database-types';
 import  { type CreateJobInput } from '@heyclaude/web-runtime';
 import { createJob } from '@heyclaude/web-runtime/actions';
-import { spaceY, muted, marginBottom, weight , size } from '@heyclaude/web-runtime/design-system';
+import { spaceY, muted, marginBottom, weight , size, tracking,
+} from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
 import  { type Metadata } from 'next';
@@ -162,7 +163,7 @@ export default async function NewJobPage() {
   return (
     <div className={spaceY.relaxed}>
       <div>
-        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']} tracking-tight`}>Post a Job</h1>
+        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']} ${tracking.tight}`}>Post a Job</h1>
         <p className={muted.default}>
           Create a new job listing to reach talented developers
         </p>

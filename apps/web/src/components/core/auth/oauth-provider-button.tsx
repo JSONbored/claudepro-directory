@@ -6,8 +6,21 @@
 
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@heyclaude/web-runtime/icons';
-import { ANIMATION_CONSTANTS, cn, toasts } from '@heyclaude/web-runtime/ui';
-import { weight ,size    } from '@heyclaude/web-runtime/design-system';
+import { cn, toasts } from '@heyclaude/web-runtime/ui';
+import {
+  alignItems,
+  flexDir,
+  gap,
+  iconSize,
+  justify,
+  opacityLevel,
+  padding,
+  radius,
+  size,
+  textColor,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 
@@ -73,22 +86,22 @@ export function OAuthProviderButton({
       onClick={handleSignIn}
       disabled={loading}
       className={cn(
-        'flex flex-col items-center ${gap.comfortable} ${padding.xComfortable}',
-        loading && 'cursor-wait opacity-60',
+        `flex ${flexDir.col} ${alignItems.center} ${gap.comfortable} ${padding.xComfortable}`,
+        loading && `cursor-wait ${opacityLevel[60]}`,
         className
       )}
     >
       {/* Circular icon button */}
       <div
         className={cn(
-          `flex h-16 w-16 items-center justify-center rounded-full border bg-white/5 ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:scale-105 hover:bg-white/10`,
+          `flex ${iconSize['4xl']} ${alignItems.center} ${justify.center} ${radius.full} border bg-white/5 ${transition.default} hover:scale-105 hover:bg-white/10`,
           loading && 'cursor-wait'
         )}
         style={{ borderColor: 'oklch(74% 0.2 35 / 0.3)' }}
       >
         {loading ? (
           <motion.div
-            className="h-7 w-7 rounded-full border-2 border-white/20 border-t-white/80"
+            className={`${iconSize.lgPlus} ${radius.full} border-2 border-white/20 border-t-white/80`}
             animate={{ rotate: 360 }}
             transition={{ duration: 0.8, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
           />
@@ -100,7 +113,7 @@ export function OAuthProviderButton({
       </div>
 
       {/* Label below */}
-      <span className={`${weight.medium} text-foreground ${size.sm}`}>
+      <span className={`${weight.medium} ${textColor.foreground} ${size.sm}`}>
         {loading ? 'Signing in...' : config.label}
       </span>
     </button>

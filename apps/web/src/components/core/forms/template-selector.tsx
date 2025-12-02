@@ -6,8 +6,20 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { ChevronDown, FileText } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, weight  , padding   } from '@heyclaude/web-runtime/design-system';
-import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
+import {
+  cluster,
+  flexDir,
+  iconSize,
+  alignItems,
+  justify,
+  marginTop,
+  muted,
+  opacityLevel,
+  padding,
+  size,
+  weight,
+  dropdownWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
   DropdownMenu,
@@ -46,7 +58,6 @@ interface TemplateSelectorProps {
  * @see DropdownMenuContent
  * @see DropdownMenuItem
  * @see Button
- * @see DIMENSIONS
  */
 export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps) {
   if (templates.length === 0) {
@@ -56,26 +67,26 @@ export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild={true}>
-        <Button variant="outline" className="w-full justify-between" type="button">
+        <Button variant="outline" className={`w-full ${justify.between}`} type="button">
           <span className={cluster.compact}>
             <FileText className={iconSize.sm} />
             Use Template
           </span>
-          <ChevronDown className={`${iconSize.sm} opacity-50`} />
+          <ChevronDown className={`${iconSize.sm} ${opacityLevel[50]}`} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className={`${DIMENSIONS.DROPDOWN_SM} sm:${DIMENSIONS.DROPDOWN_MD}`}
+        className={`${dropdownWidth.sm} sm:${dropdownWidth.md}`}
       >
         {templates.map((template) => (
           <DropdownMenuItem
             key={template.id}
             onClick={() => onSelect(template)}
-            className={`cursor-pointer flex-col items-start ${padding.yCompact}`}
+            className={`cursor-pointer ${flexDir.col} ${alignItems.start} ${padding.yCompact}`}
           >
             <div className={weight.medium}>{template.name}</div>
-            <div className={'mt-0.5 ${muted.default} ${size.xs}'}>{template.description}</div>
+            <div className={`${marginTop.micro} ${muted.default} ${size.xs}`}>{template.description}</div>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

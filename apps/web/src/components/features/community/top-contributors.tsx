@@ -13,7 +13,8 @@
  */
 
 import { Users } from '@heyclaude/web-runtime/icons';
-import { iconSize, cluster, weight , size  , gap , padding } from '@heyclaude/web-runtime/design-system';
+import { iconSize, cluster, weight, size, gap, padding, textColor, marginBottom,
+} from '@heyclaude/web-runtime/design-system';
 import { memo } from 'react';
 import {
   ProfileCard,
@@ -49,8 +50,8 @@ function TopContributorsComponent({
 
   return (
     <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
-      <div className={`mb-6 ${cluster.default}`}>
-        <Users className={`${iconSize.lg} text-accent`} />
+      <div className={`${marginBottom.comfortable} ${cluster.default}`}>
+        <Users className={`${iconSize.lg} ${textColor.accent}`} />
         <h2 className={`${weight.bold} ${size['2xl']}`}>{title}</h2>
       </div>
 

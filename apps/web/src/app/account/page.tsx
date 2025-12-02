@@ -7,7 +7,26 @@ import {
   getContentDetailCore,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding } from '@heyclaude/web-runtime/design-system';
+import {
+  alignItems,
+  bgColor,
+  border,
+  borderColor,
+  cluster,
+  flexDir,
+  gap,
+  iconSize,
+  justify,
+  marginBottom,
+  marginTop,
+  muted,
+  padding,
+  radius,
+  size,
+  spaceY,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import  { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
@@ -282,11 +301,11 @@ export default async function AccountDashboard() {
       <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-3`}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Bookmarks</CardTitle>
+            <CardTitle className={size.sm}>Bookmarks</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={cluster.compact}>
-              <Bookmark className="h-5 w-5 text-primary" />
+              <Bookmark className={`${iconSize.md} ${textColor.primary}`} />
               <span className={`${weight.bold} ${size['3xl']}`}>{bookmarkCount ?? 0}</span>
             </div>
             <p className={`${marginTop.compact} ${muted.xs}`}>Saved items</p>
@@ -295,7 +314,7 @@ export default async function AccountDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Tier</CardTitle>
+            <CardTitle className={size.sm}>Tier</CardTitle>
           </CardHeader>
           <CardContent>
             <UnifiedBadge
@@ -313,11 +332,11 @@ export default async function AccountDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Member Since</CardTitle>
+            <CardTitle className={size.sm}>Member Since</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={cluster.compact}>
-              <Calendar className="h-5 w-5 text-primary" />
+              <Calendar className={`${iconSize.md} ${textColor.primary}`} />
               <span className={`${weight.bold} ${size['3xl']}`}>{accountAge}</span>
             </div>
             <p className={`${marginTop.compact} ${muted.xs}`}>Days active</p>
@@ -382,16 +401,16 @@ export default async function AccountDashboard() {
                   return (
                     <li
                       key={`${item.category}-${item.slug}`}
-                      className={`rounded-xl border border-border/60 bg-muted/20 ${padding.compact}`}
+                      className={`${radius.xl} border ${borderColor['border/60']} ${bgColor['muted/20']} ${padding.compact}`}
                     >
-                      <div className={`flex items-start justify-between ${gap.default}`}>
+                      <div className={`flex ${alignItems.start} ${justify.between} ${gap.default}`}>
                         <div>
                           <p className={weight.semibold}>{item.title}</p>
                           {item.description ? <p className={`line-clamp-2 ${muted.sm}`}>
                               {item.description}
                             </p> : null}
                         </div>
-                        <div className={`flex flex-col items-end ${gap.compact}`}>
+                        <div className={`flex ${flexDir.col} ${alignItems.end} ${gap.compact}`}>
                           <NavLink href={itemHref} className={`${weight.medium} ${size.sm}`}>
                             Explore →
                           </NavLink>
@@ -429,7 +448,7 @@ function QuickActionRow({
   title: string;
 }) {
   return (
-    <div className={`flex items-center justify-between ${gap.comfortable} rounded-xl border border-border/50 ${padding.compact}`}>
+    <div className={`flex ${alignItems.center} ${justify.between} ${gap.comfortable} ${radius.xl} border ${borderColor['border/50']} ${padding.compact}`}>
       <div>
         <p className={weight.medium}>{title}</p>
         <p className={muted.sm}>{description}</p>
@@ -443,7 +462,7 @@ function QuickActionRow({
 
 function EmptyRecentlySavedState() {
   return (
-    <div className={`rounded-2xl border border-border/70 border-dashed ${padding.comfortable} text-center`}>
+    <div className={`${radius['2xl']} ${border.dashedVisible} ${padding.comfortable} text-center`}>
       <p className={weight.medium}>No saved configs yet</p>
       <p className={muted.sm}>
         Browse the directory and bookmark your favorite configurations to see them here.

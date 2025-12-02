@@ -17,8 +17,11 @@ import { X } from '../../icons.tsx';
 import { cn } from '../utils.ts';
 // Design System imports
 import { iconSize } from '../../design-system/styles/icons.ts';
-import { stack } from '../../design-system/styles/layout.ts';
+import { stack, gap, padding } from '../../design-system/styles/layout.ts';
+import { size } from '../../design-system/styles/typography.ts';
 import { fixed, absolute } from '../../design-system/styles/position.ts';
+import { radius } from '../../design-system/styles/radius.ts';
+import { shadow } from '../../design-system/styles/effects.ts';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion, useDragControls } from 'motion/react';
@@ -51,7 +54,7 @@ const SheetOverlay = ({
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  'fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out will-change-transform contain-paint data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+  `fixed z-50 ${gap.comfortable} bg-background ${padding.comfortable} ${shadow.lg} transition ease-in-out will-change-transform contain-paint data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500`,
   {
     variants: {
       side: {
@@ -160,7 +163,7 @@ const SheetContent = ({
           {children}
           <SheetPrimitive.Close
             data-radix-sheet-close={true}
-            className={`${absolute.topRightOffsetXl} rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary`}
+            className={`${absolute.topRightOffsetXl} ${radius.sm} opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary`}
           >
             <X className={iconSize.sm} />
             <span className="sr-only">Close</span>
@@ -197,7 +200,7 @@ const SheetTitle = ({
 }) => (
   <SheetPrimitive.Title
     ref={ref}
-    className={cn('font-semibold text-foreground text-lg', className)}
+    className={cn(`font-semibold text-foreground ${size.lg}`, className)}
     {...props}
   />
 );
@@ -212,7 +215,7 @@ const SheetDescription = ({
 }) => (
   <SheetPrimitive.Description
     ref={ref}
-    className={cn('text-muted-foreground text-sm', className)}
+    className={cn(`text-muted-foreground ${size.sm}`, className)}
     {...props}
   />
 );

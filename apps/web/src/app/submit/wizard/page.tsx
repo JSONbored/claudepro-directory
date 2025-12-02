@@ -26,7 +26,33 @@ import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
-import { iconSize, spaceY, cluster, marginBottom, marginTop, muted, weight ,size  , gap , padding , row , radius } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  cursor,
+  flexGrow,
+  border,
+  flexWrap,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  leading,
+  marginBottom,
+  marginTop,
+  muted,
+  opacityLevel,
+  overflow,
+  padding,
+  radius,
+  row,
+  shadow,
+  size,
+  spaceY,
+  textColor,
+  transition,
+  weight,
+  squareSize,
+} from '@heyclaude/web-runtime/design-system';
 import { useFieldHighlight, useFormTracking, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
@@ -868,7 +894,7 @@ export default function WizardSubmissionPage() {
 
         {/* Social Proof Bar - Bottom of wizard */}
         {Object.keys(socialProofStats).length > 0 && (
-          <div className={`${marginTop.relaxed} flex justify-center`}>
+          <div className={`${marginTop.relaxed} flex ${justify.center}`}>
             <SocialProofBar stats={socialProofStats} />
           </div>
         )}
@@ -901,13 +927,13 @@ function StepTypeSelection({
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
           className={`${marginBottom.default} inline-flex`}
         >
-          <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
+          <Sparkles className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Choose Your Submission Type</h2>
+        <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Choose Your Submission Type</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
           What would you like to share with the community?
         </p>
-        <div className={`${marginTop.default} flex justify-center`}>
+        <div className={`${marginTop.default} flex ${justify.center}`}>
           <StepSocialProof step={1} />
         </div>
       </motion.div>
@@ -975,9 +1001,9 @@ function StepBasicInfo({
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
           className={`${marginBottom.default} inline-flex`}
         >
-          <FileText className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
+          <FileText className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Tell us about it</h2>
+        <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Tell us about it</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
           Give your submission a clear name and description
         </p>
@@ -1086,13 +1112,13 @@ function StepBasicInfo({
                 <div className={cluster.comfortable}>
                   <label
                     htmlFor="thumbnail-upload"
-                    className={`flex cursor-pointer items-center ${gap.compact} ${radius.lg} border border-dashed ${padding.xDefault} ${padding.yCompact} transition-colors hover:bg-accent/50`}
+                    className={`flex ${cursor.pointer} ${alignItems.center} ${gap.compact} ${radius.lg} ${border.dashed} ${padding.xDefault} ${padding.yCompact} ${transition.colors} hover:bg-accent/50`}
                     style={{
                       borderColor: TOKENS.colors.border.light,
                       ...(isUploadingThumbnail && { opacity: 0.6, pointerEvents: 'none' }),
                     }}
                   >
-                    <ImageIcon className={`h-5 w-5 ${muted.default}`} />
+                    <ImageIcon className={`${iconSize.md} ${muted.default}`} />
                     <span className={`${weight.medium} ${size.sm}`}>
                       {isUploadingThumbnail ? 'Generating thumbnail...' : 'Choose image'}
                     </span>
@@ -1125,7 +1151,7 @@ function StepBasicInfo({
                       className="relative inline-block"
                     >
                       <div
-                        className={`relative h-32 w-32 overflow-hidden ${radius.lg} border`}
+                        className={`relative ${squareSize.avatar4xl} ${overflow.hidden} ${radius.lg} border`}
                         style={{ borderColor: TOKENS.colors.border.light }}
                       >
                         <Image
@@ -1141,7 +1167,7 @@ function StepBasicInfo({
                         onClick={onRemoveThumbnail}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        className="-right-2 -top-2 absolute flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm"
+                        className={`-right-2 -top-2 absolute flex ${iconSize.lg} ${alignItems.center} ${justify.center} ${radius.full} bg-destructive text-destructive-foreground ${shadow.sm}`}
                         disabled={isUploadingThumbnail}
                       >
                         <X className={iconSize.sm} />
@@ -1193,13 +1219,13 @@ function StepConfiguration({
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
           className={`${marginBottom.default} inline-flex`}
         >
-          <Code className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
+          <Code className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Configuration Details</h2>
+        <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Configuration Details</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
           Type-specific settings for your {submissionType}
         </p>
-        <div className={`${marginTop.default} flex justify-center`}>
+        <div className={`${marginTop.default} flex ${justify.center}`}>
           <StepSocialProof step={3} />
         </div>
       </motion.div>
@@ -1466,13 +1492,13 @@ function StepExamplesTags({
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
           className={`${marginBottom.default} inline-flex`}
         >
-          <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
+          <Sparkles className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Examples & Tags</h2>
+        <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Examples & Tags</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
           Help others understand and discover your submission
         </p>
-        <div className={`${marginTop.default} flex justify-center`}>
+        <div className={`${marginTop.default} flex ${justify.center}`}>
           <StepSocialProof step={4} />
         </div>
       </motion.div>
@@ -1541,14 +1567,14 @@ function StepExamplesTags({
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.9 }}
                         transition={TOKENS.animations.spring.snappy}
-                        className={`group ${row.default} ${radius.lg} border ${padding.compact} transition-all hover:border-accent-primary/50`}
+                        className={`group ${row.default} ${radius.lg} border ${padding.compact} ${transition.all} hover:border-accent-primary/50`}
                         style={{
                           backgroundColor: TOKENS.colors.background.primary,
                           borderColor: TOKENS.colors.border.default,
                         }}
                       >
                         <div
-                          className={`${marginTop.micro} flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${weight.bold} ${size.xs}`}
+                          className={`${marginTop.micro} flex ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${weight.bold} ${size.xs}`}
                           style={{
                             backgroundColor: `${TOKENS.colors.accent.primary}20`,
                             color: TOKENS.colors.accent.primary,
@@ -1556,13 +1582,13 @@ function StepExamplesTags({
                         >
                           {index + 1}
                         </div>
-                        <span className={`flex-1 ${size.sm} leading-relaxed`}>{example}</span>
+                        <span className={`flex-1 ${size.sm} ${leading.relaxed}`}>{example}</span>
                         <motion.button
                           type="button"
                           onClick={() => removeExample(index)}
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className={`shrink-0 rounded-full ${padding.micro} opacity-0 transition-all group-hover:opacity-100`}
+                          className={`shrink-0 ${radius.full} ${padding.micro} ${opacityLevel[0]} ${transition.all} group-hover:opacity-100`}
                           style={{
                             color: TOKENS.colors.error.text,
                           }}
@@ -1577,12 +1603,12 @@ function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`${radius.lg} border border-dashed ${padding.relaxed} text-center`}
+                  className={`${radius.lg} ${border.dashed} ${padding.relaxed} text-center`}
                   style={{
                     borderColor: TOKENS.colors.border.light,
                   }}
                 >
-                  <Code className={`mx-auto mb-3 h-10 w-10 ${muted.default}`} />
+                  <Code className={`mx-auto ${marginBottom.compact} ${iconSize['2xl']} ${muted.default}`} />
                   <p className={muted.sm}>
                     No examples yet. Add some to help users understand!
                   </p>
@@ -1653,7 +1679,7 @@ function StepExamplesTags({
             {/* Tags List */}
             <AnimatePresence mode="popLayout">
               {data.tags.length > 0 ? (
-                <div className={`flex flex-wrap ${gap.compact}`}>
+                <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
                   {data.tags.map((tag) => {
                     // Use tag content as key (tags should be unique)
                     const tagKey = `tag-${tag}`;
@@ -1684,7 +1710,7 @@ function StepExamplesTags({
                                 removeTag(tagIndex);
                               }
                             }}
-                            className={`ml-1 rounded-full ${padding.hair} transition-colors hover:bg-accent-primary/20`}
+                            className={`ml-1 ${radius.full} ${padding.hair} ${transition.colors} hover:bg-accent-primary/20`}
                           >
                             <X className={iconSize.xs} />
                           </button>
@@ -1697,12 +1723,12 @@ function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`${radius.lg} border border-dashed ${padding.comfortable} text-center`}
+                  className={`${radius.lg} ${border.dashed} ${padding.comfortable} text-center`}
                   style={{
                     borderColor: TOKENS.colors.border.light,
                   }}
                 >
-                  <Tag className={`mx-auto mb-2 h-8 w-8 ${muted.default}`} />
+                  <Tag className={`mx-auto ${marginBottom.tight} ${iconSize.xl} ${muted.default}`} />
                   <p className={muted.sm}>
                     No tags yet. Add tags to improve discoverability!
                   </p>

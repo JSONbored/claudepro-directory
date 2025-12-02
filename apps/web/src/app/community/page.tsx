@@ -1,8 +1,28 @@
 import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, grid, animate, spaceY, muted, marginBottom, weight, radius , size  , gap , padding , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  grid,
+  iconSize,
+  spaceY,
+  muted,
+  marginBottom,
+  weight,
+  size,
+  gap,
+  padding,
+  minHeight,
+  maxWidth,
+  bgColor,
+  textColor,
+  justify,
+  borderColor,
+  flexWrap,
+  overflow,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Github,
+  type IconComponent,
   Layers,
   MessageCircle,
   MessageSquare,
@@ -17,20 +37,11 @@ import {
   getHomepageCategoryIds,
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
-import { UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
+import { UnifiedBadge, Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
-  {
-    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
-  }
-);
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -131,19 +142,19 @@ export default async function CommunityPage() {
 
   const statCards = [
     {
-      icon: Layers,
+      icon: Layers as IconComponent,
       title: 'Configurations',
       value: formatStatValue(totalConfigurations),
       description: 'Published Claude setups in the directory',
     },
     {
-      icon: MessageCircle,
+      icon: MessageCircle as IconComponent,
       title: 'Contributors',
       value: formatStatValue(totalContributors),
       description: 'Builders sharing agents, MCP servers, and hooks',
     },
     {
-      icon: Users,
+      icon: Users as IconComponent,
       title: 'Community Members',
       value: formatStatValue(memberCount),
       description: 'Discord, newsletter, and directory members',
@@ -151,43 +162,43 @@ export default async function CommunityPage() {
   ];
 
   return (
-    <div className={`${minHeight.screen} bg-background`}>
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Hero Section */}
-      <section className={`relative overflow-hidden ${padding.xDefault} ${padding.yXl}`}>
+      <section className={`relative ${overflow.hidden} ${padding.xDefault} ${padding.yXl}`}>
         <div className="container mx-auto text-center">
           <div className={`mx-auto ${maxWidth['3xl']}`}>
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={`${marginBottom.comfortable} border-accent/20 bg-accent/5 text-accent`}
+              className={`${marginBottom.comfortable} ${borderColor['accent/20']} ${bgColor['accent/5']} ${textColor.accent}`}
             >
-              <Users className="mr-1 h-3 w-3 text-accent" />
+              <Users className={`mr-1 ${iconSize.xs} ${textColor.accent}`} />
               Community
             </UnifiedBadge>
 
-            <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:text-6xl`}>Join the Claude Community</h1>
+            <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:${size['6xl']}`}>Join the Claude Community</h1>
 
-            <p className={`mx-auto mb-8 ${maxWidth['2xl']} ${muted.lg}`}>
+            <p className={`mx-auto ${marginBottom.relaxed} ${maxWidth['2xl']} ${muted.lg}`}>
               Connect with developers and AI enthusiasts building with Claude. Share your
               configurations, learn from the community, and contribute to our open-source directory.
             </p>
 
-            <div className={`flex flex-wrap justify-center ${gap.comfortable}`}>
+            <div className={`flex ${flexWrap.wrap} ${justify.center} ${gap.comfortable}`}>
               {channels.github ? <Button size="lg" asChild>
                   <a href={channels.github} target="_blank" rel="noopener noreferrer">
-                    <Github className="mr-2 h-5 w-5" />
+                    <Github className={`mr-2 ${iconSize.md}`} />
                     GitHub
                   </a>
                 </Button> : null}
               {channels.discord ? <Button size="lg" variant="outline" asChild>
                   <a href={channels.discord} target="_blank" rel="noopener noreferrer">
-                    <MessageSquare className="mr-2 h-5 w-5" />
+                    <MessageSquare className={`mr-2 ${iconSize.md}`} />
                     Discord
                   </a>
                 </Button> : null}
               {channels.twitter ? <Button size="lg" variant="outline" asChild>
                   <a href={channels.twitter} target="_blank" rel="noopener noreferrer">
-                    <Twitter className="mr-2 h-5 w-5" />X (Twitter)
+                    <Twitter className={`mr-2 ${iconSize.md}`} />X (Twitter)
                   </a>
                 </Button> : null}
             </div>
@@ -203,7 +214,7 @@ export default async function CommunityPage() {
               <Card key={title}>
                 <CardHeader>
                   <CardTitle className={cluster.compact}>
-                    <Icon className="h-5 w-5 text-primary" />
+                    <Icon className={`${iconSize.md} ${textColor.primary}`} />
                     {title}
                   </CardTitle>
                 </CardHeader>

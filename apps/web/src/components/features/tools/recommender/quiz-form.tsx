@@ -10,7 +10,29 @@ import { Constants } from '@heyclaude/database-types';
 import { getQuizConfigurationAction } from '@heyclaude/web-runtime/actions';
 import { generateConfigRecommendations, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
-import { spaceY, cluster, between, iconLeading, iconSize, muted, marginTop, helper, weight, radius ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  bgColor,
+  borderColor,
+  cluster,
+  gap,
+  helper,
+  iconLeading,
+  iconSize,
+  alignItems,
+  justify,
+  marginTop,
+  muted,
+  opacityLevel,
+  overflow,
+  padding,
+  radius,
+  size,
+  spaceY,
+  textColor,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';
@@ -76,7 +98,8 @@ function mapQuizConfigToQuestions(config: QuizConfigurationResult | null): QuizQ
 }
 
 import { ArrowLeft, ArrowRight, Sparkles } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
+import { toasts } from '@heyclaude/web-runtime/ui';
+import { minWidth } from '@heyclaude/web-runtime/design-system';
 import { InlineSpinner } from '@heyclaude/web-runtime/ui';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
@@ -295,7 +318,7 @@ export function QuizForm() {
 
   if (!quizConfig) {
     return (
-      <div className={`flex items-center justify-center ${padding.section}`}>
+      <div className={`flex ${alignItems.center} ${justify.center} ${padding.section}`}>
         <InlineSpinner size="lg" />
       </div>
     );
@@ -329,7 +352,7 @@ export function QuizForm() {
         percentComplete={progressPercentage}
       />
 
-      <Card className="relative overflow-hidden">
+      <Card className={`relative ${overflow.hidden}`}>
         <CardHeader>
           <CardTitle className={cluster.compact}>
             <span className={muted.sm}>
@@ -347,7 +370,7 @@ export function QuizForm() {
               })}
             >
               <div className={spaceY.comfortable}>
-                <div className={`${spaceY.compact} ${radius.lg} bg-muted ${padding.default}`}>
+                <div className={`${spaceY.compact} ${radius.lg} ${bgColor.muted} ${padding.default}`}>
                   <div>
                     <span className={weight.medium}>Use Case:</span>{' '}
                     <span className={muted.default}>
@@ -388,10 +411,10 @@ export function QuizForm() {
                   )}
                 </div>
 
-                <Card className="border-primary/20 bg-primary/5">
+                <Card className={`border-primary/20 ${bgColor['primary/5']}`}>
                   <CardHeader>
                     <CardTitle className={`${cluster.compact} ${size.lg}`}>
-                      <Sparkles className={`${iconSize.md} text-primary`} />
+                      <Sparkles className={`${iconSize.md} ${textColor.primary}`} />
                       What happens next?
                     </CardTitle>
                   </CardHeader>
@@ -443,12 +466,12 @@ export function QuizForm() {
                         }
                       }}
                       disabled={!canSelect}
-                      className={`${radius.lg} border-2 ${padding.default} text-left transition-all ${
+                      className={`${radius.lg} border-2 ${padding.default} text-left ${transition.all} ${
                         isSelected
-                          ? 'border-primary bg-primary/5'
+                          ? `${borderColor.primary} ${bgColor['primary/5']}`
                           : canSelect
-                            ? 'border-border hover:border-primary/50'
-                            : 'cursor-not-allowed border-border opacity-50'
+                            ? `${borderColor.border} hover:border-primary/50`
+                            : `cursor-not-allowed ${borderColor.border} ${opacityLevel[50]}`
                       }`}
                     >
                       <div className={weight.medium}>{option.label}</div>
@@ -478,14 +501,14 @@ export function QuizForm() {
             {currentQuestion < totalQuestions ? (
               <Button type="button" onClick={goToNext} disabled={isPending}>
                 Next
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className={`ml-2 ${iconSize.sm}`} />
               </Button>
             ) : (
               <Button
                 type="button"
                 onClick={handleSubmit}
                 disabled={isPending}
-                className={DIMENSIONS.MIN_W_INPUT}
+                className={minWidth.input}
               >
                 {isPending ? (
                   <InlineSpinner size="sm" message="Generating..." />

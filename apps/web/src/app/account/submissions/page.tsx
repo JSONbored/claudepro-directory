@@ -5,15 +5,36 @@ import {
   getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, iconSize, submissionBadge, spaceY, muted, marginBottom, marginTop, iconLeading, weight ,size  , gap , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
-import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
+import {
+  between,
+  flexDir,
+  flexGrow,
+  gap,
+  iconLeading,
+  iconSize,
+  alignItems,
+  marginBottom,
+  marginTop,
+  maxWidth,
+  muted,
+  padding,
+  size,
+  spaceY,
+  submissionBadge,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
+import { CheckCircle, Clock, GitPullRequest, type IconComponent, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, Button ,
+import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
+  CardTitle,
+  UnifiedBadge,
+} from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 import Link from 'next/link';
 
@@ -291,16 +312,16 @@ export default async function SubmissionsPage() {
     return (ALLOWED_TYPES as readonly string[]).includes(type);
   }
 
-  // Use Constants for enum values in Record keys
+  // Use string literals for enum values in Record keys (safer than array indices)
   const SUBMISSION_STATUS_VARIANTS: Record<
     Database['public']['Enums']['submission_status'],
-    { icon: typeof Clock; label: string }
+    { icon: IconComponent; label: string }
   > = {
-    [Constants.public.Enums.submission_status[0]]: { icon: Clock, label: 'Pending Review' }, // 'pending'
-    [Constants.public.Enums.submission_status[1]]: { icon: CheckCircle, label: 'Approved' }, // 'approved'
-    [Constants.public.Enums.submission_status[4]]: { icon: CheckCircle, label: 'Merged ✓' }, // 'merged'
-    [Constants.public.Enums.submission_status[2]]: { icon: XCircle, label: 'Rejected' }, // 'rejected'
-    [Constants.public.Enums.submission_status[3]]: { icon: XCircle, label: 'Spam' }, // 'spam'
+    pending: { icon: Clock as IconComponent, label: 'Pending Review' },
+    approved: { icon: CheckCircle as IconComponent, label: 'Approved' },
+    merged: { icon: CheckCircle as IconComponent, label: 'Merged ✓' },
+    rejected: { icon: XCircle as IconComponent, label: 'Rejected' },
+    spam: { icon: XCircle as IconComponent, label: 'Spam' },
   };
 
   const getStatusBadge = (status: Database['public']['Enums']['submission_status']) => {
@@ -317,15 +338,15 @@ export default async function SubmissionsPage() {
   };
 
   const getTypeLabel = (type: Database['public']['Enums']['submission_type']): string => {
-    // Use Constants for enum values in Record keys
+    // Use string literals for enum values in Record keys (safer than array indices)
     const labels: Record<Database['public']['Enums']['submission_type'], string> = {
-      [Constants.public.Enums.submission_type[0]]: 'Claude Agent', // 'agents'
-      [Constants.public.Enums.submission_type[1]]: 'MCP Server', // 'mcp'
-      [Constants.public.Enums.submission_type[2]]: 'Claude Rule', // 'rules'
-      [Constants.public.Enums.submission_type[3]]: 'Command', // 'commands'
-      [Constants.public.Enums.submission_type[4]]: 'Hook', // 'hooks'
-      [Constants.public.Enums.submission_type[5]]: 'Statusline', // 'statuslines'
-      [Constants.public.Enums.submission_type[6]]: 'Skill', // 'skills'
+      agents: 'Claude Agent',
+      mcp: 'MCP Server',
+      rules: 'Claude Rule',
+      commands: 'Command',
+      hooks: 'Hook',
+      statuslines: 'Statusline',
+      skills: 'Skill',
     };
     return labels[type];
   };
@@ -357,7 +378,7 @@ export default async function SubmissionsPage() {
     status: Database['public']['Enums']['submission_status']
   ): null | { href: string } {
     const safeUrl = getSafeContentUrl(type, slug);
-    return safeUrl && status === Constants.public.Enums.submission_status[4] ? { href: safeUrl } : null; // 'merged'
+    return safeUrl && status === 'merged' ? { href: safeUrl } : null;
   }
 
   // Log any submissions with missing IDs for data integrity monitoring
@@ -388,8 +409,8 @@ export default async function SubmissionsPage() {
 
       {submissions.length === 0 ? (
         <Card>
-          <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
-            <Send className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+          <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+            <Send className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
             <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No submissions yet</h3>
             <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
               Share your Claude configurations with the community! Your contributions help everyone
@@ -431,7 +452,7 @@ export default async function SubmissionsPage() {
         <CardContent className="pt-6">
           <div className={`flex ${gap.default}`}>
             <GitPullRequest
-              className={`${iconSize.md} text-blue-600 mt-0.5 shrink-0`}
+              className={`${iconSize.md} ${textColor.blue} ${marginTop.micro} ${flexGrow.shrink0}`}
             />
             <div className="flex-1">
               <p className={`${weight.medium} text-blue-400 ${size.sm}`}>How it works</p>

@@ -10,7 +10,21 @@ import {
   getUserJobById,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, jobStatusBadge, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , radius } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  bgColor,
+  gap,
+  iconSize,
+  jobStatusBadge,
+  marginBottom,
+  marginTop,
+  muted,
+  padding,
+  radius,
+  size,
+  spaceY,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UnifiedBadge, Button ,
@@ -183,7 +197,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
       <div>
         <Button variant="ghost" size="sm" asChild className={marginBottom.default}>
           <Link href={ROUTES.ACCOUNT_JOBS}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className={`mr-2 ${iconSize.sm}`} />
             Back to Jobs
           </Link>
         </Button>
@@ -194,7 +208,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
           </div>
           {job.slug ? <Button variant="outline" asChild>
               <Link href={`${ROUTES.JOBS}/${job.slug}`}>
-                <ExternalLink className="mr-2 h-4 w-4" />
+                <ExternalLink className={`mr-2 ${iconSize.sm}`} />
                 View Listing
               </Link>
             </Button> : null}
@@ -278,8 +292,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
         <CardContent>
           <div className={spaceY.comfortable}>
             {viewCount === 0 && (
-              <div className={`${radius.lg} bg-muted/50 ${padding.default}`}>
-                <p className="text-sm">
+              <div className={`${radius.lg} ${bgColor['muted/50']} ${padding.default}`}>
+                <p className={size.sm}>
                   Your job listing hasn't received any views yet. Try sharing it on social media or
                   updating the description to make it more discoverable.
                 </p>
@@ -288,7 +302,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
 
             {viewCount > 0 && clickCount === 0 && (
               <div className={`${radius.lg} border border-yellow-500/20 bg-yellow-500/10 ${padding.default}`}>
-                <p className="text-sm text-yellow-400">
+                <p className={`${size.sm} text-yellow-400`}>
                   Your listing is getting views but no clicks. Consider:
                 </p>
                 <ul className={`${marginTop.compact} ml-4 list-disc ${size.sm} text-yellow-400`}>

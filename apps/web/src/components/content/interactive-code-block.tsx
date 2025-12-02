@@ -25,7 +25,32 @@ import {
   Share2,
   Twitter,
 } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, codeBlock, border, radius, muted  , padding , gap , weight , size } from '@heyclaude/web-runtime/design-system';
+import {
+  animateDuration,
+  backdrop,
+  bgColor,
+  border,
+  borderTop,
+  cluster,
+  codeBlock,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  muted,
+  overflow,
+  padding,
+  radius,
+  shadow,
+  size,
+  textColor,
+  tracking,
+  transition,
+  weight,
+  zLayer,
+} from '@heyclaude/web-runtime/design-system';
 import {
   copyScreenshotToClipboard,
   copyShareLink,
@@ -129,11 +154,11 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`absolute right-0 top-full z-50 mt-2 w-56 ${radius.lg} ${border.default} bg-card/95 ${padding.tight} shadow-xl backdrop-blur-md`}
+      className={`absolute right-0 top-full ${zLayer.modal} ${marginTop.compact} w-56 ${radius.lg} ${border.default} bg-card/95 ${padding.tight} ${shadow.xl} ${backdrop.md}`}
       onMouseLeave={onMouseLeave}
     >
       {/* Twitter Share */}
-      <div className="share-button-wrapper mb-1">
+      <div className={`share-button-wrapper ${marginBottom.micro}`}>
         <TwitterShareButton
           url={generateShareUrl({
             url: currentUrl,
@@ -151,7 +176,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           })}
           onClick={() => onShare('twitter')}
         >
-          <div className={`flex w-full items-center ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} ${size.sm} transition-all hover:bg-accent/15`}>
+          <div className={`flex w-full ${alignItems.center} ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} ${size.sm} ${transition.all} hover:bg-accent/15`}>
             <div className={`${codeBlock.socialIconWrapper} bg-[#1DA1F2]/20`}>
               <Twitter className={`${iconSize.xs} text-[#1DA1F2]`} />
             </div>
@@ -161,7 +186,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
       </div>
 
       {/* LinkedIn Share */}
-      <div className="share-button-wrapper mb-1">
+      <div className={`share-button-wrapper ${marginBottom.micro}`}>
         <LinkedinShareButton
           url={generateShareUrl({
             url: currentUrl,
@@ -180,7 +205,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           summary={`Check out this ${category} resource on claudepro.directory`}
           onClick={() => onShare('linkedin')}
         >
-          <div className={`flex w-full items-center ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} ${size.sm} transition-all hover:bg-accent/15`}>
+          <div className={`flex w-full ${alignItems.center} ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} ${size.sm} ${transition.all} hover:bg-accent/15`}>
             <div className={`${codeBlock.socialIconWrapper} bg-[#0A66C2]/20`}>
               <Linkedin className={`${iconSize.xs} text-[#0A66C2]`} />
             </div>
@@ -193,9 +218,9 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
       <button
         type="button"
         onClick={() => onShare('copy_link')}
-        className={`flex w-full items-center ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} text-foreground ${size.sm} transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]`}
+        className={`flex w-full ${alignItems.center} ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} ${textColor.foreground} ${size.sm} ${transition.all} hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]`}
       >
-        <div className={`${codeBlock.socialIconWrapper} bg-accent/20`}>
+        <div className={`${codeBlock.socialIconWrapper} ${bgColor['accent/20']}`}>
           <Copy className={iconSize.xs} />
         </div>
         <span>Copy Link</span>
@@ -594,7 +619,7 @@ export function ProductionCodeBlock({
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className={`${iconSize.xs} text-green-500`} />
+                <Check className={`${iconSize.xs} ${textColor.green}`} />
               ) : (
                 <Copy className={`${iconSize.xs} ${muted.default}`} />
               )}
@@ -612,7 +637,7 @@ export function ProductionCodeBlock({
 
             {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' && (
-              <div className={`px-2 ${padding.yHair} ${weight.semibold} text-[10px] ${muted.default} uppercase tracking-wider`}>
+              <div className={`px-2 ${padding.yHair} ${weight.semibold} ${size['2xs']} ${muted.default} uppercase ${tracking.wider}`}>
                 {language}
               </div>
             )}
@@ -623,14 +648,14 @@ export function ProductionCodeBlock({
       {/* Code block container - Polar-style clean design */}
       <div
         ref={codeBlockRef}
-        className={`relative overflow-hidden ${radius.lg} ${border.default} transition-[height] duration-300 ease-in-out`}
+        className={`relative ${overflow.hidden} ${radius.lg} ${border.default} transition-[height] ${animateDuration.slow} ease-in-out`}
         style={{
           height: needsCollapse && !isExpanded ? maxHeight : 'auto',
         }}
       >
         {/* Top-right action buttons + badge (when no filename header) */}
         {!filename && (
-          <div className={`absolute right-4 top-4 z-20 ${cluster.tight}`}>
+          <div className={`absolute right-4 top-4 ${zLayer.sticky} ${cluster.tight}`}>
             {/* Screenshot button */}
             <motion.button
               type="button"
@@ -675,7 +700,7 @@ export function ProductionCodeBlock({
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className={`${iconSize.xs} text-green-500`} />
+                <Check className={`${iconSize.xs} ${textColor.green}`} />
               ) : (
                 <Copy className={`${iconSize.xs} ${muted.default}`} />
               )}
@@ -693,7 +718,7 @@ export function ProductionCodeBlock({
 
             {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' && (
-              <div className={`px-2 ${padding.yHair} ${weight.semibold} text-[10px] ${muted.default} uppercase tracking-wider`}>
+              <div className={`px-2 ${padding.yHair} ${weight.semibold} ${size['2xs']} ${muted.default} uppercase ${tracking.wider}`}>
                 {language}
               </div>
             )}
@@ -703,7 +728,7 @@ export function ProductionCodeBlock({
         {/* Gradient fade when collapsed */}
         {needsCollapse && !isExpanded && (
           <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-20 bg-gradient-to-b from-transparent to-[#1e1e1e] dark:to-[#1e1e1e] [html[data-theme='light']_&]:to-[#fafafa]"
+            className={`pointer-events-none absolute inset-x-0 bottom-0 ${zLayer.raised} h-20 bg-gradient-to-b from-transparent to-[#1e1e1e] dark:to-[#1e1e1e] [html[data-theme='light']_&]:to-[#fafafa]`}
           />
         )}
 
@@ -722,10 +747,10 @@ export function ProductionCodeBlock({
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`flex w-full items-center justify-center ${gap.snug} border-border/40 border-t ${padding.yCompact} ${muted.default} ${size.xs} transition-colors hover:text-foreground`}
+          className={`flex w-full ${alignItems.center} ${justify.center} ${gap.snug} ${borderTop.subtle} ${padding.yCompact} ${muted.default} ${size.xs} ${transition.colors} hover:text-foreground`}
         >
           <ChevronDown 
-            className={`h-3.5 w-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+            className={`${iconSize.xsPlus} ${transition.transform} ${animateDuration.default} ${isExpanded ? 'rotate-180' : ''}`}
           />
           <span>
             {isExpanded ? 'Collapse' : `Show ${code.split('\n').length} lines`}

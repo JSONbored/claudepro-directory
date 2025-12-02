@@ -15,7 +15,29 @@
  */
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
-import { cluster, marginBottom, marginTop, muted, weight, radius ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  borderColor,
+  cluster,
+  flexGrow,
+  gap,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  muted,
+  opacityLevel,
+  overflow,
+  padding,
+  radius,
+  iconSize,
+  size,
+  textColor,
+  transition,
+  weight,
+  zLayer,
+  skeletonSize,
+} from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { motion } from 'motion/react';
@@ -56,7 +78,7 @@ export function ProgressIndicator({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`${marginBottom.default} flex items-center justify-between ${radius.lg} border border-border/50 bg-background-secondary ${padding.compact}`}
+          className={`${marginBottom.default} flex ${alignItems.center} ${justify.between} ${radius.lg} border ${borderColor['border/50']} bg-background-secondary ${padding.compact}`}
           style={{
             borderColor: TOKENS.colors.border.light,
             backgroundColor: TOKENS.colors.background.secondary,
@@ -64,9 +86,9 @@ export function ProgressIndicator({
         >
           <span className={muted.sm}>Form Completion</span>
           <div className={cluster.compact}>
-            <div className="h-2 w-32 overflow-hidden rounded-full bg-background">
+            <div className={`${skeletonSize.progressBar} ${overflow.hidden} ${radius.full} ${bgColor.background}`}>
               <motion.div
-                className="h-full rounded-full"
+                className={`h-full ${radius.full}`}
                 initial={{ width: 0 }}
                 animate={{ width: `${qualityScore}%` }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -88,9 +110,9 @@ export function ProgressIndicator({
       )}
 
       {/* Progress Bar */}
-      <div className="relative mb-8 h-1 w-full overflow-hidden rounded-full bg-background">
+      <div className={`relative ${marginBottom.relaxed} h-1 w-full ${overflow.hidden} ${radius.full} ${bgColor.background}`}>
         <motion.div
-          className="absolute top-0 left-0 h-full rounded-full"
+          className={`absolute top-0 left-0 h-full ${radius.full}`}
           initial={{ width: 0 }}
           animate={{ width: `${progressPercentage}%` }}
           transition={TOKENS.animations.spring.smooth}
@@ -102,19 +124,19 @@ export function ProgressIndicator({
       </div>
 
       {/* Step Indicators - Desktop */}
-      <div className="hidden items-center justify-between md:flex">
+      <div className={`hidden ${alignItems.center} ${justify.between} md:flex`}>
         {steps.map((step, index) => (
-          <div key={step.id} className="flex flex-1 items-center">
+          <div key={step.id} className={`flex ${flexGrow['1']} ${alignItems.center}`}>
             {/* Step Circle */}
             <button
               type="button"
               onClick={() => step.isAccessible && onStepClick?.(step.number)}
               disabled={!step.isAccessible}
               className={cn(
-                'group relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all',
+                `group relative flex ${iconSize['2xl']} ${alignItems.center} ${justify.center} ${radius.full} border-2 ${transition.all}`,
                 step.isCurrent && 'scale-110',
                 step.isAccessible && 'cursor-pointer hover:scale-110',
-                !step.isAccessible && 'cursor-not-allowed opacity-50'
+                !step.isAccessible && `cursor-not-allowed ${opacityLevel[50]}`
               )}
               style={{
                 borderColor:
@@ -135,7 +157,7 @@ export function ProgressIndicator({
                   animate={{ scale: 1, rotate: 0 }}
                   transition={TOKENS.animations.spring.bouncy}
                 >
-                  <CheckCircle className="h-5 w-5 text-white" />
+                  <CheckCircle className={`${iconSize.md} ${textColor.white}`} />
                 </motion.div>
               ) : (
                 <span
@@ -151,7 +173,7 @@ export function ProgressIndicator({
               {/* Tooltip on hover */}
               {step.description && step.isAccessible && (
                 <div
-                  className={`-top-12 -translate-x-1/2 pointer-events-none absolute left-1/2 z-50 whitespace-nowrap rounded-md ${padding.xCompact} ${padding.ySnug} ${size.xs} opacity-0 transition-opacity group-hover:opacity-100`}
+                  className={`-top-12 -translate-x-1/2 pointer-events-none absolute left-1/2 ${zLayer.modal} whitespace-nowrap ${radius.md} ${padding.xCompact} ${padding.ySnug} ${size.xs} ${opacityLevel[0]} ${transition.opacity} group-hover:opacity-100`}
                   style={{
                     backgroundColor: TOKENS.colors.background.elevated,
                     border: `1px solid ${TOKENS.colors.border.medium}`,
@@ -164,7 +186,7 @@ export function ProgressIndicator({
             </button>
 
             {/* Label */}
-            <div className="ml-3 flex-1">
+            <div className={`ml-3 ${flexGrow['1']}`}>
               <div
                 className={cn(
                   `${weight.medium} ${size.sm}`,
@@ -177,13 +199,13 @@ export function ProgressIndicator({
 
             {/* Connector Line */}
             {index < steps.length - 1 && (
-              <div className="relative mx-4 h-0.5 flex-1">
+              <div className={`relative mx-4 h-0.5 ${flexGrow['1']}`}>
                 <div
-                  className="absolute inset-0 rounded-full"
+                  className={`absolute inset-0 ${radius.full}`}
                   style={{ backgroundColor: TOKENS.colors.border.default }}
                 />
                 <motion.div
-                  className="absolute inset-0 rounded-full"
+                  className={`absolute inset-0 ${radius.full}`}
                   initial={{ scaleX: 0 }}
                   animate={{
                     scaleX: step.isCompleted ? 1 : 0,
@@ -201,7 +223,7 @@ export function ProgressIndicator({
       </div>
 
       {/* Step Indicators - Mobile (Compact) */}
-      <div className={`flex items-center justify-center ${gap.compact} md:hidden`}>
+      <div className={`flex ${alignItems.center} ${justify.center} ${gap.compact} md:hidden`}>
         {steps.map((step) => (
           <button
             key={step.id}
@@ -209,10 +231,10 @@ export function ProgressIndicator({
             onClick={() => step.isAccessible && onStepClick?.(step.number)}
             disabled={!step.isAccessible}
             className={cn(
-              'flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all',
+              `flex ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} border-2 ${transition.all}`,
               step.isCurrent && 'scale-125',
               step.isAccessible && 'cursor-pointer',
-              !step.isAccessible && 'cursor-not-allowed opacity-50'
+              !step.isAccessible && `cursor-not-allowed ${opacityLevel[50]}`
             )}
             style={{
               borderColor:
@@ -230,7 +252,7 @@ export function ProgressIndicator({
             title={step.label}
           >
             {step.isCompleted ? (
-              <CheckCircle className="h-4 w-4 text-white" />
+              <CheckCircle className={`${iconSize.sm} ${textColor.white}`} />
             ) : (
               <span
                 className={cn(
@@ -247,7 +269,7 @@ export function ProgressIndicator({
 
       {/* Current Step Label - Mobile Only */}
       <div className={`${marginTop.default} text-center md:hidden`}>
-        <div className={`${weight.medium} text-foreground ${size.sm}`}>
+        <div className={`${weight.medium} ${textColor.foreground} ${size.sm}`}>
           {steps.find((s) => s.isCurrent)?.label || 'Step'}
         </div>
         <div className={`${marginTop.tight} ${muted.default} ${size.xs}`}>

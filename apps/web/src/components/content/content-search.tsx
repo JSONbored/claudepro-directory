@@ -20,7 +20,12 @@ const UnifiedSearch = dynamic(
 );
 
 import type { Database } from '@heyclaude/database-types';
-import { spaceY, marginBottom, weight, muted ,size  , gap , padding } from '@heyclaude/web-runtime/design-system';
+import { iconSize, spaceY, marginBottom, weight, muted, size, gap, padding, shadow, borderColor,
+  flexWrap,
+  tracking,
+  justify,
+  radius,
+} from '@heyclaude/web-runtime/design-system';
 import type { UnifiedSearchFilters } from '@heyclaude/web-runtime';
 import { searchUnifiedClient } from '@heyclaude/web-runtime/data';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
@@ -524,12 +529,12 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
           />
         </ErrorBoundary>
       ) : (
-        <div className={`rounded-3xl border border-border/60 bg-card/40 ${padding.relaxed} text-center shadow-inner`}>
+        <div className={`${radius['3xl']} border ${borderColor['border/60']} bg-card/40 ${padding.relaxed} text-center ${shadow.inner}`}>
           {(() => {
             const IconComponent = ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
             return (
               <IconComponent
-                className={`mx-auto mb-4 h-16 w-16 ${muted.default}/50`}
+                className={`mx-auto ${marginBottom.default} ${iconSize['4xl']} ${muted.default}/50`}
                 aria-hidden="true"
               />
             );
@@ -541,8 +546,8 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
 
           {quickFiltersAvailable && (
             <div className={`${marginBottom.comfortable} ${spaceY.compact}`}>
-              <p className={`${muted.default} ${size.xs} uppercase tracking-wide`}>Quick filters</p>
-              <div className={`flex flex-wrap justify-center ${gap.compact}`}>
+              <p className={`${muted.default} ${size.xs} uppercase ${tracking.wide}`}>Quick filters</p>
+              <div className={`flex ${flexWrap.wrap} ${justify.center} ${gap.compact}`}>
                 {resolvedQuickTagOptions.map((tag) => (
                   <Button
                     key={`tag-${tag}`}
@@ -582,7 +587,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
 
           {visibleFallbackSuggestions.length > 0 && (
             <div className={`${spaceY.default} text-left`}>
-              <p className={`${muted.default} ${size.xs} uppercase tracking-wide`}>
+              <p className={`${muted.default} ${size.xs} uppercase ${tracking.wide}`}>
                 Trending &nbsp;•&nbsp; Suggested picks
               </p>
               <ErrorBoundary>

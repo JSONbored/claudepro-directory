@@ -5,7 +5,20 @@ import {
   getSponsorshipAnalytics,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, absolute, spaceY, muted, weight ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  absolute,
+  bgColor,
+  cluster,
+  gap,
+  alignItems,
+  muted,
+  overflow,
+  padding,
+  size,
+  spaceY,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UnifiedBadge, Button ,
   Card,
@@ -285,48 +298,50 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
         </CardHeader>
         <CardContent>
           <div className={spaceY.compact}>
-            {Array.from({ length: 30 }).map((_, index) => {
-              const date = new Date();
-              date.setDate(date.getDate() - (29 - index));
-              const dayKey = date.toISOString().slice(0, 10); // Extract YYYY-MM-DD
-              const impressions = impressionsMap.get(dayKey) ?? 0;
-              const clicks = clicksMap.get(dayKey) ?? 0;
+            {(() => {
               const maxImpressions = Math.max(...impressionsMap.values(), 1);
+              return Array.from({ length: 30 }).map((_, index) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (29 - index));
+                const dayKey = date.toISOString().slice(0, 10); // Extract YYYY-MM-DD
+                const impressions = impressionsMap.get(dayKey) ?? 0;
+                const clicks = clicksMap.get(dayKey) ?? 0;
 
-              return (
-                <div key={dayKey} className={`grid grid-cols-12 items-center ${gap.compact}`}>
+                return (
+                <div key={dayKey} className={`grid grid-cols-12 ${alignItems.center} ${gap.compact}`}>
                   <div className={`col-span-2 ${muted.default} ${size.xs}`}>
                     {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                   <div className={`col-span-10 grid grid-cols-2 ${gap.tight}`}>
                     {/* Impressions bar */}
-                    <div className="relative h-8 overflow-hidden rounded bg-muted">
+                    <div className={`relative h-8 ${overflow.hidden} rounded ${bgColor.muted}`}>
                       <div
-                        className={`${absolute.topLeft} h-full bg-primary/30 transition-all`}
+                        className={`${absolute.topLeft} h-full bg-primary/30 ${transition.all}`}
                         style={{ width: `${(impressions / maxImpressions) * 100}%` }}
                       />
                       <div
-                        className={`${absolute.inset} flex items-center ${padding.xTight} ${size.xs}`}
+                        className={`${absolute.inset} flex ${alignItems.center} ${padding.xTight} ${size.xs}`}
                       >
                         {impressions > 0 && `${impressions} views`}
                       </div>
                     </div>
                     {/* Clicks bar */}
-                    <div className="relative h-8 overflow-hidden rounded bg-muted">
+                    <div className={`relative h-8 ${overflow.hidden} rounded ${bgColor.muted}`}>
                       <div
-                        className={`${absolute.topLeft} h-full bg-accent/50 transition-all`}
+                        className={`${absolute.topLeft} h-full ${bgColor['accent/50']} ${transition.all}`}
                         style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
                       />
                       <div
-                        className={`${absolute.inset} flex items-center ${padding.xTight} ${size.xs}`}
+                        className={`${absolute.inset} flex ${alignItems.center} ${padding.xTight} ${size.xs}`}
                       >
                         {clicks > 0 && `${clicks} clicks`}
                       </div>
                     </div>
                   </div>
                 </div>
-              );
-            })}
+                );
+              });
+            })()}
           </div>
         </CardContent>
       </Card>

@@ -57,6 +57,7 @@
 
 import { useId, useState } from 'react';
 import { cn } from '../../utils.ts';
+import { size } from '../../../design-system/styles/typography.ts';
 import { Input } from '../input.tsx';
 import { Label } from '../label.tsx';
 import { Select, SelectContent, SelectTrigger, SelectValue } from '../select.tsx';
@@ -282,21 +283,21 @@ export function FormField(props: FormFieldProps) {
 
       {/* Helper text */}
       {description && (
-        <p id={descriptionId} className="text-muted-foreground text-xs">
+        <p id={descriptionId} className={`text-muted-foreground ${size.xs}`}>
           {description}
         </p>
       )}
 
       {/* Character count */}
       {showCharCount && maxLength && (
-        <p id={charCountId} className="text-muted-foreground text-xs">
+        <p id={charCountId} className={`text-muted-foreground ${size.xs}`}>
           {currentCharCount}/{maxLength} characters
         </p>
       )}
 
       {/* Error message */}
       {error && errorMessage && (
-        <p id={errorId} className="text-destructive text-xs" role="alert">
+        <p id={errorId} className={`text-destructive ${size.xs}`} role="alert">
           {errorMessage}
         </p>
       )}

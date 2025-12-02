@@ -112,20 +112,4 @@ export const zIndexClass = {
   max: 'z-[100]',
 } as const;
 
-// =============================================================================
-// OVERFLOW UTILITIES
-// =============================================================================
-
-/**
- * Overflow patterns.
- */
-export const overflow = {
-  hidden: 'overflow-hidden',
-  auto: 'overflow-auto',
-  scroll: 'overflow-scroll',
-  xHidden: 'overflow-x-hidden',
-  xAuto: 'overflow-x-auto',
-  yHidden: 'overflow-y-hidden',
-  yAuto: 'overflow-y-auto',
-  visible: 'overflow-visible',
-} as const;
+// NOTE: overflow utilities moved to layout.ts for consolidation

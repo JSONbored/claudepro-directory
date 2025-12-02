@@ -17,7 +17,25 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { colors, animation, muted, padding, radius, weight, size } from '@heyclaude/web-runtime/design-system';
+import {
+  animateDuration,
+  animation,
+  borderColor,
+  colors,
+  flexDir,
+  gap,
+  alignItems,
+  muted,
+  opacityLevel,
+  padding,
+  shadow,
+  radius,
+  size,
+  tracking,
+  transition,
+  weight,
+  zLayer,
+} from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import {
   motion,
@@ -145,14 +163,26 @@ function StatCard({
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
       className={cn(
-        'group relative flex flex-col items-center ${gap.compact} rounded-xl border border-border/30',
-        'bg-gradient-to-br from-background to-muted/10 ${padding.xComfortable} ${padding.yDefault}',
-        'transition-all duration-300 hover:border-accent/40 hover:shadow-lg'
+        `group relative flex border bg-gradient-to-br from-background to-muted/10 transition-all hover:border-accent/40 hover:${shadow.lg}`,
+        flexDir.col,
+        alignItems.center,
+        gap.compact,
+        radius.xl,
+        borderColor['border/30'],
+        padding.xComfortable,
+        padding.yDefault,
+        animateDuration.slow
       )}
     >
       {/* Glow effect on hover */}
       <div
-        className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        className={cn(
+          'pointer-events-none absolute inset-0 group-hover:opacity-100',
+          radius.xl,
+          opacityLevel[0],
+          transition.opacity,
+          animateDuration.slow
+        )}
         style={{
           background: `radial-gradient(circle at 50% 50%, ${categoryColor}20, transparent 70%)`,
         }}
@@ -160,7 +190,7 @@ function StatCard({
 
       {/* Icon */}
       <div
-        className={`relative z-10 ${radius.lg} ${padding.tight} transition-colors duration-200`}
+        className={cn('relative', zLayer.raised, radius.lg, padding.tight, transition.colors, animateDuration.default)}
         style={{
           backgroundColor: `${categoryColor}15`,
           color: categoryColor,
@@ -175,11 +205,11 @@ function StatCard({
         format={stat.format ?? formatCompactNumber}
         isInView={isInView}
         delay={index * 100 + 200}
-        className={`relative z-10 ${weight.bold} ${size['2xl']} tabular-nums tracking-tight`}
+        className={cn('relative tabular-nums', zLayer.raised, weight.bold, size['2xl'], tracking.tight)}
       />
 
       {/* Label */}
-      <span className={cn('relative z-10', muted.sm)}>{stat.label}</span>
+      <span className={cn('relative', zLayer.raised, muted.sm)}>{stat.label}</span>
     </motion.div>
   );
 }
@@ -201,7 +231,7 @@ export function AnimatedStatsRow({ stats, category, className }: AnimatedStatsRo
   return (
     <motion.div
       ref={containerRef}
-      className={cn('grid ${gap.comfortable}', className)}
+      className={cn('grid', gap.comfortable, className)}
       style={{
         gridTemplateColumns: `repeat(${Math.min(stats.length, 4)}, minmax(0, 1fr))`,
       }}

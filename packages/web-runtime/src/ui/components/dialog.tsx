@@ -20,7 +20,10 @@ import { cn } from '../utils.ts';
 import { iconSize } from '../../design-system/styles/icons.ts';
 import { heading, body } from '../../design-system/styles/typography.ts';
 import { fixed, absolute } from '../../design-system/styles/position.ts';
+import { gap, padding } from '../../design-system/styles/layout.ts';
 import { focusRing } from '../../design-system/styles/interactive.ts';
+import { radius } from '../../design-system/styles/radius.ts';
+import { shadow } from '../../design-system/styles/effects.ts';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -76,7 +79,7 @@ const DialogContent = ({
       <DialogPrimitive.Content ref={ref} asChild={true} {...props}>
         <motion.div
           className={cn(
-            `${fixed.center} z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg`,
+            `${fixed.center} z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] ${gap.comfortable} border bg-background ${padding.comfortable} ${shadow.lg} sm:${radius.lg}`,
             className
           )}
           initial={{ opacity: 0, scale: 0.95, y: '-48%' }}
@@ -88,7 +91,7 @@ const DialogContent = ({
           <DialogPrimitive.Close
             className={cn(
               absolute.topRightOffsetXl,
-              'rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100',
+              `${radius.sm} opacity-70 ring-offset-background transition-opacity hover:opacity-100`,
               focusRing.offset,
               'disabled:opacity-50 disabled:pointer-events-none',
               'data-[state=open]:bg-accent data-[state=open]:text-muted-foreground'

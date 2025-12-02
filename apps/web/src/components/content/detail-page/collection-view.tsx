@@ -4,7 +4,7 @@
  * @server This is a SERVER-ONLY component (async server component)
  *
  * Extracted from src/app/collections/[slug]/page.tsx for reuse in UnifiedDetailPage.
- * Renders collection-specific sections: prerequisites, embedded items, installation order, compatibility.
+ * Renders collection-specific sections: prerequisites, embedded, items, installation order, compatibility.
  *
  * **Architecture:**
  * - Server Component: Parallel content loading with Promise.all
@@ -32,7 +32,24 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { getCategoryConfigs, getContentBySlug } from '@heyclaude/web-runtime/data';
 import { AlertTriangle, CheckCircle } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, spaceY, marginBottom, marginTop, muted, weight ,size , gap , row } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  cluster,
+  flexGrow,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  muted,
+  radius,
+  row,
+  size,
+  spaceY,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { Suspense } from 'react';
 import { ConfigCard } from '@heyclaude/web-runtime/ui';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
@@ -54,7 +71,7 @@ export interface CollectionDetailViewProps {
 }
 
 /**
- * Render collection detail sections including prerequisites, embedded items, installation order, and compatibility.
+ * Render collection detail sections including prerequisites, embedded, items, installation order, and compatibility.
  *
  * This server component performs server-side data fetching for category configurations and the embedded items referenced by the collection metadata, then renders accessible UI sections for prerequisites, "What's Included" (grouped by category), recommended installation order, and compatibility indicators.
  *
@@ -155,7 +172,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
           <CardHeader>
             <CardTitle className={`${cluster.compact} ${size.xl}`}>
               <AlertTriangle
-                className={`${iconSize.md} text-yellow-500`}
+                className={`${iconSize.md} ${textColor.yellow}`}
                 aria-hidden="true"
               />
               Prerequisites
@@ -166,7 +183,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
               {prerequisites.map((prereq: string) => (
                 <li key={prereq} className={`${row.compact}`}>
                   <CheckCircle
-                    className={`h-4 w-4 ${muted.default} mt-0.5 shrink-0`}
+                    className={`${iconSize.sm} ${muted.default} ${marginTop.micro} ${flexGrow.shrink0}`}
                     aria-hidden="true"
                   />
                   <span className={muted.sm}>{prereq}</span>
@@ -179,7 +196,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
 
       {/* What's Included Section - Embedded ConfigCards */}
       <div>
-        <h2 className={`${marginBottom.comfortable} ${weight.bold} ${size['2xl']} text-foreground`}>
+        <h2 className={`${marginBottom.comfortable} ${weight.bold} ${size['2xl']} ${textColor.foreground}`}>
           What's Included ({validItems.length} {validItems.length === 1 ? 'item' : 'items'})
         </h2>
 
@@ -196,7 +213,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             {(Object.entries(itemsByCategory) as [string, ItemWithData[]][]).map(
               ([category, items]) => (
                 <div key={category}>
-                  <h3 className={`${marginBottom.default} ${weight.semibold} text-foreground ${size.lg}`}>
+                  <h3 className={`${marginBottom.default} ${weight.semibold} ${textColor.foreground} ${size.lg}`}>
                     {categoryConfigs[category as keyof typeof categoryConfigs]?.pluralTitle ||
                       category}{' '}
                     ({items.length})
@@ -224,7 +241,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       {installationOrder && installationOrder.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Recommended Installation Order</CardTitle>
+            <CardTitle className={size.xl}>Recommended Installation Order</CardTitle>
           </CardHeader>
           <CardContent>
             <ol className={spaceY.compact}>
@@ -233,12 +250,12 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                 return (
                   <li key={slug} className={`${row.default}`}>
                     <span
-                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 ${weight.semibold} text-primary ${size.sm}`}
+                      className={`flex ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['primary/10']} ${weight.semibold} ${textColor.primary} ${size.sm}`}
                       aria-hidden="true"
                     >
                       {index + 1}
                     </span>
-                    <span className={`${marginTop.micro} text-foreground ${size.sm}`}>
+                    <span className={`${marginTop.micro} ${textColor.foreground} ${size.sm}`}>
                       {item?.data?.title || slug}
                     </span>
                   </li>
@@ -253,19 +270,19 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       {compatibility && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Compatibility</CardTitle>
+            <CardTitle className={size.xl}>Compatibility</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={`grid grid-cols-2 ${gap.comfortable}`}>
               <div className={cluster.compact}>
                 {compatibility.claudeDesktop ? (
                   <CheckCircle
-                    className={`${iconSize.sm} text-green-500`}
+                    className={`${iconSize.sm} ${textColor.green}`}
                     aria-hidden="true"
                   />
                 ) : (
                   <AlertTriangle
-                    className={`${iconSize.sm} text-red-500`}
+                    className={`${iconSize.sm} ${textColor.red}`}
                     aria-hidden="true"
                   />
                 )}
@@ -276,12 +293,12 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
               <div className={cluster.compact}>
                 {compatibility.claudeCode ? (
                   <CheckCircle
-                    className={`${iconSize.sm} text-green-500`}
+                    className={`${iconSize.sm} ${textColor.green}`}
                     aria-hidden="true"
                   />
                 ) : (
                   <AlertTriangle
-                    className={`${iconSize.sm} text-red-500`}
+                    className={`${iconSize.sm} ${textColor.red}`}
                     aria-hidden="true"
                   />
                 )}

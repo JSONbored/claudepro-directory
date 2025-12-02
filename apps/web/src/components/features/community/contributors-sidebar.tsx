@@ -14,7 +14,25 @@
 
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { Award, Medal, TrendingUp } from '@heyclaude/web-runtime/icons';
-import { between, iconSize, sticky, cluster, transition, hoverBg, spaceY, muted, radius ,size , padding , weight } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  bgColor,
+  cluster,
+  flexGrow,
+  hoverBg,
+  iconSize,
+  alignItems,
+  justify,
+  muted,
+  padding,
+  radius,
+  size,
+  spaceY,
+  sticky,
+  textColor,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
@@ -138,13 +156,15 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
       <Card>
         <CardHeader>
           <div className={cluster.compact}>
-            <TrendingUp className={`${iconSize.sm} text-accent`} />
-            <CardTitle className="text-sm">Trending Contributors</CardTitle>
+            <TrendingUp className={`${iconSize.sm} ${textColor.accent}`} />
+            <CardTitle className={size.sm}>Trending Contributors</CardTitle>
           </div>
         </CardHeader>
         <CardContent className={spaceY.default}>
           {topContributors.slice(0, 5).map((contributor, index) => {
-            const slug = contributor.slug || `unknown-${index}`;
+            // Skip entries without valid slug to avoid key collisions and invalid URLs
+            if (!contributor.slug) return null;
+            const slug = contributor.slug;
             const safeUrl = getSafeUserProfileUrl(slug);
             // Don't render if slug is invalid or unsafe
             if (!safeUrl) return null;
@@ -163,24 +183,24 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                 href={validatedUrl}
                 className={`${cluster.default} ${radius.lg} ${padding.tight} ${transition.colors} ${hoverBg.muted}`}
               >
-                <div className="relative shrink-0">
+                <div className={`relative ${flexGrow.shrink0}`}>
                   {contributor.image ? (
                     <Image
                       src={contributor.image}
                       alt={displayName}
                       width={40}
                       height={40}
-                      className="h-10 w-10 rounded-full object-cover"
+                      className={`${iconSize['2xl']} ${radius.full} object-cover`}
                     />
                   ) : (
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-accent ${weight.bold} ${size.sm}`}>
+                    <div className={`flex ${iconSize['2xl']} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.accent} ${weight.bold} ${size.sm}`}>
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
                   {index < 3 && (
-                    <div className={`-bottom-1 -right-1 absolute rounded-full bg-background ${padding.micro}`}>
+                    <div className={`-bottom-1 -right-1 absolute ${radius.full} ${bgColor.background} ${padding.micro}`}>
                       <Medal
-                        className={`h-3 w-3 ${
+                        className={`${iconSize.xs} ${
                           index === 0
                             ? 'text-amber-500'
                             : index === 1
@@ -191,7 +211,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                     </div>
                   )}
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className={`min-w-0 ${flexGrow['1']}`}>
                   <p className={`truncate ${weight.medium} ${size.sm}`}>{displayName}</p>
                   {contributor.total_contributions !== undefined && (
                     <div className={`${cluster.tight} ${muted.default} ${size.xs}`}>
@@ -210,11 +230,13 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
       {newMembers.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">New Members</CardTitle>
+            <CardTitle className={size.sm}>New Members</CardTitle>
           </CardHeader>
           <CardContent className={spaceY.default}>
-            {newMembers.slice(0, 5).map((member, index) => {
-              const slug = member.slug || `unknown-member-${index}`;
+            {newMembers.slice(0, 5).map((member) => {
+              // Skip entries without valid slug to avoid key collisions and invalid URLs
+              if (!member.slug) return null;
+              const slug = member.slug;
               const safeUrl = getSafeUserProfileUrl(slug);
               // Don't render if slug is invalid or unsafe
               if (!safeUrl) return null;
@@ -239,14 +261,14 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       alt={displayName}
                       width={32}
                       height={32}
-                      className={`${iconSize.xl} shrink-0 rounded-full object-cover`}
+                      className={`${iconSize.xl} ${flexGrow.shrink0} ${radius.full} object-cover`}
                     />
                   ) : (
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent ${weight.bold} ${size.xs}`}>
+                    <div className={`flex ${iconSize.xl} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.accent} ${weight.bold} ${size.xs}`}>
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <div className="min-w-0 flex-1">
+                  <div className={`min-w-0 ${flexGrow['1']}`}>
                     <p className={`truncate ${weight.medium} ${size.sm}`}>{displayName}</p>
                     {member.work && (
                       <p className={`truncate ${muted.default} ${size.xs}`}>{member.work}</p>
@@ -262,12 +284,12 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
       {/* Community Stats */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Community Stats</CardTitle>
+          <CardTitle className={size.sm}>Community Stats</CardTitle>
         </CardHeader>
         <CardContent className={spaceY.compact}>
           <div className={between.center}>
             <span className={`${muted.default} ${size.xs}`}>Total Members</span>
-            <UnifiedBadge variant="base" style="secondary" className="text-xs">
+            <UnifiedBadge variant="base" style="secondary" className={size.xs}>
               {topContributors.length + newMembers.length}
             </UnifiedBadge>
           </div>

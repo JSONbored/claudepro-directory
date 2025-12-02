@@ -4,7 +4,13 @@
 
 'use client';
 
-import { cardBody, cluster, marginTop ,size } from '@heyclaude/web-runtime/design-system';
+import {
+  cardBody,
+  cluster,
+  marginTop,
+  size,
+  textColor,
+} from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 
@@ -33,7 +39,7 @@ export function AuthMobileHeader() {
       </div>
 
       <motion.p
-        className={`${marginTop.compact} text-white/90 ${size.xs}`}
+        className={`${marginTop.compact} ${textColor.white}/90 ${size.xs}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}

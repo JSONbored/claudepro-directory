@@ -14,7 +14,30 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { muted, stack, spaceY, cluster, iconLeading, srOnly, weight ,size  , gap , padding , row , radius } from '@heyclaude/web-runtime/design-system';
+import {
+  alignItems,
+  bgColor,
+  borderColor,
+  cluster,
+  cursor,
+  flexDir,
+  gap,
+  iconLeading,
+  iconSize,
+  justify,
+  muted,
+  overflow,
+  padding,
+  radius,
+  row,
+  size,
+  spaceY,
+  srOnly,
+  stack,
+  transition,
+  weight,
+  squareSize,
+} from '@heyclaude/web-runtime/design-system';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import {
@@ -324,7 +347,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
 
             {logoPreview ? (
               <div className={`${row.comfortable}`}>
-                <div className={`relative h-24 w-24 overflow-hidden ${radius.lg} border`}>
+                <div className={`relative ${squareSize.avatar3xl} ${overflow.hidden} ${radius.lg} border`}>
                   <Image
                     src={logoPreview}
                     alt="Company logo preview"
@@ -361,9 +384,9 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 </div>
               </div>
             ) : (
-              <label htmlFor={logoUploadId} className={`flex cursor-pointer flex-col items-center justify-center ${radius.lg} border-2 border-dashed border-muted-foreground/25 bg-muted/50 ${padding.relaxed} transition-colors hover:border-muted-foreground/50 hover:bg-muted`}>
-                <div className={`${stack.compact} items-center text-center`}>
-                  <FileText className={`h-8 w-8 ${muted.default}`} />
+              <label htmlFor={logoUploadId} className={`flex ${cursor.pointer} ${flexDir.col} ${alignItems.center} ${justify.center} ${radius.lg} border-2 border-dashed border-muted-foreground/25 ${bgColor['muted/50']} ${padding.relaxed} ${transition.colors} hover:border-muted-foreground/50 hover:bg-muted`}>
+                <div className={`${stack.compact} ${alignItems.center} text-center`}>
+                  <FileText className={`${iconSize.xl} ${muted.default}`} />
                   <div>
                     <p className={`${weight.medium} ${size.sm}`}>
                       {isUploadingLogo ? 'Uploading...' : 'Click to upload logo'}
@@ -458,7 +481,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 type="date"
                 name="using_cursor_since"
                 defaultValue={initialData?.using_cursor_since || ''}
-                className={`flex h-10 w-full rounded-md border border-input bg-background ${padding.xCompact} ${padding.yCompact} ${size.sm} ring-offset-background file:border-0 file:bg-transparent file:${weight.medium} file:text-sm placeholder:${muted.default} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
+                className={`flex h-10 w-full ${radius.md} border ${borderColor.input} ${bgColor.background} ${padding.xCompact} ${padding.yCompact} ${size.sm} ring-offset-background file:border-0 file:bg-transparent file:font-medium file:${size.sm} placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
               />
             )}
           </div>

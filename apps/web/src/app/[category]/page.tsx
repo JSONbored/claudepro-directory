@@ -200,11 +200,15 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     return processed;
   });
 
+  // Safely extract icon name from component
+  const iconComponent = config.icon as unknown as { displayName?: string; name?: string };
+  const iconName = iconComponent.displayName?.toLowerCase() ?? iconComponent.name?.toLowerCase() ?? 'sparkles';
+
   return (
     <ContentListServer
       title={config.pluralTitle}
       description={config.description}
-      icon={config.icon.displayName?.toLowerCase() ?? 'sparkles'}
+      icon={iconName}
       items={items}
       type={category}
       searchPlaceholder={config.listPage.searchPlaceholder}

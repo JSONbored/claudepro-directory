@@ -1,7 +1,26 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { cluster, iconSize, weight  , padding } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  iconSize,
+  weight,
+  padding,
+  zLayer,
+  shadow,
+  backdrop,
+  radius,
+  borderColor,
+  flexDir,
+  bgColor,
+  justify,
+  textColor,
+  alignItems,
+  buttonMinHeight,
+  buttonMinWidth,
+  transition,
+  size,
+} from '@heyclaude/web-runtime/design-system';
 import {
   AlertTriangle,
   ArrowRight,
@@ -11,7 +30,6 @@ import {
   Sparkles,
   X,
 } from '@heyclaude/web-runtime/icons';
-import { ANIMATION_CONSTANTS, DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { type ComponentType, useEffect, useState } from 'react';
 import {
@@ -90,11 +108,11 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
   /**
    * Z-Index Hierarchy:
    * - z-[100]: Skip-to-content link (highest priority - accessibility)
-   * - z-[60]:  Announcement banner (above navigation, below skip link)
-   * - z-50:    Navigation, dialogs, sheets, dropdowns
-   * - z-10:    Component-level overlays (badges, cards)
+   * - zLayer.popover:  Announcement banner (above navigation, below skip link)
+   * - zLayer.modal:    Navigation, dialogs, sheets, dropdowns
+   * - zLayer.raised:    Component-level overlays (badges, cards)
    *
-   * Note: Navigation uses `sticky top-0 z-50 contain-layout` which creates
+   * Note: Navigation uses sticky top-0 zLayer.modal contain-layout which creates
    * a new stacking context. Without explicit z-index, the announcement would
    * be visually obscured by navigation's stacking context.
    */
@@ -103,36 +121,36 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
       aria-label="Site announcement"
       aria-live="polite"
       aria-atomic="true"
-      className={`relative z-60 hidden w-full ${padding.xCompact} pt-2 pb-2 md:block`}
+      className={`relative ${zLayer.popover} hidden w-full ${padding.xCompact} pt-2 pb-2 md:block`}
     >
       {/* Rounded pill container */}
       <div className="container mx-auto">
         <div
-          className={`rounded-full border border-accent/20 bg-accent/10 shadow-sm backdrop-blur-sm ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} hover:border-accent/30 hover:shadow-md motion-reduce:transition-none`}
+          className={`${radius.full} border ${borderColor['accent/20']} ${bgColor['accent/10']} ${shadow.sm} ${backdrop.sm} ${transition.slow} hover:border-accent/30 hover:${shadow.md} motion-reduce:transition-none`}
         >
           <div className={`px-4 ${padding.yCompact} md:px-6 md:py-2.5`}>
-            <div className="flex flex-col items-center justify-between sm:flex-row">
+            <div className={`flex ${flexDir.col} ${alignItems.center} ${justify.between} sm:flex-row`}>
               {/* Announcement Content */}
               <Announcement
                 variant={announcement.variant}
-                className={'flex-1 border-none bg-transparent shadow-none'}
+                className={`flex-1 border-none ${bgColor.transparent} ${shadow.none}`}
               >
                 {announcement.tag && (
-                  <AnnouncementTag className={'shrink-0 ${weight.bold} text-[9px] sm:text-xs'}>
+                  <AnnouncementTag className={`shrink-0 ${weight.bold} ${size['2xs']} sm:${size.xs}`}>
                     {announcement.tag}
                   </AnnouncementTag>
                 )}
 
-                <AnnouncementTitle className={`${weight.semibold} text-[11px] text-foreground sm:text-sm`}>
+                <AnnouncementTitle className={`${weight.semibold} ${size['3xs']} ${textColor.foreground} sm:${size.sm}`}>
                   {announcement.href ? (
                     <Link
                       href={announcement.href}
-                      className={`hover:underline ${cluster.snug} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+                      className={`hover:underline ${cluster.snug} ${transition.default}`}
                     >
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className={'h-3 w-3 shrink-0 sm:h-4 sm:w-4'}
+                          className={`${iconSize.xs} shrink-0 sm:${iconSize.sm}`}
                           aria-hidden="true"
                         />
                       )}
@@ -142,7 +160,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className={'h-3 w-3 shrink-0 sm:h-4 sm:w-4'}
+                          className={`${iconSize.xs} shrink-0 sm:${iconSize.sm}`}
                           aria-hidden="true"
                         />
                       )}
@@ -157,10 +175,10 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   type="button"
                   onClick={dismiss}
                   aria-label="Dismiss announcement"
-                  className={`flex ${DIMENSIONS.MIN_H_ICON_BUTTON_SM} ${DIMENSIONS.MIN_W_ICON_BUTTON_SM} shrink-0 items-center justify-center rounded-full ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:${DIMENSIONS.MIN_H_ICON_BUTTON_MD} sm:${DIMENSIONS.MIN_W_ICON_BUTTON_MD}`}
+                  className={`flex ${buttonMinHeight.icon} ${buttonMinWidth.icon} shrink-0 ${alignItems.center} ${justify.center} ${radius.full} ${transition.default} hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:${buttonMinHeight.iconMd} sm:${buttonMinWidth.iconMd}`}
                 >
                   <X
-                    className={`${iconSize.xs} text-foreground sm:h-4 sm:w-4`}
+                    className={`${iconSize.xs} ${textColor.foreground} sm:h-4 sm:w-4`}
                     aria-hidden="true"
                   />
                 </button>

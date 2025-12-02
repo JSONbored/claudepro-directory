@@ -17,8 +17,14 @@ import {
   sanitizeSlug,
 } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
-import { Copy, ExternalLink, Github, Thermometer } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, iconLeading, muted, categoryBadge, hoverBg, transition, border, radius, spaceY, weight ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
+import { Copy, ChevronRight, ExternalLink, Github, Thermometer } from '@heyclaude/web-runtime/icons';
+import { cluster, iconSize, iconLeading, marginBottom, muted, categoryBadge, hoverBg, transition, border, radius, spaceY, weight, size, padding, gap, flexWrap,
+  cursor,
+  justify,
+  textColor,
+  alignItems,
+  flexGrow,
+} from '@heyclaude/web-runtime/design-system';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { getDisplayTitle } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
@@ -198,7 +204,7 @@ export const DetailSidebar = memo(function DetailSidebar({
             {showGitHubLink && githubUrl && (
               <Button
                 variant="outline"
-                className="w-full justify-start"
+                className={`w-full ${justify.start}`}
                 onClick={() => {
                   pulse
                     .click({
@@ -247,7 +253,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 return (
                   <Button
                     variant="outline"
-                    className="w-full justify-start"
+                    className={`w-full ${justify.start}`}
                     onClick={() => {
                       pulse
                         .click({
@@ -294,7 +300,7 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardContent className={spaceY.comfortable}>
             {contentItem.category && (
               <div>
-                <h4 className={'mb-1 ${weight.medium}'}>Category</h4>
+                <h4 className={`${marginBottom.micro} ${weight.medium}`}>Category</h4>
                 <UnifiedBadge
                   variant="base"
                   style="default"
@@ -324,14 +330,14 @@ export const DetailSidebar = memo(function DetailSidebar({
               }
               return (
                 <div>
-                  <h4 className={'mb-1 ${weight.medium}'}>Temperature</h4>
+                  <h4 className={`${marginBottom.micro} ${weight.medium}`}>Temperature</h4>
                   <div className={cluster.compact}>
-                    <Thermometer className={`${iconSize.xs} text-orange-500`} />
+                    <Thermometer className={`${iconSize.xs} ${textColor.orange}`} />
                     <UnifiedBadge
                       variant="base"
                       style="outline"
                       className={
-                        'border-orange-500/30 bg-orange-500/10 ${weight.medium} text-orange-600 ${size.xs}'
+                        `border-orange-500/30 bg-orange-500/10 ${weight.medium} ${textColor.orange} ${size.xs}`
                       }
                     >
                       {String(config.temperature)}
@@ -343,7 +349,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasPackage && packageName && (
               <div>
-                <h4 className={'mb-1 ${weight.medium}'}>Package</h4>
+                <h4 className={`${marginBottom.micro} ${weight.medium}`}>Package</h4>
                 <UnifiedBadge variant="base" style="outline" className={`font-mono ${size.xs}`}>
                   {packageName}
                 </UnifiedBadge>
@@ -352,7 +358,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasAuth && (
               <div>
-                <h4 className={'mb-1 ${weight.medium}'}>Authentication</h4>
+                <h4 className={`${marginBottom.micro} ${weight.medium}`}>Authentication</h4>
                 <p className={`${muted.sm}`}>
                   {(metadata['requiresAuth'] as boolean) ? 'Required' : 'Not required'}
                 </p>
@@ -361,10 +367,10 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasPermissions && permissions.length > 0 && (
               <div>
-                <h4 className={'mb-1 ${weight.medium}'}>Permissions</h4>
-                <div className={`flex flex-wrap ${gap.tight}`}>
+                <h4 className={`${marginBottom.micro} ${weight.medium}`}>Permissions</h4>
+                <div className={`flex ${flexWrap.wrap} ${gap.tight}`}>
                   {permissions.map((perm) => (
-                    <UnifiedBadge key={perm} variant="base" style="outline" className="text-xs">
+                    <UnifiedBadge key={perm} variant="base" style="outline" className={size.xs}>
                       {perm}
                     </UnifiedBadge>
                   ))}
@@ -374,7 +380,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasSource && 'source' in contentItem && contentItem.source && (
               <div>
-                <h4 className={'mb-1 ${weight.medium}'}>Source</h4>
+                <h4 className={`${marginBottom.micro} ${weight.medium}`}>Source</h4>
                 <UnifiedBadge variant="base" style="outline">
                   {contentItem.source}
                 </UnifiedBadge>
@@ -394,7 +400,7 @@ export const DetailSidebar = memo(function DetailSidebar({
               <Button
                 key={action.key}
                 variant="secondary"
-                className={`w-full justify-start ${gap.default} text-left`}
+                className={`w-full ${justify.start} ${gap.default} text-left`}
                 onClick={action.onClick}
               >
                 <Copy className={iconLeading.sm} />
@@ -463,9 +469,9 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <Link
                   key={relatedSlug}
                   href={validatedUrl}
-                  className={`flex items-center justify-between w-full cursor-pointer ${radius.lg} ${border.default} ${padding.compact} text-left ${transition.colors} ${hoverBg.muted}`}
+                  className={`flex ${alignItems.center} ${justify.between} w-full ${cursor.pointer} ${radius.lg} ${border.default} ${padding.compact} text-left ${transition.colors} ${hoverBg.muted}`}
                 >
-                  <div className={'min-w-0 flex-1'}>
+                  <div className={`min-w-0 ${flexGrow['1']}`}>
                     <h4 className={`truncate ${weight.medium} ${size.sm}`}>
                       {getDisplayTitle({
                         title:
@@ -482,7 +488,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                         : ''}
                     </p>
                   </div>
-                  <ExternalLink className={`ml-2 h-4 w-4 shrink-0 ${muted.default}`} />
+                  <ChevronRight className={`ml-2 ${iconSize.sm} ${flexGrow.shrink0} ${muted.default}`} />
                 </Link>
               );
             })}

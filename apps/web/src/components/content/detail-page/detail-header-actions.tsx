@@ -45,7 +45,29 @@ import {
   FileText,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
-import { iconLeading, badge, cluster, hoverText, spaceY, marginBottom, weight, muted, radius ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  badge,
+  bgColor,
+  borderColor,
+  borderTop,
+  cluster,
+  flexWrap,
+  gap,
+  hoverText,
+  iconLeading,
+  iconSize,
+  justify,
+  leading,
+  marginBottom,
+  muted,
+  padding,
+  radius,
+  size,
+  spaceY,
+  textColor,
+  tracking,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import type { ContentItem, CopyType } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
@@ -429,18 +451,18 @@ export function DetailHeaderActions({
           </div>
 
           {/* Title - larger and more prominent */}
-          <h1 className={`${weight.bold} ${size['3xl']} tracking-tight lg:${size['4xl']}`}>{displayTitle}</h1>
+          <h1 className={`${weight.bold} ${size['3xl']} ${tracking.tight} lg:${size['4xl']}`}>{displayTitle}</h1>
 
           {/* Description - larger line height for readability */}
           {contentItem.description && (
-            <p className={`max-w-2xl ${size.lg} leading-relaxed ${muted.default} lg:text-xl`}>
+            <p className={`max-w-2xl ${size.lg} ${leading.relaxed} ${muted.default} lg:${size.xl}`}>
               {contentItem.description}
             </p>
           )}
         </div>
 
         {/* Right column - Actions sidebar (sticky on desktop) */}
-        <aside className={`${spaceY.default} ${radius.lg} border border-border/50 bg-card/50 ${padding.default} lg:sticky lg:top-24 lg:self-start`}>
+        <aside className={`${spaceY.default} ${radius.lg} border ${borderColor['border/50']} ${bgColor['card/50']} ${padding.default} lg:sticky lg:top-24 lg:self-start`}>
           {/* Primary CTA - Full width */}
           {(!(primaryAction.type === 'download') || hasDownloadAvailable) && (
             <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.01 }}>
@@ -470,7 +492,7 @@ export function DetailHeaderActions({
           )}
 
           {/* Secondary actions row */}
-          <div className={`flex flex-wrap ${gap.compact}`}>
+          <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
             <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
               <Button
                 variant={pinned ? 'secondary' : 'outline'}
@@ -498,11 +520,15 @@ export function DetailHeaderActions({
               description={contentItem.description ?? undefined}
               utmCampaign={category}
               onShare={(platform) => {
-                logUnhandledPromise(
-                  'DetailHeaderActions: share analytics failed',
-                  pulse.share({ platform, category, slug: contentItem.slug, url: shareUrl }),
-                  { platform, category, slug: contentItem.slug }
-                );
+                pulse
+                  .share({ platform, category, slug: contentItem.slug, url: shareUrl })
+                  .catch((e) =>
+                    logUnhandledPromise('DetailHeaderActions: share analytics failed', e, {
+                      platform,
+                      category,
+                      slug: contentItem.slug,
+                    })
+                  );
               }}
             />
           </div>
@@ -525,7 +551,7 @@ export function DetailHeaderActions({
           <Button
             variant="ghost"
             size="sm"
-            className={`w-full justify-start ${muted.default}`}
+            className={`w-full ${justify.start} ${muted.default}`}
             onClick={openPinboardDrawer}
           >
             <Bookmark className={iconLeading.sm} />
@@ -535,8 +561,8 @@ export function DetailHeaderActions({
           {/* Content actions divider */}
           {hasContent && (
             <>
-              <div className="border-border/50 border-t" />
-              <div className={`flex flex-wrap ${gap.compact}`}>
+              <div className={borderTop.light} />
+              <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
                 <motion.div
                   whileTap={{ scale: 0.97 }}
                   animate={copied ? { scale: [1, 1.05, 1] } : {}}
@@ -546,7 +572,7 @@ export function DetailHeaderActions({
                   <Button variant="outline" onClick={handleCopyContent} size="sm" className="w-full">
                     {copied ? (
                       <>
-                        <Check className="mr-2 h-4 w-4 text-green-500" />
+                        <Check className={`mr-2 ${iconSize.sm} ${textColor.green}`} />
                         Copied!
                       </>
                     ) : (
@@ -594,7 +620,7 @@ export function DetailHeaderActions({
               </div>
 
               {/* Download/Export row */}
-              <div className={`flex flex-wrap ${gap.compact}`}>
+              <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
                 {(() => {
                   const safeCategory = sanitizePathSegment(category);
                   const safeSlug = sanitizePathSegment(contentItem.slug);
@@ -669,8 +695,8 @@ export function DetailHeaderActions({
           {/* Secondary actions */}
           {secondaryActions && secondaryActions.length > 0 && (
             <>
-              <div className="border-border/50 border-t" />
-              <div className={`flex flex-wrap ${gap.compact}`}>
+              <div className={borderTop.light} />
+              <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
                 {secondaryActions.map((action) => (
                   <Button
                     key={action.label}

@@ -16,7 +16,8 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { cluster, row, spaceY, marginTop, muted, radius ,size , padding , weight } from '@heyclaude/web-runtime/design-system';
+import { border, cluster, row, spaceY, marginTop, muted, radius ,size , padding , weight, overflow,
+} from '@heyclaude/web-runtime/design-system';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
 import { useFormSubmit } from '@heyclaude/web-runtime/hooks';
 import { toasts } from '@heyclaude/web-runtime/ui';
@@ -210,16 +211,16 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       {mode === 'create' && bookmarks.length > 0 && (
         <div className={spaceY.comfortable}>
           <div>
-            <Label className="text-base">Add Bookmarks (Optional)</Label>
+            <Label className={size.base}>Add Bookmarks (Optional)</Label>
             <p className={`${marginTop.tight} ${muted.sm}`}>
               Select bookmarks to add to this collection. You can add more later.
             </p>
           </div>
-          <div className={`max-h-64 ${spaceY.compact} overflow-y-auto ${radius.lg} border ${padding.default}`}>
+          <div className={`max-h-64 ${spaceY.compact} ${overflow.yAuto} ${radius.lg} border ${padding.default}`}>
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className={`${row.default} rounded-md ${padding.tight} hover:bg-accent`}
+                className={`${row.default} ${radius.md} ${padding.tight} hover:bg-accent`}
               >
                 <Checkbox
                   id={bookmark.id}
@@ -241,7 +242,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                     htmlFor={bookmark.id}
                     className={`cursor-pointer font-normal ${size.sm} ${cluster.compact}`}
                   >
-                    <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
+                    <UnifiedBadge variant="base" style="outline" className={`${size.xs} capitalize`}>
                       {bookmark.content_type}
                     </UnifiedBadge>
                     {bookmark.content_slug}
@@ -261,7 +262,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Empty bookmarks message */}
       {mode === 'create' && bookmarks.length === 0 && (
-        <div className={`${radius.lg} border border-dashed ${padding.comfortable} text-center`}>
+        <div className={`${radius.lg} ${border.dashed} ${padding.comfortable} text-center`}>
           <p className={muted.sm}>
             You don't have any bookmarks yet. Create the collection first and add bookmarks later.
           </p>
@@ -269,7 +270,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       )}
 
       {/* Actions */}
-      <div className={'${cluster.comfortable} pt-4'}>
+      <div className={`${cluster.comfortable} pt-4`}>
         <Button type="submit" disabled={isPending} className="flex-1 sm:flex-initial">
           {isPending
             ? mode === 'create'

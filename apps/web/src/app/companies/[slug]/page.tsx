@@ -7,7 +7,33 @@
 import  { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, muted, iconSize, spaceY, marginBottom, marginTop, weight ,size  , gap , padding , row , radius , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  animateDuration,
+  between,
+  bgColor,
+  borderBottom,
+  cluster,
+  flexDir,
+  flexWrap,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  maxWidth,
+  minHeight,
+  muted,
+  padding,
+  radius,
+  row,
+  size,
+  spaceY,
+  textColor,
+  transition,
+  weight,
+  squareSize,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building,
@@ -195,9 +221,9 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
     <>
       <StructuredData route={`/companies/${slug}`} />
 
-      <div className={`${minHeight.screen} bg-background`}>
+      <div className={`${minHeight.screen} ${bgColor.background}`}>
         {/* Company Header */}
-        <section className="relative border-border border-b">
+        <section className={`relative ${borderBottom.default}`}>
           <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
             <div className={`${row.relaxed}`}>
               {company.logo ? (
@@ -206,12 +232,12 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   alt={`${company.name} logo`}
                   width={96}
                   height={96}
-                  className={`h-24 w-24 ${radius.lg} border-4 border-background object-cover`}
+                  className={`${squareSize.avatar3xl} ${radius.lg} border-4 border-background object-cover`}
                   priority
                 />
               ) : (
-                <div className={`flex h-24 w-24 items-center justify-center ${radius.lg} border-4 border-background bg-accent ${weight.bold} ${size['2xl']}`}>
-                  <Building className="h-12 w-12" />
+                <div className={`flex ${squareSize.avatar3xl} ${alignItems.center} ${justify.center} ${radius.lg} border-4 border-background ${bgColor.accent} ${weight.bold} ${size['2xl']}`}>
+                  <Building className={iconSize['3xl']} />
                 </div>
               )}
 
@@ -225,10 +251,10 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
                 {company.description ? <p className={`${marginTop.compact} ${maxWidth['3xl']} ${muted.default}`}>{company.description}</p> : null}
 
-                <div className={`${marginTop.default} flex flex-wrap items-center ${gap.comfortable} ${size.sm}`}>
+                <div className={`${marginTop.default} flex ${flexWrap.wrap} ${alignItems.center} ${gap.comfortable} ${size.sm}`}>
                   <SafeWebsiteLink
                     url={company.website}
-                    className={`${cluster.tight} text-accent hover:text-accent-hover transition-colors duration-200`}
+                    className={`${cluster.tight} ${textColor.accent} hover:text-accent-hover ${transition.colors} ${animateDuration.default}`}
                   >
                     <Globe className={iconSize.sm} />
                     Website
@@ -272,8 +298,8 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
               {!active_jobs || active_jobs.length === 0 ? (
                 <Card>
-                  <CardContent className={`flex flex-col items-center ${padding.yHero}`}>
-                    <Briefcase className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+                  <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.yHero}`}>
+                    <Briefcase className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
                     <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No Active Positions</h3>
                     <p className={`${marginBottom.comfortable} ${maxWidth.md} text-center ${muted.default}`}>
                       This company doesn't have any job openings at the moment. Check back later!
@@ -364,7 +390,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
                   <div className={between.center}>
                     <span className={`${muted.sm}`}>Active Openings</span>
-                    <span className={`${weight.semibold} text-green-600`}>{stats?.active_jobs ?? 0}</span>
+                    <span className={`${weight.semibold} ${textColor.green}`}>{stats?.active_jobs ?? 0}</span>
                   </div>
 
                   {stats && (stats.remote_jobs ?? 0) > 0 ? <div className={between.center}>
@@ -400,17 +426,17 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
               </Card>
 
               {/* CTA Card */}
-              <Card className="border-accent/30 bg-accent/5">
+              <Card className={`border-accent/30 ${bgColor['accent/5']}`}>
                 <CardHeader>
-                  <CardTitle className="text-lg">Interested in joining?</CardTitle>
+                  <CardTitle className={size.lg}>Interested in joining?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className={`${muted.sm} mb-4`}>
+                  <p className={`${muted.sm} ${marginBottom.default}`}>
                     {company.website
                       ? 'Visit their website to learn more about the company and culture.'
                       : 'Check back regularly for new opportunities!'}
                   </p>
-                  <SafeWebsiteLink url={company.website} className="text-accent hover:text-accent-hover transition-colors duration-200">
+                  <SafeWebsiteLink url={company.website} className={`text-accent hover:text-accent-hover ${transition.colors} ${animateDuration.default}`}>
                     Visit Website
                   </SafeWebsiteLink>
                 </CardContent>

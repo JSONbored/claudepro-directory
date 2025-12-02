@@ -19,7 +19,12 @@ import {
   TrendingUp,
   User as UserIcon,
 } from '@heyclaude/web-runtime/icons';
-import { muted, iconSize, spaceY, cluster, weight ,size  , padding } from '@heyclaude/web-runtime/design-system';
+import { borderBottom, muted, iconSize, spaceY, cluster, weight, size, padding, radius, bgColor,
+  justify,
+  alignItems,
+  marginBottom,
+  squareSize,
+} from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
@@ -131,19 +136,19 @@ export async function AccountSidebar({
 
   return (
     <Card className={`h-fit ${padding.default} md:col-span-1`}>
-      <div className={`mb-6 ${cluster.default} border-b pb-4`}>
+      <div className={`${marginBottom.comfortable} ${cluster.default} ${borderBottom.default} pb-4`}>
         {profile?.image ? (
           <Image
             src={profile.image}
             alt={`${profile.name ?? 'User'}'s avatar`}
             width={48}
             height={48}
-            className="h-12 w-12 rounded-full object-cover"
+            className={`${squareSize.avatarLg} ${radius.full} object-cover`}
             unoptimized
             priority
           />
         ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
+          <div className={`flex ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.accent}`}>
             <UserIcon className={iconSize.lg} />
           </div>
         )}
@@ -161,7 +166,7 @@ export async function AccountSidebar({
       <nav className={spaceY.compact}>
         {navigation.map((item) => (
           <Link key={item.name} href={item.href}>
-            <Button variant="ghost" className={`w-full justify-start ${size.sm}`}>
+            <Button variant="ghost" className={`w-full ${justify.start} ${size.sm}`}>
               <item.icon className={`mr-2 ${iconSize.sm}`} />
               {item.name}
             </Button>

@@ -11,6 +11,9 @@
  * - Overflow handling for full-viewport experience
  */
 
+import { bgColor, overflow } from '@heyclaude/web-runtime/design-system';
+import { cn } from '@heyclaude/web-runtime/ui';
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  return <div className="overflow-hidden bg-background">{children}</div>;
+  return <div className={cn(overflow.hidden, bgColor.background)}>{children}</div>;
 }

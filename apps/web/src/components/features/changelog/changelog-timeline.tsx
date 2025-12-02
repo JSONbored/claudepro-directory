@@ -13,7 +13,27 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { cluster, spaceY, muted, iconSize, weight, size, padding , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  animateDuration,
+  cluster,
+  flexDir,
+  flexWrap,
+  gap,
+  iconSize,
+  marginBottom,
+  muted,
+  padding,
+  shadow,
+  shadowColor,
+  size,
+  spaceY,
+  transition,
+  weight,
+  bgColor,
+  justify,
+  alignItems,
+  radius,
+} from '@heyclaude/web-runtime/design-system';
 import { Calendar, ChevronRight } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion, useInView } from 'motion/react';
@@ -29,37 +49,37 @@ type ChangelogCategory = Database['public']['Enums']['changelog_category'];
 const CATEGORY_COLORS: Record<ChangelogCategory, { dot: string; glow: string; border: string; cssColor: string }> = {
   Added: {
     dot: 'bg-emerald-500',
-    glow: 'shadow-emerald-500/50',
+    glow: shadowColor.emerald,
     border: 'border-emerald-500/30',
     cssColor: 'rgb(16 185 129)', // emerald-500
   },
   Changed: {
     dot: 'bg-blue-500',
-    glow: 'shadow-blue-500/50',
+    glow: shadowColor.blue,
     border: 'border-blue-500/30',
     cssColor: 'rgb(59 130 246)', // blue-500
   },
   Fixed: {
     dot: 'bg-amber-500',
-    glow: 'shadow-amber-500/50',
+    glow: shadowColor.amber,
     border: 'border-amber-500/30',
     cssColor: 'rgb(245 158 11)', // amber-500
   },
   Removed: {
     dot: 'bg-red-500',
-    glow: 'shadow-red-500/50',
+    glow: shadowColor.red,
     border: 'border-red-500/30',
     cssColor: 'rgb(239 68 68)', // red-500
   },
   Deprecated: {
     dot: 'bg-orange-500',
-    glow: 'shadow-orange-500/50',
+    glow: shadowColor.orange,
     border: 'border-orange-500/30',
     cssColor: 'rgb(249 115 22)', // orange-500
   },
   Security: {
     dot: 'bg-purple-500',
-    glow: 'shadow-purple-500/50',
+    glow: shadowColor.purple,
     border: 'border-purple-500/30',
     cssColor: 'rgb(168 85 247)', // purple-500
   },
@@ -80,7 +100,7 @@ function TimelineDot({ category, isInView, index }: TimelineDotProps) {
 
   return (
     <motion.div
-      className="relative flex items-center justify-center"
+      className={`relative flex ${alignItems.center} ${justify.center}`}
       initial={{ scale: 0, opacity: 0 }}
       animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
       transition={{
@@ -93,7 +113,7 @@ function TimelineDot({ category, isInView, index }: TimelineDotProps) {
       {/* Outer glow ring */}
       <motion.div
         className={cn(
-          'absolute h-6 w-6 rounded-full',
+          `absolute ${iconSize.lg} ${radius.full}`,
           colors.dot,
           'opacity-20 blur-sm'
         )}
@@ -116,9 +136,9 @@ function TimelineDot({ category, isInView, index }: TimelineDotProps) {
       {/* Main dot */}
       <motion.div
         className={cn(
-          'relative h-3 w-3 rounded-full',
+          `relative ${iconSize.xs} ${radius.full}`,
           colors.dot,
-          'shadow-lg',
+          shadow.lg,
           colors.glow
         )}
         animate={
@@ -179,7 +199,7 @@ export function TimelineEntry({ entry, index, targetPath }: TimelineEntryProps) 
       }}
     >
       {/* Timeline column */}
-      <div className="relative flex flex-col items-center">
+      <div className={`relative flex ${flexDir.col} ${alignItems.center}`}>
         {/* Connecting line (above) */}
         {index > 0 && (
           <motion.div
@@ -212,7 +232,7 @@ export function TimelineEntry({ entry, index, targetPath }: TimelineEntryProps) 
         transition={{ duration: 0.4, delay: index * 0.1 + 0.1 }}
       >
         {/* Date */}
-        <div className={cn(cluster.tight, muted.sm, 'mb-2')}>
+        <div className={cn(cluster.tight, muted.sm, marginBottom.tight)}>
           <Calendar className={iconSize.sm} />
           <time dateTime={entry.release_date}>
             {new Date(entry.release_date).toLocaleDateString(undefined, {
@@ -227,27 +247,27 @@ export function TimelineEntry({ entry, index, targetPath }: TimelineEntryProps) 
         <Link href={targetPath} className="group block">
           <motion.div
             className={cn(
-              'rounded-xl border bg-card ${padding.medium} transition-all duration-200',
-              'hover:shadow-lg hover:border-primary/30',
+              `${radius.xl} border ${bgColor.card} ${padding.medium} ${transition.all} ${animateDuration.default}`,
+              `hover:${shadow.lg} hover:border-primary/30`,
               colors.border
             )}
             whileHover={{ scale: 1.01, y: -2 }}
             whileTap={{ scale: 0.99 }}
           >
             {/* Title */}
-            <h3 className={`mb-2 ${weight.semibold} ${size.lg} group-hover:text-primary transition-colors`}>
+            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.lg} group-hover:text-primary ${transition.colors}`}>
               {entry.title}
             </h3>
 
             {/* TL;DR */}
             {entry.tldr && (
-              <p className={cn(muted.sm, 'mb-3 line-clamp-2')}>
+              <p className={cn(muted.sm, marginBottom.compact, 'line-clamp-2')}>
                 {entry.tldr}
               </p>
             )}
 
             {/* Categories */}
-            <div className={`flex flex-wrap ${gap.compact} mb-3`}>
+            <div className={`flex ${flexWrap.wrap} ${gap.compact} ${marginBottom.compact}`}>
               {Object.keys(entry.changes ?? {}).map((cat) => {
                 const catColors = CATEGORY_COLORS[cat as ChangelogCategory];
                 if (!catColors) return null;
@@ -255,7 +275,7 @@ export function TimelineEntry({ entry, index, targetPath }: TimelineEntryProps) 
                   <span
                     key={cat}
                     className={cn(
-                      `rounded-full px-2.5 ${padding.yHair} ${size.xs} ${weight.medium}`,
+                      `${radius.full} px-2.5 ${padding.yHair} ${size.xs} ${weight.medium}`,
                       catColors.dot,
                       'text-white'
                     )}

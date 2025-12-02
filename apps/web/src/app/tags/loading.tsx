@@ -1,4 +1,9 @@
-import { emptyCard, marginBottom, marginTop, radius , padding , gap , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { emptyCard, marginBottom, marginTop, radius , padding , gap , minHeight , maxWidth, bgColor,
+  justify,
+  flexWrap,
+  squareSize,
+  skeletonSize,
+} from '@heyclaude/web-runtime/design-system';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 
 // Static skeleton IDs to avoid array index keys
@@ -7,19 +12,19 @@ const TAG_GRID_SKELETONS = ['tg-1', 'tg-2', 'tg-3', 'tg-4', 'tg-5', 'tg-6', 'tg-
 
 export default function TagsLoading() {
   return (
-    <div className={`${minHeight.screen} bg-background`} aria-busy="true" role="status">
+    <div className={`${minHeight.screen} ${bgColor.background}`} aria-busy="true" role="status">
       {/* Hero Skeleton */}
       <section className={emptyCard.default} aria-hidden="true">
         <div className={`container mx-auto ${padding.xDefault} py-20`}>
           <div className={`mx-auto ${maxWidth['3xl']}`}>
-            <div className={`${marginBottom.comfortable} flex justify-center`}>
-              <Skeleton className="h-16 w-16 rounded-full" />
+            <div className={`${marginBottom.comfortable} flex ${justify.center}`}>
+              <Skeleton className={`${squareSize.avatarXl} ${radius.full}`} />
             </div>
-            <Skeleton className={`${marginBottom.default} mx-auto h-12 w-64`} />
-            <Skeleton className={`mx-auto h-6 w-96 ${maxWidth.full}`} />
-            <div className={`${marginTop.comfortable} flex justify-center ${gap.compact}`}>
-              <Skeleton className="h-6 w-24" />
-              <Skeleton className="h-6 w-32" />
+            <Skeleton className={`${marginBottom.default} mx-auto ${skeletonSize.heroBar}`} />
+            <Skeleton className={`mx-auto ${skeletonSize.barLgMaxWide} ${maxWidth.full}`} />
+            <div className={`${marginTop.comfortable} flex ${justify.center} ${gap.compact}`}>
+              <Skeleton className={skeletonSize.barLgComfortable} />
+              <Skeleton className={skeletonSize.barLgLarge} />
             </div>
           </div>
         </div>
@@ -28,25 +33,25 @@ export default function TagsLoading() {
       {/* Content Skeleton */}
       <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
         {/* Popular Tags Skeleton */}
-        <div className={`mb-8 ${radius.lg} border ${padding.comfortable}`}>
-          <Skeleton className="mb-4 h-6 w-32" />
-          <div className={`flex flex-wrap ${gap.compact}`}>
+        <div className={`${marginBottom.relaxed} ${radius.lg} border ${padding.comfortable}`}>
+          <Skeleton className={`${marginBottom.default} ${skeletonSize.barLgLarge}`} />
+          <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
             {POPULAR_TAG_SKELETONS.map((id) => (
-              <Skeleton key={id} className="h-8 w-24" />
+              <Skeleton key={id} className={skeletonSize.barXlDefault} />
             ))}
           </div>
         </div>
 
         {/* Grid Skeleton */}
-        <Skeleton className="mb-4 h-6 w-24" />
+        <Skeleton className={`${marginBottom.default} ${skeletonSize.barLgComfortable}`} />
         <div className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4`}>
           {TAG_GRID_SKELETONS.map((id) => (
             <div key={id} className={`${radius.lg} border ${padding.default}`}>
-              <Skeleton className="mb-2 h-5 w-32" />
-              <Skeleton className="mb-3 h-4 w-16" />
+              <Skeleton className={`${marginBottom.tight} ${skeletonSize.barMdLarge}`} />
+              <Skeleton className={`${marginBottom.compact} ${skeletonSize.barCompact}`} />
               <div className={`flex ${gap.tight}`}>
-                <Skeleton className="h-5 w-16" />
-                <Skeleton className="h-5 w-12" />
+                <Skeleton className={skeletonSize.barMdCompact} />
+                <Skeleton className={skeletonSize.barMdDefault} />
               </div>
             </div>
           ))}

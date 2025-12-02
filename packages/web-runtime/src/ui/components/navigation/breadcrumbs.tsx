@@ -45,6 +45,9 @@ import { useMemo } from 'react';
 import { ChevronRight, Home } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
 import { focusRing } from '../../../design-system/styles/interactive.ts';
+import { gap, marginBottom } from '../../../design-system/styles/layout.ts';
+import { size } from '../../../design-system/styles/typography.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
 
 /** Single breadcrumb item */
 export interface BreadcrumbItem {
@@ -162,15 +165,15 @@ export function Breadcrumbs({
   }
 
   return (
-    <nav aria-label="Breadcrumb" className={cn('mb-4', className)}>
-      <ol className="flex flex-wrap items-center gap-1 text-sm">
+    <nav aria-label="Breadcrumb" className={cn(marginBottom.default, className)}>
+      <ol className={`flex flex-wrap items-center ${gap.tight} ${size.sm}`}>
         {displayItems.map((item, index) => {
           const isFirst = index === 0;
           const isLast = index === displayItems.length - 1;
           const isEllipsis = item.label === '...';
 
           return (
-            <li key={`${item.href}-${index}`} className="flex items-center gap-1">
+            <li key={`${item.href}-${index}`} className={`flex items-center ${gap.tight}`}>
               {/* Separator (not before first item) */}
               {!isFirst && (
                 <ChevronRight
@@ -198,7 +201,7 @@ export function Breadcrumbs({
                   href={item.href}
                   className={cn(
                     focusRing.default,
-                    'flex items-center gap-1 rounded-sm text-muted-foreground transition-colors',
+                    `flex items-center ${gap.tight} ${radius.sm} text-muted-foreground transition-colors`,
                     'hover:text-foreground'
                   )}
                 >

@@ -3,18 +3,18 @@ import './view-transitions.css';
 import './micro-interactions.css';
 import './sugar-high.css';
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
-import dynamicImport from 'next/dynamic';
 import localFont from 'next/font/local';
-import { ThemeProvider } from 'next-themes';
+import { ThemeProvider as NextThemesProvider, type ThemeProviderProps as NextThemesProps } from 'next-themes';
+import { type ReactNode } from 'react';
 import { Suspense } from 'react';
 import { Toaster } from 'sonner';
 
@@ -23,17 +23,16 @@ import { Pulse } from '@/src/components/core/infra/pulse';
 import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
+import { NotificationToastHandler } from '@/src/components/features/notifications/notification-toast-handler';
 import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
 
-const NotificationToastHandler = dynamicImport(
-  () =>
-    import('@/src/components/features/notifications/notification-toast-handler').then((module_) => ({
-      default: module_.NotificationToastHandler,
-    })),
-  {
-    loading: () => null,
-  }
-);
+/**
+ * ThemeProvider wrapper that properly types children for React 19
+ * next-themes v0.4.6 types don't include children in ThemeProviderProps for React 19
+ */
+function ThemeProvider({ children, ...props }: NextThemesProps & { children: ReactNode }) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+}
 
 // Component config is now static
 
