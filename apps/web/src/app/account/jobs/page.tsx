@@ -88,6 +88,14 @@ function toTitleCase(value: string): string {
     .join(' ');
 }
 
+/**
+ * Convert a raw job status token into a human-readable title-cased label.
+ *
+ * @param value - The raw status token (for example: "active", "pending", "expired"); may be null or undefined
+ * @returns `'Unknown'` if `value` is missing, otherwise the `value` converted to Title Case
+ *
+ * @see toTitleCase
+ */
 function humanizeStatus(value?: null | string): string {
   if (!value) return 'Unknown';
   return toTitleCase(value);
@@ -140,11 +148,9 @@ function getStatusColor(status: JobStatus): string {
 }
 
 /**
- * Provide page metadata for the '/account/jobs' (My Job Listings) route.
+ * Produce page metadata for the My Job Listings route ("/account/jobs").
  *
- * This metadata is consumed by Next.js to populate the page head for the account jobs page.
- *
- * @returns Metadata for the '/account/jobs' page
+ * @returns Metadata object used to populate the page head for the My Job Listings page
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
@@ -156,9 +162,12 @@ interface MyJobsPageProperties {
 }
 
 /**
- * Render the account "My Job Listings" page showing the user's jobs, per-job billing details, and an optional payment confirmation banner.
+ * Render the My Job Listings account page showing the user's job listings, per-job billing details, and an optional payment confirmation banner.
  *
- * Server-side component rendered with dynamic SSR and Node.js runtime. Shows a sign-in prompt when no authenticated user is present, loads the user's dashboard and job billing summaries, validates job rows from RPC responses, and exposes per-job controls (edit, analytics, view, toggle status, delete).
+ * This server component is rendered with dynamic SSR (dynamic = 'force-dynamic') on the Node.js runtime and performs server-side data fetching:
+ * - Verifies authenticated user and renders a sign-in prompt when unauthenticated.
+ * - Loads the user's dashboard and job billing summaries and validates job rows returned from RPC responses.
+ * - Surfaces a payment success banner when `searchParams.payment === 'success'` and `searchParams.job_id` is present.
  *
  * @param searchParams - Optional URL query parameters; may include `payment` and `job_id` to surface a payment success banner for a specific job.
  * @returns The rendered JSX for the My Job Listings account page.

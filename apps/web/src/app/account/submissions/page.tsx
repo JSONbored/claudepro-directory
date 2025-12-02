@@ -183,7 +183,13 @@ function isValidSlug(slug: string): boolean {
   return /^[a-z0-9-_]+$/.test(slug);
 }
 
-// Strict type validation - must be in allowlist
+/**
+ * Checks whether a string is one of the allowed `submission_type` enum values.
+ *
+ * @param type - The string to validate as a submission type
+ * @returns `true` if `type` is one of the allowed `submission_type` values, `false` otherwise.
+ * @see ALLOWED_TYPES
+ */
 function isSafeType(type: string): type is Database['public']['Enums']['submission_type'] {
   return (ALLOWED_TYPES as readonly string[]).includes(type);
 }
@@ -211,16 +217,15 @@ function getSafeContentUrl(
 }
 
 /**
- * Renders the account "My Submissions" page, fetching the current user's submissions and displaying them with controls for viewing PRs, content links, and creating new submissions.
+ * Server-rendered page that displays the current user's "My Submissions" dashboard.
  *
- * Fetches the authenticated user and the user's dashboard data (submissions). If the user is not authenticated, renders a sign-in prompt. If dashboard loading fails, renders an error message. Validates submission enums, constructs safe PR and content links, logs data-integrity issues, and renders a list of SubmissionCard components or an empty-state card.
+ * Fetches the authenticated user and the user's dashboard submissions on the server; when unauthenticated it renders a sign-in prompt, and when the dashboard fetch fails it renders a short error message. For each submission it validates enums, constructs safe PR and content links, logs data-integrity issues, and renders SubmissionCard components or an empty-state with a CTA.
  *
  * @returns The React element tree for the submissions page.
  *
- * @see getAuthenticatedUser - authentication helper used to resolve the current user
- * @see getUserDashboard - server-side data fetch that returns submissions
+ * @see getAuthenticatedUser - resolves the current authenticated user on the server
+ * @see getUserDashboard - fetches the user's dashboard and submissions
  * @see SubmissionCard - presentation component used to render individual submissions
- * @see generateRequestId - request-scoped identifier used for logging
  */
 export default async function SubmissionsPage() {
   // Generate single requestId for this page request
@@ -314,7 +319,12 @@ export default async function SubmissionsPage() {
   }
 
   /**
-   * Validate submission type against enum values
+   * Check whether a value is a valid submission type.
+   *
+   * @param type - The value to test for membership in the `submission_type` enum
+   * @returns `true` if `type` is one of the allowed `submission_type` enum values, `false` otherwise.
+   *
+   * @see ALLOWED_TYPES
    */
   function isValidSubmissionType(
     type: unknown
@@ -381,7 +391,13 @@ export default async function SubmissionsPage() {
   }
 
   /**
-   * Get safe content URL or null if invalid
+   * Return a safe, canonical content URL for a merged submission, or null when unavailable.
+   *
+   * @param type - Submission content type (one of the allowed `submission_type` values)
+   * @param slug - Content slug; must be a lowercase, URL-safe identifier
+   * @param status - Submission status; only `'merged'` produces a link
+   * @returns An object with `href` set to the safe content path when `type`/`slug` are valid and `status` is `'merged'`, or `null` otherwise.
+   * @see getSafeContentUrl
    */
   function getContentLinkProperties(
     type: Database['public']['Enums']['submission_type'],

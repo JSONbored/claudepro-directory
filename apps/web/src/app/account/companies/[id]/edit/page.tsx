@@ -42,6 +42,25 @@ interface EditCompanyPageProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Renders the "Edit Company" page for a given company id.
+ *
+ * Fetches the authenticated user and the target company, then renders a company edit form
+ * initialized with the loaded company data. If the requester is not authenticated this
+ * page redirects to the login page. If loading the company fails, a "Company unavailable"
+ * fallback UI is rendered. If the company does not exist or is inaccessible, a notFound()
+ * response is triggered.
+ *
+ * @param params - Route params object; `params.id` is the company identifier to edit.
+ * @returns The page UI: either the edit form prefilled with the company data, the
+ *          "Company unavailable" fallback card when a data error occurs, or a redirect/notFound
+ *          response as described above.
+ *
+ * @see CompanyForm
+ * @see getAuthenticatedUser
+ * @see getUserCompanyById
+ * @see normalizeError
+ */
 export default async function EditCompanyPage({ params }: EditCompanyPageProperties) {
   const { id } = await params;
 

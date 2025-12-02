@@ -106,25 +106,21 @@ export async function generateMetadata({
 }
 
 /**
- * Dynamic category list page component
+ * Render the category list page for a given category.
  *
- * @description
- * Server component that renders a list of content items for a given category.
- * Handles validation, config loading, content fetching from database, and rendering.
- * Returns 404 if category is invalid.
+ * Server component that validates the requested category, loads the category configuration
+ * and its items on the server, and renders the list UI. If the category is invalid or its
+ * configuration is missing, this component triggers a 404 via Next.js' notFound().
  *
- * @param {object} props - Component props
- * @param {{ category: string }} props.params - Route parameters containing category slug
+ * @param props - Component props
+ * @param props.params - Route parameters
+ * @param props.params.category - Category slug to render (e.g., "agents", "mcp", "statuslines")
+ * @returns The rendered JSX element for the category list page
  *
- * @returns {Promise<JSX.Element>} Rendered category list page
- *
- * @throws {notFound} Returns 404 page if category is invalid or config not found
- *
- * @example
- * // Handles routes like:
- * // /agents → Lists all AI agents with search/filter
- * // /mcp → Lists all MCP servers with search/filter
- * // /statuslines → Lists all statuslines with search/filter
+ * @see isValidCategory
+ * @see getCategoryConfig
+ * @see getContentByCategory
+ * @see ContentListServer
  */
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;

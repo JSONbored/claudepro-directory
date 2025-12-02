@@ -135,6 +135,30 @@ function hasFilterCriteria(filters?: FilterState | null): boolean {
   );
 }
 
+/**
+ * Renders a client-side content search UI with unified search, filters, quick filters, saved searches, and fallback suggestions.
+ *
+ * @param props - Component props
+ * @param props.items - Initial list of content items shown before or without an active search.
+ * @param props.searchPlaceholder - Placeholder text for the search input.
+ * @param props.title - Human-readable content type name used in empty states and labels.
+ * @param props.icon - Optional icon name to display in the empty state.
+ * @param props.category - Optional fixed category to scope searches and filter options.
+ * @param props.availableTags - Explicit list of tags to expose in filters; if empty, tags are derived from items.
+ * @param props.availableAuthors - Explicit list of authors to expose in filters; if empty, authors are derived from items.
+ * @param props.availableCategories - Explicit list of categories to expose in filters; if empty, categories are derived from items.
+ * @param props.zeroStateSuggestions - Suggested items to show when there are no results and no search query.
+ * @param props.quickTags - Optional short list of tags shown as quick-filter buttons.
+ * @param props.quickAuthors - Optional short list of authors shown as quick-filter buttons.
+ * @param props.quickCategories - Optional short list of categories shown as quick-filter buttons.
+ * @param props.fallbackSuggestions - Optional override for fallback suggestions used when zeroStateSuggestions is not provided.
+ * @returns The rendered search UI element.
+ *
+ * @see searchUnifiedClient
+ * @see useSavedSearchPresets
+ * @see UnifiedSearch
+ * @see UnifiedCardGrid
+ */
 function ContentSearchClientComponent<T extends DisplayableContent>({
   items,
   searchPlaceholder,

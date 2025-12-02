@@ -42,14 +42,14 @@ import {
 } from '@heyclaude/web-runtime/ui';
 
 /**
- * Render an interactive checklist card with per-item completion toggles and a progress indicator.
+ * Renders an interactive checklist card with per-item completion toggles and a progress indicator.
  *
  * @param props - ChecklistProps containing checklist configuration and items.
- * @param props.title - Optional title to display; defaults to "<Type> Checklist" when omitted.
+ * @param props.title - Optional title to display; when omitted a default title derived from `props.type` (e.g., "Prerequisites Checklist") is used.
  * @param props.items - Array of checklist items. Each item must include `task` and may include `description`, `priority` (one of `"critical" | "high" | "medium" | "low"`), and `completed`.
  * @param props.description - Optional descriptive text displayed under the header.
  * @param props.type - Checklist type that selects the header icon and default title (`"prerequisites" | "security" | "testing"`).
- * @returns A React element representing the checklist card with item toggles and a progress bar.
+ * @returns A React element representing the checklist card, its progress bar, and the list of toggleable items.
  *
  * @see Card
  * @see UnifiedBadge

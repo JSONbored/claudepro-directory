@@ -92,13 +92,13 @@ function getSafeWebsiteUrl(url: null | string | undefined): null | string {
 }
 
 /**
- * Produce a safe `mailto:` URL from an email address or return `null` if the input is invalid.
+ * Create a validated and normalized `mailto:` URL from an email address.
  *
- * Performs format validation, security checks (null bytes, path traversal, protocol injection),
- * normalization to lowercase, and length enforcement before encoding the address for use in a `mailto:` link.
+ * Performs validation and security checks, normalizes the address to lowercase,
+ * enforces length limits, and percent-encodes the result for safe use in links.
  *
- * @param email - The email address to validate and encode; may be `null` or `undefined`.
- * @returns `mailto:` URL-encoded email address if valid, `null` otherwise.
+ * @param email - The email address to validate and encode; may be null or undefined
+ * @returns `mailto:` URL-encoded email address if valid, `null` otherwise
  *
  * @see getSafeWebsiteUrl
  */
@@ -137,12 +137,12 @@ function getSafeMailtoUrl(email: null | string | undefined): null | string {
 }
 
 /**
- * Build metadata for a job detail page based on the incoming slug.
+ * Create Next.js metadata for a job detail page identified by its slug.
  *
- * Attempts to load the job by slug and includes the job as the page item when available; otherwise generates default route metadata for /jobs/:slug.
+ * Attempts to load the job by slug and, when found, embeds the job (with tags defaulted to an empty array) as the page item used to populate metadata; if loading fails or the job is missing, generates default route metadata for /jobs/:slug.
  *
- * @param params - An object (or promise resolving to an object) that provides the `slug` route parameter.
- * @returns The Next.js Metadata for the job page, optionally populated with the job item and its tags.
+ * @param params - An object (or promise resolving to an object) containing the `slug` route parameter
+ * @returns The Metadata object for the job page, with `item` populated when the job was successfully loaded
  *
  * @see getJobBySlug
  * @see generatePageMetadata
@@ -182,16 +182,14 @@ export async function generateMetadata({
 }
 
 /**
- * Produce the list of slugs to pre-render at build time for the jobs listing.
+ * Provide slugs to pre-render at build time and during ISR for job detail pages.
  *
- * Attempts to fetch up to the top 10 jobs and returns an array of { slug } objects for Incremental Static Regeneration (ISR); remaining job pages are rendered on-demand because dynamicParams is enabled.
+ * Runs at build time (and during ISR revalidation) to produce up to 10 `{ slug }` route parameter objects for Next.js static generation; if jobs cannot be fetched it returns a single placeholder slug so pages can be handled on-demand via `dynamicParams`.
  *
- * This runs at build-time (or during ISR revalidation) and uses a scoped logger and requestId for tracing; on fetch errors or when no jobs are available it returns a single placeholder slug.
+ * @returns An array of route parameter objects of the form `{ slug: string }`. Returns `[{ slug: 'placeholder' }]` when no jobs are available or fetching fails.
  *
- * @returns An array of route parameter objects like `{ slug: string }` to be used by Next.js for static generation.
- *
- * @see getFilteredJobs - server helper used to fetch the top jobs
- * @see dynamicParams - page-level flag enabling on-demand rendering for non-pre-rendered slugs
+ * @see getFilteredJobs - fetches the top jobs used to build the list
+ * @see dynamicParams - enables on-demand rendering for slugs not pre-rendered
  */
 export async function generateStaticParams() {
   // Limit to top 10 jobs to optimize build time
@@ -228,9 +226,9 @@ export async function generateStaticParams() {
 }
 
 /**
- * Render the job detail page for a given route slug and return the page UI or trigger a 404 when the slug is invalid or the job does not exist.
+ * Render the job detail page for the provided route slug and produce the job's server-rendered UI or trigger a 404 when the slug is invalid or the job cannot be found.
  *
- * This server component validates the incoming `slug` route parameter, performs a server-side fetch of the job record, and renders the job detail UI (including apply actions and job metadata). It creates a request-scoped logger for diagnostics and participates in the module-level ISR behavior (revalidation and on-demand rendering controlled by the file's exported configuration).
+ * Validates the incoming `slug` parameter, fetches the job record server-side, and renders the job detail UI (including apply actions and structured metadata). This server component participates in the module-level ISR configuration (revalidation and dynamic params).
  *
  * @param params - Route parameters object containing the `slug` to resolve the job
  * @returns The rendered job detail page as a JSX element

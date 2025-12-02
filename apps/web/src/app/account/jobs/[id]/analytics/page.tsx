@@ -51,9 +51,9 @@ interface JobAnalyticsPageProperties {
 }
 
 /**
- * Convert a raw job status into a human-friendly, title-cased label.
+ * Converts a raw job status into a human-friendly title-cased label.
  *
- * @param rawStatus - The stored status string (may contain underscores and lowercase letters)
+ * @param rawStatus - Stored status string that may contain underscores and lowercase letters
  * @returns The input with underscores replaced by spaces and each word capitalized (e.g., `in_review` -> `In Review`)
  *
  * @see getStatusColor
@@ -77,14 +77,13 @@ function getStatusColor(status: JobStatus): string {
 }
 
 /**
- * Create page metadata for the job analytics route using the route `id`.
+ * Generate metadata for the /account/jobs/:id/analytics page.
  *
- * Uses the route `id` to produce metadata for the `/account/jobs/:id/analytics` page.
+ * Uses the route `id` parameter to produce Next.js page metadata for the analytics route.
  *
  * @param props - Page properties containing route parameters.
- * @param props.params - An object (or promise resolving to an object) with route parameters.
- * @param props.params.id - The job identifier used in the analytics route path.
- * @returns The Next.js page metadata for the `/account/jobs/:id/analytics` route.
+ * @param props.params - An object (or a promise resolving to an object) with route parameters, including `id`.
+ * @returns The Next.js page metadata for the analytics route.
  *
  * @see generatePageMetadata
  */

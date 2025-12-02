@@ -360,6 +360,23 @@ function TrustedHTML({ html, className, id }: { html: string; className?: string
   );
 }
 
+/**
+ * Render a single Section object into the appropriate React node based on its `type`.
+ *
+ * Renders each supported section variant (text, heading, code, code_group, callout,
+ * tldr, feature_grid, expert_quote, comparison_table, tabs, accordion, faq, steps,
+ * checklist, related_content) into the corresponding UI components and performs
+ * safety checks for links and HTML where applicable.
+ *
+ * @param section - The section data to render; its `type` determines which UI is produced.
+ * @param index - The numeric index used as a fallback when generating a stable key.
+ * @returns The rendered React node for the given section, or `null` when the section type is unsupported.
+ *
+ * @see JSONSectionRenderer
+ * @see getSafeExternalUrl
+ * @see isValidInternalPath
+ * @see TrustedHTML
+ */
 function render_section(section: Section, index: number): React.ReactNode {
   const key = section.id || `section-${index}`;
 
@@ -716,6 +733,17 @@ function render_section(section: Section, index: number): React.ReactNode {
   }
 }
 
+/**
+ * Renders a vertically spaced container of content sections provided via the `sections` prop.
+ *
+ * Normalizes the prop to an array and renders each section in order; returns `null` when there are no sections.
+ *
+ * @param sections - The sections prop; expected to be an array of `Section` objects (or a value that will be normalized to an array). If missing or empty, nothing is rendered.
+ * @returns A React element containing the rendered sections, or `null` if there are no sections.
+ *
+ * @see render_section
+ * @see TrustedHTML
+ */
 export function JSONSectionRenderer({ sections }: JSONSectionRendererProps) {
   const sections_array = Array.isArray(sections) ? (sections as Section[]) : [];
 

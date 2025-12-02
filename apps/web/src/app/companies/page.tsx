@@ -62,9 +62,15 @@ import { NewsletterCTAVariant } from '@/src/components/features/growth/newslette
 export const revalidate = 1800;
 
 /**
- * Validate and sanitize external website URL for safe use in href attributes
- * Only allows HTTPS URLs (or HTTP for localhost in development)
- * Returns canonicalized URL or null if invalid
+ * Validate and canonicalize an external website URL for safe use in link hrefs.
+ *
+ * Allows only `https:` URLs except `http:` when the host is `localhost`, `127.0.0.1`, or `::1`.
+ * Rejects URLs containing username or password, strips credentials, normalizes the hostname (removes a trailing dot and lowercases), and removes default ports 80 and 443.
+ *
+ * @param url - The raw URL string to validate and sanitize
+ * @returns The canonicalized href string if the URL is allowed and valid, or `null` if it is invalid or disallowed
+ *
+ * @see CompaniesPage - caller that uses this helper to render external company website links
  */
 function getSafeWebsiteUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
@@ -115,18 +121,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Renders the Companies directory page: loads a list of companies, logs request-scoped events, and returns the server-rendered UI.
+ * Render the Companies directory page and its server-side data.
  *
- * Fetches up to 50 companies, renders a hero, a responsive grid of company cards (or an empty-state card), and a newsletter CTA.
- * The page validates external company websites before rendering external links and marks featured companies and basic stats when present.
+ * Loads up to 50 companies, sets up request-scoped logging for the request, and returns the server-rendered UI containing a hero, a responsive grid of company cards or an empty state, and a newsletter CTA. External company websites and logos are validated before rendering external links or images; featured companies and basic job/size statistics are surfaced when present.
  *
- * @returns The page's JSX element rendering the companies directory.
- * @throws Normalized error when loading the companies list fails (rethrows the result of `normalizeError`).
+ * @returns The page's JSX element for the Companies directory.
+ * @throws A normalized error when loading the companies list fails.
  * @see getCompaniesList
  * @see getSafeWebsiteUrl
  * @see generateRequestId
  * @see normalizeError
- * @remarks This page uses ISR with a revalidation interval of 86,400 seconds (24 hours).
+ * @remarks This page uses ISR with a revalidation interval of 1800 seconds (30 minutes).
  */
 export default async function CompaniesPage() {
   // Generate single requestId for this page request

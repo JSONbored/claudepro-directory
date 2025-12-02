@@ -61,11 +61,11 @@ export async function POST(request: NextRequest, context: unknown) {
 }
 
 /**
- * Handle PUT requests to /api/inngest by creating a request-scoped logger and delegating to the Inngest sync handler.
+ * Handle PUT requests to /api/inngest by creating a request-scoped logger and delegating handling to the Inngest sync handler.
  *
- * @param {NextRequest} request - The Next.js request object for the incoming HTTP request.
- * @param {unknown} context - The route context passed through to the Inngest handler.
- * @returns {Response} The Response produced by the underlying Inngest PUT handler.
+ * @param {NextRequest} request - The incoming Next.js request.
+ * @param {unknown} context - Route context forwarded to the Inngest handler.
+ * @returns {Response} The response produced by the Inngest PUT handler.
  * @see {@link @heyclaude/web-runtime/inngest#PUT}
  * @see {@link @heyclaude/web-runtime/logging/server.generateRequestId}
  * @see {@link @heyclaude/web-runtime/logging/server.logger}

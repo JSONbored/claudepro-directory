@@ -40,11 +40,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the Account Activity page and adapt the UI based on authentication and available activity data.
+ * Render the Account Activity page and present the authenticated user's activity summary and timeline.
  *
- * Loads the authenticated user, fetches activity summary and timeline in parallel (tolerating partial failures),
- * logs authentication and data-fetch outcomes with request- and user-scoped context, and conditionally renders
- * summary and timeline sections or appropriate fallbacks.
+ * Fetches the authenticated user and, for authenticated requests, loads activity summary and timeline in parallel.
+ * Tolerates partial failures and falls back to appropriate UI states (sign-in prompt, global fallback, or partial content).
+ * Logs authentication and data-fetch outcomes with request- and user-scoped context.
  *
  * @returns The Activity page React element
  *

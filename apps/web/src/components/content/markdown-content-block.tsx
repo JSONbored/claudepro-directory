@@ -239,7 +239,22 @@ function CaseStudyVariant(props: CaseStudyProps) {
 
 // ============================================================================
 // VARIANT 2: FEATURE GRID
-// ============================================================================
+/**
+ * Renders a responsive grid of feature cards with an optional section title and description.
+ *
+ * Renders a Card for each feature including its title, description, and optional badge; returns `null` when the `features` array is empty.
+ *
+ * @param props.features - Array of features to display. Each feature must include `title` and `description`, and may include an optional `badge`.
+ * @param props.title - Section heading displayed above the grid.
+ * @param props.description - Optional paragraph shown under the heading.
+ * @param props.columns - Number of columns to use on medium+ screens (2, 3, or 4). Defaults to 3 when unspecified.
+ *
+ * @returns `JSX.Element | null` The rendered feature grid section when `features` contains items, or `null` when it is empty.
+ *
+ * @see UnifiedContentBlock
+ * @see Card
+ * @see UnifiedBadge
+ */
 
 function FeatureGridVariant(props: FeatureGridProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -382,7 +397,24 @@ function TLDRVariant(props: TLDRSummaryProps) {
 
 // ============================================================================
 // VARIANT 4: EXPERT QUOTE
-// ============================================================================
+/**
+ * Render a stylized expert quote block with optional avatar, role, and company attribution.
+ *
+ * Renders a semantic blockquote using Quotation schema.org markup, displays the quote text,
+ * and shows the author's name with optional job title and employer. An avatar is shown when
+ * `imageUrl` is provided; otherwise a fallback with the author's initials is used.
+ *
+ * @param props.quote - The quoted text to display (required).
+ * @param props.author - The name of the person who provided the quote (required).
+ * @param props.role - The author's job title to display after their name (optional).
+ * @param props.company - The organization the author works for to display after their name (optional).
+ * @param props.imageUrl - URL for the author's avatar image; when omitted a initials fallback is used (optional).
+ *
+ * @returns A React element containing the expert quote block with structured author attribution.
+ *
+ * @see UnifiedContentBlock
+ * @see Avatar
+ */
 
 function ExpertQuoteVariant(props: ExpertQuoteProps) {
   // Database CHECK constraint validates structure - no runtime validation needed

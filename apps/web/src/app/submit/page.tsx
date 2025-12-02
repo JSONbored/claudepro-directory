@@ -153,11 +153,9 @@ export async function generateMetadata(): Promise<Metadata> {
  * Edge-cached data: Dashboard data fetched from edge-cached data layer
  */
 /**
- * Render the Submit page for database-first community submissions.
+ * Render the Submit page for community submissions.
  *
- * Fetches submission dashboard data, submission form configuration, and content templates (with defensive fallbacks), composes community stats and recent merged submissions, and renders the submission form alongside a right-hand sidebar with stats, recent activity, promos, and a newsletter CTA.
- *
- * Data fetching is request-scoped and uses per-request logging; form configuration errors will abort rendering while dashboard and template errors use fallbacks so the page can still render partially. The page respects the file-level ISR revalidation setting (revalidate = 900).
+ * Fetches submission dashboard data, submission form configuration, and content templates; uses per-request logging and request-scoped diagnostics. Form configuration load failures abort rendering, while dashboard and template failures fall back to empty data so the page can render partially. The page respects the file-level ISR revalidation setting (revalidate = 900).
  *
  * @returns A React element representing the Submit page layout and UI.
  *

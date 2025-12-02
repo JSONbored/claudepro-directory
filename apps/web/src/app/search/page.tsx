@@ -154,6 +154,24 @@ async function SearchResultsSection({
   );
 }
 
+/**
+ * Renders the dynamic Search page, resolving query parameters, loading search facets and optional zero-state suggestions, and composing the search results and sidebar UI.
+ *
+ * This server component:
+ * - Normalizes incoming searchParams into query and filter state.
+ * - Attempts to load facet data and homepage-derived suggestions when appropriate.
+ * - Derives fallback suggestions and ranked "quick" lists for tags, authors, and categories.
+ * - Logs request-scoped metadata and returns the page markup with Suspense boundaries for results and the recently viewed sidebar.
+ *
+ * @param props.searchParams - Partial search parameter set possibly containing `q`, `category`, `tags`, `author`, and `sort`; used to build the page's query and filters.
+ * @returns The page's React element tree for the Search route.
+ *
+ * @see getSearchFacets
+ * @see searchContent
+ * @see getHomepageData
+ * @see ContentSearchClient
+ * @see SearchResultsSection
+ */
 export default async function SearchPage({ searchParams }: SearchPageProperties) {
   const resolvedParameters = await searchParams;
   

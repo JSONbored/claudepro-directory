@@ -21,6 +21,20 @@ interface DetailQuickActionsBarProps {
   className?: string;
 }
 
+/**
+ * Renders a sticky "Quick actions" bar for a content item showing actionable buttons derived from item metadata.
+ *
+ * The bar is omitted when there are no quick actions for the provided item.
+ *
+ * @param item - The content item for which quick actions are computed.
+ * @param metadata - Additional metadata used to derive quick actions.
+ * @param packageName - Optional package name that can influence available actions.
+ * @param configurationObject - Optional configuration object that can influence available actions.
+ * @param mcpServers - Optional MCP servers configuration that can influence available actions.
+ * @param className - Optional additional class names applied to the outer section element.
+ *
+ * @see useDetailQuickActions - Hook that determines the list of quick actions shown by this component.
+ */
 export function DetailQuickActionsBar({
   item,
   metadata,

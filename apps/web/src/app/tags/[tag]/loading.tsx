@@ -11,6 +11,15 @@ import { Skeleton } from '@heyclaude/web-runtime/ui';
 const CONTENT_GRID_SKELETONS = ['cg-1', 'cg-2', 'cg-3', 'cg-4', 'cg-5', 'cg-6', 'cg-7', 'cg-8', 'cg-9'] as const;
 const RELATED_TAG_SKELETONS = ['rt-1', 'rt-2', 'rt-3', 'rt-4', 'rt-5', 'rt-6', 'rt-7', 'rt-8'] as const;
 
+/**
+ * Renders the full-page loading skeleton for the tag detail page.
+ *
+ * @returns A JSX element containing hero, main content grid, and sidebar skeleton placeholders.
+ *
+ * @see Skeleton
+ * @see CONTENT_GRID_SKELETONS
+ * @see RELATED_TAG_SKELETONS
+ */
 export default function TagDetailLoading() {
   return (
     <div className={`${minHeight.screen} ${bgColor.background}`}>

@@ -10,6 +10,18 @@ import { Skeleton } from '@heyclaude/web-runtime/ui';
 const POPULAR_TAG_SKELETONS = ['pt-1', 'pt-2', 'pt-3', 'pt-4', 'pt-5', 'pt-6', 'pt-7', 'pt-8', 'pt-9', 'pt-10'] as const;
 const TAG_GRID_SKELETONS = ['tg-1', 'tg-2', 'tg-3', 'tg-4', 'tg-5', 'tg-6', 'tg-7', 'tg-8', 'tg-9', 'tg-10', 'tg-11', 'tg-12'] as const;
 
+/**
+ * Render a full-page skeleton loading state for the Tags page.
+ *
+ * Displays a hero skeleton (avatar, title, subtitle, CTAs), a "Popular Tags" row of pill
+ * skeletons, and a responsive grid of tag-item skeleton cards to indicate content loading.
+ *
+ * @returns A JSX element containing the skeleton UI for the tags page loading state.
+ *
+ * @see Skeleton - design-system skeleton component used to render placeholders
+ * @see POPULAR_TAG_SKELETONS
+ * @see TAG_GRID_SKELETONS
+ */
 export default function TagsLoading() {
   return (
     <div className={`${minHeight.screen} ${bgColor.background}`} aria-busy="true" role="status">

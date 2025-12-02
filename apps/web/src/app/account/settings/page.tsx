@@ -45,15 +45,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the account settings page for the current authenticated user, including data loading,
- * optional user-record initialization, and UI sections for editing profile information, viewing
- * account details, and managing the profile picture.
- *
- * Fetches the authenticated user and their settings, attempts to initialize a missing user record
- * when necessary, and falls back to compact UIs when the user is unauthenticated or settings/profile
+ * Server component that loads the authenticated user and their settings and renders the account
+ * Settings page or a compact fallback UI when the user is unauthenticated or profile/settings
  * data cannot be loaded.
  *
- * @returns A React element containing the settings UI or a compact fallback UI when the user is not authenticated or profile/settings data cannot be loaded.
+ * Renders sections for editing profile information, viewing account details, and managing the
+ * profile picture; falls back to concise prompts when authentication or settings/profile data are
+ * unavailable.
+ *
+ * @returns A React element that displays the Settings UI or a compact fallback UI when the user is
+ *          not authenticated or profile/settings data cannot be loaded.
  *
  * @see generateRequestId
  * @see getAuthenticatedUser

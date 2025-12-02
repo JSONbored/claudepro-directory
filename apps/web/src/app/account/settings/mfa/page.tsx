@@ -28,12 +28,11 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 /**
- * Render the server-side Two-Factor Authentication settings page and enforce that the user is authenticated.
+ * Server-rendered page that allows an authenticated user to manage MFA factors and read how-two-factor authentication works.
  *
- * Generates a per-request identifier and request-scoped logger for tracing, ensures an authenticated user
- * (redirecting to /login when absent), and returns the UI for managing MFA factors and viewing usage notes.
+ * Fetches the authenticated user for the current request and redirects to `/login` if no user is present.
  *
- * @returns The page JSX containing an MFA factors management card and a "How it works" informational card.
+ * @returns The JSX for the MFA settings page containing an MFA factors management card and an informational "How it works" card.
  *
  * @see getAuthenticatedUser
  * @see MFAFactorsListClient

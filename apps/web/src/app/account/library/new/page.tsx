@@ -25,6 +25,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/library/new');
 }
 
+/**
+ * Renders the "Create Collection" page for an authenticated user, including the collection form populated with the user's bookmarks.
+ *
+ * Performs server-side authentication and redirects the client to `/login` if no user is authenticated. When authenticated, fetches the user's bookmarks for use by the CollectionForm.
+ *
+ * @returns The page's React element tree containing navigation, page header, and a card with the CollectionForm preloaded with the user's bookmarks.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserBookmarksForCollections
+ * @see CollectionForm
+ * @see ROUTES.ACCOUNT_LIBRARY
+ */
 export default async function NewCollectionPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

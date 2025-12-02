@@ -17,6 +17,26 @@ export const revalidate = false;
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
+/**
+ * Renders the Community Directory page content: a searchable user grid and a contributors sidebar.
+ *
+ * This server component fetches community directory data (up to DEFAULT_DIRECTORY_LIMIT) using
+ * getCommunityDirectory, normalizes and filters returned user records, and supplies them to the
+ * client components used in the layout. If the fetch fails the error is normalized, logged via the
+ * request-scoped logger, and rethrown. An empty directory response is recorded as a warning.
+ *
+ * @param props.searchQuery - Optional search query used to filter directory results.
+ * @returns The page content JSX containing the header, a ProfileSearchClient populated with users,
+ * and a desktop-only ContributorsSidebar populated with top contributors and new members.
+ *
+ * @see getCommunityDirectory
+ * @see ProfileSearchClient
+ * @see ContributorsSidebar
+ * @see DEFAULT_DIRECTORY_LIMIT
+ * @see generateRequestId
+ * @see normalizeError
+ * @see logger
+ */
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   // Generate single requestId for this component
   const requestId = generateRequestId();

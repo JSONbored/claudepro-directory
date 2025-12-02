@@ -42,7 +42,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Produce metadata for the "/account/library" page.
+ * Generate metadata for the /account/library page.
  *
  * @returns Metadata for the /account/library route
  *

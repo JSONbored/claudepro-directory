@@ -216,6 +216,23 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
   };
 }
 
+/**
+ * Render the Configuration Recommender results page for a given result id and encoded answers.
+ *
+ * Decodes the Base64URL-encoded `answers` query parameter, fetches and normalizes recommendations
+ * based on the decoded answers, builds a shareable results URL, and returns the server-rendered
+ * results UI. If the `answers` parameter is missing, invalid, or recommendations cannot be fetched,
+ * this page triggers a 404 via `notFound()`.
+ *
+ * @param params - Route parameters object; must contain `id` (the result identifier)
+ * @param searchParams - Query parameters object; `answers` must be a Base64URL-encoded JSON string of quiz answers
+ *
+ * @returns A React element that renders the recommendations results page.
+ *
+ * @see decodeQuizAnswers
+ * @see getConfigRecommendations
+ * @see ResultsDisplay
+ */
 export default async function ResultsPage({ params, searchParams }: PageProperties) {
   const resolvedParameters = await params;
   const resolvedSearchParameters = await searchParams;

@@ -24,11 +24,19 @@ export interface DetailHeaderProps {
 }
 
 /**
- * DetailHeader Component (Server Component)
+ * Renders the detail page header including breadcrumbs, title and client-driven action controls.
  *
- * Renders the header section with breadcrumbs, back button, title, description, badges, and action buttons
- * Static content is server-rendered, interactive elements use client component
- * No React.memo needed - server components don't re-render
+ * This is a server component that outputs static header markup; interactive controls are mounted by the client-side
+ * DetailHeaderActions component.
+ *
+ * @param displayTitle - Title shown as the current item's heading in the header and breadcrumbs
+ * @param item - Content item (or DB detail result) used to derive category, description, and whether the item has content
+ * @param config - Category-specific configuration that supplies labels and serializable action definitions
+ * @param onCopyContent - Optional callback invoked when the "copy content" action is triggered
+ * @returns The header JSX element for a content detail page
+ *
+ * @see Breadcrumbs
+ * @see DetailHeaderActions
  */
 export function DetailHeader({ displayTitle, item, config, onCopyContent }: DetailHeaderProps) {
   const hasContent = Boolean(

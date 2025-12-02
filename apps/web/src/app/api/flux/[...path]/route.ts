@@ -26,17 +26,19 @@ interface RouteContext {
 }
 
 /**
- * Handle GET requests for the Flux catch-all API route and forward them to the Flux router.
+ * Forward GET requests from the catch-all /api/flux route to the Flux router.
  *
- * Resolves the dynamic path segments from `context`, creates a request-scoped log context, and delegates
- * processing to the Flux routing implementation.
+ * Resolves dynamic path segments from `context`, creates a request-scoped log context, and delegates
+ * handling to the Flux routing implementation.
  *
- * @param request - The incoming Next.js request object for the GET operation.
- * @param context - Route context containing resolved dynamic route parameters; `context.params.path` is the path segments array.
- * @returns A Response object representing the Flux API response for the routed GET request.
+ * @param request - The incoming NextRequest for the GET operation.
+ * @param context - RouteContext whose resolved `params.path` is the array of path segments to route.
+ * @returns The Response produced by the Flux router for the routed GET request.
  * @see routeFluxRequest
  * @see generateRequestId
  * @see logger
+ * @see createErrorResponse
+ * @see normalizeError
  */
 export async function GET(request: NextRequest, context: RouteContext) {
   const requestId = generateRequestId();
@@ -102,9 +104,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
 }
 
 /**
- * Produce a CORS preflight response for the Flux catch-all API route.
+ * Produce the HTTP response for a CORS preflight (OPTIONS) request on the Flux catch-all API route.
  *
- * @returns The HTTP Response configured for CORS preflight, including allowed methods and headers.
+ * @returns The `Response` configured for CORS preflight with the allowed methods and headers set.
+ * @see handleOptions
  */
 export function OPTIONS() {
   return handleOptions();

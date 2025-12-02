@@ -105,12 +105,10 @@ export async function generateStaticParams() {
 }
 
 /**
- * Generate page metadata for a changelog entry identified by its slug.
+ * Create SEO and page metadata for a changelog entry page based on the route slug.
  *
- * Attempts to load the changelog entry and produces canonical metadata used by Next.js for the detail page.
- *
- * @param params - A promise resolving to route params containing `slug`
- * @returns Metadata for the changelog entry page; if the entry cannot be loaded, returns metadata generated without item data
+ * @param params - Route parameters; must include `slug`
+ * @returns Metadata for the changelog entry page. If the entry cannot be loaded, returns metadata generated without the entry (`item`) data.
  *
  * @see getChangelogEntryBySlug
  * @see generatePageMetadata
