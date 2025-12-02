@@ -34,13 +34,11 @@ import Link from 'next/link';
 import { useEffect } from 'react';
 
 /**
- * Renders a client-side 500 Server Error page with actions to reload or go home.
+ * Render a client-side 500 (Server Error) page that logs a structured client error on mount and offers actions to reload or go home.
  *
- * The component logs a structured client-side error on mount (includes requestId, route,
- * module, userAgent, url, segment, and statusCode 500) and displays a centered card with
- * a descriptive message and two actions: reload the page or navigate to the home route.
+ * The component logs an error containing requestId, route, module, userAgent, url, segment, and statusCode (500) when mounted.
  *
- * @returns The Server Error page as a JSX element.
+ * @returns A JSX element representing the Server Error page.
  *
  * @see generateRequestId
  * @see logClientError

@@ -78,15 +78,14 @@ interface CollectionItemManagerProps {
 }
 
 /**
- * Renders a UI for managing items in a collection, allowing adding bookmarks, removing items, and reordering items.
+ * UI for managing items in a collection: add bookmarks, remove items, and reorder items.
  *
- * This component provides selection of available bookmarks to add, optimistic reorder updates with server reconciliation,
- * removal of items, and safe "view item" links when available. User feedback is surfaced via toasts and the Next.js router is refreshed after server changes.
+ * Maintains local selection and item-order state and synchronizes add/remove/reorder actions with the server.
  *
- * @param props.collectionId - The ID of the collection being managed.
- * @param props.items - Initial list of collection items.
- * @param props.availableBookmarks - List of bookmarks that can be added to the collection.
- * @returns A React element containing the collection item management UI.
+ * @param props.collectionId - The ID of the collection to manage.
+ * @param props.items - Initial list of collection items used to populate local state.
+ * @param props.availableBookmarks - Bookmarks that can be added to the collection; bookmarks already present are excluded from the add list.
+ * @returns A React element rendering the collection item management interface.
  *
  * @see getSafeContentUrl
  * @see addItemToCollection

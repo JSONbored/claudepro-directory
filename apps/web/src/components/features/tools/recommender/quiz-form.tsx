@@ -137,6 +137,12 @@ const quizAnswersSchema = z.object({
 
 type QuizAnswers = z.infer<typeof quizAnswersSchema>;
 
+/**
+ * Encodes a quiz answers object into a URL-safe base64 string.
+ *
+ * @param answers - The quiz answers object to encode.
+ * @returns A URL-safe base64 (base64url) representation of `answers`.
+ */
 function encodeQuizAnswers(answers: QuizAnswers): string {
   return Buffer.from(JSON.stringify(answers)).toString('base64url');
 }

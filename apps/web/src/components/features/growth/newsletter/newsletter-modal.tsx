@@ -27,16 +27,14 @@ export interface NewsletterModalProps {
 }
 
 /**
- * Renders a bottom-sheet newsletter signup modal that tracks impressions, submissions, and dismissals.
+ * Newsletter signup modal rendered as a bottom sheet that collects an email and emits telemetry for impressions, submissions, and dismissals.
  *
- * The modal collects an email address, triggers newsletter subscription, and sends analytics events when shown or dismissed.
- *
- * @param source - The newsletter source identifier used for subscription metadata.
- * @param category - Optional content category to attach to subscription metadata.
- * @param open - Controls whether the modal is visible.
+ * @param source - Identifier for the newsletter source; attached to subscription metadata and telemetry.
+ * @param category - Optional content category to include in subscription metadata and telemetry.
+ * @param open - Whether the modal is visible.
  * @param onOpenChange - Callback invoked with the new open state when the modal is opened or closed.
- * @param copyType - Variant of copy/context used for telemetry and subscription metadata.
- * @param slug - Optional content slug to attach to subscription metadata.
+ * @param copyType - Copy/telemetry variant to include in subscription metadata and analytics.
+ * @param slug - Optional content slug to include in subscription metadata and telemetry.
  * @returns The rendered newsletter modal element.
  *
  * @see useNewsletter

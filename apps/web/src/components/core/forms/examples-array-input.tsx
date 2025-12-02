@@ -107,8 +107,13 @@ interface ExamplesArrayInputProps {
 }
 
 /**
- * Validate a single example
- * Replaces Zod validation for bundle size optimization
+ * Validate a UsageExample object against required fields and length constraints.
+ *
+ * @param example - The usage example to validate (title, code, language, optional description)
+ * @returns `valid` true if the example meets all requirements; `error` contains a human-readable message when invalid
+ *
+ * @see ExamplesArrayInput
+ * @see SUPPORTED_LANGUAGES
  */
 function validateExample(example: UsageExample): { valid: boolean; error?: string } {
   // Validate title

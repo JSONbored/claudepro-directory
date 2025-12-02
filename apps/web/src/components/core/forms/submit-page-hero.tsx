@@ -84,13 +84,10 @@ const iconVariants = {
 };
 
 /**
- * Render the Submit page hero header with animated visuals, feature badges, and contribution statistics.
+ * Renders the hero section for the /submit page with animated visuals, feature badges, and contribution statistics.
  *
- * Renders an animated card containing a badge, title, description, feature items that include the provided
- * statistics, and a responsive illustrative panel with hover and pulsing animations.
- *
- * @param props.stats - Statistics shown in the hero: `{ total, pending, merged_this_week }`. `total` is used to display the total number of contributed configs.
- * @param props.className - Optional additional className applied to the root card container.
+ * @param stats - Statistics shown in the hero: `{ total, pending, merged_this_week }`. `total` is displayed as the total number of contributed configs.
+ * @param className - Optional additional className applied to the root card container.
  * @returns The hero React element for the /submit page.
  *
  * @see BorderBeam

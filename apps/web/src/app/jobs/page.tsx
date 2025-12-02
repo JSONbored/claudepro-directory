@@ -115,6 +115,18 @@ async function JobsCountBadge() {
   );
 }
 
+/**
+ * Builds metadata for the /jobs page from the provided search parameters.
+ *
+ * Reads the `category` and `remote` query values (interpreting `'remote' === 'true'` as a boolean)
+ * and delegates metadata construction to `generatePageMetadata`.
+ *
+ * @param props.searchParams - An awaitable Record of query parameters for the current request.
+ *                             Expected keys: `category` (string) and `remote` ('true'|'false').
+ * @returns Metadata for the /jobs route.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({
   searchParams,
 }: PagePropsWithSearchParams): Promise<Metadata> {
@@ -290,16 +302,16 @@ async function JobsListSection({
 }
 
 /**
- * Server-rendered jobs listing page that parses query parameters, builds filter URLs, and renders the jobs UI.
+ * Render the server-side jobs listing page with parsed filters, pagination, and filter URL helpers.
  *
- * Parses search and filter query parameters (search/q/query, category, employment, experience, remote, sort, page, limit),
- * normalizes pagination (clamps page and limit, computes offset), and exposes helper IDs and a buildFilterUrl function
- * used by the filter form and active-filter controls. The page streams the total job count via JobsCountBadge and
- * delegates filtered job fetching and rendering to JobsListSection; filtered queries bypass the cache while the base
- * list uses ISR-appropriate rendering.
+ * Parses query parameters (search/q/query, category, employment, experience, remote, sort, page, limit),
+ * normalizes pagination (clamps page and limit, computes offset), and exposes helper IDs and buildFilterUrl
+ * for the filter form and active-filter controls. Streams the total job count via JobsCountBadge and delegates
+ * filtered job fetching and rendering to JobsListSection; filtered queries bypass the cache while the base
+ * listing uses ISR-appropriate rendering.
  *
  * @param props.searchParams - Incoming URL search parameters (may be a Promise). Supported keys: `q`, `query`, `search`, `category`, `employment`, `experience`, `remote`, `sort`, `page`, `limit`.
- * @returns The rendered jobs page JSX.
+ * @returns The page JSX for the jobs listing, including filter UI, active-filter badges, job list section, and side content.
  *
  * @see JobsListSection
  * @see JobsCountBadge
@@ -714,6 +726,16 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
   });
 }
 
+/**
+ * Extracts a numeric salary value from a raw salary string.
+ *
+ * Accepts strings containing a single value or a range (optionally with commas) and returns the larger numeric value found; returns 0 when no numeric value can be extracted.
+ *
+ * @param raw - Salary text (e.g., "£40,000", "40k - 60k", or null/undefined)
+ * @returns The extracted numeric salary value, or 0 if unavailable
+ *
+ * @see applyJobSorting
+ */
 function extractSalaryValue(raw: null | string | undefined) {
   if (!raw) return 0;
   const match = raw.replaceAll(',', '').match(/(\d{2,6})(?:\s?-\s?(\d{2,6}))?/);

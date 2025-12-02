@@ -57,15 +57,9 @@ import { UnifiedBadge, HoverCard, Button,
 export const revalidate = 86_400;
 
 /**
- * Server-rendered page for partner advertising and pricing, assembling real-time stats,
- * launch pricing, pricing options, features, FAQ, and contact CTAs.
+ * Render the partner advertising and pricing landing page with real-time stats, pricing, features, FAQ, and contact CTAs.
  *
- * Loads pricing configuration, hero statistics, contact channels, and CTAs, and renders
- * the Partner marketing UI. If pricing configuration fails to load, a sensible default
- * pricing object is used to avoid a server error. A request-scoped ID and child logger
- * are generated for the page request to help correlate logs.
- *
- * Note: this page uses incremental static regeneration with a 1-day revalidation window.
+ * Loads pricing configuration, hero statistics, contact channels, and CTAs to compose the server-rendered marketing UI. If pricing configuration cannot be loaded, a sensible default pricing object is used so the page still renders. This route uses incremental static regeneration with a 1-day revalidation window.
  *
  * @returns The React element tree for the partner landing page.
  *

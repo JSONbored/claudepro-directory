@@ -40,7 +40,20 @@ const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 
 // Helper to get a safe, sanitized href for the author profile.
 // Only allows strictly mapped profile URLs for allowed domains or fallback to default.
-// Never uses arbitrary user-supplied URLs to prevent client-side URL redirect attacks.
+/**
+ * Produce a sanitized, safe href for an author's profile URL or fallback to the canonical default.
+ *
+ * Performs strict validation and domain-specific mapping so the returned href is safe for direct use
+ * in anchor href attributes (prevents open-redirects and arbitrary external URLs).
+ *
+ * @param item - Content item (or RPC-derived content object) that may contain `author_profile_url`
+ * @returns A safe href string: either an allowed absolute URL, an encoded relative path, or the
+ * canonical default author profile when the input is missing or considered unsafe
+ *
+ * @see getSocialLinks
+ * @see SOCIAL_LINK_SNAPSHOT
+ * @see DetailMetadata
+ */
 function getSafeAuthorProfileHref(
   item:
     | ContentItem

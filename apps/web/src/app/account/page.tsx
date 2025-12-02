@@ -55,20 +55,11 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Renders the Account Dashboard page for the authenticated user, showing account stats,
- * quick actions, recently saved items, and recommended next items.
+ * Render the authenticated user's account dashboard with stats, quick actions, recently saved items, and personalized recommendations.
  *
- * This server component performs server-side authentication and data fetching:
- * it obtains the authenticated user, loads the account dashboard bundle (dashboard, library, homepage),
- * resolves recent bookmark content details, and derives personalized recommendations.
+ * Performs server-side authentication and loads the account dashboard bundle (dashboard, library, homepage) to assemble recent bookmarks and candidate recommendations. If the request is unauthenticated this component returns a sign-in prompt; if dashboard data cannot be loaded it returns an error card.
  *
- * The component returns a UI that:
- * - Prompts sign-in when the request is unauthenticated.
- * - Shows an error card if dashboard data cannot be loaded.
- * - Displays bookmark count, membership tier, and account age.
- * - Lists up to three recent saved items and up to three recommended items (excluding already-bookmarked content).
- *
- * @returns The rendered dashboard page as JSX.
+ * @returns The rendered dashboard page as JSX. When unauthenticated, a sign-in prompt is returned; when dashboard data is unavailable, an error card is returned.
  *
  * @see getAuthenticatedUser
  * @see getAccountDashboardBundle
@@ -460,6 +451,14 @@ function QuickActionRow({
   );
 }
 
+/**
+ * Renders an empty-state card shown when the user has no saved configurations.
+ *
+ * Displays a brief message, guidance to browse the directory, and a link to the home/explore page.
+ *
+ * @see RecentlySavedGrid
+ * @see ROUTES.HOME
+ */
 function EmptyRecentlySavedState() {
   return (
     <div className={`${radius['2xl']} ${border.dashedVisible} ${padding.comfortable} text-center`}>

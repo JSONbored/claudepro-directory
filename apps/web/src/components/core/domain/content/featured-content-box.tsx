@@ -65,6 +65,16 @@ export type UnifiedContentBoxProps =
   | InfoBoxVariant
   | CalloutVariant;
 
+/**
+ * Renders a content box by delegating to the variant component indicated by `props.contentType`.
+ *
+ * @param props - Props discriminated by `contentType` that provide the data and configuration for the chosen variant.
+ * @returns The JSX element for the selected content box: AccordionBox, FAQBox, InfoBoxComponent, or CalloutComponent.
+ * @see AccordionBox
+ * @see FAQBox
+ * @see InfoBoxComponent
+ * @see CalloutComponent
+ */
 export function UnifiedContentBox(props: UnifiedContentBoxProps) {
   switch (props.contentType) {
     case 'accordion':
@@ -180,6 +190,20 @@ function AccordionBox(props: AccordionVariant) {
   );
 }
 
+/**
+ * Render a list of frequently asked questions as styled cards.
+ *
+ * Renders a section containing an optional title and description followed by one card per FAQ entry.
+ *
+ * @param props - Component props
+ * @param props.questions - Array of FAQ items with `question` and `answer` fields; if empty or undefined, the component renders `null`.
+ * @param props.title - Optional heading displayed above the FAQ list.
+ * @param props.description - Optional descriptive text displayed under the heading.
+ * @returns A section element containing FAQ cards, or `null` when `questions` is empty.
+ *
+ * @see UnifiedContentBox
+ * @see AccordionBox
+ */
 function FAQBox(props: FAQVariant) {
   const { questions, title, description } = props;
   const validQuestions = questions || [];

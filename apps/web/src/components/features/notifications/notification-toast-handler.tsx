@@ -21,6 +21,15 @@ function getShownIds(): Set<string> {
   }
 }
 
+/**
+ * Persistently records a notification ID as shown so it will not be shown again across sessions.
+ *
+ * Attempts to add `id` to the persisted set stored under the `SHOWN_KEY` localStorage entry; failures are silently ignored.
+ *
+ * @param id - The notification identifier to mark as shown
+ * @see getShownIds
+ * @see SHOWN_KEY
+ */
 function markShown(id: string): void {
   try {
     const shown = getShownIds();

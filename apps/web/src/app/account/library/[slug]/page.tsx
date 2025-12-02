@@ -43,6 +43,14 @@ interface CollectionPageProperties {
   params: Promise<{ slug: string }>;
 }
 
+/**
+ * Generate page metadata for the collection detail route using the route `slug`.
+ *
+ * @param params - An object resolving to route parameters; `slug` is used to build the metadata.
+ * @returns The Next.js `Metadata` for the collection detail page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: CollectionPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug', { params: { slug } });

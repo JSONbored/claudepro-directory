@@ -39,22 +39,17 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
  * ISR: 30 minutes (1800s) - Matches CACHE_TTL.jobs_detail
  * Job postings need reasonably fresh data for status/applicant updates
  */
-export const revalidate = 1800;
-export const dynamicParams = true;
-
-/**
- * Validate and sanitize an external website URL for safe use in href attributes.
+export const revalidate = 7200;
+export const dynamicParams = true; /**
+ * Validate and canonicalize an external website URL for safe use in href attributes.
  *
- * Accepts a string URL and returns a canonicalized href when the URL is allowed:
- * only `https:` URLs are permitted, while `http:` is permitted only for localhost
- * hostnames (`localhost`, `127.0.0.1`, `::1`). Returns `null` for invalid,
- * disallowed, or unsafe URLs.
+ * Accepts `null`/`undefined` or a string and returns a canonicalized href when the URL is allowed:
+ * only `https:` URLs are permitted; `http:` is permitted only for localhost hostnames (`localhost`, `127.0.0.1`, `::1`).
+ * The function rejects URLs with embedded credentials or invalid/unsafe formats and normalizes the result
+ * by lowercasing the hostname, removing a trailing dot, and stripping default ports (`80`, `443`).
  *
- * The returned href has credentials stripped, hostname normalized to lowercase
- * (trailing dot removed), and default ports (`80`, `443`) removed.
- *
- * @param url - The input URL to validate and sanitize; may be `null` or `undefined`.
- * @returns A sanitized canonical href string when allowed, or `null` if the input is invalid or disallowed.
+ * @param url - The input URL to validate and sanitize.
+ * @returns A sanitized canonical href string when the URL is allowed, or `null` if the input is invalid or disallowed.
  *
  * @see getSafeMailtoUrl
  */
@@ -97,8 +92,15 @@ function getSafeWebsiteUrl(url: null | string | undefined): null | string {
 }
 
 /**
- * Validate and sanitize email address for safe use in mailto links
- * Returns safe mailto URL or null if email is invalid
+ * Produce a safe `mailto:` URL from an email address or return `null` if the input is invalid.
+ *
+ * Performs format validation, security checks (null bytes, path traversal, protocol injection),
+ * normalization to lowercase, and length enforcement before encoding the address for use in a `mailto:` link.
+ *
+ * @param email - The email address to validate and encode; may be `null` or `undefined`.
+ * @returns `mailto:` URL-encoded email address if valid, `null` otherwise.
+ *
+ * @see getSafeWebsiteUrl
  */
 function getSafeMailtoUrl(email: null | string | undefined): null | string {
   if (!email || typeof email !== 'string') return null;
@@ -226,12 +228,12 @@ export async function generateStaticParams() {
 }
 
 /**
- * Renders the job detail page for a given slug: validates the slug, loads job data server-side, and returns the page UI or a 404 when the slug is invalid or the job does not exist.
+ * Render the job detail page for a given route slug and return the page UI or trigger a 404 when the slug is invalid or the job does not exist.
  *
- * The page uses server-side data fetching and participates in ISR as configured at the module level (revalidation and dynamicParams). A per-request logger is created for scoped diagnostics.
+ * This server component validates the incoming `slug` route parameter, performs a server-side fetch of the job record, and renders the job detail UI (including apply actions and job metadata). It creates a request-scoped logger for diagnostics and participates in the module-level ISR behavior (revalidation and on-demand rendering controlled by the file's exported configuration).
  *
- * @param params - Route parameters object containing `slug`
- * @returns The rendered job detail page as JSX.Element
+ * @param params - Route parameters object containing the `slug` to resolve the job
+ * @returns The rendered job detail page as a JSX element
  *
  * @see getJobBySlug - Loads job data from the database
  * @see getSafeWebsiteUrl - Validates external application links before rendering

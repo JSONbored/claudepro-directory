@@ -127,6 +127,15 @@ interface UserProfilePageProperties {
  */
 export const revalidate = 1800;
 
+/**
+ * Create metadata for the user profile page.
+ *
+ * Generates page metadata for the /u/:slug route using the provided route parameters.
+ *
+ * @param params - A promise that resolves to an object containing the `slug` route parameter
+ * @returns Metadata for the user profile page
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: UserProfilePageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/u/:slug', {
@@ -135,11 +144,11 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
 }
 
 /**
- * Render the public user profile page for the given route slug.
+ * Render the public user profile page for the specified user slug.
  *
- * Fetches the public profile, activity stats, public collections, and contributions for the requested user,
- * determines viewer context to control follow actions, validates slugs and related item URLs, and returns
- * the fully rendered page or triggers a 404 when the slug is invalid or the profile is not found.
+ * Validates the slug, loads the public profile plus activity stats, public collections, and contributions,
+ * adapts rendering based on the viewer (e.g., follow controls), and triggers a 404 when the slug is invalid
+ * or the profile cannot be found.
  *
  * @param props - Route parameters object containing `slug`
  * @returns The React element for the user profile page

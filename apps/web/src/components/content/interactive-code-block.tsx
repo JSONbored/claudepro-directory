@@ -135,14 +135,14 @@ interface ShareDropdownProps {
 }
 
 /**
- * Render a floating share dropdown with Twitter, LinkedIn, and copy-link actions.
+ * Floating share dropdown offering Twitter, LinkedIn, and copy-link actions.
  *
- * @param currentUrl - The full URL to be shared; used to build platform-specific share links.
+ * @param currentUrl - Full URL to include in generated share links and texts.
  * @param category - Content category used in generated share metadata and share text.
  * @param slug - Content slug used in generated share metadata and share text.
  * @param onShare - Callback invoked with the selected platform identifier: `'twitter'`, `'linkedin'`, or `'copy_link'`.
- * @param onMouseLeave - Callback invoked when pointer leaves the dropdown (used to close the dropdown).
- * @returns A React element representing the share dropdown UI.
+ * @param onMouseLeave - Callback invoked when the pointer leaves the dropdown (used to close the dropdown).
+ * @returns A React element rendering the share dropdown UI.
  *
  * @see generateShareUrl
  * @see generateShareText
@@ -230,21 +230,19 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
 }
 
 /**
- * Render a syntax-highlighted, interactive code block with copy, screenshot, share, and download actions.
+ * Render an interactive, syntax-highlighted code block with actions for copy, screenshot, share, and download.
  *
- * Renders server-provided Shiki HTML (sanitized on the client), displays optional filename and language badge,
- * collapses long blocks based on `maxLines`, and provides client-side handlers for copying, downloading,
- * screenshotting, and sharing the code. Telemetry events are emitted for user interactions.
+ * Sanitizes server-rendered Shiki HTML on the client, optionally shows a filename and language badge,
+ * collapses long blocks based on `maxLines`, and wires UI controls to client-side handlers and telemetry.
  *
- * @param html - Server-rendered Shiki HTML for the highlighted code; sanitized on the client before insertion.
- * @param code - Raw source code string used for copy, download, and screenshot generation.
- * @param language - Language label used for the badge and to determine default download extension; defaults to `'text'`.
- * @param filename - Optional filename displayed in the header and used as the screenshot title when present.
+ * @param html - Server-rendered Shiki HTML; sanitized on the client before insertion into the DOM.
+ * @param code - Raw source code used for copy, download, and screenshot generation.
+ * @param language - Language label shown in the badge and used to infer a default download extension; defaults to `'text'`.
+ * @param filename - Optional filename displayed in the header and used as the screenshot title when provided.
  * @param maxLines - Number of lines before the block collapses; defaults to `20`.
  * @param showLineNumbers - Whether to apply line-number styling to the rendered HTML; defaults to `true`.
  * @param className - Additional CSS classes applied to the outer container.
- *
- * @returns The rendered JSX element for the interactive code block.
+ * @returns The JSX element for the interactive code block.
  *
  * @see sanitizeShikiHtml
  * @see ShareDropdown

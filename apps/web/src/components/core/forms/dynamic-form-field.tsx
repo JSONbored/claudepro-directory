@@ -118,15 +118,13 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
 }
 
 /**
- * Render a textarea form field using the provided field definition and form identifier.
+ * Render a labeled textarea form field from a field definition and form identifier.
  *
- * Renders a labeled textarea with optional monospace styling, rows, placeholder, default value,
- * required flag, and help text. The field is wrapped in a responsive grid column class derived
- * from the field's `gridColumn` setting.
+ * Renders a Label and Textarea using a stable id of `${formId}-${field.name}`, applies optional
+ * monospace styling, rows, placeholder, default value, required flag, help text, and a responsive
+ * grid column class based on `field.gridColumn`.
  *
- * @param props.field - Field definition for the textarea; expected properties include
- *   `name`, `label`, `placeholder`, `required`, `rows`, `defaultValue`, `helpText`, `monospace`,
- *   and `gridColumn`.
+ * @param props.field - Field definition with expected properties: `name`, `label`, `placeholder`, `required`, `rows`, `defaultValue`, `helpText`, `monospace`, and `gridColumn`.
  * @param props.formId - Base identifier used to build the element id as `${formId}-${field.name}`.
  * @returns The textarea field element when `field.type === 'textarea'`, or `null` otherwise.
  *
@@ -161,14 +159,14 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
 }
 
 /**
- * Render a numeric input field when the provided field configuration has type "number".
+ * Render a configured numeric input field when the field's type is "number".
  *
- * Renders a labeled numeric input with min, max, step, default value, placeholder, and required attributes;
- * places help text below the input and applies a grid column class derived from the field's `gridColumn`.
+ * Renders a labeled number input with optional min, max, step, default value, placeholder, required flag,
+ * grid-aware wrapper, and optional help text.
  *
- * @param field - Field definition for the input. Used properties: `type`, `name`, `label`, `min`, `max`, `step`, `defaultValue`, `placeholder`, `required`, `helpText`, and `gridColumn`.
- * @param formId - Prefix used to build a stable HTML id for the field (`${formId}-${field.name}`).
- * @returns A JSX element for the configured number input, or `null` if `field.type` is not `"number"`.
+ * @param field - Field configuration; uses these properties: `type`, `name`, `label`, `min`, `max`, `step`, `defaultValue`, `placeholder`, `required`, `helpText`, and `gridColumn`.
+ * @param formId - Prefix used to build the element id as `${formId}-${field.name}`.
+ * @returns The JSX element for the configured number input, or `null` if `field.type` is not `"number"`.
  *
  * @see GRID_COLUMN_CLASSES
  * @see ContentTypeFieldRenderer
@@ -273,10 +271,19 @@ export interface ContentTypeFieldRendererProps {
 }
 
 /**
- * Content Type Field Renderer
+ * Render form fields for a content type into responsive, grid-aware groups.
  *
- * Renders all fields for a content type based on config.
- * Handles responsive grid layouts and accessibility.
+ * Groups consecutive grid-aligned fields (e.g., 'half', 'third', 'two-thirds') so they render in a responsive grid,
+ * and renders full-width fields as single-item groups. Each field is rendered via the single-field renderer and
+ * receives a stable id derived from the provided `formId`.
+ *
+ * @param props.config - Configuration describing the fields and their layout for the content type.
+ * @param props.formId - Base id used to compute stable field ids for accessibility and form association.
+ * @returns A React node tree with the configured fields arranged according to each field's `gridColumn` setting.
+ *
+ * @see SingleFieldRenderer
+ * @see getResponsiveGridClass
+ * @see FormFieldConfig
  */
 export function ContentTypeFieldRenderer({ config, formId }: ContentTypeFieldRendererProps) {
   // Group consecutive grid fields together

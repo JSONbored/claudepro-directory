@@ -29,7 +29,7 @@ export interface AuthSignOutButtonProps extends ButtonStyleProps {
 }
 
 /**
- * Renders a sign-out button that signs the current user out and redirects to the homepage.
+ * Renders a button that signs the current user out and redirects to the homepage.
  *
  * @param size - Visual size of the button (e.g., 'sm', 'md', 'lg').
  * @param variant - Visual variant of the button (e.g., 'ghost', 'solid').

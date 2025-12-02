@@ -34,20 +34,26 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Produces the page metadata for the /account/settings route.
+ *
+ * @returns The Metadata object for the account settings page.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/settings');
 }
 
 /**
- * Render the account settings page for the authenticated user, handling data loading,
- * missing-user initialization, and appropriate fallback UIs for unauthenticated or error states.
+ * Render the account settings page for the current authenticated user, including data loading,
+ * optional user-record initialization, and UI sections for editing profile information, viewing
+ * account details, and managing the profile picture.
  *
- * The component performs request-scoped logging, fetches the authenticated user and their
- * settings, attempts to initialize a missing user record, and renders profile editing,
- * account details, and profile-picture controls (or compact fallback cards when required).
+ * Fetches the authenticated user and their settings, attempts to initialize a missing user record
+ * when necessary, and falls back to compact UIs when the user is unauthenticated or settings/profile
+ * data cannot be loaded.
  *
- * @returns A React element containing the settings UI or a fallback UI when the user is not
- * authenticated or settings/profile data cannot be loaded.
+ * @returns A React element containing the settings UI or a compact fallback UI when the user is not authenticated or profile/settings data cannot be loaded.
  *
  * @see generateRequestId
  * @see getAuthenticatedUser

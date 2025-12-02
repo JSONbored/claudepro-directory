@@ -45,28 +45,35 @@ interface AnalyticsPageProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Create page metadata for the sponsorship analytics route using the provided route parameters.
+ *
+ * @param params - An object containing the route `id` used to build the sponsorship analytics page URL.
+ * @returns The generated `Metadata` for the '/account/sponsorships/:id/analytics' page.
+ *
+ * @see generatePageMetadata
+ * @see AnalyticsPageProperties
+ */
 export async function generateMetadata({ params }: AnalyticsPageProperties): Promise<Metadata> {
   const { id } = await params;
   return generatePageMetadata('/account/sponsorships/:id/analytics', { params: { id } });
 }
 
 /**
- * Renders the sponsorship analytics page for a specific sponsorship ID, presenting overview metrics,
+ * Render the sponsorship analytics page for a given sponsorship id, showing overview metrics,
  * campaign details, a 30-day performance chart, and optimization tips.
  *
- * Fetches authenticated user context and sponsorship analytics for the current user; if no user is
- * authenticated the page shows a sign-in prompt, and if analytics are missing the page triggers a
- * 404 via Next.js `notFound()`. Invalid or nullable backend fields are handled with safe defaults
- * and logged.
+ * This server component requires an authenticated user: when no user is present it renders a
+ * sign-in prompt, and when analytics cannot be loaded it triggers Next.js `notFound()` (404).
  *
- * @param props.params - An object containing route parameters.
- * @param props.params.id - The sponsorship identifier used to load analytics.
+ * @param props.params - Route parameters object.
+ * @param props.params.id - Sponsorship identifier used to load analytics for the current user.
  * @returns The server-rendered React element for the Sponsorship Analytics page.
  *
- * @see getSponsorshipAnalytics - Loads sponsorship analytics from the public database
- * @see getAuthenticatedUser - Resolves the current authenticated user
- * @see MetricsDisplay - Component used to present overview metrics
- * @see UnifiedBadge - Component used to display sponsorship tier and status
+ * @see getSponsorshipAnalytics
+ * @see getAuthenticatedUser
+ * @see MetricsDisplay
+ * @see UnifiedBadge
  */
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProperties) {
   const { id } = await params;

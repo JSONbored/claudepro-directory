@@ -23,6 +23,21 @@ interface DetailTocProps {
   className?: string;
 }
 
+/**
+ * Renders a "On this page" table of contents for document headings and manages active heading state.
+ *
+ * Displays a navigable list of normalized headings (when there are three or more). Highlights the
+ * currently visible heading, updates the browser URL hash to reflect the active heading, and scrolls
+ * to a heading when it is clicked (respecting the user's reduced-motion preference). The component
+ * also computes indentation based on heading levels.
+ *
+ * @param props.headings - Array of content heading metadata to include in the table of contents; may be null or undefined.
+ * @param props.className - Optional additional class name(s) applied to the outer nav element.
+ * @returns The rendered navigation element or `null` when there are fewer than three headings.
+ *
+ * @see normalizeHeadings from @heyclaude/web-runtime/utils/heading-normalization
+ * @see ListTree (icon used in the header)
+ */
 export function DetailToc({ headings, className }: DetailTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
   const [activeId, setActiveId] = useState<string | null>(null);

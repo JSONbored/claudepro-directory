@@ -37,17 +37,16 @@ interface AccountSidebarProps {
 }
 
 /**
- * Render the account sidebar for a signed-in user, fetching profile and sponsorship data.
+ * Render the account sidebar for the authenticated user, including avatar, name/email, profile link, and navigation.
  *
- * This React Server Component loads user settings (profile) and sponsorships. Settings and
- * sponsorships are fetched in parallel when possible; if settings are missing the component
- * attempts to create/ensure a user record and reload settings. Errors are normalized and logged,
- * and the UI falls back to safe defaults (no profile image, empty sponsorships) when data cannot be loaded.
+ * Loads user settings (profile) and sponsorships in parallel where possible; if settings are missing the component
+ * attempts to create/ensure a user record and reload settings. Failures are logged and safe UI defaults are used
+ * (no profile image, empty sponsorships) when data cannot be loaded.
  *
- * @param user - Authenticated Supabase user object for the current session
- * @param userNameMetadata - Name extracted from authentication metadata to use when profile name is absent
- * @param userImageMetadata - Image URL extracted from authentication metadata to use when profile image is absent
- * @returns The account sidebar element containing avatar, name/email, profile link (if present), and navigation
+ * @param user - Authenticated Supabase user for the current session
+ * @param userNameMetadata - Fallback display name from authentication metadata when profile name is absent
+ * @param userImageMetadata - Fallback image URL from authentication metadata when profile image is absent
+ * @returns The account sidebar React element
  *
  * @see getUserSettings
  * @see getUserSponsorships
