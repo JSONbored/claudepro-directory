@@ -16,7 +16,21 @@
  */
 
 import { AlertCircle, AlertTriangle, CheckCircle, Info } from '@heyclaude/web-runtime/icons';
-import { cluster, marginTop, iconSize, muted, weight, spaceY , row } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  iconSize,
+  alignItems,
+  marginTop,
+  muted,
+  radius,
+  row,
+  spaceY,
+  transition,
+  weight,
+  justify,
+  flexGrow,
+  size,
+} from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
@@ -176,7 +190,7 @@ export function AnimatedFormField({
       transition={TOKENS.animations.spring.smooth}
     >
       {/* Label Row */}
-      <div className="flex items-center justify-between">
+      <div className={`flex ${alignItems.center} ${justify.between}`}>
         <Label htmlFor={id} className={cluster.snug}>
           <span>{label}</span>
           {required && (
@@ -190,7 +204,7 @@ export function AnimatedFormField({
         {showCharCount && maxLength && (
           <motion.span
             className={cn(
-              'text-xs transition-colors',
+              `${size.xs} ${transition.colors}`,
               currentLength > maxLength * 0.9 && currentLength < maxLength
                 ? 'text-warning'
                 : currentLength >= maxLength
@@ -209,7 +223,10 @@ export function AnimatedFormField({
       {/* Field Container with Validation Icon */}
       <div className="relative">
         <motion.div
-          className={cn('relative transition-all', fieldClassName)}
+          className={cn(
+            `relative ${transition.all}`,
+            fieldClassName
+          )}
           animate={{
             borderColor: getBorderColor(),
           }}
@@ -247,30 +264,30 @@ export function AnimatedFormField({
             {/* Icon for messages */}
             {messageType === 'error' && (
               <AlertCircle
-                className={`${marginTop.micro} h-4 w-4 shrink-0`}
+                className={`${marginTop.micro} ${iconSize.sm} ${flexGrow.shrink0}`}
                 style={{ color: TOKENS.colors.error.text }}
               />
             )}
             {messageType === 'warning' && (
               <AlertTriangle
-                className={`${marginTop.micro} h-4 w-4 shrink-0`}
+                className={`${marginTop.micro} ${iconSize.sm} ${flexGrow.shrink0}`}
                 style={{ color: TOKENS.colors.warning.text }}
               />
             )}
             {messageType === 'success' && (
               <CheckCircle
-                className={`${marginTop.micro} h-4 w-4 shrink-0`}
+                className={`${marginTop.micro} ${iconSize.sm} ${flexGrow.shrink0}`}
                 style={{ color: TOKENS.colors.success.text }}
               />
             )}
             {messageType === 'help' && (
-              <Info className={`${marginTop.micro} h-4 w-4 shrink-0 ${muted.default}`} />
+              <Info className={`${marginTop.micro} ${iconSize.sm} ${flexGrow.shrink0} ${muted.default}`} />
             )}
 
             {/* Message Text */}
             <span
               className={cn(
-                'text-sm',
+                size.sm,
                 messageType === 'error' && weight.medium,
                 messageType === 'warning' && weight.medium,
                 messageType === 'success' && weight.medium,
@@ -295,7 +312,7 @@ export function AnimatedFormField({
 
       {/* Focus Indicator (bottom border animation) */}
       <motion.div
-        className="h-0.5 w-full rounded-full"
+        className={`h-0.5 w-full ${radius.full}`}
         initial={{ scaleX: 0, opacity: 0 }}
         animate={{
           scaleX: isFocused ? 1 : 0,

@@ -257,14 +257,27 @@ export const whitespace = {
  * Responsive text size patterns.
  */
 export const responsiveText = {
-  /** sm → base */
+  // V1 compatible aliases (sm, md, lg, xl, 2xl)
+  /** text-sm sm:text-sm md:text-base - Small responsive */
+  sm: 'text-sm sm:text-sm md:text-base',
+  /** text-base sm:text-base md:text-lg - Medium responsive */
+  md: 'text-base sm:text-base md:text-lg',
+  /** text-lg sm:text-lg md:text-xl lg:text-2xl - Large responsive */
+  lg: 'text-lg sm:text-lg md:text-xl lg:text-2xl',
+  /** text-xl sm:text-xl md:text-2xl lg:text-3xl - Extra large responsive */
+  xl: 'text-xl sm:text-xl md:text-2xl lg:text-3xl',
+  /** text-2xl sm:text-2xl md:text-3xl lg:text-4xl - 2XL responsive */
+  '2xl': 'text-2xl sm:text-2xl md:text-3xl lg:text-4xl',
+  
+  // Semantic aliases (for backward compatibility)
+  /** sm → base (alias for .sm) */
   smBase: 'text-sm sm:text-sm md:text-base',
-  /** base → lg */
+  /** base → lg (alias for .md) */
   baseLg: 'text-base sm:text-base md:text-lg',
-  /** lg → xl → 2xl */
+  /** lg → xl → 2xl (alias for .lg) */
   lgXl: 'text-lg sm:text-lg md:text-xl lg:text-2xl',
-  /** xl → 2xl → 3xl */
+  /** xl → 2xl → 3xl (alias for .xl) */
   xl2xl: 'text-xl sm:text-xl md:text-2xl lg:text-3xl',
-  /** 2xl → 3xl → 4xl */
+  /** 2xl → 3xl → 4xl (alias for .2xl) */
   xl3xl: 'text-2xl sm:text-2xl md:text-3xl lg:text-4xl',
 } as const;

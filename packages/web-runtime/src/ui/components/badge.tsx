@@ -1,9 +1,11 @@
 import { cn } from '../utils.ts';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { size } from '../../design-system/styles/typography.ts';
+import { radius } from '../../design-system/styles/radius.ts';
 import type * as React from 'react';
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+  `inline-flex items-center ${radius.full} border px-2.5 py-0.5 ${size.xs} font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`,
   {
     variants: {
       variant: {

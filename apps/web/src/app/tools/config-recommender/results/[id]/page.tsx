@@ -6,7 +6,8 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { padding , minHeight } from '@heyclaude/web-runtime/design-system';
+import { padding , minHeight, bgColor,
+} from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -304,7 +305,7 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
   });
 
   return (
-    <div className={`${minHeight.screen} bg-background`}>
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
       <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
         <ResultsDisplay recommendations={recommendations} shareUrl={shareUrl} />
       </section>

@@ -11,7 +11,21 @@ import {
   normalizeError,
 } from '@heyclaude/web-runtime/core';
 import { createWebAppContextWithIdClient } from '@heyclaude/web-runtime/logging/client';
-import { spaceY, marginTop, muted, weight ,size  , gap , padding } from '@heyclaude/web-runtime/design-system';
+import {
+  flexDir,
+  flexGrow,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  marginTop,
+  muted,
+  padding,
+  size,
+  spaceY,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { Component, type ReactNode } from 'react';
 import { Terminal } from '@heyclaude/web-runtime/ui';
@@ -52,22 +66,22 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
   override render() {
     if (this.state.hasError) {
       return (
-        <Terminal className="relative flex min-h-[500px] flex-col">
-          <div className={`flex flex-1 items-center justify-center ${padding.relaxed}`}>
+        <Terminal className={`relative flex min-h-[500px] ${flexDir.col}`}>
+          <div className={`flex ${flexGrow['1']} ${alignItems.center} ${justify.center} ${padding.relaxed}`}>
             <div className={`max-w-md ${spaceY.comfortable} text-center`}>
-              <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
+              <AlertTriangle className={`mx-auto ${iconSize['3xl']} ${textColor.destructive}`} />
               <div className={spaceY.compact}>
                 <h3 className={`${weight.semibold} ${size.lg}`}>Terminal Error</h3>
                 <p className={muted.sm}>
                   Something went wrong with the interactive terminal.
                   {this.state.error?.message && (
-                    <span className={`${marginTop.compact} block font-mono text-destructive ${size.xs}`}>
+                    <span className={`${marginTop.compact} block font-mono ${textColor.destructive} ${size.xs}`}>
                       {this.state.error.message}
                     </span>
                   )}
                 </p>
               </div>
-              <div className={`flex justify-center ${gap.compact}`}>
+              <div className={`flex ${justify.center} ${gap.compact}`}>
                 <Button
                   variant="outline"
                   size="sm"

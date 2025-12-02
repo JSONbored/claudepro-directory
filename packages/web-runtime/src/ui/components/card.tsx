@@ -6,7 +6,10 @@
 
 import { cn } from '../../ui/utils.ts';
 // Design System imports
-import { stack } from '../../design-system/styles/layout.ts';
+import { stack, gap } from '../../design-system/styles/layout.ts';
+import { size } from '../../design-system/styles/typography.ts';
+import { radius } from '../../design-system/styles/radius.ts';
+import { shadow } from '../../design-system/styles/effects.ts';
 import type * as React from 'react';
 import { memo } from 'react';
 
@@ -16,7 +19,7 @@ const Card = memo(function Card({ className, ...props }: React.ComponentProps<'d
       data-slot="card"
       className={cn(
         stack.loose,
-        'rounded-xl border bg-card py-6 text-card-foreground shadow-sm',
+        `${radius.xl} border bg-card py-6 text-card-foreground ${shadow.sm}`,
         className
       )}
       {...props}
@@ -29,7 +32,7 @@ const CardHeader = memo(function CardHeader({ className, ...props }: React.Compo
     <div
       data-slot="card-header"
       className={cn(
-        '@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6',
+        `@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start ${gap.compact} px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6`,
         className
       )}
       {...props}
@@ -67,7 +70,7 @@ const CardDescription = memo(function CardDescription({
   return (
     <div
       data-slot="card-description"
-      className={cn('text-muted-foreground text-sm', className)}
+      className={cn(`text-muted-foreground ${size.sm}`, className)}
       {...props}
     />
   );

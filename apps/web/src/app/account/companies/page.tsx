@@ -11,7 +11,30 @@ import {
   getUserCompanies,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, iconSize, spaceY, muted, marginBottom, marginTop, iconLeading, weight ,size  , gap , padding , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  bgColor,
+  cluster,
+  flexDir,
+  flexGrow,
+  flexWrap,
+  gap,
+  iconLeading,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  maxWidth,
+  muted,
+  padding,
+  radius,
+  size,
+  spaceY,
+  textColor,
+  weight,
+  squareSize,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building2,
@@ -211,7 +234,7 @@ export default async function CompaniesPage() {
         </div>
         <Button asChild>
           <Link href={`${ROUTES.ACCOUNT_COMPANIES}/new`}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className={`mr-2 ${iconSize.sm}`} />
             Add Company
           </Link>
         </Button>
@@ -219,15 +242,15 @@ export default async function CompaniesPage() {
 
       {companies.length === 0 ? (
         <Card>
-          <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
-            <Building2 className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+          <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+            <Building2 className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
             <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No companies yet</h3>
             <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
               Create a company profile to showcase your organization and post job listings
             </p>
             <Button asChild>
               <Link href={`${ROUTES.ACCOUNT_COMPANIES}/new`}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className={`mr-2 ${iconSize.sm}`} />
                 Create Your First Company
               </Link>
             </Button>
@@ -252,14 +275,14 @@ export default async function CompaniesPage() {
               return (
                 <Card key={company.id}>
                   <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className={`flex flex-1 items-start ${gap.comfortable}`}>
+                    <div className={`flex ${alignItems.start} ${justify.between}`}>
+                      <div className={`flex ${flexGrow['1']} ${alignItems.start} ${gap.comfortable}`}>
                         {(() => {
                           // Validate logo URL is safe (should be from Supabase storage or trusted domain)
                           if (!company.logo) {
                             return (
-                              <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
-                                <Building2 className={`h-8 w-8 ${muted.default}`} />
+                              <div className={`flex ${squareSize.avatarXl} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
+                                <Building2 className={`${iconSize.xl} ${muted.default}`} />
                               </div>
                             );
                           }
@@ -268,8 +291,8 @@ export default async function CompaniesPage() {
                             // Only allow HTTPS
                             if (parsed.protocol !== 'https:') {
                               return (
-                                <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
-                                  <Building2 className={`h-8 w-8 ${muted.default}`} />
+                                <div className={`flex ${squareSize.avatarXl} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
+                                  <Building2 className={`${iconSize.xl} ${muted.default}`} />
                                 </div>
                               );
                             }
@@ -291,8 +314,8 @@ export default async function CompaniesPage() {
                               isAwsS3;
                             if (!isTrustedSource) {
                               return (
-                                <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
-                                  <Building2 className={`h-8 w-8 ${muted.default}`} />
+                                <div className={`flex ${squareSize.avatarXl} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
+                                  <Building2 className={`${iconSize.xl} ${muted.default}`} />
                                 </div>
                               );
                             }
@@ -302,14 +325,14 @@ export default async function CompaniesPage() {
                                 alt={`${company.name} logo`}
                                 width={64}
                                 height={64}
-                                className={`h-16 w-16 ${radius.lg} border object-cover`}
+                                className={`${squareSize.avatarXl} ${radius.lg} border object-cover`}
                                 priority={index === 0}
                               />
                             );
                           } catch {
                             return (
-                              <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
-                                <Building2 className={`h-8 w-8 ${muted.default}`} />
+                              <div className={`flex ${squareSize.avatarXl} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
+                                <Building2 className={`${iconSize.xl} ${muted.default}`} />
                               </div>
                             );
                           }
@@ -368,7 +391,7 @@ export default async function CompaniesPage() {
                                 href={validatedUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`${marginTop.compact} inline-${cluster.tight} ${size.sm} text-accent hover:underline`}
+                                className={`${marginTop.compact} inline-flex items-center ${gap.tight} ${size.sm} ${textColor.primary} hover:underline`}
                               >
                                 <ExternalLink className={iconSize.xs} />
                                 {displayText}
@@ -381,7 +404,7 @@ export default async function CompaniesPage() {
                   </CardHeader>
 
                   <CardContent>
-                    <div className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}>
+                    <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
                       <div className={cluster.tight}>
                         <Briefcase className={iconSize.sm} />
                         {company.stats?.active_jobs ?? 0} active job

@@ -5,7 +5,11 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { spaceY, muted  , padding } from '@heyclaude/web-runtime/design-system';
+import { spaceY, muted  , padding, flexDir,
+  justify,
+  alignItems,
+  size,
+} from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -19,7 +23,7 @@ function NotificationListComponent() {
 
   if (notifications.length === 0) {
     return (
-      <div className={`flex flex-col items-center justify-center ${padding.relaxed} text-center`}>
+      <div className={`flex ${flexDir.col} ${alignItems.center} ${justify.center} ${padding.relaxed} text-center`}>
         <p className={muted.sm}>No new notifications</p>
       </div>
     );
@@ -28,8 +32,8 @@ function NotificationListComponent() {
   return (
     <div className={spaceY.default}>
       {notifications.length > 1 && (
-        <div className={`flex justify-end ${padding.xMicro}`}>
-          <Button variant="ghost" size="sm" onClick={dismissAll} className="text-xs">
+        <div className={`flex ${justify.end} ${padding.xMicro}`}>
+          <Button variant="ghost" size="sm" onClick={dismissAll} className={size.xs}>
             Dismiss All
           </Button>
         </div>

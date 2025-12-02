@@ -3,6 +3,12 @@
  * Prevents hanging requests and resource exhaustion
  */
 
+/**
+ * Maximum allowed timeout duration (5 minutes)
+ * Prevents resource exhaustion attacks from user-controlled timeout values
+ */
+const MAX_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
 export class TimeoutError extends Error {
   constructor(
     message: string,
@@ -15,8 +21,13 @@ export class TimeoutError extends Error {
 
 /**
  * Wraps a promise with a timeout
+ * 
+ * **Security:**
+ * - Enforces maximum timeout limit (5 minutes) to prevent resource exhaustion
+ * - Validates timeout values to prevent invalid inputs
+ * 
  * @param promise - The promise to wrap
- * @param timeoutMs - Timeout in milliseconds
+ * @param timeoutMs - Timeout in milliseconds (max: 5 minutes)
  * @param errorMessage - Custom error message
  */
 export function withTimeout<T>(
@@ -34,6 +45,17 @@ export function withTimeout<T>(
     );
   }
 
+  // Enforce maximum timeout to prevent resource exhaustion attacks
+  // User-controlled timeout values are capped at MAX_TIMEOUT_MS
+  const effectiveTimeout = Math.min(timeoutMs, MAX_TIMEOUT_MS);
+
+  // Warn when capping occurs so developers are aware
+  if (timeoutMs > MAX_TIMEOUT_MS) {
+    console.warn(
+      `Timeout value ${timeoutMs}ms exceeds maximum allowed duration. Capping to ${MAX_TIMEOUT_MS}ms.`
+    );
+  }
+
   return new Promise<T>((resolve, reject) => {
     let settled = false;
     
@@ -41,10 +63,10 @@ export function withTimeout<T>(
       if (!settled) {
         settled = true;
         reject(
-          new TimeoutError(errorMessage ?? `Operation timed out after ${timeoutMs}ms`, timeoutMs)
+          new TimeoutError(errorMessage ?? `Operation timed out after ${effectiveTimeout}ms`, timeoutMs)
         );
       }
-    }, timeoutMs);
+    }, effectiveTimeout);
     
     promise.then(
       (result) => {

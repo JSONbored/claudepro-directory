@@ -7,9 +7,10 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
+import { bgColor, flexDir, minHeight, overflow, radius, height } from '@heyclaude/web-runtime/design-system';
 import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
-import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
@@ -190,7 +191,7 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
   // Auth routes: minimal wrapper with no height constraints for true fullscreen experience
   if (isAuthRoute) {
     return (
-      <main id="main-content" className={`${DIMENSIONS.FULL_VIEWPORT} w-full overflow-hidden`}>
+      <main id="main-content" className={`${height.viewport100dvh} w-full ${overflow.hidden}`}>
         {children}
       </main>
     );
@@ -202,13 +203,13 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
       <a
         href="#main-content"
         className={
-          'sr-only rounded-md focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground'
+          `sr-only ${radius.md} focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground`
         }
       >
         Skip to main content
       </a>
       <PinboardDrawerProvider>
-        <div className={'flex ${minHeight.screen} flex-col bg-background'}>
+        <div className={`flex ${minHeight.screen} ${flexDir.col} ${bgColor.background}`}>
           {announcement && <AnnouncementBannerClient announcement={announcement} />}
           <Navigation hideCreateButton={useFloatingActionBar} navigationData={navigationData} />
           <main id="main-content" className="flex-1">

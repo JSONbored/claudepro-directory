@@ -164,11 +164,41 @@ export type LogContextValue =
 
 export type LogContext = Record<string, LogContextValue>;
 
+/**
+ * Sanitize a string to prevent log injection attacks
+ * Removes newlines and other control characters that could be used to forge log entries
+ * 
+ * @param str - String to sanitize
+ * @returns Sanitized string with newlines and control characters removed
+ */
+function sanitizeLogString(str: string): string {
+  // Remove newlines and carriage returns to prevent log injection
+  // Replace with space to preserve readability
+  return str.replace(/[\r\n]+/g, ' ').trim();
+}
+
+/**
+ * Check if a property key is dangerous (could cause prototype pollution)
+ * 
+ * @param key - Property key to check
+ * @returns true if the key is dangerous and should be filtered out
+ */
+function isDangerousPropertyKey(key: string): boolean {
+  // Filter out keys that could cause prototype pollution
+  // These keys are commonly exploited in prototype pollution attacks
+  const dangerousKeys = ['__proto__', 'constructor', 'prototype', 'toString', 'valueOf'];
+  return dangerousKeys.includes(key);
+}
+
 export function toLogContextValue(value: unknown): LogContextValue {
   if (value === null || value === undefined) {
     return null;
   }
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+  if (typeof value === 'string') {
+    // Sanitize strings to prevent log injection attacks
+    return sanitizeLogString(value);
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
     return value;
   }
   if (Array.isArray(value)) {
@@ -177,11 +207,18 @@ export function toLogContextValue(value: unknown): LogContextValue {
   if (typeof value === 'object') {
     const result: Record<string, LogContextValue> = {};
     for (const [key, val] of Object.entries(value)) {
+      // Prevent prototype pollution by filtering out dangerous property keys
+      // Dangerous keys are silently filtered to prevent security vulnerabilities
+      if (isDangerousPropertyKey(key)) {
+        // Skip dangerous keys to prevent prototype pollution attacks
+        continue;
+      }
       result[key] = toLogContextValue(val);
     }
     return result as { readonly [key: string]: LogContextValue };
   }
-  return String(value);
+  // For other types, convert to string and sanitize
+  return sanitizeLogString(String(value));
 }
 
 // Manual sanitization functions removed - now using Pino's native redaction
@@ -190,26 +227,47 @@ export function toLogContextValue(value: unknown): LogContextValue {
 // - Error serialization (via stdSerializers.err)
 // - Context sanitization (via redaction paths)
 
+/**
+ * Sanitize log message to prevent log injection attacks
+ * Removes newlines and control characters that could be used to forge log entries
+ * 
+ * @param message - Log message to sanitize
+ * @returns Sanitized message
+ */
+function sanitizeLogMessage(message: string): string {
+  // Remove newlines and carriage returns to prevent log injection
+  // Replace with space to preserve readability
+  return message.replace(/[\r\n]+/g, ' ').trim();
+}
+
 class Logger {
   debug(message: string, context?: LogContext, metadata?: LogContext): void {
+    // Sanitize message to prevent log injection
+    const sanitizedMessage = sanitizeLogMessage(message);
     // Pino handles redaction automatically via config
     // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
-    pinoInstance.debug({ ...context, ...metadata }, message);
+    pinoInstance.debug({ ...context, ...metadata }, sanitizedMessage);
   }
 
   info(message: string, context?: LogContext, metadata?: LogContext): void {
+    // Sanitize message to prevent log injection
+    const sanitizedMessage = sanitizeLogMessage(message);
     // Pino handles redaction automatically via config
     // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
-    pinoInstance.info({ ...context, ...metadata }, message);
+    pinoInstance.info({ ...context, ...metadata }, sanitizedMessage);
   }
 
   warn(message: string, context?: LogContext, metadata?: LogContext): void {
+    // Sanitize message to prevent log injection
+    const sanitizedMessage = sanitizeLogMessage(message);
     // Pino handles redaction automatically via config
     // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
-    pinoInstance.warn({ ...context, ...metadata }, message);
+    pinoInstance.warn({ ...context, ...metadata }, sanitizedMessage);
   }
 
   error(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
+    // Sanitize message to prevent log injection
+    const sanitizedMessage = sanitizeLogMessage(message);
     // Pino's stdSerializers.err automatically handles error serialization
     // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
     // Pass error as 'err' key - Pino will serialize it properly
@@ -217,28 +275,32 @@ class Logger {
     if (error !== undefined) {
       // Use normalizeError() for consistent error normalization across codebase
       // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
+      const normalized = normalizeError(error, sanitizedMessage);
       logData['err'] = normalized;
     }
-    pinoInstance.error(logData, message);
+    pinoInstance.error(logData, sanitizedMessage);
   }
 
   fatal(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
+    // Sanitize message to prevent log injection
+    const sanitizedMessage = sanitizeLogMessage(message);
     // Pino's stdSerializers.err automatically handles error serialization
     // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
     const logData: Record<string, unknown> = { ...context, ...metadata };
     if (error !== undefined) {
       // Use normalizeError() for consistent error normalization across codebase
       // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
+      const normalized = normalizeError(error, sanitizedMessage);
       logData['err'] = normalized;
     }
-    pinoInstance.fatal(logData, message);
+    pinoInstance.fatal(logData, sanitizedMessage);
   }
 
   trace(message: string, context?: LogContext, metadata?: LogContext): void {
+    // Sanitize message to prevent log injection
+    const sanitizedMessage = sanitizeLogMessage(message);
     // Trace level for finest-grained logging (detailed debugging, performance tracing)
-    pinoInstance.trace({ ...context, ...metadata }, message);
+    pinoInstance.trace({ ...context, ...metadata }, sanitizedMessage);
   }
 
   /**
@@ -317,41 +379,47 @@ class RequestLogger extends Logger {
   }
 
   override debug(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.debug({ ...context, ...metadata }, message);
+    const sanitizedMessage = sanitizeLogMessage(message);
+    this.childPino.debug({ ...context, ...metadata }, sanitizedMessage);
   }
 
   override info(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.info({ ...context, ...metadata }, message);
+    const sanitizedMessage = sanitizeLogMessage(message);
+    this.childPino.info({ ...context, ...metadata }, sanitizedMessage);
   }
 
   override warn(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.warn({ ...context, ...metadata }, message);
+    const sanitizedMessage = sanitizeLogMessage(message);
+    this.childPino.warn({ ...context, ...metadata }, sanitizedMessage);
   }
 
   override error(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
+    const sanitizedMessage = sanitizeLogMessage(message);
     const logData: Record<string, unknown> = { ...context, ...metadata };
     if (error !== undefined) {
       // Use normalizeError() for consistent error normalization across codebase
       // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
+      const normalized = normalizeError(error, sanitizedMessage);
       logData['err'] = normalized;
     }
-    this.childPino.error(logData, message);
+    this.childPino.error(logData, sanitizedMessage);
   }
 
   override fatal(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
+    const sanitizedMessage = sanitizeLogMessage(message);
     const logData: Record<string, unknown> = { ...context, ...metadata };
     if (error !== undefined) {
       // Use normalizeError() for consistent error normalization across codebase
       // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
+      const normalized = normalizeError(error, sanitizedMessage);
       logData['err'] = normalized;
     }
-    this.childPino.fatal(logData, message);
+    this.childPino.fatal(logData, sanitizedMessage);
   }
 
   override trace(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.trace({ ...context, ...metadata }, message);
+    const sanitizedMessage = sanitizeLogMessage(message);
+    this.childPino.trace({ ...context, ...metadata }, sanitizedMessage);
   }
 
   override bindings(): Record<string, unknown> {

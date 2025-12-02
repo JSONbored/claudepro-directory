@@ -13,7 +13,7 @@
  * @module features/indicators/new-content-stat
  */
 
-import { cluster, muted, weight } from '@heyclaude/web-runtime/design-system';
+import { cluster, muted, weight, textColor, iconSize, size } from '@heyclaude/web-runtime/design-system';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion, AnimatePresence } from 'motion/react';
@@ -89,7 +89,7 @@ export function NewContentStat(props: NewContentStatProps) {
   return (
     <AnimatePresence>
       <motion.span
-        className={cn(cluster.tight, 'text-sm', className)}
+        className={cn(cluster.tight, size.sm, className)}
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -5 }}
@@ -108,12 +108,12 @@ export function NewContentStat(props: NewContentStatProps) {
             ease: 'easeInOut',
           }}
         >
-          <Sparkles className="h-3.5 w-3.5" />
+          <Sparkles className={iconSize.xsPlus} />
         </motion.span>
 
         {/* Animated number */}
         <motion.span
-          className={`${weight.semibold} text-foreground`}
+          className={`${weight.semibold} ${textColor.foreground}`}
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}

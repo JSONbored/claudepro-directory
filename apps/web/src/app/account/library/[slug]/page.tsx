@@ -4,7 +4,19 @@ import {
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, spaceY, muted, marginTop, weight ,size , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  muted,
+  size,
+  spaceY,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UnifiedBadge, SimpleCopyButton,
@@ -159,17 +171,17 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       {/* Header */}
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button variant="ghost" className={`mb-4 ${cluster.compact}`}>
+          <Button variant="ghost" className={`${marginBottom.default} ${cluster.compact}`}>
             <ArrowLeft className={iconSize.sm} />
             Back to Library
           </Button>
         </Link>
 
-        <div className="flex items-start justify-between">
+        <div className={`flex ${alignItems.start} ${justify.between}`}>
           <div className="flex-1">
-            <div className={`${cluster.compact} mb-2`}>
+            <div className={`${cluster.compact} ${marginBottom.tight}`}>
               <h1 className={`${weight.bold} ${size['3xl']}`}>{collection.name}</h1>
-              {collection.is_public ? <UnifiedBadge variant="base" style="outline" className="text-xs">
+              {collection.is_public ? <UnifiedBadge variant="base" style="outline" className={size.xs}>
                   Public
                 </UnifiedBadge> : null}
             </div>
@@ -188,7 +200,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
                 variant="outline"
                 size="sm"
                 className={cluster.compact}
-                iconClassName="h-4 w-4"
+                iconClassName={iconSize.sm}
               /> : null}
             <Link href={`/account/library/${slug}/edit`}>
               <Button variant="outline" size="sm" className={cluster.compact}>

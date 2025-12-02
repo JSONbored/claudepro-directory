@@ -2,7 +2,26 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { iconSize, weight, muted ,size  , gap , padding , spaceY , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  backdrop,
+  bgColor,
+  borderColor,
+  flexWrap,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  maxWidth,
+  muted,
+  padding,
+  radius,
+  shadow,
+  size,
+  spaceY,
+  textColor,
+  tracking,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { ArrowRight, Trash } from '@heyclaude/web-runtime/icons';
 import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
@@ -126,21 +145,33 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
   return (
     <section
       aria-labelledby="recently-viewed-rail-heading"
-      className={`container mx-auto ${spaceY.relaxed} ${padding.xDefault} ${padding.yRelaxed}`}
+      className={cn('container mx-auto', spaceY.relaxed, padding.xDefault, padding.yRelaxed)}
     >
-      <div className={`mx-auto ${maxWidth['7xl']} ${spaceY.relaxed} rounded-2xl border border-border/60 bg-card/60 ${padding.default} shadow-md backdrop-blur-xl sm:p-6`}>
-        <div className={`flex flex-wrap items-center justify-between ${gap.default}`}>
+      <div
+        className={cn(
+          'mx-auto border',
+          maxWidth['7xl'],
+          spaceY.relaxed,
+          radius['2xl'],
+          borderColor['border/60'],
+          bgColor['card/60'],
+          padding.default,
+          shadow.md,
+          backdrop.xl
+        )}
+      >
+        <div className={cn('flex', flexWrap.wrap, alignItems.center, justify.between, gap.default)}>
           <div>
-            <p className={`${muted.default} ${size.xs} uppercase tracking-wide`}>Keep exploring</p>
-            <h2 id="recently-viewed-rail-heading" className={`${weight.semibold} ${size['2xl']}`}>
+            <p className={cn('uppercase', muted.default, size.xs, tracking.wide)}>Keep exploring</p>
+            <h2 id="recently-viewed-rail-heading" className={cn(weight.semibold, size['2xl'])}>
               Recently viewed
             </h2>
           </div>
-          <div className={`flex flex-wrap ${gap.compact}`}>
+          <div className={cn('flex', flexWrap.wrap, gap.compact)}>
             <Button
               variant="ghost"
               size="sm"
-              className={`${gap.compact} ${size.sm}`}
+              className={cn(gap.compact, size.sm)}
               onClick={handleResumeSearch}
               aria-label="Resume your last search"
             >
@@ -150,11 +181,11 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
             <Button
               variant="ghost"
               size="sm"
-              className={`${gap.compact} ${size.sm}`}
+              className={cn(gap.compact, size.sm)}
               onClick={handleClearHistory}
               aria-label="Clear recently viewed history"
             >
-              <Trash className={`${iconSize.sm} text-destructive`} aria-hidden="true" />
+              <Trash className={cn(iconSize.sm, textColor.destructive)} aria-hidden="true" />
               Clear history
             </Button>
           </div>
@@ -162,7 +193,8 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
 
         <div
           className={cn(
-            'grid ${gap.comfortable}',
+            'grid',
+            gap.comfortable,
             railItems.length >= 3 && 'md:grid-cols-2 xl:grid-cols-3',
             railItems.length < 3 && 'md:grid-cols-2'
           )}

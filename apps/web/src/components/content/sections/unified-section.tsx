@@ -13,14 +13,20 @@ import {
   Copy,
   Download,
   FileText,
-  type LucideIcon,
+  type IconComponent,
   Package,
   Rocket,
   Sparkles,
   Terminal,
   Zap,
 } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, hoverBg, spaceY, marginBottom, marginTop, muted, weight ,size  , gap , padding , row } from '@heyclaude/web-runtime/design-system';
+import { borderBottom, cluster, iconSize, hoverBg, spaceY, marginBottom, marginTop, muted, weight, size, gap, padding, row, radius, flexWrap,
+  leading,
+  transition,
+  bgColor,
+  textColor,
+  shadow,
+} from '@heyclaude/web-runtime/design-system';
 import type { UnifiedSectionProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
@@ -35,7 +41,7 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 
-const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon> = {
+const ICONS: Record<Database['public']['Enums']['content_category'], IconComponent> = {
   agents: Sparkles,
   mcp: Package,
   commands: Terminal,
@@ -75,7 +81,7 @@ function Wrapper({
 }: {
   title: string;
   description?: string;
-  icon?: LucideIcon;
+  icon?: IconComponent;
   category?: Database['public']['Enums']['content_category'];
   className?: string;
   children: React.ReactNode;
@@ -154,16 +160,16 @@ function CodeGroupTabs({
   return (
     <div className={spaceY.default}>
       {/* Tab buttons */}
-      <div className={`flex flex-wrap ${gap.tight} border-border border-b pb-2`}>
+      <div className={`flex ${flexWrap.wrap} ${gap.tight} ${borderBottom.default} pb-2`}>
         {blocks.map((block, index) => (
           <button
             key={`${block.label}-${index}`}
             type="button"
             onClick={() => setActiveIndex(index)}
             className={cn(
-              'rounded-t-md ${padding.xCompact} ${padding.ySnug} ${weight.medium} ${size.xs} transition-colors',
+              `rounded-t-md ${padding.xCompact} ${padding.ySnug} ${weight.medium} ${size.xs} ${transition.colors}`,
               activeIndex === index
-                ? 'bg-accent/20 text-accent-foreground'
+                ? `bg-accent/20 ${textColor.accentForeground}`
                 : `${muted.default} ${hoverBg.muted} hover:text-foreground`
             )}
           >
@@ -192,7 +198,7 @@ function CodeGroupTabs({
                   onDownload?.();
                 }}
               >
-                <Download className="mr-2 h-4 w-4" />
+                <Download className={`mr-2 ${iconSize.sm}`} />
                 Download {activeBlock.filename}
               </Button>
             </div>
@@ -216,8 +222,8 @@ function List({ items, color }: { items: string[]; color: string }) {
     <ul className={spaceY.compact}>
       {items.map((item) => (
         <li key={item.slice(0, 50)} className={`${row.default}`}>
-          <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 rounded-full`, color)} />
-          <span className="text-sm leading-relaxed">{item}</span>
+          <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 ${radius.full}`, color)} />
+          <span className={`${size.sm} ${leading.relaxed}`}>{item}</span>
         </li>
       ))}
     </ul>
@@ -250,15 +256,15 @@ function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: stri
       {items.map((item, index) =>
         typeof item === 'string' ? (
           <li key={getEnhancedListKey(item, index)} className={`${row.default}`}>
-            <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 rounded-full`, color)} />
-            <span className="text-sm leading-relaxed">{item}</span>
+            <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 ${radius.full}`, color)} />
+            <span className={`${size.sm} ${leading.relaxed}`}>{item}</span>
           </li>
         ) : (
           <li key={getEnhancedListKey(item, index)} className={spaceY.compact}>
             <div className={`${row.default}`}>
-              <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 rounded-full`, color)} />
+              <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 ${radius.full}`, color)} />
               <div className={spaceY.tight}>
-                <p className={`${weight.medium} text-foreground ${size.sm}`}>{item.issue}</p>
+                <p className={`${weight.medium} ${textColor.foreground} ${size.sm}`}>{item.issue}</p>
                 <p className={muted.smRelaxed}>{item.solution}</p>
               </div>
             </div>
@@ -318,8 +324,8 @@ function Platform({
             </div>
           ) : (
             <div key={getStepKey(step, index)} className={`${row.default}`}>
-              <div className={`${marginTop.compact} h-1.5 w-1.5 shrink-0 rounded-full bg-primary`} />
-              <span className="text-sm leading-relaxed">{step.text}</span>
+              <div className={`${marginTop.compact} h-1.5 w-1.5 shrink-0 ${radius.full} ${bgColor.primary}`} />
+              <span className={`${size.sm} ${leading.relaxed}`}>{step.text}</span>
             </div>
           )
         )}
@@ -333,7 +339,7 @@ function Platform({
                 <UnifiedBadge variant="base" style="outline" className="capitalize">
                   {k}
                 </UnifiedBadge>
-                <code className={`rounded bg-muted ${padding.xMicro} ${padding.yHair} ${size.xs}`}>{String(p)}</code>
+                <code className={`rounded ${bgColor.muted} ${padding.xMicro} ${padding.yHair} ${size.xs}`}>{String(p)}</code>
               </div>
             ))}
           </div>
@@ -456,7 +462,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   trackDownload();
                 }}
               >
-                <Download className="mr-2 h-4 w-4" />
+                <Download className={`mr-2 ${iconSize.sm}`} />
                 Download {props.filename}
               </Button>
             </div>
@@ -495,7 +501,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     trackDownload();
                   }}
                 >
-                  <Download className="mr-2 h-4 w-4" />
+                  <Download className={`mr-2 ${iconSize.sm}`} />
                   Download {block.filename}
                 </Button>
               </div>
@@ -539,7 +545,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                 itemType="https://schema.org/SoftwareSourceCode"
               >
                 <div className={spaceY.tight}>
-                  <h4 className={`${weight.semibold} ${size.base} text-foreground`} itemProp="name">
+                  <h4 className={`${weight.semibold} ${size.base} ${textColor.foreground}`} itemProp="name">
                     {ex.title}
                   </h4>
                   {ex.description && (
@@ -560,7 +566,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     filename={ex.filename}
                     maxLines={props.maxLines || 20}
                     showLineNumbers={props.showLineNumbers}
-                    className="shadow-sm"
+                    className={shadow.sm}
                   />
                   {/* Download button for example code */}
                   {ex.filename && (
@@ -573,7 +579,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                           trackDownload();
                         }}
                       >
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className={`mr-2 ${iconSize.sm}`} />
                         Download {ex.filename}
                       </Button>
                     </div>
@@ -615,7 +621,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                           trackDownload();
                         }}
                       >
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className={`mr-2 ${iconSize.sm}`} />
                         Download {c.filename}
                       </Button>
                     </div>
@@ -712,7 +718,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   trackDownload();
                 }}
               >
-                <Download className="mr-2 h-4 w-4" />
+                <Download className={`mr-2 ${iconSize.sm}`} />
                 Download {props.filename}
               </Button>
             </div>

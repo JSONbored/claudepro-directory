@@ -1,6 +1,9 @@
 import type { Database } from '@heyclaude/database-types';
 import { baseBadgeVariants } from '../badges/unified-badge.tsx';
-import { ANIMATION_CONSTANTS } from '../../constants.ts';
+import { transition } from '../../../design-system/styles/interactive.ts';
+import { gap } from '../../../design-system/styles/layout.ts';
+import { size } from '../../../design-system/styles/typography.ts';
+import { shadow } from '../../../design-system/styles/effects.ts';
 import { cn } from '../../utils.ts';
 import type * as React from 'react';
 
@@ -61,12 +64,12 @@ export function Announcement({
       className={cn(
         baseBadgeVariants({ variant }),
         // Announcement-specific styles
-        'inline-flex items-center gap-2',
+        `inline-flex items-center ${gap.compact}`,
         'px-3 py-1.5',
-        'text-sm',
-        ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT,
+        size.sm,
+        transition.default,
         // Themed enhancements
-        themed && ['shadow-sm hover:shadow-md', 'hover:scale-[1.02]', 'active:scale-[0.98]'],
+        themed && [`${shadow.sm} hover:${shadow.md}`, 'hover:scale-[1.02]', 'active:scale-[0.98]'],
         className
       )}
       {...props}
@@ -88,7 +91,7 @@ export function AnnouncementTag({ className, ...props }: AnnouncementTagProps) {
         // Base styles
         'inline-flex items-center justify-center',
         'px-1.5 py-0.5',
-        'font-semibold text-[10px] uppercase tracking-wider',
+        `font-semibold ${size['2xs']} uppercase tracking-wider`,
         'rounded',
         'bg-accent text-accent-foreground',
         'shrink-0',
@@ -111,9 +114,9 @@ export function AnnouncementTitle({ className, ...props }: AnnouncementTitleProp
     <span
       className={cn(
         // Typography
-        'font-medium text-sm',
+        `font-medium ${size.sm}`,
         // Layout
-        'inline-flex items-center gap-1',
+        `inline-flex items-center ${gap.tight}`,
         // Responsive
         'truncate',
         className

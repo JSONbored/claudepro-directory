@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '../../utils.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
 import {
   type HTMLMotionProps,
   motion,
@@ -52,7 +53,7 @@ function HighlightText({
         display: 'inline',
       }}
       className={cn(
-        'relative inline-block rounded-lg bg-orange-400 px-2 py-1 dark:bg-orange-500/50',
+        `relative inline-block ${radius.lg} bg-orange-400 px-2 py-1 dark:bg-orange-500/50`,
         className
       )}
       {...props}

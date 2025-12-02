@@ -17,8 +17,10 @@
 import { UI_ANIMATION } from '../../config/unified-config.ts';
 import { cn } from '../../ui/utils.ts';
 // Design System imports
-import { padding } from '../../design-system/styles/layout.ts';
+import { padding, gap, squareSize } from '../../design-system/styles/layout.ts';
 import { focusRing, hoverBg, hoverText } from '../../design-system/styles/interactive.ts';
+import { size } from '../../design-system/styles/typography.ts';
+import { radius } from '../../design-system/styles/radius.ts';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'motion/react';
@@ -33,7 +35,7 @@ interface RippleType {
 }
 
 const buttonVariants = cva(
-  `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors ${focusRing.default} disabled:opacity-50 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0`,
+  `inline-flex items-center justify-center ${gap.compact} whitespace-nowrap ${radius.md} ${size.sm} font-medium ring-offset-background transition-colors ${focusRing.default} disabled:opacity-50 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0`,
   {
     variants: {
       variant: {
@@ -46,9 +48,9 @@ const buttonVariants = cva(
       },
       size: {
         default: `h-10 ${padding.xDefault}`,
-        sm: 'h-9 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10',
+        sm: `h-9 ${radius.md} px-3`,
+        lg: `h-11 ${radius.md} px-8`,
+        icon: squareSize.avatarMd,
       },
     },
     defaultVariants: {
@@ -138,7 +140,7 @@ const Button = ({
         {ripples.map((ripple) => (
           <motion.span
             key={ripple.id}
-            className="pointer-events-none absolute rounded-full bg-white/30"
+            className={`pointer-events-none absolute ${radius.full} bg-white/30`}
             style={{
               left: ripple.x,
               top: ripple.y,

@@ -15,7 +15,7 @@
 
 'use client';
 
-import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
+import { overflow, maxHeight, marginTop } from '@heyclaude/web-runtime/design-system';
 import {
   Sheet,
   SheetContent,
@@ -33,7 +33,7 @@ export function NotificationSheet() {
 
   return (
     <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
-      <SheetContent side="bottom" className={DIMENSIONS.MODAL_MAX}>
+      <SheetContent side="bottom" className={maxHeight.modal}>
         <SheetHeader>
           <SheetTitle>Notifications</SheetTitle>
           <SheetDescription>
@@ -42,7 +42,7 @@ export function NotificationSheet() {
               : 'No new notifications'}
           </SheetDescription>
         </SheetHeader>
-        <div className={`mt-6 ${DIMENSIONS.NOTIFICATION_MAX} overflow-y-auto`}>
+        <div className={`${marginTop.comfortable} ${maxHeight.notification} ${overflow.yAuto}`}>
           <NotificationList />
         </div>
       </SheetContent>

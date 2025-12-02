@@ -18,7 +18,33 @@ import {
   Tag,
   X,
 } from '@heyclaude/web-runtime/icons';
-import { iconSize, cluster, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , row , radius } from '@heyclaude/web-runtime/design-system';
+import {
+  backdrop,
+  cluster,
+  flexDir,
+  flexWrap,
+  gap,
+  iconSize,
+  alignItems,
+  leading,
+  border,
+  marginBottom,
+  marginTop,
+  muted,
+  opacityLevel,
+  padding,
+  radius,
+  row,
+  size,
+  spaceY,
+  textColor,
+  transition,
+  weight,
+  zLayer,
+  justify,
+  flexGrow,
+  squareSize,
+} from '@heyclaude/web-runtime/design-system';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
@@ -101,9 +127,9 @@ export function StepExamplesTags({
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
           className={`${marginBottom.default} inline-flex`}
         >
-          <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
+          <Sparkles className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Examples & Tags</h2>
+        <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Examples & Tags</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
           Help users discover and understand your submission
         </p>
@@ -180,14 +206,14 @@ export function StepExamplesTags({
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.9 }}
                         transition={TOKENS.animations.spring.snappy}
-                        className={`group ${row.default} ${radius.lg} border ${padding.compact} transition-all hover:border-accent-primary/50`}
+                        className={`group ${row.default} ${radius.lg} border ${padding.compact} ${transition.all} hover:border-accent-primary/50`}
                         style={{
                           backgroundColor: TOKENS.colors.background.primary,
                           borderColor: TOKENS.colors.border.default,
                         }}
                       >
                         <div
-                          className={`${marginTop.micro} flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${weight.bold} ${size.xs}`}
+                          className={`${marginTop.micro} flex ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${weight.bold} ${size.xs}`}
                           style={{
                             backgroundColor: `${TOKENS.colors.accent.primary}20`,
                             color: TOKENS.colors.accent.primary,
@@ -195,13 +221,13 @@ export function StepExamplesTags({
                         >
                           {index + 1}
                         </div>
-                        <span className={`flex-1 ${size.sm} leading-relaxed`}>{example}</span>
+                        <span className={`flex-1 ${size.sm} ${leading.relaxed}`}>{example}</span>
                         <motion.button
                           type="button"
                           onClick={() => removeExample(index)}
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className={`shrink-0 rounded-full ${padding.micro} opacity-0 transition-all group-hover:opacity-100`}
+                          className={`shrink-0 ${radius.full} ${padding.micro} ${opacityLevel[0]} ${transition.all} group-hover:opacity-100`}
                           style={{
                             color: TOKENS.colors.error.text,
                           }}
@@ -216,12 +242,12 @@ export function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`${radius.lg} border border-dashed ${padding.relaxed} text-center`}
+                  className={`${radius.lg} ${border.dashed} ${padding.relaxed} text-center`}
                   style={{
                     borderColor: TOKENS.colors.border.light,
                   }}
                 >
-                  <Code className={`mx-auto mb-3 h-10 w-10 ${muted.default}`} />
+                  <Code className={`mx-auto ${marginBottom.compact} ${iconSize['2xl']} ${muted.default}`} />
                   <p className={muted.sm}>
                     No examples yet. Add some to help users understand!
                   </p>
@@ -292,7 +318,7 @@ export function StepExamplesTags({
             {/* Tags List */}
             <AnimatePresence mode="popLayout">
               {data.tags.length > 0 ? (
-                <div className={`flex flex-wrap ${gap.compact}`}>
+                <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
                   {data.tags.map((tag) => {
                     // Use tag content as key (tags should be unique)
                     const tagKey = `tag-${tag}`;
@@ -323,7 +349,7 @@ export function StepExamplesTags({
                                 removeTag(tagIndex);
                               }
                             }}
-                            className={`ml-1 rounded-full ${padding.hair} transition-colors hover:bg-accent-primary/20`}
+                            className={`ml-1 ${radius.full} ${padding.hair} ${transition.colors} hover:bg-accent-primary/20`}
                           >
                             <X className={iconSize.xs} />
                           </button>
@@ -336,12 +362,12 @@ export function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`${radius.lg} border border-dashed ${padding.comfortable} text-center`}
+                  className={`${radius.lg} ${border.dashed} ${padding.comfortable} text-center`}
                   style={{
                     borderColor: TOKENS.colors.border.light,
                   }}
                 >
-                  <Tag className={`mx-auto mb-2 h-8 w-8 ${muted.default}`} />
+                  <Tag className={`mx-auto ${marginBottom.tight} ${iconSize.xl} ${muted.default}`} />
                   <p className={muted.sm}>
                     No tags yet. Add tags to improve discoverability!
                   </p>
@@ -390,7 +416,7 @@ export function StepReviewSubmit({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+            className={`fixed inset-0 ${zLayer.modal} flex ${alignItems.center} ${justify.center} ${backdrop.sm}`}
             style={{
               backgroundColor: `${TOKENS.colors.background.primary}cc`,
             }}
@@ -413,7 +439,7 @@ export function StepReviewSubmit({
                 }}
               >
                 <Rocket
-                  className="mx-auto mb-6 h-24 w-24"
+                  className={`mx-auto ${marginBottom.comfortable} ${squareSize.avatar3xl}`}
                   style={{ color: TOKENS.colors.accent.primary }}
                 />
               </motion.div>
@@ -439,7 +465,7 @@ export function StepReviewSubmit({
                       delay: i * 0.05,
                       ease: 'easeOut',
                     }}
-                    className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/2 left-1/2 h-3 w-3 rounded-full"
+                    className={`-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/2 left-1/2 ${squareSize.indicator} ${radius.full}`}
                     style={{
                       backgroundColor: [
                         TOKENS.colors.accent.primary,
@@ -469,9 +495,9 @@ export function StepReviewSubmit({
           transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
           className={`${marginBottom.default} inline-flex`}
         >
-          <Eye className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
+          <Eye className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Review & Submit</h2>
+        <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Review & Submit</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
           Double-check everything looks good before submitting
         </p>
@@ -500,7 +526,7 @@ export function StepReviewSubmit({
               >
                 <div className="relative">
                   {/* Circular Progress */}
-                  <svg className="-rotate-90 h-32 w-32 transform">
+                  <svg className={`-rotate-90 ${iconSize.hero} transform`}>
                     {/* Background Circle */}
                     <circle
                       cx="64"
@@ -530,7 +556,7 @@ export function StepReviewSubmit({
                   </svg>
 
                   {/* Score Text */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className={`absolute inset-0 flex ${flexDir.col} ${alignItems.center} ${justify.center}`}>
                     <motion.span
                       className={`${weight.bold} ${size['3xl']}`}
                       style={{ color: qualityLevel.color }}
@@ -638,10 +664,10 @@ export function StepReviewSubmit({
           }}
         >
           <CardHeader>
-            <CardTitle className="text-base">Description</CardTitle>
+            <CardTitle className={size.base}>Description</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className={`whitespace-pre-wrap ${size.sm} leading-relaxed`}>{data.description}</p>
+            <p className={`whitespace-pre-wrap ${size.sm} ${leading.relaxed}`}>{data.description}</p>
           </CardContent>
         </Card>
       </motion.div>
@@ -680,7 +706,7 @@ export function StepReviewSubmit({
               </>
             ) : (
               <>
-                <Rocket className="group-hover:-translate-y-1 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                <Rocket className={`group-hover:-translate-y-1 ${iconSize.md} ${transition.transform} group-hover:translate-x-1`} />
                 Submit for Review
               </>
             )}

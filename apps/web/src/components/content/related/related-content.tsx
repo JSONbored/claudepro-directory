@@ -5,7 +5,24 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { iconSize, cluster, marginBottom, weight, muted ,size , padding , gap , radius } from '@heyclaude/web-runtime/design-system';
+import {
+  alignItems,
+  bgColor,
+  borderColor,
+  cluster,
+  flexDir,
+  flexGrow,
+  gap,
+  iconSize,
+  justify,
+  marginBottom,
+  muted,
+  padding,
+  radius,
+  size,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { getContentItemUrl, isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
@@ -42,13 +59,13 @@ function getCategoryBadgeClass(category: string): string {
     commands: 'badge-category-commands',
     hooks: 'badge-category-hooks',
     tutorials: 'badge-category-tutorials',
-    comparisons: 'bg-primary/20 text-primary border-primary/30',
+    comparisons: `${bgColor['primary/20']} ${textColor.primary} ${borderColor['primary/30']}`,
     workflows: 'badge-category-workflows',
     'use-cases': 'badge-category-use-cases',
     troubleshooting: 'badge-category-troubleshooting',
   };
 
-  return classes[category as keyof typeof classes] || 'bg-muted/20 text-muted border-muted/30';
+  return classes[category as keyof typeof classes] || `${bgColor['muted/20']} ${textColor.muted} ${borderColor['border/30']}`;
 }
 
 function getMatchTypeBadge(matchType: string): {
@@ -187,17 +204,17 @@ export function RelatedContentClient({
       aria-label="Related content"
     >
       {showTitle && (
-        <div className={`${marginBottom.relaxed} rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 ${padding.default} sm:p-6`}>
-          <div className={`flex flex-col items-start justify-between ${gap.comfortable} sm:flex-row sm:items-center`}>
+        <div className={`${marginBottom.relaxed} ${radius.xl} border ${borderColor['primary/20']} bg-gradient-to-r from-primary/5 to-primary/10 ${padding.default} sm:${padding.comfortable}`}>
+          <div className={`flex ${flexDir.col} ${alignItems.start} ${justify.between} ${gap.comfortable} sm:flex-row sm:items-center`}>
             <div className={`${cluster.default} sm:${gap.comfortable}`}>
-              <div className={`shrink-0 ${radius.lg} bg-primary/10 ${padding.tight}`}>
-                <Sparkles className={`${iconSize.md} text-primary sm:h-6 sm:w-6`} />
+              <div className={`shrink-0 ${radius.lg} ${bgColor['primary/10']} ${padding.tight}`}>
+                <Sparkles className={`${iconSize.md} ${textColor.primary} sm:h-6 sm:w-6`} />
               </div>
               <div className="min-w-0">
-                <h2 className={`${marginBottom.micro} ${weight.bold} text-foreground ${size.xl} sm:${size['2xl']}`} itemProp="name">
+                <h2 className={`${marginBottom.micro} ${weight.bold} ${textColor.foreground} ${size.xl} sm:${size['2xl']}`} itemProp="name">
                   {title}
                 </h2>
-                <p className={`${muted.default} ${size.xs} sm:text-sm`}>
+                <p className={`${muted.default} ${size.xs} sm:${size.sm}`}>
                   Intelligently curated based on your current content
                 </p>
               </div>
@@ -205,7 +222,7 @@ export function RelatedContentClient({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={`shrink-0imary/30 bg-primary/10 ${padding.xTight} ${padding.yMicro} ${weight.medium} text-primary ${size.xs} sm:px-3 sm:text-sm`}
+              className={`shrink-0 ${borderColor['primary/30']} ${bgColor['primary/10']} ${padding.xTight} ${padding.yMicro} ${weight.medium} ${textColor.primary} ${size.xs} sm:px-3 sm:${size.sm}`}
             >
               AI Powered
             </UnifiedBadge>
@@ -240,9 +257,9 @@ export function RelatedContentClient({
               compactMode={true}
               ariaLabel={`Related: ${relatedItem.title}`}
               renderTopBadges={() => (
-                <div className={`flex w-full items-center justify-between ${gap.compact}`}>
+                <div className={`flex w-full ${alignItems.center} ${justify.between} ${gap.compact}`}>
                   <UnifiedBadge
-                    className={`${categoryBadge} shrink-0 border ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.xs} sm:px-3 sm:text-sm`}
+                    className={`${categoryBadge} ${flexGrow.shrink0} border ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.xs} sm:px-3 sm:${size.sm}`}
                     variant="base"
                     style="secondary"
                   >
@@ -252,7 +269,7 @@ export function RelatedContentClient({
                     <UnifiedBadge
                       variant="base"
                       style={matchBadge.variant}
-                      className={`shrink-0 border ${padding.xSnug} ${padding.yMicro} ${weight.medium} text-2xs sm:px-2 sm:text-xs`}
+                      className={`shrink-0 border ${padding.xSnug} ${padding.yMicro} ${weight.medium} ${size['2xs']} sm:px-2 sm:${size.xs}`}
                     >
                       {matchBadge.label}
                     </UnifiedBadge>

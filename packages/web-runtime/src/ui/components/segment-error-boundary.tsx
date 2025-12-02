@@ -27,7 +27,9 @@ import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 import { logClientErrorBoundary, logClientWarn } from '../../utils/client-logger.ts';
 import { usePulse } from '../../hooks/use-pulse.ts';
 // Design System imports
-import { responsive } from '../../design-system/styles/layout.ts';
+import { responsive, padding, marginTop, marginBottom } from '../../design-system/styles/layout.ts';
+import { size as textSize } from '../../design-system/styles/typography.ts';
+import { radius } from '../../design-system/styles/radius.ts';
 import { Button } from './button.tsx';
 import {
   Card,
@@ -120,7 +122,7 @@ function SegmentErrorFallbackUI({
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-12">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl">{title}</CardTitle>
+          <CardTitle className={textSize['2xl']}>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -144,15 +146,15 @@ function SegmentErrorFallbackUI({
           )}
 
           {isDevelopment && error && (
-            <div className="rounded-lg border border-muted-foreground/30 border-dashed bg-muted/30 p-4">
-              <p className="mb-2 font-semibold text-muted-foreground text-sm">
+            <div className={`${radius.lg} border border-muted-foreground/30 border-dashed bg-muted/30 ${padding.default}`}>
+              <p className={`${marginBottom.compact} font-semibold text-muted-foreground ${textSize.sm}`}>
                 Error details
               </p>
-              <pre className="wrap-break-word whitespace-pre-wrap text-destructive text-xs">
+              <pre className={`wrap-break-word whitespace-pre-wrap text-destructive ${textSize.xs}`}>
                 {error.message}
               </pre>
               {error.digest && (
-                <p className="mt-2 font-mono text-muted-foreground text-xs">
+                <p className={`${marginTop.compact} font-mono text-muted-foreground ${textSize.xs}`}>
                   Digest: {error.digest}
                 </p>
               )}

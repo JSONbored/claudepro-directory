@@ -6,7 +6,9 @@
 
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
-import { marginBottom, marginTop, muted, weight , size , gap } from '@heyclaude/web-runtime/design-system';
+import { marginBottom, marginTop, muted, weight , size , gap, justify,
+  alignItems,
+} from '@heyclaude/web-runtime/design-system';
 
 interface AuthFormPanelProps {
   title?: string;
@@ -35,7 +37,7 @@ export function AuthFormPanel({
 
       {/* Icon grid - 3 columns */}
       <motion.div
-        className={`flex items-center justify-center ${gap.comfortable}`}
+        className={`flex ${alignItems.center} ${justify.center} ${gap.comfortable}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.5 }}

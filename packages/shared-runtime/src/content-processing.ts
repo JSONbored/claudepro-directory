@@ -123,7 +123,10 @@ export function detectLanguage(code: string, hint?: string): string {
     return 'python';
   }
 
-  if (/^[\w-]+:\s+.+$/m.test(code) && !code.includes('{')) {
+  // SECURITY: Use non-greedy, bounded regex to prevent ReDoS attacks
+  // Limit the pattern to prevent catastrophic backtracking on malicious input
+  // Check for YAML-like pattern (key: value) but with length limits
+  if (code.length < 10000 && /^[\w-]+:\s+.+$/m.test(code) && !code.includes('{')) {
     return 'yaml';
   }
 
@@ -272,7 +275,19 @@ export function extractMarkdownHeadings(source: string): HeadingMetadata[] {
   const counts = new Map<string, number>();
   const lines = source.split(/\r?\n/);
 
+  // SECURITY: Limit input size to prevent ReDoS attacks
+  // Polynomial regex can be slow on malicious input, so we limit the source length
+  const MAX_SOURCE_LENGTH = 1_000_000; // 1MB max
+  if (source.length > MAX_SOURCE_LENGTH) {
+    return [];
+  }
+
   for (const line of lines) {
+    // SECURITY: Limit line length to prevent ReDoS on individual lines
+    // The regex /^(#{2,6})\s+(.+?)\s*$/ can be slow on very long lines
+    if (line.length > 1000) {
+      continue; // Skip extremely long lines
+    }
     const match = line.match(/^(#{2,6})\s+(.+?)\s*$/);
     if (!(match?.[1] && match[2])) continue;
 

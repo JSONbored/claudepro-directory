@@ -47,8 +47,12 @@ import { cn } from '../../utils.ts';
 import { SEMANTIC_COLORS } from '../../colors.ts';
 // Design System imports
 import { animation } from '../../../design-system/tokens.ts';
-import { iconLeading } from '../../../design-system/styles/icons.ts';
+import { iconLeading, iconSize } from '../../../design-system/styles/icons.ts';
+import { squareSize } from '../../../design-system/styles/layout.ts';
 import { transition } from '../../../design-system/styles/interactive.ts';
+import { size } from '../../../design-system/styles/typography.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
+import { shadow, shadowColor } from '../../../design-system/styles/effects.ts';
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -57,7 +61,7 @@ import type * as React from 'react';
  * Base badge variants (from original badge.tsx)
  */
 const baseBadgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+  `inline-flex items-center ${radius.full} border px-2.5 py-0.5 ${size.xs} font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`,
   {
     variants: {
       variant: {
@@ -99,7 +103,7 @@ const sourceBadgeStyles = {
 } as const;
 
 const statusBadgeStyles = {
-  active: 'bg-accent text-accent-foreground shadow-lg shadow-primary/25',
+  active: `bg-accent text-accent-foreground ${shadow.lg} ${shadowColor.primary}`,
   trending: 'bg-primary/10 text-primary border-primary/20',
   new: 'bg-green-500/10 text-green-400 border-green-500/20',
   updated: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -243,7 +247,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         <div
           className={cn(
             baseBadgeVariants({ variant: props.style }),
-            'hover:shadow-md hover:shadow-primary/20',
+            `hover:${shadow.md} hover:${shadowColor.primary}`,
             props.className
           )}
         >
@@ -259,7 +263,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
-            `border font-medium text-xs ${transition.default} hover:shadow-md hover:shadow-primary/20`,
+            `border font-medium ${size.xs} ${transition.default} hover:${shadow.md} hover:${shadowColor.primary}`,
             categoryBadgeStyles[props.category as keyof typeof categoryBadgeStyles] ??
               'badge-category-rules',
             props.className
@@ -277,7 +281,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
-            `border font-medium text-xs ${transition.default} hover:shadow-md hover:shadow-primary/20`,
+            `border font-medium ${size.xs} ${transition.default} hover:${shadow.md} hover:${shadowColor.primary}`,
             sourceBadgeStyles[props.source],
             props.className
           )}
@@ -294,7 +298,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
-            `border font-medium text-xs ${transition.default} hover:shadow-md hover:shadow-primary/20`,
+            `border font-medium ${size.xs} ${transition.default} hover:${shadow.md} hover:${shadowColor.primary}`,
             statusBadgeStyles[props.status],
             props.className
           )}
@@ -312,7 +316,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
       switch (props.tier) {
         case 'featured':
-          return <Star className="mr-1 h-3 w-3 fill-current" aria-hidden="true" />;
+          return <Star className={`mr-1 ${iconSize.xs} fill-current`} aria-hidden="true" />;
         case 'promoted':
           return <TrendingUp className={iconLeading.xs} aria-hidden="true" />;
         case 'spotlight':
@@ -339,7 +343,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
-            'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
+            `inline-flex items-center ${radius.full} border px-2.5 py-0.5 font-semibold ${size.xs} transition-colors hover:${shadow.md} hover:${shadowColor.primary}`,
             sponsoredBadgeStyles[props.tier],
             props.className
           )}
@@ -357,14 +361,14 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
     // Common class names for tag badges
     const baseTagClasses = cn(
-      'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
-      'cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent hover:shadow-md hover:shadow-primary/20',
+      `inline-flex items-center ${radius.full} border px-2.5 py-0.5 font-semibold ${size.xs} transition-all duration-200`,
+      `cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent hover:${shadow.md} hover:${shadowColor.primary}`,
       props.className
     );
 
     const activeTagClasses = cn(
-      `inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs ${transition.default}`,
-      'cursor-pointer bg-accent text-accent-foreground shadow-lg shadow-primary/25',
+      `inline-flex items-center ${radius.full} border px-2.5 py-0.5 font-semibold ${size.xs} ${transition.default}`,
+      `cursor-pointer bg-accent text-accent-foreground ${shadow.lg} ${shadowColor.primary}`,
       props.className
     );
 
@@ -437,14 +441,14 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
     // Indicator dot component
     const IndicatorDot = (
-      <output className={cn('relative flex h-2 w-2', props.className)} aria-label={label}>
+      <output className={cn(`relative flex ${squareSize.dotMd}`, props.className)} aria-label={label}>
         <span className="sr-only">{label}</span>
         <span
-          className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75 motion-reduce:animate-none"
+          className={`absolute inline-flex h-full w-full animate-ping ${radius.full} bg-accent opacity-75 motion-reduce:animate-none`}
           aria-hidden="true"
         />
         <span
-          className="relative inline-flex h-2 w-2 rounded-full bg-accent"
+          className={`relative inline-flex ${squareSize.dotMd} ${radius.full} bg-accent`}
           aria-hidden="true"
         />
       </output>
@@ -462,7 +466,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         <TooltipProvider delayDuration={delayDuration}>
           <Tooltip>
             <TooltipTrigger asChild={true}>{IndicatorDot}</TooltipTrigger>
-            <TooltipContent side={side} className="font-medium text-xs">
+            <TooltipContent side={side} className={`font-medium ${size.xs}`}>
               <p>{label}</p>
             </TooltipContent>
           </Tooltip>
@@ -490,10 +494,10 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
           className={cn(
             'inline-flex items-center justify-center',
             'px-2.5 py-0.5',
-            'font-semibold text-[10px] uppercase tracking-wider',
-            'rounded-full border',
+            `font-semibold ${size['2xs']} uppercase tracking-wider`,
+            `${radius.full} border`,
             transition.default,
-            'hover:shadow-md hover:shadow-primary/20',
+            `hover:${shadow.md} hover:${shadowColor.primary}`,
             variantStyles[badgeVariant],
             props.className
           )}
@@ -527,13 +531,13 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       bookmark: SEMANTIC_COLORS.SOCIAL_BOOKMARK,
     };
 
-    // Custom font size: text-[10px] instead of text-xs (12px) for minimal badge overlays
+    // Custom font size: size['2xs'] (10px) instead of size.xs (12px) for minimal badge overlays
     // where 12px would be too large and obtrusive
     return (
       <span
         className={cn(
           '-top-1 -right-1 absolute',
-          'font-semibold text-[10px] tabular-nums leading-none',
+          `font-semibold ${size['2xs']} tabular-nums leading-none`,
           'pointer-events-none',
           colorStyles[type],
           props.className

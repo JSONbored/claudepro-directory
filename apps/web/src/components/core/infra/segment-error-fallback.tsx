@@ -1,6 +1,21 @@
 'use client';
 
-import { responsive, spaceY, marginBottom, marginTop, muted, weight ,size  , padding , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  maxWidth,
+  muted,
+  padding,
+  radius,
+  responsive,
+  size,
+  spaceY,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Button,
   Card,
@@ -59,7 +74,7 @@ export function SegmentErrorFallback({
   error,
 }: SegmentErrorFallbackProps) {
   return (
-    <div className={`flex min-h-[60vh] items-center justify-center ${padding.xDefault} ${padding.ySection}`}>
+    <div className={`flex min-h-[60vh] ${alignItems.center} ${justify.center} ${padding.xDefault} ${padding.ySection}`}>
       <Card className={`w-full ${maxWidth['2xl']}`}>
         <CardHeader>
           <CardTitle className={`${size['2xl']}`}>{title}</CardTitle>
@@ -86,9 +101,9 @@ export function SegmentErrorFallback({
             </div>
           )}
           {isDevelopment && error && (
-            <div className={`${radius.lg} border border-muted-foreground/30 border-dashed bg-muted/30 ${padding.default}`}>
+            <div className={`${radius.lg} border border-muted-foreground/30 border-dashed ${bgColor['muted/30']} ${padding.default}`}>
               <p className={`${marginBottom.tight} ${weight.semibold} ${muted.sm}`}>Error details</p>
-              <pre className={`wrap-break-word whitespace-pre-wrap text-destructive ${size.xs}`}>
+              <pre className={`wrap-break-word whitespace-pre-wrap ${textColor.destructive} ${size.xs}`}>
                 {error.message}
               </pre>
               {error.digest && (

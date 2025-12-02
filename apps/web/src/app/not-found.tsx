@@ -1,5 +1,12 @@
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { padding , minHeight } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  alignItems,
+  justify,
+  minHeight,
+  padding,
+} from '@heyclaude/web-runtime/design-system';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
 import { NotFoundEmpty } from '@/src/components/primitives/feedback/empty-state';
@@ -16,7 +23,7 @@ export const revalidate = false;
 
 export default function NotFound() {
   return (
-    <div className={`flex ${minHeight.screen} items-center justify-center bg-background ${padding.xDefault}`}>
+    <div className={cn('flex', minHeight.screen, alignItems.center, justify.center, bgColor.background, padding.xDefault)}>
       <NotFoundEmpty />
     </div>
   );

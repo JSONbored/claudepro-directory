@@ -16,7 +16,8 @@ import {
   getSocialLinks,
 } from '@heyclaude/web-runtime/core';
 import { Calendar, Copy, Eye, Tag, User } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, marginBottom, muted  , gap , padding } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, marginBottom, muted  , gap , padding, flexWrap,
+} from '@heyclaude/web-runtime/design-system';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 
@@ -168,7 +169,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
     <div className={`container mx-auto ${padding.xDefault}`}>
       {/* Author, Date & View Count Metadata */}
       {hasMetadata && (
-        <div className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}>
+        <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
           {'author' in item &&
             item.author &&
             (() => {
@@ -217,7 +218,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
       )}
       {/* Tags */}
       {hasTags && tags.length > 0 && (
-        <div className={`flex flex-wrap ${gap.compact}`}>
+        <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
           <Tag className={`${iconSize.sm} ${muted.default}`} />
           {tags.map((tag) => (
             <UnifiedBadge

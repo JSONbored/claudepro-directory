@@ -110,8 +110,39 @@ export const codeButton = {
  * Minimum width constraints for buttons.
  */
 export const buttonMinWidth = {
+  /** min-w-[8rem] - Default button minimum width */
   default: 'min-w-[8rem]',
+  /** min-w-[36px] - Small icon button */
   icon: 'min-w-[36px]',
+  /** min-w-[40px] - Medium icon button */
   iconMd: 'min-w-[40px]',
+  /** min-w-[140px] - Newsletter button */
   newsletter: 'min-w-[140px]',
+} as const;
+
+// =============================================================================
+// BUTTON HEIGHT UTILITIES
+// =============================================================================
+
+/**
+ * Arbitrary height utilities for buttons.
+ * Use when standard Tailwind heights don't match design specs.
+ */
+export const buttonHeight = {
+  /** h-[36px] - Small button */
+  sm: 'h-[36px]',
+  /** h-[40px] - Medium button */
+  md: 'h-[40px]',
+  /** h-[52px] - Large button */
+  lg: 'h-[52px]',
+} as const;
+
+/**
+ * Button minimum height utilities.
+ */
+export const buttonMinHeight = {
+  /** min-h-[36px] - Small icon button */
+  icon: 'min-h-[36px]',
+  /** min-h-[40px] - Medium icon button */
+  iconMd: 'min-h-[40px]',
 } as const;

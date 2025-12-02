@@ -10,7 +10,24 @@ import {
   getAuthenticatedUser,
   getPublicCollectionDetail,
 } from '@heyclaude/web-runtime/data';
-import { between, cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , row , minHeight } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  bgColor,
+  cluster,
+  flexDir,
+  gap,
+  iconSize,
+  alignItems,
+  marginBottom,
+  marginTop,
+  minHeight,
+  muted,
+  padding,
+  row,
+  size,
+  spaceY,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, UnifiedBadge, Button ,
@@ -172,7 +189,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   const { user: profileUser, collection, items, is_owner } = collectionData;
 
   return (
-    <div className={`${minHeight.screen} bg-background`}>
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Track view - non-blocking */}
       <Pulse
         variant="view"
@@ -195,7 +212,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
           {/* Header */}
           <div>
-            <div className={`${between.center} mb-2`}>
+            <div className={`${between.center} ${marginBottom.tight}`}>
               <div className={cluster.compact}>
                 <h1 className={`${weight.bold} ${size['3xl']}`}>{collection?.name ?? 'Untitled Collection'}</h1>
                 <UnifiedBadge variant="base" style="outline">
@@ -224,7 +241,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
             {!items || items.length === 0 ? (
               <Card>
-                <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
+                <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
                   <p className={muted.default}>This collection is empty</p>
                 </CardContent>
               </Card>
@@ -247,7 +264,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                     <Card key={item.id}>
                       <CardHeader>
                         <div className={`${row.comfortable}`}>
-                          <div className={`w-8 ${weight.bold} ${size['2xl']} ${muted.default}/50`}>
+                          <div className={`w-8 ${weight.bold} ${size['2xl']} text-muted-foreground/50`}>
                             {index + 1}
                           </div>
                           <div className="flex-1">
@@ -255,7 +272,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                               <UnifiedBadge variant="base" style="outline" className="capitalize">
                                 {item.content_type}
                               </UnifiedBadge>
-                              <CardTitle className="text-lg">{item.content_slug}</CardTitle>
+                              <CardTitle className={size.lg}>{item.content_slug}</CardTitle>
                             </div>
                             {item.notes ? <CardDescription className={marginTop.compact}>{item.notes}</CardDescription> : null}
                           </div>

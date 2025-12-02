@@ -14,7 +14,30 @@ import type {
   FAQProps,
   InfoBoxProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { between, cluster, iconSize, border, spaceY, muted, marginBottom, marginTop, weight ,size   , row } from '@heyclaude/web-runtime/design-system';
+import {
+  backdrop,
+  between,
+  bgColor,
+  border,
+  cluster,
+  flexGrow,
+  iconSize,
+  alignItems,
+  justify,
+  leading,
+  marginBottom,
+  marginTop,
+  muted,
+  padding,
+  radius,
+  radiusRight,
+  row,
+  size,
+  spaceY,
+  textColor,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { cn, INFOBOX_COLORS, INFOBOX_ICON_COLORS } from '@heyclaude/web-runtime/ui';
 import { useCallback, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
@@ -138,15 +161,15 @@ function AccordionBox(props: AccordionVariant) {
               <CardHeader className="transition-colors hover:bg-muted/30">
                 <CardTitle className={between.center} itemProp="name">
                   <span>{item.title}</span>
-                  <div className="ml-4 shrink-0">
+                  <div className={`ml-4 ${flexGrow.shrink0}`}>
                     {openItems.has(index) ? (
                       <ChevronUp
-                        className={`${iconSize.sm} ${muted.default} transition-transform`}
+                        className={`${iconSize.sm} ${muted.default} ${transition.transform}`}
                         aria-hidden="true"
                       />
                     ) : (
                       <ChevronDown
-                        className={`${iconSize.sm} ${muted.default} transition-transform`}
+                        className={`${iconSize.sm} ${muted.default} ${transition.transform}`}
                         aria-hidden="true"
                       />
                     )}
@@ -198,18 +221,18 @@ function FAQBox(props: FAQVariant) {
 
       <div className={spaceY.comfortable}>
         {validQuestions.map((faq) => (
-          <Card key={faq.question} className={`${border.default} bg-code/50 backdrop-blur-sm`}>
+          <Card key={faq.question} className={`${border.default} bg-code/50 ${backdrop.sm}`}>
             <CardHeader>
               <CardTitle className={`${row.default} ${weight.semibold} ${size.lg}`}>
-                <div className={`${marginTop.micro} flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10`}>
-                  <span className={`${weight.bold} text-primary ${size.sm}`}>Q</span>
+                <div className={`${marginTop.micro} flex ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['primary/10']}`}>
+                  <span className={`${weight.bold} ${textColor.primary} ${size.sm}`}>Q</span>
                 </div>
                 {faq.question}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="pl-9">
-                <div className={`${muted.default} leading-relaxed`}>{faq.answer}</div>
+                <div className={`${muted.default} ${leading.relaxed}`}>{faq.answer}</div>
               </div>
             </CardContent>
           </Card>
@@ -250,17 +273,18 @@ function InfoBoxComponent(props: InfoBoxVariant) {
     <div
       itemScope={true}
       itemType="https://schema.org/Note"
-      className={cn('my-6 rounded-r-lg border-l-4 ${padding.comfortable}', INFOBOX_COLORS[variantKey])}
+      className={cn(
+  `my-6 ${radiusRight.lg} border-l-4 ${padding.comfortable}`, INFOBOX_COLORS[variantKey])}
     >
       {title && (
-        <div className={cn(cluster.compact, 'mb-3')}>
+        <div className={cn(cluster.compact, marginBottom.compact)}>
           {iconMap[currentVariant]}
-          <h4 className={`${weight.semibold} text-foreground`} itemProp="name">
+          <h4 className={`${weight.semibold} ${textColor.foreground}`} itemProp="name">
             {title}
           </h4>
         </div>
       )}
-      <div itemProp="text" className={`${muted.default} leading-relaxed`}>
+      <div itemProp="text" className={`${muted.default} ${leading.relaxed}`}>
         {children}
       </div>
     </div>

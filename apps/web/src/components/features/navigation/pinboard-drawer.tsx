@@ -1,7 +1,27 @@
 'use client';
 
 import { formatRelativeDate } from '@heyclaude/web-runtime';
-import { iconSize, iconLeading, animate, cluster, spaceY, marginTop, muted, weight, radius ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  animate,
+  bgColor,
+  border,
+  cluster,
+  gap,
+  iconLeading,
+  iconSize,
+  alignItems,
+  justify,
+  marginTop,
+  muted,
+  padding,
+  radius,
+  size,
+  spaceY,
+  textColor,
+  tracking,
+  weight,
+  skeletonSize,
+} from '@heyclaude/web-runtime/design-system';
 import { BookmarkMinus, BookmarkPlus } from '@heyclaude/web-runtime/icons';
 import Link from 'next/link';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -49,7 +69,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className={`${marginTop.default} flex items-center justify-between ${muted.sm}`}>
+        <div className={`${marginTop.default} flex ${alignItems.center} ${justify.between} ${muted.sm}`}>
           <span>{hasPins ? `${pinnedItems.length} saved` : 'No pinned items yet'}</span>
           {hasPins && (
             <Button variant="ghost" size="sm" onClick={clearAll}>
@@ -60,10 +80,10 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
 
         <div className={`${marginTop.comfortable} ${spaceY.comfortable}`}>
           {!isLoaded && (
-            <div className={`${spaceY.default} ${radius.lg} border border-border/60 border-dashed ${padding.default}`}>
-              <div className={`h-4 w-2/3 ${animate.pulse} rounded bg-muted/60`} />
-              <div className={`h-3 w-5/6 ${animate.pulse} rounded bg-muted/40`} />
-              <div className={`h-3 w-1/2 ${animate.pulse} rounded bg-muted/30`} />
+            <div className={`${spaceY.default} ${radius.lg} border ${border.dashedMedium} ${padding.default}`}>
+              <div className={`${skeletonSize.barResponsive} ${animate.pulse} rounded ${bgColor['muted/60']}`} />
+              <div className={`${skeletonSize.barSmResponsive} ${animate.pulse} rounded ${bgColor['muted/40']}`} />
+              <div className={`${skeletonSize.barSmHalf} ${animate.pulse} rounded ${bgColor['muted/30']}`} />
             </div>
           )}
 
@@ -72,17 +92,17 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
               {pinnedItems.map((item) => (
                 <li
                   key={`${item.category}-${item.slug}`}
-                  className={`${radius.lg} border border-border/60 ${padding.default}`}
+                  className={`${radius.lg} ${border.medium} ${padding.default}`}
                 >
-                  <div className={`flex items-start justify-between ${gap.comfortable}`}>
+                  <div className={`flex ${alignItems.start} ${justify.between} ${gap.comfortable}`}>
                     <div>
-                      <p className={`${muted.default} ${size.xs} uppercase tracking-wide`}>
+                      <p className={`${muted.default} ${size.xs} uppercase ${tracking.wide}`}>
                         {item.category}
                         {item.typeName ? ` • ${item.typeName}` : ''}
                       </p>
                       <Link
                         href={`/${item.category}/${item.slug}`}
-                        className={`${marginTop.tight} block ${weight.semibold} ${size.base} text-primary hover:underline`}
+                        className={`${marginTop.tight} block ${weight.semibold} ${size.base} ${textColor.primary} hover:underline`}
                         onClick={() => onOpenChange(false)}
                       >
                         {item.title}
@@ -111,7 +131,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
           )}
 
           {isLoaded && !hasPins && (
-            <div className={`${radius.lg} border border-border/60 border-dashed ${padding.comfortable} text-center`}>
+            <div className={`${radius.lg} border ${border.dashedMedium} ${padding.comfortable} text-center`}>
               <p className={weight.medium}>Nothing pinned yet</p>
               <p className={`${marginTop.compact} ${muted.sm}`}>
                 Tap “Pin for later” on any detail page to build your personal shortlist.

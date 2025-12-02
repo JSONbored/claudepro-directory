@@ -1,5 +1,11 @@
 import type { Database } from '@heyclaude/database-types';
-import type { LucideIcon } from 'lucide-react';
+import type { ComponentType, SVGProps } from 'react';
+
+/**
+ * Strict icon component type that doesn't contain `any`.
+ * Use this instead of `LucideIcon` from lucide-react.
+ */
+export type IconComponent = ComponentType<SVGProps<SVGSVGElement> & { className?: string }>;
 
 export type SectionId =
   | 'description'
@@ -22,7 +28,7 @@ export interface TabConfig {
   readonly id: string;
   readonly label: string;
   readonly mobileLabel?: string;
-  readonly icon?: LucideIcon;
+  readonly icon?: IconComponent;
   readonly sections: ReadonlyArray<SectionId>;
   readonly lazy?: boolean;
   readonly order: number;
@@ -33,7 +39,7 @@ export interface UnifiedCategoryConfig<TId extends string = string> {
   title: string;
   pluralTitle: string;
   description: string;
-  icon: LucideIcon;
+  icon: IconComponent;
   colorScheme: string;
   showOnHomepage: boolean;
   keywords: string;
@@ -91,7 +97,7 @@ export interface UnifiedCategoryConfig<TId extends string = string> {
 
 export interface CategoryStatsConfig {
   categoryId: Database['public']['Enums']['content_category'];
-  icon: LucideIcon;
+  icon: IconComponent;
   displayText: string;
   delay: number;
 }

@@ -9,9 +9,27 @@ import { listMFAFactors, type MFAFactor, unenrollMFAFactor } from '@heyclaude/we
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertTriangle, CheckCircle, Loader2, Shield, Trash } from '@heyclaude/web-runtime/icons';
-import { iconLeading, iconSize, cluster, spaceY, marginTop, muted, helper, weight, radius , padding , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  borderColor,
+  cluster,
+  gap,
+  helper,
+  iconLeading,
+  iconSize,
+  alignItems,
+  justify,
+  marginTop,
+  muted,
+  padding,
+  radius,
+  spaceY,
+  transition,
+  weight,
+  size,
+} from '@heyclaude/web-runtime/design-system';
 import { errorToasts, successToasts } from '@heyclaude/web-runtime/ui';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -48,7 +66,8 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
   const [factorToUnenroll, setFactorToUnenroll] = useState<MFAFactor | null>(null);
   const [unenrolling, setUnenrolling] = useState(false);
 
-  const supabase = createSupabaseBrowserClient();
+  // Memoize to maintain stable reference across renders
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const runLoggedAsync = useLoggedAsync({
     scope: 'MFAFactorsList',
     defaultMessage: 'MFA operation failed',
@@ -144,7 +163,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
 
   if (loading) {
     return (
-      <div className={`flex items-center justify-center ${padding.yRelaxed}`}>
+      <div className={`flex ${alignItems.center} ${justify.center} ${padding.yRelaxed}`}>
         <Loader2 className={`${iconSize.xl} animate-spin ${muted.default}`} />
       </div>
     );
@@ -152,7 +171,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
 
   if (error) {
     return (
-      <div className={`${radius.lg} border border-destructive/50 bg-destructive/10 ${padding.default} ${helper.destructive}`}>
+      <div className={`${radius.lg} border ${borderColor.destructive}/50 ${bgColor['destructive/10']} ${padding.default} ${helper.destructive}`}>
         {error}
       </div>
     );
@@ -160,7 +179,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
 
   if (factors.length === 0) {
     return (
-      <div className={`${radius.lg} border bg-muted/30 ${padding.default} text-center ${muted.sm}`}>
+      <div className={`${radius.lg} border ${bgColor['muted/30']} ${padding.default} text-center ${muted.sm}`}>
         No MFA factors enrolled. Enable two-factor authentication to get started.
       </div>
     );
@@ -172,10 +191,10 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
         {factors.map((factor) => (
           <div
             key={factor.id}
-            className={`flex items-center justify-between ${radius.lg} border ${padding.default} transition-colors hover:bg-accent/5`}
+            className={`flex ${alignItems.center} ${justify.between} ${radius.lg} border ${padding.default} ${transition.colors} hover:bg-accent/5`}
           >
             <div className={cluster.comfortable}>
-              <div className={`rounded-full border bg-accent/5 ${padding.compact}`}>
+              <div className={`${radius.full} border ${bgColor['accent/5']} ${padding.compact}`}>
                 <Shield className={iconSize.lg} />
               </div>
               <div>
@@ -197,7 +216,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
                 <div className={`${marginTop.tight} ${muted.sm}`}>
                   <p>Type: {factor.factor_type.toUpperCase()}</p>
                   {factor.factor_type === 'phone' && factor.phone && <p>Phone: {factor.phone}</p>}
-                  <p className="text-xs">
+                  <p className={size.xs}>
                     Added: {new Date(factor.created_at).toLocaleDateString()}
                   </p>
                 </div>

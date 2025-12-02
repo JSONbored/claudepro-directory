@@ -74,7 +74,7 @@ export default async function NewCollectionPage() {
     <div className={spaceY.relaxed}>
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button variant="ghost" className={`mb-4 ${cluster.compact}`}>
+          <Button variant="ghost" className={`${marginBottom.default} ${cluster.compact}`}>
             <ArrowLeft className={iconSize.sm} />
             Back to Library
           </Button>

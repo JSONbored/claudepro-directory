@@ -36,12 +36,14 @@
  * ```
  */
 
-import type { LucideIcon } from '../../../icons.tsx';
+import type { IconComponent } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
 // Design System imports
-import { cluster } from '../../../design-system/styles/layout.ts';
+import { cluster, padding, marginTop } from '../../../design-system/styles/layout.ts';
 import { iconSize } from '../../../design-system/styles/icons.ts';
 import { cardHeader, cardBody } from '../../../design-system/styles/cards.ts';
+import { size } from '../../../design-system/styles/typography.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { BorderBeam } from '../animation/border-beam.tsx';
@@ -59,7 +61,7 @@ export interface FormSectionCardProps {
   /** Section description */
   description: string;
   /** Lucide icon component */
-  icon: LucideIcon;
+  icon: IconComponent;
   /** Color theme for the section */
   theme?: SectionTheme;
   /** Section content */
@@ -160,8 +162,8 @@ export function FormSectionCard({
             {/* Icon with step number */}
             <div
               className={cn(
-                'rounded-lg',
-                'p-2',
+                radius.lg,
+                padding.tight,
                 themeConfig.iconBg,
                 'shrink-0'
               )}
@@ -172,12 +174,12 @@ export function FormSectionCard({
             {/* Title and description */}
             <div className="flex-1">
               <CardTitle
-                className={cn(cluster.compact, 'text-lg font-semibold')}
+                className={cn(cluster.compact, `${size.lg} font-semibold`)}
               >
                 <span className={cn('font-semibold', themeConfig.iconText)}>{step}.</span>
                 {title}
               </CardTitle>
-              <p className={cn('text-sm text-muted-foreground', 'mt-0.5')}>
+              <p className={cn(`${size.sm} text-muted-foreground`, marginTop.micro)}>
                 {description}
               </p>
             </div>

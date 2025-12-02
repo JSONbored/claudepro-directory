@@ -13,6 +13,11 @@
 
 /**
  * Hover background effects.
+ * 
+ * @migration Replaces inline `hover:bg-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="hover:bg-accent/10"
+ * // ✅ NEW: className={hoverBg.default}
  */
 export const hoverBg = {
   /** Very subtle hover */
@@ -23,24 +28,66 @@ export const hoverBg = {
   strong: 'hover:bg-accent/20',
   /** Muted hover */
   muted: 'hover:bg-muted/50',
+  /** Muted lighter hover */
+  mutedLight: 'hover:bg-muted/30',
+  /** White subtle hover (dark backgrounds) */
+  white5: 'hover:bg-white/5',
+  /** White hover (dark backgrounds) */
+  white10: 'hover:bg-white/10',
+  /** Destructive hover */
+  destructive: 'hover:bg-destructive/10',
+  /** Destructive strong hover */
+  destructiveStrong: 'hover:bg-destructive/20',
+  /** Primary hover */
+  primary: 'hover:bg-primary/10',
+  /** Primary strong hover */
+  primaryStrong: 'hover:bg-primary/20',
 } as const;
 
 /**
  * Hover text effects.
+ * 
+ * @migration Replaces inline `hover:text-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="hover:text-foreground"
+ * // ✅ NEW: className={hoverText.foreground}
  */
 export const hoverText = {
+  /** Hover to accent color */
   accent: 'hover:text-accent',
+  /** Hover to foreground color */
   foreground: 'hover:text-foreground',
+  /** Hover to primary color */
   primary: 'hover:text-primary',
+  /** Hover to muted color */
+  muted: 'hover:text-muted-foreground',
+  /** Hover to destructive color */
+  destructive: 'hover:text-destructive',
+  /** Hover to white */
+  white: 'hover:text-white',
 } as const;
 
 /**
  * Hover border effects.
+ * 
+ * @migration Replaces inline `hover:border-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="hover:border-primary"
+ * // ✅ NEW: className={hoverBorder.primary}
  */
 export const hoverBorder = {
+  /** Hover to accent border */
   accent: 'hover:border-accent/50',
+  /** Hover to medium border */
   medium: 'hover:border-border-medium',
+  /** Hover to primary border */
   primary: 'hover:border-primary/50',
+  /** Hover to primary solid */
+  primarySolid: 'hover:border-primary',
+  /** Hover to foreground border */
+  foreground: 'hover:border-foreground',
+  /** Hover to border color */
+  border: 'hover:border-border',
 } as const;
 
 // =============================================================================
@@ -142,22 +189,43 @@ export const groupHover = {
 
 /**
  * Transition patterns.
+ * 
+ * @migration Replaces inline `transition-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="transition-colors"
+ * // ✅ NEW: className={transition.colors}
+ * // ❌ OLD: className="transition-all duration-200 ease-out"
+ * // ✅ NEW: className={transition.default}
  */
 export const transition = {
-  /** Fast transition */
+  /** No transition */
+  none: 'transition-none',
+  /** Fast transition (150ms) */
   fast: 'transition-all duration-150 ease-out',
-  /** Default transition */
+  /** Default transition (200ms) */
   default: 'transition-all duration-200 ease-out',
-  /** Slow transition */
+  /** Slow transition (300ms) */
   slow: 'transition-all duration-300 ease-out',
+  /** Very slow transition (500ms) */
+  slower: 'transition-all duration-500 ease-out',
   /** Smooth (from design system) */
   smooth: 'transition-smooth',
+  /** All properties */
+  all: 'transition-all',
   /** Colors only */
   colors: 'transition-colors',
   /** Transform only */
   transform: 'transition-transform',
   /** Opacity only */
   opacity: 'transition-opacity',
+  /** Shadow only */
+  shadow: 'transition-shadow',
+  /** Width only */
+  width: 'transition-[width]',
+  /** Height only */
+  height: 'transition-[height]',
+  /** Combined common for interactive elements */
+  interactive: 'transition-colors duration-200 ease-out',
 } as const;
 
 // =============================================================================

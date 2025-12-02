@@ -1,6 +1,36 @@
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, grid, animate, marginBottom, muted, iconLeading, iconSize, weight, radius ,size  , gap , padding , row , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  animateDuration,
+  between,
+  bgColor,
+  borderBottom,
+  flexDir,
+  flexWrap,
+  gap,
+  grid,
+  iconLeading,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  maxWidth,
+  minHeight,
+  muted,
+  overflow,
+  padding,
+  radius,
+  row,
+  shadow,
+  size,
+  textColor,
+  tracking,
+  transition,
+  weight,
+  zLayer,
+  squareSize,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building,
@@ -10,27 +40,20 @@ import {
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, Button ,
+import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
+  CardTitle,
+  UnifiedBadge,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
-  {
-    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
-  }
-);
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 
 /**
  * ISR: 30 minutes (1800s) - Matches CACHE_TTL.company_list
@@ -148,24 +171,24 @@ export default async function CompaniesPage() {
   });
 
   return (
-    <div className={`${minHeight.screen} bg-background`}>
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border">
+      <section className={`relative ${overflow.hidden} ${borderBottom.default}`}>
         <div className={`container mx-auto ${padding.xDefault} py-20`}>
           <div className={`mx-auto ${maxWidth['3xl']}`}>
-            <div className={`${marginBottom.comfortable} flex justify-center`}>
-              <div className={`rounded-full bg-accent/10 ${padding.compact}`}>
-                <Building className="h-8 w-8 text-primary" />
+            <div className={`${marginBottom.comfortable} flex ${justify.center}`}>
+              <div className={`${radius.full} ${bgColor['accent/10']} ${padding.compact}`}>
+                <Building className={`${iconSize.xl} ${textColor.primary}`} />
               </div>
             </div>
 
-            <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']} tracking-tight sm:text-5xl`}>Companies Directory</h1>
+            <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']} ${tracking.tight} sm:${size['5xl']}`}>Companies Directory</h1>
 
-            <p className={`mx-auto mt-4 ${maxWidth.xl} ${muted.default} ${size.lg}`}>
+            <p className={`mx-auto ${marginTop.default} ${maxWidth.xl} ${muted.default} ${size.lg}`}>
               Discover companies building the future with Claude and Cursor
             </p>
 
-            <div className={`${marginBottom.relaxed} flex justify-center ${gap.compact}`}>
+            <div className={`${marginBottom.relaxed} flex ${justify.center} ${gap.compact}`}>
               <UnifiedBadge variant="base" style="secondary">
                 <Building className={iconLeading.xs} />
                 {companies.length} Companies
@@ -177,7 +200,7 @@ export default async function CompaniesPage() {
 
             <Button variant="outline" asChild>
               <Link href={ROUTES.ACCOUNT_COMPANIES}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className={`mr-2 ${iconSize.sm}`} />
                 Add Your Company
               </Link>
             </Button>
@@ -189,15 +212,15 @@ export default async function CompaniesPage() {
       <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
         {companies.length === 0 ? (
           <Card>
-            <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
-              <Building className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+            <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+              <Building className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
               <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No companies yet</h3>
               <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
                 Be the first company to join the directory!
               </p>
               <Button asChild>
                 <Link href={ROUTES.ACCOUNT_COMPANIES}>
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className={`mr-2 ${iconSize.sm}`} />
                   Add Your Company
                 </Link>
               </Button>
@@ -206,9 +229,9 @@ export default async function CompaniesPage() {
         ) : (
           <div className={grid.responsive3}>
             {companies.map((company, index) => (
-              <Card key={company.id} className="card-gradient transition-all duration-200 hover:shadow-lg">
-                {company.featured ? <div className="-top-2 -right-2 absolute z-10">
-                    <UnifiedBadge variant="base" className="bg-accent text-accent-foreground">
+              <Card key={company.id} className={`card-gradient ${transition.all} ${animateDuration.default} hover:${shadow.lg}`}>
+                {company.featured ? <div className={`-top-2 -right-2 absolute ${zLayer.raised}`}>
+                    <UnifiedBadge variant="base" className={`bg-accent ${textColor.accentForeground}`}>
                       <Star className={iconLeading.xs} />
                       Featured
                     </UnifiedBadge>
@@ -220,8 +243,8 @@ export default async function CompaniesPage() {
                       // Validate logo URL is safe (from trusted sources only)
                       if (!company.logo) {
                         return (
-                          <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
-                            <Building className={`h-6 w-6 ${muted.default}`} />
+                          <div className={`flex ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
+                            <Building className={`${iconSize.lg} ${muted.default}`} />
                           </div>
                         );
                       }
@@ -230,8 +253,8 @@ export default async function CompaniesPage() {
                         // Only allow HTTPS
                         if (parsed.protocol !== 'https:') {
                           return (
-                            <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
-                              <Building className={`h-6 w-6 ${muted.default}`} />
+                            <div className={`flex ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
+                              <Building className={`${iconSize.lg} ${muted.default}`} />
                             </div>
                           );
                         }
@@ -252,8 +275,8 @@ export default async function CompaniesPage() {
                           isAwsS3;
                         if (!isTrustedSource) {
                           return (
-                            <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
-                              <Building className={`h-6 w-6 ${muted.default}`} />
+                            <div className={`flex ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
+                              <Building className={`${iconSize.lg} ${muted.default}`} />
                             </div>
                           );
                         }
@@ -263,14 +286,14 @@ export default async function CompaniesPage() {
                             alt={`${company.name} logo`}
                             width={48}
                             height={48}
-                            className={`h-12 w-12 ${radius.lg} object-cover`}
+                            className={`${squareSize.avatarLg} ${radius.lg} object-cover`}
                             priority={index < 6}
                           />
                         );
                       } catch {
                         return (
-                          <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
-                            <Building className={`h-6 w-6 ${muted.default}`} />
+                          <div className={`flex ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
+                            <Building className={`${iconSize.lg} ${muted.default}`} />
                           </div>
                         );
                       }
@@ -295,22 +318,22 @@ export default async function CompaniesPage() {
                     </p> : null}
 
                   {/* Job Statistics from RPC/data layer (getCompanyProfile RPC) */}
-                  {company.stats && (company.stats.active_jobs ?? 0) > 0 ? <div className={`${marginBottom.default} flex flex-wrap ${gap.compact}`}>
-                      <UnifiedBadge variant="base" style="secondary" className="text-xs">
+                  {company.stats && (company.stats.active_jobs ?? 0) > 0 ? <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.compact}`}>
+                      <UnifiedBadge variant="base" style="secondary" className={size.xs}>
                         <Briefcase className={iconLeading.xs} />
                         {company.stats.active_jobs ?? 0} Active{' '}
                         {(company.stats.active_jobs ?? 0) === 1 ? 'Job' : 'Jobs'}
                       </UnifiedBadge>
 
                       {(company.stats.total_views ?? 0) > 0 && (
-                        <UnifiedBadge variant="base" style="outline" className="text-xs">
+                        <UnifiedBadge variant="base" style="outline" className={size.xs}>
                           <TrendingUp className={iconLeading.xs} />
                           {(company.stats.total_views ?? 0).toLocaleString()} views
                         </UnifiedBadge>
                       )}
 
                       {(company.stats.remote_jobs ?? 0) > 0 && (
-                        <UnifiedBadge variant="base" style="outline" className="text-xs">
+                        <UnifiedBadge variant="base" style="outline" className={size.xs}>
                           {company.stats.remote_jobs ?? 0} Remote
                         </UnifiedBadge>
                       )}
@@ -318,7 +341,7 @@ export default async function CompaniesPage() {
 
                   <div className={between.center}>
                     {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
-                    {company.size ? <UnifiedBadge variant="base" style="outline" className="text-xs">
+                    {company.size ? <UnifiedBadge variant="base" style="outline" className={size.xs}>
                         {company.size} employees
                       </UnifiedBadge> : null}
 

@@ -23,6 +23,7 @@
  */
 
 import { Star } from '../../../icons.tsx';
+import { iconSize } from '../../../design-system/styles/icons.ts';
 
 /** Size variants for star icons */
 export type StarSize = 'sm' | 'md' | 'lg';
@@ -40,9 +41,9 @@ export interface StarDisplayProps {
 }
 
 const SIZE_CLASSES: Record<StarSize, string> = {
-  sm: 'h-3.5 w-3.5',
-  md: 'h-5 w-5',
-  lg: 'h-6 w-6',
+  sm: iconSize.xsPlus,
+  md: iconSize.md,
+  lg: iconSize.lg,
 };
 
 /**

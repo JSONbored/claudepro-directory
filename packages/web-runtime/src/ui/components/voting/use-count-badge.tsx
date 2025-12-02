@@ -9,6 +9,8 @@
 
 import { Zap } from '../../../icons.tsx';
 import { cluster } from '../../../design-system/styles/layout.ts';
+import { iconSize } from '../../../design-system/styles/icons.ts';
+import { size as textSize } from '../../../design-system/styles/typography.ts';
 
 export interface UseCountBadgeProps {
   /** Number of users who marked "I use this" */
@@ -35,13 +37,13 @@ export function UseCountBadge({
   if (count <= 0) return null;
 
   const sizeClasses = {
-    sm: 'text-xs',
-    default: 'text-sm',
+    sm: textSize.xs,
+    default: textSize.sm,
   };
 
   const iconSizes = {
-    sm: 'h-3 w-3',
-    default: 'h-3.5 w-3.5',
+    sm: iconSize.xs,
+    default: iconSize.xsPlus,
   };
 
   // Format count for display (e.g., 1.2k for 1200)
@@ -97,10 +99,10 @@ export function UseCountBadgeCompact({
 
   return (
     <div
-      className={`${cluster.tight} text-xs text-muted-foreground ${className}`}
+      className={`${cluster.tight} ${textSize.xs} text-muted-foreground ${className}`}
       title={`${count} ${count === 1 ? 'person uses' : 'people use'} this`}
     >
-      <Zap className="h-3 w-3 text-emerald-500" aria-hidden="true" />
+      <Zap className={`${iconSize.xs} text-emerald-500`} aria-hidden="true" />
       <span className="font-medium">{formatCount(count)}</span>
     </div>
   );

@@ -31,6 +31,37 @@
 const SESSION_ID_KEY = 'app_session_id';
 
 /**
+ * Generate a cryptographically secure random string
+ * 
+ * Uses crypto.getRandomValues() for secure randomness in browser environments.
+ * Falls back to Math.random() only if crypto API is unavailable (shouldn't happen in modern browsers).
+ * 
+ * @param length - Length of random string to generate (default: 8)
+ * @returns Random alphanumeric string
+ */
+function generateSecureRandomString(length: number = 8): string {
+  // Check if crypto API is available (should be in all modern browsers)
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+    // Use cryptographically secure random number generator
+    // Generate enough values to guarantee sufficient characters
+    // Each Uint32 produces at minimum 1 char, but average ~6-7 chars in base36
+    // Generate length values to ensure we always have enough characters
+    const array = new Uint32Array(length);
+    window.crypto.getRandomValues(array);
+    
+    // Convert to base36 string (0-9, a-z) and slice to exact length
+    return Array.from(array)
+      .map((n) => n.toString(36))
+      .join('')
+      .slice(0, length);
+  }
+  
+  // Fallback (shouldn't happen in modern browsers, but included for safety)
+  // This is still insecure, but better than crashing
+  return Math.random().toString(36).slice(2, 2 + length);
+}
+
+/**
  * Get or create a session ID for the current browser session
  * 
  * Session IDs persist across page navigations but are unique per browser tab.
@@ -40,6 +71,10 @@ const SESSION_ID_KEY = 'app_session_id';
  * - Uses sessionStorage (fast, synchronous)
  * - Cached per component lifecycle (via {@link ../hooks/use-client-logger | useClientLogger})
  * - Graceful fallback if sessionStorage unavailable (returns temporary ID)
+ * 
+ * **Security:**
+ * - Uses cryptographically secure random number generation (crypto.getRandomValues)
+ * - Prevents session ID prediction attacks
  * 
  * **Usage:**
  * - Automatically called by {@link createClientLogContext} - no need to call directly
@@ -73,16 +108,18 @@ export function getOrCreateSessionId(): string {
     let sessionId = sessionStorage.getItem(SESSION_ID_KEY);
     
     if (!sessionId) {
-      // Generate new session ID
-      sessionId = `session_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+      // Generate new session ID using cryptographically secure randomness
+      const randomPart = generateSecureRandomString(10);
+      sessionId = `session_${Date.now().toString(36)}${randomPart}`;
       sessionStorage.setItem(SESSION_ID_KEY, sessionId);
     }
     
     return sessionId;
   } catch (error) {
     // sessionStorage might be unavailable (private browsing, quota exceeded, etc.)
-    // Return a temporary ID that won't persist
-    return `temp_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+    // Return a temporary ID that won't persist (using secure randomness)
+    const randomPart = generateSecureRandomString(8);
+    return `temp_${Date.now().toString(36)}${randomPart}`;
   }
 }
 

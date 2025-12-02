@@ -43,8 +43,11 @@ import { Bookmark, Copy as CopyIcon } from '../../../icons.tsx';
 // Design System imports
 import { absolute } from '../../../design-system/styles/position.ts';
 import { iconSize } from '../../../design-system/styles/icons.ts';
+import { padding } from '../../../design-system/styles/layout.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
 import { SEMANTIC_COLORS } from '../../colors.ts';
 import { motion, useMotionValue, useTransform } from 'motion/react';
+import type { PanInfo } from 'motion/react';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -173,7 +176,7 @@ export function SwipeableCardWrapper({
         className={`pointer-events-none ${absolute.insetYLeft} z-0 flex w-20 items-center justify-start pl-4`}
         style={{ opacity: copyIndicatorOpacity }}
       >
-        <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_COPY}`}>
+        <div className={`${radius.lg} ${padding.compact} ${SEMANTIC_COLORS.SWIPE_COPY}`}>
           <CopyIcon className={iconSize.md} aria-hidden="true" />
         </div>
       </motion.div>
@@ -183,7 +186,7 @@ export function SwipeableCardWrapper({
         className={`pointer-events-none ${absolute.insetYRight} z-0 flex w-20 items-center justify-end pr-4`}
         style={{ opacity: bookmarkIndicatorOpacity }}
       >
-        <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_BOOKMARK}`}>
+        <div className={`${radius.lg} ${padding.compact} ${SEMANTIC_COLORS.SWIPE_BOOKMARK}`}>
           <Bookmark className={iconSize.md} aria-hidden="true" />
         </div>
       </motion.div>
@@ -195,7 +198,7 @@ export function SwipeableCardWrapper({
         dragElastic={0.2}
         dragMomentum={false}
         style={{ x }}
-        onDragEnd={(_event, info) => {
+        onDragEnd={(_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
           try {
             // Swipe right threshold: 100px
             if (info.offset.x > 100 && onSwipeRight) {

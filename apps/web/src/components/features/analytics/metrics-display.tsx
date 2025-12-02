@@ -5,7 +5,15 @@
 
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@heyclaude/web-runtime/icons';
 import type { MetricsDisplayProps } from '@heyclaude/web-runtime/types/component.types';
-import { cluster, grid, iconSize, marginBottom, muted, weight ,size    , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { cluster, gap, grid, iconSize, marginBottom, marginTop, muted, weight, size, maxWidth, tracking,
+  animateDuration,
+  transition,
+  textColor,
+  padding,
+  radius,
+  backdrop,
+  shadow,
+} from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 
 /**
@@ -45,7 +53,7 @@ function BadgeDelta({
   return (
     <span
       className={cn(
-        'inline-${cluster.tight} rounded-full ${padding.xTight} ${padding.yHair} ${size.xs}',
+        `inline-flex ${gap.tight} ${radius.full} ${padding.xTight} ${padding.yHair} ${size.xs}`,
         colorClass,
         className
       )}
@@ -89,7 +97,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
       {(title || description) && (
         <div className={`${marginBottom.relaxed} text-center`}>
           {title && (
-            <h3 className={`mb-3 ${weight.semibold} text-foreground ${size.xl}`} itemProp="name">
+            <h3 className={`${marginBottom.compact} ${weight.semibold} ${textColor.foreground} ${size.xl}`} itemProp="name">
               {title}
             </h3>
           )}
@@ -122,25 +130,25 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
             <div
               key={`${metricLabel}-${metricValue}`}
               className={cn(
-                '${radius.lg} border bg-linear-to-br ${padding.comfortable} backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl',
+                `${radius.lg} border bg-linear-to-br ${padding.comfortable} ${backdrop.sm} ${transition.all} ${animateDuration.slow} hover:scale-105 hover:${shadow.xl}`,
                 gradientClass
               )}
             >
               {/* Metric Label */}
-              <p className={`${weight.medium} ${muted.sm} uppercase tracking-wide`}>
+              <p className={`${weight.medium} ${muted.sm} uppercase ${tracking.wide}`}>
                 {metricLabel}
               </p>
 
               {/* Metric Value */}
               <p
-                className={`mt-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text ${weight.bold} ${size['3xl']} text-transparent`}
+                className={`${marginTop.compact} bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text ${weight.bold} ${size['3xl']} ${textColor.transparent}`}
               >
                 {metricValue}
               </p>
 
               {/* Change indicator */}
               {metricChange && (
-                <div className={cn('mt-4', cluster.compact)}>
+                <div className={cn(marginTop.default, cluster.compact)}>
                   <BadgeDelta deltaType={deltaType} className={weight.semibold} />
                   <span className={`${weight.medium} ${muted.sm}`}>{metricChange}</span>
                 </div>

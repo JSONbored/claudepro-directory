@@ -4,7 +4,10 @@ import { Check, ChevronDown, ChevronUp } from '../../icons.tsx';
 import { iconSize } from '../../design-system/styles/icons.ts';
 import { absolute } from '../../design-system/styles/position.ts';
 import { focusRing } from '../../design-system/styles/interactive.ts';
-import { DIMENSIONS } from '../constants.ts';
+import { minWidth, padding } from '../../design-system/styles/layout.ts';
+import { size } from '../../design-system/styles/typography.ts';
+import { radius } from '../../design-system/styles/radius.ts';
+import { shadow } from '../../design-system/styles/effects.ts';
 import { cn } from '../utils.ts';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import type * as React from 'react';
@@ -37,7 +40,7 @@ const SelectTrigger = ({
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      `flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground ${focusRing.outline} disabled:opacity-50 disabled:cursor-not-allowed [&>span]:line-clamp-1`,
+      `flex h-10 w-full items-center justify-between ${radius.md} border border-input bg-background px-3 py-2 ${size.sm} ring-offset-background placeholder:text-muted-foreground ${focusRing.outline} disabled:opacity-50 disabled:cursor-not-allowed [&>span]:line-clamp-1`,
       error && 'border-destructive focus:ring-destructive',
       className
     )}
@@ -100,7 +103,7 @@ const SelectContent = ({
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-96 ${DIMENSIONS.MIN_W_BUTTON} overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in`,
+        `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-96 ${minWidth.button} overflow-hidden ${radius.md} border bg-popover text-popover-foreground ${shadow.md} data-[state=closed]:animate-out data-[state=open]:animate-in`,
         position === 'popper' &&
           'data-[side=left]:-translate-x-1 data-[side=top]:-translate-y-1 data-[side=right]:translate-x-1 data-[side=bottom]:translate-y-1',
         className
@@ -111,7 +114,7 @@ const SelectContent = ({
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
         className={cn(
-          'p-1',
+          padding.micro,
           position === 'popper' &&
             'h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)'
         )}
@@ -133,7 +136,7 @@ const SelectLabel = ({
 }) => (
   <SelectPrimitive.Label
     ref={ref}
-    className={cn('py-1.5 pr-2 pl-8 font-semibold text-sm', className)}
+    className={cn(`py-1.5 pr-2 pl-8 font-semibold ${size.sm}`, className)}
     {...props}
   />
 );
@@ -150,7 +153,7 @@ const SelectItem = ({
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      `relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-none hover:bg-accent/10 hover:text-accent data-disabled:pointer-events-none data-disabled:opacity-50`,
+      `relative flex w-full cursor-default select-none items-center ${radius.sm} py-1.5 pr-2 pl-8 ${size.sm} outline-none hover:bg-accent/10 hover:text-accent data-disabled:pointer-events-none data-disabled:opacity-50`,
       className
     )}
     {...props}

@@ -10,8 +10,31 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Mail, X } from '@heyclaude/web-runtime/icons';
-import { between, iconSize, stack, fixed, absolute, cluster, muted, weight ,size  , gap , padding , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
-import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
+import {
+  absolute,
+  animateDuration,
+  between,
+  bgColor,
+  borderColor,
+  borderTop,
+  cluster,
+  fixed,
+  flexGrow,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  maxWidth,
+  muted,
+  padding,
+  radius,
+  size,
+  stack,
+  textColor,
+  weight,
+  zLayer,
+} from '@heyclaude/web-runtime/design-system';
+import { minWidth } from '@heyclaude/web-runtime/design-system';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -130,7 +153,7 @@ export function NewsletterFooterBar({
 
   return (
     <aside
-      className={`slide-in-from-bottom ${fixed.bottomFullResponsive} z-50 animate-in border-border-medium border-t-2 bg-bg-overlaydrop-blur-xl duration-300`}
+      className={`slide-in-from-bottom ${fixed.bottomFullResponsive} ${zLayer.modal} animate-in ${borderTop.strong} bg-background/95 backdrop-blur-xl ${animateDuration.slow}`}
       aria-label="Newsletter signup"
     >
       <div
@@ -138,13 +161,13 @@ export function NewsletterFooterBar({
       />
       <div className={`container mx-auto ${padding.xDefault} ${padding.yComfortable} md:py-4`}>
         {/* Desktop layout */}
-        <div className={`mx-auto hidden ${maxWidth['5xl']} items-center justify-between ${gap.relaxed} md:flex`}>
-          <div className={`flex shrink-0 items-center ${gap.default}`}>
-            <div className={`${radius.lg} border border-accent/20 bg-accent/10 ${padding.between}`}>
-              <Mail className={`${iconSize.md} text-accent`} aria-hidden="true" />
+        <div className={`mx-auto hidden ${maxWidth['5xl']} ${alignItems.center} ${justify.between} ${gap.relaxed} md:flex`}>
+          <div className={`flex ${flexGrow.shrink0} ${alignItems.center} ${gap.default}`}>
+            <div className={`${radius.lg} border ${borderColor['accent/20']} ${bgColor['accent/10']} ${padding.between}`}>
+              <Mail className={`${iconSize.md} ${textColor.accent}`} aria-hidden="true" />
             </div>
             <div>
-              <p className={`${weight.semibold} ${size.base} text-foreground`}>
+              <p className={`${weight.semibold} ${size.base} ${textColor.foreground}`}>
                 {ctaVariant === 'aggressive'
                   ? "⚡ Don't miss out!"
                   : ctaVariant === 'social_proof'
@@ -160,8 +183,8 @@ export function NewsletterFooterBar({
               </p>
             </div>
           </div>
-          <div className={`flex shrink-0 items-center ${gap.default}`}>
-            <NewsletterForm source={source} className={DIMENSIONS.MIN_W_NEWSLETTER_FORM_LG} />
+          <div className={`flex ${flexGrow.shrink0} ${alignItems.center} ${gap.default}`}>
+            <NewsletterForm source={source} className={minWidth.newsletterFormLg} />
             {dismissible && (
               <Button
                 variant="ghost"
@@ -180,8 +203,8 @@ export function NewsletterFooterBar({
         <div className={`${stack.default} md:hidden`}>
           <div className={between.center}>
             <div className={cluster.compact}>
-              <Mail className={`${iconSize.sm} shrink-0`} aria-hidden="true" />
-              <p className={`${weight.medium} text-foreground ${size.sm}`}>
+              <Mail className={`${iconSize.sm} ${flexGrow.shrink0}`} aria-hidden="true" />
+              <p className={`${weight.medium} ${textColor.foreground} ${size.sm}`}>
                 {ctaVariant === 'aggressive'
                   ? "⚡ Don't miss out!"
                   : ctaVariant === 'social_proof'

@@ -10,31 +10,33 @@ import {
   getSubmissionDashboard,
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
-import { cluster, iconSize, muted, animate, weight, radius ,size  , gap , padding , spaceY , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  gap,
+  iconSize,
+  alignItems,
+  maxWidth,
+  muted,
+  padding,
+  radius,
+  size,
+  spaceY,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/server';
-import { cn, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
+import { cn, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
-  {
-    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
-  }
-);
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 
 // Use enum values from Constants
 const DEFAULT_CONTENT_CATEGORY = Constants.public.Enums.content_category[0]; // 'agents'
@@ -155,7 +157,7 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * Fetches submission dashboard data, submission form configuration, and content templates (with defensive fallbacks), composes community stats and recent merged submissions, and renders the submission form alongside a right-hand sidebar with stats, recent activity, promos, and a newsletter CTA.
  *
- * Data fetching is request-scoped and uses per-request logging; form configuration errors will abort rendering while dashboard and template errors use fallbacks so the page can still render partially. The page respects the file-level ISR revalidation setting (revalidate = 86400).
+ * Data fetching is request-scoped and uses per-request logging; form configuration errors will abort rendering while dashboard and template errors use fallbacks so the page can still render partially. The page respects the file-level ISR revalidation setting (revalidate = 900).
  *
  * @returns A React element representing the Submit page layout and UI.
  *
@@ -316,7 +318,7 @@ export default async function SubmitPage() {
       {/* Hero Header with animations */}
       <SubmitPageHero stats={stats} />
 
-      <div className={`grid items-start ${gap.relaxed} lg:grid-cols-[2fr_1fr] lg:gap-8`}>
+      <div className={`grid ${alignItems.start} ${gap.relaxed} lg:grid-cols-[2fr_1fr] lg:${gap.loose}`}>
         <div className="w-full min-w-0">
           <SubmitFormClient formConfig={formConfig} templates={templates} />
         </div>
@@ -335,21 +337,24 @@ export default async function SubmitPage() {
             </CardHeader>
             <CardContent className={`grid grid-cols-3 ${gap.compact}`}>
               {/* Total */}
-              <div className={cn('${radius.lg} ${padding.compact} text-center', 'bg-blue-500/10')}>
+              <div className={cn(
+  `${radius.lg} ${padding.compact} text-center`, 'bg-blue-500/10')}>
                 <div className={`${weight.bold} ${size['2xl']} text-blue-400`}>{stats.total}</div>
-                <div className={cn(muted.default, 'text-xs')}>Total</div>
+                <div className={cn(muted.default, size.xs)}>Total</div>
               </div>
 
               {/* Pending */}
-              <div className={cn('${radius.lg} ${padding.compact} text-center', 'bg-yellow-500/10')}>
+              <div className={cn(
+  `${radius.lg} ${padding.compact} text-center`, 'bg-yellow-500/10')}>
                 <div className={`${weight.bold} ${size['2xl']} text-yellow-400`}>{stats.pending}</div>
-                <div className={cn(muted.default, 'text-xs')}>Pending</div>
+                <div className={cn(muted.default, size.xs)}>Pending</div>
               </div>
 
               {/* This Week */}
-              <div className={cn('${radius.lg} ${padding.compact} text-center', 'bg-green-500/10')}>
+              <div className={cn(
+  `${radius.lg} ${padding.compact} text-center`, 'bg-green-500/10')}>
                 <div className={`${weight.bold} ${size['2xl']} text-green-400`}>{stats.merged_this_week}</div>
-                <div className={cn(muted.default, 'text-xs')}>This Week</div>
+                <div className={cn(muted.default, size.xs)}>This Week</div>
               </div>
             </CardContent>
           </Card>

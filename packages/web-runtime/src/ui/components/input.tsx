@@ -1,8 +1,9 @@
 'use client';
 
-import { ANIMATION_CONSTANTS } from '../constants.ts';
 import { cn } from '../utils.ts';
-import { focusRing } from '../../design-system/styles/interactive.ts';
+import { focusRing, transition } from '../../design-system/styles/interactive.ts';
+import { size } from '../../design-system/styles/typography.ts';
+import { radius } from '../../design-system/styles/radius.ts';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useState } from 'react';
@@ -21,7 +22,7 @@ const Input = ({ className, type, ref, error, errorId, onFocus, onBlur, ...props
       {/* Glow effect on focus - No layout shift, pure visual enhancement */}
       {isFocused && (
         <motion.div
-          className="-inset-0.5 -z-10 absolute rounded-md bg-linear-to-r from-accent/50 to-primary/50 blur-sm"
+          className={`-inset-0.5 -z-10 absolute ${radius.md} bg-linear-to-r from-accent/50 to-primary/50 blur-sm`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -31,7 +32,7 @@ const Input = ({ className, type, ref, error, errorId, onFocus, onBlur, ...props
       <input
         type={type}
         className={cn(
-          `relative flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground ${focusRing.default} disabled:opacity-50 disabled:cursor-not-allowed md:text-sm`,
+          `relative flex h-12 w-full ${radius.md} border border-input bg-background px-3 py-2 ${size.base} ring-offset-background ${transition.default} file:border-0 file:bg-transparent file:font-medium file:text-foreground file:${size.sm} placeholder:text-muted-foreground ${focusRing.default} disabled:opacity-50 disabled:cursor-not-allowed md:${size.sm}`,
           error && 'border-destructive focus-visible:ring-destructive',
           className
         )}

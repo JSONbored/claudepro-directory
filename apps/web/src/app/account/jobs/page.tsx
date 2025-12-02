@@ -9,7 +9,29 @@ import {
   getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, jobStatusBadge, iconSize, spaceY, muted, marginBottom, marginTop, iconLeading, weight, radius ,size , padding , gap , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  bgColor,
+  cluster,
+  flexDir,
+  flexWrap,
+  gap,
+  iconLeading,
+  iconSize,
+  alignItems,
+  jobStatusBadge,
+  justify,
+  marginBottom,
+  marginTop,
+  maxWidth,
+  muted,
+  padding,
+  radius,
+  size,
+  spaceY,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import {
   BarChart,
   Briefcase,
@@ -340,14 +362,14 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   ) => {
     if (tier === 'featured') {
       return (
-        <UnifiedBadge variant="base" className="bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400">
+        <UnifiedBadge variant="base" className={`${bgColor['green/10']} ${textColor.green} dark:${bgColor['green/20']} dark:text-green-400`}>
           Featured
         </UnifiedBadge>
       );
     }
     if (plan === 'subscription') {
       return (
-        <UnifiedBadge variant="base" className="bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">
+        <UnifiedBadge variant="base" className={`${bgColor['purple/10']} ${textColor.purple} dark:${bgColor['purple/20']} dark:text-purple-400`}>
           Subscription
         </UnifiedBadge>
       );
@@ -359,7 +381,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
     <div className={spaceY.relaxed}>
       {paymentStatus === 'success' && (
         <Alert className="border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-200/30 dark:bg-emerald-950/40 dark:text-emerald-100">
-          <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+          <CheckCircle className={`${iconSize.sm} ${textColor.emerald}`} />
           <AlertTitle>Payment confirmed</AlertTitle>
           <AlertDescription className={`${spaceY.tight} ${size.sm}`}>
             <p>
@@ -367,7 +389,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                 ? `${paymentJob.title} is now live.`
                 : 'Your job listing is now live.'}
             </p>
-            <p className={`text-emerald-900/80 ${size.xs} sm:text-sm dark:text-emerald-100/80`}>
+            <p className={`text-emerald-900/80 ${size.xs} sm:${size.sm} dark:text-emerald-100/80`}>
               {paymentAlertPlanLabel} • {paymentAlertTierLabel}
               {paymentAlertPrice ? ` • ${paymentAlertPrice}` : ''}
               {paymentAlertRenewal ? ` • ${paymentAlertRenewal}` : ''}
@@ -384,7 +406,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
         </div>
         <Button asChild>
           <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className={`mr-2 ${iconSize.sm}`} />
             Post a Job
           </Link>
         </Button>
@@ -392,15 +414,15 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
 
       {jobs.length === 0 ? (
         <Card>
-          <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
-            <Briefcase className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
+          <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+            <Briefcase className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
             <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No job listings yet</h3>
             <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
               Post your first job listing to reach talented developers in the Claude community
             </p>
             <Button asChild>
               <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className={`mr-2 ${iconSize.sm}`} />
                 Post Your First Job
               </Link>
             </Button>
@@ -444,7 +466,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
             return (
               <Card key={job.id}>
                 <CardHeader>
-                  <div className="flex items-start justify-between">
+                  <div className={`flex ${alignItems.start} ${justify.between}`}>
                     <div className="flex-1">
                       <div className={cluster.compact}>
                         <UnifiedBadge
@@ -465,7 +487,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                 </CardHeader>
 
                 <CardContent>
-                  <div className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}>
+                  <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
                     <div className={cluster.tight}>
                       <Eye className={iconSize.sm} />
                       {job.view_count ?? 0} views
@@ -473,9 +495,9 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                     {job.posted_at ? <div>Posted {formatRelativeDate(job.posted_at)}</div> : null}
                     {job.expires_at ? <div>Expires {formatRelativeDate(job.expires_at)}</div> : null}
                   </div>
-                  {showBillingCard ? <div className={`${marginBottom.default} ${radius.lg} border border-muted border-dashed bg-muted/20 ${padding.compact} ${size.xs} sm:text-sm`}>
+                  {showBillingCard ? <div className={`${marginBottom.default} ${radius.lg} border border-muted border-dashed ${bgColor['muted/20']} ${padding.compact} ${size.xs} sm:${size.sm}`}>
                       <div className={between.center}>
-                        <span className={`${weight.semibold} text-foreground`}>Billing</span>
+                        <span className={`${weight.semibold} ${textColor.foreground}`}>Billing</span>
                         <UnifiedBadge variant="base" style="outline" className="capitalize">
                           {planLabel} • {tierLabel}
                         </UnifiedBadge>

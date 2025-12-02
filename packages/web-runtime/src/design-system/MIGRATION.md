@@ -306,3 +306,182 @@ className={spaceX.compact}      // space-x-2
 | `hover:bg-accent/10` | `hoverBg.default` |
 | `border border-border` | `border.default` |
 | `border-b border-border` | `borderBottom.default` |
+
+---
+
+## New V2 Utilities (December 2025)
+
+### Directional Margins
+
+```tsx
+// ❌ OLD - Inline Tailwind
+className="my-4"
+className="mx-auto"
+className="mr-2"
+className="ml-auto"
+
+// ✅ NEW - Design system utilities
+import { marginY, marginX, marginRight, marginLeft } from '@heyclaude/web-runtime/design-system';
+
+className={marginY.comfortable}    // my-4
+className={marginX.auto}           // mx-auto
+className={marginRight.compact}    // mr-2
+className={marginLeft.auto}        // ml-auto
+```
+
+| Inline Pattern | Design System Utility | Value |
+|----------------|----------------------|-------|
+| `my-0` | `marginY.none` | my-0 |
+| `my-1` | `marginY.tight` | my-1 |
+| `my-2` | `marginY.compact` | my-2 |
+| `my-4` | `marginY.comfortable` | my-4 |
+| `my-6` | `marginY.relaxed` | my-6 |
+| `mx-auto` | `marginX.auto` | mx-auto |
+| `mx-2` | `marginX.compact` | mx-2 |
+| `mx-4` | `marginX.comfortable` | mx-4 |
+| `mr-1` | `marginRight.tight` | mr-1 |
+| `mr-2` | `marginRight.compact` | mr-2 |
+| `mr-auto` | `marginRight.auto` | mr-auto |
+| `ml-1` | `marginLeft.tight` | ml-1 |
+| `ml-2` | `marginLeft.compact` | ml-2 |
+| `ml-auto` | `marginLeft.auto` | ml-auto |
+
+### Directional Padding
+
+```tsx
+// ❌ OLD - Inline Tailwind
+className="pt-4"
+className="pb-8"
+className="pl-6"
+className="pr-4"
+
+// ✅ NEW - Design system utilities
+import { paddingTop, paddingBottom, paddingLeft, paddingRight } from '@heyclaude/web-runtime/design-system';
+
+className={paddingTop.comfortable}    // pt-4
+className={paddingBottom.loose}       // pb-8
+className={paddingLeft.relaxed}       // pl-6
+className={paddingRight.comfortable}  // pr-4
+```
+
+| Inline Pattern | Design System Utility | Value |
+|----------------|----------------------|-------|
+| `pt-2` | `paddingTop.compact` | pt-2 |
+| `pt-4` | `paddingTop.comfortable` | pt-4 |
+| `pt-6` | `paddingTop.relaxed` | pt-6 |
+| `pt-8` | `paddingTop.loose` | pt-8 |
+| `pb-2` | `paddingBottom.compact` | pb-2 |
+| `pb-4` | `paddingBottom.comfortable` | pb-4 |
+| `pb-6` | `paddingBottom.relaxed` | pb-6 |
+| `pb-8` | `paddingBottom.loose` | pb-8 |
+| `pl-2` | `paddingLeft.compact` | pl-2 |
+| `pl-4` | `paddingLeft.comfortable` | pl-4 |
+| `pr-2` | `paddingRight.compact` | pr-2 |
+| `pr-4` | `paddingRight.comfortable` | pr-4 |
+
+### Grid Column/Row Span
+
+```tsx
+// ❌ OLD - Inline Tailwind
+className="col-span-2"
+className="col-span-full"
+className="row-span-3"
+
+// ✅ NEW - Design system utilities
+import { colSpan, rowSpan } from '@heyclaude/web-runtime/design-system';
+
+className={colSpan['2']}     // col-span-2
+className={colSpan.full}     // col-span-full
+className={rowSpan['3']}     // row-span-3
+```
+
+| Inline Pattern | Design System Utility |
+|----------------|----------------------|
+| `col-span-1` | `colSpan['1']` |
+| `col-span-2` | `colSpan['2']` |
+| `col-span-3` | `colSpan['3']` |
+| `col-span-full` | `colSpan.full` |
+| `row-span-2` | `rowSpan['2']` |
+| `row-span-full` | `rowSpan.full` |
+
+### Max-Height Utilities
+
+```tsx
+// ❌ OLD - Inline Tailwind
+className="max-h-screen"
+className="max-h-[80vh]"
+className="max-h-[300px]"
+
+// ✅ NEW - Design system utilities
+import { maxHeight } from '@heyclaude/web-runtime/design-system';
+
+className={maxHeight.screen}     // max-h-screen
+className={maxHeight.modal}      // max-h-[80vh]
+className={maxHeight.dropdown}   // max-h-[300px]
+```
+
+| Inline Pattern | Design System Utility | Semantic Use |
+|----------------|----------------------|--------------|
+| `max-h-screen` | `maxHeight.screen` | Full viewport |
+| `max-h-full` | `maxHeight.full` | Full parent |
+| `max-h-[80vh]` | `maxHeight.modal` | Modal dialogs |
+| `max-h-[400px]` | `maxHeight.popover` | Popovers |
+| `max-h-[300px]` | `maxHeight.dropdown` | Dropdown menus |
+| `max-h-[calc(100vh-6rem)]` | `maxHeight.sidebar` | Sidebars |
+
+### Outline Utilities
+
+```tsx
+// ❌ OLD - Inline Tailwind
+className="outline-none"
+className="outline outline-2 outline-offset-2"
+
+// ✅ NEW - Design system utilities
+import { outline, outlineWidth, outlineOffset, outlinePattern } from '@heyclaude/web-runtime/design-system';
+
+className={outline.none}                  // outline-none
+className={outlinePattern.focusRing}      // outline outline-2 outline-offset-2 outline-ring
+className={outlinePattern.selected}       // outline outline-2 outline-accent
+```
+
+| Inline Pattern | Design System Utility |
+|----------------|----------------------|
+| `outline-none` | `outline.none` |
+| `outline` | `outline.default` |
+| `outline-dashed` | `outline.dashed` |
+| `outline-2` | `outlineWidth[2]` |
+| `outline-offset-2` | `outlineOffset[2]` |
+
+---
+
+## V1 → V2 Utility Mapping Reference
+
+This table maps V1 (legacy) patterns from `@heyclaude/web-runtime/ui` to V2 design system utilities.
+
+### From DIMENSIONS (constants.ts)
+
+| V1 Constant | V2 Utility | Notes |
+|-------------|-----------|-------|
+| `DIMENSIONS.MODAL_MAX` | `maxHeight.modal` | max-h-[80vh] |
+| `DIMENSIONS.DROPDOWN_MAX` | `maxHeight.dropdown` | max-h-[300px] |
+| `DIMENSIONS.POPOVER_MAX` | `maxHeight.popover` | max-h-[400px] |
+| `DIMENSIONS.SIDEBAR_MAX` | `maxHeight.sidebar` | max-h-[calc(100vh-6rem)] |
+| `DIMENSIONS.NOTIFICATION_MAX` | `maxHeight.notification` | max-h-[calc(80vh-8rem)] |
+
+### From RESPONSIVE_PATTERNS (constants.ts)
+
+| V1 Constant | V2 Utility |
+|-------------|-----------|
+| `RESPONSIVE_PATTERNS.FLEX_COL_SM_ROW` | `responsive.smRowGap` |
+| `RESPONSIVE_PATTERNS.FLEX_COL_MD_ROW` | `responsive.mdRowGap` |
+| `RESPONSIVE_PATTERNS.FLEX_COL_LG_ROW` | `responsive.lgRowGap` |
+| `RESPONSIVE_PATTERNS.GRID_RESPONSIVE_1_2` | `grid.responsive2` |
+| `RESPONSIVE_PATTERNS.GRID_RESPONSIVE_1_2_3` | `grid.responsive3` |
+
+### From ANIMATION_CONSTANTS (constants.ts)
+
+| V1 Constant | V2 Utility |
+|-------------|-----------|
+| `ANIMATION_CONSTANTS.CSS_TRANSITION_FAST` | `transition.fast` |
+| `ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT` | `transition.default` |
+| `ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW` | `transition.slow` |

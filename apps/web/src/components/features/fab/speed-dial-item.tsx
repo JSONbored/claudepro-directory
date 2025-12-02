@@ -17,7 +17,11 @@
 'use client';
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { iconSize } from '@heyclaude/web-runtime/design-system';
+import { iconSize , shadow , shadowColor, backdrop , radius, borderColor,
+  justify,
+  textColor,
+  alignItems,
+} from '@heyclaude/web-runtime/design-system';
 import type { SpeedDialAction } from '@heyclaude/web-runtime/types/component.types';
 import { motion } from 'motion/react';
 import { NotificationBadge } from '@/src/components/features/notifications/notification-badge';
@@ -65,7 +69,7 @@ export function SpeedDialItem({
         damping: 17,
         delay,
       }}
-      className={`relative flex h-12 w-12 items-center justify-center rounded-full border border-border/50 bg-card/95 text-foreground shadow-black/10 shadow-lg backdrop-blur-md will-change-transform hover:border-accent/50 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background dark:shadow-black/30 ${visibilityClasses}`}
+      className={`relative flex ${iconSize['3xl']} ${alignItems.center} ${justify.center} ${radius.full} border ${borderColor['border/50']} bg-card/95 ${textColor.foreground} ${shadowColor.black} ${shadow.lg} ${backdrop.md} will-change-transform hover:border-accent/50 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background dark:${shadowColor.blackStrong} ${visibilityClasses}`}
       aria-label={label}
       type="button"
     >

@@ -16,7 +16,25 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { isValidCategory, logClientWarning, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, stack, spaceY, muted, weight, radius ,size , padding  } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  cluster,
+  gap,
+  iconSize,
+  border,
+  items as alignItems,
+  marginBottom,
+  marginTop,
+  muted,
+  padding,
+  radius,
+  size,
+  spaceY,
+  stack,
+  textColor,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -225,23 +243,23 @@ export function CollectionItemManager({
   return (
     <div className={spaceY.comfortable}>
       {/* Add Item Section */}
-      <div className={'flex items-end ${gap.compact} pb-4'}>
+      <div className={`flex ${alignItems.end} ${gap.compact} pb-4`}>
         <div className="flex-1">
-          <div className={'mb-2 block ${weight.medium} ${size.sm}'}>Add Bookmark to Collection</div>
+          <div className={`${marginBottom.tight} block ${weight.medium} ${size.sm}`}>Add Bookmark to Collection</div>
           <Select value={selectedBookmarkId} onValueChange={setSelectedBookmarkId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a bookmark to add" />
             </SelectTrigger>
             <SelectContent>
               {availableToAdd.length === 0 ? (
-                <div className={`p-2 ${muted.sm}`}>
+                <div className={`${padding.tight} ${muted.sm}`}>
                   All bookmarks have been added
                 </div>
               ) : (
                 availableToAdd.map((bookmark) => (
                   <SelectItem key={bookmark.id} value={bookmark.id}>
                     <div className={cluster.compact}>
-                      <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
+                      <UnifiedBadge variant="base" style="outline" className={`${size.xs} capitalize`}>
                         {bookmark.content_type}
                       </UnifiedBadge>
                       {bookmark.content_slug}
@@ -266,7 +284,7 @@ export function CollectionItemManager({
 
       {/* Items List */}
       {items.length === 0 ? (
-        <div className={`${radius.lg} border border-dashed ${padding.ySection} text-center`}>
+        <div className={`${radius.lg} ${border.dashed} ${padding.ySection} text-center`}>
           <p className={muted.default}>
             No items in this collection yet. Add bookmarks above to get started.
           </p>
@@ -276,7 +294,7 @@ export function CollectionItemManager({
           {items.map((item: CollectionItem, index: number) => (
             <div
               key={item.id}
-              className={`${cluster.default} ${radius.lg} border bg-card ${padding.compact} transition-colors hover:bg-accent/50`}
+              className={`${cluster.default} ${radius.lg} border ${bgColor.card} ${padding.compact} ${transition.colors} hover:bg-accent/50`}
             >
               {/* Order Controls */}
               <div className={stack.tight}>
@@ -310,12 +328,12 @@ export function CollectionItemManager({
               {/* Content Info */}
               <div className="flex-1">
                 <div className={cluster.compact}>
-                  <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
+                  <UnifiedBadge variant="base" style="outline" className={`${size.xs} capitalize`}>
                     {item.content_type}
                   </UnifiedBadge>
                   <span className={`${weight.medium} ${size.sm}`}>{item.content_slug}</span>
                 </div>
-                {item.notes && <p className={'mt-1 ${muted.default} ${size.xs}'}>{item.notes}</p>}
+                {item.notes && <p className={`${marginTop.tight} ${muted.default} ${size.xs}`}>{item.notes}</p>}
               </div>
 
               {/* Actions */}
@@ -338,7 +356,7 @@ export function CollectionItemManager({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${iconSize.xl} ${padding.none} text-destructive hover:text-destructive`}
+                  className={`${iconSize.xl} ${padding.none} ${textColor.destructive} hover:text-destructive`}
                   onClick={() => handleRemove(item.id)}
                   disabled={isPending}
                   aria-label="Remove item"

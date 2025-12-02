@@ -20,7 +20,22 @@
  */
 
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
-import { iconSize, iconLeading, marginTop, muted, weight ,size , padding } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  flexDir,
+  iconLeading,
+  iconSize,
+  alignItems,
+  leading,
+  marginTop,
+  muted,
+  padding,
+  radius,
+  size,
+  textColor,
+  weight,
+  dropdownWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   Activity,
@@ -29,7 +44,7 @@ import {
   Settings,
   User as UserIcon,
 } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -110,7 +125,7 @@ export function UserMenu({ className }: UserMenuProps) {
   // Loading state
   if (loading) {
     return (
-      <div className={`flex items-center ${className}`}>
+      <div className={`flex ${alignItems.center} ${className}`}>
         <Skeleton size="lg" width="lg" rounded="full" className={iconSize.xl} />
       </div>
     );
@@ -124,7 +139,7 @@ export function UserMenu({ className }: UserMenuProps) {
           asChild={true}
           variant="ghost"
           size="sm"
-          className={`border-accent/20 bg-accent/10 ${weight.medium} text-accent ${size.xs} hover:bg-accent hover:text-white`}
+          className={`border-accent/20 ${bgColor['accent/10']} ${weight.medium} ${textColor.accent} ${size.xs} hover:bg-accent hover:text-white`}
         >
           <Link href="/login" aria-label="Get started - Sign in with GitHub">
             <UserIcon className={iconLeading.xs} />
@@ -159,12 +174,12 @@ export function UserMenu({ className }: UserMenuProps) {
           >
             <Button
               variant="ghost"
-              className={`relative h-8 w-8 rounded-full ${padding.none} hover:ring-2 hover:ring-accent/30`}
+              className={`relative ${iconSize.xl} ${radius.full} ${padding.none} hover:ring-2 hover:ring-accent/30`}
               aria-label={`User menu for ${displayName}`}
             >
               <Avatar className={iconSize.xl}>
                 {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName || 'User avatar'} />}
-                <AvatarFallback className={`bg-accent/20 ${weight.semibold} text-accent ${size.sm}`}>
+                <AvatarFallback className={`bg-accent/20 ${weight.semibold} ${textColor.accent} ${size.sm}`}>
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -173,15 +188,15 @@ export function UserMenu({ className }: UserMenuProps) {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
-          className={`${DIMENSIONS.DROPDOWN_SM} sm:${DIMENSIONS.DROPDOWN_MD}`}
+          className={`${dropdownWidth.sm} sm:${dropdownWidth.md}`}
           align="end"
           forceMount={true}
         >
           {/* User Info */}
           <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col">
-              <p className={`${weight.medium} ${size.sm} leading-none`}>{displayName}</p>
-              <p className={`${marginTop.tight} ${muted.default} ${size.xs} leading-none`}>{user.email}</p>
+            <div className={`flex ${flexDir.col}`}>
+              <p className={`${weight.medium} ${size.sm} ${leading.none}`}>{displayName}</p>
+              <p className={`${marginTop.tight} ${muted.default} ${size.xs} ${leading.none}`}>{user.email}</p>
             </div>
           </DropdownMenuLabel>
 
@@ -215,7 +230,7 @@ export function UserMenu({ className }: UserMenuProps) {
           <DropdownMenuItem
             onClick={handleSignOut}
             disabled={signingOut}
-            className="cursor-pointer text-destructive focus:text-destructive"
+            className={`cursor-pointer ${textColor.destructive} focus:text-destructive`}
           >
             <LogOut className={iconLeading.sm} />
             <span>{signingOut ? 'Signing out...' : 'Sign out'}</span>

@@ -26,12 +26,14 @@
  *
  * @example With custom styling
  * ```tsx
+ * import { radius } from '@heyclaude/web-runtime/design-system';
+ * 
  * <ToggleField
  *   label="Email notifications"
  *   description="Send me an email when someone follows me"
  *   checked={followEmail}
  *   onCheckedChange={setFollowEmail}
- *   className="p-4 border rounded-lg"
+ *   className={`p-4 border ${radius.lg}`}
  *   labelClassName="font-semibold"
  * />
  * ```
@@ -42,7 +44,7 @@
  * <div className="flex items-center justify-between">
  *   <div>
  *     <Label>Public profile</Label>
- *     <p className="text-xs text-muted-foreground mt-1">
+ *     <p className={`${size.xs} text-muted-foreground ${marginTop.tight}`}>
  *       Allow others to view your profile
  *     </p>
  *   </div>
@@ -72,6 +74,8 @@
 
 import { useId } from 'react';
 import { cn } from '../../utils.ts';
+import { marginTop } from '../../../design-system/styles/layout.ts';
+import { size } from '../../../design-system/styles/typography.ts';
 import { Label } from '../label.tsx';
 import { Switch } from '../switch.tsx';
 
@@ -134,13 +138,13 @@ export function ToggleField({
         <Label
           htmlFor={id}
           className={cn(
-            'font-medium text-base',
+            `font-medium ${size.base}`,
             disabled ? 'cursor-not-allowed' : 'cursor-pointer'
           )}
         >
           {label}
         </Label>
-        {description && <p className="mt-1 text-muted-foreground text-xs">{description}</p>}
+        {description && <p className={`${marginTop.tight} text-muted-foreground ${size.xs}`}>{description}</p>}
       </div>
 
       {/* Switch */}

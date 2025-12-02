@@ -35,8 +35,8 @@ import {
   Calendar,
   FileText,
   Handshake,
+  type IconComponent,
   Layers,
-  type LucideIcon,
   MessageSquare,
   Plug,
   PlusCircle,
@@ -52,8 +52,8 @@ export interface NavigationLink {
   label: string;
   /** URL path or href */
   href: string;
-  /** Optional Lucide icon component */
-  icon?: LucideIcon;
+  /** Optional icon component */
+  icon?: IconComponent;
   /** Optional description for tooltips/dropdowns */
   description?: string;
   /** Whether to show a "new" badge */

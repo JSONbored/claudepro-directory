@@ -16,6 +16,15 @@ import {
   padding,
   minHeight,
   maxWidth,
+  backdrop,
+  radius,
+  flexWrap,
+  overflow,
+  tracking,
+  bgColor,
+  justify,
+  textColor,
+  squareSize,
 } from '@heyclaude/web-runtime/design-system';
 import type {
   ContentListServerProps,
@@ -141,29 +150,29 @@ function ContentHeroSection<T extends DisplayableContent>({
     : [];
 
   return (
-    <section className="relative overflow-hidden" aria-labelledby={pageTitleId}>
+    <section className={`relative ${overflow.hidden}`} aria-labelledby={pageTitleId}>
       {/* Ambient background effects */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-accent/5 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-muted/20 blur-3xl" />
+      <div className={`pointer-events-none absolute inset-0 -z-10 ${overflow.hidden}`}>
+        <div className={`absolute -left-40 -top-40 ${squareSize.heroLg} ${radius.full} ${bgColor['accent/5']} blur-3xl`} />
+        <div className={`absolute -bottom-40 -right-40 ${squareSize.heroXl} ${radius.full} ${bgColor['primary/5']} blur-3xl`} />
+        <div className={`absolute left-1/2 top-1/3 ${squareSize.hero} -translate-x-1/2 ${radius.full} ${bgColor['muted/20']} blur-3xl`} />
       </div>
 
       <div className={emptyCard.default}>
         <div className={`container mx-auto ${padding.xDefault} ${padding.yHero} md:py-20`}>
           <div className={`mx-auto ${maxWidth['4xl']}`}>
             {/* Animated icon container */}
-            <div className={`${marginBottom.comfortable} flex justify-center`}>
+            <div className={`${marginBottom.comfortable} flex ${justify.center}`}>
               <div className="relative">
-                <div className="absolute inset-0 animate-pulse rounded-full bg-accent/20 blur-xl" />
+                <div className={`absolute inset-0 animate-pulse ${radius.full} ${bgColor['accent/20']} blur-xl`} />
                 <div
-                  className={`relative rounded-full bg-gradient-to-br from-accent/20 to-primary/20 ${padding.default} backdrop-blur-sm`}
+                  className={`relative ${radius.full} bg-gradient-to-br from-accent/20 to-primary/20 ${padding.default} ${backdrop.sm}`}
                   aria-hidden="true"
                 >
                   {(() => {
                     const IconComponent =
                       ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
-                    return <IconComponent className={`${iconSize.xl} text-primary`} />;
+                    return <IconComponent className={`${iconSize.xl} ${textColor.primary}`} />;
                   })()}
                 </div>
               </div>
@@ -172,7 +181,7 @@ function ContentHeroSection<T extends DisplayableContent>({
             {/* Title with gradient */}
             <h1
               id={pageTitleId}
-              className={`${marginBottom.default} bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text ${weight.bold} ${size['4xl']} tracking-tight text-transparent sm:text-5xl`}
+              className={`${marginBottom.default} bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text ${weight.bold} ${size['4xl']} ${tracking.tight} ${textColor.transparent} sm:${size['5xl']}`}
             >
               {title}
             </h1>
@@ -184,7 +193,7 @@ function ContentHeroSection<T extends DisplayableContent>({
 
             {/* Badges */}
             <ul
-              className={`${marginTop.comfortable} ${marginBottom.comfortable} flex list-none flex-wrap justify-center ${gap.compact}`}
+              className={`${marginTop.comfortable} ${marginBottom.comfortable} flex list-none ${flexWrap.wrap} ${justify.center} ${gap.compact}`}
             >
               {displayBadges.map((badge, idx) => (
                 <li key={badge.text || `badge-${idx}`}>
@@ -259,7 +268,7 @@ function ContentSearchSkeleton() {
   return (
     <div className={`w-full ${spaceY.comfortable}`}>
       <Skeleton size="xl" width="3xl" />
-      <div className={`flex justify-end ${gap.compact}`}>
+      <div className={`flex ${justify.end} ${gap.compact}`}>
         <Skeleton size="lg" width="sm" />
         <Skeleton size="lg" width="xs" />
       </div>
@@ -300,7 +309,7 @@ export function ContentListServer<T extends DisplayableContent>({
   category,
 }: ContentListServerProps<T>) {
   return (
-    <div className={`${minHeight.screen} bg-background`}>
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Hero Section - Rendered immediately on server */}
       <ContentHeroSection
         title={title}
@@ -308,7 +317,7 @@ export function ContentListServer<T extends DisplayableContent>({
         icon={icon}
         items={items}
         badges={badges}
-        category={type}
+        category={category ?? type}
       />
 
       <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`} aria-label={`${title} content and search`}>

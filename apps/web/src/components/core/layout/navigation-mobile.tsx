@@ -7,14 +7,23 @@
 'use client';
 
 import { getContactChannels } from '@heyclaude/web-runtime/core';
-import { grid, iconSize, absolute, hoverBg, transition, border, radius, spaceY, muted, srOnly, weight ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
+import { grid, iconSize, absolute, hoverBg, transition, border, borderLeft, borderTop, radius, spaceY, muted, srOnly, weight, size, padding, gap, borderColor,
+  flexDir,
+  overflow,
+  cursor,
+  bgColor,
+  justify,
+  textColor,
+  alignItems,
+  flexGrow,
+  height,
+  sidebarWidth,
+  marginTop,
+  skeletonSize,
+} from '@heyclaude/web-runtime/design-system';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
-import {
-  ANIMATION_CONSTANTS,
-  DIMENSIONS,
-} from '@heyclaude/web-runtime/ui';
-import { motion } from 'motion/react';
+import { motion, type PanInfo } from 'motion/react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -43,7 +52,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative ${padding.xTight} ${padding.yMicro} ${size.xs} ${weight.medium} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} no-underline ${
+    className: `group relative ${padding.xTight} ${padding.yMicro} ${size.xs} ${weight.medium} ${transition.default} no-underline ${
       active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground'
     } ${className}`,
     ...(active && { 'aria-current': 'page' as const }),
@@ -58,7 +67,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       <span className="relative inline-block">
         {children}
         <span
-          className={`${absolute.bottomLeft} ${DIMENSIONS.UNDERLINE} bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} ${
+          className={`${absolute.bottomLeft} ${height.underline} ${bgColor.accent} ${transition.slow} ${
             active ? 'w-full' : 'w-0 group-hover:w-full'
           }`}
           aria-hidden="true"
@@ -113,14 +122,14 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
       </SheetTrigger>
       <SheetContent
         side="right"
-        className={`w-full border-border/50 border-l sm:${DIMENSIONS.SIDEBAR_LG}`}
+        className={`w-full ${borderLeft.light} sm:${sidebarWidth.lg}`}
       >
         {/* Swipe-to-close indicator */}
         <motion.div
-          className={`${absolute.topHalf} -translate-x-1/2 left-1/2 h-1 w-12 cursor-grab rounded-full bg-border/50 active:cursor-grabbing`}
+          className={`${absolute.topHalf} -translate-x-1/2 left-1/2 ${skeletonSize.handle} ${cursor.grab} ${radius.full} bg-border/50 active:cursor-grabbing`}
           drag="y"
           dragConstraints={{ top: 0, bottom: 50 }}
-          onDragEnd={(_, info) => {
+          onDragEnd={(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
             if (info.offset.y > 100) onOpenChange(false);
           }}
           whileDrag={{ scale: 1.2, backgroundColor: 'hsl(var(--accent))' }}
@@ -128,10 +137,10 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
         />
 
         <SheetTitle className={srOnly.default}>Navigation Menu</SheetTitle>
-        <div className={'flex h-full flex-col pt-8'}>
+        <div className={`flex h-full ${flexDir.col} pt-8`}>
           {/* Header with Motion.dev fade-in */}
           <motion.div
-            className={'flex items-center ${padding.xMicro} pb-8'}
+            className={`flex ${alignItems.center} ${padding.xMicro} pb-8`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
@@ -140,8 +149,8 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
           </motion.div>
 
           {/* Main Navigation - Staggered animations */}
-          <div className={'flex-1 overflow-y-auto'}>
-            <nav className={'${spaceY.default} ${padding.xCompact}'} aria-label="Primary navigation">
+          <div className={`flex-1 ${overflow.yAuto}`}>
+            <nav className={`${spaceY.default} ${padding.xCompact}`} aria-label="Primary navigation">
               {/* Action Links (Submit Config) - Prominent position */}
               {ACTION_LINKS.map((link, index) => {
                 const ActionIcon = link.icon;
@@ -155,9 +164,9 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                     <Link
                       href={link.href}
                       onClick={() => onOpenChange(false)}
-                      className={`flex w-full items-center justify-center rounded-xl border-2 border-accent bg-accent ${padding.xMedium} ${padding.yDefault} ${weight.semibold} text-accent-foreground ${size.base} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/90 active:scale-[0.97]`}
+                      className={`flex w-full ${alignItems.center} ${justify.center} ${radius.xl} border-2 ${borderColor.accent} ${bgColor.accent} ${padding.xMedium} ${padding.yDefault} ${weight.semibold} ${textColor.accentForeground} ${size.base} ${transition.default} hover:bg-accent/90 active:scale-[0.97]`}
                     >
-                      {ActionIcon && <ActionIcon className={`mr-2 ${iconSize.md} shrink-0`} />}
+                      {ActionIcon && <ActionIcon className={`mr-2 ${iconSize.md} ${flexGrow.shrink0}`} />}
                       <span>{link.label}</span>
                     </Link>
                   </motion.div>
@@ -179,9 +188,9 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                       href={link.href}
                       isActive={isActive}
                       onClick={() => onOpenChange(false)}
-                      className={`flex w-full items-center ${radius.xl} ${border.default} bg-card ${padding.xMedium} ${padding.yDefault} ${weight.medium} ${size.base} ${transition.default} hover:border-accent/50 ${hoverBg.default} active:scale-[0.97]`}
+                      className={`flex w-full ${alignItems.center} ${radius.xl} ${border.default} ${bgColor.card} ${padding.xMedium} ${padding.yDefault} ${weight.medium} ${size.base} ${transition.default} hover:border-accent/50 ${hoverBg.default} active:scale-[0.97]`}
                     >
-                      {IconComponent && <IconComponent className={`mr-3 ${iconSize.md} shrink-0`} />}
+                      {IconComponent && <IconComponent className={`mr-3 ${iconSize.md} ${flexGrow.shrink0}`} />}
                       <span>{link.label}</span>
                       {link.isNew && (
                         <UnifiedBadge
@@ -197,7 +206,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
 
               {/* Secondary Navigation */}
               <nav
-                className={'mt-4 border-border/30 border-t pt-6'}
+                className={`${marginTop.default} ${borderTop.faint} pt-6`}
                 aria-label="Secondary navigation"
               >
                 <div className={spaceY.default}>
@@ -216,9 +225,9 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                           href={link.href}
                           isActive={isActive}
                           onClick={() => onOpenChange(false)}
-                          className={`flex w-full items-center rounded-xl border border-border/40 bg-card/50 ${padding.xMedium} ${padding.yDefault} ${weight.medium} ${muted.sm} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/30 hover:bg-accent/5 hover:text-foreground active:scale-[0.98]`}
+                          className={`flex w-full ${alignItems.center} ${radius.xl} ${border.subtle} ${bgColor['card/50']} ${padding.xMedium} ${padding.yDefault} ${weight.medium} ${muted.sm} ${transition.default} hover:border-accent/30 hover:bg-accent/5 hover:text-foreground active:scale-[0.98]`}
                         >
-                          {IconComponent && <IconComponent className={`mr-3 ${iconSize.sm} shrink-0`} />}
+                          {IconComponent && <IconComponent className={`mr-3 ${iconSize.sm} ${flexGrow.shrink0}`} />}
                           <span>{link.label}</span>
                         </NavLink>
                       </motion.div>
@@ -231,7 +240,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
 
           {/* Footer with spring animation on tap */}
           <motion.div
-            className={'border-border/30 border-t pt-6 pb-6'}
+            className={`${borderTop.faint} pt-6 pb-6`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -255,7 +264,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                   <Button
                     variant="outline"
                     size="lg"
-                    className={`h-20 w-full rounded-2xl border-border/40 bg-card hover:bg-${item.color}/10 hover:border-${item.color}/30 ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+                    className={`h-20 w-full ${radius['2xl']} ${borderColor['border/40']} ${bgColor.card} hover:bg-${item.color}/10 hover:border-${item.color}/30 ${transition.default}`}
                     onClick={item.onClick}
                     aria-label={item.label}
                   >

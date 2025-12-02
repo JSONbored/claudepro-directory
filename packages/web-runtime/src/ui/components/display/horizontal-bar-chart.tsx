@@ -35,6 +35,7 @@
 
 import type { ReactNode } from 'react';
 import { cn } from '../../utils.ts';
+import { size } from '../../../design-system/styles/typography.ts';
 
 /** Data point for horizontal bar chart */
 export interface HorizontalBarChartDataPoint {
@@ -98,7 +99,7 @@ export function HorizontalBarChart({
 
   return (
     <div className={cn('w-full', className)} role="img" aria-label={ariaLabel}>
-      <svg width="100%" height={height} className="text-xs" style={{ overflow: 'visible' }}>
+      <svg width="100%" height={height} className={size.xs} style={{ overflow: 'visible' }}>
         {data.map((point, index) => {
           const yPosition = chartPadding + index * barHeight;
           const barWidthPercent = (point.value / maxValue) * 100;
@@ -111,7 +112,7 @@ export function HorizontalBarChart({
                 y={yPosition + effectiveBarHeight / 2}
                 textAnchor="end"
                 dominantBaseline="middle"
-                className="fill-muted-foreground text-xs"
+                className={`fill-muted-foreground ${size.xs}`}
                 aria-label={`${point.label}: ${point.value}`}
               >
                 {point.label}
@@ -146,7 +147,7 @@ export function HorizontalBarChart({
                   y={yPosition + effectiveBarHeight / 2}
                   textAnchor="start"
                   dominantBaseline="middle"
-                  className="fill-muted-foreground text-xs"
+                  className={`fill-muted-foreground ${size.xs}`}
                 >
                   {point.formattedLabel}
                 </text>

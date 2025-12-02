@@ -154,15 +154,15 @@
     "eslint-plugin-unicorn": "^62.0.0",
     "eslint-plugin-vitest": "^0.5.4",
     "jsdom": "^27.2.0",
-    "knip": "^5.70.2",
+    "knip": "^5.71.0",
     "lefthook": "^2.0.4",
     "ora": "^9.0.0",
-    "react": "^18.3.1",
-    "react-dom": "18.3.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "server-only": "^0.0.1",
     "tailwindcss": "^4.1.17",
     "ts-prune": "^0.10.3",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "turbo": "^2.6.1",
     "typescript": "5.9.3",
     "typescript-eslint": "^8.48.0",
@@ -177,12 +177,13 @@
       "js-yaml": ">=4.1.1",
       "rimraf": ">=6.0.0",
       "inflight": ">=2.0.0",
-      "@types/react": "19.2.5",
+      "@types/react": "19.2.7",
       "@types/react-dom": "19.2.3",
       "undici@>=4.5.0 <5.28.5": ">=5.28.5",
       "esbuild@<=0.24.2": ">=0.25.0",
       "undici@<5.29.0": ">=5.29.0",
-      "browserslist": "4.24.4"
+      "browserslist": "4.24.4",
+      "path-to-regexp": ">=6.3.0"
     }
   }
 }

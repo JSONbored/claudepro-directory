@@ -1,6 +1,9 @@
 'use client';
 
 import { cn } from '../../utils.ts';
+import { padding, squareSize } from '../../../design-system/styles/layout.ts';
+import { size } from '../../../design-system/styles/typography.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
 import { type MotionProps, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -15,7 +18,7 @@ export const AnimatedSpan = ({ children, delay = 0, className, ...props }: Anima
     initial={{ opacity: 0, y: -5 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.3, delay: delay / 1000 }}
-    className={cn('grid font-normal text-sm tracking-tight', className)}
+    className={cn(`grid font-normal ${size.sm} tracking-tight`, className)}
     {...props}
   >
     {children}
@@ -78,7 +81,7 @@ export const TypingAnimation = ({
   return (
     <MotionComponent
       ref={elementRef}
-      className={cn('font-normal text-sm tracking-tight', className)}
+      className={cn(`font-normal ${size.sm} tracking-tight`, className)}
       {...props}
     >
       {displayedText}
@@ -95,18 +98,18 @@ export const Terminal = ({ children, className }: TerminalProps) => {
   return (
     <div
       className={cn(
-        'z-0 w-full overflow-hidden rounded-xl border border-border bg-background',
+        `z-0 w-full overflow-hidden ${radius.xl} border border-border bg-background`,
         className
       )}
     >
-      <div className="flex flex-col gap-y-2 border-border border-b p-4">
+      <div className={`flex flex-col gap-y-2 border-border border-b ${padding.default}`}>
         <div className="flex flex-row gap-x-2">
-          <div className="h-2 w-2 rounded-full bg-red-500" />
-          <div className="h-2 w-2 rounded-full bg-yellow-500" />
-          <div className="h-2 w-2 rounded-full bg-green-500" />
+          <div className={`${squareSize.dotMd} ${radius.full} bg-red-500`} />
+          <div className={`${squareSize.dotMd} ${radius.full} bg-yellow-500`} />
+          <div className={`${squareSize.dotMd} ${radius.full} bg-green-500`} />
         </div>
       </div>
-      <pre className="overflow-x-auto p-4">
+      <pre className={`overflow-x-auto ${padding.default}`}>
         <code className="grid gap-y-1">{children}</code>
       </pre>
     </div>

@@ -6,7 +6,7 @@ import { iconSize } from '@heyclaude/web-runtime/design-system';
 import { useLoggedAsync, useButtonSuccess } from '@heyclaude/web-runtime/hooks';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
-import { Check, type LucideIcon } from 'lucide-react';
+import { Check, type IconComponent } from '@heyclaude/web-runtime/icons';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -16,7 +16,7 @@ interface ContentActionButtonProps extends ButtonStyleProps {
   action: (content: string) => Promise<void>;
   label: string;
   successMessage: string;
-  icon: LucideIcon;
+  icon: IconComponent;
   showIcon?: boolean;
   trackAnalytics?: () => Promise<void>;
 }

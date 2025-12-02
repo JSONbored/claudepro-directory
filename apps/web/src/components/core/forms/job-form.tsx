@@ -7,7 +7,24 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { between, iconSize, muted, spaceY, marginTop, weight, radius ,size , padding , gap , row } from '@heyclaude/web-runtime/design-system';
+import {
+  alignItems,
+  between,
+  bgColor,
+  borderColor,
+  cursor,
+  gap,
+  iconSize,
+  marginTop,
+  muted,
+  padding,
+  radius,
+  row,
+  size,
+  spaceY,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import type { CreateJobInput } from '@heyclaude/web-runtime';
 import type { PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data';
@@ -610,7 +627,7 @@ export function JobForm({
             </SelectContent>
           </Select>
           {selectedPlanOption && (
-            <div className={`${marginTop.default} ${radius.lg} border border-border/50 bg-muted/20 ${padding.default} ${size.sm}`}>
+            <div className={`${marginTop.default} ${radius.lg} border ${borderColor['border/50']} ${bgColor['muted/20']} ${padding.default} ${size.sm}`}>
               <div className={between.start}>
                 <div>
                   <div className={weight.semibold}>{PLAN_LABELS[selectedPlanOption.plan]}</div>
@@ -655,14 +672,14 @@ export function JobForm({
               <div className="flex-1">
                 <Label
                   htmlFor={featuredCheckboxId}
-                  className={`flex cursor-pointer items-center ${gap.compact} ${weight.semibold} ${size.sm}`}
+                  className={`flex ${cursor.pointer} ${alignItems.center} ${gap.compact} ${weight.semibold} ${size.sm}`}
                 >
-                  <Star className={`${iconSize.sm} text-orange-500`} />
+                  <Star className={`${iconSize.sm} ${textColor.orange}`} />
                   Make this a Featured Listing
                 </Label>
                 <p className={`${muted.default} ${size.xs} ${marginTop.tight}`}>{featuredUpsellDescription}</p>
                 {featuredUpgradeLabel && (
-                  <p className={`${marginTop.compact} ${weight.medium} text-orange-600 ${size.sm} dark:text-orange-400`}>
+                  <p className={`${marginTop.compact} ${weight.medium} ${textColor.orange} ${size.sm} dark:text-orange-400`}>
                     {featuredUpgradeLabel}
                   </p>
                 )}

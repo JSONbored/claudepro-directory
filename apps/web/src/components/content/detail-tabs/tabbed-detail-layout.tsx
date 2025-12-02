@@ -10,7 +10,11 @@ import type { Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import type { TabbedDetailLayoutProps } from '@heyclaude/web-runtime/types/component.types';
-import { hoverBg, marginTop, spaceY  , padding } from '@heyclaude/web-runtime/design-system';
+import { borderBottom, hoverBg, marginTop, spaceY, padding, zLayer, backdrop, radius, bgColor,
+  justify,
+  borderColor,
+  size,
+} from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
@@ -127,9 +131,9 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
       {/* Sticky tab bar */}
-      <div className={`-mx-4 sticky top-16 z-10 border-b bg-background/95 ${padding.xDefault} backdrop-blur supports-backdrop-filter:bg-background/60`}>
+      <div className={`-mx-4 sticky top-16 ${zLayer.raised} ${borderBottom.default} ${bgColor['background/95']} ${padding.xDefault} ${backdrop.default} supports-backdrop-filter:bg-background/60`}>
         <div className="container mx-auto">
-          <TabsList className={`h-auto w-full justify-start rounded-none border-0 bg-transparent ${padding.none}`}>
+          <TabsList className={`h-auto w-full ${justify.start} ${radius.none} border-0 ${bgColor.transparent} ${padding.none}`}>
             {tabs.map((tab) => {
               const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
               const label = isMobile && tab.mobileLabel ? tab.mobileLabel : tab.label;
@@ -139,11 +143,15 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
                   key={tab.id}
                   value={tab.id}
                   className={cn(
-                    'relative rounded-none border-transparent border-b-2 ${padding.xDefault} ${padding.yCompact}',
+                    'relative border-b-2',
+                    radius.none,
+                    borderColor.transparent,
+                    padding.xDefault,
+                    padding.yCompact,
                     'data-[state=active]:border-primary data-[state=active]:bg-transparent',
                     hoverBg.muted,
                     // Mobile optimization
-                    'text-sm md:text-base',
+                    `${size.sm} md:${size.base}`,
                     'min-w-20 md:min-w-[100px]'
                   )}
                 >

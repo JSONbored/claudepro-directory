@@ -17,7 +17,31 @@
 import type { Database } from '@heyclaude/database-types';
 import { formatTagForDisplay } from '@heyclaude/web-runtime/data';
 import { animation, colors } from '@heyclaude/web-runtime/design-system/tokens';
-import { muted, weight, size, padding , gap , cluster } from '@heyclaude/web-runtime/design-system';
+import {
+  animateDuration,
+  backdrop,
+  bgColor,
+  borderColor,
+  cluster,
+  flexGrow,
+  gap,
+  alignItems,
+  marginBottom,
+  marginTop,
+  muted,
+  opacityLevel,
+  padding,
+  radius,
+  shadow,
+  size,
+  transition,
+  weight,
+  zLayer,
+  flexWrap,
+  overflow,
+  justify,
+  squareSize,
+} from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
 import Link from 'next/link';
@@ -74,15 +98,15 @@ function getTagSizeClass(count: number, maxCount: number): {
   const ratio = maxCount > 0 ? count / maxCount : 0;
 
   if (ratio > 0.7) {
-    return { fontSize: 'text-lg', padding: `${padding.xDefault} ${padding.yTight}`, fontWeight: weight.bold };
+    return { fontSize: size.lg, padding: `${padding.xDefault} ${padding.yTight}`, fontWeight: weight.bold };
   }
   if (ratio > 0.4) {
-    return { fontSize: 'text-base', padding: `${padding.xCompact} ${padding.ySnug}`, fontWeight: weight.semibold };
+    return { fontSize: size.base, padding: `${padding.xCompact} ${padding.ySnug}`, fontWeight: weight.semibold };
   }
   if (ratio > 0.2) {
-    return { fontSize: 'text-sm', padding: `${padding.xTight} ${padding.yMicro}`, fontWeight: weight.medium };
+    return { fontSize: size.sm, padding: `${padding.xTight} ${padding.yMicro}`, fontWeight: weight.medium };
   }
-  return { fontSize: 'text-xs', padding: `${padding.xTight} ${padding.yHair}`, fontWeight: weight.medium };
+  return { fontSize: size.xs, padding: `${padding.xTight} ${padding.yHair}`, fontWeight: weight.medium };
 }
 
 /**
@@ -193,12 +217,12 @@ function AnimatedTag({
       <Link
         href={`/tags/${encodeURIComponent(tag.tag)}`}
         className={cn(
-          'relative block overflow-hidden rounded-full border transition-all duration-300',
+          `relative block ${overflow.hidden} ${radius.full} border ${transition.all} ${animateDuration.slow}`,
           sizeClass.fontSize,
           sizeClass.padding,
           sizeClass.fontWeight,
-          'border-border/30 bg-background/80 backdrop-blur-sm',
-          'hover:border-accent/50 hover:shadow-lg',
+          `${borderColor['border/30']} bg-background/80 ${backdrop.sm}`,
+          `hover:border-accent/50 hover:${shadow.lg}`,
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
         )}
         onMouseEnter={() => setIsHovered(true)}
@@ -210,7 +234,7 @@ function AnimatedTag({
       >
         {/* Spotlight effect overlay */}
         <motion.div
-          className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-300"
+          className={`pointer-events-none absolute inset-0 ${radius.full} ${opacityLevel[0]} ${transition.opacity} ${animateDuration.slow}`}
           style={{
             background: spotlightBackground,
             opacity: isHovered ? 0.6 : 0,
@@ -219,7 +243,7 @@ function AnimatedTag({
 
         {/* Gradient border on hover */}
         <motion.div
-          className="pointer-events-none absolute inset-0 rounded-full"
+          className={`pointer-events-none absolute inset-0 ${radius.full}`}
           style={{
             background: `linear-gradient(135deg, ${tagColor.base}, transparent)`,
             opacity: isHovered ? 0.2 : 0,
@@ -229,15 +253,15 @@ function AnimatedTag({
         />
 
         {/* Tag content */}
-        <span className={`relative z-10 ${cluster.snug}`}>
+        <span className={`relative ${zLayer.raised} ${cluster.snug}`}>
           <span
-            className="transition-colors duration-200"
+            className={`transition-colors ${animateDuration.default}`}
             style={{ color: isHovered ? tagColor.base : undefined }}
           >
             {formatTagForDisplay(tag.tag)}
           </span>
           <span
-            className={`rounded-full bg-muted/50 ${padding.xSnug} text-[10px] tabular-nums ${muted.default} transition-colors duration-200`}
+            className={`${radius.full} ${bgColor['muted/50']} ${padding.xSnug} ${size['2xs']} tabular-nums ${muted.default} ${transition.colors} ${animateDuration.default}`}
             style={{
               backgroundColor: isHovered ? `color-mix(in oklch, ${tagColor.base} 15%, transparent)` : undefined,
               color: isHovered ? tagColor.base : undefined,
@@ -265,7 +289,7 @@ export function AnimatedTagCloud({ tags, maxTags = 50, className }: AnimatedTagC
   return (
     <motion.div
       className={cn(
-        'relative flex flex-wrap items-center justify-center ${gap.default}',
+        `relative flex ${flexWrap.wrap} ${alignItems.center} ${justify.center} ${gap.default}`,
         className
       )}
       initial="hidden"
@@ -283,8 +307,8 @@ export function AnimatedTagCloud({ tags, maxTags = 50, className }: AnimatedTagC
     >
       {/* Ambient glow background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-1/4 top-1/4 h-32 w-32 rounded-full bg-accent/5 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 h-40 w-40 rounded-full bg-primary/5 blur-3xl" />
+        <div className={`absolute left-1/4 top-1/4 ${squareSize.avatar4xl} ${radius.full} ${bgColor['accent/5']} blur-3xl`} />
+        <div className={`absolute bottom-1/4 right-1/4 ${squareSize.avatar5xl} ${radius.full} ${bgColor['primary/5']} blur-3xl`} />
       </div>
 
       {displayTags.map((tag, index) => (
@@ -336,10 +360,11 @@ export function PopularTagsMarquee({
   const duplicatedTags = [...displayTags, ...displayTags];
 
   return (
-    <div className={cn('relative overflow-hidden', className)}>
+    <div className={cn(
+  `relative ${overflow.hidden}`, className)}>
       {/* Gradient fade edges */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-background to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-background to-transparent" />
+      <div className={`pointer-events-none absolute inset-y-0 left-0 ${zLayer.raised} w-20 bg-gradient-to-r from-background to-transparent`} />
+      <div className={`pointer-events-none absolute inset-y-0 right-0 ${zLayer.raised} w-20 bg-gradient-to-l from-background to-transparent`} />
 
       <motion.div
         ref={containerRef}
@@ -360,16 +385,23 @@ export function PopularTagsMarquee({
               key={`${tag.tag}-${index}`}
               href={`/tags/${encodeURIComponent(tag.tag)}`}
               className={cn(
-                'flex shrink-0 items-center ${gap.compact} rounded-full border border-border/30',
-                'bg-background/60 ${padding.xDefault} ${padding.yCompact} backdrop-blur-sm',
-                'transition-all duration-200 hover:border-accent/50 hover:shadow-md'
+                `flex border bg-background/60 transition-all hover:border-accent/50 hover:${shadow.md}`,
+                flexGrow.shrink0,
+                alignItems.center,
+                gap.compact,
+                radius.full,
+                borderColor['border/30'],
+                padding.xDefault,
+                padding.yCompact,
+                backdrop.sm,
+                animateDuration.default
               )}
               style={{
                 ['--tag-color' as string]: tagColor.base,
               }}
             >
-              <span className={`${weight.medium} ${size.sm}`}>{formatTagForDisplay(tag.tag)}</span>
-              <span className={`rounded-full bg-muted/50 ${padding.xTight} ${padding.yHair} ${size.xs} tabular-nums ${muted.default}`}>
+              <span className={cn(weight.medium, size.sm)}>{formatTagForDisplay(tag.tag)}</span>
+              <span className={cn(`${radius.full} tabular-nums`, bgColor['muted/50'], padding.xTight, padding.yHair, size.xs, muted.default)}>
                 {tag.count}
               </span>
             </Link>
@@ -397,7 +429,8 @@ export function FeaturedTagsGrid({
   }
 
   return (
-    <div className={cn('grid grid-cols-2 ${gap.comfortable} md:grid-cols-3', className)}>
+    <div className={cn(
+  `grid grid-cols-2 ${gap.comfortable} md:grid-cols-3`, className)}>
       {featuredTags.map((tag, index) => (
         <FeaturedTagCard key={tag.tag} tag={tag} index={index} />
       ))}
@@ -454,25 +487,25 @@ function FeaturedTagCard({ tag, index }: { tag: TagCloudItem; index: number }) {
         <Link
           href={`/tags/${encodeURIComponent(tag.tag)}`}
           className={cn(
-            'group relative block overflow-hidden rounded-xl border border-border/30 ${padding.comfortable}',
-            'bg-gradient-to-br from-background to-muted/20 backdrop-blur-sm',
-            'transition-all duration-300 hover:border-accent/50 hover:shadow-xl'
+            `group relative block ${overflow.hidden} ${radius.xl} border ${borderColor[`border/30`]} ${padding.comfortable}`,
+            `bg-gradient-to-br from-background to-muted/20 ${backdrop.sm}`,
+            `transition-all ${animateDuration.slow} hover:border-accent/50 hover:${shadow.xl}`
           )}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
         >
           {/* Background glow */}
           <div
-            className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            className={`absolute inset-0 ${opacityLevel[0]} ${transition.opacity} ${animateDuration.slow} group-hover:opacity-100`}
             style={{
               background: `radial-gradient(circle at 50% 50%, ${tagColor.glow}, transparent 70%)`,
             }}
           />
 
           {/* Content */}
-          <div className="relative z-10">
+          <div className={`relative ${zLayer.raised}`}>
             <h3
-              className={`mb-2 ${weight.bold} ${size.xl} transition-colors duration-200 group-hover:text-accent`}
+              className={`${marginBottom.tight} ${weight.bold} ${size.xl} ${transition.colors} ${animateDuration.default} group-hover:text-accent`}
               style={{ color: tagColor.base }}
             >
               {formatTagForDisplay(tag.tag)}
@@ -482,11 +515,11 @@ function FeaturedTagCard({ tag, index }: { tag: TagCloudItem; index: number }) {
             </p>
 
             {/* Category pills */}
-            <div className={`mt-3 flex flex-wrap ${gap.tight}`}>
+            <div className={`${marginTop.compact} flex ${flexWrap.wrap} ${gap.tight}`}>
               {tag.categories.slice(0, 3).map((cat) => (
                 <span
                   key={cat}
-                  className={`rounded-full border border-border/50 bg-background/50 ${padding.xTight} ${padding.yHair} ${size.xs} capitalize ${muted.default}`}
+                  className={`${radius.full} border ${borderColor['border/50']} bg-background/50 ${padding.xTight} ${padding.yHair} ${size.xs} capitalize ${muted.default}`}
                 >
                   {cat}
                 </span>
@@ -496,7 +529,7 @@ function FeaturedTagCard({ tag, index }: { tag: TagCloudItem; index: number }) {
 
           {/* Shine effect */}
           <motion.div
-            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            className={`pointer-events-none absolute inset-0 ${opacityLevel[0]} ${transition.opacity} ${animateDuration.slow} group-hover:opacity-100`}
             style={{
               background:
                 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 55%, transparent 60%)',

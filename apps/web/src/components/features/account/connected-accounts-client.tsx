@@ -14,7 +14,23 @@ import {
   GithubBrandIcon,
   GoogleBrandIcon,
 } from '@heyclaude/web-runtime/icons';
-import { iconSize, spaceY, cluster, marginBottom, marginTop, muted, weight, radius ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  cluster,
+  gap,
+  iconSize,
+  alignItems,
+  justify,
+  marginBottom,
+  marginTop,
+  muted,
+  padding,
+  radius,
+  size,
+  spaceY,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { errorToasts, successToasts } from '@heyclaude/web-runtime/ui';
 import { type ComponentType, useState, useTransition } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -150,10 +166,10 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         return (
           <div
             key={provider}
-            className={`flex items-center justify-between ${radius.lg} border ${padding.default} transition-colors hover:bg-accent/5`}
+            className={`flex ${alignItems.center} ${justify.between} ${radius.lg} border ${padding.default} ${transition.colors} hover:bg-accent/5`}
           >
             <div className={cluster.comfortable}>
-              <div className={`rounded-full border bg-accent/5 ${padding.compact}`}>
+              <div className={`${radius.full} border ${bgColor['accent/5']} ${padding.compact}`}>
                 <IconComponent className={iconSize.lg} />
               </div>
               <div>
@@ -169,7 +185,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
                 {identity && (
                   <div className={`${marginTop.tight} ${muted.sm}`}>
                     <p>{identity.email ?? 'No email'}</p>
-                    <p className="text-xs">
+                    <p className={size.xs}>
                       {identity.last_sign_in_at
                         ? `Last sign-in: ${new Date(identity.last_sign_in_at).toLocaleDateString()}`
                         : 'Never signed in'}
@@ -206,7 +222,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         );
       })}
 
-      <div className={`${marginTop.comfortable} ${radius.lg} border bg-muted/30 ${padding.default}`}>
+      <div className={`${marginTop.comfortable} ${radius.lg} border ${bgColor['muted/30']} ${padding.default}`}>
         <h4 className={`${marginBottom.tight} ${weight.medium} ${size.sm}`}>How it works</h4>
         <ul className={`${spaceY.tight} ${muted.sm}`}>
           <li>• Link multiple OAuth providers to your account</li>

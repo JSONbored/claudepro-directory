@@ -197,7 +197,7 @@ export {
   ListTree,
   X,
 } from './icons.tsx';
-export type { LucideIcon } from './icons.tsx';
+export type { IconComponent } from './icons.tsx';
 export * from './types/component.types.ts';
 export * from './transformers/skill-to-md.ts';
 export * from './hooks/index.ts';

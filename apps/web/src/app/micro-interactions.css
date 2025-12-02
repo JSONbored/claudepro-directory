@@ -129,7 +129,7 @@ a:not([class*="button"]):not([class*="btn"]):not(.no-underline):hover::after {
  * - Static cards that don't need interactive animations
  *
  * If you're building a new component, use Motion.dev instead.
- * See: src/lib/ui-constants.ts → ANIMATION_CONSTANTS
+ * See: @heyclaude/web-runtime/design-system → transition.*
  */
 .hover-lift:hover {
   transform: translateY(-2px);

@@ -234,8 +234,8 @@ import {
   Briefcase,
   Code,
   FileText,
+  type IconComponent,
   Layers,
-  type LucideIcon,
   Server,
   Sparkles,
   Terminal,
@@ -245,17 +245,17 @@ import type { UnifiedCategoryConfig } from '../../../types/category.ts';
 
 type ContentCategory = Database['public']['Enums']['content_category'];
 
-const ICON_MAP: Record<string, LucideIcon> = {
-  Sparkles,
-  Terminal,
-  Webhook,
-  BookOpen,
-  Server,
-  Layers,
-  Briefcase,
-  FileText,
-  Code,
-};
+const ICON_MAP = {
+  Sparkles: Sparkles as IconComponent,
+  Terminal: Terminal as IconComponent,
+  Webhook: Webhook as IconComponent,
+  BookOpen: BookOpen as IconComponent,
+  Server: Server as IconComponent,
+  Layers: Layers as IconComponent,
+  Briefcase: Briefcase as IconComponent,
+  FileText: FileText as IconComponent,
+  Code: Code as IconComponent,
+} as const;
 
 export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<ContentCategory>> = {
 ${configEntries}

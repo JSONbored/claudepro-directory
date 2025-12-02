@@ -1,6 +1,7 @@
-import { Constants, type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/web-runtime/core';
-import { between, cluster, marginBottom, marginTop, muted, weight ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, marginBottom, marginTop, muted, weight ,size , padding , gap, flexWrap,
+} from '@heyclaude/web-runtime/design-system';
 import type { ReactElement } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import {
@@ -142,7 +143,7 @@ export function SubmissionCard({
                 </UnifiedBadge>
               )}
               {type ? (
-                <UnifiedBadge variant="base" style="outline" className="text-xs">
+                <UnifiedBadge variant="base" style="outline" className={size.xs}>
                   {getTypeLabel(type)}
                 </UnifiedBadge>
               ) : (
@@ -157,14 +158,14 @@ export function SubmissionCard({
             </div>
             <CardTitle className={marginTop.compact}>{submission.content_name ?? 'Untitled'}</CardTitle>
             <CardDescription className={marginTop.tight}>
-              Slug: <code className="text-xs">{submission.content_slug ?? 'N/A'}</code>
+              Slug: <code className={size.xs}>{submission.content_slug ?? 'N/A'}</code>
             </CardDescription>
           </div>
         </div>
       </CardHeader>
 
       <CardContent>
-        <div className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}>
+        <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
           <div>
             Submitted {submission.created_at ? formatSubmissionDate(submission.created_at) : 'N/A'}
           </div>
@@ -182,14 +183,14 @@ export function SubmissionCard({
           )}
         </div>
 
-        {status === Constants.public.Enums.submission_status[2] && submission.rejection_reason && ( // 'rejected'
+        {status === 'rejected' && submission.rejection_reason && (
           <div className={`${marginBottom.default} rounded border border-red-500/20 bg-red-500/10 ${padding.compact}`}>
-            <p className={'mb-1 ${weight.medium} text-red-400 ${size.sm}'}>Rejection Reason:</p>
+            <p className={`${marginBottom.micro} ${weight.medium} text-red-400 ${size.sm}`}>Rejection Reason:</p>
             <p className={muted.sm}>{submission.rejection_reason}</p>
           </div>
         )}
 
-        {status === Constants.public.Enums.submission_status[4] && ( // 'merged'
+        {status === 'merged' && (
           <div className={`${marginBottom.default} rounded border border-green-500/20 bg-green-500/10 ${padding.compact}`}>
             <p className={`${weight.medium} text-green-400 ${size.sm}`}>
               🎉 Your contribution is now live on ClaudePro Directory!

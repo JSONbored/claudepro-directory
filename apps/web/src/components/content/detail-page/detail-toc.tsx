@@ -4,7 +4,18 @@ import { ListTree } from '@heyclaude/web-runtime/icons';
 import type { ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
 import { normalizeHeadings, type NormalizedHeading } from '@heyclaude/web-runtime/utils/heading-normalization';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { focusRing, hoverBg, cluster, marginTop, truncate, weight, muted ,size  , gap  } from '@heyclaude/web-runtime/design-system';
+import { focusRing, hoverBg, cluster, marginTop, truncate, weight, muted, size, gap, borderColor,
+  tracking,
+  transition,
+  justify,
+  textColor,
+  alignItems,
+  padding,
+  radius,
+  shadow,
+  backdrop,
+  iconSize,
+} from '@heyclaude/web-runtime/design-system';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface DetailTocProps {
@@ -138,16 +149,16 @@ export function DetailToc({ headings, className }: DetailTocProps) {
   return (
     <nav
       className={cn(
-        'rounded-2xl border border-border/60 bg-card/70 ${padding.default} shadow-sm backdrop-blur',
+        `${radius['2xl']} border ${borderColor['border/60']} bg-card/70 ${padding.default} ${shadow.sm} ${backdrop.default}`,
         'lg:sticky lg:top-28',
         className
       )}
       aria-label="On this page"
     >
-      <div className={`flex items-center justify-between ${gap.default}`}>
+      <div className={`flex ${alignItems.center} ${justify.between} ${gap.default}`}>
         <div className={cluster.compact}>
-          <ListTree className={`h-4 w-4 ${muted.default}`} aria-hidden="true" />
-          <p className={`${weight.semibold} ${muted.default} ${size.xs} uppercase tracking-wide`}>
+          <ListTree className={`${iconSize.sm} ${muted.default}`} aria-hidden="true" />
+          <p className={`${weight.semibold} ${muted.default} ${size.xs} uppercase ${tracking.wide}`}>
             On this page
           </p>
         </div>
@@ -165,9 +176,9 @@ export function DetailToc({ headings, className }: DetailTocProps) {
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
                   focusRing.default,
-                  'w-full rounded-md ${padding.xTight} ${padding.ySnug} text-left ${size.sm} transition-colors',
+                  `w-full ${radius.md} ${padding.xTight} ${padding.ySnug} text-left ${size.sm} ${transition.colors}`,
                   activeId === heading.id
-                    ? 'bg-accent/15 text-foreground'
+                    ? `bg-accent/15 ${textColor.foreground}`
                     : `${muted.default} ${hoverBg.default} hover:text-foreground`
                 )}
                 style={{
@@ -178,7 +189,7 @@ export function DetailToc({ headings, className }: DetailTocProps) {
                 <span className={cluster.compact}>
                   <span
                     className={cn(
-                      'h-1.5 w-1.5 rounded-full',
+                      `h-1.5 w-1.5 ${radius.full}`,
                       activeId === heading.id ? 'bg-primary' : 'bg-muted-foreground/50'
                     )}
                   />

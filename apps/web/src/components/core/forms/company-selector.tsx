@@ -5,7 +5,20 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { iconSize, muted, spaceY, cluster  , padding , gap , size } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  gap,
+  iconSize,
+  alignItems,
+  muted,
+  opacityLevel,
+  overflow,
+  padding,
+  radius,
+  size,
+  spaceY,
+  justify,
+} from '@heyclaude/web-runtime/design-system';
 import {
   createCompany,
   getCompanyByIdAction,
@@ -219,7 +232,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between"
+            className={`w-full ${justify.between}`}
           >
             {selectedCompany ? (
               <span className={cluster.compact}>
@@ -231,7 +244,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                 {defaultCompanyName || 'Select or create company...'}
               </span>
             )}
-            <Search className={`${iconSize.sm} opacity-50`} />
+            <Search className={`${iconSize.sm} ${opacityLevel[50]}`} />
           </Button>
         </PopoverTrigger>
         <PopoverContent className={`w-[400px] ${padding.none}`} align="start">
@@ -284,13 +297,13 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
               {isSearching ? (
                 <p className={`${muted.sm} ${padding.xTight} ${padding.yDefault}`}>Searching...</p>
               ) : companies.length > 0 ? (
-                <div className={`max-h-[200px] ${spaceY.tight} overflow-y-auto`}>
+                <div className={`max-h-[200px] ${spaceY.tight} ${overflow.yAuto}`}>
                   {companies.map((company) => (
                     <button
                       key={company.id}
                       type="button"
                       onClick={() => handleSelect(company)}
-                      className={`flex w-full items-center ${gap.compact} rounded-md ${padding.xTight} ${padding.yCompact} text-left ${size.sm} hover:bg-accent`}
+                      className={`flex w-full ${alignItems.center} ${gap.compact} ${radius.md} ${padding.xTight} ${padding.yCompact} text-left ${size.sm} hover:bg-accent`}
                     >
                       <Building2 className={iconSize.sm} />
                       <span>{company.name}</span>

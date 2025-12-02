@@ -76,11 +76,13 @@ import type { ConfigCardProps, ContentItem } from '../../../types/component.type
 import { SEMANTIC_COLORS } from '../../colors.ts';
 import { ContentIndicators } from '../indicators/content-indicators.tsx';
 // Design System imports
-import { cluster } from '../../../design-system/styles/layout.ts';
+import { cluster, padding } from '../../../design-system/styles/layout.ts';
 import { iconSize, iconLeading } from '../../../design-system/styles/icons.ts';
 import { buttonSize, buttonGhost } from '../../../design-system/styles/buttons.ts';
-import { badge } from '../../../design-system/styles/typography.ts';
+import { badge, size } from '../../../design-system/styles/typography.ts';
 import { collectionTypeBadge, difficultyBadge } from '../../../design-system/styles/badges.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
+import { shadow } from '../../../design-system/styles/effects.ts';
 import { getDisplayTitle } from '../../utils.ts';
 import { toasts } from '../../../client/toast.ts';
 import { BaseCard, type BaseCardProps } from './base-card.tsx';
@@ -675,7 +677,7 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="secondary"
-                  className={`fade-in slide-in-from-top-2 animate-in ${cluster.tight} font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md ${SEMANTIC_COLORS.FEATURED}`}
+                  className={`fade-in slide-in-from-top-2 animate-in ${cluster.tight} font-semibold ${shadow.sm} transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:${shadow.md} ${SEMANTIC_COLORS.FEATURED}`}
                 >
                   {featuredRank && featuredRank <= 3 ? (
                     <Award
@@ -686,7 +688,7 @@ export const ConfigCard = memo(
                     <Sparkles className={iconSize.xs} aria-hidden="true" />
                   )}
                   Featured
-                  {featuredRank && <span className="text-xs opacity-75">#{featuredRank}</span>}
+                  {featuredRank && <span className={`${size.xs} opacity-75`}>#{featuredRank}</span>}
                 </UnifiedBadge>
               )}
               {isSponsored && sponsorTier && (
@@ -1054,12 +1056,12 @@ export const ConfigCard = memo(
       });
       // Return minimal fallback
       return (
-        <div className="rounded-lg border p-4" role="article">
+        <div className={`${radius.lg} border ${padding.default}`} role="article">
           <h3 className="font-semibold">
             {'title' in item && typeof item.title === 'string' ? item.title : 'Content'}
           </h3>
           {'description' in item && item.description && (
-            <p className="text-sm text-muted-foreground">{item.description}</p>
+            <p className={`${size.sm} text-muted-foreground`}>{item.description}</p>
           )}
         </div>
       );

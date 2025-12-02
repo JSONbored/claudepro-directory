@@ -5,6 +5,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
+import { borderTop } from '@heyclaude/web-runtime/design-system';
 import type {
   ContentItem,
   ProcessedSectionData,
@@ -224,7 +225,7 @@ export function TabSectionRenderer({
       const validSlug = item.slug ?? '';
       if (!validSlug) return null;
       return (
-        <div className="border-t pt-8">
+        <div className={`${borderTop.default} pt-8`}>
           <ReviewListSection contentType={validCategory} contentSlug={validSlug} />
         </div>
       );

@@ -23,29 +23,30 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, animate, spaceY, muted, weight, radius , size , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  iconSize,
+  maxWidth,
+  muted,
+  padding,
+  size,
+  spaceY,
+  textColor,
+  tracking,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { NavLink  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
+import { NavLink } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
 import { WhatsNewSummary } from '@/src/components/features/changelog/whats-new-summary';
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
-  {
-    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
-  }
-);
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 
 /**
  * ISR: 1 hour (3600s) - Changelog list updates periodically
@@ -203,7 +204,7 @@ export default async function ChangelogPage() {
             </NavLink>
 
             <div className={spaceY.compact}>
-              <h1 className={`${weight.bold} ${size['4xl']} tracking-tight`}>Changelog</h1>
+              <h1 className={`${weight.bold} ${size['4xl']} ${tracking.tight}`}>Changelog</h1>
               <p className={muted.lg}>
                 Track all updates, new features, bug fixes, and improvements to Claude Pro
                 Directory.
@@ -213,7 +214,7 @@ export default async function ChangelogPage() {
             {/* Stats */}
             <div className={`${cluster.relaxed} ${muted.sm}`}>
               <div>
-                <span className={`${weight.semibold} text-foreground`}>
+                <span className={`${weight.semibold} ${textColor.foreground}`}>
                   {overview.metadata?.total_entries ?? publishedEntries.length}
                 </span>{' '}
                 total updates
@@ -223,7 +224,7 @@ export default async function ChangelogPage() {
                     Latest:{' '}
                     <time
                       dateTime={publishedEntries[0].release_date}
-                      className={`${weight.medium} text-foreground`}
+                      className={`${weight.medium} ${textColor.foreground}`}
                     >
                       {new Date(publishedEntries[0].release_date).toLocaleDateString('en-US', {
                         year: 'numeric',
@@ -271,7 +272,7 @@ export default async function ChangelogPage() {
     return (
       <div className={`container ${maxWidth['6xl']} ${padding.yRelaxed}`}>
         <div className={spaceY.comfortable}>
-          <h1 className={`${weight.bold} ${size['4xl']} tracking-tight`}>Changelog</h1>
+          <h1 className={`${weight.bold} ${size['4xl']} ${tracking.tight}`}>Changelog</h1>
           <p className={muted.default}>
             Unable to load changelog entries. Please try again later.
           </p>

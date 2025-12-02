@@ -3,7 +3,8 @@
  * Shows average rating and distribution across 1-5 stars
  */
 
-import { cluster, iconSize, marginBottom, muted, weight ,size  , padding } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, marginBottom, muted, weight ,size  , padding, justify,
+} from '@heyclaude/web-runtime/design-system';
 import { Star } from '@heyclaude/web-runtime/icons';
 import type { ReviewHistogramProps } from '@heyclaude/web-runtime/types/component.types';
 import {
@@ -62,7 +63,7 @@ export function ReviewRatingHistogram({
     return (
       <Card className={`bg-muted/50 ${padding.comfortable}`}>
         <div className="text-center">
-          <div className={`${cluster.compact} mb-2 justify-center`}>
+          <div className={`${cluster.compact} ${marginBottom.tight} ${justify.center}`}>
             <Star className={`${iconSize.xl} ${muted.default}/30`} aria-hidden="true" />
           </div>
           <p className={muted.sm}>No reviews yet. Be the first to review!</p>
@@ -72,10 +73,10 @@ export function ReviewRatingHistogram({
   }
 
   return (
-    <Card className="p-6">
+    <Card className={padding.comfortable}>
       {/* Header: Average Rating */}
       <div className={marginBottom.comfortable}>
-        <div className={`${cluster.default} mb-2`}>
+        <div className={`${cluster.default} ${marginBottom.tight}`}>
           <div className={`${weight.bold} ${size['4xl']}`}>{averageRating.toFixed(1)}</div>
           <div className={cluster.tight}>
             <StarDisplay rating={averageRating} size="md" />

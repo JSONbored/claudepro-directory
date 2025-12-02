@@ -54,9 +54,10 @@ import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
 // Design System imports
 import { absolute } from '../../../design-system/styles/position.ts';
-import { cluster, wrap } from '../../../design-system/styles/layout.ts';
+import { cluster, wrap, gap, padding, marginTop, marginBottom } from '../../../design-system/styles/layout.ts';
 import { card as cardStyles, cardPadding, cardHeader } from '../../../design-system/styles/cards.ts';
-import { muted } from '../../../design-system/styles/typography.ts';
+import { muted, size } from '../../../design-system/styles/typography.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
 import type { ReactNode, HTMLAttributes } from 'react';
 import { memo } from 'react';
 
@@ -353,7 +354,7 @@ export const BaseCard = memo(
       // Card content wrapper - conditionally render with or without motion animations
       const cardElement = (
         <CardComponent
-          className={`${disableNavigation ? '' : cardStyles.interactive} ${variant === 'detailed' ? cardPadding.default : ''} ${variant === 'review' ? `rounded-lg border ${cardPadding.compact}` : ''} ${compactMode ? cardPadding.compact : ''} ${className || ''} relative`}
+          className={`${disableNavigation ? '' : cardStyles.interactive} ${variant === 'detailed' ? cardPadding.default : ''} ${variant === 'review' ? `${radius.lg} border ${cardPadding.compact}` : ''} ${compactMode ? cardPadding.compact : ''} ${className || ''} relative`}
           style={{
             ...viewTransitionStyle,
             contain: 'paint',
@@ -372,7 +373,7 @@ export const BaseCard = memo(
           )}
 
           <CardHeaderComponent
-            className={`${variant === 'review' ? 'mb-3 p-0' : 'pb-3'} ${compactMode ? cardHeader.tight : ''}`}
+            className={`${variant === 'review' ? `${marginBottom.compact} ${padding.none}` : 'pb-3'} ${compactMode ? cardHeader.tight : ''}`}
           >
             {/* Custom header slot (for review avatar/rating, changelog date) */}
             {renderHeader?.()}
@@ -383,21 +384,21 @@ export const BaseCard = memo(
                 <div className="flex-1">
                   {/* Top badges slot (type, difficulty, sponsored, etc.) */}
                   {renderTopBadges && (
-                    <div className={`mb-1 ${cluster.compact}`}>
+                    <div className={`${marginBottom.tight} ${cluster.compact}`}>
                       {renderTopBadges()}
                     </div>
                   )}
 
                   {/* Title */}
                   <CardTitleComponent
-                    className={`text-lg font-semibold text-foreground ${disableNavigation ? '' : 'transition-colors-smooth group-hover:text-accent'}`}
+                    className={`${size.lg} font-semibold text-foreground ${disableNavigation ? '' : 'transition-colors-smooth group-hover:text-accent'}`}
                   >
                     {displayTitle}
                   </CardTitleComponent>
 
                   {/* Description */}
                   {description && (
-                    <CardDescriptionComponent className={'mt-1 line-clamp-2 text-muted-foreground text-sm'}>
+                    <CardDescriptionComponent className={`${marginTop.tight} line-clamp-2 text-muted-foreground ${size.sm}`}>
                       {description}
                     </CardDescriptionComponent>
                   )}
@@ -433,14 +434,14 @@ export const BaseCard = memo(
           </CardHeaderComponent>
 
           <CardContentComponent
-            className={`${variant === 'review' ? 'p-0' : 'pt-0'} ${compactMode ? 'pt-0' : ''}`}
+            className={`${variant === 'review' ? padding.none : 'pt-0'} ${compactMode ? 'pt-0' : ''}`}
           >
             {/* Custom content slot (for review expandable text) */}
-            {renderContent && <div className="mb-3">{renderContent()}</div>}
+            {renderContent && <div className={marginBottom.compact}>{renderContent()}</div>}
 
             {/* Tags */}
             {tags && tags.length > 0 && (
-              <div className={wrap.compact + ' mb-4'}>
+              <div className={`${wrap.compact} ${marginBottom.default}`}>
                 {visibleTags?.map((tag: string, index: number) => {
                   // Use highlighted tag if available, otherwise use original
                   const highlightedTag = highlightedTags?.[index];
@@ -465,7 +466,7 @@ export const BaseCard = memo(
                   <UnifiedBadge
                     variant="base"
                     style="outline"
-                    className="border-muted-foreground/20 text-muted-foreground text-xs font-semibold"
+                    className={`border-muted-foreground/20 text-muted-foreground ${size.xs} font-semibold`}
                   >
                     +{overflowCount}
                   </UnifiedBadge>
@@ -474,7 +475,7 @@ export const BaseCard = memo(
             )}
 
             {/* Footer: Metadata and Actions */}
-            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div className={`flex flex-col ${gap.compact} md:flex-row md:items-center md:justify-between`}>
               {/* Left side: Author and custom metadata */}
               {(showAuthor && author) || customMetadataText ? (
                 <div className={`${cluster.compact} ${muted.xs}`}>
@@ -499,7 +500,7 @@ export const BaseCard = memo(
               )}
 
               {/* Right side: Metadata badges and actions */}
-              <div className={cluster.compact + ' text-xs flex-nowrap'}>
+              <div className={`${cluster.compact} ${size.xs} flex-nowrap`}>
                 {/* Metadata badges slot (view count, item count, etc.) */}
                 {renderMetadataBadges?.()}
 
@@ -560,9 +561,9 @@ export const BaseCard = memo(
       });
       // Return a minimal fallback
       return (
-        <div className="rounded-lg border p-4" role="article" aria-label={ariaLabel}>
+        <div className={`${radius.lg} border ${padding.default}`} role="article" aria-label={ariaLabel}>
           <h3 className="font-semibold">{displayTitle}</h3>
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          {description && <p className={`${size.sm} text-muted-foreground`}>{description}</p>}
         </div>
       );
     }

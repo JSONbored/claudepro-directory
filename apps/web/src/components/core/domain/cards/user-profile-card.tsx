@@ -18,7 +18,26 @@ import type { Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Award, ExternalLink, Users } from '@heyclaude/web-runtime/icons';
-import { badge, buttonGhost, iconSize, iconWrapper, marginTop, muted, weight, size, memberBadge , padding , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  badge,
+  bgColor,
+  borderColor,
+  buttonGhost,
+  flexDir,
+  flexWrap,
+  gap,
+  iconSize,
+  iconWrapper,
+  alignItems,
+  justify,
+  marginTop,
+  memberBadge,
+  muted,
+  padding,
+  size,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { memo } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { BaseCard } from '@heyclaude/web-runtime/ui';
@@ -34,7 +53,7 @@ function getSafeExternalUrl(url: string | null | undefined): string | null {
 
   try {
     const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol (or HTTP for localhost/development)
+    // Only allow HTTPS or HTTP protocols
     if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
     // Reject dangerous components
     if (parsed.username || parsed.password) return null;
@@ -164,13 +183,13 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
       showAuthor={false}
       compactMode={variant === 'compact'}
       renderHeader={() => (
-        <div className={`flex flex-col items-center ${gap.default} text-center`}>
+        <div className={`flex ${flexDir.col} ${alignItems.center} ${gap.default} text-center`}>
           {/* Avatar */}
-          <Avatar className="h-16 w-16 ring-2 ring-accent/20 ring-offset-2 ring-offset-background">
+          <Avatar className={`${iconSize['4xl']} ring-2 ring-accent/20 ring-offset-2 ring-offset-background`}>
             {user.image && (
               <AvatarImage src={user.image} alt={`${username}'s avatar`} className="object-cover" />
             )}
-            <AvatarFallback className={`bg-accent/10 ${weight.semibold} text-accent ${size.lg}`}>
+            <AvatarFallback className={`bg-accent/10 ${weight.semibold} ${textColor.accent} ${size.lg}`}>
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -185,7 +204,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
         </div>
       )}
       renderTopBadges={() => (
-        <div className={`flex flex-wrap items-center justify-center ${gap.snug}`}>
+        <div className={`flex ${flexWrap.wrap} ${alignItems.center} ${justify.center} ${gap.snug}`}>
           {/* Member type badge */}
           <UnifiedBadge
             variant="base"
@@ -201,7 +220,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               key={interest}
               variant="base"
               style="secondary"
-              className={`${badge.default} border-primary/20 text-primary`}
+              className={`${badge.default} ${borderColor['primary/20']} ${textColor.primary}`}
             >
               {interest}
             </UnifiedBadge>
@@ -215,7 +234,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={`h-7 ${gap.snug} border-primary/20 bg-primary/10 ${weight.medium} text-primary`}
+              className={`h-7 ${gap.snug} ${borderColor['primary/20']} ${bgColor['primary/10']} ${weight.medium} ${textColor.primary}`}
             >
               <Award className={iconSize.xs} aria-hidden="true" />
               <span className={badge.default}>{user.total_contributions}</span>
@@ -227,7 +246,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={`h-7 ${gap.snug} border-border bg-muted/50 ${weight.medium} text-foreground`}
+              className={`h-7 ${gap.snug} ${borderColor.border} ${bgColor['muted/50']} ${weight.medium} ${textColor.foreground}`}
             >
               <Users className={iconSize.xs} aria-hidden="true" />
               <span className={badge.default}>{user.followers_count}</span>

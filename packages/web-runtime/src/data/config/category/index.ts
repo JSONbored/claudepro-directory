@@ -47,13 +47,15 @@ export const getCategoryConfig = (
 export { VALID_CATEGORIES, isValidCategory } from '../../../utils/category-validation.ts';
 
 export const getCategoryStatsConfig = (): readonly CategoryStatsConfig[] => {
-  return Object.keys(CATEGORY_CONFIGS).map((id, index) => ({
-    categoryId: id as Database['public']['Enums']['content_category'],
-    icon: CATEGORY_CONFIGS[id as Database['public']['Enums']['content_category']].icon,
-    displayText:
-      CATEGORY_CONFIGS[id as Database['public']['Enums']['content_category']].pluralTitle,
-    delay: index * 100,
-  }));
+  return (Object.keys(CATEGORY_CONFIGS) as Array<Database['public']['Enums']['content_category']>).map((id, index) => {
+    const config = CATEGORY_CONFIGS[id];
+    return {
+      categoryId: id,
+      icon: config.icon,
+      displayText: config.pluralTitle,
+      delay: index * 100,
+    };
+  });
 };
 
 

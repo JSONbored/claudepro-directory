@@ -1,10 +1,11 @@
 import { cn } from '../utils.ts';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { size } from '../../design-system/styles/typography.ts';
 import type * as React from 'react';
 
 const labelVariants = cva(
-  'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+  `${size.sm} font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`
 );
 
 const Label = ({

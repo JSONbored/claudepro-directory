@@ -1,4 +1,15 @@
-import { spaceY, marginBottom, radius, padding, row , gap , minHeight } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  borderBottom,
+  flexWrap,
+  gap,
+  marginBottom,
+  minHeight,
+  padding,
+  radius,
+  row,
+  spaceY,
+} from '@heyclaude/web-runtime/design-system';
 import { getSkeletonKeys, Skeleton  } from '@heyclaude/web-runtime/ui';
 
 
@@ -18,9 +29,9 @@ const CODE_LINE_KEYS = getSkeletonKeys(8);
  */
 export default function Loading() {
   return (
-    <div className={`${minHeight.screen} bg-background`}>
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Header */}
-      <div className="border-border/50 border-b bg-card/30">
+      <div className={`${borderBottom.light} bg-card/30`}>
         <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
           {/* Back button */}
           <Skeleton size="sm" width="sm" className={marginBottom.comfortable} />
@@ -35,7 +46,7 @@ export default function Loading() {
           </div>
 
           {/* Metadata badges */}
-          <div className={`flex flex-wrap ${gap.compact}`}>
+          <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />

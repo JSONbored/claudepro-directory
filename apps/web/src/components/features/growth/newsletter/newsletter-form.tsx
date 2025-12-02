@@ -1,11 +1,30 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { iconSize, responsive, stack, cluster, helper, weight ,size , padding } from '@heyclaude/web-runtime/design-system';
+import {
+  animateDuration,
+  backdrop,
+  bgColor,
+  borderColor,
+  cluster,
+  flexGrow,
+  helper,
+  iconSize,
+  opacityLevel,
+  padding,
+  responsive,
+  shadow,
+  size,
+  stack,
+  textColor,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { Mail } from '@heyclaude/web-runtime/icons';
-import { cn, DIMENSIONS } from '@heyclaude/web-runtime/ui';
+import { cn } from '@heyclaude/web-runtime/ui';
+import { buttonHeight, minWidth } from '@heyclaude/web-runtime/design-system';
 import { useId, useState } from 'react';
 import { InlineSpinner } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -55,7 +74,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
     <form onSubmit={handleSubmit} className={cn('w-full', className)}>
       <div className={stack.default}>
         <div className={responsive.smRowGap}>
-          <div className="relative flex-1">
+          <div className={`relative ${flexGrow['1']}`}>
             <Input
               type="email"
               placeholder="your@email.com"
@@ -66,12 +85,12 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
               required={true}
               disabled={isSubmitting}
               className={cn(
-                `${DIMENSIONS.BUTTON_LG} min-w-0 ${padding.xMedium} ${size.base}`,
-                'border-border/40 bg-background/95 backdrop-blur-sm',
-                'transition-all duration-200 ease-out',
+                `${buttonHeight.lg} min-w-0 ${padding.xMedium} ${size.base}`,
+                `${borderColor['border/40']} ${bgColor['background/95']} ${backdrop.sm}`,
+                `${transition.all} ${animateDuration.default} ease-out`,
                 'focus:border-accent/50 focus:ring-2 focus:ring-accent/20',
                 error && 'border-destructive/50 focus:border-destructive focus:ring-destructive/20',
-                isSubmitting && 'cursor-not-allowed opacity-60'
+                isSubmitting && `cursor-not-allowed ${opacityLevel[60]}`
               )}
               aria-label="Email address"
               aria-invalid={!!error}
@@ -79,8 +98,8 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             />
             <div
               className={cn(
-                'absolute bottom-0 left-0 h-0.5 bg-linear-to-r from-accent to-primary transition-all duration-300 ease-out',
-                isFocused && !error ? 'w-full opacity-100' : 'w-0 opacity-0'
+                `absolute bottom-0 left-0 h-0.5 bg-linear-to-r from-accent to-primary ${transition.all} ${animateDuration.slow} ease-out`,
+                isFocused && !error ? `w-full ${opacityLevel[100]}` : `w-0 ${opacityLevel[0]}`
               )}
             />
           </div>
@@ -89,14 +108,14 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             disabled={isSubmitting || !email.trim()}
             size="lg"
             className={cn(
-              `${DIMENSIONS.BUTTON_LG} shrink-0 whitespace-nowrap ${padding.xRelaxed}`,
-              `bg-linear-to-r from-accent via-accent to-primary ${weight.semibold} text-accent-foreground`,
-              'shadow-md transition-all duration-200 ease-out',
-              'hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:shadow-lg',
+              `${buttonHeight.lg} ${flexGrow.shrink0} whitespace-nowrap ${padding.xRelaxed}`,
+              `bg-linear-to-r from-accent via-accent to-primary ${weight.semibold} ${textColor.accentForeground}`,
+              `${shadow.md} ${transition.all} ${animateDuration.default} ease-out`,
+              `hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:${shadow.lg}`,
               'active:scale-[0.98]',
               'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
               'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100',
-              `w-full sm:w-auto sm:${DIMENSIONS.MIN_W_NEWSLETTER_BUTTON}`
+              `w-full sm:w-auto sm:${minWidth.newsletterButton}`
             )}
           >
             {isSubmitting ? (

@@ -5,7 +5,8 @@
  * Shows placeholder content matching the layout of the detail page.
  */
 
-import { spaceY, cluster, marginBottom , padding , gap , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { spaceY, cluster, marginBottom , padding , gap , radius , maxWidth, flexWrap,
+} from '@heyclaude/web-runtime/design-system';
 import { Skeleton, Separator  } from '@heyclaude/web-runtime/ui';
 
 
@@ -55,7 +56,7 @@ export default function ChangelogEntryLoading() {
         </div>
 
         {/* Category Badges */}
-        <div className={`flex flex-wrap ${gap.compact}`}>
+        <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
           {Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={`category-${index + 1}`} size="sm" width="xs" rounded="full" />
           ))}

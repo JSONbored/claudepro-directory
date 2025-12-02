@@ -16,6 +16,10 @@ import { cn } from '../utils.ts';
 // Design System imports
 import { absolute } from '../../design-system/styles/position.ts';
 import { hoverText, focusRing } from '../../design-system/styles/interactive.ts';
+import { padding, marginTop } from '../../design-system/styles/layout.ts';
+import { size } from '../../design-system/styles/typography.ts';
+import { radius } from '../../design-system/styles/radius.ts';
+import { shadow } from '../../design-system/styles/effects.ts';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -32,7 +36,7 @@ const TabsList = ({
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      'inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
+      `inline-flex h-10 items-center justify-center ${radius.md} bg-muted ${padding.micro} text-muted-foreground`,
       className
     )}
     {...props}
@@ -58,7 +62,7 @@ const TabsTrigger = ({
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        `relative inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 font-medium text-sm ring-offset-background transition-colors ${hoverText.foreground} ${focusRing.default} disabled:opacity-50 disabled:pointer-events-none data-[state=active]:text-foreground [&[data-state=active]>.tab-indicator]:block`,
+        `relative inline-flex items-center justify-center whitespace-nowrap ${radius.sm} px-3 py-1.5 font-medium ${size.sm} ring-offset-background transition-colors ${hoverText.foreground} ${focusRing.default} disabled:opacity-50 disabled:pointer-events-none data-[state=active]:text-foreground [&[data-state=active]>.tab-indicator]:block`,
         className
       )}
       {...props}
@@ -66,7 +70,7 @@ const TabsTrigger = ({
       {/* Morphing active indicator - only visible on active tab via CSS */}
       <motion.span
         layoutId="tabs-indicator"
-        className={`tab-indicator -z-10 ${absolute.inset} hidden rounded-sm bg-background shadow-sm`}
+        className={`tab-indicator -z-10 ${absolute.inset} hidden ${radius.sm} bg-background ${shadow.sm}`}
         transition={springBouncy}
       />
       {props.children}
@@ -85,7 +89,7 @@ const TabsContent = ({
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      `data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-2 mt-2 ring-offset-background ${focusRing.default} data-[state=active]:animate-in`,
+      `data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-2 ${marginTop.compact} ring-offset-background ${focusRing.default} data-[state=active]:animate-in`,
       className
     )}
     {...props}

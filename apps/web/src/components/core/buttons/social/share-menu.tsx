@@ -12,7 +12,7 @@
  */
 
 import type { SharePlatform } from '@heyclaude/web-runtime/core';
-import { iconSize , gap } from '@heyclaude/web-runtime/design-system';
+import { iconSize , gap , opacityLevel } from '@heyclaude/web-runtime/design-system';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
 import {
   ChevronDown,
@@ -145,7 +145,7 @@ export function ShareMenu({
           <Button variant={variant} className={`min-w-0 ${gap.compact}`}>
             <Share2 className={iconSize.sm} />
             <span>{label}</span>
-            {showChevron && <ChevronDown className={`${iconSize.xs} opacity-50`} />}
+            {showChevron && <ChevronDown className={`${iconSize.xs} ${opacityLevel[50]}`} />}
           </Button>
         </motion.div>
       </DropdownMenuTrigger>

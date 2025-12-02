@@ -44,6 +44,7 @@ import { logger, normalizeError } from '../../../entries/core.ts';
 import { UI_TIMEOUTS } from '../../../config/unified-config.ts';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { toasts } from '../../../client/toast.ts';
+import { iconSize } from '../../../design-system/styles/icons.ts';
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../button.tsx';
@@ -58,7 +59,7 @@ import { Button } from '../button.tsx';
  * @property {boolean} [showIcon=true] - Show copy/check icon
  * @property {() => void} [onCopySuccess] - Callback after successful copy
  * @property {string} [ariaLabel] - Accessible label (auto-generated if not provided)
- * @property {string} [iconClassName="h-4 w-4"] - Icon size classes
+ * @property {string} [iconClassName] - Icon size classes (defaults to iconSize.sm)
  * @property {ButtonStyleProps} - Standard button styling props (variant, size, className, disabled)
  */
 interface SimpleCopyButtonProps extends ButtonStyleProps {
@@ -80,7 +81,7 @@ export function SimpleCopyButton({
   showIcon = true,
   onCopySuccess,
   ariaLabel,
-  iconClassName = 'h-4 w-4',
+  iconClassName = iconSize.sm,
   variant = 'default',
   size = 'default',
   className,

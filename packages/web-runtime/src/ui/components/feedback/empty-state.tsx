@@ -46,15 +46,18 @@ import {
 import { cn } from '../../utils.ts';
 // Design System imports - unified tokens and composable styles
 import { colors, animation } from '../../../design-system/tokens.ts';
-import { center, stack, responsive } from '../../../design-system/styles/layout.ts';
-import type { LucideIcon } from 'lucide-react';
+import { center, stack, responsive, padding, marginBottom } from '../../../design-system/styles/layout.ts';
+import { iconSize } from '../../../design-system/styles/icons.ts';
+import { size } from '../../../design-system/styles/typography.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
+import type { IconComponent } from '../../../icons.tsx';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 export interface EmptyStateProps {
   /** Icon component to display */
-  icon: LucideIcon;
+  icon: IconComponent;
   /** Main heading */
   title: string;
   /** Supporting description text */
@@ -158,7 +161,7 @@ export function EmptyState({
       return (
         <Link
           href={actionHref}
-          className="inline-flex items-center justify-center rounded-md bg-accent px-6 py-3 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className={`inline-flex items-center justify-center ${radius.md} bg-accent px-6 py-3 ${size.sm} font-medium text-accent-foreground transition-colors hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`}
         >
           {actionLabel}
         </Link>
@@ -177,7 +180,7 @@ export function EmptyState({
       return (
         <Link
           href={secondaryActionHref}
-          className="inline-flex items-center justify-center rounded-md border border-input bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className={`inline-flex items-center justify-center ${radius.md} border border-input bg-background px-6 py-3 ${size.sm} font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`}
         >
           {secondaryActionLabel}
         </Link>
@@ -194,19 +197,19 @@ export function EmptyState({
       {/* Animated Icon */}
       <motion.div
         {...iconAnimation}
-        className="mb-6 rounded-full p-6"
+        className={`${marginBottom.relaxed} ${radius.full} ${padding.comfortable}`}
         style={{
           backgroundColor: variantColors.iconBg,
         }}
       >
-        <Icon className="h-12 w-12" style={{ color: variantColors.iconColor }} aria-hidden="true" />
+        <Icon className={iconSize['3xl']} style={{ color: variantColors.iconColor }} aria-hidden="true" />
       </motion.div>
 
       {/* Title */}
-      <h3 className="mb-2 font-semibold text-foreground text-xl">{title}</h3>
+      <h3 className={`${marginBottom.compact} font-semibold text-foreground ${size.xl}`}>{title}</h3>
 
       {/* Description */}
-      <p className="mb-6 max-w-md text-muted-foreground leading-relaxed">{description}</p>
+      <p className={`${marginBottom.relaxed} max-w-md text-muted-foreground leading-relaxed`}>{description}</p>
 
       {/* Action Buttons */}
       {(actionLabel || secondaryActionLabel || renderAction || renderSecondaryAction) && (
@@ -231,7 +234,7 @@ export function CompactEmptyState({
   description,
   className,
 }: {
-  icon: LucideIcon;
+  icon: IconComponent;
   title: string;
   description: string;
   className?: string;
@@ -241,19 +244,19 @@ export function CompactEmptyState({
       className={cn(center.column, 'px-4 py-8 text-center', className)}
     >
       <div
-        className="mb-3 rounded-full p-3"
+        className={`${marginBottom.compact} ${radius.full} ${padding.compact}`}
         style={{
           backgroundColor: `${colors.brand.orange}10`,
         }}
       >
         <Icon
-          className="h-6 w-6"
+          className={iconSize.lg}
           style={{ color: colors.brand.orange }}
           aria-hidden="true"
         />
       </div>
-      <h4 className="mb-1 font-medium text-foreground text-sm">{title}</h4>
-      <p className="text-muted-foreground text-xs leading-relaxed">{description}</p>
+      <h4 className={`${marginBottom.tight} font-medium text-foreground ${size.sm}`}>{title}</h4>
+      <p className={`text-muted-foreground ${size.xs} leading-relaxed`}>{description}</p>
     </div>
   );
 }

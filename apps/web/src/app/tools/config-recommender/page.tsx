@@ -18,40 +18,56 @@
  */
 
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { cluster, animate, marginBottom, iconLeading, muted, weight, radius ,size  , gap , padding , row , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  marginBottom,
+  marginTop,
+  iconLeading,
+  iconSize,
+  muted,
+  weight,
+  size,
+  gap,
+  padding,
+  radius,
+  row,
+  minHeight,
+  maxWidth,
+  bgColor,
+  textColor,
+  alignItems,
+  justify,
+  borderColor,
+  flexWrap,
+  overflow,
+  flexGrow,
+} from '@heyclaude/web-runtime/design-system';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
 import {
   generateRequestId,
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge,
+import {
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
-  {
-    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
-  }
-);
-
 /**
- * Dynamic Rendering Required
+ * ISR: 24 hours (86,400s)
  *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ * This page uses Incremental Static Regeneration. Server component code executes at
+ * build/revalidation time, not on every request.
  *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#revalidate
  */
 export const revalidate = 86_400;
 
@@ -75,9 +91,9 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * Renders a server-side React page that presents a client-side, rule-based quiz and
  * supporting informational sections (hero, benefits, features, and newsletter CTA).
- * Creates a request-scoped logger with a generated requestId, normalizes and logs
- * render errors, and re-throws normalized errors so they are handled by the application's
- * error boundary.
+ * Creates an ISR-scoped logger with a generated requestId (generated at build/revalidation
+ * time), normalizes and logs render errors, and re-throws normalized errors so they are
+ * handled by the application's error boundary.
  *
  * @returns The React element tree for the Config Recommender landing page.
  *
@@ -92,7 +108,7 @@ export default function ConfigRecommenderPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create ISR-scoped child logger (generated at build/revalidation time)
   const reqLogger = logger.child({
     requestId,
     operation: 'ConfigRecommenderPage',
@@ -102,41 +118,41 @@ export default function ConfigRecommenderPage() {
 
   try {
     return (
-      <div className={`${minHeight.screen} bg-background`}>
+      <div className={`${minHeight.screen} ${bgColor.background}`}>
         {/* Hero Section */}
-        <section className={`relative overflow-hidden ${padding.xDefault} ${padding.yHero}`}>
+        <section className={`relative ${overflow.hidden} ${padding.xDefault} ${padding.yHero}`}>
           <div className={`container mx-auto ${maxWidth['4xl']}`}>
             {/* Badge */}
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={`${marginBottom.comfortable} border-primary/20 bg-accent/5 text-primary`}
+              className={`${marginBottom.comfortable} ${borderColor['primary/20']} ${bgColor['accent/5']} ${textColor.primary}`}
             >
               <Sparkles className={iconLeading.xs} aria-hidden="true" />
               AI-Powered Recommendations
             </UnifiedBadge>
 
             {/* Title */}
-            <h1 className={`${marginBottom.comfortable} bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text ${weight.bold} ${size['4xl']} text-transparent md:text-5xl lg:text-6xl`}>
+            <h1 className={`${marginBottom.comfortable} bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text ${weight.bold} ${size['4xl']} ${textColor.transparent} md:${size['5xl']} lg:${size['6xl']}`}>
               Find Your Perfect Claude Configuration
             </h1>
 
             {/* Description */}
-            <p className={`mx-auto mb-8 ${maxWidth['3xl']} ${muted.lg} md:text-xl`}>
+            <p className={`mx-auto ${marginBottom.relaxed} ${maxWidth['3xl']} ${muted.lg} md:${size.xl}`}>
               Answer 7 quick questions and get personalized recommendations from our catalog of 147+
               configurations. Instant results, zero cost, tailored to your needs.
             </p>
 
             {/* Stats */}
-            <div className={`flex flex-wrap justify-center ${gap.default}`}>
-              <UnifiedBadge variant="base" style="secondary" className="text-sm">
+            <div className={`flex ${flexWrap.wrap} ${justify.center} ${gap.default}`}>
+              <UnifiedBadge variant="base" style="secondary" className={size.sm}>
                 <Clock className={iconLeading.xs} aria-hidden="true" />2 minutes
               </UnifiedBadge>
-              <UnifiedBadge variant="base" style="secondary" className="text-sm">
+              <UnifiedBadge variant="base" style="secondary" className={size.sm}>
                 <Target className={iconLeading.xs} aria-hidden="true" />
                 147+ configs analyzed
               </UnifiedBadge>
-              <UnifiedBadge variant="base" style="secondary" className="text-sm">
+              <UnifiedBadge variant="base" style="secondary" className={size.sm}>
                 <Zap className={iconLeading.xs} aria-hidden="true" />
                 Instant results
               </UnifiedBadge>
@@ -161,7 +177,7 @@ export default function ConfigRecommenderPage() {
                 <CardHeader>
                   <CardTitle className={`${cluster.compact} ${size.lg}`}>
                     <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full bg-primary ${weight.bold} text-primary-foreground ${size.sm}`}
+                      className={`flex ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${weight.bold} ${textColor.primaryForeground} ${size.sm}`}
                     >
                       1
                     </span>
@@ -180,7 +196,7 @@ export default function ConfigRecommenderPage() {
                 <CardHeader>
                   <CardTitle className={`${cluster.compact} ${size.lg}`}>
                     <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full bg-primary ${weight.bold} text-primary-foreground ${size.sm}`}
+                      className={`flex ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${weight.bold} ${textColor.primaryForeground} ${size.sm}`}
                     >
                       2
                     </span>
@@ -199,7 +215,7 @@ export default function ConfigRecommenderPage() {
                 <CardHeader>
                   <CardTitle className={`${cluster.compact} ${size.lg}`}>
                     <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full bg-primary ${weight.bold} text-primary-foreground ${size.sm}`}
+                      className={`flex ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${weight.bold} ${textColor.primaryForeground} ${size.sm}`}
                     >
                       3
                     </span>
@@ -220,10 +236,10 @@ export default function ConfigRecommenderPage() {
         {/* Features Section */}
         <section className={`container mx-auto ${padding.xDefault} pb-16`}>
           <div className={`mx-auto ${maxWidth['4xl']}`}>
-            <Card className="border-accent/20 bg-accent/5">
+            <Card className={`border-accent/20 ${bgColor['accent/5']}`}>
               <CardHeader>
                 <CardTitle className={cluster.compact}>
-                  <BarChart className="h-5 w-5 text-primary" />
+                  <BarChart className={`${iconSize.md} ${textColor.primary}`} />
                   What You'll Get
                 </CardTitle>
               </CardHeader>
@@ -231,41 +247,41 @@ export default function ConfigRecommenderPage() {
                 <ul className={`grid ${gap.default} sm:grid-cols-2`}>
                   <li className={`${row.compact}`}>
                     <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
+                      className={`${iconSize.md} ${textColor.primary} ${marginTop.micro} ${flexGrow.shrink0}`}
                     />
-                    <span className="text-sm">
+                    <span className={size.sm}>
                       Personalized match scores for each configuration
                     </span>
                   </li>
                   <li className={`${row.compact}`}>
                     <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
+                      className={`${iconSize.md} ${textColor.primary} ${marginTop.micro} ${flexGrow.shrink0}`}
                     />
-                    <span className="text-sm">Clear explanations of why each was recommended</span>
+                    <span className={size.sm}>Clear explanations of why each was recommended</span>
                   </li>
                   <li className={`${row.compact}`}>
                     <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
+                      className={`${iconSize.md} ${textColor.primary} ${marginTop.micro} ${flexGrow.shrink0}`}
                     />
-                    <span className="text-sm">Ranked results from best to good fit</span>
+                    <span className={size.sm}>Ranked results from best to good fit</span>
                   </li>
                   <li className={`${row.compact}`}>
                     <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
+                      className={`${iconSize.md} ${textColor.primary} ${marginTop.micro} ${flexGrow.shrink0}`}
                     />
-                    <span className="text-sm">Shareable results to discuss with your team</span>
+                    <span className={size.sm}>Shareable results to discuss with your team</span>
                   </li>
                   <li className={`${row.compact}`}>
                     <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
+                      className={`${iconSize.md} ${textColor.primary} ${marginTop.micro} ${flexGrow.shrink0}`}
                     />
-                    <span className="text-sm">Direct links to setup guides and documentation</span>
+                    <span className={size.sm}>Direct links to setup guides and documentation</span>
                   </li>
                   <li className={`${row.compact}`}>
                     <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
+                      className={`${iconSize.md} ${textColor.primary} ${marginTop.micro} ${flexGrow.shrink0}`}
                     />
-                    <span className="text-sm">Filter results by category and use case</span>
+                    <span className={size.sm}>Filter results by category and use case</span>
                   </li>
                 </ul>
               </CardContent>

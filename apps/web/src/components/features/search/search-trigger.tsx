@@ -1,6 +1,9 @@
 'use client';
 
-import { iconSize, groupHover, cluster, border, radius, transition, srOnly, muted, padding, size as textSize , gap , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { iconSize, groupHover, cluster, border, radius, transition, srOnly, muted, padding, size as textSize , gap , maxWidth, cursor,
+  bgColor,
+  alignItems,
+} from '@heyclaude/web-runtime/design-system';
 import { Search } from '@heyclaude/web-runtime/icons';
 import { Button } from '@heyclaude/web-runtime/ui';
 
@@ -47,7 +50,7 @@ export function SearchTrigger({
       <button
         type="button"
         onClick={onClick}
-        className={`group flex w-full ${maxWidth.md} cursor-pointer items-center ${gap.default} ${radius.lg} ${border.default} bg-background ${padding.xDefault} ${padding.yTight} ${muted.default} ${transition.colors} hover:border-border/80 hover:text-foreground ${className}`}
+        className={`group flex w-full ${maxWidth.md} ${cursor.pointer} ${alignItems.center} ${gap.default} ${radius.lg} ${border.default} ${bgColor.background} ${padding.xDefault} ${padding.yTight} ${muted.default} ${transition.colors} hover:border-border/80 hover:text-foreground ${className}`}
       >
         <Search
           className={`${iconSize.sm} ${muted.default} ${groupHover.accent}`}
@@ -55,7 +58,7 @@ export function SearchTrigger({
         <span className={`flex-1 text-left ${textSize.sm}`}>Search content...</span>
         {showShortcut && (
           <div className={`${cluster.tight} ${textSize.xs}`}>
-            <kbd className={`rounded border bg-muted ${padding.xSnug} ${padding.yHair} ${textSize.xs}`}>⌘K</kbd>
+            <kbd className={`rounded border ${bgColor.muted} ${padding.xSnug} ${padding.yHair} ${textSize.xs}`}>⌘K</kbd>
           </div>
         )}
       </button>
@@ -68,7 +71,7 @@ export function SearchTrigger({
       <span className={srOnly.default}>Search</span>
       {showShortcut && size !== 'sm' && (
         <div className={`ml-2 ${cluster.tight}`}>
-          <kbd className={`hidden rounded border bg-muted ${padding.xSnug} ${padding.yHair} ${textSize.xs} sm:inline-block`}>
+          <kbd className={`hidden rounded border ${bgColor.muted} ${padding.xSnug} ${padding.yHair} ${textSize.xs} sm:inline-block`}>
             ⌘K
           </kbd>
         </div>

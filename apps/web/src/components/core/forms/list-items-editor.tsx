@@ -11,7 +11,7 @@
  * Production Standards:
  * - Type-safe with discriminated union variants
  * - Flexible rendering (badge vs list styles)
- * - Built-in validation (min/max items, maxLength, no duplicates)
+ * - Built-in validation (min/max, items, maxLength, no duplicates)
  * - Accessible with ARIA labels
  * - Toast integration for user feedback
  * - Counter display and error states
@@ -20,7 +20,18 @@
  */
 
 import { X } from '@heyclaude/web-runtime/icons';
-import { between, cluster, iconSize, spaceY, muted ,size  , gap  } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  cluster,
+  flexWrap,
+  gap,
+  iconSize,
+  marginTop,
+  muted,
+  padding,
+  size,
+  spaceY,
+} from '@heyclaude/web-runtime/design-system';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -250,7 +261,7 @@ export function ListItemManager(props: ListItemManagerProps) {
         <>
           {/* Badge variant */}
           {props.variant === 'badge' && (
-            <div className={`flex flex-wrap ${gap.compact} mt-3`}>
+            <div className={`flex ${flexWrap.wrap} ${gap.compact} ${marginTop.compact}`}>
               {items.map((item, index) => (
                 <UnifiedBadge
                   key={item}
@@ -282,9 +293,9 @@ export function ListItemManager(props: ListItemManagerProps) {
                 return (
                   <div
                     key={itemKey}
-                    className={cn(between.center, 'rounded border ${padding.tight}')}
+                    className={cn(between.center, `rounded border ${padding.tight}`)}
                   >
-                    <span className="text-sm">{item}</span>
+                    <span className={size.sm}>{item}</span>
                     <Button
                       type="button"
                       variant="ghost"

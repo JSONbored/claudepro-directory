@@ -17,7 +17,29 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { formatTagForDisplay } from '@heyclaude/web-runtime/data';
-import { colors, animation, cluster, muted, iconSize, weight, spaceY ,size  , gap  } from '@heyclaude/web-runtime/design-system';
+import {
+  animateDuration,
+  animation,
+  backdrop,
+  bgColor,
+  border,
+  borderColor,
+  cluster,
+  colors,
+  flexWrap,
+  gap,
+  hoverBorder,
+  hoverText,
+  iconSize,
+  muted,
+  padding,
+  radius,
+  shadow,
+  size,
+  spaceY,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { Tag } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion, useInView } from 'motion/react';
@@ -105,25 +127,39 @@ function TagPill({
       <Link
         href={`/tags/${encodeURIComponent(tag)}?category=${category}`}
         className={cn(
-          'group ${cluster.snug} rounded-full border border-border/40',
-          'bg-background/80 ${padding.xCompact} ${padding.ySnug} backdrop-blur-sm',
-          'transition-all duration-200',
-          'hover:border-accent/50 hover:shadow-md'
+          'group',
+          border.default,
+          backdrop.sm,
+          transition.all,
+          hoverBorder.accent,
+          shadow.md,
+          cluster.snug,
+          radius.full,
+          borderColor['border/40'],
+          padding.xCompact,
+          padding.ySnug,
+          animateDuration.default
         )}
         style={{
           ['--tag-color' as string]: categoryColor,
         }}
       >
         <Tag
-          className={cn(iconSize.xs, `${muted.default} transition-colors group-hover:text-[var(--tag-color)]`)}
+          className={cn(iconSize.xs, muted.default, transition.colors, 'group-hover:text-[var(--tag-color)]')}
         />
-        <span className={`${weight.medium} ${size.sm} transition-colors group-hover:text-[var(--tag-color)]`}>
+        <span className={cn(weight.medium, size.sm, transition.colors, 'group-hover:text-[var(--tag-color)]')}>
           {formatTagForDisplay(tag)}
         </span>
         <span
           className={cn(
-            'rounded-full bg-muted/50 ${padding.xSnug} ${padding.yHair} text-[10px] tabular-nums',
-            'transition-colors group-hover:bg-[var(--tag-color)]/10 group-hover:text-[var(--tag-color)]'
+            'tabular-nums',
+            radius.full,
+            size.xs,
+            transition.colors,
+            'group-hover:bg-[var(--tag-color)]/10 group-hover:text-[var(--tag-color)]',
+            bgColor['muted/50'],
+            padding.xSnug,
+            padding.yHair
           )}
         >
           {count}
@@ -168,7 +204,7 @@ export function CategoryTagStrip({
       </motion.div>
 
       {/* Tags row */}
-      <div className={`flex flex-wrap ${gap.compact}`}>
+      <div className={cn('flex', flexWrap.wrap, gap.compact)}>
         {topTags.map((tagData, index) => (
           <TagPill
             key={tagData.tag}
@@ -191,9 +227,16 @@ export function CategoryTagStrip({
             <Link
               href={`/tags?category=${category}`}
               className={cn(
-                '${cluster.tight} rounded-full border border-dashed border-border/40',
-                'px-3 ${padding.ySnug} ${size.sm} ${muted.default}',
-                'transition-colors hover:border-accent/50 hover:text-foreground'
+                border.dashedSubtle,
+                padding.xCompact,
+                transition.colors,
+                hoverBorder.accent,
+                hoverText.foreground,
+                cluster.tight,
+                radius.full,
+                padding.ySnug,
+                size.sm,
+                muted.default
               )}
             >
               View all tags →

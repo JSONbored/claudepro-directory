@@ -8,7 +8,20 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { CheckCircle, Clock, Lightbulb } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, muted, padding, stack, marginTop ,size , row , spaceY  } from '@heyclaude/web-runtime/design-system';
+import {
+  borderBottom,
+  cluster,
+  flexGrow,
+  iconSize,
+  marginTop,
+  muted,
+  padding,
+  row,
+  size,
+  spaceY,
+  stack,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -90,19 +103,19 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
                   <div
                     key={submission.id}
                     className={cn(
-                      '${row.compact}',
-                      'border-border/50 border-b pb-3 last:border-0 last:pb-0'
+                      `${row.compact}`,
+                      `${borderBottom.light} pb-3 last:border-0 last:pb-0`
                     )}
                   >
                     <CheckCircle
                       className={cn(marginTop.micro, 'shrink-0', iconSize.sm, 'text-green-600')}
                     />
-                    <div className="min-w-0 flex-1">
-                      <p className={cn('truncate ${weight.medium} ${size.sm}')}>
+                    <div className={`min-w-0 ${flexGrow['1']}`}>
+                      <p className={cn(`truncate ${weight.medium} ${size.sm}`)}>
                         {submission.content_name}
                       </p>
                       <div className={cn(cluster.compact, marginTop.tight, 'flex-wrap')}>
-                        <UnifiedBadge variant="base" style="outline" className="text-xs">
+                        <UnifiedBadge variant="base" style="outline" className={size.xs}>
                           {typeLabels[submission.content_type]}
                         </UnifiedBadge>
                         {submission.user && (

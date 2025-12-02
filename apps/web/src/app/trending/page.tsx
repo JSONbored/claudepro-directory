@@ -6,31 +6,38 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getTrendingPageData } from '@heyclaude/web-runtime/data';
-import { animate, marginBottom, iconLeading, muted, weight, radius , size  , gap , padding , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  bgColor,
+  borderColor,
+  flexWrap,
+  gap,
+  iconLeading,
+  justify,
+  marginBottom,
+  marginTop,
+  maxWidth,
+  minHeight,
+  muted,
+  overflow,
+  padding,
+  size,
+  textColor,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
-import  { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
-import  {
+import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
+import {
   type DisplayableContent,
   type HomepageContentItem,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UnifiedBadge  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
-  {
-    loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
-  }
-);
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 
 /**
  * Dynamic Rendering Required
@@ -122,29 +129,29 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   const pageTitleId = 'trending-page-title';
 
   return (
-    <div className={`${minHeight.screen} bg-background`}>
-      <section className={`relative overflow-hidden ${padding.xDefault} ${padding.yXl}`} aria-labelledby={pageTitleId}>
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
+      <section className={`relative ${overflow.hidden} ${padding.xDefault} ${padding.yXl}`} aria-labelledby={pageTitleId}>
         <div className="container mx-auto text-center">
           <div className={`mx-auto ${maxWidth['3xl']}`}>
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={`${marginBottom.comfortable} border-accent/20 bg-accent/5 text-accent`}
+              className={`${marginBottom.comfortable} ${borderColor['accent/20']} ${bgColor['accent/5']} ${textColor.accent}`}
             >
-              <TrendingUp className="mr-1 h-3 w-3 text-accent" aria-hidden="true" />
+              <TrendingUp className={`${iconLeading.xs} ${textColor.accent}`} aria-hidden="true" />
               Trending
             </UnifiedBadge>
 
-            <h1 id={pageTitleId} className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:text-6xl`}>
+            <h1 id={pageTitleId} className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:${size['6xl']}`}>
               Trending Configurations
             </h1>
 
-            <p className={`mx-auto mt-6 ${maxWidth['2xl']} ${muted.lg}`}>
+            <p className={`mx-auto ${marginTop.comfortable} ${maxWidth['2xl']} ${muted.lg}`}>
               Discover the most popular and trending Claude configurations in our community. Stay up
               to date with what developers are using and loving.
             </p>
 
-            <ul className={`flex flex-wrap ${gap.compact} list-none justify-center`}>
+            <ul className={`flex ${flexWrap.wrap} ${gap.compact} list-none ${justify.center}`}>
               <li>
                 <UnifiedBadge variant="base" style="secondary">
                   <Clock className={iconLeading.xs} aria-hidden="true" />

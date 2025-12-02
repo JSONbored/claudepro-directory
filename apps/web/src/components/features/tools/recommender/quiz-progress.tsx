@@ -6,7 +6,25 @@
  */
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
-import { between, cluster, iconSize, absolute, spaceY, weight ,size  } from '@heyclaude/web-runtime/design-system';
+import {
+  absolute,
+  animateDuration,
+  between,
+  bgColor,
+  borderColor,
+  cluster,
+  iconSize,
+  alignItems,
+  justify,
+  muted,
+  overflow,
+  radius,
+  size,
+  spaceY,
+  textColor,
+  transition,
+  weight,
+} from '@heyclaude/web-runtime/design-system';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 
 interface QuizProgressProps {
@@ -48,7 +66,7 @@ export function QuizProgress({
           </UnifiedBadge>
         </div>
         {percentComplete === 100 && (
-          <div className={`${cluster.compact} text-primary ${size.sm}`}>
+          <div className={`${cluster.compact} ${textColor.primary} ${size.sm}`}>
             <CheckCircle className={iconSize.sm} />
             <span>Complete!</span>
           </div>
@@ -56,9 +74,9 @@ export function QuizProgress({
       </div>
 
       {/* Progress bar */}
-      <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+      <div className={`relative h-2 w-full ${overflow.hidden} ${radius.full} ${bgColor.muted}`}>
         <div
-          className={`${absolute.topLeft} h-full bg-primary transition-all duration-300 ease-in-out`}
+          className={`${absolute.topLeft} h-full ${bgColor.primary} ${transition.all} ${animateDuration.slow} ease-in-out`}
           style={{ width: `${percentComplete}%` }}
           role="progressbar"
           aria-valuenow={percentComplete}
@@ -73,12 +91,12 @@ export function QuizProgress({
         {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((step) => (
           <div
             key={step}
-            className={`flex h-8 w-8 items-center justify-center rounded-full ${weight.medium} ${size.xs} transition-colors ${
+            className={`flex ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${weight.medium} ${size.xs} ${transition.colors} ${
               step < currentQuestion
-                ? 'bg-primary text-primary-foreground'
+                ? `bg-primary ${textColor.primaryForeground}`
                 : step === currentQuestion
-                  ? 'border-2 border-primary bg-primary/20 text-primary'
-                  : 'bg-muted ${muted.default}'
+                  ? `border-2 ${borderColor.primary} bg-primary/20 ${textColor.primary}`
+                  : `bg-muted ${muted.default}`
             }`}
             title={`Question ${step}${step < currentQuestion ? ' (completed)' : step === currentQuestion ? ' (current)' : ''}`}
           >

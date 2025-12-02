@@ -13,7 +13,27 @@
  * - Apply/Clear actions
  */
 
-import { between, cluster, transition, hoverBg, spaceY, srOnly, weight ,size  , gap , padding  } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  border,
+  borderTop,
+  cluster,
+  gap,
+  hoverBg,
+  alignItems,
+  justify,
+  marginBottom,
+  padding,
+  size,
+  spaceY,
+  srOnly,
+  transition,
+  weight,
+  flexWrap,
+  leading,
+  radius,
+} from '@heyclaude/web-runtime/design-system';
+import { cn } from '@heyclaude/web-runtime/ui';
 import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { memo, useId } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -86,10 +106,10 @@ function SearchFilterPanelComponent({
 
   return (
     <section
-      className={'${spaceY.comfortable} ${radius.lg} border border-border/50 bg-card/30 ${padding.default} md:${spaceY.relaxed} md:p-6'}
+      className={`${spaceY.comfortable} ${radius.lg} ${border.light} bg-card/30 ${padding.default} md:${spaceY.relaxed} md:${padding.comfortable}`}
     >
       {/* Main Filters */}
-      <fieldset className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 md:gap-6 lg:grid-cols-3`}>
+      <fieldset className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 md:${gap.relaxed} lg:grid-cols-3`}>
         <legend className={srOnly.default}>Filter by category, author, and date range</legend>
 
         {/* Category Filter */}
@@ -181,7 +201,7 @@ function SearchFilterPanelComponent({
 
       {/* Popularity Slider */}
       <fieldset className={spaceY.compact}>
-        <legend className={`${weight.medium} ${size.sm} leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}>
+        <legend className={`${weight.medium} ${size.sm} ${leading.none} peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}>
           Popularity Range ({filters.popularity?.[0] || 0} - {filters.popularity?.[1] || 100})
         </legend>
         <div className={`px-2 ${padding.yDefault}`}>
@@ -202,10 +222,10 @@ function SearchFilterPanelComponent({
       {/* Tags - Organized in Scrollable Area */}
       {availableTags.length > 0 && (
         <fieldset className={spaceY.default}>
-          <div className={'border-border/50 border-t pt-3'} />
+          <div className={`${borderTop.light} pt-3`} />
           <div>
-            <div className={`${between.center} mb-3`}>
-              <legend className={`${weight.medium} ${size.sm} leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}>
+            <div className={`${between.center} ${marginBottom.compact}`}>
+              <legend className={`${weight.medium} ${size.sm} ${leading.none} peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}>
                 Tags
               </legend>
               {filters.tags && filters.tags.length > 0 && (
@@ -220,10 +240,10 @@ function SearchFilterPanelComponent({
               )}
             </div>
             <ScrollArea
-              className={'h-40 w-full rounded-md border border-border/50 ${padding.default} md:h-48'}
+              className={`h-40 w-full ${radius.md} ${border.light} ${padding.default} md:h-48`}
               aria-label="Select tags to filter by"
             >
-              <div className={`flex flex-wrap ${gap.compact}`}>
+              <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
                 {availableTags.map((tag) => (
                   <button
                     key={tag}
@@ -256,7 +276,7 @@ function SearchFilterPanelComponent({
 
       {/* Action Buttons */}
       {showActions && (
-        <fieldset className={'flex items-center justify-between border-border/50 border-t pt-6'}>
+        <fieldset className={cn('flex pt-6', borderTop.light, alignItems.center, justify.between)}>
           <legend className={srOnly.default}>Filter actions</legend>
           <Button
             variant="ghost"

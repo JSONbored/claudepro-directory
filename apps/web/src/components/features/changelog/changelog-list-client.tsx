@@ -9,7 +9,9 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
-import { spaceY, marginTop, muted  , padding } from '@heyclaude/web-runtime/design-system';
+import { spaceY, marginTop, muted  , padding, justify,
+  alignItems,
+} from '@heyclaude/web-runtime/design-system';
 import { useState } from 'react';
 
 import { CategoryFilter } from '@/src/components/features/changelog/changelog-category-filter';
@@ -98,7 +100,7 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
 
       <TabsContent value={activeCategory} className={marginTop.comfortable}>
         {timelineEntries.length === 0 ? (
-          <output className={`flex items-center justify-center ${padding.ySection}`} aria-live="polite">
+          <output className={`flex ${alignItems.center} ${justify.center} ${padding.ySection}`} aria-live="polite">
             <p className={muted.lg}>
               No changelog entries found for {activeCategory.toLowerCase()} category.
             </p>

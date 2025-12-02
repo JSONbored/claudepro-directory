@@ -5,7 +5,7 @@
  */
 
 import { Clock, Star, TrendingUp } from '@heyclaude/web-runtime/icons';
-import { spaceY, marginBottom, weight, size, maxWidth } from '@heyclaude/web-runtime/design-system';
+import { iconSize, spaceY, marginBottom, weight, size, maxWidth , zLayer } from '@heyclaude/web-runtime/design-system';
 import type { TrendingContentProps } from '@heyclaude/web-runtime/types/component.types';
 import { useId } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -78,7 +78,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
               value={config.value}
               aria-label={`View ${config.label.toLowerCase()} configurations`}
             >
-              <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
+              <Icon className={`mr-2 ${iconSize.sm}`} aria-hidden="true" />
               {config.label}
             </TabsTrigger>
           );
@@ -117,7 +117,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                     <div key={item.slug} className="relative">
                       {showRankBadge && index < 3 && (
                         <UnifiedBadge
-                          className="-top-2 -right-2 absolute z-10"
+                          className={`-top-2 -right-2 absolute ${zLayer.raised}`}
                           variant="base"
                           style="default"
                           aria-label={`Rank ${index + 1}`}

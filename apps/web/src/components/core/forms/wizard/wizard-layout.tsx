@@ -16,7 +16,23 @@
  */
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { iconSize, marginTop, muted, weight ,size  , gap , padding  , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  alignItems,
+  backdrop,
+  borderBottom,
+  borderTop,
+  gap,
+  iconSize,
+  justify,
+  marginTop,
+  maxWidth,
+  minHeight,
+  muted,
+  padding,
+  size,
+  weight,
+  zLayer,
+} from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ArrowRight, Save, X } from '@heyclaude/web-runtime/icons';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
@@ -163,21 +179,22 @@ export function WizardLayout({
 
   return (
     <div
-      className={cn('relative ${minHeight.screen}', className)}
+      className={cn(
+  `relative ${minHeight.screen}`, className)}
       style={{
         backgroundColor: TOKENS.colors.background.primary,
       }}
     >
       {/* Header */}
       <header
-        className="sticky top-0 z-30 border-b backdrop-blur-sm"
+        className={`sticky top-0 ${zLayer.fixed} ${borderBottom.default} ${backdrop.sm}`}
         style={{
           backgroundColor: `${TOKENS.colors.background.primary}e6`, // 90% opacity
           borderColor: TOKENS.colors.border.light,
         }}
       >
         <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yDefault}`}>
-          <div className="flex items-center justify-between">
+          <div className={`flex ${alignItems.center} ${justify.between}`}>
             {/* Exit Button */}
             <Button type="button" variant="ghost" size="sm" onClick={handleExit} className={`${gap.compact}`}>
               <X className={iconSize.sm} />
@@ -236,14 +253,14 @@ export function WizardLayout({
 
       {/* Footer Navigation */}
       <footer
-        className="sticky bottom-0 z-30 border-t backdrop-blur-sm"
+        className={`sticky bottom-0 ${zLayer.fixed} ${borderTop.default} ${backdrop.sm}`}
         style={{
           backgroundColor: `${TOKENS.colors.background.primary}e6`, // 90% opacity
           borderColor: TOKENS.colors.border.light,
         }}
       >
         <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yDefault}`}>
-          <div className={`flex items-center justify-between ${gap.comfortable}`}>
+          <div className={`flex ${alignItems.center} ${justify.between} ${gap.comfortable}`}>
             {/* Previous Button */}
             <Button
               type="button"
