@@ -68,9 +68,10 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Validate company website URL is safe for use in href
- * Only allows absolute URLs with http:// or https:// protocol
- * Strictly validates to prevent XSS and protocol-relative URLs
+ * Determines whether a value is an absolute HTTP(S) URL safe for use in an href.
+ *
+ * @param url - The value to validate; may be `null` or `undefined`.
+ * @returns `true` if `url` is a non-empty string that parses as an absolute `http:` or `https:` URL, `false` otherwise.
  */
 function isAllowedHttpUrl(url: null | string | undefined): boolean {
   if (!url || typeof url !== 'string') return false;
@@ -85,11 +86,9 @@ function isAllowedHttpUrl(url: null | string | undefined): boolean {
 }
 
 /**
- * Provide metadata for the "My Companies" page.
+ * Create page metadata for the /account/companies route.
  *
- * Generates the Next.js Metadata for the /account/companies route using the shared page metadata builder.
- *
- * @returns The Metadata object used by Next.js for this page.
+ * @returns The Next.js `Metadata` object for the My Companies page.
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {

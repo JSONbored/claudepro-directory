@@ -182,18 +182,14 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
 }
 
 /**
- * Renders the company profile page for a given company slug, including header, active job listings, and company statistics.
+ * Render the company profile page for a given company slug, including header, active job listings, and a sidebar with company statistics and CTAs.
  *
- * This server component:
- * - Fetches the company profile via `getCompanyProfile(slug)` and returns a 404 if no company is found.
- * - Renders SEO structured data, company header (logo, name, description, metadata), a list of active job cards, and a sidebar with company stats and a CTA.
- * - Uses a per-request logger (generated with `generateRequestId`) scoped to this page to record fetch outcomes.
+ * Fetches the company profile for `slug` and renders a 404 page when no company is found. This page is server-rendered and participates in ISR (revalidate = 1800 seconds).
  *
  * @param params - Route parameters containing the company `slug`.
- * @returns The rendered React element tree for the company page.
+ * @returns The React element tree for the company page.
  *
  * @see getCompanyProfile
- * @see generateRequestId
  * @see SafeWebsiteLink
  * @see StructuredData
  */

@@ -21,6 +21,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime
 
 import { TabSectionRenderer } from './tab-section-renderer';
 
+/**
+ * Render a tabbed detail layout that keeps every tab's content mounted for SEO, supports mobile swipe navigation, and synchronizes the active tab with the URL hash.
+ *
+ * Renders a sticky tab bar, updates the URL hash without scrolling when the active tab changes, listens for external hash changes, and emits analytics for tab switches.
+ *
+ * @param item - The content item to render; used to render sections and for analytics (expects fields like `slug` and `category`).
+ * @param config - Layout configuration containing `typeName` and `sections` used when rendering section components.
+ * @param tabs - An ordered array of tab definitions. Each tab should include `id`, `label`, optional `mobileLabel`, and `sections` (array of section IDs).
+ * @param sectionData - A map of section IDs to their corresponding data used by section renderers.
+ * @returns A React element containing the tabbed detail layout.
+ *
+ * @see TabSectionRenderer
+ * @see usePulse
+ */
 export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDetailLayoutProps) {
   const pulse = usePulse();
   // Get initial tab from URL hash or default to first tab

@@ -18,9 +18,9 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Provide page metadata for the "/account/jobs/new" route.
+ * Generate metadata for the "/account/jobs/new" page.
  *
- * @returns Page metadata for the "/account/jobs/new" route.
+ * @returns Metadata for the "/account/jobs/new" route.
  *
  * @see generatePageMetadata
  */

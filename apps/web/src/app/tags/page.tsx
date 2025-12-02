@@ -85,6 +85,17 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Server-rendered page that displays a browsable tags index with a hero, featured tags, and an interactive tag cloud.
+ *
+ * Fetches tag summaries from the backend and renders counts and visual components; if fetching fails the page logs the error and renders an empty state.
+ *
+ * @returns The rendered tags index page as JSX.
+ *
+ * @see getAllTagsWithCounts
+ * @see AnimatedTagCloud
+ * @see FeaturedTagsGrid
+ */
 export default async function TagsIndexPage() {
   const requestId = generateRequestId();
   const reqLogger = logger.child({

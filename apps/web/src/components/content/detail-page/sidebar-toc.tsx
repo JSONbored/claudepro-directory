@@ -34,15 +34,14 @@ interface SidebarTocProps {
 }
 
 /**
- * Render a right-side table of contents that highlights the currently visible section and enables in-page navigation.
+ * Renders a right-side table of contents that highlights the currently visible section and enables in-page navigation.
  *
- * The component normalizes provided headings, keeps the active heading in sync with the URL hash and scroll position,
- * and scrolls smoothly (respecting reduced-motion) when a TOC entry is clicked.
+ * Normalizes provided headings, keeps the active heading in sync with the URL hash and scroll position, and performs
+ * smooth scrolling to a heading when its TOC entry is clicked (respecting the user's reduced-motion preference).
  *
- * @param props.headings - Array of heading metadata (ContentHeadingMetadata) or `null`/`undefined`. Headings are normalized internally.
- * @param props.className - Optional additional class names to apply to the root nav container.
- * @param props.minHeadings - Minimum number of headings required to render the TOC (default: 2).
- *
+ * @param headings - Array of heading metadata to display in the TOC; may be `null`/`undefined`. Headings are normalized internally.
+ * @param className - Optional additional class names applied to the root navigation container.
+ * @param minHeadings - Minimum number of headings required to render the TOC (default: 2).
  * @returns A navigation element containing the page table of contents, or `null` if the number of headings is below `minHeadings`.
  *
  * @see normalizeHeadings

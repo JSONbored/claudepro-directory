@@ -44,6 +44,14 @@ import Link from 'next/link';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 
 
+/**
+ * Produces the Next.js page metadata for the Community page.
+ *
+ * @returns The Metadata object for the "/community" route used by Next.js.
+ *
+ * @see generatePageMetadata
+ * @see import('next').Metadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community');
 }
@@ -74,14 +82,11 @@ function formatStatValue(value: null | number | undefined): string {
 }
 
 /**
- * Renders the Community page, fetching directory and homepage metrics and displaying community stats, contribution guidance, and contact CTA.
+ * Render the Community page with community stats, contribution guidance, and contact CTAs.
  *
- * This server component:
- * - Loads community directory entries, configuration count, and homepage metrics in parallel and uses safe fallbacks if any fetch fails.
- * - Creates a request-scoped logger and records warnings when expected contact channels (Discord, Twitter/X) are not configured and errors when data fetches fail.
- * - Renders hero actions for configured contact channels, three summary stat cards (Configurations, Contributors, Community Members), contribution instructions, and an email newsletter CTA.
+ * Fetches community directory entries, configuration counts, and homepage metrics in parallel and uses safe fallbacks if any fetch fails. Creates a request-scoped logger and records warnings when expected contact channels (Discord, X/Twitter) are missing and errors when data fetches fail. Renders hero actions for configured contact channels, three summary stat cards (Configurations, Contributors, Community Members), contribution instructions, and a newsletter CTA.
  *
- * @returns The rendered React element for the Community page.
+ * @returns A React element representing the Community page.
  *
  * @see generateRequestId
  * @see getContactChannels

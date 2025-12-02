@@ -62,21 +62,30 @@ const ENHANCED_HERO_CATEGORIES: readonly ContentCategory[] = [
   'guides',
 ] as const;
 
+/**
+ * Determines whether a category opts into enhanced hero features.
+ *
+ * @param category - Category identifier to test (typically a content type slug)
+ * @returns `true` if `category` is included in `ENHANCED_HERO_CATEGORIES` and can be treated as a `ContentCategory`, `false` otherwise.
+ *
+ * @see ENHANCED_HERO_CATEGORIES
+ * @see ContentHeroSection
+ */
 function isEnhancedCategory(category: string): category is ContentCategory {
   return ENHANCED_HERO_CATEGORIES.includes(category as ContentCategory);
 }
 
 /**
- * Renders the hero section for a content list page including title, description, icon, badges, and a submit action.
+ * Render the hero section for a content list page, including title, description, decorative icon, badges, and a submit action.
  *
- * @template T - The content item shape used to compute badge defaults.
- * @param props.title - Page title shown as the main heading.
- * @param props.description - Short descriptive text shown under the heading.
- * @param props.icon - Name of the icon to display in the decorative icon area.
- * @param props.items - Array of content items; used to derive default badges (e.g., item count).
- * @param props.badges - Optional custom badges to display; if empty, a default set is shown.
- * @param props.category - The content category for themed styling and tag extraction.
- * @returns The hero section JSX element for the content list page.
+ * @template T - The shape of each content item used to derive badges and statistics.
+ * @param title - Page heading text shown prominently at the top of the hero.
+ * @param description - Short descriptive text displayed beneath the title.
+ * @param icon - Icon name used for the decorative, animated icon container.
+ * @param items - Array of content items used to build default badges, aggregate statistics, and populate tag strips.
+ * @param badges - Optional custom badges to display; when empty a default badge set is constructed (category-aware).
+ * @param category - Optional content category used to enable enhanced hero features (e.g., dynamic badges, stats, tag strip).
+ * @returns The rendered hero section as a JSX element.
  *
  * @see ContentListServer
  * @see UnifiedBadge
@@ -264,6 +273,17 @@ function ContentHeroSection<T extends DisplayableContent>({
   );
 }
 
+/**
+ * Skeleton placeholder UI shown while the content search client is loading.
+ *
+ * Renders a large primary skeleton followed by two smaller skeletons aligned to the end,
+ * matching the layout used by the content search header.
+ *
+ * @returns A JSX element containing the search-area skeleton placeholders.
+ *
+ * @see ContentSearchClient
+ * @see ContentListServer
+ */
 function ContentSearchSkeleton() {
   return (
     <div className={`w-full ${spaceY.comfortable}`}>

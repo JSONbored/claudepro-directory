@@ -62,6 +62,21 @@ export interface ReadProgressProps {
   };
 }
 
+/**
+ * Renders a configurable horizontal reading progress bar that animates with scroll position.
+ *
+ * The bar can be positioned at the top, bottom, or directly below the site's navigation, and
+ * supports configurable color, height, stacking order, and spring animation tuning.
+ *
+ * @param props.position - Where to place the progress bar: `'top'`, `'bottom'`, or `'below-nav'` (default: `'below-nav'`).
+ * @param props.color - Visual token to use for the bar: `'accent'`, `'primary'`, or `'foreground'` (default: `'accent'`).
+ * @param props.height - Height of the bar in pixels (default: `5`).
+ * @param props.zIndex - CSS z-index to control stacking (default: `51`).
+ * @param props.springConfig - Spring physics configuration used to smooth the progress animation.
+ * @returns The rendered progress bar element, or `null` when not mounted or awaiting navigation measurements.
+ *
+ * @see ReadProgressPresets
+ */
 export function ReadProgress({
   position = 'below-nav',
   color = 'accent',

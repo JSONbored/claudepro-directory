@@ -27,8 +27,15 @@ import { NotificationToastHandler } from '@/src/components/features/notification
 import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
 
 /**
- * ThemeProvider wrapper that properly types children for React 19
- * next-themes v0.4.6 types don't include children in ThemeProviderProps for React 19
+ * Wrapper around the next-themes ThemeProvider that provides correct children typing for React 19.
+ *
+ * Ensures the provider accepts a ReactNode `children` prop while forwarding all other ThemeProvider props to the underlying next-themes provider.
+ *
+ * @param children - Rendered React nodes placed inside the theme provider
+ * @param props - All other ThemeProvider props forwarded to the underlying next-themes provider
+ * @returns The rendered ThemeProvider element
+ *
+ * @see NextThemesProvider
  */
 function ThemeProvider({ children, ...props }: NextThemesProps & { children: ReactNode }) {
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;

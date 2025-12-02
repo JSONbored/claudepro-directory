@@ -85,7 +85,14 @@ const FILTERABLE_CATEGORIES = Constants.public.Enums.content_category.filter(
 );
 
 /**
- * Generate metadata for tag pages
+ * Build page metadata for a tag detail page using the decoded tag and its stored metadata.
+ *
+ * @param params - An object with a URL-encoded `tag` path parameter.
+ * @returns The Metadata object for the tag page including title, description, keywords, and Open Graph data.
+ *
+ * @see getTagMetadata
+ * @see formatTagForDisplay
+ * @see CATEGORY_LABELS
  */
 export async function generateMetadata({
   params,
@@ -125,7 +132,15 @@ export async function generateMetadata({
 }
 
 /**
- * Related tags sidebar
+ * Renders a sidebar card listing tags that share at least one category with the current tag.
+ *
+ * @param props.currentTag - The tag currently being viewed; used to exclude from results.
+ * @param props.allTags - Array of tag summaries (including `tag`, `categories`, and `count`) to search for related tags.
+ * @returns A JSX element containing a card of related tag badges, or `null` when no related tags are available.
+ *
+ * @see formatTagForDisplay
+ * @see UnifiedBadge
+ * @see Card
  */
 function RelatedTagsSidebar({
   currentTag,
@@ -174,7 +189,15 @@ function RelatedTagsSidebar({
 type FilterableCategory = (typeof FILTERABLE_CATEGORIES)[number];
 
 /**
- * Category filter tabs
+ * Renders a horizontal row of category filter tabs for a specific tag, including an "All" tab and one tab per category that has a non-zero count.
+ *
+ * @param tag - The raw tag value used to build each tab's URL; will be URL-encoded when rendered.
+ * @param activeCategory - The currently selected filter category, or `null` to indicate "All".
+ * @param categoryCounts - A map from content category to the number of items for that category for this tag; tabs are rendered only for categories with a count greater than zero.
+ * @returns The JSX element containing the filter tabs.
+ *
+ * @see FILTERABLE_CATEGORIES
+ * @see CATEGORY_LABELS
  */
 function CategoryFilterTabs({
   tag,
@@ -218,8 +241,13 @@ function CategoryFilterTabs({
 }
 
 /**
- * Convert TaggedContentItem to DisplayableContent for ConfigCard
- * This casts the item to the enriched_content_item format expected by the UI
+ * Map a TaggedContentItem into the DisplayableContent shape consumed by card components.
+ *
+ * @param item - The tagged content item to convert into the UI-facing displayable format.
+ * @returns A DisplayableContent object with fields populated from the source item (ids, titles, dates, counts, category, tags, and source); optional/enhanced fields are set to null when not provided.
+ *
+ * @see DisplayableContent
+ * @see ConfigCard
  */
 function toDisplayableContent(item: TaggedContentItem): DisplayableContent {
   // Cast to enriched_content_item compatible structure
@@ -254,6 +282,23 @@ function toDisplayableContent(item: TaggedContentItem): DisplayableContent {
   } as DisplayableContent;
 }
 
+/**
+ * Renders the Tag detail page showing tag metadata, a filtered content grid, and related tags.
+ *
+ * Fetches tag metadata, content for the tag (optionally narrowed by a category query param), and a list of all tags in parallel; converts fetched items to displayable content and renders a hero, category filter tabs, content grid (or an empty-state card), and a sidebar with related tags and a browse CTA.
+ *
+ * Next.js behavior:
+ * - Uses dynamic rendering (dynamic = 'force-dynamic') and supports dynamic route params.
+ * - Triggers Next.js notFound() when no metadata and no content are found for the tag.
+ *
+ * @param params - Route params object containing an encoded `tag` string.
+ * @param searchParams - Query params object; supports optional `category` to filter displayed items.
+ *
+ * @see generateMetadata
+ * @see toDisplayableContent
+ * @see RelatedTagsSidebar
+ * @see CategoryFilterTabs
+ */
 export default async function TagDetailPage({
   params,
   searchParams,

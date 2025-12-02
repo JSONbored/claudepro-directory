@@ -429,6 +429,18 @@ export default async function AccountDashboard() {
   );
 }
 
+/**
+ * Renders a compact action row with a title, supporting description, and a right-aligned "Open" link.
+ *
+ * Displays a two-column layout: the left column shows the title and description, and the right column shows a navigation link to `href`.
+ *
+ * @param title - The primary label for the action
+ * @param description - A short explanatory line shown beneath the title
+ * @param href - Destination URL for the "Open" link
+ *
+ * @see NavLink
+ * @see RecentlySavedGrid
+ */
 function QuickActionRow({
   title,
   description,

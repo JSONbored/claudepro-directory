@@ -42,15 +42,25 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Provide page metadata for the /account/sponsorships route.
+ *
+ * Used by Next.js to populate the page's head metadata (title, description, open graph, etc.).
+ *
+ * @returns Metadata for the Sponsorships page.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/sponsorships');
 }
 
 /**
- * Determine whether a sponsorship is currently active.
+ * Determines whether a sponsorship is active at a given time.
+ *
+ * Considers both the sponsorship's `active` flag and inclusive `start_date`/`end_date` bounds.
  *
  * @param sponsorship - Sponsorship record containing `active` and ISO date strings `start_date` and `end_date`
- * @param now - Reference time to evaluate activity against
+ * @param now - Reference time used to evaluate the sponsorship's date range
  * @returns `true` if the sponsorship's `active` flag is `true` and `now` is between `start_date` and `end_date` (inclusive), `false` otherwise
  *
  * @see SponsorshipsPage

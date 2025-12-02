@@ -23,11 +23,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export const revalidate = 3600;
 
 /**
- * Renders the site's Accessibility Statement, including conformance information, accessibility features, known limitations, testing approach, compatible technologies, feedback channels, and the last-updated timestamp.
+ * Render the site's Accessibility Statement page, including conformance status, accessibility features, known limitations, testing approach, compatible technologies, feedback channels, and a last-updated timestamp.
  *
- * Fetches the site's last updated timestamp and contact channels during render and injects the organization name from APP_CONFIG. This page is intended to be statically generated and participates in the file's ISR/revalidation cycle.
+ * The page displays the organization name from APP_CONFIG and uses contact information from getContactChannels and the timestamp from getLastUpdatedDate. It is produced as a statically generated page and participates in the file's ISR/revalidation behavior.
  *
- * @returns The React element representing the full Accessibility Statement page.
+ * @returns The React element representing the Accessibility Statement page.
  * @see getLastUpdatedDate
  * @see getContactChannels
  * @see APP_CONFIG

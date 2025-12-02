@@ -47,9 +47,11 @@ import { NewsletterCTAVariant } from '@/src/components/features/growth/newslette
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
 export const revalidate = 900; /**
- * Produce metadata for the /trending route.
+ * Provide route metadata for the /trending page.
  *
- * @returns A Metadata object describing the /trending page.
+ * Includes SEO attributes (title, description, open graph) and route-specific Next.js metadata such as ISR revalidation settings.
+ *
+ * @returns Metadata for the /trending page, including SEO attributes and revalidation configuration
  * @see generatePageMetadata
  * @see revalidate
  */
@@ -257,6 +259,17 @@ function mapPopularContent(
   });
 }
 
+/**
+ * Convert recent-content rows into homepage-ready DisplayableContent items.
+ *
+ * @param rows - Raw rows returned by the `get_recent_content` database function.
+ * @param category - Optional category override applied to every item; if `null` the row's category is used. Invalid categories fall back to `DEFAULT_CATEGORY`.
+ * @returns An array of `DisplayableContent` items suitable for homepage rendering; each item has `created_at` and `date_added` set from the row and `featuredRank` set to the item's 1-based position.
+ *
+ * @see toHomepageContentItem
+ * @see DEFAULT_CATEGORY
+ * @see isValidCategory
+ */
 function mapRecentContent(
   rows: Database['public']['Functions']['get_recent_content']['Returns'],
   category: Database['public']['Enums']['content_category'] | null

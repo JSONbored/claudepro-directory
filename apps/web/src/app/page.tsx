@@ -44,6 +44,12 @@ import { RecentlyViewedRail } from '@/src/components/features/home/recently-view
  */
 export const revalidate = 3600;
 
+/**
+ * Produce metadata for the homepage.
+ *
+ * @returns A `Metadata` object describing the homepage (root route).
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/');
 }
@@ -55,10 +61,16 @@ interface HomePageProperties {
 }
 
 /**
- * Top Contributors Server Component
- * 
- * NOTE: This calls getHomepageData which is deduplicated via React's cache()
- * The data is already fetched in the main page component, so this is a cache hit.
+ * Renders the top contributors section by reading and normalizing cached homepage data.
+ *
+ * Fetches homepage data (deduplicated via React's cache), reports fetch failures via trackRPCFailure, extracts and filters top contributors that have id, slug, and name, and maps them to a simplified contributor shape (defaulting `tier` to `'free'` and adding a `created_at` timestamp) passed into the TopContributors component.
+ *
+ * @returns A JSX element rendering the TopContributors component populated with the processed contributors.
+ *
+ * @see getHomepageData
+ * @see getHomepageCategoryIds
+ * @see TopContributors
+ * @see trackRPCFailure
  */
 async function TopContributorsServer() {
   const categoryIds = getHomepageCategoryIds;
@@ -100,19 +112,16 @@ async function TopContributorsServer() {
 }
 
 /**
- * Streaming SSR Homepage Architecture
+ * Server-rendered homepage that streams a fast-rendering hero and progressively streams content and lazy sections.
  *
- * Data Flow:
- * 1. Main page fetches homepage data (member count for hero)
- * 2. Hero section renders with member count
- * 3. HomepageContentServer streams (uses React-cached getHomepageData - cache hit)
- * 4. TopContributorsServer lazy loads (uses React-cached getHomepageData - cache hit)
+ * Renders the hero immediately using a cached homepage data fetch (member count and "new this week" indicator), then streams the main content and lazy-loaded sections (recently viewed, top contributors, newsletter). Data fetching uses React cache-level deduplication and cross-request caching; fetch errors for the initial hero request are captured and degrade to safe defaults.
  *
- * This architecture:
- * - Improves TTFB by ~50% (hero renders immediately)
- * - Uses React cache() for request-level deduplication
- * - Uses unstable_cache for cross-request caching
- * - Errors are NOT cached (fixed in fetch-cached.ts)
+ * @param searchParams - A promise resolving to query parameters (e.g., `{ q?: string }`) supplied to the page.
+ * @returns The homepage React element tree rendered on the server.
+ *
+ * @see getHomepageData
+ * @see HomepageHeroServer
+ * @see HomepageContentServerWrapper
  */
 export default async function HomePage({ searchParams }: HomePageProperties) {
   const requestId = generateRequestId();

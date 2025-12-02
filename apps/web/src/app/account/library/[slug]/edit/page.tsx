@@ -29,6 +29,21 @@ export async function generateMetadata({ params }: EditCollectionPageProperties)
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
+/**
+ * Render the Edit Collection page for the collection identified by the provided slug.
+ *
+ * Authenticates the current user, loads the collection and its bookmarks, and renders the edit form.
+ * Unauthenticated users are redirected to `/login`. If the collection is not found or inaccessible,
+ * a 404 is rendered. Failures while fetching collection details are normalized and re-thrown.
+ *
+ * @param params - Route params object containing the `slug` of the collection to edit
+ * @returns The page's React element containing the edit UI for the collection
+ * @throws Error - Normalized error when collection detail loading fails
+ *
+ * @see getAuthenticatedUser
+ * @see getCollectionDetail
+ * @see CollectionForm
+ */
 export default async function EditCollectionPage({ params }: EditCollectionPageProperties) {
   const { slug } = await params;
   
