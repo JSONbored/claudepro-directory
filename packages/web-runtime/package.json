@@ -122,6 +122,10 @@
       "types": "./src/data/content/index.ts",
       "default": "./src/data/content/index.ts"
     },
+    "./data/tag-utils": {
+      "types": "./src/data/tag-utils.ts",
+      "default": "./src/data/tag-utils.ts"
+    },
     "./seo": {
       "types": "./src/seo/generator.ts",
       "default": "./src/seo/generator.ts"

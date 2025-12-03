@@ -278,19 +278,6 @@ export async function getTagMetadata(tag: string): Promise<null | TagSummary> {
   return allTags.find((t) => t.tag === tag) ?? null;
 }
 
-/**
- * Format tag for display (capitalize words, replace hyphens with spaces)
- */
-export function formatTagForDisplay(tag: string): string {
-  return tag
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
-/**
- * Format tag for URL (lowercase, hyphenated)
- */
-export function formatTagForUrl(tag: string): string {
-  return tag.toLowerCase().replaceAll(/\s+/g, '-');
-}
+// NOTE: formatTagForDisplay and formatTagForUrl are now in tag-utils.ts
+// Import from '@heyclaude/web-runtime/data' for client components
+// or from './tag-utils.ts' for server components

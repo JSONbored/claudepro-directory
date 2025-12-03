@@ -1,6 +1,22 @@
 import type { Database } from '@heyclaude/database-types';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 
+// Handle special cases that don't follow standard pluralization
+const SPECIAL_CASES: Record<string, string> = {
+  'MCP': 'MCP',
+  'MCP Servers': 'MCP Server',
+  'Agents': 'Agent',
+  'Rules': 'Rule',
+  'Commands': 'Command',
+  'Hooks': 'Hook',
+  'Statuslines': 'Statusline',
+  'Skills': 'Skill',
+  'Collections': 'Collection',
+  'Guides': 'Guide',
+  'Jobs': 'Job',
+  'Changelog': 'Changelog',
+};
+
 /**
  * Produce the singular form of a category title for UI text and aria-labels.
  *
@@ -14,24 +30,8 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
  * @see ContentHeroSection
  */
 function singularizeTitle(title: string): string {
-  // Handle special cases that don't follow standard pluralization
-  const specialCases: Record<string, string> = {
-    'MCP': 'MCP',
-    'MCP Servers': 'MCP Server',
-    'Agents': 'Agent',
-    'Rules': 'Rule',
-    'Commands': 'Command',
-    'Hooks': 'Hook',
-    'Statuslines': 'Statusline',
-    'Skills': 'Skill',
-    'Collections': 'Collection',
-    'Guides': 'Guide',
-    'Jobs': 'Job',
-    'Changelog': 'Changelog',
-  };
-  
-  if (specialCases[title]) {
-    return specialCases[title];
+  if (SPECIAL_CASES[title]) {
+    return SPECIAL_CASES[title];
   }
   
   // Standard pluralization: remove trailing 's'
@@ -175,19 +175,22 @@ function ContentHeroSection<T extends DisplayableContent>({
           ...(isEnhanced ? [] : [{ text: 'Production Ready' }]),
         ];
 
-  // Aggregate real stats from items (safely cast to expected shape)
-  const aggregated = aggregateContentStats(
-    items as Array<{
-      view_count?: number | null;
-      bookmark_count?: number | null;
-      copy_count?: number | null;
-      use_count?: number | null;
-    }>
-  );
+  // Aggregate real stats from items (only when enhanced features are enabled)
+  const aggregated = isEnhanced
+    ? aggregateContentStats(
+        items as Array<{
+          view_count?: number | null;
+          bookmark_count?: number | null;
+          copy_count?: number | null;
+          use_count?: number | null;
+        }>
+      )
+    : null;
 
   // Build stats for AnimatedStatsRow (only show if we have meaningful data)
-  const hasStats = aggregated.totalViews > 0 || aggregated.totalBookmarks > 0;
-  const stats = hasStats
+  const hasStats =
+    !!aggregated && (aggregated.totalViews > 0 || aggregated.totalBookmarks > 0);
+  const stats = hasStats && aggregated
     ? [
         {
           label: title,
@@ -274,7 +277,8 @@ function ContentHeroSection<T extends DisplayableContent>({
                             <BadgeIconComponent className={iconLeading.xs} aria-hidden="true" />
                           );
                         }
-                        return null;
+                        // Allow pre-constructed ReactNode icons to render as-is
+                        return badge.icon;
                       })()}
                     {badge.text}
                   </UnifiedBadge>

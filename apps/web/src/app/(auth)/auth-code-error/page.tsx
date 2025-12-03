@@ -12,6 +12,7 @@ import {
   maxWidth,
   radius,
   size,
+  squareSize,
   stack,
   textAlign,
   textColor,
@@ -22,7 +23,7 @@ import {
   generateRequestId,
   logger,
 } from '@heyclaude/web-runtime/logging/server';
-import { Button ,
+import { Button,
   Card,
   CardContent,
   CardDescription,
@@ -100,11 +101,11 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
     <Card className={`${width.full} ${maxWidth.md}`}>
       <CardHeader className={textAlign.center}>
         <div
-          className={`${marginX.auto} ${marginBottom.default} ${display.flex} ${iconSize['3xl']} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['destructive/10']}`}
+          className={`${marginX.auto} ${marginBottom.default} ${display.flex} ${squareSize.avatar3xl} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['destructive/10']}`}
         >
           <AlertCircle className={`${iconSize.lg} ${textColor.destructive}`} />
         </div>
-        <CardTitle className={`${size['2xl']}`}>Authentication Error</CardTitle>
+        <CardTitle className={size['2xl']}>Authentication Error</CardTitle>
         <CardDescription>
           There was a problem signing you in. This could be due to an invalid or expired link.
         </CardDescription>

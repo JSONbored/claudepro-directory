@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-export const submitContactFormSchema = z.object({
+const submitContactFormSchema = z.object({
   name: z.string(),
   email: z.string(),
   category: z.enum(['bug', 'feature', 'partnership', 'general', 'other']),

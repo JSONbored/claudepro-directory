@@ -23,6 +23,7 @@ import {
   width,
   textAlign,
   marginRight,
+  hoverText,
 } from '@heyclaude/web-runtime/design-system';
 import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
@@ -110,15 +111,15 @@ export default function ErrorBoundary({
         <div className={`${marginTop.relaxed} ${muted.sm}`}>
           <p className={marginBottom.tight}>Or explore:</p>
           <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact} ${justify.center}`}>
-            <Link href={ROUTES.AGENTS} className={`hover:${textColor.primary}`}>
+            <Link href={ROUTES.AGENTS} className={hoverText.primary}>
               Agents
             </Link>
             <span>•</span>
-            <Link href={ROUTES.MCP} className={`hover:${textColor.primary}`}>
+            <Link href={ROUTES.MCP} className={hoverText.primary}>
               MCP Servers
             </Link>
             <span>•</span>
-            <Link href={ROUTES.GUIDES} className={`hover:${textColor.primary}`}>
+            <Link href={ROUTES.GUIDES} className={hoverText.primary}>
               <Search className={`${marginRight.tight} ${display.inline} ${iconSize.xs}`} />
               Guides
             </Link>

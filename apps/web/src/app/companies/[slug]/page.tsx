@@ -135,6 +135,7 @@ interface CompanyPageProperties {
 
 export const revalidate = 1800; // 30min ISR (fallback if edge function cache misses)
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
+const MAX_STATIC_COMPANIES = 10; // Limit pre-rendered companies to optimize build time
 
 /**
  * Generate route parameter objects for a small set of company pages to pre-render at build time.
@@ -148,8 +149,6 @@ export const dynamicParams = true; // Allow unknown slugs to be rendered on dema
  * @see logger - request-scoped logger used for error reporting
  */
 export async function generateStaticParams() {
-  // Limit to top 10 companies to optimize build time
-  const MAX_STATIC_COMPANIES = 10;
 
   // Generate requestId for static params generation (build-time)
   const staticParamsRequestId = generateRequestId();
@@ -289,7 +288,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
                   {company.using_cursor_since ? <div className={cluster.tight}>
                       <Calendar className={iconSize.sm} />
-                      Using Claude since{' '}
+                      Using Cursor since{' '}
                       {new Date(company.using_cursor_since).toLocaleDateString('en-US', {
                         month: 'short',
                         year: 'numeric',

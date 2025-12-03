@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-export const addItemToCollectionSchema = z.object({
+const addItemToCollectionSchema = z.object({
   collection_id: z.string().uuid().nullable().optional(),
   content_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable().optional(),
   content_slug: z.string().nullable().optional(),

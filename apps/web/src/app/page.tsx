@@ -102,7 +102,7 @@ async function TopContributorsServer() {
       bio: contributor.bio,
       work: contributor.work,
       tier: contributor.tier ?? 'free',
-      created_at: new Date().toISOString(),
+      created_at: (contributor as { created_at?: string }).created_at ?? new Date().toISOString(),
     }));
 
   return <TopContributors contributors={topContributors} />;

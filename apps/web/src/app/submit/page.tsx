@@ -41,12 +41,21 @@ import {
 } from '@heyclaude/web-runtime/logging/server';
 import { cn, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import dynamic from 'next/dynamic';
 
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
-import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Dynamic import type inference limitation
+const NewsletterCTAVariant = dynamic(
+  async () => {
+    const mod = await import('@/src/components/features/growth/newsletter/newsletter-cta-variants');
+    return { default: mod.NewsletterCTAVariant };
+  },
+  { ssr: true }
+);
 
 // Use enum values from Constants
 const DEFAULT_CONTENT_CATEGORY = Constants.public.Enums.content_category[0]; // 'agents'

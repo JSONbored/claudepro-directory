@@ -203,7 +203,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
       {/* Track view - non-blocking */}
       <Pulse
         variant="view"
-        category={Constants.public.Enums.content_category[8]} // 'collections'
+        category="collections"
         slug={collectionSlug}
         metadata={{
           user_slug: slug,

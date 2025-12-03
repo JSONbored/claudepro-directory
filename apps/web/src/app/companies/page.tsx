@@ -28,7 +28,6 @@ import {
   position,
   radius,
   row,
-  shadow,
   size,
   squareSize,
   textAlign,
@@ -265,7 +264,7 @@ export default async function CompaniesPage() {
               </div>
             </div>
 
-            <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']} ${tracking.tight} sm:${size['5xl']}`}>Companies Directory</h1>
+            <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']} ${tracking.tight} sm:text-5xl`}>Companies Directory</h1>
 
             <p className={`${marginX.auto} ${marginTop.default} ${maxWidth.xl} ${muted.default} ${size.lg}`}>
               Discover companies building the future with Claude and Cursor
@@ -312,7 +311,7 @@ export default async function CompaniesPage() {
         ) : (
           <div className={grid.responsive3}>
             {companies.map((company, index) => (
-              <Card key={company.id} className={`card-gradient ${transition.all} ${animateDuration.default} hover:${shadow.lg}`}>
+              <Card key={company.id} className={`card-gradient ${transition.all} ${animateDuration.default} hover:shadow-lg`}>
                 {company.featured ? <div className={`-top-2 -right-2 ${position.absolute} ${zLayer.raised}`}>
                     <UnifiedBadge variant="base" className={`${bgColor.accent} ${textColor.accentForeground}`}>
                       <Star className={iconLeading.xs} />

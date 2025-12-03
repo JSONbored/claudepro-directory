@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-export const markReviewHelpfulSchema = z.object({
+const markReviewHelpfulSchema = z.object({
   review_id: z.string().uuid(),
   helpful: z.boolean()
 });

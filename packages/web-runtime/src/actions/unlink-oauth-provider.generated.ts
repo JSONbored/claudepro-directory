@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-export const unlinkOAuthProviderSchema = z.object({
+const unlinkOAuthProviderSchema = z.object({
   provider: z.enum(['discord', 'github', 'google'])
 });
 export type UnlinkOAuthProviderInput = z.infer<typeof unlinkOAuthProviderSchema>;

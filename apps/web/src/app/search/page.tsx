@@ -75,7 +75,7 @@ export async function generateMetadata({ searchParams }: SearchPageProperties): 
     title: query ? `Search results for "${query}"` : 'Search',
     description: query
       ? `Find agents, MCP servers, rules, commands, and more matching "${query}"`
-      : 'Search the Claude Code directory',
+      : 'Search the Claude Pro directory',
   });
 }
 

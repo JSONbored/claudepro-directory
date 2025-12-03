@@ -10,6 +10,7 @@ import {
   absolute,
   bgColor,
   cluster,
+  colSpan,
   gap,
   grid,
   alignItems,
@@ -37,6 +38,36 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
+
+/**
+ * Generate daily chart data for the last N days
+ * 
+ * @param impressionsMap - Map of day keys to impression counts
+ * @param clicksMap - Map of day keys to click counts
+ * @param days - Number of days to generate (default: 30)
+ * @returns Array of chart data points with date, dayKey, impressions, clicks, and maxImpressions
+ */
+function generateDailyChartData(
+  impressionsMap: Map<string, number>,
+  clicksMap: Map<string, number>,
+  days = 30
+) {
+  const maxImpressions = Math.max(...impressionsMap.values(), 1);
+  
+  return Array.from({ length: days }).map((_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (days - 1 - index));
+    const dayKey = date.toISOString().slice(0, 10);
+    
+    return {
+      date,
+      dayKey,
+      impressions: impressionsMap.get(dayKey) ?? 0,
+      clicks: clicksMap.get(dayKey) ?? 0,
+      maxImpressions,
+    };
+  });
+}
 
 /**
  * Dynamic Rendering Required
@@ -311,50 +342,39 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
         </CardHeader>
         <CardContent>
           <div className={spaceY.compact}>
-            {(() => {
-              const maxImpressions = Math.max(...impressionsMap.values(), 1);
-              return Array.from({ length: 30 }).map((_, index) => {
-                const date = new Date();
-                date.setDate(date.getDate() - (29 - index));
-                const dayKey = date.toISOString().slice(0, 10); // Extract YYYY-MM-DD
-                const impressions = impressionsMap.get(dayKey) ?? 0;
-                const clicks = clicksMap.get(dayKey) ?? 0;
-
-                return (
-                <div key={dayKey} className={`${grid.cols12} ${alignItems.center}`}>
-                  <div className={`col-span-2 ${muted.default} ${size.xs}`}>
-                    {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </div>
-                  <div className={`col-span-10 ${grid.cols2NoGap} ${gap.tight}`}>
-                    {/* Impressions bar */}
-                    <div className={`${position.relative} ${height.input} ${overflow.hidden} ${radius.default} ${bgColor.muted}`}>
-                      <div
-                        className={`${absolute.topLeft} ${height.full} ${bgColor['primary/30']} ${transition.all}`}
-                        style={{ width: `${(impressions / maxImpressions) * 100}%` }}
-                      />
-                      <div
-                        className={`${absolute.inset} ${display.flex} ${alignItems.center} ${padding.xTight} ${size.xs}`}
-                      >
-                        {impressions > 0 && `${impressions} views`}
-                      </div>
+            {generateDailyChartData(impressionsMap, clicksMap).map(({ date, dayKey, impressions, clicks, maxImpressions }) => (
+              <div key={dayKey} className={`${grid.cols12} ${alignItems.center}`}>
+                <div className={`${colSpan['2']} ${muted.default} ${size.xs}`}>
+                  {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </div>
+                <div className={`${colSpan['10']} ${grid.cols2NoGap} ${gap.tight}`}>
+                  {/* Impressions bar */}
+                  <div className={`${position.relative} ${height.input} ${overflow.hidden} ${radius.default} ${bgColor.muted}`}>
+                    <div
+                      className={`${absolute.topLeft} ${height.full} ${bgColor['primary/30']} ${transition.all}`}
+                      style={{ width: `${(impressions / maxImpressions) * 100}%` }}
+                    />
+                    <div
+                      className={`${absolute.inset} ${display.flex} ${alignItems.center} ${padding.xTight} ${size.xs}`}
+                    >
+                      {impressions > 0 && `${impressions} views`}
                     </div>
-                    {/* Clicks bar */}
-                    <div className={`${position.relative} ${height.input} ${overflow.hidden} ${radius.default} ${bgColor.muted}`}>
-                      <div
-                        className={`${absolute.topLeft} ${height.full} ${bgColor['accent/50']} ${transition.all}`}
-                        style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
-                      />
-                      <div
-                        className={`${absolute.inset} ${display.flex} ${alignItems.center} ${padding.xTight} ${size.xs}`}
-                      >
-                        {clicks > 0 && `${clicks} clicks`}
-                      </div>
+                  </div>
+                  {/* Clicks bar */}
+                  <div className={`${position.relative} ${height.input} ${overflow.hidden} ${radius.default} ${bgColor.muted}`}>
+                    <div
+                      className={`${absolute.topLeft} ${height.full} ${bgColor['accent/50']} ${transition.all}`}
+                      style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
+                    />
+                    <div
+                      className={`${absolute.inset} ${display.flex} ${alignItems.center} ${padding.xTight} ${size.xs}`}
+                    >
+                      {clicks > 0 && `${clicks} clicks`}
                     </div>
                   </div>
                 </div>
-                );
-              });
-            })()}
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

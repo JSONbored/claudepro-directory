@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-export const reorderCollectionItemsSchema = z.object({
+const reorderCollectionItemsSchema = z.object({
   collection_id: z.string().uuid(),
   items: z.array(z.any())
 });

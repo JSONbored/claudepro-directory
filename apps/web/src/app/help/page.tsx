@@ -146,7 +146,7 @@ const commonQuestions = [
  */
 export default function HelpPage() {
   return (
-    <div className={`${container.default} ${maxWidth['6xl']} ${padding.xDefault} ${padding.yRelaxed} sm:${padding.ySection}`}>
+    <div className={`${container.default} ${maxWidth['6xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
       <div className={`${marginBottom.section} ${textAlign.center}`}>
         <h1 className={`${marginBottom.default} ${weight.bold} ${responsiveText['3xl']}`}>Help Center</h1>
         <p className={`${marginX.auto} ${maxWidth['2xl']} ${muted.lg}`}>

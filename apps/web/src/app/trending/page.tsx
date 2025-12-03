@@ -52,12 +52,12 @@ import { NewsletterCTAVariant } from '@/src/components/features/growth/newslette
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 900; /**
- * Provide route metadata for the /trending page.
+export const revalidate = 900;
+
+/**
+ * Generate metadata for the trending page.
  *
- * Includes SEO attributes (title, description, open graph) and route-specific Next.js metadata such as ISR revalidation settings.
- *
- * @returns Metadata for the /trending page, including SEO attributes and revalidation configuration
+ * @returns A Metadata object describing the /trending page.
  * @see generatePageMetadata
  * @see revalidate
  */
@@ -161,7 +161,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
               Trending
             </UnifiedBadge>
 
-            <h1 id={pageTitleId} className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:${size['6xl']}`}>
+            <h1 id={pageTitleId} className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:text-6xl`}>
               Trending Configurations
             </h1>
 

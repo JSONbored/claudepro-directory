@@ -26,7 +26,7 @@ import { shadowColor, zLayer, opacityLevel, blur } from '../../../design-system/
 import { bgGradient, gradientFrom, gradientVia, gradientTo, bgColor, textColor } from '../../../design-system/styles/colors.ts';
 import { CheckCircle, Sparkles, User, Clock } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip.tsx';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../tooltip.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { useMemo } from 'react';
 
@@ -372,45 +372,47 @@ export function ContentIndicators({
   }
 
   return (
-    <div className={cn(`${display.flex} ${alignItems.center} ${gap.snug}`, className)}>
-      <AnimatePresence mode="popLayout">
-        {/* New badge takes priority */}
-        {shouldShowNew && (
-          <motion.div
-            key="new"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-          >
-            <NewBadge size={size} />
-          </motion.div>
-        )}
+    <TooltipProvider delayDuration={300}>
+      <div className={cn(`${display.flex} ${alignItems.center} ${gap.snug}`, className)}>
+        <AnimatePresence mode="popLayout">
+          {/* New badge takes priority */}
+          {shouldShowNew && (
+            <motion.div
+              key="new"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+            >
+              <NewBadge size={size} />
+            </motion.div>
+          )}
 
-        {/* Freshness indicator */}
-        {shouldShowFreshness && !shouldShowNew && (
-          <motion.div
-            key="freshness"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-          >
-            <FreshnessIndicator tier={freshnessTier} label={freshnessLabel} size={size} />
-          </motion.div>
-        )}
+          {/* Freshness indicator */}
+          {shouldShowFreshness && !shouldShowNew && (
+            <motion.div
+              key="freshness"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+            >
+              <FreshnessIndicator tier={freshnessTier} label={freshnessLabel} size={size} />
+            </motion.div>
+          )}
 
-        {/* Source indicator */}
-        {shouldShowSource && (
-          <motion.div
-            key="source"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-          >
-            <SourceIndicator source={source} size={size} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+          {/* Source indicator */}
+          {shouldShowSource && (
+            <motion.div
+              key="source"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+            >
+              <SourceIndicator source={source} size={size} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </TooltipProvider>
   );
 }
 

@@ -28,6 +28,7 @@ import {
   size,
   gap,
   cluster,
+  responsiveText,
   padding,
   paddingBottom,
   radius,
@@ -166,7 +167,7 @@ export default async function TagsIndexPage() {
 
             <h1
               id="tags-title"
-              className={`${marginBottom.default} ${bgGradient.toR} ${gradientFrom.foreground} ${gradientVia.foreground} ${gradientTo.mutedForeground} ${bgClip.text} ${weight.bold} ${size['4xl']} ${tracking.tight} ${textColor.transparent} sm:${size['5xl']} md:${size['6xl']}`}
+              className={`${marginBottom.default} ${bgGradient.toR} ${gradientFrom.foreground} ${gradientVia.foreground} ${gradientTo.mutedForeground} ${bgClip.text} ${weight.bold} ${responsiveText.hero} ${tracking.tight} ${textColor.transparent}`}
             >
               Explore by Topic
             </h1>
@@ -203,12 +204,12 @@ export default async function TagsIndexPage() {
       <div className={`${container.default} ${padding.xDefault} ${paddingBottom.hero}`}>
         {hadLoadError ? (
           <Card className={`${bgColor['muted/50']} ${padding.section} ${textAlign.center}`}>
-            <Tag className={`${marginX.auto} ${marginBottom.default} ${iconSize['4xl']} ${muted.default}/20`} />
+            <Tag className={`${marginX.auto} ${marginBottom.default} ${iconSize['4xl']} ${muted.faded}`} />
             <p className={muted.lg}>We couldn't load tags, please try again.</p>
           </Card>
         ) : (tags.length === 0 ? (
           <Card className={`${bgColor['muted/50']} ${padding.section} ${textAlign.center}`}>
-            <Tag className={`${marginX.auto} ${marginBottom.default} ${iconSize['4xl']} ${muted.default}/20`} />
+            <Tag className={`${marginX.auto} ${marginBottom.default} ${iconSize['4xl']} ${muted.faded}`} />
             <p className={muted.lg}>No tags found.</p>
           </Card>
         ) : (
@@ -248,7 +249,7 @@ export default async function TagsIndexPage() {
               </div>
 
               {/* Animated Tag Cloud */}
-              <div className={`${position.relative} ${radius['2xl']} ${border.default} ${borderColor['border/30']} ${bgGradient.toBR} ${gradientFrom.background} ${gradientVia.background} ${gradientTo.muted10} ${padding.relaxed} md:${padding.section}`}>
+              <div className={`${position.relative} ${radius['2xl']} ${border.default} ${borderColor['border/30']} ${bgGradient.toBR} ${gradientFrom.background} ${gradientVia.background} ${gradientTo.muted10} ${padding.relaxed} md:py-12`}>
                 {/* Inner glow effect */}
                 <div className={`${pointerEvents.none} ${absolute.inset} ${radius['2xl']} ${bgGradient.toBR} ${gradientFrom.accent5} ${gradientVia.transparent} ${gradientTo.primary5}`} />
 

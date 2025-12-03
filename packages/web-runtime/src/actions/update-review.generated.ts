@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-export const updateReviewSchema = z.object({
+const updateReviewSchema = z.object({
   review_id: z.string().uuid().nullable().optional(),
   rating: z.number().nullable().optional(),
   review_text: z.string().nullable().optional()

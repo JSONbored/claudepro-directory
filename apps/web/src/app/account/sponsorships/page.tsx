@@ -182,7 +182,7 @@ export default async function SponsorshipsPage() {
     );
   }
 
-  const orderedSponsorships = [...sponsorships].toSorted(
+  const orderedSponsorships = sponsorships.toSorted(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 

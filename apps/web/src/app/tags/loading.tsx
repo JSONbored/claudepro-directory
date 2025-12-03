@@ -28,7 +28,12 @@ const TAG_GRID_SKELETONS = ['tg-1', 'tg-2', 'tg-3', 'tg-4', 'tg-5', 'tg-6', 'tg-
  */
 export default function TagsLoading() {
   return (
-    <div className={`${minHeight.screen} ${bgColor.background}`} aria-busy="true" role="status">
+    <div
+      className={`${minHeight.screen} ${bgColor.background}`}
+      aria-busy="true"
+      role="status"
+      aria-label="Loading tags"
+    >
       {/* Hero Skeleton */}
       <section className={emptyCard.default} aria-hidden="true">
         <div className={`${container.default} ${padding.xDefault} ${padding.yLarge}`}>

@@ -46,6 +46,7 @@ import {
   paddingBottom,
   position,
   radius,
+  responsiveText,
   row,
   size,
   textAlign,
@@ -145,12 +146,12 @@ export default function ConfigRecommenderPage() {
             </UnifiedBadge>
 
             {/* Title */}
-            <h1 className={`${marginBottom.comfortable} ${bgGradient.toR} ${gradientFrom.foreground} ${gradientTo.foreground70} ${bgClip.text} ${weight.bold} ${size['4xl']} ${textColor.transparent} md:${size['5xl']} lg:${size['6xl']}`}>
+            <h1 className={`${marginBottom.comfortable} ${bgGradient.toR} ${gradientFrom.foreground} ${gradientTo.foreground70} ${bgClip.text} ${weight.bold} ${responsiveText.hero} ${textColor.transparent}`}>
               Find Your Perfect Claude Configuration
             </h1>
 
             {/* Description */}
-            <p className={`${marginX.auto} ${marginBottom.relaxed} ${maxWidth['3xl']} ${muted.lg} md:${size.xl}`}>
+            <p className={`${marginX.auto} ${marginBottom.relaxed} ${maxWidth['3xl']} ${muted.lg} md:text-xl`}>
               Answer 7 quick questions and get personalized recommendations from our catalog of 147+
               configurations. Instant results, zero cost, tailored to your needs.
             </p>

@@ -15,7 +15,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { formatTagForDisplay } from '@heyclaude/web-runtime/data';
+import { formatTagForDisplay } from '@heyclaude/web-runtime/data/tag-utils';
 import { animation, colors } from '@heyclaude/web-runtime/design-system/tokens';
 import {
   animateDuration,
