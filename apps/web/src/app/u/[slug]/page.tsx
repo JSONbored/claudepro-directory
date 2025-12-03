@@ -321,7 +321,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                   <span className={`${muted.sm}`}>Member since</span>
                   <span className={size.sm}>
                     {profile?.created_at
-                      ? new Date(profile.created_at).toLocaleDateString('en-US', {
+                      ? new Date(profile.created_at).toLocaleDateString(undefined, {
                           month: 'short',
                           year: 'numeric',
                         })
@@ -348,29 +348,29 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
               ) : (
                 <div className={grid.responsive2}>
                   {collections
-                    .filter(
-                      (
-                        collection
-                      ): collection is typeof collection & {
-                        id: string;
-                        name: null | string;
-                        slug: string;
-                      } =>
-                        collection.id !== null &&
-                        collection.slug !== null &&
-                        collection.name !== null
-                    )
-                    .flatMap((collection) => {
+                    .filter((collection): collection is typeof collection & { id: string; name: string; slug: string; } => {
+                      if (collection.id === null || collection.slug === null || collection.name === null) {
+                        return false;
+                      }
+                      // TypeScript now knows collection.slug is string
                       const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
                       if (!safeCollectionUrl) {
                         viewerLogger.warn('UserProfilePage: skipping collection with invalid slug', {
                           collectionId: collection.id,
-                          collectionName: collection.name ?? 'Unknown',
+                          collectionName: collection.name,
                           collectionSlug: collection.slug,
                         });
-                        return [];
+                        return false;
                       }
-                      return [
+                      return true;
+                    })
+                    .map((collection) => {
+                      // TypeScript knows collection.slug is string after filter
+                      // getSafeCollectionUrl validated in filter, but re-compute for TypeScript
+                      const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
+                      // Guard for TypeScript - filter already validated this won't be null
+                      if (!safeCollectionUrl) return null;
+                      return (
                         <Card key={collection.id} className={card.interactive}>
                           <NavLink href={safeCollectionUrl}>
                             <CardHeader>
@@ -393,8 +393,8 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                               </div>
                             </CardContent>
                           </NavLink>
-                        </Card>,
-                      ];
+                        </Card>
+                      );
                     })}
                 </div>
               )}

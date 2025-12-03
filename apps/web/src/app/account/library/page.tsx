@@ -19,7 +19,6 @@ import { between, cluster, iconSize, hoverBg, transition, spaceY, muted, marginB
   width,
   textAlign,
   truncate,
-  shadow,
   cursor,
 } from '@heyclaude/web-runtime/design-system';
 import {
@@ -248,7 +247,7 @@ export default async function LibraryPage() {
                       </div>
                       <NavLink
                         href={`/${bookmark.content_type}/${bookmark.content_slug}`}
-                        className={`hover:${textColor.primary}/80`}
+                        className="hover:text-primary/80"
                       >
                         <ExternalLink className={iconSize.sm} />
                       </NavLink>
@@ -292,7 +291,7 @@ export default async function LibraryPage() {
           ) : (
             <div className={grid.responsive2}>
               {collections.map((collection) => (
-                <Card key={collection.id} className={`${cursor.pointer} ${transition.default} ${hoverBg.muted} hover:${shadow.md}`}>
+                <Card key={collection.id} className={`${cursor.pointer} ${transition.default} ${hoverBg.muted} hover:shadow-md`}>
                   <Link href={`/account/library/${collection.slug}`}>
                     <CardHeader>
                       <div className={`${display.flex} ${alignItems.start} ${justify.between}`}>

@@ -1,4 +1,4 @@
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { z } from 'zod';
 
@@ -6,18 +6,27 @@ import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
 import { generateRequestId } from '../utils/request-id.ts';
 
-const changeItemSchema = z.object({
-  content: z.string(),
-});
-
+/**
+ * Changelog changes schema
+ *
+ * Matches the actual database format where each category contains
+ * an array of plain strings (not objects with content property).
+ *
+ * Example database format:
+ * {
+ *   "Added": ["feature 1", "feature 2"],
+ *   "Fixed": ["bug fix 1"],
+ *   "Changed": []
+ * }
+ */
 const changesSchema = z
   .object({
-    Added: z.array(changeItemSchema).optional(),
-    Changed: z.array(changeItemSchema).optional(),
-    Fixed: z.array(changeItemSchema).optional(),
-    Removed: z.array(changeItemSchema).optional(),
-    Deprecated: z.array(changeItemSchema).optional(),
-    Security: z.array(changeItemSchema).optional(),
+    Added: z.array(z.string()).optional(),
+    Changed: z.array(z.string()).optional(),
+    Fixed: z.array(z.string()).optional(),
+    Removed: z.array(z.string()).optional(),
+    Deprecated: z.array(z.string()).optional(),
+    Security: z.array(z.string()).optional(),
   })
   .refine(
     (data) => {

@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-export const updateCollectionSchema = z.object({
+const updateCollectionSchema = z.object({
   id: z.string().uuid().nullable().optional(),
   name: z.string().nullable().optional(),
   slug: z.string().nullable().optional(),

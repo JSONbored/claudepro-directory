@@ -58,7 +58,7 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
  * Returns canonicalized URL or null if invalid
  */
 /**
- * ISR: 30 minutes (1800s) - Matches CACHE_TTL.jobs_detail
+ * ISR: 2 hours (7200s) - Matches CACHE_TTL.jobs_detail
  * Job postings need reasonably fresh data for status/applicant updates
  */
 export const revalidate = 7200;

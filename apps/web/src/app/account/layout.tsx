@@ -11,11 +11,11 @@ import {
   container,
   display,
   grid,
+  groupHover,
   justify,
   minHeight,
   padding,
   transition,
-  textColor,
 } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
@@ -102,7 +102,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
       <div className={`${borderBottom.default} ${padding.xDefault} ${padding.yDefault}`}>
         <div className={`${container.default} ${display.flex} ${alignItems.center} ${justify.between}`}>
           <div className={`${cluster.compact} group`}>
-            <Link href="/" className={`${transition.colors} group-hover:${textColor.accent}`}>
+            <Link href="/" className={`${transition.colors} ${groupHover.accent}`}>
               ← Back to Directory
             </Link>
           </div>

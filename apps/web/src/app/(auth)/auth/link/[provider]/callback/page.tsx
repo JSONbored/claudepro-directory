@@ -3,10 +3,12 @@
 /**
  * OAuth Account Linking Client Component
  * Handles the client-side linkIdentity() call for linking OAuth providers
+ *
+ * Dynamic rendering required: OAuth callbacks need fresh URL params on every request.
  */
 
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
+import { isValidProvider, validateNextParameter } from '@heyclaude/web-runtime';
 import {
   alignItems,
   animate,
@@ -21,6 +23,7 @@ import {
   muted,
   padding,
   radius,
+  squareSize,
   stack,
   textAlign,
   textColor,
@@ -33,16 +36,20 @@ import {
   logClientError,
   logClientWarn,
 } from '@heyclaude/web-runtime/logging/client';
-import { Button ,
+import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 
-// Force dynamic rendering - auth callback pages should never be cached
+/**
+ * Force dynamic rendering for OAuth callback handling
+ */
 export const dynamic = 'force-dynamic';
 
 /**
@@ -236,7 +243,7 @@ export default function OAuthLinkCallbackPage({
       <Card className={`${width.full} ${maxWidth.md}`}>
         <CardHeader className={textAlign.center}>
           <div
-            className={`${marginX.auto} ${marginBottom.default} ${display.flex} ${iconSize['3xl']} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['destructive/10']}`}
+            className={`${marginX.auto} ${marginBottom.default} ${display.flex} ${squareSize.avatar3xl} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['destructive/10']}`}
           >
             <AlertCircle className={`${iconSize.lg} ${textColor.destructive}`} />
           </div>

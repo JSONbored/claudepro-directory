@@ -76,6 +76,8 @@ export const muted = {
   xs: 'text-xs text-muted-foreground',
   /** Large muted */
   lg: 'text-lg text-muted-foreground leading-relaxed',
+  /** Muted with 20% opacity (very faded, for decorative icons) */
+  faded: 'text-muted-foreground/20',
   /** Muted with 30% opacity (very subtle) */
   opacity30: 'text-muted-foreground/30',
   /** Muted with 50% opacity (subtle) */
@@ -379,4 +381,6 @@ export const responsiveText = {
   xl3xl: 'text-2xl sm:text-2xl md:text-3xl lg:text-4xl',
   /** text-4xl lg:text-5xl - 4XL to 5XL at lg breakpoint */
   '4xlTo5xl': 'text-4xl lg:text-5xl',
+  /** text-4xl sm:text-5xl md:text-6xl - Hero title responsive pattern */
+  hero: 'text-4xl sm:text-5xl md:text-6xl',
 } as const;

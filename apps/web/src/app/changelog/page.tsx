@@ -22,7 +22,6 @@
  * - Responsive design
  */
 
-import { Constants } from '@heyclaude/database-types';
 import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
@@ -237,16 +236,15 @@ export default async function ChangelogPage() {
             </div>
           </div>
 
-          {/* What's New This Week - only shows if there are recent updates */}
+          {/* WhatsNewSummary handles display logic internally and only shows content when recent updates exist */}
           <WhatsNewSummary
             entries={publishedEntries.map((entry) => ({
               slug: entry.slug,
               title: entry.title,
               release_date: entry.release_date,
-              changes: entry.changes as null | Record<string, unknown>,
+              changes: entry.changes as Record<string, unknown>,
             }))}
             daysBack={7}
-            getTargetPath={(slug) => `/changelog/${slug}`}
           />
 
           {/* Client-side filtered list */}
@@ -258,7 +256,7 @@ export default async function ChangelogPage() {
           <NewsletterCTAVariant
             source="content_page"
             variant="hero"
-            category={Constants.public.Enums.content_category[10]} // 'changelog' - Context needed for analytics and correct copy
+            category="changelog"
           />
         </section>
       </>

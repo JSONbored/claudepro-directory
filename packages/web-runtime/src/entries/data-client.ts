@@ -43,6 +43,9 @@ export * from '../data/changelog.shared.ts';
 // export * from '../data/content-helpers.ts';
 export * from '../data/forms/submission-form-fields.ts';
 
+// Tag utilities (safe for client use)
+export { formatTagForDisplay, formatTagForUrl } from '../data/tag-utils.ts';
+
 // Layout Flags - Static defaults (client-safe)
 export { getLayoutFlags, type LayoutFlags } from '../data/layout/flags.ts';
 

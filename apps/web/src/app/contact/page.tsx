@@ -3,6 +3,7 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import {
   cluster,
+  colSpan,
   container,
   display,
   iconSize,
@@ -21,8 +22,8 @@ import {
 } from '@heyclaude/web-runtime/design-system';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
-import { NavLink, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { NavLink, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
@@ -71,22 +72,15 @@ export default function ContactPage() {
   });
 
   const channels = getContactChannels();
-  if (!channels.email) {
-    reqLogger.warn('ContactPage: email channel is not configured', {
-      channel: 'email',
-      configKey: 'CONTACT_EMAIL',
-    });
-  }
-  if (!channels.github) {
-    reqLogger.warn('ContactPage: github channel is not configured', {
-      channel: 'github',
-      configKey: 'GITHUB_URL',
-    });
-  }
-  if (!channels.discord) {
-    reqLogger.warn('ContactPage: discord channel is not configured', {
-      channel: 'discord',
-      configKey: 'DISCORD_INVITE_URL',
+  const missingChannels = [
+    !channels.email && { channel: 'email', configKey: 'CONTACT_EMAIL' },
+    !channels.github && { channel: 'github', configKey: 'GITHUB_URL' },
+    !channels.discord && { channel: 'discord', configKey: 'DISCORD_INVITE_URL' },
+  ].filter(Boolean) as Array<{ channel: string; configKey: string }>;
+
+  if (missingChannels.length > 0) {
+    reqLogger.warn('ContactPage: some channels are not configured', {
+      missingChannels,
     });
   }
 
@@ -129,7 +123,7 @@ export default function ContactPage() {
 
         <div className={grid.responsiveForm}>
           {!(channels.github || channels.discord || channels.email) && (
-            <div className={`col-span-2 ${padding.yRelaxed} ${textAlign.center} ${muted.default}`}>
+            <div className={`${colSpan['2']} ${padding.yRelaxed} ${textAlign.center} ${muted.default}`}>
               <p>Contact channels are currently being configured. Please check back soon.</p>
             </div>
           )}

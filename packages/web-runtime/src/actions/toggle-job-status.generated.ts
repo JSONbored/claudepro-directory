@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-export const toggleJobStatusSchema = z.object({
+const toggleJobStatusSchema = z.object({
   job_id: z.string().uuid(),
   new_status: z.enum(['draft', 'pending_payment', 'pending_review', 'active', 'expired', 'rejected', 'deleted'])
 });

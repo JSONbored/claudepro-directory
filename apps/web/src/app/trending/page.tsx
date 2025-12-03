@@ -52,18 +52,14 @@ import { NewsletterCTAVariant } from '@/src/components/features/growth/newslette
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 900; /**
- * Provide route metadata for the /trending page.
- *
- * Includes SEO attributes (title, description, open graph) and route-specific Next.js metadata such as ISR revalidation settings.
- *
- * @returns Metadata for the /trending page, including SEO attributes and revalidation configuration
- * @see generatePageMetadata
- * @see revalidate
- */
+export const revalidate = 900;
 
 /**
- * Generate metadata for the trending page
+ * Generate metadata for the trending page.
+ *
+ * @returns A Metadata object describing the /trending page.
+ * @see generatePageMetadata
+ * @see revalidate
  */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/trending');
@@ -153,7 +149,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
               Trending
             </UnifiedBadge>
 
-            <h1 id={pageTitleId} className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:${size['6xl']}`}>
+            <h1 id={pageTitleId} className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:text-6xl`}>
               Trending Configurations
             </h1>
 
@@ -306,7 +302,7 @@ function mapRecentContent(
  *
  * Produces consistent defaults for missing fields, resolves a timestamp from `created_at` or `date_added`
  * (falling back to the current time), ensures arrays and counts are present, and marks the item as featured
- * when a `featuredScore` is provided.
+ * when a positive `featuredScore` is provided.
  *
  * @param input - Raw content values from the database or API; optional fields will be normalized.
  * @returns A `HomepageContentItem` with normalized `slug`, `title`, `description`, `author`, `tags`, `source`,

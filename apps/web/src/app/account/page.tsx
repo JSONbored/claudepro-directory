@@ -354,7 +354,9 @@ export default async function AccountDashboard() {
             /> : null}
           <QuickActionRow
             title="View all bookmarks"
-            description={`You have ${bookmarkCount ?? 0} saved configurations`}
+            description={`You have ${bookmarkCount ?? 0} saved ${
+              (bookmarkCount ?? 0) === 1 ? 'configuration' : 'configurations'
+            }`}
             href={ROUTES.ACCOUNT_LIBRARY}
           />
           <QuickActionRow

@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-export const updateJobSchema = z.object({
+const updateJobSchema = z.object({
   job_id: z.string().uuid(),
   updates: z.any()
 });

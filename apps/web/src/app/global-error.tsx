@@ -29,8 +29,8 @@ import { useEffect } from 'react';
  *
  * Logs the error with pathname, stack, user agent, and optional `digest` for observability, and displays a resettable error screen.
  *
- * @param props.error - The caught Error object; may include a `digest` string for grouping or observability.
- * @param props.reset - Callback invoked to reset the error boundary or application state.
+ * @param error - The caught Error object; may include a `digest` string for grouping or observability.
+ * @param reset - Callback invoked to reset the error boundary or application state.
  * @see {@link logClientErrorBoundary}
  */
 export default function GlobalError({

@@ -82,7 +82,7 @@ import {
   X,
 } from '@heyclaude/web-runtime/icons';
 import { useClientLogger } from '@heyclaude/web-runtime/logging/client';
-import  { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import {
   Badge,
   Button,
@@ -90,10 +90,10 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  cn,
   Input,
   Textarea,
   toasts,
-  cn,
 } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
@@ -907,7 +907,7 @@ export default function WizardSubmissionPage() {
   return (
     <>
       {/* Inline Preview - Desktop Sidebar */}
-      <div className={`${display.none} lg:${position.sticky} lg:${sticky.top24} ${display.block} lg:${width.sidebar}`}>
+      <div className={`${display.none} lg:${position.sticky} lg:${sticky.top24} lg:${display.block} lg:${width.sidebar}`}>
         <InlinePreview formData={formData} qualityScore={qualityScore} />
       </div>
       <WizardLayout
@@ -1224,7 +1224,7 @@ function StepBasicInfo({
                         onClick={onRemoveThumbnail}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        className={`-right-2 -top-2 ${position.absolute} ${display.flex} ${iconSize.lg} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.destructive} ${textColor.destructiveForeground} ${shadow.sm}`}
+                        className={cn("-right-2 -top-2", position.absolute, display.flex, iconSize.lg, alignItems.center, justify.center, radius.full, bgColor.destructive, textColor.destructiveForeground, shadow.sm)}
                         disabled={isUploadingThumbnail}
                       >
                         <X className={iconSize.sm} />

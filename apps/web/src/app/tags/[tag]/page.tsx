@@ -18,11 +18,11 @@ import { APP_CONFIG } from '@heyclaude/shared-runtime';
 import {
   getContentByTag,
   getTagMetadata,
-  formatTagForDisplay,
   getAllTagsWithCounts,
   type TaggedContentItem,
   type TagSummary,
 } from '@heyclaude/web-runtime/data';
+import { formatTagForDisplay } from '@heyclaude/web-runtime/data/tag-utils';
 import {
   bgColor,
   cluster,
@@ -65,7 +65,6 @@ import {
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/server';
-import  { type DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import { UnifiedBadge, Card, CardContent , Button , UnifiedCardGrid  } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 import Link from 'next/link';
@@ -117,7 +116,20 @@ export async function generateMetadata({
   const tag = decodeURIComponent(encodedTag);
   const displayTag = formatTagForDisplay(tag);
 
-  const tagMetadata = await getTagMetadata(tag);
+  let tagMetadata: Awaited<ReturnType<typeof getTagMetadata>> = null;
+  try {
+    tagMetadata = await getTagMetadata(tag);
+  } catch (error) {
+    // Fallback to basic metadata if fetch fails
+    const normalized = normalizeError(error, 'Failed to load tag metadata');
+    logger.warn('TagDetailPage: getTagMetadata failed in generateMetadata', {
+      error: normalized,
+      tag,
+      operation: 'generateMetadata',
+      route: `/tags/${tag}`,
+      module: 'apps/web/src/app/tags/[tag]/page',
+    });
+  }
   const itemCount = tagMetadata?.count ?? 0;
 
   // Use tagMetadata categories if available, otherwise empty array
@@ -255,16 +267,17 @@ function CategoryFilterTabs({
 }
 
 /**
- * Map a TaggedContentItem into the DisplayableContent shape consumed by card components.
+ * Map a TaggedContentItem into the enriched_content_item shape consumed by card components.
  *
  * @param item - The tagged content item to convert into the UI-facing displayable format.
- * @returns A DisplayableContent object with fields populated from the source item (ids, titles, dates, counts, category, tags, and source); optional/enhanced fields are set to null when not provided.
+ * @returns An enriched_content_item object with all required fields populated from the source item.
  *
  * @see DisplayableContent
  * @see ConfigCard
  */
-function toDisplayableContent(item: TaggedContentItem): DisplayableContent {
-  // Cast to enriched_content_item compatible structure
+function toDisplayableContent(
+  item: TaggedContentItem
+): Database['public']['CompositeTypes']['enriched_content_item'] {
   return {
     id: item.id,
     slug: item.slug,
@@ -293,7 +306,7 @@ function toDisplayableContent(item: TaggedContentItem): DisplayableContent {
     sponsored_content_id: null,
     sponsorship_tier: null,
     is_sponsored: null,
-  } as DisplayableContent;
+  };
 }
 
 /**
@@ -347,6 +360,12 @@ export default async function TagDetailPage({
     category: null,
   };
   let allTags: TagSummary[] = [];
+  let unfilteredContentResult: Awaited<ReturnType<typeof getContentByTag>> = {
+    items: [],
+    totalCount: 0,
+    tag,
+    category: null,
+  };
 
   // Build options conditionally to avoid exactOptionalPropertyTypes issues
   const contentOptions: Parameters<typeof getContentByTag>[1] = { limit: 100 };
@@ -355,14 +374,16 @@ export default async function TagDetailPage({
   }
 
   try {
-    const [tagMeta, content, tags] = await Promise.all([
+    const [tagMeta, content, unfilteredContent, tags] = await Promise.all([
       getTagMetadata(tag),
       getContentByTag(tag, contentOptions),
+      getContentByTag(tag, { limit: 100 }), // Fetch unfiltered for category counts
       getAllTagsWithCounts({ minCount: 1, limit: 100 }),
     ]);
 
     tagMetadata = tagMeta;
     contentResult = content;
+    unfilteredContentResult = unfilteredContent;
     allTags = tags;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load tag content');
@@ -376,10 +397,10 @@ export default async function TagDetailPage({
 
   const displayTag = formatTagForDisplay(tag);
 
-  // Calculate category counts for filter tabs
+  // Calculate category counts for filter tabs from unfiltered content
   const categoryCounts = new Map<ContentCategory, number>();
-  // Count actual items per category from the content results
-  for (const item of contentResult.items) {
+  // Count actual items per category from the unfiltered content results
+  for (const item of unfilteredContentResult.items) {
     const currentCount = categoryCounts.get(item.category) ?? 0;
     categoryCounts.set(item.category, currentCount + 1);
   }

@@ -947,7 +947,7 @@ export async function UnifiedDetailPage({
             </div>
 
             {/* Sidebars - TOC + Related content + Recently Viewed */}
-            <aside className={`${spaceY.relaxed} lg:${position.sticky} lg:${sticky.top24} lg:${self.start}`}>
+            <aside className={`${spaceY.relaxed} lg:sticky lg:top-24 lg:self-start`}>
               {/* On This Page - Supabase-style minimal TOC */}
               {headingMetadata && headingMetadata.length >= 2 && (
                 <SidebarToc headings={headingMetadata} />

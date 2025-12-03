@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-export const deleteReviewSchema = z.object({
+const deleteReviewSchema = z.object({
   delete_id: z.string().uuid().optional()
 });
 export type DeleteReviewInput = z.infer<typeof deleteReviewSchema>;

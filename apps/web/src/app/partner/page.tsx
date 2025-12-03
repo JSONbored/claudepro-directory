@@ -117,7 +117,7 @@ export default async function PartnerPage() {
       launch: {
         discountPercent: 20,
         enabled: false,
-        endDate: 'TBD',
+        endDate: 'a date to be announced',
       },
     };
   }
@@ -183,7 +183,7 @@ export default async function PartnerPage() {
       >
         <CardContent className={`${paddingTop.relaxed} ${paddingBottom.relaxed}`}>
           <div
-            className={`${display.flex} ${flexDir.col} ${alignItems.center} ${gap.default} ${textAlign.center} md:${display.flex}-row md:${justify.between} md:${textAlign.left}`}
+            className={`${display.flex} ${flexDir.col} ${alignItems.center} ${gap.default} ${textAlign.center} md:flex-row md:justify-between md:text-left`}
           >
             <div className={`${row.default}`}>
               <div className={`${radius.full} ${bgColor['primary/10']} ${padding.tight}`}>
@@ -288,7 +288,7 @@ export default async function PartnerPage() {
             <Card className={`${position.relative} ${overflow.hidden} ${borderWidth['2']}`}>
               <CardHeader>
                 <div className={`${marginBottom.default} ${display.flex} ${alignItems.start} ${justify.between}`}>
-                  <div className={`${radius.lg} bg-purple-500/10 ${padding.compact}`}>
+                  <div className={`${radius.lg} ${bgColor['purple/5']} ${padding.compact}`}>
                     <Megaphone className={`${iconSize.lg} ${textColor.purple}`} />
                   </div>
                   <UnifiedBadge

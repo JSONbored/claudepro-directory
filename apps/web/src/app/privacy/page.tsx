@@ -32,7 +32,7 @@ export default function PrivacyPage() {
   const lastUpdated = getLastUpdatedDate();
 
   return (
-    <div className={`${container.default} ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:${padding.ySection}`}>
+    <div className={`${container.default} ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
       <div className={`prose prose-invert ${maxWidth.none}`}>
         <h1 className={cn(marginBottom.comfortable, weight.bold, responsiveText['3xl'])}>Privacy Policy</h1>
         <p className={`${marginBottom.relaxed} ${muted.default}`}>Last updated: {lastUpdated}</p>

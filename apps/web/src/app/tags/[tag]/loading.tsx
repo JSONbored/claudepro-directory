@@ -9,6 +9,7 @@ import { emptyCard, marginBottom, marginTop, spaceY, radius, padding, gap, grid,
   marginX,
   textAlign,
   border,
+  colSpan,
 } from '@heyclaude/web-runtime/design-system';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 
@@ -52,7 +53,7 @@ export default function TagDetailLoading() {
       <div className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}>
         <div className={grid.sidebar}>
           {/* Main content */}
-          <div className="lg:col-span-3">
+            <div className={colSpan.lg3}>
             {/* Filter tabs skeleton */}
             <div className={`${marginBottom.comfortable} ${display.flex} ${gap.compact}`}>
               <Skeleton className={skeletonSize.buttonCompact} />

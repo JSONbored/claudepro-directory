@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-export const createCollectionSchema = z.object({
+const createCollectionSchema = z.object({
   name: z.string().nullable().optional(),
   slug: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
