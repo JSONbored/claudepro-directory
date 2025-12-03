@@ -21,7 +21,7 @@ import type { Database } from '@heyclaude/database-types';
 import { muted } from '../../../design-system/styles/typography.ts';
 import { CheckCircle, Sparkles, User, Clock } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip.tsx';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../tooltip.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { useMemo } from 'react';
 
@@ -367,8 +367,9 @@ export function ContentIndicators({
   }
 
   return (
-    <div className={cn('flex items-center gap-1.5', className)}>
-      <AnimatePresence mode="popLayout">
+    <TooltipProvider delayDuration={300}>
+      <div className={cn('flex items-center gap-1.5', className)}>
+        <AnimatePresence mode="popLayout">
         {/* New badge takes priority */}
         {shouldShowNew && (
           <motion.div
@@ -406,6 +407,7 @@ export function ContentIndicators({
         )}
       </AnimatePresence>
     </div>
+    </TooltipProvider>
   );
 }
 
