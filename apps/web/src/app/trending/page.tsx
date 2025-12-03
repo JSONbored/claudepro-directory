@@ -63,7 +63,15 @@ export const revalidate = 900; /**
  */
 
 /**
- * Generate metadata for the trending page
+ * Provide page metadata for the /trending route.
+ *
+ * Returns metadata consumed by Next.js (title, description, Open Graph, and other SEO-related fields)
+ * to populate the /trending page head and social previews.
+ *
+ * @returns The `Metadata` object for the /trending page
+ *
+ * @see generatePageMetadata
+ * @see revalidate
  */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/trending');
@@ -245,6 +253,17 @@ function mapTrendingMetrics(
   });
 }
 
+/**
+ * Convert database "popular" rows into normalized DisplayableContent items for the homepage.
+ *
+ * @param rows - Result rows from the database function `get_popular_content`
+ * @param category - Optional category override; when `null` the row's category is used. Invalid categories will fall back to `DEFAULT_CATEGORY`.
+ * @returns An array of DisplayableContent items with normalized fields and a 1-based popularity rank
+ *
+ * @see toHomepageContentItem
+ * @see isValidCategory
+ * @see DEFAULT_CATEGORY
+ */
 function mapPopularContent(
   rows: Database['public']['Functions']['get_popular_content']['Returns'],
   category: Database['public']['Enums']['content_category'] | null
@@ -302,15 +321,15 @@ function mapRecentContent(
 }
 
 /**
- * Normalize a raw content record into a HomepageContentItem for homepage display.
+ * Convert a raw content record into a normalized HomepageContentItem for homepage lists.
  *
- * Produces consistent defaults for missing fields, resolves a timestamp from `created_at` or `date_added`
- * (falling back to the current time), ensures arrays and counts are present, and marks the item as featured
- * when a `featuredScore` is provided.
+ * Ensures required fields are present by applying sensible defaults: derives a timestamp from
+ * `created_at` or `date_added` (falls back to the current time), defaults missing strings and arrays,
+ * ensures numeric counts are present, and sets `featured` when `featuredScore` is greater than zero.
  *
  * @param input - Raw content values from the database or API; optional fields will be normalized.
- * @returns A `HomepageContentItem` with normalized `slug`, `title`, `description`, `author`, `tags`, `source`,
- * `created_at`, `date_added`, `category`, `view_count`, `copy_count`, and a boolean `featured` flag.
+ * @returns A HomepageContentItem with normalized `slug`, `title`, `description`, `author`, `tags`, `source`,
+ * `created_at`, `date_added`, `category`, `view_count`, `copy_count`, and `featured`.
  *
  * @see mapTrendingMetrics
  * @see mapPopularContent

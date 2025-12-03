@@ -83,12 +83,13 @@ import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form'
 export const revalidate = 86_400;
 
 /**
- * Produces metadata for the Config Recommender page.
+ * Provide metadata for the Config Recommender page.
  *
- * Delegates to the centralized metadata registry to build the metadata for the
- * '/tools/config-recommender' route.
+ * Delegates to the centralized metadata registry to build metadata for the
+ * '/tools/config-recommender' route so Next.js can use it during server-side
+ * rendering and static metadata generation.
  *
- * @returns Page metadata for the Config Recommender route.
+ * @returns Page metadata for the Config Recommender page
  *
  * @see generatePageMetadata
  * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata

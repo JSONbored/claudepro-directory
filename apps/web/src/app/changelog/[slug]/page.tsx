@@ -110,10 +110,14 @@ export async function generateStaticParams() {
 }
 
 /**
- * Create SEO and page metadata for a changelog entry page based on the route slug.
+ * Builds SEO and page metadata for a changelog entry identified by the route slug.
  *
- * @param params - Route parameters; must include `slug`
- * @returns Metadata for the changelog entry page. If the entry cannot be loaded, returns metadata generated without the entry (`item`) data.
+ * Attempts to load the changelog entry for the given `slug` and includes the entry as
+ * the `item` when generating metadata; if the entry cannot be loaded, metadata is
+ * generated without `item` data.
+ *
+ * @param params - Promise resolving to route parameters; must include `slug`
+ * @returns Metadata for the changelog entry page. If the entry cannot be loaded, metadata is returned without the `item` field populated.
  *
  * @see getChangelogEntryBySlug
  * @see generatePageMetadata
@@ -161,9 +165,9 @@ export async function generateMetadata({
  * and returns the complete article for the changelog entry. If the entry cannot be found the route
  * will trigger a 404 response.
  *
- * @param params - A promise that resolves to an object with the route params: `{ slug: string }`
+ * @param params - A promise resolving to an object with the route params: `{ slug: string }`
  * @returns The React element that renders the changelog entry page
- * @throws A normalized error if loading the changelog entry fails
+ * @throws A normalized error when loading the changelog entry fails
  *
  * @see getChangelogEntryBySlug
  * @see ReadProgress

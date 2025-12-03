@@ -93,6 +93,16 @@ function formatPriceLabel(cents: number, isSubscription?: boolean | null): strin
   return isSubscription ? `${base}/month` : base;
 }
 
+/**
+ * Convert a string to title case by capitalizing the first letter of each word-like segment.
+ *
+ * Splits the input on spaces, underscores, or hyphens and rejoins segments with single spaces.
+ *
+ * @param value - The input string to convert
+ * @returns The input transformed to title case (e.g., "hello_world" -> "Hello World")
+ *
+ * @see {@link resolvePlanLabel}
+ */
 function toTitleCase(value: string): string {
   return value
     .split(/[\s_-]+/)
@@ -101,12 +111,10 @@ function toTitleCase(value: string): string {
 }
 
 /**
- * Convert a raw job status token into a human-readable title-cased label.
+ * Converts a raw job status token to a human-readable title-cased label.
  *
- * @param value - The raw status token (for example: "active", "pending", "expired"); may be null or undefined
- * @returns `'Unknown'` if `value` is missing, otherwise the `value` converted to Title Case
- *
- * @see toTitleCase
+ * @param value - The raw status token (e.g. "active", "pending", "expired"); may be null or undefined
+ * @returns `'Unknown'` if `value` is missing, otherwise the status formatted in Title Case
  */
 function humanizeStatus(value?: null | string): string {
   if (!value) return 'Unknown';
@@ -114,10 +122,10 @@ function humanizeStatus(value?: null | string): string {
 }
 
 /**
- * Map a job plan enum value to its human-readable label.
+ * Return a human-friendly label for a job plan enum.
  *
- * @param plan - The job plan enum (`'one-time'` or `'subscription'`), or `null`/`undefined`
- * @returns The human-friendly label for the given plan; defaults to "One-Time" when `plan` is missing
+ * @param plan - The job plan enum value (`'one-time'` or `'subscription'`), or `null`/`undefined`
+ * @returns The human-friendly label for `plan`; defaults to "One-Time" when `plan` is missing
  *
  * @see JOB_PLAN_LABELS
  */
@@ -174,15 +182,12 @@ interface MyJobsPageProperties {
 }
 
 /**
- * Render the My Job Listings account page showing the user's job listings, per-job billing details, and an optional payment confirmation banner.
+ * Render the account page displaying the authenticated user's job listings, per-job billing details, and an optional payment confirmation banner.
  *
- * This server component is rendered with dynamic SSR (dynamic = 'force-dynamic') on the Node.js runtime and performs server-side data fetching:
- * - Verifies authenticated user and renders a sign-in prompt when unauthenticated.
- * - Loads the user's dashboard and job billing summaries and validates job rows returned from RPC responses.
- * - Surfaces a payment success banner when `searchParams.payment === 'success'` and `searchParams.job_id` is present.
+ * Performs server-side data fetching and authorization: verifies the authenticated user, loads the user's dashboard and job billing summaries, and surfaces a payment success banner when appropriate.
  *
- * @param searchParams - Optional URL query parameters; may include `payment` and `job_id` to surface a payment success banner for a specific job.
- * @returns The rendered JSX for the My Job Listings account page.
+ * @param searchParams - Optional URL query parameters; may include `payment` (e.g., "success") and `job_id` to surface a payment confirmation banner for a specific job.
+ * @returns The JSX for the My Job Listings account page.
  *
  * @see getAuthenticatedUser
  * @see getUserDashboard

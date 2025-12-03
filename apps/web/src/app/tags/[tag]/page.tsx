@@ -297,13 +297,16 @@ function toDisplayableContent(item: TaggedContentItem): DisplayableContent {
 }
 
 /**
- * Renders the Tag detail page showing tag metadata, a filtered content grid, and related tags.
+ * Display the Tag detail page with tag metadata, optional category-filtered content, and related tags.
  *
- * Fetches tag metadata, content for the tag (optionally narrowed by a category query param), and a list of all tags in parallel; converts fetched items to displayable content and renders a hero, category filter tabs, content grid (or an empty-state card), and a sidebar with related tags and a browse CTA.
+ * This server component loads tag metadata, content items for the tag (optionally filtered by a
+ * `category` query parameter), and a list of all tags; it then renders a hero with tag info,
+ * optional category filter tabs, a content grid or empty state, and a sidebar with related tags
+ * and a "Browse All Tags" CTA. If neither metadata nor content are found for the tag, the page
+ * triggers Next.js' notFound().
  *
- * Next.js behavior:
+ * Next.js specifics:
  * - Uses dynamic rendering (dynamic = 'force-dynamic') and supports dynamic route params.
- * - Triggers Next.js notFound() when no metadata and no content are found for the tag.
  *
  * @param params - Route params object containing an encoded `tag` string.
  * @param searchParams - Query params object; supports optional `category` to filter displayed items.

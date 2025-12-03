@@ -37,7 +37,18 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
  * @see normalizeError
  * @see logger
  */
-// Helper to filter and map user records with required fields
+/**
+ * Filter and normalize an array of user-like records, returning only entries that contain the required fields.
+ *
+ * The function enforces presence of `id`, `slug`, `name`, `tier`, and `created_at`, and maps optional fields (`image`, `bio`, `work`)
+ * to `null` when absent.
+ *
+ * @param users - An array (or `null`) of user-like objects whose fields may be nullable or partially present.
+ * @returns An array of normalized user objects each containing: `id`, `slug`, `name`, `image | null`, `bio | null`, `work | null`, `tier`, and `created_at`.
+ *
+ * @see getCommunityDirectory
+ * @see CommunityDirectoryContent
+ */
 function normalizeUserList<T extends { bio?: null | string; created_at: null | string; id: null | string; image?: null | string; name: null | string; slug: null | string; tier: null | string; work?: null | string }>(
   users: null | T[]
 ) {
@@ -58,6 +69,23 @@ function normalizeUserList<T extends { bio?: null | string; created_at: null | s
     }));
 }
 
+/**
+ * Renders the Community Directory page content: header, searchable user grid, and contributors sidebar.
+ *
+ * Fetches directory data for the provided search query, normalizes user records, and supplies them to
+ * the ProfileSearchClient and ContributorsSidebar components. If the directory fetch returns no data,
+ * the component continues and renders with empty lists.
+ *
+ * @param props.searchQuery - Query string used to filter directory results
+ * @returns The page content JSX containing the header, main user grid, and desktop-only contributors sidebar
+ *
+ * @throws A normalized error when fetching the community directory fails
+ *
+ * @see getCommunityDirectory
+ * @see normalizeUserList
+ * @see ProfileSearchClient
+ * @see ContributorsSidebar
+ */
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   // Generate single requestId for this component
   const requestId = generateRequestId();
@@ -129,6 +157,18 @@ interface CommunityDirectoryPageProperties {
   searchParams: Promise<{ q?: string }>;
 }
 
+/**
+ * Renders the Community Directory page, resolving URL search parameters and mounting the directory content inside a Suspense boundary.
+ *
+ * Resolves the incoming `searchParams` promise, extracts the optional `q` query value as `searchQuery` (defaults to an empty string), and renders CommunityDirectoryContent with a Skeleton fallback while the content loads.
+ *
+ * @param props.searchParams - A promise resolving to the page's search parameters; may include `q` to prefill the directory search.
+ * @returns The page's React element tree containing a Suspense boundary and the CommunityDirectoryContent component.
+ *
+ * @see CommunityDirectoryContent
+ * @see Suspense
+ * @see Skeleton
+ */
 export default async function CommunityDirectoryPage({
   searchParams,
 }: CommunityDirectoryPageProperties) {

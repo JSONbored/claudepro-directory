@@ -73,13 +73,12 @@ export interface CollectionDetailViewProps {
 }
 
 /**
- * Render collection detail sections including prerequisites, embedded, items, installation order, and compatibility.
+ * Render the detailed view for a collection, including prerequisites, embedded items grouped by category, recommended installation order, and compatibility indicators.
  *
- * This server component performs server-side data fetching for category configurations and the embedded items referenced by the collection metadata, then renders accessible UI sections for prerequisites, "What's Included" (grouped by category), recommended installation order, and compatibility indicators.
+ * Performs server-side data fetching for category configurations and the embedded items referenced by the collection metadata; groups and validates embedded items before rendering accessible UI sections.
  *
- * @param props - Component props
- * @param props.collection - Database content row representing a collection (category `"collections"`)
- * @returns JSX element for the collection detail view
+ * @param props.collection - Database row for the collection (category "collections"); its metadata drives prerequisites, items, installation_order, and compatibility sections
+ * @returns A React element that renders the collection detail sections
  *
  * @see getCategoryConfigs
  * @see getContentBySlug

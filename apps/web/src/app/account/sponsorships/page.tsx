@@ -85,13 +85,14 @@ function isSponsorshipActive(
 }
 
 /**
- * Render the account sponsorships overview page for the authenticated user.
+ * Render the account sponsorships overview page for the current authenticated user.
  *
- * Displays one of: a sign-in prompt when unauthenticated, an error message on fetch failure, an empty-state when no sponsorships exist, or a grid of sponsorship cards showing status badges, impressions, clicks, CTR, progress toward limits, and links to analytics.
+ * Performs server-side fetching of the user's sponsorships, emits structured request- and user-scoped logs,
+ * and renders one of: a sign-in prompt when unauthenticated, an error message on fetch failure, an empty-state
+ * when no sponsorships exist, or a grid of sponsorship cards showing status badges, impressions, clicks,
+ * CTR, progress toward limits, and links to analytics.
  *
- * Performs server-side fetching of the current user's sponsorships and emits structured request- and user-scoped logs for auditing and diagnostics.
- *
- * @returns The React element for the sponsorships page or the appropriate alternative state (sign-in, error, or empty state).
+ * @returns The React element for the sponsorships page or an alternative state UI (sign-in prompt, error message, or empty state).
  *
  * @see getAuthenticatedUser
  * @see getUserSponsorships

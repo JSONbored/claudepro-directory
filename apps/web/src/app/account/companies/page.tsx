@@ -229,8 +229,15 @@ export default async function CompaniesPage() {
   });
 
   /**
-   * Renders company logo with validation for trusted sources
-   * Falls back to placeholder icon if logo is invalid or from untrusted source
+   * Render a company logo image or a placeholder when the logo is missing or not from a trusted source.
+   *
+   * @param logo - The logo URL or `null` if none is provided.
+   * @param companyName - Company name used for the image `alt` text and accessibility.
+   * @param priority - Whether the rendered image should be loaded with priority.
+   * @returns A React element containing the company logo image or a placeholder icon.
+   *
+   * @see normalizeError
+   * @see Image from next/image
    */
   function renderCompanyLogo(logo: null | string, companyName: string, priority: boolean) {
     const placeholderIcon = (

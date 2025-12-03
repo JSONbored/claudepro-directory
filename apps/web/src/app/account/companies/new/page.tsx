@@ -17,16 +17,21 @@ import { CompanyForm } from '@/src/components/core/forms/company-form';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Generate the Next.js page metadata for the "Create Company" route.
+ *
+ * @returns The Metadata object for the '/account/companies/new' page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies/new');
 }
 
 /**
- * Page component that renders the "Create Company" form for authenticated users.
+ * Render the "Create Company" page for an authenticated user.
  *
- * If the current request is unauthenticated the function redirects the user to
- * the login page; otherwise it renders the page UI and the CompanyForm in
- * create mode.
+ * Verifies authentication on the server; if the request is unauthenticated the function redirects to `/login`, otherwise it returns the page UI containing the company creation form.
  *
  * @returns The React element tree for the new-company page.
  *

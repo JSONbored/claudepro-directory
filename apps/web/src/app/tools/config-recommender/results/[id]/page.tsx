@@ -201,6 +201,18 @@ interface PageProperties {
   searchParams: Promise<{ answers?: string }>;
 }
 
+/**
+ * Build page metadata for a results page and set robots to prevent indexing while allowing following.
+ *
+ * Generates base metadata for the route pattern "/tools/config-recommender/results/:id" using the provided route params
+ * and overrides the `robots` field to `index: false` and `follow: true`.
+ *
+ * @param props - Object containing route parameters.
+ * @param props.params - Route params object; expects `id` to identify the results page.
+ * @returns The page Metadata with the base metadata merged with the robots override.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: PageProperties): Promise<Metadata> {
   const { id } = await params;
   const baseMetadata = await generatePageMetadata('/tools/config-recommender/results/:id', {

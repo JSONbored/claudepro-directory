@@ -142,6 +142,19 @@ async function ViewCountMetadata({
   return <DetailMetadata item={item} viewCount={viewCount} copyCount={resolvedCopyCount} />;
 }
 
+/**
+ * Renders a detail sidebar populated with related items for the given content item.
+ *
+ * This server component resolves `relatedItemsPromise` and passes the resolved related items,
+ * along with `item` and `config`, to the `DetailSidebar` component.
+ *
+ * @param item - The primary content item for which the sidebar and related items apply.
+ * @param relatedItemsPromise - A promise that resolves to an array of related content items.
+ * @param config - Configuration for sidebar rendering (includes `typeName` and optional metadata such as `categoryLabel`, `showGitHubLink`, and `githubPathPrefix`).
+ * @returns The rendered DetailSidebar element with the provided item, resolved related items, and config.
+ *
+ * @see DetailSidebar
+ */
 async function SidebarWithRelated({
   item,
   relatedItemsPromise,

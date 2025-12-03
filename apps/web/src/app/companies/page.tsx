@@ -187,8 +187,16 @@ export default async function CompaniesPage() {
   });
 
   /**
-   * Renders company logo with validation for trusted sources
-   * Falls back to placeholder icon if logo is invalid or from untrusted source
+   * Render a company logo element from a provided URL, falling back to a styled placeholder when the URL is missing, invalid, or not from a trusted host.
+   *
+   * @param logo - The logo URL to render; may be null or undefined to indicate no logo.
+   * @param name - The company name used for the image alt text fallback.
+   * @param priority - If true, mark the Image as high-priority for loading.
+   * @returns A JSX element containing the company logo image when valid and trusted, otherwise a placeholder icon block.
+   *
+   * @see getSafeWebsiteUrl
+   * @see normalizeError
+   * @see Image
    */
   function renderCompanyLogo(logo: null | string | undefined, name: null | string, priority: boolean) {
     const placeholderIcon = (

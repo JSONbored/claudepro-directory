@@ -31,9 +31,9 @@ interface RouteContext {
  * Resolves dynamic path segments from `context`, creates a request-scoped log context, and delegates
  * handling to the Flux routing implementation.
  *
- * @param request - The incoming NextRequest for the GET operation.
- * @param context - RouteContext whose resolved `params.path` is the array of path segments to route.
- * @returns The Response produced by the Flux router for the routed GET request.
+ * @param request - NextRequest — the incoming request for the GET operation
+ * @param context - RouteContext — runtime route context whose resolved `params.path` is the array of path segments to route
+ * @returns Response — the HTTP response produced by the Flux router for the routed GET request
  * @see routeFluxRequest
  * @see generateRequestId
  * @see logger
@@ -67,11 +67,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 /**
- * Forwards POST requests to the Flux router for the matched catch-all path.
+ * Forward a POST request to the Flux router for the resolved catch-all path.
  *
- * @param request - Incoming Next.js request for the POST operation.
- * @param context - Route context whose `params.path` (resolved promise) contains path segments.
- * @returns The Response produced by the Flux router for the given path and request.
+ * @param {NextRequest} request - The incoming Next.js POST request to forward.
+ * @param {RouteContext} context - Route context whose `params.path` (a resolved promise) contains the dynamic path segments.
+ * @returns {Promise<Response>} The HTTP Response produced by the Flux router for the provided path and request.
  *
  * @see routeFluxRequest
  * @see generateRequestId

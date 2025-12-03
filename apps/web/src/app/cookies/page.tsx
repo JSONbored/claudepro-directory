@@ -16,13 +16,12 @@ export async function generateMetadata(): Promise<Metadata> {
 export const revalidate = false;
 
 /**
- * Render the Cookie Policy page with its sections and the page's last updated date.
+ * Renders the Cookie Policy page with the last updated date and eight structured policy sections.
  *
- * Renders a structured policy document that displays the last updated timestamp and
- * eight content sections covering cookie definitions, usage, types, third-party cookies,
- * management instructions, effects of disabling cookies, policy updates, and contact links.
+ * Reads the page's last updated timestamp via getLastUpdatedDate at render time. This page is
+ * statically generated with no revalidation (revalidate = false).
  *
- * @returns The Cookie Policy page JSX including the displayed "Last updated" date and all policy sections.
+ * @returns The Cookie Policy page JSX element including the displayed "Last updated" date and all policy sections.
  *
  * @see getLastUpdatedDate
  * @see NavLink

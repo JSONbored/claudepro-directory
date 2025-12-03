@@ -24,6 +24,18 @@ interface EditCollectionPageProperties {
   params: Promise<{ slug: string }>;
 }
 
+/**
+ * Builds page metadata for the "Edit Collection" route using the provided slug.
+ *
+ * Generates route-specific metadata (title, description, open graph, etc.) for Next.js
+ * by delegating to the shared `generatePageMetadata` helper with the route pattern
+ * `/account/library/:slug/edit`.
+ *
+ * @param params - An object whose `params` promise resolves to route parameters containing `slug`.
+ * @returns The Next.js `Metadata` for the edit-collection page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: EditCollectionPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });

@@ -137,15 +137,15 @@ export const revalidate = 1800; // 30min ISR (fallback if edge function cache mi
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
- * Produce the list of route parameters for statically pre-rendering company pages.
+ * Generate route parameter objects for a small set of company pages to pre-render at build time.
  *
- * Retrieves up to 10 top companies at build time and returns an array of objects containing the `slug` param for each company to pre-render. On failure the function logs the error and returns an empty array so build proceeds without pre-rendered company pages.
+ * Fetches up to 10 top companies and returns an array of `{ slug: string }` entries for those with a slug. If fetching fails, the function logs the error and returns an empty array so the build can continue without pre-rendered company pages.
  *
- * @returns An array of route parameter objects like `{ slug: string }` for the pages to statically generate.
+ * @returns An array of route parameter objects, each of the form `{ slug: string }`.
  *
  * @see getCompaniesList - data loader used to fetch the top companies
  * @see generateRequestId - used to create a request-scoped id for logging
- * @see logger - the request-scoped logger used for error reporting
+ * @see logger - request-scoped logger used for error reporting
  */
 export async function generateStaticParams() {
   // Limit to top 10 companies to optimize build time
@@ -181,10 +181,10 @@ export async function generateStaticParams() {
 }
 
 /**
- * Create page metadata for a company profile page based on the route slug.
+ * Generate page metadata for a company profile using the route slug.
  *
- * @param params - Promise-resolved route params containing the `slug` for the company page.
- * @returns Page metadata for the company identified by `slug`.
+ * @param params - Route parameters object whose `slug` property identifies the company page
+ * @returns Metadata for the company page
  * @see generatePageMetadata from @heyclaude/web-runtime/data
  */
 export async function generateMetadata({ params }: CompanyPageProperties): Promise<Metadata> {

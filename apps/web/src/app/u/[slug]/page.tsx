@@ -149,14 +149,17 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
 }
 
 /**
- * Render the public user profile page for a given user slug.
+ * Render the public user profile page for the given route slug.
  *
- * Loads the public profile, activity stats, public collections, and contributions; validates the slug,
- * adapts the UI based on the current viewer (e.g., follow controls), and resolves to the profile page
- * or triggers a 404 when the slug is invalid or the profile is not found.
+ * Fetches the public profile, activity stats, public collections, and contributions for the requested user,
+ * adapts the UI based on the current viewer (for example, showing follow controls when appropriate),
+ * and resolves to the profile page or triggers a 404 when the slug is invalid or the profile is not found.
  *
  * @param props - Route parameters object containing `slug`
  * @returns The React element for the user profile page
+ *
+ * @remarks
+ * This server-rendered page reads public user data and respects the file-level revalidation configuration (revalidate = 1800).
  *
  * @see {@link isValidSlug}
  * @see {@link getPublicUserProfile}

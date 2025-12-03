@@ -57,10 +57,10 @@ interface JobAnalyticsPageProperties {
 }
 
 /**
- * Converts a raw job status into a human-friendly title-cased label.
+ * Produce a human-friendly label from a raw job status string.
  *
- * @param rawStatus - Stored status string that may contain underscores and lowercase letters
- * @returns The input with underscores replaced by spaces and each word capitalized (e.g., `in_review` -> `In Review`)
+ * @param rawStatus - Status value that may contain underscores and lowercase letters (e.g., "in_review")
+ * @returns The status formatted with spaces and title-cased words (e.g., "In Review")
  *
  * @see getStatusColor
  * @see jobStatusBadge
@@ -101,12 +101,12 @@ export async function generateMetadata({ params }: JobAnalyticsPageProperties): 
 /**
  * Render the Job Analytics dashboard for the job identified by the route `id`.
  *
- * Performs server-side authentication and loads the authenticated user's job data, computes basic metrics
- * (views, clicks, click-through rate), and returns a React element that displays listing details,
- * performance metrics, and contextual insights. If the user is unauthenticated the request is redirected;
- * if the job cannot be loaded or is not owned by the user, a fallback UI is returned.
+ * Performs server-side authentication, loads the authenticated user's job data, computes basic
+ * metrics (views, clicks, click-through rate), and returns a React element showing listing details,
+ * performance metrics, and contextual insights. Unauthenticated requests are redirected to the login
+ * route; if the job cannot be loaded or is not owned by the user, a fallback UI is returned.
  *
- * @param params - Route parameters object containing the job `id` (for example, `{ id: string }`)
+ * @param params - Route parameters (a promise resolving to an object with `id`) used to locate the job
  * @returns A React element containing the job analytics dashboard, or a fallback Card when analytics are unavailable
  *
  * @see getAuthenticatedUser

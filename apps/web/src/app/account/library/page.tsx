@@ -59,15 +59,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Renders the account "My Library" page: verifies the authenticated user, loads the user's
- * bookmarks and collections, and returns the appropriate UI for authenticated, unauthenticated,
- * empty-state, or error conditions.
+ * Render the account "My Library" page that displays the authenticated user's bookmarks and collections.
  *
- * Performs server-side authentication and data fetching, emits request- and user-scoped logs,
- * and maps backend library statistics to the rendered counts.
+ * Performs server-side authentication, fetches the user's library data, emits request- and user-scoped
+ * logs, and renders the appropriate UI for authenticated, unauthenticated, empty-state, or error conditions.
  *
- * @returns A React element representing the library page UI (bookmarks and collections) or an
- *          authentication/error fallback UI.
+ * @returns A React element representing the library UI or an authentication/error fallback UI.
  *
  * @see getAuthenticatedUser
  * @see getUserLibrary

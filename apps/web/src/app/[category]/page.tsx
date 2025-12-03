@@ -58,25 +58,17 @@ export const dynamic = 'force-dynamic';
 export const dynamicParams = true; // Allow unknown categories to be rendered on demand (will 404 if invalid)
 
 /**
- * Generate metadata for category list pages
+ * Build SEO metadata for a category list page.
  *
- * @description
- * Generates SEO metadata including title, description, OpenGraph, and Twitter Card
- * data for each category list page. Falls back to error metadata if category is invalid.
+ * Generates page metadata (title, description, OpenGraph, Twitter card, etc.) for the given category.
+ * If the category is invalid, returns fallback/error metadata for the category route.
  *
- * @param {object} props - Component props
- * @param {Promise<{category: string}>} props.params - Route parameters containing category slug
+ * @param params - Promise resolving to route parameters containing the `category` slug
+ * @returns The Metadata object to use for the page
  *
- * @returns {Promise<Metadata>} Next.js metadata object for the page
- *
- * @example
- * // For /agents route, generates metadata:
- * // {
- * //   title: "AI Agents - Claude Pro Directory",
- * //   description: "Browse specialized AI agents...",
- * //   openGraph: { ... },
- * //   twitter: { ... }
- * // }
+ * @see isValidCategory
+ * @see getCategoryConfig
+ * @see generatePageMetadata
  */
 export async function generateMetadata({
   params,
@@ -106,16 +98,17 @@ export async function generateMetadata({
 }
 
 /**
- * Render the category list page for a given category.
+ * Render a category-specific list page with configuration-driven UI and content.
  *
- * Server component that validates the requested category, loads the category configuration
- * and its items on the server, and renders the list UI. If the category is invalid or its
- * configuration is missing, this component triggers a 404 via Next.js' notFound().
+ * Validates the requested category and its configuration, loads the category's items on the server,
+ * and returns the rendered list UI. If the category is invalid or its configuration is missing,
+ * this component triggers Next.js' 404 via `notFound()`. If loading items fails, the page renders
+ * with an empty list (the error is logged).
  *
  * @param props - Component props
  * @param props.params - Route parameters
  * @param props.params.category - Category slug to render (e.g., "agents", "mcp", "statuslines")
- * @returns The rendered JSX element for the category list page
+ * @returns The JSX element for the category list page
  *
  * @see isValidCategory
  * @see getCategoryConfig

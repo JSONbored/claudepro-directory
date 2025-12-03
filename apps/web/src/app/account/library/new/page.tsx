@@ -21,6 +21,13 @@ import { CollectionForm } from '@/src/components/core/forms/collection-form';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Generate metadata for the Create Collection page.
+ *
+ * @returns Metadata object describing the page (title, description, and other head tags)
+ * @see {@link generatePageMetadata} for the shared metadata construction logic
+ * @see {@link https://nextjs.org/docs/app/api-reference/functions/generate-metadata#generatemetadata Next.js generateMetadata}
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/library/new');
 }

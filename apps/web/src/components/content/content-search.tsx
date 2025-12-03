@@ -139,6 +139,17 @@ function chunkItems<T>(items: T[], size: number): T[][] {
   return chunks;
 }
 
+/**
+ * Determine whether a filter state contains any active criteria.
+ *
+ * Checks the provided filter object for any of: category, author, one or more tags,
+ * sort, dateRange, or popularity.
+ *
+ * @param filters - The filter state to inspect; may be `null` or `undefined`.
+ * @returns `true` if at least one filter criterion is present, `false` otherwise.
+ *
+ * @see sanitizeStringList
+ */
 function hasFilterCriteria(filters?: FilterState | null): boolean {
   if (!filters) return false;
   return Boolean(
@@ -152,23 +163,24 @@ function hasFilterCriteria(filters?: FilterState | null): boolean {
 }
 
 /**
- * Renders a client-side content search UI with unified search, filters, quick filters, saved searches, and fallback suggestions.
+ * Render a client-side content search UI with unified search, filters, quick-filter chips, saved search presets, and fallback suggestions.
  *
- * @param props - Component props
- * @param props.items - Initial list of content items shown before or without an active search.
- * @param props.searchPlaceholder - Placeholder text for the search input.
- * @param props.title - Human-readable content type name used in empty states and labels.
- * @param props.icon - Optional icon name to display in the empty state.
- * @param props.category - Optional fixed category to scope searches and filter options.
- * @param props.availableTags - Explicit list of tags to expose in filters; if empty, tags are derived from items.
- * @param props.availableAuthors - Explicit list of authors to expose in filters; if empty, authors are derived from items.
- * @param props.availableCategories - Explicit list of categories to expose in filters; if empty, categories are derived from items.
- * @param props.zeroStateSuggestions - Suggested items to show when there are no results and no search query.
- * @param props.quickTags - Optional short list of tags shown as quick-filter buttons.
- * @param props.quickAuthors - Optional short list of authors shown as quick-filter buttons.
- * @param props.quickCategories - Optional short list of categories shown as quick-filter buttons.
- * @param props.fallbackSuggestions - Optional override for fallback suggestions used when zeroStateSuggestions is not provided.
- * @returns The rendered search UI element.
+ * Provides an integrated search experience that displays initial items when idle, issues edge-backed searches when a query or filters are present, and shows a rich empty state with quick filters and suggested content.
+ *
+ * @param props.items - Initial content items displayed before a search or when no search criteria are active.
+ * @param props.searchPlaceholder - Placeholder text shown in the search input.
+ * @param props.title - Human-readable content type used in headings and empty-state copy.
+ * @param props.icon - Optional icon name to display in the empty state; falls back to a default if omitted.
+ * @param props.category - Optional fixed category to scope searches and available category filter options.
+ * @param props.availableTags - Explicit tags to expose in the filters; when empty, tags are derived from items.
+ * @param props.availableAuthors - Explicit authors to expose in the filters; when empty, authors are derived from items.
+ * @param props.availableCategories - Explicit categories to expose in the filters; when empty, categories are derived from items.
+ * @param props.zeroStateSuggestions - Suggested items to show when no results and no active query; used before fallbackSuggestions.
+ * @param props.quickTags - Optional short list of tags shown as quick-filter buttons (limits applied).
+ * @param props.quickAuthors - Optional short list of authors shown as quick-filter buttons (limits applied).
+ * @param props.quickCategories - Optional short list of categories shown as quick-filter buttons (limits applied).
+ * @param props.fallbackSuggestions - Optional override pool for fallback suggestions when zeroStateSuggestions is not provided.
+ * @returns The rendered React element for the searchable content UI.
  *
  * @see searchUnifiedClient
  * @see useSavedSearchPresets

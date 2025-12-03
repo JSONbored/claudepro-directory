@@ -79,7 +79,29 @@ export async function generateMetadata({ searchParams }: SearchPageProperties): 
   });
 }
 
-// Deferred Results Section Component for PPR
+/**
+ * Renders the search results section by fetching matching content on the server and supplying results and facet options to the client UI.
+ *
+ * Fetches results for the given `query` and `filters`, then renders a configured ContentSearchClient with fetched items, facet options, zero-state/fallback suggestions, and quick lists. Uses `requestId` to create a request-scoped logger and performs server-side data fetching; when `query` or user filters are present the fetch is performed without caching.
+ *
+ * @param props.query - Trimmed search query string used to fetch results.
+ * @param props.filters - SearchFilters applied to the query (sort, categories, tags, authors, limit).
+ * @param props.hasUserFilters - True when the request includes user-applied filters (controls no-cache behavior).
+ * @param props.facetOptions - Available facet values to expose in the UI: `authors`, `categories`, and `tags`.
+ * @param props.fallbackSuggestions - Zero-state or fallback suggestions used when no query or results are available.
+ * @param props.quickTags - Precomputed quick tag suggestions for the UI.
+ * @param props.quickAuthors - Precomputed quick author suggestions for the UI.
+ * @param props.quickCategories - Precomputed quick category suggestions for the UI.
+ * @param props.requestId - Correlation ID used to create a request-scoped logger.
+ *
+ * @returns The rendered ContentSearchClient configured with fetched items and facet/quick lists.
+ *
+ * @throws When the server-side search fetch fails; the error is normalized and rethrown.
+ *
+ * @see ContentSearchClient
+ * @see searchContent
+ * @see normalizeError
+ */
 async function SearchResultsSection({
   query,
   filters,
@@ -343,6 +365,21 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
   );
 }
 
+/**
+ * Produce a ranked list of string values extracted from facet summaries.
+ *
+ * Extracted values are scored by summing each facet's contribution weighted by the facet's `contentCount` (minimum weight of 1),
+ * then sorted by descending score with alphabetical tiebreaking. If no facets or no values are found, returns the provided `fallback` trimmed to `limit`.
+ *
+ * @param facets - Facet summaries to rank; if empty or undefined the `fallback` is used
+ * @param selector - Function that extracts string values (e.g., tags or authors) from a single facet
+ * @param limit - Maximum number of values to return
+ * @param fallback - Fallback values to use when no ranked values are available
+ * @returns An array of up to `limit` ranked string values, ordered by score then alphabetically
+ *
+ * @see deriveQuickCategories
+ * @see dedupeSuggestions
+ */
 function rankFacetValues(
   facets: SearchFacetSummary[] | undefined,
   selector: (facet: SearchFacetSummary) => string[],
@@ -391,6 +428,18 @@ function deriveQuickCategories(
     .slice(0, limit);
 }
 
+/**
+ * Produce a list of suggestions with duplicate slugs removed, preserving original order and capped by `limit`.
+ *
+ * Iterates the provided items, removes later items that share the same non-empty `slug` as a previously seen item, and returns the first `limit` entries after deduplication.
+ *
+ * @template T - Item type which may include an optional `slug` property.
+ * @param items - Array of suggestion-like objects; items without a `slug` are never considered duplicates.
+ * @param limit - Maximum number of items to return; iteration stops once this limit is reached.
+ * @returns The deduplicated list of items, up to `limit` entries.
+ * @see deriveQuickCategories
+ * @see rankFacetValues
+ */
 function dedupeSuggestions<T extends { slug?: null | string }>(items: T[], limit: number): T[] {
   if (!Array.isArray(items) || items.length === 0) {
     return [];

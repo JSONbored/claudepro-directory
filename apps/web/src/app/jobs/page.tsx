@@ -103,12 +103,11 @@ import { NewsletterCTAVariant } from '@/src/components/features/growth/newslette
 export const dynamic = 'force-dynamic';
 
 /**
- * Renders a badge that displays the total number of available jobs by fetching the count separately.
+ * Display a badge showing the total number of available jobs by fetching a minimal jobs response.
  *
- * Fetches a minimal jobs response to obtain the `total_count` and renders a UnifiedBadge with that value.
- * If the fetch fails, logs a warning and renders the badge showing `0` jobs.
+ * Fetches a single job (limit 1) to read `total_count`; if the fetch fails, logs a warning and the badge shows `0`.
  *
- * @returns A React element rendering a badge that shows the total number of jobs available.
+ * @returns A React element that displays the total number of jobs available.
  *
  * @see getFilteredJobs
  * @see UnifiedBadge
@@ -137,14 +136,14 @@ async function JobsCountBadge() {
 }
 
 /**
- * Generate route metadata for the /jobs page from the incoming query parameters.
+ * Build page metadata for the /jobs route using relevant query parameters.
  *
- * Reads `category` and `remote` from the provided `searchParams` (treating the string `'true'`
- * for `remote` as boolean `true`) and delegates construction to `generatePageMetadata`.
+ * Reads the `category` and `remote` values from the provided awaitable `searchParams`
+ * (treating the string `'true'` for `remote` as boolean `true`) and produces metadata
+ * tailored to those filters.
  *
- * @param props.searchParams - An awaitable record of query parameters for the current request;
- *                             expected keys include `category` (string) and `remote` ('true' | 'false').
- * @returns Metadata object for the /jobs route.
+ * @param props.searchParams - An awaitable record of query parameters for the current request; expected keys include `category` and `remote`
+ * @returns A Metadata object configured for the /jobs route reflecting the active filters
  *
  * @see generatePageMetadata
  */
@@ -323,17 +322,16 @@ async function JobsListSection({
 }
 
 /**
- * Render the Jobs page with parsed filters, pagination, and a filter URL helper.
+ * Render the Jobs listing page with parsed filters, pagination, stable control IDs, and a helper to build filter URLs.
  *
- * Parses query parameters (q/query/search, category, employment, experience, remote, sort, page, limit),
- * normalizes pagination (clamps page and limit and computes offset), exposes stable control IDs and
- * a buildFilterUrl helper for filter controls, and composes the page UI (hero, filter form, active-filter badges,
- * streamed total count badge, jobs listing section, and side content).
+ * Parses incoming search parameters (q/query/search, category, employment, experience, remote, sort, page, limit),
+ * normalizes pagination (clamps page and limit and computes offset), exposes stable element IDs for filter controls,
+ * and provides a buildFilterUrl helper used by filter controls and active-filter links.
  *
  * Filtered requests bypass the page cache (uncached SSR); the unfiltered base listing follows the page's ISR/cache semantics.
  *
  * @param props.searchParams - Incoming URL search parameters (may be a Promise). Supported keys: `q`, `query`, `search`, `category`, `employment`, `experience`, `remote`, `sort`, `page`, `limit`.
- * @returns The page JSX element for the /jobs route.
+ * @returns The JSX element for the /jobs route.
  *
  * @see JobsListSection
  * @see JobsCountBadge
@@ -722,15 +720,14 @@ type SortOption = 'newest' | 'oldest' | 'salary';
 const SORT_VALUES = new Set<SortOption>(['newest', 'oldest', 'salary']);
 
 /**
- * Sorts an array of job records according to the provided sort option.
+ * Sorts job records according to the selected sort option.
  *
- * @param jobs - The list of job records to sort (may be undefined or non-array).
+ * Chooses between sorting by most recent (`newest`), oldest (`oldest`), or by highest extracted
+ * maximum salary (`salary`). If `jobs` is not an array or is falsy, an empty array is returned.
+ *
+ * @param jobs - The list of job records to sort.
  * @param sort - The sort mode to apply (`'newest' | 'oldest' | 'salary'`).
- * @returns A new array of jobs sorted by the selected mode:
- * - `newest`: most recently posted first (by `posted_at`).
- * - `oldest`: oldest posted first (by `posted_at`).
- * - `salary`: highest extracted maximum salary first.
- * Returns an empty array if `jobs` is not an array or is falsy.
+ * @returns A new array of jobs sorted according to `sort`. `newest` orders by `posted_at` descending, `oldest` orders by `posted_at` ascending, and `salary` orders by the highest extracted salary descending. Returns an empty array if `jobs` is not an array or is falsy.
  *
  * @see extractSalaryValue
  * @see SORT_VALUES

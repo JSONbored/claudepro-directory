@@ -165,9 +165,9 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Render the Submit page for community submissions.
  *
- * Fetches submission dashboard data, submission form configuration, and content templates; uses per-request logging and request-scoped diagnostics. Form configuration load failures abort rendering, while dashboard and template failures fall back to empty data so the page can render partially. The page respects the file-level ISR revalidation setting (revalidate = 900).
+ * Fetches submission dashboard stats, submission form fields, and content templates on the server; uses a per-request logger and request-scoped diagnostics. Form configuration loading failures abort rendering (error is thrown), while dashboard or template failures are tolerated and result in fallbacks so the page can render partially. The page honors the file-level ISR setting (revalidate = 900).
  *
- * @returns A React element representing the Submit page layout and UI.
+ * @returns A React element representing the Submit page layout.
  *
  * @see SubmitFormClient
  * @see SubmitPageHero

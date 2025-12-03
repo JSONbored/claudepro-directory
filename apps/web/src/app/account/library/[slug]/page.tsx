@@ -63,13 +63,11 @@ export async function generateMetadata({ params }: CollectionPageProperties): Pr
 /**
  * Render the collection detail page for a user's library collection.
  *
- * This server component ensures the request is authenticated (redirecting to /login when not),
- * loads the collection details for the authenticated user, and handles load errors or missing
- * collections by showing an error card or triggering a 404. When successful, it renders the
- * collection header (including an optional share link for public collections), an interactive
- * CollectionItemManager for managing items and bookmarks, and summary statistics.
+ * The server component requires an authenticated user, loads the collection identified by `params.slug`,
+ * and renders the collection header, item manager, and summary statistics. If the collection cannot be
+ * loaded it shows an error card; if the collection is not found it triggers a 404.
  *
- * @param params - Route params (resolves to an object containing `slug`) identifying the collection
+ * @param params - Route params resolving to an object containing `slug` that identifies the collection
  * @returns The rendered collection detail page as a React element
  *
  * @see getCollectionDetail

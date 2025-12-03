@@ -158,12 +158,12 @@ function getSafeMailtoUrl(email: null | string | undefined): null | string {
 }
 
 /**
- * Create Next.js metadata for a job detail page identified by its slug.
+ * Generate Next.js metadata for a job detail page identified by its slug.
  *
- * Attempts to load the job by slug and, when found, embeds the job (with tags defaulted to an empty array) as the page item used to populate metadata; if loading fails or the job is missing, generates default route metadata for /jobs/:slug.
+ * Loads the job by slug and, if found, includes the job as the `item` (ensuring `tags` defaults to an empty array) when producing page metadata; if loading fails or the job is missing, produces default route metadata for `/jobs/:slug`.
  *
- * @param params - An object (or promise resolving to an object) containing the `slug` route parameter
- * @returns The Metadata object for the job page, with `item` populated when the job was successfully loaded
+ * @param params - An object or promise resolving to an object containing the route `slug`
+ * @returns The Metadata for the job page; `item` is the job (with `tags` set to `[]`) when available
  *
  * @see getJobBySlug
  * @see generatePageMetadata
@@ -247,12 +247,12 @@ export async function generateStaticParams() {
 }
 
 /**
- * Render the job detail page for the provided route slug and produce the job's server-rendered UI or trigger a 404 when the slug is invalid or the job cannot be found.
+ * Render the job detail page for a given job slug.
  *
- * Validates the incoming `slug` parameter, fetches the job record server-side, and renders the job detail UI (including apply actions and structured metadata). This server component participates in the module-level ISR configuration (revalidation and dynamic params).
+ * Validates the route `slug`, loads the job record server-side, triggers a 404 for invalid or missing resources, and returns the server-rendered UI including apply actions and structured metadata. This server component participates in the module-level ISR configuration (revalidation and dynamicParams).
  *
  * @param params - Route parameters object containing the `slug` to resolve the job
- * @returns The rendered job detail page as a JSX element
+ * @returns The job detail page as a JSX element
  *
  * @see getJobBySlug - Loads job data from the database
  * @see getSafeWebsiteUrl - Validates external application links before rendering

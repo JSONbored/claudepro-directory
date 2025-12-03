@@ -56,13 +56,17 @@ import { NewsletterCTAVariant } from '@/src/components/features/growth/newslette
 export const revalidate = 3600;
 
 /**
- * Build metadata for the changelog page and include RSS and Atom feed alternates.
+ * Builds page metadata for the /changelog route, including RSS and Atom feed alternates.
  *
- * If metadata generation fails, returns a fallback metadata object with a default title,
- * description, and the same RSS/Atom alternates.
+ * On failure, returns a fallback metadata object containing a default title and description
+ * while preserving the RSS and Atom alternates for feed discovery.
  *
- * @returns Page metadata for the `/changelog` route. The metadata includes feed discovery
- *          URLs under `alternates.types` for `application/rss+xml` and `application/atom+xml`.
+ * @returns Page metadata for the `/changelog` route. Includes feed discovery URLs under
+ *          `alternates.types` for `application/rss+xml` and `application/atom+xml`.
+ *
+ * @see generatePageMetadata
+ * @see APP_CONFIG
+ * @see revalidate
  */
 export async function generateMetadata(): Promise<Metadata> {
   // Generate requestId for metadata generation (separate from page render)
@@ -108,21 +112,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the Changelog page with server-loaded changelog entries, structured data, client-side filtering, and a newsletter CTA.
+ * Render the Changelog page including server-loaded entries, structured data, client-side filtering, and a newsletter CTA.
  *
- * Loads published entries and server-calculated category counts, normalizes entry shapes for the client, and renders:
- * - SEO structured data for the /changelog route
- * - Header with totals and latest release date (when available)
- * - A client-side ChangelogListClient for interactive filtering
- * - A newsletter CTA footer variant
- *
- * If loading the overview fails, returns a minimal fallback UI with an error message.
+ * Loads published changelog overview (entries and server-calculated category counts), normalizes entry shapes for client consumption, and renders SEO structured data, a header with totals and latest release date, a "What's New" summary, a client-side filterable changelog list, and a newsletter CTA. On failure, returns a minimal fallback UI with an error message and logs the error.
  *
  * @returns The React element for the changelog page; when data loading fails, a minimal fallback UI element is returned.
  *
  * @see getChangelogOverview
  * @see ChangelogListClient
  * @see StructuredData
+ * @see WhatsNewSummary
  * @see NewsletterCTAVariant
  * @see revalidate (ISR configuration exported from this module)
  */

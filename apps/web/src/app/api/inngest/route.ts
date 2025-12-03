@@ -16,12 +16,14 @@ import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtim
 import { type NextRequest } from 'next/server';
 
 /**
- * Forward GET requests to the Inngest runtime handler for /api/inngest.
+ * Handle GET requests for /api/inngest by delegating to the Inngest runtime while adding per-request logging and error normalization.
+ *
+ * Creates a request-scoped logger with a generated requestId, logs the incoming request, delegates to the underlying Inngest GET handler, and on failure normalizes and logs the error before re-throwing it.
  *
  * @param {NextRequest} request - Incoming Next.js request for the route.
  * @param {unknown} context - Route handler context provided by Next.js; forwarded to the Inngest handler.
  * @returns {Response} The Response produced by the Inngest runtime handler.
- *
+ * @throws {*} Re-throws the original error if the underlying Inngest handler fails.
  * @see {@link @heyclaude/web-runtime/inngest~GET} - Underlying Inngest GET handler
  * @see {@link @heyclaude/web-runtime/logging/server~generateRequestId} - Request ID generator used for tracing
  * @see {@link @heyclaude/web-runtime/logging/server~logger} - Logger used to create a per-request child logger
@@ -50,10 +52,10 @@ export async function GET(request: NextRequest, context: unknown) {
 }
 
 /**
- * Handles POST requests to /api/inngest by adding per-request logging and delegating to the Inngest POST handler.
+ * Add per-request logging and forward POST requests to the Inngest POST handler for /api/inngest.
  *
  * @param {NextRequest} request - The incoming NextRequest for the API route.
- * @param {unknown} context - The Next.js route handler context (framework-provided).
+ * @param {unknown} context - The Next.js route handler context provided by the framework.
  * @returns {Promise<Response>} The HTTP response produced by the Inngest POST handler.
  * @see {@link inngestPOST}
  * @see {@link generateRequestId}
@@ -83,9 +85,9 @@ export async function POST(request: NextRequest, context: unknown) {
 }
 
 /**
- * Handle PUT requests to /api/inngest by creating a request-scoped logger and delegating handling to the Inngest sync handler.
+ * Handle PUT requests to /api/inngest and delegate to the Inngest sync handler.
  *
- * @param {NextRequest} request - The incoming Next.js request.
+ * @param {NextRequest} request - The incoming Next.js request object for this route.
  * @param {unknown} context - Route context forwarded to the Inngest handler.
  * @returns {Response} The response produced by the Inngest PUT handler.
  * @see {@link @heyclaude/web-runtime/inngest#PUT}

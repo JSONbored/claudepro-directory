@@ -183,7 +183,14 @@ const ALLOWED_TYPES_ARRAY: Database['public']['Enums']['submission_type'][] = [
   ...ALLOWED_TYPES,
 ];
 
-// Strict content slug validation - only alphanumeric, hyphens, underscores
+/**
+ * Determines whether a slug is valid for use in URLs and paths.
+ *
+ * Accepts only lowercase letters (a–z), digits (0–9), hyphens (-), and underscores (_); rejects strings containing dots, slashes, percent-encoding, uppercase letters, or other special characters. Non-string inputs return `false`.
+ *
+ * @param slug - The candidate slug to validate
+ * @returns `true` if `slug` contains only lowercase letters, digits, hyphens, or underscores; `false` otherwise.
+ */
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string') return false;
   // No path separators, no dots, no percent-encoding, no special chars
@@ -316,7 +323,11 @@ export default async function SubmissionsPage() {
   const VALID_SUBMISSION_STATUSES = Constants.public.Enums.submission_status;
 
   /**
-   * Validate submission status against enum values
+   * Determine whether a value is a valid submission status.
+   *
+   * @param status - The value to validate as a submission_status
+   * @returns `true` if `status` is one of the allowed submission_status values, `false` otherwise.
+   * @see VALID_SUBMISSION_STATUSES
    */
   function isValidSubmissionStatus(
     status: unknown
@@ -380,8 +391,15 @@ export default async function SubmissionsPage() {
   };
 
   /**
-   * Get safe PR link props or null if PR URL is invalid
-   * Extracts and validates PR components, then constructs a safe URL
+   * Build a validated GitHub pull-request link for a submission.
+   *
+   * Attempts to parse and validate `submission.pr_url` and `submission.pr_number`, then returns a canonical, safe PR href when both owner/repo/PR number are acceptable.
+   *
+   * @param submission - A submission record that may contain `pr_url` and/or `pr_number`; `pr_url` must be a GitHub PR URL and `pr_number` must be a numeric PR identifier when present.
+   * @returns An object `{ href: string }` with a canonical GitHub PR URL when validation succeeds, or `null` if the URL or PR number is missing or invalid.
+   *
+   * @see extractPrComponents
+   * @see buildSafePrUrl
    */
   function getPrLinkProperties(submission: (typeof submissions)[number]) {
     const components = submission.pr_url ? extractPrComponents(submission.pr_url) : null;
@@ -398,12 +416,12 @@ export default async function SubmissionsPage() {
   }
 
   /**
-   * Return a safe, canonical content URL for a merged submission, or null when unavailable.
+   * Produce a safe, canonical content link for a submission only when it has been merged.
    *
    * @param type - Submission content type (one of the allowed `submission_type` values)
-   * @param slug - Content slug; must be a lowercase, URL-safe identifier
-   * @param status - Submission status; only `'merged'` produces a link
-   * @returns An object with `href` set to the safe content path when `type`/`slug` are valid and `status` is `'merged'`, or `null` otherwise.
+   * @param slug - Lowercase, URL-safe content slug (e.g., `my-agent`)
+   * @param status - Submission status; only `'merged'` yields a link
+   * @returns `{ href: string }` with a safe content path when `status` is `'merged'` and `type`/`slug` are valid, `null` otherwise.
    * @see getSafeContentUrl
    */
   function getContentLinkProperties(

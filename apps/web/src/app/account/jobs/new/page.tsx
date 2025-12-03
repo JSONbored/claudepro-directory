@@ -18,9 +18,9 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Generate metadata for the "/account/jobs/new" page.
+ * Generates page metadata for the "/account/jobs/new" route used by Next.js.
  *
- * @returns Metadata for the "/account/jobs/new" route.
+ * @returns The metadata object for the "/account/jobs/new" page.
  *
  * @see generatePageMetadata
  */
@@ -29,12 +29,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the "Post a Job" page containing the job form and a server action to create a job.
+ * Render the "Post a Job" page and provide a server action that creates jobs and handles post-creation flows.
  *
- * The component loads the payment plan catalog server-side (falls back to an empty catalog on failure),
- * provides a `handleSubmit` server action that calls `createJob`, handles required payment flows
- * (returns a checkout URL payload when needed) and performs a redirect to the jobs list when creation
- * succeeds without payment. All fetch and action errors are normalized and logged.
+ * The component loads the payment plan catalog server-side (falls back to an empty catalog on failure)
+ * and exposes a server action (`handleSubmit`) which calls `createJob`, normalizes and logs errors,
+ * returns a checkout payload when payment is required, or redirects to the jobs list when creation
+ * succeeds without payment.
  *
  * @returns The page's React element containing the job form and related UI.
  *
@@ -73,20 +73,15 @@ export default async function NewJobPage() {
   }
 
   /**
-   * Server action that creates a job and handles the post-creation flow (redirect or checkout).
-   *
-   * Attempts to create a job with the provided input, handles RPC and server errors by throwing a normalized error,
-   * initiates a checkout flow when payment is required by returning a payload with a `checkoutUrl`, or redirects to
-   * the jobs list when creation succeeds without payment.
+   * Create a job and handle the post-creation flow: either redirect to the jobs list or return a payload to start checkout.
    *
    * @param data - Job creation input payload
-   * @returns When payment is required: an object with `{ success: true, requiresPayment: true, checkoutUrl, message }`
-   *          if a checkout URL was produced, or `{ success: false, requiresPayment: true, message }` if checkout could not
-   *          be started. When creation unexpectedly fails: `{ success: false, message }`. When creation succeeds and no
-   *          payment is required the function redirects to `/account/jobs` and does not return.
-   * @throws NormalizedError when the createJob call throws, when the RPC returns `serverError`, or when `data` is missing
-   *         from the RPC result.
-   *
+   * @returns When payment is required: an object `{ success: true, requiresPayment: true, checkoutUrl, message }`
+   *          if a checkout URL is available, or `{ success: false, requiresPayment: true, message }` if checkout could not
+   *          be started. When creation fails: `{ success: false, message }`. When creation succeeds with no payment required
+   *          the function performs a redirect to `/account/jobs` and does not return.
+   * @throws NormalizedError when the underlying `createJob` call throws, when the RPC returns a `serverError`, or when
+   *         the RPC result contains no `data`.
    * @see createJob
    * @see generateRequestId
    */

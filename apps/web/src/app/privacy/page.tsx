@@ -17,10 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export const revalidate = false;
 
 /**
- * Renders the Privacy Policy page with a last-updated date and nine policy sections.
+ * Render the Privacy Policy page with the current "last updated" date and nine policy sections.
  *
- * The page displays the app name, the most recent update date, and internal links to the
- * Cookie Policy and Contact page. Styling is applied via design-system tokens.
+ * This server-rendered page reads the last updated timestamp via `getLastUpdatedDate` and includes
+ * links to the Cookie Policy and Contact page. The page is built statically at build time and
+ * does not revalidate on the server (revalidate = false).
  *
  * @returns The Privacy Policy page as a JSX element.
  *

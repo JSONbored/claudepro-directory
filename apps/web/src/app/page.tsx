@@ -46,9 +46,11 @@ import { RecentlyViewedRail } from '@/src/components/features/home/recently-view
 export const revalidate = 3600;
 
 /**
- * Produce metadata for the homepage.
+ * Generate the Metadata for the homepage (root route).
  *
- * @returns A `Metadata` object describing the homepage (root route).
+ * Used by Next.js to provide page metadata for '/'.
+ *
+ * @returns The `Metadata` object representing the homepage.
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
@@ -56,11 +58,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Renders the top contributors section by reading and normalizing cached homepage data.
+ * Render the TopContributors section using cached homepage data.
  *
- * Fetches homepage data (deduplicated via React's cache), reports fetch failures via trackRPCFailure, extracts and filters top contributors that have id, slug, and name, and maps them to a simplified contributor shape (defaulting `tier` to `'free'` and adding a `created_at` timestamp) passed into the TopContributors component.
+ * Fetch homepage data, extract entries from `top_contributors` that include `id`, `slug`, and `name`, normalize each contributor (default `tier` to `'free'` and add a `created_at` timestamp), and return a TopContributors React element. If fetching homepage data fails, report the failure via `trackRPCFailure` and render with an empty contributor list.
  *
- * @returns A JSX element rendering the TopContributors component populated with the processed contributors.
+ * @returns A JSX element rendering `TopContributors` populated with the normalized contributor objects.
  *
  * @see getHomepageData
  * @see getHomepageCategoryIds
@@ -107,16 +109,17 @@ async function TopContributorsServer() {
 }
 
 /**
- * Server-rendered homepage that streams a fast-rendering hero and progressively streams content and lazy sections.
+ * Render the server-side homepage with a fast-rendering hero and progressively streamed content and lazy-loaded sections.
  *
- * Renders the hero immediately using a cached homepage data fetch (member count and "new this week" indicator), then streams the main content and lazy-loaded sections (recently viewed, top contributors, newsletter). Data fetching uses React cache-level deduplication and cross-request caching; fetch errors for the initial hero request are captured and degrade to safe defaults.
+ * The hero is rendered immediately using cached homepage data to provide `memberCount` and a "new this week" indicator; fetch errors degrade to safe defaults. Main content and additional sections (recently viewed, top contributors, newsletter) are streamed progressively using Suspense and LazySection while search facets are fetched in parallel.
  *
- * @param searchParams - A promise resolving to query parameters (e.g., `{ q?: string }`) supplied to the page.
- * @returns The homepage React element tree rendered on the server.
+ * @returns The server-rendered React element tree for the homepage.
  *
  * @see getHomepageData
  * @see HomepageHeroServer
  * @see HomepageContentServerWrapper
+ * @see TopContributorsServer
+ * @see HomepageSearchFacetsServer
  */
 export default async function HomePage() {
   const requestId = generateRequestId();
@@ -200,7 +203,16 @@ export default async function HomePage() {
 }
 
 /**
- * Wrapper component that awaits search filters and passes to content server
+ * Await a SearchFilterOptions promise and render HomepageContentServer with the resolved filters.
+ *
+ * Blocks server rendering until `searchFiltersPromise` resolves, then supplies the resulting
+ * SearchFilterOptions to the child server component.
+ *
+ * @param searchFiltersPromise - A promise that resolves to SearchFilterOptions used to populate search filters.
+ * @returns A React element rendering HomepageContentServer with the resolved search filters.
+ *
+ * @see HomepageContentServer
+ * @see HomepageSearchFacetsServer
  */
 async function HomepageContentServerWrapper({
   searchFiltersPromise,

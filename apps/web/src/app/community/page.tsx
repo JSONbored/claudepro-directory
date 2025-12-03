@@ -90,9 +90,9 @@ function formatStatValue(value: null | number | undefined): string {
 }
 
 /**
- * Render the Community page with community stats, contribution guidance, and contact CTAs.
+ * Render the Community page displaying stats, contribution guidance, and contact CTAs.
  *
- * Fetches community directory entries, configuration counts, and homepage metrics in parallel and uses safe fallbacks if any fetch fails. Creates a request-scoped logger and records warnings when expected contact channels (Discord, X/Twitter) are missing and errors when data fetches fail. Renders hero actions for configured contact channels, three summary stat cards (Configurations, Contributors, Community Members), contribution instructions, and a newsletter CTA.
+ * Performs server-side fetches for the community directory, configuration counts, and homepage metrics and uses safe fallbacks on fetch failures so the page can render resiliently. Creates a request-scoped logger and records warnings when expected contact channels (Discord, X/Twitter) are not configured.
  *
  * @returns A React element representing the Community page.
  *
@@ -102,6 +102,7 @@ function formatStatValue(value: null | number | undefined): string {
  * @see getConfigurationCount
  * @see getHomepageData
  * @see NewsletterCTAVariant
+ * @see revalidate
  */
 export default async function CommunityPage() {
   // Generate single requestId for this page request

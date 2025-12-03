@@ -2,8 +2,16 @@ import type { Database } from '@heyclaude/database-types';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 
 /**
- * Singularize category title for button text and aria-labels
- * Handles special cases like "MCP" that don't follow standard pluralization
+ * Produce the singular form of a category title for UI text and aria-labels.
+ *
+ * Handles a set of predefined irregular or special-case titles (for example,
+ * "MCP Servers" -> "MCP Server", "Guides" -> "Guide") and otherwise removes a
+ * trailing "s" when present.
+ *
+ * @param title - The category title to singularize (e.g., "Guides", "Agents")
+ * @returns The singular form of `title` (e.g., "Guide", "Agent")
+ *
+ * @see ContentHeroSection
  */
 function singularizeTitle(title: string): string {
   // Handle special cases that don't follow standard pluralization
