@@ -1,7 +1,7 @@
 'use client';
 
 import { Constants } from '@heyclaude/database-types';
-import { borderColor, cluster, muted, spaceY, helper, gap, size } from '@heyclaude/web-runtime/design-system';
+import { borderColor, cluster, muted, spaceY, helper, grid, size, flexGrow, leading } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -120,7 +120,7 @@ export function JobAlertsCard({
           </div>
 
           <div className={cn(
-  `grid ${gap.default}`, 'sm:grid-cols-2')}>
+  grid.responsive2, 'sm:grid-cols-2')}>
             <div className={spaceY.compact}>
               <label className={size.sm} htmlFor="job-alert-category">
                 Category preference
@@ -187,7 +187,7 @@ export function JobAlertsCard({
           )}
 
           <div className={cluster.compact}>
-            <Button type="submit" disabled={isSubmitting} className="flex-1">
+            <Button type="submit" disabled={isSubmitting} className={flexGrow['1']}>
               {isSubmitting ? 'Subscribing…' : 'Create alert'}
             </Button>
             <Button type="button" variant="ghost" disabled={isSubmitting} onClick={reset}>
@@ -195,7 +195,7 @@ export function JobAlertsCard({
             </Button>
           </div>
 
-          <p className={cn(muted.default, size.xs, 'leading-snug')}>
+          <p className={cn(muted.default, size.xs, leading.snug)}>
             We only send relevant AI roles. Unsubscribe anytime.
           </p>
         </form>

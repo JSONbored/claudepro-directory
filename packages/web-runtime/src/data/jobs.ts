@@ -16,6 +16,10 @@ import {
   isValidExperienceLevel,
 } from '../utils/type-guards.ts';
 
+// Cache TTL key constants to avoid hardcoded string literals
+const JOBS_TTL_KEY = 'jobs' as const;
+const JOBS_DETAIL_TTL_KEY = 'jobs_detail' as const;
+
 export type JobsFilterResult = Database['public']['Functions']['filter_jobs']['Returns'];
 
 export interface JobsFilterOptions {
@@ -173,7 +177,7 @@ export async function getFilteredJobs(
       {
         keyParts: ['jobs-all', limit ?? 0, offset ?? 0],
         tags: ['jobs-list'],
-        ttlKey: 'cache.jobs.ttl_seconds',
+        ttlKey: JOBS_TTL_KEY,
         fallback: null,
         logMeta: filtersLog
       }
@@ -271,7 +275,7 @@ export async function getFilteredJobs(
           sort ?? 'newest',
         ],
         tags: ['jobs-search'],
-        ttlKey: 'cache.jobs.ttl_seconds',
+        ttlKey: JOBS_TTL_KEY,
         fallback: null,
         logMeta: filtersLog
       }
@@ -304,7 +308,7 @@ export async function getJobBySlug(slug: string) {
       {
         keyParts: ['job', slug],
         tags: [`job-${slug}`],
-        ttlKey: 'cache.jobs_detail.ttl_seconds',
+        ttlKey: JOBS_DETAIL_TTL_KEY,
         fallback: null,
         logMeta: { slug },
       }
@@ -340,7 +344,7 @@ export async function getFeaturedJobs(limit = 5) {
       {
         keyParts: ['jobs-featured', limit],
         tags: ['jobs-featured'],
-        ttlKey: 'cache.jobs.ttl_seconds',
+        ttlKey: JOBS_TTL_KEY,
         fallback: [],
         logMeta: { limit },
       }

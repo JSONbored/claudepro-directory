@@ -24,6 +24,13 @@ import { cluster, iconSize, iconLeading, marginBottom, muted, categoryBadge, hov
   textColor,
   alignItems,
   flexGrow,
+  display,
+  width,
+  textAlign,
+  marginLeft,
+  minWidth,
+  borderColor,
+  bgColor,
 } from '@heyclaude/web-runtime/design-system';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { getDisplayTitle } from '@heyclaude/web-runtime/ui';
@@ -204,7 +211,7 @@ export const DetailSidebar = memo(function DetailSidebar({
             {showGitHubLink && githubUrl && (
               <Button
                 variant="outline"
-                className={`w-full ${justify.start}`}
+                className={`${width.full} ${justify.start}`}
                 onClick={() => {
                   pulse
                     .click({
@@ -253,7 +260,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 return (
                   <Button
                     variant="outline"
-                    className={`w-full ${justify.start}`}
+                    className={`${width.full} ${justify.start}`}
                     onClick={() => {
                       pulse
                         .click({
@@ -337,7 +344,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                       variant="base"
                       style="outline"
                       className={
-                        `border-orange-500/30 bg-orange-500/10 ${weight.medium} ${textColor.orange} ${size.xs}`
+                        `${borderColor['orange/30']} ${bgColor['orange/10']} ${weight.medium} ${textColor.orange} ${size.xs}`
                       }
                     >
                       {String(config.temperature)}
@@ -368,7 +375,7 @@ export const DetailSidebar = memo(function DetailSidebar({
             {hasPermissions && permissions.length > 0 && (
               <div>
                 <h4 className={`${marginBottom.micro} ${weight.medium}`}>Permissions</h4>
-                <div className={`flex ${flexWrap.wrap} ${gap.tight}`}>
+                <div className={`${display.flex} ${flexWrap.wrap} ${gap.tight}`}>
                   {permissions.map((perm) => (
                     <UnifiedBadge key={perm} variant="base" style="outline" className={size.xs}>
                       {perm}
@@ -400,11 +407,11 @@ export const DetailSidebar = memo(function DetailSidebar({
               <Button
                 key={action.key}
                 variant="secondary"
-                className={`w-full ${justify.start} ${gap.default} text-left`}
+                className={`${width.full} ${justify.start} ${gap.default} ${textAlign.left}`}
                 onClick={action.onClick}
               >
                 <Copy className={iconLeading.sm} />
-                <div className="text-left">
+                <div className={textAlign.left}>
                   <div className={`${weight.medium} ${size.sm}`}>{action.label}</div>
                   {action.description && (
                     <p className={`${muted.default} ${size.xs}`}>{action.description}</p>
@@ -469,9 +476,9 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <Link
                   key={relatedSlug}
                   href={validatedUrl}
-                  className={`flex ${alignItems.center} ${justify.between} w-full ${cursor.pointer} ${radius.lg} ${border.default} ${padding.compact} text-left ${transition.colors} ${hoverBg.muted}`}
+                  className={`${display.flex} ${alignItems.center} ${justify.between} ${width.full} ${cursor.pointer} ${radius.lg} ${border.default} ${padding.compact} ${textAlign.left} ${transition.colors} ${hoverBg.muted}`}
                 >
-                  <div className={`min-w-0 ${flexGrow['1']}`}>
+                  <div className={`${minWidth[0]} ${flexGrow['1']}`}>
                     <h4 className={`truncate ${weight.medium} ${size.sm}`}>
                       {getDisplayTitle({
                         title:
@@ -488,7 +495,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                         : ''}
                     </p>
                   </div>
-                  <ChevronRight className={`ml-2 ${iconSize.sm} ${flexGrow.shrink0} ${muted.default}`} />
+                  <ChevronRight className={`${marginLeft.compact} ${iconSize.sm} ${flexGrow.shrink0} ${muted.default}`} />
                 </Link>
               );
             })}

@@ -18,6 +18,7 @@ import {
   bgColor,
   cluster,
   gap,
+  hoverBg,
   iconSize,
   alignItems,
   justify,
@@ -30,6 +31,8 @@ import {
   spaceY,
   transition,
   weight,
+  display,
+  textColor,
 } from '@heyclaude/web-runtime/design-system';
 import { errorToasts, successToasts } from '@heyclaude/web-runtime/ui';
 import { type ComponentType, useState, useTransition } from 'react';
@@ -166,7 +169,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         return (
           <div
             key={provider}
-            className={`flex ${alignItems.center} ${justify.between} ${radius.lg} border ${padding.default} ${transition.colors} hover:bg-accent/5`}
+            className={`${display.flex} ${alignItems.center} ${justify.between} ${radius.lg} border ${padding.default} ${transition.colors} ${hoverBg.subtle}`}
           >
             <div className={cluster.comfortable}>
               <div className={`${radius.full} border ${bgColor['accent/5']} ${padding.compact}`}>
@@ -203,7 +206,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
                     size="sm"
                     onClick={() => openUnlinkDialog(provider)}
                     disabled={isPending}
-                    className="text-destructive hover:bg-destructive/10"
+                    className={`${textColor.destructive} ${hoverBg.destructive}`}
                   >
                     Unlink
                   </Button>
@@ -237,7 +240,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         <DialogContent>
           <DialogHeader>
             <DialogTitle className={cluster.compact}>
-              <AlertTriangle className="text-destructive" />
+              <AlertTriangle className={textColor.destructive} />
               Unlink {providerToUnlink && PROVIDER_CONFIG[providerToUnlink]?.label} Account?
             </DialogTitle>
             <DialogDescription>

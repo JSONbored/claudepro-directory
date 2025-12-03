@@ -14,7 +14,7 @@ export async function fetchContactCommands(): Promise<ContactCommandsRow | null>
     {
       keyParts: ['contact-commands'],
       tags: ['contact'],
-      ttlKey: 'cache.contact.ttl_seconds',
+      ttlKey: 'contact',
       fallback: [],
       logMeta: { source: 'contact.actions' },
     }

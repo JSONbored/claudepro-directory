@@ -24,6 +24,8 @@
 
 // Default orange color - can be overridden via props
 const DEFAULT_PARTICLE_COLOR = '#F97316';
+import { zLayer } from '../../../design-system/styles/effects.ts';
+import { pointerEvents, position, inset } from '../../../design-system/styles/layout.ts';
 import { useEffect, useRef } from 'react';
 
 interface Particle {
@@ -163,7 +165,7 @@ export function ParticlesBackground({
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none absolute inset-0 z-0"
+      className={`${pointerEvents.none} ${position.absolute} ${inset['0']} ${zLayer.base}`}
       style={{ opacity: 0.5 }}
     />
   );

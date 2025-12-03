@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
 
-const ACCOUNT_TTL_KEY = 'cache.account.ttl_seconds';
+const ACCOUNT_TTL_KEY = 'account';
 
 const USER_TIER_VALUES = Constants.public.Enums.user_tier;
 
@@ -227,7 +227,7 @@ export async function getSubmissionDashboard(
     {
       keyParts: ['submission-dashboard', recentLimit, contributorsLimit],
       tags: ['submissions', 'dashboard', 'content'],
-      ttlKey: 'cache.submission_dashboard.ttl_seconds',
+      ttlKey: 'submission_dashboard',
       useAuth: true,
       fallback: null,
       logMeta: { recentLimit, contributorsLimit },

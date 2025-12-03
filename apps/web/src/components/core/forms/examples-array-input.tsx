@@ -48,6 +48,8 @@ import {
   flexGrow,
   iconSize,
   marginTop,
+  width,
+  marginX,
   muted,
   padding,
   size,
@@ -55,6 +57,10 @@ import {
   transition,
   weight,
   inputHeight,
+  textColor,
+  paddingBottom,
+  opacityLevel,
+  textAlign,
 } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
@@ -256,9 +262,9 @@ export function ExamplesArrayInput({
       <div className={spaceY.default}>
         {examples.length === 0 && (
           <Card className={border.dashed}>
-            <CardContent className="py-8">
-              <div className={`${spaceY.compact} text-center`}>
-                <Code className={`mx-auto ${iconSize.xl} ${muted.default}`} />
+            <CardContent className={padding.yLoose}>
+              <div className={`${spaceY.compact} ${textAlign.center}`}>
+                <Code className={`${marginX.auto} ${iconSize.xl} ${muted.default}`} />
                 <p className={cn(size.sm, muted.default)}>
                   No examples added yet. Click "Add Example" to get started.
                 </p>
@@ -277,12 +283,12 @@ export function ExamplesArrayInput({
 
           return (
             <Card key={example.id} className={cn(!validation.valid && 'border-destructive')}>
-              <CardHeader className="pb-3">
+              <CardHeader className={paddingBottom.default}>
                 <div className={between.center}>
                   <button
                     type="button"
                     onClick={() => toggleExpanded(index)}
-                    className={`${cluster.compact} ${flexGrow['1']} text-left ${transition.opacity} hover:opacity-70`}
+                    className={`${cluster.compact} ${flexGrow['1']} ${textAlign.left} ${transition.opacity} hover:${opacityLevel[70]}`}
                   >
                     {isExpanded ? (
                       <ChevronUp className={iconSize.sm} />
@@ -305,7 +311,7 @@ export function ExamplesArrayInput({
                   </Button>
                 </div>
                 {!validation.valid && (
-                  <CardDescription className="text-destructive">{validation.error}</CardDescription>
+                  <CardDescription className={textColor.destructive}>{validation.error}</CardDescription>
                 )}
               </CardHeader>
 
@@ -314,7 +320,7 @@ export function ExamplesArrayInput({
                   {/* Title */}
                   <div className={spaceY.compact}>
                     <Label htmlFor={titleId}>
-                      Example Title <span className="text-destructive">*</span>
+                      Example Title <span className={textColor.destructive}>*</span>
                     </Label>
                     <Input
                       id={titleId}
@@ -330,7 +336,7 @@ export function ExamplesArrayInput({
                   {/* Language */}
                   <div className={spaceY.compact}>
                     <Label htmlFor={languageId}>
-                      Language <span className="text-destructive">*</span>
+                      Language <span className={textColor.destructive}>*</span>
                     </Label>
                     <Select
                       value={example.language}
@@ -354,7 +360,7 @@ export function ExamplesArrayInput({
                   {/* Code */}
                   <div className={spaceY.compact}>
                     <Label htmlFor={codeId}>
-                      Code <span className="text-destructive">*</span>
+                      Code <span className={textColor.destructive}>*</span>
                     </Label>
                     <Textarea
                       id={codeId}
@@ -399,7 +405,7 @@ export function ExamplesArrayInput({
           variant="outline"
           size="sm"
           onClick={addExample}
-          className={cn(cluster.compact, 'w-full')}
+          className={cn(cluster.compact, width.full)}
         >
           <Plus className={iconSize.sm} />
           Add Another Example ({examples.length}/{maxExamples})

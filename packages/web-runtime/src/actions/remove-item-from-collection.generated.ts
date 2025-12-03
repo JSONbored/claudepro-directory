@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const removeItemFromCollectionSchema = z.object({
+export const removeItemFromCollectionSchema = z.object({
   remove_item_id: z.string().uuid().optional()
 });
 export type RemoveItemFromCollectionInput = z.infer<typeof removeItemFromCollectionSchema>;
@@ -42,7 +42,6 @@ export const removeItemFromCollection = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -55,9 +54,10 @@ export const removeItemFromCollection = authedAction
       revalidatePath(`/account/library`);
       revalidatePath(`/account/library/${result?.collection?.slug}`);
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.collection_items']
+        cacheConfig,
+        invalidateKeys: ['collection_items']
       });
 
       

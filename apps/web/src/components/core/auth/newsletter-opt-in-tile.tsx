@@ -1,13 +1,40 @@
 'use client';
 
 import { cn } from '@heyclaude/web-runtime/ui';
-import { stack, cluster, responsive, weight, muted, size, gap, padding, transition, radius, backdrop, textColor,
-  flexWrap,
-  overflow,
-  animateDuration,
-  cursor,
-  opacityLevel,
+import {
+  absolute,
   alignItems,
+  animateDuration,
+  backdrop,
+  bgGradient,
+  border,
+  cluster,
+  cursor,
+  display,
+  flexWrap,
+  gap,
+  gradientFrom,
+  gradientTo,
+  gradientVia,
+  muted,
+  opacityLevel,
+  overflow,
+  padding,
+  position,
+  radius,
+  responsive,
+  size,
+  stack,
+  textAlign,
+  textColor,
+  transition,
+  weight,
+  width,
+  pointerEvents,
+  borderColor,
+  shadow,
+  hoverShadow,
+  hoverBorder,
 } from '@heyclaude/web-runtime/design-system';
 import type { CheckedState } from '@radix-ui/react-checkbox';
 import { motion } from 'motion/react';
@@ -74,17 +101,17 @@ export function NewsletterOptInTile({
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.99 }}
       className={cn(
-        `group relative w-full ${overflow.hidden} ${radius['2xl']} border ${padding.comfortable} text-left ${transition.all} ${animateDuration.slow}`,
-        `bg-gradient-to-br from-card/80 via-card/60 to-card/30 ${backdrop.xl}`,
+        `group ${position.relative} ${width.full} ${overflow.hidden} ${radius['2xl']} ${border.default} ${padding.comfortable} ${textAlign.left} ${transition.all} ${animateDuration.slow}`,
+        `${bgGradient.toBR} ${gradientFrom.card80} ${gradientVia.card60} ${gradientTo.card30} ${backdrop.xl}`,
         checked
-          ? 'border-accent/70 shadow-[0_10px_40px_-20px_rgba(255,138,76,0.8)]'
-          : 'border-white/10 hover:border-accent/40 hover:shadow-[0_10px_40px_-20px_rgba(255,138,76,0.6)]'
+          ? `${borderColor['accent/70']} ${shadow.accentGlow}`
+          : `${borderColor['white/10']} ${hoverBorder['accent/40']} ${hoverShadow.accentGlow}`
       )}
     >
       <div className={stack.relaxed}>
         <div className={stack.default}>
           <div className={`${cluster.default} ${flexWrap.wrap}`}>
-            <span className={`inline-flex ${alignItems.center} ${radius.full} bg-white/10 ${padding.xCompact} ${padding.yMicro} ${weight.semibold} ${textColor.white}/90 ${size.xs}`}>
+            <span className={`${display.inlineFlex} ${alignItems.center} ${radius.full} bg-white/10 ${padding.xCompact} ${padding.yMicro} ${weight.semibold} ${textColor.white}/90 ${size.xs}`}>
               {badgeLabel}
             </span>
           </div>
@@ -96,7 +123,7 @@ export function NewsletterOptInTile({
         <div className={responsive.smRowBetween}>
           <label
             htmlFor={checkboxId}
-            className={`flex ${cursor.pointer} ${alignItems.center} ${gap.default} ${weight.medium} ${textColor.foreground} ${size.sm}`}
+            className={`${display.flex} ${cursor.pointer} ${alignItems.center} ${gap.default} ${weight.medium} ${textColor.foreground} ${size.sm}`}
             onClick={(event) => event.stopPropagation()}
             onKeyDown={(event) => event.stopPropagation()}
             onKeyUp={(event) => event.stopPropagation()}
@@ -114,12 +141,12 @@ export function NewsletterOptInTile({
       </div>
       <div
         className={cn(
-          `pointer-events-none absolute inset-0 ${opacityLevel[0]} ${transition.opacity} ${animateDuration.slow} group-hover:opacity-100`,
-          checked ? 'opacity-80' : 'opacity-0'
+          `${pointerEvents.none} ${absolute.inset} ${opacityLevel[0]} ${transition.opacity} ${animateDuration.slow} group-hover:${opacityLevel[100]}`,
+          checked ? opacityLevel[80] : opacityLevel[0]
         )}
         aria-hidden="true"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-transparent" />
+        <div className={`${absolute.inset} ${bgGradient.toBR} ${gradientFrom.accent10} ${gradientVia.transparent} ${gradientTo.transparent}`} />
       </div>
     </motion.button>
   );

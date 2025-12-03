@@ -12,6 +12,7 @@ import {
   bgColor,
   flexDir,
   flexGrow,
+  grid,
   alignItems,
   justify,
   maxWidth,
@@ -20,6 +21,9 @@ import {
   padding,
   radius,
   shadow,
+  display,
+  position,
+  width,
 } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
@@ -54,12 +58,12 @@ const cardBorderStyle = {
  */
 export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAuthLayoutProps) {
   return (
-    <div className={`relative ${minHeight.screen} ${minHeight.dvh} ${overflow.hidden} ${bgColor.background}`}>
+    <div className={`${position.relative} ${minHeight.screen} ${minHeight.dvh} ${overflow.hidden} ${bgColor.background}`}>
       {/* Desktop: Side-by-side layout - both sides vertically centered */}
-      <div className={`hidden ${minHeight.screen} ${minHeight.dvh} lg:grid lg:grid-cols-2`}>
+      <div className={`${display.none} ${minHeight.screen} ${minHeight.dvh} lg:${grid.auth}`}>
         {/* Left: Brand content - centered */}
         <motion.div
-          className={`flex ${minHeight.screen} ${minHeight.dvh} ${alignItems.center} ${justify.center} ${padding.xSpacious} xl:px-16`}
+          className={`${display.flex} ${minHeight.screen} ${minHeight.dvh} ${alignItems.center} ${justify.center} ${padding.xSpacious} xl:${padding.xHero}`}
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
@@ -70,7 +74,7 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
         {/* Right: Auth card - centered with Claude orange accent */}
         <div className={`flex ${minHeight.screen} ${minHeight.dvh} ${alignItems.center} ${justify.center} ${padding.xRelaxed}`}>
           <motion.div
-            className={`w-full ${maxWidth.md} ${radius['2xl']} ${bgColor.card} ${padding.spacious} ${shadow['2xl']} xl:${padding.section}`}
+            className={`${width.full} ${maxWidth.md} ${radius['2xl']} ${bgColor.card} ${padding.spacious} ${shadow['2xl']} xl:${padding.section}`}
             style={cardBorderStyle}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -82,10 +86,10 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
       </div>
 
       {/* Mobile: Stacked layout */}
-      <div className={`flex ${minHeight.screen} ${minHeight.dvh} ${flexDir.col} lg:hidden`}>
+      <div className={`${display.flex} ${minHeight.screen} ${minHeight.dvh} ${flexDir.col} lg:${display.none}`}>
         {mobileHeader}
-        <div className={`flex ${flexGrow['1']} ${alignItems.center} ${justify.center} ${padding.comfortable}`}>
-          <div className={`w-full ${maxWidth.md} ${radius['2xl']} ${bgColor.card} ${padding.relaxed}`} style={cardBorderStyle}>
+        <div className={`${display.flex} ${flexGrow['1']} ${alignItems.center} ${justify.center} ${padding.comfortable}`}>
+          <div className={`${width.full} ${maxWidth.md} ${radius['2xl']} ${bgColor.card} ${padding.relaxed}`} style={cardBorderStyle}>
             {authPanel}
           </div>
         </div>

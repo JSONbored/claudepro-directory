@@ -44,10 +44,12 @@ import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 import { ChevronRight, Home } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
-import { focusRing } from '../../../design-system/styles/interactive.ts';
-import { gap, marginBottom } from '../../../design-system/styles/layout.ts';
-import { size } from '../../../design-system/styles/typography.ts';
+import { focusRing, transition } from '../../../design-system/styles/interactive.ts';
+import { gap, marginBottom, maxWidth, paddingLeft, display, flexWrap, alignItems, flexGrow } from '../../../design-system/styles/layout.ts';
+import { size, weight, muted } from '../../../design-system/styles/typography.ts';
+import { iconSize } from '../../../design-system/styles/icons.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
+import { textColor } from '../../../design-system/styles/colors.ts';
 
 /** Single breadcrumb item */
 export interface BreadcrumbItem {
@@ -166,31 +168,31 @@ export function Breadcrumbs({
 
   return (
     <nav aria-label="Breadcrumb" className={cn(marginBottom.default, className)}>
-      <ol className={`flex flex-wrap items-center ${gap.tight} ${size.sm}`}>
+      <ol className={`${display.flex} ${flexWrap.wrap} ${alignItems.center} ${gap.tight} ${size.sm}`}>
         {displayItems.map((item, index) => {
           const isFirst = index === 0;
           const isLast = index === displayItems.length - 1;
           const isEllipsis = item.label === '...';
 
           return (
-            <li key={`${item.href}-${index}`} className={`flex items-center ${gap.tight}`}>
+            <li key={`${item.href}-${index}`} className={`${display.flex} ${alignItems.center} ${gap.tight}`}>
               {/* Separator (not before first item) */}
               {!isFirst && (
                 <ChevronRight
-                  className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50"
+                  className={`${iconSize.xs} ${flexGrow.shrink0} ${muted.opacity50}`}
                   aria-hidden="true"
                 />
               )}
 
               {/* Ellipsis (non-interactive) */}
               {isEllipsis ? (
-                <span className="px-1 text-muted-foreground" aria-hidden="true">
+                <span className={`${paddingLeft.tight} ${muted.default}`} aria-hidden="true">
                   …
                 </span>
               ) : isLast ? (
                 /* Current page (non-interactive) */
                 <span
-                  className="max-w-[200px] truncate font-medium text-foreground"
+                  className={`${maxWidth['200px']} truncate ${weight.medium} ${textColor.foreground}`}
                   aria-current="page"
                 >
                   {item.label}
@@ -201,17 +203,17 @@ export function Breadcrumbs({
                   href={item.href}
                   className={cn(
                     focusRing.default,
-                    `flex items-center ${gap.tight} ${radius.sm} text-muted-foreground transition-colors`,
-                    'hover:text-foreground'
+                    `${display.flex} ${alignItems.center} ${gap.tight} ${radius.sm} ${muted.default} ${transition.colors}`,
+                    `hover:${textColor.foreground}`
                   )}
                 >
                   {isFirst && showHomeIcon ? (
                     <>
-                      <Home className="h-3.5 w-3.5" aria-hidden="true" />
+                      <Home className={iconSize.xsPlus} aria-hidden="true" />
                       <span className="sr-only">{item.label}</span>
                     </>
                   ) : (
-                    <span className="max-w-[150px] truncate">{item.label}</span>
+                    <span className={`${maxWidth['150px']} truncate`}>{item.label}</span>
                   )}
                 </Link>
               )}

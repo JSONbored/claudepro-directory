@@ -1,5 +1,6 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import {
+  formatDate,
   generatePageMetadata,
   getAuthenticatedUser,
   getSponsorshipAnalytics,
@@ -10,6 +11,7 @@ import {
   bgColor,
   cluster,
   gap,
+  grid,
   alignItems,
   muted,
   overflow,
@@ -18,6 +20,10 @@ import {
   spaceY,
   transition,
   weight,
+  display,
+  position,
+  height,
+  radius,
 } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UnifiedBadge, Button ,
@@ -253,7 +259,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardDescription>Current sponsorship configuration</CardDescription>
         </CardHeader>
         <CardContent className={spaceY.comfortable}>
-          <div className={`grid grid-cols-2 ${gap.comfortable}`}>
+          <div className={grid.cols2}>
             <div>
               <p className={`${weight.medium} ${size.sm}`}>Content Type</p>
               <p className={muted.default}>{sponsorship.content_type}</p>
@@ -267,14 +273,14 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             <div>
               <p className={`${weight.medium} ${size.sm}`}>Start Date</p>
               <p className={muted.default}>
-                {new Date(sponsorship.start_date).toLocaleDateString()}
+                {formatDate(sponsorship.start_date)}
               </p>
             </div>
 
             <div>
               <p className={`${weight.medium} ${size.sm}`}>End Date</p>
               <p className={muted.default}>
-                {new Date(sponsorship.end_date).toLocaleDateString()}
+                {formatDate(sponsorship.end_date)}
               </p>
             </div>
 
@@ -315,31 +321,31 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                 const clicks = clicksMap.get(dayKey) ?? 0;
 
                 return (
-                <div key={dayKey} className={`grid grid-cols-12 ${alignItems.center} ${gap.compact}`}>
+                <div key={dayKey} className={`${grid.cols12} ${alignItems.center}`}>
                   <div className={`col-span-2 ${muted.default} ${size.xs}`}>
                     {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
-                  <div className={`col-span-10 grid grid-cols-2 ${gap.tight}`}>
+                  <div className={`col-span-10 ${grid.cols2NoGap} ${gap.tight}`}>
                     {/* Impressions bar */}
-                    <div className={`relative h-8 ${overflow.hidden} rounded ${bgColor.muted}`}>
+                    <div className={`${position.relative} ${height.input} ${overflow.hidden} ${radius.default} ${bgColor.muted}`}>
                       <div
-                        className={`${absolute.topLeft} h-full bg-primary/30 ${transition.all}`}
+                        className={`${absolute.topLeft} ${height.full} ${bgColor['primary/30']} ${transition.all}`}
                         style={{ width: `${(impressions / maxImpressions) * 100}%` }}
                       />
                       <div
-                        className={`${absolute.inset} flex ${alignItems.center} ${padding.xTight} ${size.xs}`}
+                        className={`${absolute.inset} ${display.flex} ${alignItems.center} ${padding.xTight} ${size.xs}`}
                       >
                         {impressions > 0 && `${impressions} views`}
                       </div>
                     </div>
                     {/* Clicks bar */}
-                    <div className={`relative h-8 ${overflow.hidden} rounded ${bgColor.muted}`}>
+                    <div className={`${position.relative} ${height.input} ${overflow.hidden} ${radius.default} ${bgColor.muted}`}>
                       <div
-                        className={`${absolute.topLeft} h-full ${bgColor['accent/50']} ${transition.all}`}
+                        className={`${absolute.topLeft} ${height.full} ${bgColor['accent/50']} ${transition.all}`}
                         style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
                       />
                       <div
-                        className={`${absolute.inset} flex ${alignItems.center} ${padding.xTight} ${size.xs}`}
+                        className={`${absolute.inset} ${display.flex} ${alignItems.center} ${padding.xTight} ${size.xs}`}
                       >
                         {clicks > 0 && `${clicks} clicks`}
                       </div>

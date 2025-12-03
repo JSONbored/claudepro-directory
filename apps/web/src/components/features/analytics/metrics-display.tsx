@@ -5,14 +5,25 @@
 
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@heyclaude/web-runtime/icons';
 import type { MetricsDisplayProps } from '@heyclaude/web-runtime/types/component.types';
-import { cluster, gap, grid, iconSize, marginBottom, marginTop, muted, weight, size, maxWidth, tracking,
+import { cluster, gap, grid, iconSize, marginBottom, marginTop, marginX, muted, weight, size, maxWidth, tracking,
   animateDuration,
   transition,
   textColor,
+  bgColor,
+  bgGradient,
+  gradientFrom,
+  gradientTo,
   padding,
   radius,
   backdrop,
   shadow,
+  borderColor,
+  hoverBorder,
+  textAlign,
+  marginY,
+  display,
+  bgClip,
+  transform as textTransform,
 } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 
@@ -45,15 +56,15 @@ function BadgeDelta({
 
   const colorClass =
     deltaType === 'increase'
-      ? 'text-green-600 bg-green-100'
+      ? `${textColor.green600} ${bgColor.greenLight}`
       : deltaType === 'decrease'
-        ? 'text-red-600 bg-red-100'
-        : 'text-gray-600 bg-gray-100';
+        ? `${textColor.red600} ${bgColor.red100}`
+        : `${textColor.gray600} ${bgColor.gray100}`;
 
   return (
     <span
       className={cn(
-        `inline-flex ${gap.tight} ${radius.full} ${padding.xTight} ${padding.yHair} ${size.xs}`,
+        `${display.inlineFlex} ${gap.tight} ${radius.full} ${padding.xTight} ${padding.yHair} ${size.xs}`,
         colorClass,
         className
       )}
@@ -93,16 +104,16 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
   const validMetrics = metrics;
 
   return (
-    <section itemScope={true} itemType="https://schema.org/Dataset" className="my-12">
+    <section itemScope={true} itemType="https://schema.org/Dataset" className={marginY.section}>
       {(title || description) && (
-        <div className={`${marginBottom.relaxed} text-center`}>
+        <div className={`${marginBottom.relaxed} ${textAlign.center}`}>
           {title && (
             <h3 className={`${marginBottom.compact} ${weight.semibold} ${textColor.foreground} ${size.xl}`} itemProp="name">
               {title}
             </h3>
           )}
           {description && (
-            <p className={`mx-auto ${maxWidth['3xl']} ${muted.lg}`} itemProp="description">
+            <p className={`${marginX.auto} ${maxWidth['3xl']} ${muted.lg}`} itemProp="description">
               {description}
             </p>
           )}
@@ -121,10 +132,10 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
           // Choose gradient based on trend
           const gradientClass =
             metric.trend === 'up'
-              ? 'from-green-500/10 to-emerald-500/10 border-green-500/20 hover:border-green-500/40'
+              ? `${gradientFrom.green10} ${gradientTo.emerald10} ${borderColor['green/20']} ${hoverBorder['green/40']}`
               : metric.trend === 'down'
-                ? 'from-blue-500/10 to-cyan-500/10 border-blue-500/20 hover:border-blue-500/40'
-                : 'from-gray-500/10 to-slate-500/10 border-gray-500/20 hover:border-gray-500/40';
+                ? `${gradientFrom.blue10} ${gradientTo.cyan10} ${borderColor['blue/20']} ${hoverBorder['blue/40']}`
+                : `${gradientFrom.gray10} ${gradientTo.slate10} ${borderColor['gray/20']} ${hoverBorder['gray/40']}`;
 
           return (
             <div
@@ -135,13 +146,13 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
               )}
             >
               {/* Metric Label */}
-              <p className={`${weight.medium} ${muted.sm} uppercase ${tracking.wide}`}>
+              <p className={`${weight.medium} ${muted.sm} ${textTransform.uppercase} ${tracking.wide}`}>
                 {metricLabel}
               </p>
 
               {/* Metric Value */}
               <p
-                className={`${marginTop.compact} bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text ${weight.bold} ${size['3xl']} ${textColor.transparent}`}
+                className={`${marginTop.compact} ${bgGradient.toR} ${gradientFrom.foreground} ${gradientTo.mutedForeground} ${bgClip.text} ${weight.bold} ${size['3xl']} ${textColor.transparent}`}
               >
                 {metricValue}
               </p>

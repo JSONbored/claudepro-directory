@@ -1,24 +1,32 @@
 import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
+  bgColor,
+  borderColor,
   cluster,
+  container,
+  display,
+  flexWrap,
+  gap,
   grid,
   iconSize,
-  spaceY,
-  muted,
-  marginBottom,
-  weight,
-  size,
-  gap,
-  padding,
-  minHeight,
-  maxWidth,
-  bgColor,
-  textColor,
   justify,
-  borderColor,
-  flexWrap,
+  marginBottom,
+  marginRight,
+  marginX,
+  maxWidth,
+  minHeight,
+  muted,
   overflow,
+  padding,
+  paddingLeft,
+  paddingTop,
+  position,
+  size,
+  spaceY,
+  textAlign,
+  textColor,
+  weight,
 } from '@heyclaude/web-runtime/design-system';
 import {
   Github,
@@ -127,32 +135,44 @@ export default async function CommunityPage() {
   // Section: Data Fetch
   const categoryIds = getHomepageCategoryIds;
 
-  const [communityDirectory, configurationCount, homepageData] = await Promise.all([
-    getCommunityDirectory({ limit: 500 }).catch((error) => {
-      reqLogger.error('CommunityPage: failed to load community directory', normalizeError(error), {
-        section: 'data-fetch',
-      });
-      return null;
-    }),
-    getConfigurationCount().catch((error) => {
-      reqLogger.error('CommunityPage: failed to load configuration count', normalizeError(error), {
-        section: 'data-fetch',
-      });
-      return 0;
-    }),
-    getHomepageData(categoryIds).catch((error) => {
-      reqLogger.error('CommunityPage: failed to load homepage metrics', normalizeError(error), {
-        section: 'data-fetch',
-      });
-      return null;
-    }),
-  ]);
+  const communityDirectoryResult = await getCommunityDirectory({ limit: 500 }).catch((error: unknown) => {
+    const normalized = normalizeError(error, 'Failed to load community directory');
+    reqLogger.error('CommunityPage: failed to load community directory', normalized, {
+      section: 'data-fetch',
+    });
+    return null;
+  });
+
+  const configurationCountResult = await getConfigurationCount().catch((error: unknown) => {
+    const normalized = normalizeError(error, 'Failed to load configuration count');
+    reqLogger.error('CommunityPage: failed to load configuration count', normalized, {
+      section: 'data-fetch',
+    });
+    return 0;
+  });
+
+  const homepageDataResult = await getHomepageData(categoryIds).catch((error: unknown) => {
+    const normalized = normalizeError(error, 'Failed to load homepage metrics');
+    reqLogger.error('CommunityPage: failed to load homepage metrics', normalized, {
+      section: 'data-fetch',
+    });
+    return null;
+  });
+
+  const communityDirectory = communityDirectoryResult;
+  const configurationCount = configurationCountResult;
+  const homepageData = homepageDataResult;
 
   const totalConfigurations = configurationCount;
   const totalContributors = communityDirectory?.all_users?.length ?? 0;
   const memberCount = homepageData?.member_count ?? totalContributors;
 
-  const statCards = [
+  const statCards: Array<{
+    description: string;
+    icon: IconComponent;
+    title: string;
+    value: string;
+  }> = [
     {
       icon: Layers as IconComponent,
       title: 'Configurations',
@@ -176,41 +196,41 @@ export default async function CommunityPage() {
   return (
     <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Hero Section */}
-      <section className={`relative ${overflow.hidden} ${padding.xDefault} ${padding.yXl}`}>
-        <div className="container mx-auto text-center">
-          <div className={`mx-auto ${maxWidth['3xl']}`}>
+      <section className={`${position.relative} ${overflow.hidden} ${padding.xDefault} ${padding.yXl}`}>
+        <div className={`${container.default} ${textAlign.center}`}>
+          <div className={`${marginX.auto} ${maxWidth['3xl']}`}>
             <UnifiedBadge
               variant="base"
               style="outline"
               className={`${marginBottom.comfortable} ${borderColor['accent/20']} ${bgColor['accent/5']} ${textColor.accent}`}
             >
-              <Users className={`mr-1 ${iconSize.xs} ${textColor.accent}`} />
+              <Users className={`${marginRight.tight} ${iconSize.xs} ${textColor.accent}`} />
               Community
             </UnifiedBadge>
 
             <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:${size['6xl']}`}>Join the Claude Community</h1>
 
-            <p className={`mx-auto ${marginBottom.relaxed} ${maxWidth['2xl']} ${muted.lg}`}>
+            <p className={`${marginX.auto} ${marginBottom.relaxed} ${maxWidth['2xl']} ${muted.lg}`}>
               Connect with developers and AI enthusiasts building with Claude. Share your
               configurations, learn from the community, and contribute to our open-source directory.
             </p>
 
-            <div className={`flex ${flexWrap.wrap} ${justify.center} ${gap.comfortable}`}>
+            <div className={`${display.flex} ${flexWrap.wrap} ${justify.center} ${gap.comfortable}`}>
               {channels.github ? <Button size="lg" asChild>
                   <a href={channels.github} target="_blank" rel="noopener noreferrer">
-                    <Github className={`mr-2 ${iconSize.md}`} />
+                    <Github className={`${marginRight.compact} ${iconSize.md}`} />
                     GitHub
                   </a>
                 </Button> : null}
               {channels.discord ? <Button size="lg" variant="outline" asChild>
                   <a href={channels.discord} target="_blank" rel="noopener noreferrer">
-                    <MessageSquare className={`mr-2 ${iconSize.md}`} />
+                    <MessageSquare className={`${marginRight.compact} ${iconSize.md}`} />
                     Discord
                   </a>
                 </Button> : null}
               {channels.twitter ? <Button size="lg" variant="outline" asChild>
                   <a href={channels.twitter} target="_blank" rel="noopener noreferrer">
-                    <Twitter className={`mr-2 ${iconSize.md}`} />X (Twitter)
+                    <Twitter className={`${marginRight.compact} ${iconSize.md}`} />X (Twitter)
                   </a>
                 </Button> : null}
             </div>
@@ -219,8 +239,8 @@ export default async function CommunityPage() {
       </section>
 
       {/* Community Stats */}
-      <section className={`px-4 ${padding.yHero}`}>
-        <div className="container mx-auto">
+      <section className={`${paddingLeft.comfortable} ${padding.yHero}`}>
+        <div className={container.default}>
           <div className={grid.responsive3}>
             {statCards.map(({ icon: Icon, title, value, description }) => (
               <Card key={title}>
@@ -241,8 +261,8 @@ export default async function CommunityPage() {
       </section>
 
       {/* Contributing Section */}
-      <section className={`px-4 ${padding.yHero}`}>
-        <div className="container mx-auto">
+      <section className={`${paddingLeft.comfortable} ${padding.yHero}`}>
+        <div className={container.default}>
           <Card>
             <CardHeader>
               <CardTitle className={`${size['2xl']}`}>How to Contribute</CardTitle>
@@ -267,7 +287,7 @@ export default async function CommunityPage() {
                   Submit a pull request with your contribution. Our team will review it promptly.
                 </p>
               </div>
-              <div className="pt-4">
+              <div className={paddingTop.comfortable}>
                 <Button asChild>
                   <Link href={ROUTES.SUBMIT}>Submit Your Configuration</Link>
                 </Button>
@@ -278,7 +298,7 @@ export default async function CommunityPage() {
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+      <section className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

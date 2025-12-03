@@ -44,15 +44,18 @@
 import type { Database } from '@heyclaude/database-types';
 import { Star, TrendingUp, Zap } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
-import { SEMANTIC_COLORS } from '../../colors.ts';
 // Design System imports
 import { animation } from '../../../design-system/tokens.ts';
-import { iconLeading, iconSize } from '../../../design-system/styles/icons.ts';
-import { squareSize } from '../../../design-system/styles/layout.ts';
-import { transition } from '../../../design-system/styles/interactive.ts';
-import { size } from '../../../design-system/styles/typography.ts';
+import { iconLeading, iconSize, iconFill } from '../../../design-system/styles/icons.ts';
+import { squareSize, display, alignItems, padding, justify, position, height, width, marginRight, marginLeft, inset, pointerEvents } from '../../../design-system/styles/layout.ts';
+import { transition, hoverBg } from '../../../design-system/styles/interactive.ts';
+import { size, weight, leading, tracking, fontVariantNumeric, muted } from '../../../design-system/styles/typography.ts';
+import { bgColor, textColor, borderColor } from '../../../design-system/styles/colors.ts';
+import { opacityLevel } from '../../../design-system/styles/effects.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
 import { shadow, shadowColor } from '../../../design-system/styles/effects.ts';
+import { animate } from '../../../design-system/styles/animation.ts';
+import { stateColor } from '../../../design-system/styles/colors.ts';
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -61,16 +64,16 @@ import type * as React from 'react';
  * Base badge variants (from original badge.tsx)
  */
 const baseBadgeVariants = cva(
-  `inline-flex items-center ${radius.full} border px-2.5 py-0.5 ${size.xs} font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`,
+  `${display.inlineFlex} ${alignItems.center} ${radius.full} border ${padding.xBetween} ${padding.yHair} ${size.xs} ${weight.semibold} ${transition.colors} focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`,
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-accent text-accent-foreground hover:bg-accent/80',
+        default: `${borderColor.transparent} ${bgColor.accent} ${textColor.accentForeground} ${hoverBg.veryStrong}`,
         secondary:
-          'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          `${borderColor.transparent} ${bgColor.secondary} ${textColor.secondaryForeground} ${hoverBg.secondaryVeryStrong}`,
         destructive:
-          'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
-        outline: 'text-foreground',
+          `${borderColor.transparent} ${bgColor.destructive} ${textColor.destructiveForeground} ${hoverBg.destructiveVeryStrong}`,
+        outline: textColor.foreground,
       },
     },
     defaultVariants: {
@@ -94,30 +97,30 @@ const categoryBadgeStyles = {
 } as const satisfies Partial<Record<Database['public']['Enums']['content_category'], string>>;
 
 const sourceBadgeStyles = {
-  official: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  partner: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  community: 'bg-green-500/10 text-green-400 border-green-500/20',
-  verified: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-  experimental: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  other: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+  official: `${bgColor['amber/10']} ${textColor.amber400} ${borderColor['amber/20']}`,
+  partner: `${bgColor['blue/10']} ${textColor.blue400} ${borderColor['blue/20']}`,
+  community: `${bgColor['green/10']} ${textColor.green400} ${borderColor['green/20']}`,
+  verified: `${bgColor['purple/10']} ${textColor.purple400} ${borderColor['purple/20']}`,
+  experimental: `${bgColor['orange/10']} ${textColor.orange400} ${borderColor['orange/30']}`,
+  other: `${bgColor['gray/10']} ${textColor.gray400} ${borderColor['gray/20']}`,
 } as const;
 
 const statusBadgeStyles = {
-  active: `bg-accent text-accent-foreground ${shadow.lg} ${shadowColor.primary}`,
-  trending: 'bg-primary/10 text-primary border-primary/20',
-  new: 'bg-green-500/10 text-green-400 border-green-500/20',
-  updated: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  deprecated: 'bg-red-500/10 text-red-400 border-red-500/20',
+  active: `${bgColor.accent} ${textColor.accentForeground} ${shadow.lg} ${shadowColor.primary}`,
+  trending: `${bgColor['primary/10']} ${textColor.primary} ${borderColor['primary/20']}`,
+  new: `${bgColor['green/10']} ${textColor.green400} ${borderColor['green/20']}`,
+  updated: `${bgColor['blue/10']} ${textColor.blue400} ${borderColor['blue/20']}`,
+  deprecated: `${bgColor['red/10']} ${textColor.red400} ${borderColor['red/20']}`,
 } as const;
 
 /**
  * Sponsored badge styles (from sponsored-badge.tsx)
  */
 const sponsoredBadgeStyles = {
-  featured: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
-  promoted: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
-  spotlight: 'border-purple-500/30 bg-purple-500/10 text-purple-400',
-  sponsored: 'border-muted-foreground/30 bg-muted/50 text-muted-foreground',
+  featured: `${borderColor['amber/30']} ${bgColor['amber/10']} ${textColor.amber400}`,
+  promoted: `${borderColor['blue/30']} ${bgColor['blue/10']} ${textColor.blue400}`,
+  spotlight: `${borderColor['purple/30']} ${bgColor['purple/10']} ${textColor.purple400}`,
+  sponsored: `${borderColor['border/30']} ${bgColor['muted/50']} ${muted.default}`,
 } as const;
 
 /**
@@ -225,7 +228,7 @@ const BadgeWrapper = ({
   springDefault: { type: 'spring'; stiffness: number; damping: number };
 }) => (
   <motion.div
-    className="inline-block"
+    className={display.inlineBlock}
     whileHover={{
       y: -2,
       transition: springDefault,
@@ -263,7 +266,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
-            `border font-medium ${size.xs} ${transition.default} hover:${shadow.md} hover:${shadowColor.primary}`,
+            `border ${weight.medium} ${size.xs} ${transition.default} hover:${shadow.md} hover:${shadowColor.primary}`,
             categoryBadgeStyles[props.category as keyof typeof categoryBadgeStyles] ??
               'badge-category-rules',
             props.className
@@ -281,7 +284,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
-            `border font-medium ${size.xs} ${transition.default} hover:${shadow.md} hover:${shadowColor.primary}`,
+            `border ${weight.medium} ${size.xs} ${transition.default} hover:${shadow.md} hover:${shadowColor.primary}`,
             sourceBadgeStyles[props.source],
             props.className
           )}
@@ -298,7 +301,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
-            `border font-medium ${size.xs} ${transition.default} hover:${shadow.md} hover:${shadowColor.primary}`,
+            `border ${weight.medium} ${size.xs} ${transition.default} hover:${shadow.md} hover:${shadowColor.primary}`,
             statusBadgeStyles[props.status],
             props.className
           )}
@@ -316,7 +319,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
       switch (props.tier) {
         case 'featured':
-          return <Star className={`mr-1 ${iconSize.xs} fill-current`} aria-hidden="true" />;
+          return <Star className={`${marginRight.tight} ${iconSize.xs} ${iconFill.current}`} aria-hidden="true" />;
         case 'promoted':
           return <TrendingUp className={iconLeading.xs} aria-hidden="true" />;
         case 'spotlight':
@@ -343,7 +346,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
-            `inline-flex items-center ${radius.full} border px-2.5 py-0.5 font-semibold ${size.xs} transition-colors hover:${shadow.md} hover:${shadowColor.primary}`,
+            `${display.inlineFlex} ${alignItems.center} ${radius.full} border ${padding.xBetween} ${padding.yHair} ${weight.semibold} ${size.xs} ${transition.colors} hover:${shadow.md} hover:${shadowColor.primary}`,
             sponsoredBadgeStyles[props.tier],
             props.className
           )}
@@ -361,14 +364,14 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
     // Common class names for tag badges
     const baseTagClasses = cn(
-      `inline-flex items-center ${radius.full} border px-2.5 py-0.5 font-semibold ${size.xs} transition-all duration-200`,
-      `cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent hover:${shadow.md} hover:${shadowColor.primary}`,
+      `${display.inlineFlex} ${alignItems.center} ${radius.full} border ${padding.xBetween} ${padding.yHair} ${weight.semibold} ${size.xs} ${transition.all} duration-200`,
+      `cursor-pointer ${borderColor['border/20']} ${muted.default} hover:${borderColor['accent/30']} ${hoverBg.default} hover:${textColor.accent} hover:${shadow.md} hover:${shadowColor.primary}`,
       props.className
     );
 
     const activeTagClasses = cn(
-      `inline-flex items-center ${radius.full} border px-2.5 py-0.5 font-semibold ${size.xs} ${transition.default}`,
-      `cursor-pointer bg-accent text-accent-foreground ${shadow.lg} ${shadowColor.primary}`,
+      `${display.inlineFlex} ${alignItems.center} ${radius.full} border ${padding.xBetween} ${padding.yHair} ${weight.semibold} ${size.xs} ${transition.default}`,
+      `cursor-pointer ${bgColor.accent} ${textColor.accentForeground} ${shadow.lg} ${shadowColor.primary}`,
       props.className
     );
 
@@ -378,7 +381,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         {props.onRemove && (
           <button
             type="button"
-            className="ml-1 hover:opacity-80"
+            className={`${marginLeft.tight} hover:${opacityLevel[80]}`}
             onClick={(e) => {
               e.stopPropagation();
               props.onRemove?.();
@@ -441,14 +444,14 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
     // Indicator dot component
     const IndicatorDot = (
-      <output className={cn(`relative flex ${squareSize.dotMd}`, props.className)} aria-label={label}>
+      <output className={cn(`${position.relative} ${display.flex} ${squareSize.dotMd}`, props.className)} aria-label={label}>
         <span className="sr-only">{label}</span>
         <span
-          className={`absolute inline-flex h-full w-full animate-ping ${radius.full} bg-accent opacity-75 motion-reduce:animate-none`}
+          className={`${position.absolute} ${display.inlineFlex} ${height.full} ${width.full} ${animate.ping} ${radius.full} ${bgColor.accent} ${opacityLevel[75]} motion-reduce:animate-none`}
           aria-hidden="true"
         />
         <span
-          className={`relative inline-flex ${squareSize.dotMd} ${radius.full} bg-accent`}
+          className={`${position.relative} ${display.inlineFlex} ${squareSize.dotMd} ${radius.full} ${bgColor.accent}`}
           aria-hidden="true"
         />
       </output>
@@ -466,7 +469,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         <TooltipProvider delayDuration={delayDuration}>
           <Tooltip>
             <TooltipTrigger asChild={true}>{IndicatorDot}</TooltipTrigger>
-            <TooltipContent side={side} className={`font-medium ${size.xs}`}>
+            <TooltipContent side={side} className={`${weight.medium} ${size.xs}`}>
               <p>{label}</p>
             </TooltipContent>
           </Tooltip>
@@ -484,17 +487,17 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     const children = props.children || 'NEW';
 
     const variantStyles = {
-      default: 'bg-green-500/10 text-green-400 border-green-500/20',
-      outline: 'bg-accent/10 text-accent border-accent/20',
+      default: `${bgColor['green/10']} ${textColor.green400} ${borderColor['green/20']}`,
+      outline: `${bgColor['accent/10']} ${textColor.accent} ${borderColor['accent/20']}`,
     };
 
     return (
       <BadgeWrapper springDefault={springDefault}>
         <output
           className={cn(
-            'inline-flex items-center justify-center',
-            'px-2.5 py-0.5',
-            `font-semibold ${size['2xs']} uppercase tracking-wider`,
+            `${display.inlineFlex} ${alignItems.center} ${justify.center}`,
+            `${padding.xBetween} ${padding.yHair}`,
+            `${weight.semibold} ${size['2xs']} uppercase ${tracking.wider}`,
             `${radius.full} border`,
             transition.default,
             `hover:${shadow.md} hover:${shadowColor.primary}`,
@@ -526,9 +529,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
     // Minimal semantic colors - just the text color, no background
     const colorStyles = {
-      view: SEMANTIC_COLORS.SOCIAL_VIEW,
-      copy: SEMANTIC_COLORS.SOCIAL_COPY,
-      bookmark: SEMANTIC_COLORS.SOCIAL_BOOKMARK,
+      view: stateColor.social.view,
+      copy: stateColor.social.copy,
+      bookmark: stateColor.social.bookmark,
     };
 
     // Custom font size: size['2xs'] (10px) instead of size.xs (12px) for minimal badge overlays
@@ -536,9 +539,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     return (
       <span
         className={cn(
-          '-top-1 -right-1 absolute',
-          `font-semibold ${size['2xs']} tabular-nums leading-none`,
-          'pointer-events-none',
+          `${inset.topNeg1} ${inset.rightNeg1} ${position.absolute}`,
+          `${weight.semibold} ${size['2xs']} ${fontVariantNumeric.tabularNums} ${leading.none}`,
+          pointerEvents.none,
           colorStyles[type],
           props.className
         )}

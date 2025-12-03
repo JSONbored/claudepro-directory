@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const addItemToCollectionSchema = z.object({
+export const addItemToCollectionSchema = z.object({
   collection_id: z.string().uuid().nullable().optional(),
   content_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable().optional(),
   content_slug: z.string().nullable().optional(),
@@ -52,7 +52,6 @@ export const addItemToCollection = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -65,9 +64,10 @@ export const addItemToCollection = authedAction
       revalidatePath(`/account/library`);
       revalidatePath(`/account/library/${result?.collection?.slug}`);
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.collection_items']
+        cacheConfig,
+        invalidateKeys: ['collection_items']
       });
 
       

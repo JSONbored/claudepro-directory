@@ -1,9 +1,11 @@
 import type { Database } from '@heyclaude/database-types';
 import { baseBadgeVariants } from '../badges/unified-badge.tsx';
 import { transition } from '../../../design-system/styles/interactive.ts';
-import { gap } from '../../../design-system/styles/layout.ts';
-import { size } from '../../../design-system/styles/typography.ts';
+import { gap, display, alignItems, justify, padding, flexGrow } from '../../../design-system/styles/layout.ts';
+import { size, weight, tracking, truncate, transform } from '../../../design-system/styles/typography.ts';
+import { radius } from '../../../design-system/styles/radius.ts';
 import { shadow } from '../../../design-system/styles/effects.ts';
+import { bgColor, textColor } from '../../../design-system/styles/colors.ts';
 import { cn } from '../../utils.ts';
 import type * as React from 'react';
 
@@ -64,8 +66,8 @@ export function Announcement({
       className={cn(
         baseBadgeVariants({ variant }),
         // Announcement-specific styles
-        `inline-flex items-center ${gap.compact}`,
-        'px-3 py-1.5',
+        `${display.inlineFlex} ${alignItems.center} ${gap.compact}`,
+        `${padding.xCompact} ${padding.ySnug}`,
         size.sm,
         transition.default,
         // Themed enhancements
@@ -89,12 +91,12 @@ export function AnnouncementTag({ className, ...props }: AnnouncementTagProps) {
     <span
       className={cn(
         // Base styles
-        'inline-flex items-center justify-center',
-        'px-1.5 py-0.5',
-        `font-semibold ${size['2xs']} uppercase tracking-wider`,
-        'rounded',
-        'bg-accent text-accent-foreground',
-        'shrink-0',
+        `${display.inlineFlex} ${alignItems.center} ${justify.center}`,
+        `${padding.xSnug} ${padding.yHair}`,
+        `${weight.semibold} ${size['2xs']} ${transform.uppercase} ${tracking.wider}`,
+        radius.default,
+        `${bgColor.accent} ${textColor.accentForeground}`,
+        flexGrow.shrink0,
         className
       )}
       {...props}
@@ -114,11 +116,11 @@ export function AnnouncementTitle({ className, ...props }: AnnouncementTitleProp
     <span
       className={cn(
         // Typography
-        `font-medium ${size.sm}`,
+        `${weight.medium} ${size.sm}`,
         // Layout
-        `inline-flex items-center ${gap.tight}`,
+        `${display.inlineFlex} ${alignItems.center} ${gap.tight}`,
         // Responsive
-        'truncate',
+        truncate.single,
         className
       )}
       {...props}

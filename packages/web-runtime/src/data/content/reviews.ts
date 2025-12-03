@@ -19,7 +19,9 @@ export async function getReviewsWithStatsData(
 ): Promise<Database['public']['Functions']['get_reviews_with_stats']['Returns'] | null> {
   const { contentType, contentSlug, sortBy, limit, offset, userId } = parameters;
 
-  return fetchCached(
+  const result = await fetchCached<
+    Database['public']['Functions']['get_reviews_with_stats']['Returns']
+  >(
     (client) => new ContentService(client).getReviewsWithStats({
         p_content_type: contentType,
         p_content_slug: contentSlug,
@@ -40,9 +42,14 @@ export async function getReviewsWithStatsData(
         userId ?? 'anon',
       ],
       tags: ['content', `content-${contentSlug}`, 'reviews'],
-      ttlKey: 'cache.user_reviews.ttl_seconds',
+      ttlKey: 'user_reviews',
       useAuth: true,
-      fallback: null,
+      fallback: {
+        reviews: null,
+        has_more: null,
+        total_count: null,
+        aggregate_rating: null,
+      },
       logMeta: {
         contentType,
         contentSlug,
@@ -53,4 +60,8 @@ export async function getReviewsWithStatsData(
       },
     }
   );
+
+  // Return null if no reviews (not found or empty)
+  if (!result.reviews || result.reviews.length === 0) return null;
+  return result;
 }

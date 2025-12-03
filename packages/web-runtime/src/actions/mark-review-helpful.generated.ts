@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const markReviewHelpfulSchema = z.object({
+export const markReviewHelpfulSchema = z.object({
   review_id: z.string().uuid(),
   helpful: z.boolean()
 });
@@ -39,7 +39,6 @@ export const markReviewHelpful = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -52,9 +51,10 @@ export const markReviewHelpful = authedAction
       revalidatePath(`/${result?.content_type}/${result?.content_slug}`);
       revalidateTag(`reviews:${result?.content_type}:${result?.content_slug}`, 'default');
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.review_helpful']
+        cacheConfig,
+        invalidateKeys: ['review_helpful']
       });
 
       

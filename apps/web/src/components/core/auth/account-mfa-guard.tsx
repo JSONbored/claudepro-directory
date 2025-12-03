@@ -7,8 +7,13 @@
 
 import { requiresMFAChallenge } from '@heyclaude/web-runtime';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
-import { muted, minHeight, justify,
+import {
   alignItems,
+  display,
+  justify,
+  minHeight,
+  muted,
+  textAlign,
 } from '@heyclaude/web-runtime/design-system';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -61,8 +66,8 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
   if (checking) {
     // Show loading state while checking
     return (
-      <div className={`flex ${minHeight.screen} ${alignItems.center} ${justify.center}`}>
-        <div className={`text-center ${muted.default}`}>
+      <div className={`${display.flex} ${minHeight.screen} ${alignItems.center} ${justify.center}`}>
+        <div className={`${textAlign.center} ${muted.default}`}>
           <p>Checking authentication...</p>
         </div>
       </div>

@@ -1,20 +1,22 @@
 import { cn } from '../utils.ts';
-import { padding, marginBottom } from '../../design-system/styles/layout.ts';
-import { size } from '../../design-system/styles/typography.ts';
+import { padding, paddingLeft, marginBottom, position, width } from '../../design-system/styles/layout.ts';
+import { size, weight, leading, tracking } from '../../design-system/styles/typography.ts';
 import { radius } from '../../design-system/styles/radius.ts';
+import { bgColor, textColor, borderColor } from '../../design-system/styles/colors.ts';
+import { absolute } from '../../design-system/styles/position.ts';
 import { cva, type VariantProps } from 'class-variance-authority';
 import type * as React from 'react';
 
 const alertVariants = cva(
-  `relative w-full ${radius.lg} border ${padding.default} [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground`,
+  `${position.relative} ${width.full} ${radius.lg} border ${padding.default} [&>svg~*]:${paddingLeft.relaxed} [&>svg+div]:translate-y-[-3px] [&>svg]:${absolute.topLeftOffsetXl} [&>svg]:${textColor.foreground}`,
   {
     variants: {
       variant: {
-        default: 'bg-background text-foreground',
+        default: `${bgColor.background} ${textColor.foreground}`,
         destructive:
-          'border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive',
+          `${borderColor['destructive/50']} ${textColor.destructive} dark:${borderColor.destructive} [&>svg]:${textColor.destructive}`,
         warning:
-          'border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-200/20 dark:bg-orange-950/30 dark:text-orange-200 [&>svg]:text-orange-600 dark:[&>svg]:text-orange-400',
+          `${borderColor.orange200} ${bgColor.orange50} ${textColor.orange900} dark:${borderColor['orange200/20']} dark:${bgColor['orange950/30']} dark:${textColor.orange200} [&>svg]:${textColor.orange600} dark:[&>svg]:${textColor.orange400}`,
       },
     },
     defaultVariants: {
@@ -45,7 +47,7 @@ const AlertTitle = ({
 }) => (
   <h5
     ref={ref}
-    className={cn(`${marginBottom.tight} font-medium leading-none tracking-tight`, className)}
+    className={cn(`${marginBottom.tight} ${weight.medium} ${leading.none} ${tracking.tight}`, className)}
     {...props}
   />
 );
@@ -57,7 +59,7 @@ const AlertDescription = ({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement> & {
   ref?: React.RefObject<HTMLParagraphElement | null>;
-}) => <div ref={ref} className={cn(`${size.sm} [&_p]:leading-relaxed`, className)} {...props} />;
+}) => <div ref={ref} className={cn(`${size.sm} [&_p]:${leading.relaxed}`, className)} {...props} />;
 AlertDescription.displayName = 'AlertDescription';
 
 export { Alert, AlertTitle, AlertDescription };

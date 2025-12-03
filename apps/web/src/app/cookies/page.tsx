@@ -1,6 +1,6 @@
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { marginBottom, weight, muted ,size  , padding , spaceY , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { marginBottom, weight, muted, size, padding, spaceY, maxWidth, container, paddingLeft } from '@heyclaude/web-runtime/design-system';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 
@@ -32,7 +32,7 @@ export default function CookiesPage() {
   const lastUpdated = getLastUpdatedDate();
 
   return (
-    <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
+    <div className={`${container.default} ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:${padding.ySection}`}>
       <div className={`prose prose-invert ${maxWidth.none}`}>
         <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>Cookie Policy</h1>
         <p className={`${marginBottom.relaxed} ${muted.default}`}>Last updated: {lastUpdated}</p>
@@ -49,7 +49,7 @@ export default function CookiesPage() {
         <section className={marginBottom.relaxed}>
           <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>2. How We Use Cookies</h2>
           <p className={marginBottom.default}>We use cookies for the following purposes:</p>
-          <ul className={`list-disc ${spaceY.compact} pl-6`}>
+          <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
             <li>
               <strong>Essential Cookies:</strong> Required for the website to function properly
               (authentication, security)
@@ -76,7 +76,7 @@ export default function CookiesPage() {
             <p className={marginBottom.tight}>
               These cookies are necessary for the website to function and cannot be disabled:
             </p>
-            <ul className={`list-disc ${spaceY.tight} pl-6`}>
+            <ul className={`list-disc ${spaceY.tight} ${paddingLeft.relaxed}`}>
               <li>Session management cookies</li>
               <li>Authentication cookies (better-auth)</li>
               <li>Security and fraud prevention cookies</li>
@@ -86,7 +86,7 @@ export default function CookiesPage() {
           <div className={marginBottom.comfortable}>
             <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>Analytics Cookies</h3>
             <p className={marginBottom.tight}>We use privacy-focused analytics to understand usage patterns:</p>
-            <ul className={`list-disc ${spaceY.tight} pl-6`}>
+            <ul className={`list-disc ${spaceY.tight} ${paddingLeft.relaxed}`}>
               <li>Umami Analytics (privacy-focused, no personal data tracked)</li>
               <li>Vercel Analytics (performance monitoring)</li>
             </ul>
@@ -95,7 +95,7 @@ export default function CookiesPage() {
           <div className={marginBottom.comfortable}>
             <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>Preference Cookies</h3>
             <p className={marginBottom.tight}>These cookies remember your choices:</p>
-            <ul className={`list-disc ${spaceY.tight} pl-6`}>
+            <ul className={`list-disc ${spaceY.tight} ${paddingLeft.relaxed}`}>
               <li>Theme preference (dark/light mode)</li>
               <li>Newsletter subscription status</li>
             </ul>
@@ -105,7 +105,7 @@ export default function CookiesPage() {
         <section className={marginBottom.relaxed}>
           <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>4. Third-Party Cookies</h2>
           <p className={marginBottom.default}>We use the following third-party services that may set cookies:</p>
-          <ul className={`list-disc ${spaceY.compact} pl-6`}>
+          <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
             <li>
               <strong>Vercel:</strong> Hosting and performance monitoring
             </li>
@@ -125,7 +125,7 @@ export default function CookiesPage() {
           <div className={marginBottom.default}>
             <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.lg}`}>Browser Settings</h3>
             <p className={marginBottom.tight}>Most browsers allow you to:</p>
-            <ul className={`list-disc ${spaceY.tight} pl-6`}>
+            <ul className={`list-disc ${spaceY.tight} ${paddingLeft.relaxed}`}>
               <li>View and delete cookies</li>
               <li>Block third-party cookies</li>
               <li>Block cookies from specific sites</li>
@@ -136,7 +136,7 @@ export default function CookiesPage() {
 
           <div className={marginBottom.default}>
             <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.lg}`}>Browser-Specific Instructions</h3>
-            <ul className={`list-disc ${spaceY.tight} pl-6`}>
+            <ul className={`list-disc ${spaceY.tight} ${paddingLeft.relaxed}`}>
               <li>
                 <strong>Chrome:</strong> Settings → Privacy and Security → Cookies and other site
                 data
@@ -160,7 +160,7 @@ export default function CookiesPage() {
           <p className={marginBottom.default}>
             If you disable cookies, some features of our website may not function properly:
           </p>
-          <ul className={`list-disc ${spaceY.compact} pl-6`}>
+          <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
             <li>You may not be able to stay logged in</li>
             <li>Your preferences may not be saved</li>
             <li>Some features may not work correctly</li>

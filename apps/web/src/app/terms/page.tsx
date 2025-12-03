@@ -1,7 +1,7 @@
 import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { marginBottom, padding, stack, muted, weight , size , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { marginBottom, padding, stack, muted, weight , size , maxWidth, container, paddingLeft } from '@heyclaude/web-runtime/design-system';
 import { cn, NavLink } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 
@@ -35,7 +35,7 @@ export default function TermsPage() {
   const channels = getContactChannels();
 
   return (
-    <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
+    <div className={`${container.default} ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:${padding.ySection}`}>
       <div className={`prose prose-invert ${maxWidth.none}`}>
         <h1 className={cn(marginBottom.comfortable, weight.bold, size['3xl'], `sm:${size['4xl']}`)}>
           Terms of Service
@@ -64,7 +64,7 @@ export default function TermsPage() {
             terms.
           </p>
           <p className={marginBottom.default}>You agree NOT to:</p>
-          <ul className={`list-disc ${stack.compact} pl-6`}>
+          <ul className={`list-disc ${stack.compact} ${paddingLeft.relaxed}`}>
             <li>Violate any applicable laws or regulations</li>
             <li>Infringe upon the rights of others</li>
             <li>Upload malicious code or harmful content</li>
@@ -83,7 +83,7 @@ export default function TermsPage() {
             and display your content in connection with operating and promoting the service.
           </p>
           <p className={marginBottom.default}>You represent and warrant that:</p>
-          <ul className={`list-disc ${stack.compact} pl-6`}>
+          <ul className={`list-disc ${stack.compact} ${paddingLeft.relaxed}`}>
             <li>You own or have the necessary rights to the content you submit</li>
             <li>Your content does not violate any third-party rights</li>
             <li>Your content complies with these Terms of Service</li>

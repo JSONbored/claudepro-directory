@@ -1,8 +1,12 @@
-import { emptyCard, marginBottom, marginTop, radius , padding , gap , minHeight , maxWidth, bgColor,
+import { emptyCard, marginBottom, marginTop, radius , padding , gap , grid, minHeight , maxWidth, bgColor,
   justify,
   flexWrap,
   squareSize,
   skeletonSize,
+  display,
+  container,
+  marginX,
+  border,
 } from '@heyclaude/web-runtime/design-system';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 
@@ -27,14 +31,14 @@ export default function TagsLoading() {
     <div className={`${minHeight.screen} ${bgColor.background}`} aria-busy="true" role="status">
       {/* Hero Skeleton */}
       <section className={emptyCard.default} aria-hidden="true">
-        <div className={`container mx-auto ${padding.xDefault} py-20`}>
-          <div className={`mx-auto ${maxWidth['3xl']}`}>
-            <div className={`${marginBottom.comfortable} flex ${justify.center}`}>
+        <div className={`${container.default} ${padding.xDefault} ${padding.yLarge}`}>
+          <div className={`${marginX.auto} ${maxWidth['3xl']}`}>
+            <div className={`${marginBottom.comfortable} ${display.flex} ${justify.center}`}>
               <Skeleton className={`${squareSize.avatarXl} ${radius.full}`} />
             </div>
-            <Skeleton className={`${marginBottom.default} mx-auto ${skeletonSize.heroBar}`} />
-            <Skeleton className={`mx-auto ${skeletonSize.barLgMaxWide} ${maxWidth.full}`} />
-            <div className={`${marginTop.comfortable} flex ${justify.center} ${gap.compact}`}>
+            <Skeleton className={`${marginBottom.default} ${marginX.auto} ${skeletonSize.heroBar}`} />
+            <Skeleton className={`${marginX.auto} ${skeletonSize.barLgMaxWide} ${maxWidth.full}`} />
+            <div className={`${marginTop.comfortable} ${display.flex} ${justify.center} ${gap.compact}`}>
               <Skeleton className={skeletonSize.barLgComfortable} />
               <Skeleton className={skeletonSize.barLgLarge} />
             </div>
@@ -43,11 +47,11 @@ export default function TagsLoading() {
       </section>
 
       {/* Content Skeleton */}
-      <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
+      <div className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`} aria-hidden="true">
         {/* Popular Tags Skeleton */}
-        <div className={`${marginBottom.relaxed} ${radius.lg} border ${padding.comfortable}`}>
+          <div className={`${marginBottom.relaxed} ${radius.lg} ${border.default} ${padding.comfortable}`}>
           <Skeleton className={`${marginBottom.default} ${skeletonSize.barLgLarge}`} />
-          <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+          <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
             {POPULAR_TAG_SKELETONS.map((id) => (
               <Skeleton key={id} className={skeletonSize.barXlDefault} />
             ))}
@@ -56,12 +60,12 @@ export default function TagsLoading() {
 
         {/* Grid Skeleton */}
         <Skeleton className={`${marginBottom.default} ${skeletonSize.barLgComfortable}`} />
-        <div className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4`}>
+        <div className={grid.responsive4}>
           {TAG_GRID_SKELETONS.map((id) => (
-            <div key={id} className={`${radius.lg} border ${padding.default}`}>
+            <div key={id} className={`${radius.lg} ${border.default} ${padding.default}`}>
               <Skeleton className={`${marginBottom.tight} ${skeletonSize.barMdLarge}`} />
               <Skeleton className={`${marginBottom.compact} ${skeletonSize.barCompact}`} />
-              <div className={`flex ${gap.tight}`}>
+              <div className={`${display.flex} ${gap.tight}`}>
                 <Skeleton className={skeletonSize.barMdCompact} />
                 <Skeleton className={skeletonSize.barMdDefault} />
               </div>

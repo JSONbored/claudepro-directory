@@ -12,7 +12,7 @@ import {
   normalizeError,
   type SharePlatform,
 } from '@heyclaude/web-runtime/core';
-import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import { UI_TIMEOUTS } from '@heyclaude/web-runtime/config/unified-config';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
@@ -26,22 +26,29 @@ import {
   Twitter,
 } from '@heyclaude/web-runtime/icons';
 import {
+  absolute,
+  alignItems,
+  width,
   animateDuration,
   backdrop,
   bgColor,
+  bgGradient,
   border,
   borderTop,
   cluster,
   codeBlock,
+  display,
   gap,
+  gradientFrom,
+  hoverBg,
   iconSize,
-  alignItems,
   justify,
   marginBottom,
   marginTop,
   muted,
   overflow,
   padding,
+  position,
   radius,
   shadow,
   size,
@@ -50,6 +57,11 @@ import {
   transition,
   weight,
   zLayer,
+  opacityLevel,
+  pointerEvents,
+  height,
+  scale,
+  transform,
 } from '@heyclaude/web-runtime/design-system';
 import {
   copyScreenshotToClipboard,
@@ -154,7 +166,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`absolute right-0 top-full ${zLayer.modal} ${marginTop.compact} w-56 ${radius.lg} ${border.default} bg-card/95 ${padding.tight} ${shadow.xl} ${backdrop.md}`}
+      className={`${position.absolute} ${absolute.right0Value} ${absolute.topFullValue} ${zLayer.modal} ${marginTop.compact} ${width.dropdown} ${radius.lg} ${border.default} ${bgColor['card/95']} ${padding.tight} ${shadow.xl} ${backdrop.md}`}
       onMouseLeave={onMouseLeave}
     >
       {/* Twitter Share */}
@@ -176,11 +188,11 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           })}
           onClick={() => onShare('twitter')}
         >
-          <div className={`flex w-full ${alignItems.center} ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} ${size.sm} ${transition.all} hover:bg-accent/15`}>
-            <div className={`${codeBlock.socialIconWrapper} bg-[#1DA1F2]/20`}>
-              <Twitter className={`${iconSize.xs} text-[#1DA1F2]`} />
+          <div className={`${display.flex} ${width.full} ${alignItems.center} ${gap.default} ${radius.lg} ${padding.xCompact} ${padding.yBetween} ${weight.medium} ${size.sm} ${transition.all} ${hoverBg.medium}`}>
+            <div className={`${codeBlock.socialIconWrapper} ${bgColor['twitterBlue/20']}`}>
+              <Twitter className={`${iconSize.xs} ${textColor.twitterBlue}`} />
             </div>
-            <span className="text-foreground">Share on Twitter</span>
+            <span className={textColor.foreground}>Share on Twitter</span>
           </div>
         </TwitterShareButton>
       </div>
@@ -205,11 +217,11 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           summary={`Check out this ${category} resource on claudepro.directory`}
           onClick={() => onShare('linkedin')}
         >
-          <div className={`flex w-full ${alignItems.center} ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} ${size.sm} ${transition.all} hover:bg-accent/15`}>
-            <div className={`${codeBlock.socialIconWrapper} bg-[#0A66C2]/20`}>
-              <Linkedin className={`${iconSize.xs} text-[#0A66C2]`} />
+          <div className={`${display.flex} ${width.full} ${alignItems.center} ${gap.default} ${radius.lg} ${padding.xCompact} ${padding.yBetween} ${weight.medium} ${size.sm} ${transition.all} ${hoverBg.medium}`}>
+            <div className={`${codeBlock.socialIconWrapper} ${bgColor['linkedInBlue/20']}`}>
+              <Linkedin className={`${iconSize.xs} ${textColor.linkedInBlue}`} />
             </div>
-            <span className="text-foreground">Share on LinkedIn</span>
+            <span className={textColor.foreground}>Share on LinkedIn</span>
           </div>
         </LinkedinShareButton>
       </div>
@@ -218,7 +230,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
       <button
         type="button"
         onClick={() => onShare('copy_link')}
-        className={`flex w-full ${alignItems.center} ${gap.default} ${radius.lg} ${padding.xCompact} py-2.5 ${weight.medium} ${textColor.foreground} ${size.sm} ${transition.all} hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]`}
+        className={`${display.flex} ${width.full} ${alignItems.center} ${gap.default} ${radius.lg} ${padding.xCompact} ${padding.yBetween} ${weight.medium} ${textColor.foreground} ${size.sm} ${transition.all} ${scale.hover102Active98} ${hoverBg.medium}`}
       >
         <div className={`${codeBlock.socialIconWrapper} ${bgColor['accent/20']}`}>
           <Copy className={iconSize.xs} />
@@ -322,8 +334,7 @@ export function ProductionCodeBlock({
 
   // Load timeout config on mount
   useEffect(() => {
-    const config = getTimeoutConfig();
-    const override = config['timeout.ui.clipboard_reset_delay_ms'];
+    const override = UI_TIMEOUTS.clipboard_reset_delay_ms;
     if (typeof override === 'number' && Number.isFinite(override) && override > 0) {
       setClipboardResetDelay(override);
     }
@@ -578,14 +589,14 @@ export function ProductionCodeBlock({
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className={`${codeBlock.buttonIcon} disabled:opacity-50`}
+              className={`${codeBlock.buttonIcon} disabled:${opacityLevel[50]}`}
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
               <Camera className={iconSize.xs} />
             </motion.button>
 
             {/* Share button with dropdown */}
-            <div className="relative">
+            <div className={position.relative}>
               <motion.button
                 type="button"
                 onClick={() => setIsShareOpen(!isShareOpen)}
@@ -635,7 +646,7 @@ export function ProductionCodeBlock({
 
             {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' && (
-              <div className={`px-2 ${padding.yHair} ${weight.semibold} ${size['2xs']} ${muted.default} uppercase ${tracking.wider}`}>
+              <div className={`${padding.xCompact} ${padding.yHair} ${weight.semibold} ${size['2xs']} ${muted.default} ${transform.uppercase} ${tracking.wider}`}>
                 {language}
               </div>
             )}
@@ -646,27 +657,27 @@ export function ProductionCodeBlock({
       {/* Code block container - Polar-style clean design */}
       <div
         ref={codeBlockRef}
-        className={`relative ${overflow.hidden} ${radius.lg} ${border.default} transition-[height] ${animateDuration.slow} ease-in-out`}
+        className={`${position.relative} ${overflow.hidden} ${radius.lg} ${border.default} ${transition.height} ${animateDuration.slow}`}
         style={{
           height: needsCollapse && !isExpanded ? maxHeight : 'auto',
         }}
       >
         {/* Top-right action buttons + badge (when no filename header) */}
         {!filename && (
-          <div className={`absolute right-4 top-4 ${zLayer.sticky} ${cluster.tight}`}>
+          <div className={`${absolute.topRightOffset} ${zLayer.sticky} ${cluster.tight}`}>
             {/* Screenshot button */}
             <motion.button
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className={`${codeBlock.buttonIcon} disabled:opacity-50`}
+              className={`${codeBlock.buttonIcon} disabled:${opacityLevel[50]}`}
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
               <Camera className={iconSize.xs} />
             </motion.button>
 
             {/* Share button with dropdown */}
-            <div className="relative">
+            <div className={position.relative}>
               <motion.button
                 type="button"
                 onClick={() => setIsShareOpen(!isShareOpen)}
@@ -716,7 +727,7 @@ export function ProductionCodeBlock({
 
             {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' && (
-              <div className={`px-2 ${padding.yHair} ${weight.semibold} ${size['2xs']} ${muted.default} uppercase ${tracking.wider}`}>
+              <div className={`${padding.xCompact} ${padding.yHair} ${weight.semibold} ${size['2xs']} ${muted.default} ${transform.uppercase} ${tracking.wider}`}>
                 {language}
               </div>
             )}
@@ -726,7 +737,7 @@ export function ProductionCodeBlock({
         {/* Gradient fade when collapsed */}
         {needsCollapse && !isExpanded && (
           <div
-            className={`pointer-events-none absolute inset-x-0 bottom-0 ${zLayer.raised} h-20 bg-gradient-to-b from-transparent to-[#1e1e1e] dark:to-[#1e1e1e] [html[data-theme='light']_&]:to-[#fafafa]`}
+            className={`${pointerEvents.none} ${position.absolute} ${absolute.insetX0} ${absolute.bottom0} ${zLayer.raised} ${height.gradientFade} ${bgGradient.toB} ${gradientFrom.transparent} to-[#1e1e1e] dark:to-[#1e1e1e] [html[data-theme='light']_&]:to-[#fafafa]`}
           />
         )}
 
@@ -745,7 +756,7 @@ export function ProductionCodeBlock({
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`flex w-full ${alignItems.center} ${justify.center} ${gap.snug} ${borderTop.subtle} ${padding.yCompact} ${muted.default} ${size.xs} ${transition.colors} hover:text-foreground`}
+          className={`${display.flex} ${width.full} ${alignItems.center} ${justify.center} ${gap.snug} ${borderTop.subtle} ${padding.yCompact} ${muted.default} ${size.xs} ${transition.colors} hover:${textColor.foreground}`}
         >
           <ChevronDown 
             className={`${iconSize.xsPlus} ${transition.transform} ${animateDuration.default} ${isExpanded ? 'rotate-180' : ''}`}

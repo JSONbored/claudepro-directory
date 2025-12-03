@@ -36,7 +36,7 @@ import {
   bgColor,
   cluster,
   flexGrow,
-  gap,
+  grid,
   iconSize,
   alignItems,
   justify,
@@ -49,6 +49,8 @@ import {
   spaceY,
   textColor,
   weight,
+  display,
+  height,
 } from '@heyclaude/web-runtime/design-system';
 import { Suspense } from 'react';
 import { ConfigCard } from '@heyclaude/web-runtime/ui';
@@ -203,9 +205,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
         <Suspense
           fallback={
             <output className={spaceY.relaxed} aria-busy="true" aria-label="Loading collection items">
-              <Skeleton size="xl" width="3xl" className="h-48" />
-              <Skeleton size="xl" width="3xl" className="h-48" />
-              <Skeleton size="xl" width="3xl" className="h-48" />
+              <Skeleton size="xl" width="3xl" className={height.imageLg} />
+              <Skeleton size="xl" width="3xl" className={height.imageLg} />
+              <Skeleton size="xl" width="3xl" className={height.imageLg} />
             </output>
           }
         >
@@ -218,7 +220,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                       category}{' '}
                     ({items.length})
                   </h3>
-                  <div className={`grid ${gap.comfortable} sm:grid-cols-1`}>
+                  <div className={grid.responsive1}>
                     {items.map((item: ItemWithData) =>
                       item?.data ? (
                         <ConfigCard
@@ -250,7 +252,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                 return (
                   <li key={slug} className={`${row.default}`}>
                     <span
-                      className={`flex ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['primary/10']} ${weight.semibold} ${textColor.primary} ${size.sm}`}
+                      className={`${display.flex} ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['primary/10']} ${weight.semibold} ${textColor.primary} ${size.sm}`}
                       aria-hidden="true"
                     >
                       {index + 1}
@@ -273,7 +275,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             <CardTitle className={size.xl}>Compatibility</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`grid grid-cols-2 ${gap.comfortable}`}>
+            <div className={grid.cols2}>
               <div className={cluster.compact}>
                 {compatibility.claudeDesktop ? (
                   <CheckCircle

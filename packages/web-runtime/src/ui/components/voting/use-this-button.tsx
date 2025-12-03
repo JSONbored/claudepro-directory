@@ -17,11 +17,14 @@ import { logger, normalizeError } from '../../../entries/core.ts';
 import { toasts } from '../../../client/toast.ts';
 import { CheckCircle, Zap } from '../../../icons.tsx';
 import { Button } from '../button.tsx';
-import { cluster, gap } from '../../../design-system/styles/layout.ts';
+import { cluster, gap, padding, height } from '../../../design-system/styles/layout.ts';
 import { iconSize } from '../../../design-system/styles/icons.ts';
-import { size as textSize } from '../../../design-system/styles/typography.ts';
+import { size as textSize, weight as fontWeight, muted } from '../../../design-system/styles/typography.ts';
+import { bgColor } from '../../../design-system/styles/colors.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
 import { shadow, shadowColor } from '../../../design-system/styles/effects.ts';
+import { transition } from '../../../design-system/styles/interactive.ts';
+import { bgGradient, gradientFrom, gradientTo } from '../../../design-system/styles/colors.ts';
 
 // Session ID management for anonymous voting
 function getOrCreateSessionId(): string {
@@ -152,9 +155,9 @@ export function UseThisButton({
   }, [voted, count, slug, category]);
 
   const sizeClasses = {
-    sm: `h-7 px-2.5 ${textSize.xs} ${gap.snug}`,
-    default: `h-9 px-3 ${textSize.sm} ${gap.compact}`,
-    lg: `h-11 px-4 ${textSize.base} ${gap.compact}`,
+    sm: `${height.buttonSm} ${padding.xBetween} ${textSize.xs} ${gap.snug}`,
+    default: `${height.input} ${padding.xCompact} ${textSize.sm} ${gap.compact}`,
+    lg: `${height.buttonLg} ${padding.xComfortable} ${textSize.base} ${gap.compact}`,
   };
 
   const iconSizes = {
@@ -172,10 +175,10 @@ export function UseThisButton({
       className={`
         ${sizeClasses[size]}
         ${voted 
-          ? `bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 ${shadow.md} ${shadowColor.success}` 
+          ? `${bgGradient.toR} ${gradientFrom.emerald} ${gradientTo.teal} hover:${gradientFrom.emerald600} hover:${gradientTo.teal600} text-white border-0 ${shadow.md} ${shadowColor.success}` 
           : 'hover:border-emerald-500/50 hover:text-emerald-600 dark:hover:text-emerald-400'
         }
-        transition-all duration-300 ease-out
+        ${transition.all} duration-300 ease-out
         ${className}
       `}
       aria-label={voted ? 'Remove from your toolkit' : 'Add to your toolkit'}
@@ -202,7 +205,7 @@ export function UseThisButton({
         </motion.span>
       </AnimatePresence>
       
-      <span className="font-medium">
+      <span className={fontWeight.medium}>
         {voted ? 'I use this' : 'I use this'}
       </span>
       
@@ -212,9 +215,9 @@ export function UseThisButton({
           initial={{ scale: 0.8, opacity: 0, y: -5 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           className={`
-            ${voted ? 'bg-white/20' : 'bg-muted'} 
-            px-1.5 py-0.5 ${radius.full} ${textSize.xs} font-semibold
-            ${voted ? 'text-white' : 'text-muted-foreground'}
+            ${voted ? 'bg-white/20' : bgColor.muted} 
+            ${padding.xSnug} ${padding.yHair} ${radius.full} ${textSize.xs} ${fontWeight.semibold}
+            ${voted ? 'text-white' : muted.default}
           `}
         >
           {count}

@@ -36,6 +36,8 @@
 import type { ReactNode } from 'react';
 import { cn } from '../../utils.ts';
 import { size } from '../../../design-system/styles/typography.ts';
+import { transition } from '../../../design-system/styles/interactive.ts';
+import { width } from '../../../design-system/styles/layout.ts';
 
 /** Data point for horizontal bar chart */
 export interface HorizontalBarChartDataPoint {
@@ -98,7 +100,7 @@ export function HorizontalBarChart({
   const chartWidth = `calc(100% - ${labelWidth + valueWidth}px)`;
 
   return (
-    <div className={cn('w-full', className)} role="img" aria-label={ariaLabel}>
+    <div className={cn(width.full, className)} role="img" aria-label={ariaLabel}>
       <svg width="100%" height={height} className={size.xs} style={{ overflow: 'visible' }}>
         {data.map((point, index) => {
           const yPosition = chartPadding + index * barHeight;
@@ -137,7 +139,7 @@ export function HorizontalBarChart({
                 height={effectiveBarHeight}
                 fill={point.fill || barColor}
                 rx={borderRadius}
-                className="transition-all duration-300 ease-out"
+                className={`${transition.all} duration-300 ease-out`}
               />
 
               {/* Value label (right side) */}
@@ -179,7 +181,7 @@ export function ChartContainer({ children, height = '200px', className }: ChartC
   const heightStyle = typeof height === 'number' ? `${height}px` : height;
 
   return (
-    <div className={cn('w-full', className)} style={{ height: heightStyle }}>
+    <div className={cn(width.full, className)} style={{ height: heightStyle }}>
       {children}
     </div>
   );

@@ -14,6 +14,14 @@ import { borderBottom, hoverBg, marginTop, spaceY, padding, zLayer, backdrop, ra
   justify,
   borderColor,
   size,
+  position,
+  sticky,
+  container,
+  width,
+  height,
+  border,
+  marginX,
+  minWidth,
 } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -49,6 +57,8 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
   const [activeTab, setActiveTab] = useState<string>(getInitialTab);
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
+  const touchEndY = useRef<number>(0);
 
   // Sync tab state with URL hash
   useEffect(() => {
@@ -117,6 +127,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
     const touch = e.touches[0];
     if (touch) {
       touchStartX.current = touch.clientX;
+      touchStartY.current = touch.clientY;
     }
   }, []);
 
@@ -124,14 +135,17 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
     const touch = e.touches[0];
     if (touch) {
       touchEndX.current = touch.clientX;
+      touchEndY.current = touch.clientY;
     }
   }, []);
 
   const handleTouchEnd = useCallback(() => {
     const swipeThreshold = 50; // Minimum swipe distance
     const swipeDistance = touchStartX.current - touchEndX.current;
+    const verticalDistance = Math.abs(touchStartY.current - touchEndY.current);
 
-    if (Math.abs(swipeDistance) < swipeThreshold) return;
+    // Ignore if vertical scroll exceeds horizontal swipe
+    if (Math.abs(swipeDistance) < swipeThreshold || verticalDistance > Math.abs(swipeDistance)) return;
 
     if (swipeDistance > 0) {
       // Swiped left - go to next tab
@@ -143,11 +157,11 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
   }, [goToNextTab, goToPreviousTab]);
 
   return (
-    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+    <Tabs value={activeTab} onValueChange={handleTabChange} className={width.full}>
       {/* Sticky tab bar */}
-      <div className={`-mx-4 sticky top-16 ${zLayer.raised} ${borderBottom.default} ${bgColor['background/95']} ${padding.xDefault} ${backdrop.default} supports-backdrop-filter:bg-background/60`}>
-        <div className="container mx-auto">
-          <TabsList className={`h-auto w-full ${justify.start} ${radius.none} border-0 ${bgColor.transparent} ${padding.none}`}>
+      <div className={`${marginX.neg4} ${sticky.topNav} ${zLayer.raised} ${borderBottom.default} ${bgColor['background/95']} ${padding.xDefault} ${backdrop.default} supports-backdrop-filter:${bgColor['background/60']}`}>
+        <div className={container.default}>
+          <TabsList className={`${height.auto} ${width.full} ${justify.start} ${radius.none} ${border.none} ${bgColor.transparent} ${padding.none}`}>
             {tabs.map((tab) => {
               const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
               const label = isMobile && tab.mobileLabel ? tab.mobileLabel : tab.label;
@@ -157,16 +171,16 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
                   key={tab.id}
                   value={tab.id}
                   className={cn(
-                    'relative border-b-2',
+                    `${position.relative} ${borderBottom.strong}`,
                     radius.none,
                     borderColor.transparent,
                     padding.xDefault,
                     padding.yCompact,
-                    'data-[state=active]:border-primary data-[state=active]:bg-transparent',
+                    `data-[state=active]:${borderColor.primary} data-[state=active]:${bgColor.transparent}`,
                     hoverBg.muted,
                     // Mobile optimization
                     `${size.sm} md:${size.base}`,
-                    'min-w-20 md:min-w-[100px]'
+                    `${minWidth[20]} md:min-w-[100px]`
                   )}
                 >
                   {label}
@@ -179,7 +193,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
 
       {/* Tab content - all rendered in DOM for SEO, with swipe gesture support */}
       <div
-        className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}
+        className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

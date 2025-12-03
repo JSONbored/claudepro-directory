@@ -8,7 +8,8 @@ import { getSEOMetadata } from '../data/seo/client.ts';
 import { logger } from '../logger.ts';
 import type { Metadata } from 'next';
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
-import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from './og.ts';
+import { OG_DIMENSIONS } from '@heyclaude/shared-runtime';
+import { generateOGImageUrl } from './og.ts';
 
 interface MetadataContext {
   params?: Record<string, string | string[]>;
@@ -53,8 +54,8 @@ export async function generatePageMetadata(
         images: [
           {
             url: ogImageUrl,
-            width: OG_IMAGE_DIMENSIONS.width,
-            height: OG_IMAGE_DIMENSIONS.height,
+            width: OG_DIMENSIONS.width,
+            height: OG_DIMENSIONS.height,
             alt: APP_CONFIG.name,
           },
         ],
@@ -93,8 +94,8 @@ export async function generatePageMetadata(
         images: [
           {
             url: ogImageUrl,
-            width: OG_IMAGE_DIMENSIONS.width,
-            height: OG_IMAGE_DIMENSIONS.height,
+            width: OG_DIMENSIONS.width,
+            height: OG_DIMENSIONS.height,
             alt: APP_CONFIG.name,
           },
         ],
@@ -131,8 +132,8 @@ export async function generatePageMetadata(
       images: [
         {
           url: ogImageUrl,
-          width: OG_IMAGE_DIMENSIONS.width,
-          height: OG_IMAGE_DIMENSIONS.height,
+          width: OG_DIMENSIONS.width,
+          height: OG_DIMENSIONS.height,
           alt: config.title,
         },
       ],

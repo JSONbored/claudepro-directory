@@ -11,15 +11,16 @@
  * - Production-optimized: Radix handles state, Motion handles visuals
  */
 
-import { UI_ANIMATION } from '../../config/unified-config.ts';
+import { animation } from '../../design-system/tokens.ts';
 import { cn } from '../utils.ts';
 // Design System imports
 import { absolute } from '../../design-system/styles/position.ts';
-import { hoverText, focusRing } from '../../design-system/styles/interactive.ts';
-import { padding, marginTop } from '../../design-system/styles/layout.ts';
-import { size } from '../../design-system/styles/typography.ts';
+import { hoverText, focusRing, transition } from '../../design-system/styles/interactive.ts';
+import { padding, marginTop, display, alignItems, justify, position, height } from '../../design-system/styles/layout.ts';
+import { size, weight, muted, whitespace } from '../../design-system/styles/typography.ts';
+import { bgColor, textColor } from '../../design-system/styles/colors.ts';
 import { radius } from '../../design-system/styles/radius.ts';
-import { shadow } from '../../design-system/styles/effects.ts';
+import { shadow, zLayer, opacityLevel } from '../../design-system/styles/effects.ts';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -36,7 +37,7 @@ const TabsList = ({
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      `inline-flex h-10 items-center justify-center ${radius.md} bg-muted ${padding.micro} text-muted-foreground`,
+      `${display.inlineFlex} ${height.input} ${alignItems.center} ${justify.center} ${radius.md} ${bgColor.muted} ${padding.micro} ${muted.default}`,
       className
     )}
     {...props}
@@ -45,11 +46,7 @@ const TabsList = ({
 TabsList.displayName = TabsPrimitive.List.displayName;
 
 /** Spring animation config from unified config */
-const springBouncy = {
-  type: 'spring' as const,
-  stiffness: UI_ANIMATION['spring.bouncy.stiffness'],
-  damping: UI_ANIMATION['spring.bouncy.damping'],
-};
+const springBouncy = animation.spring.bouncy;
 
 const TabsTrigger = ({
   className,
@@ -62,7 +59,7 @@ const TabsTrigger = ({
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        `relative inline-flex items-center justify-center whitespace-nowrap ${radius.sm} px-3 py-1.5 font-medium ${size.sm} ring-offset-background transition-colors ${hoverText.foreground} ${focusRing.default} disabled:opacity-50 disabled:pointer-events-none data-[state=active]:text-foreground [&[data-state=active]>.tab-indicator]:block`,
+        `${position.relative} ${display.inlineFlex} ${alignItems.center} ${justify.center} ${whitespace.nowrap} ${radius.sm} ${padding.xCompact} ${padding.ySnug} ${weight.medium} ${size.sm} ring-offset-background ${transition.colors} ${hoverText.foreground} ${focusRing.default} disabled:${opacityLevel[50]} disabled:pointer-events-none data-[state=active]:${textColor.foreground} [&[data-state=active]>.tab-indicator]:block`,
         className
       )}
       {...props}
@@ -70,7 +67,7 @@ const TabsTrigger = ({
       {/* Morphing active indicator - only visible on active tab via CSS */}
       <motion.span
         layoutId="tabs-indicator"
-        className={`tab-indicator -z-10 ${absolute.inset} hidden ${radius.sm} bg-background ${shadow.sm}`}
+        className={`tab-indicator ${zLayer.behind10} ${absolute.inset} ${display.none} ${radius.sm} ${bgColor.background} ${shadow.sm}`}
         transition={springBouncy}
       />
       {props.children}

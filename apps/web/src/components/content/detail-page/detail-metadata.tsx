@@ -16,7 +16,18 @@ import {
   getSocialLinks,
 } from '@heyclaude/web-runtime/core';
 import { Calendar, Copy, Eye, Tag, User } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, marginBottom, muted  , gap , padding, flexWrap,
+import {
+  cluster,
+  container,
+  display,
+  flexWrap,
+  gap,
+  iconSize,
+  marginBottom,
+  muted,
+  padding,
+  transition,
+  textColor,
 } from '@heyclaude/web-runtime/design-system';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -166,10 +177,10 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
   if (!(hasMetadata || hasTags)) return null;
 
   return (
-    <div className={`container mx-auto ${padding.xDefault}`}>
+    <div className={`${container.default} ${padding.xDefault}`}>
       {/* Author, Date & View Count Metadata */}
       {hasMetadata && (
-        <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
+        <div className={`${marginBottom.default} ${display.flex} ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
           {'author' in item &&
             item.author &&
             (() => {
@@ -189,7 +200,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
                     href={validatedUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="transition-colors hover:text-foreground hover:underline"
+                    className={`${transition.colors} hover:${textColor.foreground} hover:underline`}
                   >
                     {item.author}
                   </a>
@@ -218,7 +229,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
       )}
       {/* Tags */}
       {hasTags && tags.length > 0 && (
-        <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+        <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
           <Tag className={`${iconSize.sm} ${muted.default}`} />
           {tags.map((tag) => (
             <UnifiedBadge

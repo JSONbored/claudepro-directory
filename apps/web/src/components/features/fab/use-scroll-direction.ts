@@ -16,16 +16,13 @@
 'use client';
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import { UI_TIMEOUTS } from '@heyclaude/web-runtime/config/unified-config';
 import type { ScrollState } from '@heyclaude/web-runtime/types/component.types';
 import { useEffect, useState } from 'react';
 
 // Load config values at module initialization (sync) with fallbacks
-const timeoutConfig = getTimeoutConfig();
-const DEFAULT_SCROLL_THRESHOLD =
-  timeoutConfig?.['timeout.ui.scroll_direction_threshold_px'] ?? 300;
-const DEFAULT_SCROLL_HYSTERESIS =
-  timeoutConfig?.['timeout.ui.scroll_hysteresis_px'] ?? 10;
+const DEFAULT_SCROLL_THRESHOLD = UI_TIMEOUTS.scroll_direction_threshold_px;
+const DEFAULT_SCROLL_HYSTERESIS = UI_TIMEOUTS.scroll_hysteresis_px;
 
 interface UseScrollDirectionOptions {
   /** Scroll threshold to show/hide FAB (px) */

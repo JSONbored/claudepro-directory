@@ -19,24 +19,31 @@ import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Award, ExternalLink, Users } from '@heyclaude/web-runtime/icons';
 import {
+  alignItems,
   badge,
   bgColor,
   borderColor,
   buttonGhost,
+  display,
   flexDir,
   flexWrap,
   gap,
+  objectFit,
   iconSize,
   iconWrapper,
-  alignItems,
   justify,
   marginTop,
   memberBadge,
   muted,
   padding,
   size,
+  textAlign,
   textColor,
   weight,
+  width,
+  height,
+  minWidth,
+  ring,
 } from '@heyclaude/web-runtime/design-system';
 import { memo } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -183,19 +190,19 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
       showAuthor={false}
       compactMode={variant === 'compact'}
       renderHeader={() => (
-        <div className={`flex ${flexDir.col} ${alignItems.center} ${gap.default} text-center`}>
+        <div className={`${display.flex} ${flexDir.col} ${alignItems.center} ${gap.default} ${textAlign.center}`}>
           {/* Avatar */}
-          <Avatar className={`${iconSize['4xl']} ring-2 ring-accent/20 ring-offset-2 ring-offset-background`}>
+          <Avatar className={`${iconSize['4xl']} ${ring.accent20}`}>
             {user.image && (
-              <AvatarImage src={user.image} alt={`${username}'s avatar`} className="object-cover" />
+              <AvatarImage src={user.image} alt={`${username}'s avatar`} className={objectFit.cover} />
             )}
-            <AvatarFallback className={`bg-accent/10 ${weight.semibold} ${textColor.accent} ${size.lg}`}>
+            <AvatarFallback className={`${bgColor['accent/10']} ${weight.semibold} ${textColor.accent} ${size.lg}`}>
               {initials}
             </AvatarFallback>
           </Avatar>
 
           {/* Username */}
-          <div className="w-full min-w-0">
+          <div className={`${width.full} ${minWidth[0]}`}>
             <h3 className={`truncate ${weight.semibold} ${size.base}`}>{username}</h3>
             {user.work && (
               <p className={`${marginTop.micro} truncate ${muted.sm}`}>{user.work}</p>
@@ -204,7 +211,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
         </div>
       )}
       renderTopBadges={() => (
-        <div className={`flex ${flexWrap.wrap} ${alignItems.center} ${justify.center} ${gap.snug}`}>
+        <div className={`${display.flex} ${flexWrap.wrap} ${alignItems.center} ${justify.center} ${gap.snug}`}>
           {/* Member type badge */}
           <UnifiedBadge
             variant="base"
@@ -234,7 +241,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={`h-7 ${gap.snug} ${borderColor['primary/20']} ${bgColor['primary/10']} ${weight.medium} ${textColor.primary}`}
+              className={`${height.buttonSm} ${gap.snug} ${borderColor['primary/20']} ${bgColor['primary/10']} ${weight.medium} ${textColor.primary}`}
             >
               <Award className={iconSize.xs} aria-hidden="true" />
               <span className={badge.default}>{user.total_contributions}</span>
@@ -246,7 +253,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={`h-7 ${gap.snug} ${borderColor.border} ${bgColor['muted/50']} ${weight.medium} ${textColor.foreground}`}
+              className={`${height.buttonSm} ${gap.snug} ${borderColor.border} ${bgColor['muted/50']} ${weight.medium} ${textColor.foreground}`}
             >
               <Users className={iconSize.xs} aria-hidden="true" />
               <span className={badge.default}>{user.followers_count}</span>
@@ -350,7 +357,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-7 ${gap.snug} ${padding.xTight} ${size.xs} ${buttonGhost.icon}`}
+                className={`${height.buttonSm} ${gap.snug} ${padding.xTight} ${size.xs} ${buttonGhost.icon}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   window.location.href = safeProfileUrl;

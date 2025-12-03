@@ -12,15 +12,23 @@ import {
   borderBottom,
   cluster,
   flexGrow,
+  grid,
   iconSize,
   marginTop,
   muted,
   padding,
+  paddingBottom,
   row,
   size,
   spaceY,
   stack,
   weight,
+  width,
+  textAlign,
+  textColor,
+  border,
+  minWidth,
+  flexWrap,
 } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
@@ -71,9 +79,9 @@ const tabContentVariants = {
 export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarActivityCardProps) {
   return (
     <Card>
-      <Tabs defaultValue="recent" className="w-full">
-        <CardHeader className="pb-2">
-          <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="recent" className={width.full}>
+        <CardHeader className={paddingBottom.compact}>
+          <TabsList className={`${grid.cols2} ${width.full}`}>
             <TabsTrigger value="recent" className={cluster.snug}>
               <Clock className={iconSize.xs} />
               Recent
@@ -95,7 +103,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
               className={stack.snug}
             >
               {recentMerged.length === 0 ? (
-                <p className={cn(`${muted.sm}`, 'py-4 text-center')}>
+                <p className={cn(`${muted.sm}`, `${padding.yComfortable} ${textAlign.center}`)}>
                   No recent submissions yet
                 </p>
               ) : (
@@ -104,17 +112,17 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
                     key={submission.id}
                     className={cn(
                       `${row.compact}`,
-                      `${borderBottom.light} pb-3 last:border-0 last:pb-0`
+                      `${borderBottom.light} ${paddingBottom.default} last:${border.none} last:${paddingBottom.none}`
                     )}
                   >
                     <CheckCircle
-                      className={cn(marginTop.micro, 'shrink-0', iconSize.sm, 'text-green-600')}
+                      className={cn(marginTop.micro, flexGrow.shrink0, iconSize.sm, textColor.green600)}
                     />
-                    <div className={`min-w-0 ${flexGrow['1']}`}>
+                    <div className={`${minWidth[0]} ${flexGrow['1']}`}>
                       <p className={cn(`truncate ${weight.medium} ${size.sm}`)}>
                         {submission.content_name}
                       </p>
-                      <div className={cn(cluster.compact, marginTop.tight, 'flex-wrap')}>
+                      <div className={cn(cluster.compact, marginTop.tight, flexWrap.wrap)}>
                         <UnifiedBadge variant="base" style="outline" className={size.xs}>
                           {typeLabels[submission.content_type]}
                         </UnifiedBadge>

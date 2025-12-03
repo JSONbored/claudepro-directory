@@ -3,7 +3,7 @@ import 'server-only';
 import  { type Database } from '@heyclaude/database-types';
 
 import { isBuildTime } from '../../build-time.ts';
-import { getHomepageConfigBundle } from '../../config/static-configs.ts';
+import { HOMEPAGE_CONFIG } from '../../config/unified-config.ts';
 import { logger } from '../../logger.ts';
 import { generateRequestId } from '../../utils/request-id.ts';
 
@@ -27,13 +27,9 @@ export function getHomepageFeaturedCategories(): readonly Database['public']['En
     return [];
   }
 
-  // Get static config bundle (synchronous)
-  // Note: getHomepageConfigBundle() always returns a valid bundle with homepageConfig
-  const bundle = getHomepageConfigBundle();
-  const config = bundle.homepageConfig;
-
-  const categories = Array.isArray(config['homepage.featured_categories'])
-    ? config['homepage.featured_categories'].filter((value) => isValidCategoryValue(value))
+  // Get static config (synchronous)
+  const categories = Array.isArray(HOMEPAGE_CONFIG.featured_categories)
+    ? HOMEPAGE_CONFIG.featured_categories.filter((value) => isValidCategoryValue(value))
     : [];
 
   reqLogger.debug('getHomepageFeaturedCategories: loaded categories', {
@@ -57,13 +53,8 @@ export function getHomepageTabCategories(): readonly string[] {
     return [];
   }
 
-  // Get static config bundle (synchronous)
-  // Note: getHomepageConfigBundle() always returns a valid bundle with homepageConfig
-  const bundle = getHomepageConfigBundle();
-  const config = bundle.homepageConfig;
-
-  const categories = config['homepage.tab_categories'];
-  const result = Array.isArray(categories) ? categories.map(String) : [];
+  // Get static config (synchronous)
+  const result = Array.isArray(HOMEPAGE_CONFIG.tab_categories) ? HOMEPAGE_CONFIG.tab_categories.map(String) : [];
   
   reqLogger.debug('getHomepageTabCategories: loaded categories', {
     categoryCount: result.length,

@@ -1,8 +1,12 @@
 import {
   bgColor,
   borderBottom,
+  container,
+  display,
+  flexGrow,
   flexWrap,
   gap,
+  grid,
   marginBottom,
   minHeight,
   padding,
@@ -31,22 +35,22 @@ export default function Loading() {
   return (
     <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Header */}
-      <div className={`${borderBottom.light} bg-card/30`}>
-        <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
+      <div className={`${borderBottom.light} ${bgColor['card/30']}`}>
+        <div className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}>
           {/* Back button */}
           <Skeleton size="sm" width="sm" className={marginBottom.comfortable} />
 
           {/* Title section */}
           <div className={`${marginBottom.comfortable} ${row.comfortable}`}>
-            <Skeleton size="xl" width="xs" className="shrink-0" />
-            <div className={`flex-1 ${spaceY.comfortable}`}>
+            <Skeleton size="xl" width="xs" className={flexGrow.shrink0} />
+            <div className={`${flexGrow['1']} ${spaceY.comfortable}`}>
               <Skeleton size="xl" width="3/4" />
               <Skeleton size="md" width="3xl" />
             </div>
           </div>
 
           {/* Metadata badges */}
-          <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+          <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />
@@ -55,8 +59,8 @@ export default function Loading() {
       </div>
 
       {/* Content with sidebar */}
-      <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
-        <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-3`}>
+      <div className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
+        <div className={grid.responsive13Gap8}>
           {/* Main content */}
           <div className={`${spaceY.relaxed} lg:col-span-2`}>
             {/* Content card */}

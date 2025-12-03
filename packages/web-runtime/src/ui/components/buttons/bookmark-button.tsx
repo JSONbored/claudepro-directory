@@ -31,7 +31,8 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { addBookmark } from '../../../actions/add-bookmark.generated.ts';
-import { checkConfettiEnabled } from '../../../config/static-configs.ts';
+// Confetti is enabled
+const CONFETTI_ENABLED = true;
 import { removeBookmark } from '../../../actions/remove-bookmark.generated.ts';
 import { isValidCategory, logClientWarning, normalizeError } from '../../../entries/core.ts';
 import { useLoggedAsync, usePulse, useConfetti } from '../../../hooks/index.ts';
@@ -39,9 +40,12 @@ import { Bookmark, BookmarkCheck, Loader2 } from '../../../icons.tsx';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { cn } from '../../../ui/utils.ts';
 // Design System imports
-import { iconSize } from '../../../design-system/styles/icons.ts';
+import { iconSize, iconFill } from '../../../design-system/styles/icons.ts';
 import { buttonSize } from '../../../design-system/styles/buttons.ts';
 import { badge } from '../../../design-system/styles/typography.ts';
+import { marginLeft } from '../../../design-system/styles/layout.ts';
+import { textColor } from '../../../design-system/styles/colors.ts';
+import { animate } from '../../../design-system/styles/animation.ts';
 import { toasts } from '../../../client/toast.ts';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -166,8 +170,7 @@ export function BookmarkButton({
                   });
 
                 // Check confetti enabled (static config)
-                const confettiEnabled = checkConfettiEnabled();
-                if (confettiEnabled) {
+                if (CONFETTI_ENABLED) {
                   celebrateBookmark();
                 }
               }
@@ -209,17 +212,17 @@ export function BookmarkButton({
       title={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
     >
       {isPending ? (
-        <Loader2 className={`${iconSize.xs} animate-spin`} aria-hidden="true" />
+        <Loader2 className={`${iconSize.xs} ${animate.spin}`} aria-hidden="true" />
       ) : isBookmarked ? (
         <BookmarkCheck
-          className={`${iconSize.xs} fill-current text-primary`}
+          className={`${iconSize.xs} ${iconFill.current} ${textColor.primary}`}
           aria-hidden="true"
         />
       ) : (
         <Bookmark className={iconSize.xs} aria-hidden="true" />
       )}
       {showLabel && !isPending && (
-        <span className={`ml-1 ${badge.default}`}>{isBookmarked ? 'Saved' : 'Save'}</span>
+        <span className={`${marginLeft.tight} ${badge.default}`}>{isBookmarked ? 'Saved' : 'Save'}</span>
       )}
     </Button>
   );

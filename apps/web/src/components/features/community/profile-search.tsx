@@ -17,7 +17,7 @@
  */
 
 import { memo } from 'react';
-import { muted , gap } from '@heyclaude/web-runtime/design-system';
+import { muted, grid, padding, textAlign } from '@heyclaude/web-runtime/design-system';
 import {
   ProfileCard,
   type UserProfile,
@@ -30,14 +30,14 @@ export interface ProfileSearchClientProps {
 function ProfileSearchClientComponent({ users }: ProfileSearchClientProps) {
   if (!users || users.length === 0) {
     return (
-      <div className="py-12 text-center">
+      <div className={`${padding.ySection} ${textAlign.center}`}>
         <p className={muted.default}>No community members found</p>
       </div>
     );
   }
 
   return (
-    <div className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 lg:grid-cols-3`}>
+    <div className={grid.responsive123}>
       {users.map((user, index) => (
         <ProfileCard key={user.slug || user.name || `user-${index}`} user={user} />
       ))}

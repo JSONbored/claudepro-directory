@@ -49,7 +49,7 @@ export async function getConfigRecommendations(
         viewerId ?? 'anon',
       ],
       tags: ['content', 'quiz'],
-      ttlKey: 'cache.quiz.ttl_seconds',
+      ttlKey: 'quiz',
       useAuth: true,
       fallback: null,
       logMeta: {

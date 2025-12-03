@@ -13,7 +13,7 @@ import { authedAction } from './safe-action.ts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
-import type { CacheConfig, CacheInvalidateKey, CacheInvalidateKeyLegacy } from '../cache-config.ts';
+import type { CacheConfig, CacheInvalidateKey } from '../cache-config.ts';
 import { logger } from '../logger.ts';
 
 // Use enum values directly from @heyclaude/database-types Constants
@@ -62,7 +62,7 @@ async function invalidateUserCaches({
   userIds,
 }: {
   cacheConfig?: CacheConfig;
-  invalidateKeys?: (CacheInvalidateKey | CacheInvalidateKeyLegacy)[];
+  invalidateKeys?: CacheInvalidateKey[];
   extraTags?: string[];
   userIds?: Array<string | null | undefined>;
 }): Promise<void> {
@@ -177,7 +177,7 @@ export const updateProfile = authedAction
 
     await invalidateUserCaches({
       cacheConfig,
-      invalidateKeys: ['cache.invalidate.user_update'],
+      invalidateKeys: ['user_update'],
       userIds: [ctx.userId],
     });
 
@@ -205,7 +205,7 @@ async function refreshProfileFromOAuthInternal(userId: string) {
 
   await invalidateUserCaches({
     cacheConfig,
-    invalidateKeys: ['cache.invalidate.user_profile_oauth'],
+    invalidateKeys: ['user_profile_oauth'],
     userIds: [userId],
   });
 
@@ -253,7 +253,7 @@ export const isBookmarkedAction = authedAction
       {
         keyParts: ['user-bookmark', ctx.userId, parsedInput.content_type, parsedInput.content_slug],
         tags: ['user-bookmarks', `user-${ctx.userId}`, `content-${parsedInput.content_slug}`],
-        ttlKey: 'cache.user_bookmarks.ttl_seconds',
+        ttlKey: 'user_bookmarks',
         useAuth: true,
         fallback: false,
         logMeta: { namespace: 'user-actions' },
@@ -311,7 +311,7 @@ export const addBookmarkBatch = authedAction
     await revalidateUserSurfaces({ accountSections: ['account', 'library'] });
     await invalidateUserCaches({
       cacheConfig,
-      invalidateKeys: ['cache.invalidate.bookmark_create'],
+      invalidateKeys: ['bookmark_create'],
       extraTags: ['user-bookmarks'],
       userIds: [ctx.userId],
     });
@@ -356,7 +356,7 @@ export const toggleFollow = authedAction
     });
     await invalidateUserCaches({
       cacheConfig,
-      invalidateKeys: ['cache.invalidate.follow'],
+      invalidateKeys: ['follow'],
       extraTags: ['users'],
       userIds: [ctx.userId, user_id],
     });
@@ -382,7 +382,7 @@ export const isFollowingAction = authedAction
       {
         keyParts: ['user-follow-status', ctx.userId, parsedInput.user_id],
         tags: ['users', `user-${ctx.userId}`, `user-${parsedInput.user_id}`],
-        ttlKey: 'cache.user_profile.ttl_seconds',
+        ttlKey: 'user_profile',
         useAuth: true,
         fallback: false,
         logMeta: { namespace: 'user-actions' },
@@ -422,7 +422,7 @@ export const getBookmarkStatusBatch = authedAction
       {
         keyParts: ['user-bookmark-batch', ctx.userId, ...parsedInput.items.map(i => `${i.content_type}:${i.content_slug}`)],
         tags: ['user-bookmarks', `user-${ctx.userId}`],
-        ttlKey: 'cache.user_bookmarks.ttl_seconds',
+        ttlKey: 'user_bookmarks',
         useAuth: true,
         fallback: [],
         logMeta: { namespace: 'user-actions' },
@@ -458,7 +458,7 @@ export const getFollowStatusBatch = authedAction
       {
         keyParts: ['user-follow-batch', ctx.userId, ...parsedInput.user_ids.sort()],
         tags: ['users', `user-${ctx.userId}`],
-        ttlKey: 'cache.user_profile.ttl_seconds',
+        ttlKey: 'user_profile',
         useAuth: true,
         fallback: [],
         logMeta: { namespace: 'user-actions' },
@@ -481,7 +481,7 @@ export const getActivitySummary = authedAction
       {
         keyParts: ['user-activity-summary', ctx.userId],
         tags: ['user-activity', `user-${ctx.userId}`],
-        ttlKey: 'cache.user_activity.ttl_seconds',
+        ttlKey: 'user_activity',
         useAuth: true,
         fallback: {
           total_posts: 0,
@@ -514,7 +514,7 @@ export const getActivityTimeline = authedAction
       {
         keyParts: ['user-activity-timeline', ctx.userId, type ?? 'all', limit, offset],
         tags: ['user-activity', `user-${ctx.userId}`],
-        ttlKey: 'cache.user_activity.ttl_seconds',
+        ttlKey: 'user_activity',
         useAuth: true,
         fallback: {
           activities: [],
@@ -595,7 +595,7 @@ export async function ensureUserRecord(params: {
 
   await invalidateUserCaches({
     cacheConfig,
-    invalidateKeys: ['cache.invalidate.user_update'],
+    invalidateKeys: ['user_update'],
     userIds: [params.id],
   });
 }

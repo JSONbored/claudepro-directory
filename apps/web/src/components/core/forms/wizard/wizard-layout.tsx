@@ -28,15 +28,24 @@ import {
   maxWidth,
   minHeight,
   muted,
+  display,
   padding,
   size,
   weight,
   zLayer,
+  flexGrow,
+  position,
+  sticky,
+  container,
+  textAlign,
+  radius,
+  border,
 } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ArrowRight, Save, X } from '@heyclaude/web-runtime/icons';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
+import { bgColor, borderColor, submissionFormColors } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
@@ -179,30 +188,26 @@ export function WizardLayout({
 
   return (
     <div
-      className={cn(
-  `relative ${minHeight.screen}`, className)}
-      style={{
-        backgroundColor: TOKENS.colors.background.primary,
-      }}
+      className={cn(`${position.relative} ${minHeight.screen}`, bgColor.background, className)}
     >
       {/* Header */}
       <header
-        className={`sticky top-0 ${zLayer.fixed} ${borderBottom.default} ${backdrop.sm}`}
+        className={`${sticky.top} ${zLayer.fixed} ${borderBottom.default} ${backdrop.sm}`}
         style={{
-          backgroundColor: `${TOKENS.colors.background.primary}e6`, // 90% opacity
-          borderColor: TOKENS.colors.border.light,
+          backgroundColor: `${submissionFormColors.background.primary}e6`,
+          borderColor: submissionFormColors.border.light,
         }}
       >
-        <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yDefault}`}>
-          <div className={`flex ${alignItems.center} ${justify.between}`}>
+        <div className={`${container.default} ${maxWidth['4xl']} ${padding.xDefault} ${padding.yDefault}`}>
+          <div className={`${display.flex} ${alignItems.center} ${justify.between}`}>
             {/* Exit Button */}
             <Button type="button" variant="ghost" size="sm" onClick={handleExit} className={`${gap.compact}`}>
               <X className={iconSize.sm} />
-              <span className="hidden sm:inline">Exit</span>
+              <span className={`${display.none} sm:inline`}>Exit</span>
             </Button>
 
             {/* Title */}
-            <div className="flex-1 text-center">
+            <div className={`${flexGrow['1']} ${textAlign.center}`}>
               <h1 className={`${weight.semibold} ${size.lg}`}>Submit Configuration</h1>
               <p className={muted.sm}>
                 {steps[currentStep - 1]?.label || 'Loading...'}
@@ -219,7 +224,7 @@ export function WizardLayout({
               className={`${gap.compact}`}
             >
               <Save className={iconSize.sm} />
-              <span className="hidden sm:inline">{isSaving ? 'Saving...' : saveLabel}</span>
+              <span className={`${display.none} sm:inline`}>{isSaving ? 'Saving...' : saveLabel}</span>
             </Button>
           </div>
 
@@ -236,15 +241,15 @@ export function WizardLayout({
       </header>
 
       {/* Main Content with Step Transition */}
-      <main className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed}`}>
+      <main className={`${container.default} ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={TOKENS.animations.spring.smooth}
-            className="min-h-[60vh]"
+            transition={animation.spring.smooth}
+            className={minHeight.viewport60}
           >
             {children}
           </motion.div>
@@ -253,14 +258,14 @@ export function WizardLayout({
 
       {/* Footer Navigation */}
       <footer
-        className={`sticky bottom-0 ${zLayer.fixed} ${borderTop.default} ${backdrop.sm}`}
+        className={cn(`${sticky.bottom} ${zLayer.fixed} ${borderTop.default} ${backdrop.sm}`)}
         style={{
-          backgroundColor: `${TOKENS.colors.background.primary}e6`, // 90% opacity
-          borderColor: TOKENS.colors.border.light,
+          backgroundColor: `${submissionFormColors.background.primary}e6`,
+          borderColor: submissionFormColors.border.light,
         }}
       >
-        <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yDefault}`}>
-          <div className={`flex ${alignItems.center} ${justify.between} ${gap.comfortable}`}>
+        <div className={`${container.default} ${maxWidth['4xl']} ${padding.xDefault} ${padding.yDefault}`}>
+          <div className={`${display.flex} ${alignItems.center} ${justify.between} ${gap.comfortable}`}>
             {/* Previous Button */}
             <Button
               type="button"
@@ -274,7 +279,7 @@ export function WizardLayout({
             </Button>
 
             {/* Step Indicator (Mobile) */}
-            <div className={`text-center ${muted.sm} md:hidden`}>
+            <div className={`${textAlign.center} ${muted.sm} md:${display.none}`}>
               {currentStep} / {steps.length}
             </div>
 
@@ -299,23 +304,15 @@ export function WizardLayout({
           </div>
 
           {/* Help Text */}
-          <div className={`${marginTop.compact} text-center ${muted.default} ${size.xs}`}>
+          <div className={`${marginTop.compact} ${textAlign.center} ${muted.default} ${size.xs}`}>
             <kbd
-              className={`rounded border ${padding.xSnug} ${padding.yHair} font-mono ${size.xs}`}
-              style={{
-                borderColor: TOKENS.colors.border.default,
-                backgroundColor: TOKENS.colors.background.secondary,
-              }}
+              className={cn(`${radius.default} ${border.default} ${padding.xSnug} ${padding.yHair} font-mono ${size.xs}`, borderColor.border, bgColor.muted)}
             >
               ⌘S
             </kbd>{' '}
             to save draft •{' '}
             <kbd
-              className={`rounded border ${padding.xSnug} ${padding.yHair} font-mono ${size.xs}`}
-              style={{
-                borderColor: TOKENS.colors.border.default,
-                backgroundColor: TOKENS.colors.background.secondary,
-              }}
+              className={cn(`rounded border ${padding.xSnug} ${padding.yHair} font-mono ${size.xs}`, borderColor.border, bgColor.muted)}
             >
               ESC
             </kbd>{' '}

@@ -11,7 +11,7 @@
  * @module features/indicators/new-content-badge
  */
 
-import { iconLeading, textColor,
+import { iconLeading, textColor, borderColor, bgColor,
 } from '@heyclaude/web-runtime/design-system';
 import { Sparkles, Shield } from '@heyclaude/web-runtime/icons';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -49,7 +49,7 @@ export function NewContentBadge({
           <UnifiedBadge
             variant="base"
             style="outline"
-            className={`border-amber-500/30 bg-amber-500/5 ${textColor.amber} dark:text-amber-400`}
+            className={`${borderColor['amber/30']} ${bgColor['amber/5']} ${textColor.amber} ${textColor.amber400}`}
           >
             <motion.span
               animate={{ rotate: [0, 10, -10, 0] }}

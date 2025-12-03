@@ -11,8 +11,9 @@ import { Star } from '../../../icons.tsx';
 import type { ReviewRatingCompactProps } from '../../../types/component.types.ts';
 // Design System imports
 import { cluster } from '../../../design-system/styles/layout.ts';
-import { iconSize } from '../../../design-system/styles/icons.ts';
-import { size as textSize } from '../../../design-system/styles/typography.ts';
+import { iconSize, iconFill } from '../../../design-system/styles/icons.ts';
+import { size as textSize, weight, muted } from '../../../design-system/styles/typography.ts';
+import { textColor } from '../../../design-system/styles/colors.ts';
 
 export function ReviewRatingCompact({
   average,
@@ -22,13 +23,13 @@ export function ReviewRatingCompact({
   return (
     <div className={cluster.tight}>
       <Star
-        className={`${size === 'sm' ? iconSize.xsPlus : iconSize.sm} fill-amber-400 text-amber-400`}
+        className={`${size === 'sm' ? iconSize.xsPlus : iconSize.sm} ${iconFill.amber400} ${textColor.amber400}`}
         aria-hidden="true"
       />
-      <span className={`${size === 'sm' ? textSize.xs : textSize.sm} font-medium`}>
+      <span className={`${size === 'sm' ? textSize.xs : textSize.sm} ${weight.medium}`}>
         {average.toFixed(1)}
       </span>
-      <span className={`${size === 'sm' ? textSize.xs : textSize.sm} text-muted-foreground`}>
+      <span className={`${size === 'sm' ? textSize.xs : textSize.sm} ${muted.default}`}>
         ({count})
       </span>
     </div>

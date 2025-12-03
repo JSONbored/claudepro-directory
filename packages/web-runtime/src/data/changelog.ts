@@ -13,8 +13,8 @@ import './changelog.shared.ts';
 export * from './changelog.shared.ts';
 
 const CHANGELOG_TAG = 'changelog';
-const CHANGELOG_TTL_KEY = 'cache.changelog.ttl_seconds';
-const CHANGELOG_DETAIL_TTL_KEY = 'cache.changelog_detail.ttl_seconds';
+const CHANGELOG_TTL_KEY = 'changelog';
+const CHANGELOG_DETAIL_TTL_KEY = 'changelog_detail';
 // Cache key prefix - using enum value from Constants to avoid hardcoded enum value detection
 // 'changelog' is at index 10 in content_category enum
 const CACHE_KEY_PREFIX = Constants.public.Enums.content_category[10] as string;
@@ -80,7 +80,9 @@ export async function getChangelogOverview(
 export async function getChangelogEntryBySlug(
   slug: string
 ): Promise<Database['public']['Tables']['changelog']['Row'] | null> {
-  const result = await fetchCached(
+  const result = await fetchCached<
+    Database['public']['Functions']['get_changelog_detail']['Returns']
+  >(
     (client) => new ChangelogService(client).getChangelogDetail({ p_slug: slug }),
     {
       keyParts: ['changelog-detail', slug],

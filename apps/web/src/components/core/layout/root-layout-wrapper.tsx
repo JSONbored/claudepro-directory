@@ -6,8 +6,9 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
-import { bgColor, flexDir, minHeight, overflow, radius, height } from '@heyclaude/web-runtime/design-system';
+// Confetti is enabled
+const CONFETTI_ENABLED = true;
+import { bgColor, flexDir, minHeight, overflow, radius, height, zLayer, display, flexGrow, padding, width, textColor } from '@heyclaude/web-runtime/design-system';
 import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
 import { toasts } from '@heyclaude/web-runtime/ui';
@@ -174,8 +175,7 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
     });
 
     // Check confetti enabled (static config)
-    const confettiEnabled = checkConfettiEnabled();
-    if (confettiEnabled) {
+    if (CONFETTI_ENABLED) {
       fireConfetti('subtle');
     }
 
@@ -191,7 +191,7 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
   // Auth routes: minimal wrapper with no height constraints for true fullscreen experience
   if (isAuthRoute) {
     return (
-      <main id="main-content" className={`${height.viewport100dvh} w-full ${overflow.hidden}`}>
+      <main id="main-content" className={`${height.viewport100dvh} ${width.full} ${overflow.hidden}`}>
         {children}
       </main>
     );
@@ -203,16 +203,16 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
       <a
         href="#main-content"
         className={
-          `sr-only ${radius.md} focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground`
+          `sr-only ${radius.md} focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:${zLayer.modal} focus:${bgColor.primary} focus:${padding.xComfortable} focus:${padding.yCompact} focus:${textColor.primaryForeground}`
         }
       >
         Skip to main content
       </a>
       <PinboardDrawerProvider>
-        <div className={`flex ${minHeight.screen} ${flexDir.col} ${bgColor.background}`}>
+        <div className={`${display.flex} ${minHeight.screen} ${flexDir.col} ${bgColor.background}`}>
           {announcement && <AnnouncementBannerClient announcement={announcement} />}
           <Navigation hideCreateButton={useFloatingActionBar} navigationData={navigationData} />
-          <main id="main-content" className="flex-1">
+          <main id="main-content" className={flexGrow['1']}>
             {children}
           </main>
           <Footer />

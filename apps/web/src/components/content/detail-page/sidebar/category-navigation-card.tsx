@@ -58,10 +58,22 @@
  */
 
 import { nonEmptyString } from '@heyclaude/shared-runtime';
-import { between, iconSize, transition, hoverBg, marginTop, weight, muted, radius ,size , padding, textColor,
+import {
+  between,
+  iconSize,
+  transition,
+  hoverBg,
+  marginTop,
+  weight,
+  muted,
+  radius,
+  size,
+  padding,
+  textColor,
+  maxWidth,
+  bgColor,
 } from '@heyclaude/web-runtime/design-system';
 import type { IconComponent } from '@heyclaude/web-runtime/icons';
-import { maxWidth } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { z } from 'zod';
 import {
@@ -130,8 +142,8 @@ export function CategoryNavigationCard({
                   href={`${basePath}/${key}`}
                   className={`${radius.lg} ${padding.tight} ${transition.default} ${
                     isActive
-                      ? info.activeColor || `bg-primary/10 ${textColor.primary}`
-                      : `${muted.default} ${info.color || `${hoverBg.muted} hover:text-primary`}`
+                      ? info.activeColor || `${bgColor['primary/10']} ${textColor.primary}`
+                      : `${muted.default} ${info.color || `${hoverBg.muted} hover:${textColor.primary}`}`
                   }`}
                 >
                   <Icon className={iconSize.sm} />

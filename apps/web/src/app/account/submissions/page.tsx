@@ -10,6 +10,7 @@ import {
   flexDir,
   flexGrow,
   gap,
+  grid,
   iconLeading,
   iconSize,
   alignItems,
@@ -18,11 +19,17 @@ import {
   maxWidth,
   muted,
   padding,
+  paddingTop,
   size,
   spaceY,
   submissionBadge,
   textColor,
   weight,
+  display,
+  marginRight,
+  textAlign,
+  borderColor,
+  bgColor,
 } from '@heyclaude/web-runtime/design-system';
 import { CheckCircle, Clock, GitPullRequest, type IconComponent, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -300,7 +307,7 @@ export default async function SubmissionsPage() {
   if (hasError) {
     return (
       <div className={spaceY.relaxed}>
-        <div className="text-destructive">Failed to load submissions. Please try again later.</div>
+        <div className={textColor.destructive}>Failed to load submissions. Please try again later.</div>
       </div>
     );
   }
@@ -404,8 +411,9 @@ export default async function SubmissionsPage() {
     slug: string,
     status: Database['public']['Enums']['submission_status']
   ): null | { href: string } {
+    if (status !== 'merged') return null;
     const safeUrl = getSafeContentUrl(type, slug);
-    return safeUrl && status === 'merged' ? { href: safeUrl } : null;
+    return safeUrl ? { href: safeUrl } : null;
   }
 
   // Log any submissions with missing IDs for data integrity monitoring
@@ -428,7 +436,7 @@ export default async function SubmissionsPage() {
         </div>
         <Button asChild>
           <Link href={ROUTES.SUBMIT}>
-            <Send className={`mr-2 ${iconSize.sm}`} />
+            <Send className={`${marginRight.compact} ${iconSize.sm}`} />
             New Submission
           </Link>
         </Button>
@@ -436,23 +444,23 @@ export default async function SubmissionsPage() {
 
       {submissions.length === 0 ? (
         <Card>
-          <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+          <CardContent className={`${display.flex} ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
             <Send className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
             <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No submissions yet</h3>
-            <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
+            <p className={`${marginBottom.default} ${maxWidth.md} ${textAlign.center} ${muted.default}`}>
               Share your Claude configurations with the community! Your contributions help everyone
               build better AI workflows.
             </p>
             <Button asChild>
               <Link href={ROUTES.SUBMIT}>
-                <Send className={`mr-2 ${iconSize.sm}`} />
+                <Send className={`${marginRight.compact} ${iconSize.sm}`} />
                 Submit Your First Configuration
               </Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className={`grid ${gap.comfortable}`}>
+        <div className={`${grid.base} ${gap.comfortable}`}>
           {submissions.map((submission, index) => (
             <SubmissionCard
               key={submission.id ?? `submission-${index}`}
@@ -466,7 +474,7 @@ export default async function SubmissionsPage() {
               isValidSubmissionStatus={isValidSubmissionStatus}
               isValidSubmissionType={isValidSubmissionType}
               VALID_SUBMISSION_STATUSES={
-                VALID_SUBMISSION_STATUSES as unknown as Database['public']['Enums']['submission_status'][]
+                [...VALID_SUBMISSION_STATUSES] as Database['public']['Enums']['submission_status'][]
               }
               VALID_SUBMISSION_TYPES={ALLOWED_TYPES_ARRAY}
             />
@@ -475,14 +483,14 @@ export default async function SubmissionsPage() {
       )}
 
       {/* Info Card */}
-      <Card className="border-blue-500/20 bg-blue-500/5">
-        <CardContent className="pt-6">
-          <div className={`flex ${gap.default}`}>
+      <Card className={`${borderColor['blue/20']} ${bgColor['info/5']}`}>
+        <CardContent className={paddingTop.relaxed}>
+          <div className={`${display.flex} ${gap.default}`}>
             <GitPullRequest
               className={`${iconSize.md} ${textColor.blue} ${marginTop.micro} ${flexGrow.shrink0}`}
             />
-            <div className="flex-1">
-              <p className={`${weight.medium} text-blue-400 ${size.sm}`}>How it works</p>
+            <div className={flexGrow['1']}>
+              <p className={`${weight.medium} ${textColor.info400} ${size.sm}`}>How it works</p>
               <p className={`${marginTop.tight} ${muted.sm}`}>
                 When you submit a configuration, we automatically create a Pull Request on GitHub.
                 Our team reviews it for quality, security, and accuracy. Once approved and merged,

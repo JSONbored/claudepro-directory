@@ -23,6 +23,10 @@ import {
   size,
   textColor,
   weight,
+  display,
+  width,
+  textAlign,
+  marginRight,
 } from '@heyclaude/web-runtime/design-system';
 import { AlertCircle, Home, RefreshCw } from '@heyclaude/web-runtime/icons';
 import {
@@ -63,10 +67,10 @@ export default function ServerError() {
   }, []);
 
   return (
-    <div className={`flex ${minHeight.screen} ${alignItems.center} ${justify.center} ${bgColor.background} ${padding.xDefault}`}>
-      <Card className={`w-full ${maxWidth.lg} ${padding.relaxed} text-center`}>
+    <div className={`${display.flex} ${minHeight.screen} ${alignItems.center} ${justify.center} ${bgColor.background} ${padding.xDefault}`}>
+      <Card className={`${width.full} ${maxWidth.lg} ${padding.relaxed} ${textAlign.center}`}>
         <div className={marginBottom.comfortable}>
-          <div className={`${marginBottom.default} flex ${justify.center}`}>
+          <div className={`${marginBottom.default} ${display.flex} ${justify.center}`}>
             <div className={`${radius.full} ${bgColor['destructive/10']} ${padding.compact}`}>
               <AlertCircle className={`${iconSize['3xl']} ${textColor.destructive}`} aria-hidden="true" />
             </div>
@@ -79,12 +83,12 @@ export default function ServerError() {
 
         <div className={responsive.smRowGap}>
           <Button onClick={() => globalThis.location.reload()} size="lg">
-            <RefreshCw className={`mr-2 ${iconSize.sm}`} />
+            <RefreshCw className={`${marginRight.compact} ${iconSize.sm}`} />
             Reload Page
           </Button>
           <Button asChild variant="outline" size="lg">
             <Link href={ROUTES.HOME}>
-              <Home className={`mr-2 ${iconSize.sm}`} />
+              <Home className={`${marginRight.compact} ${iconSize.sm}`} />
               Back to Home
             </Link>
           </Button>

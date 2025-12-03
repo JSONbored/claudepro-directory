@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const removeBookmarkSchema = z.object({
+export const removeBookmarkSchema = z.object({
   content_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']),
   content_slug: z.string()
 });
@@ -39,7 +39,6 @@ export const removeBookmark = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -55,9 +54,10 @@ export const removeBookmark = authedAction
       revalidateTag(`user-${ctx.userId}`, 'default');
       revalidateTag(`content-${parsedInput.content_slug}`, 'default');
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.bookmark_delete']
+        cacheConfig,
+        invalidateKeys: ['bookmark_delete']
       });
 
       

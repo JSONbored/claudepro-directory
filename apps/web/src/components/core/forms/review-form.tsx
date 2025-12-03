@@ -1,7 +1,7 @@
 'use client';
 
 import { createReview, updateReview } from '@heyclaude/web-runtime/actions';
-import { between, cluster, spaceY, marginBottom, marginTop, helper, muted ,size } from '@heyclaude/web-runtime/design-system';
+import { between, cluster, spaceY, marginBottom, marginTop, helper, muted ,size, paddingTop, display, textColor, weight } from '@heyclaude/web-runtime/design-system';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import {
   MAX_REVIEW_LENGTH,
@@ -140,8 +140,8 @@ export function ReviewForm({
     <form onSubmit={handleSubmit} className={spaceY.comfortable}>
       {/* Star Rating Input */}
       <div>
-        <Label htmlFor="rating" className={`${marginBottom.tight} block`}>
-          Your Rating <span className="text-destructive">*</span>
+        <Label htmlFor="rating" className={`${marginBottom.tight} ${display.block}`}>
+          Your Rating <span className={textColor.destructive}>*</span>
         </Label>
         <div className={marginTop.compact}>
           <ReviewRatingInteractive
@@ -165,8 +165,8 @@ export function ReviewForm({
 
       {/* Review Text */}
       <div>
-        <Label htmlFor={textareaId} className={`${marginBottom.tight} block`}>
-          Your Review <span className={`font-normal ${muted.default} ${size.xs}`}>(optional)</span>
+        <Label htmlFor={textareaId} className={`${marginBottom.tight} ${display.block}`}>
+          Your Review <span className={`${weight.normal} ${muted.default} ${size.xs}`}>(optional)</span>
         </Label>
         <Textarea
           id={textareaId}
@@ -189,7 +189,7 @@ export function ReviewForm({
             Help others by sharing details about your experience
           </p>
           <p
-            className={`${size.xs} ${charactersRemaining < 100 ? 'text-destructive' : muted.default}`}
+            className={`${size.xs} ${charactersRemaining < 100 ? textColor.destructive : muted.default}`}
           >
             {charactersRemaining} characters remaining
           </p>
@@ -197,7 +197,7 @@ export function ReviewForm({
       </div>
 
       {/* Submit Buttons */}
-      <div className={`${cluster.compact} pt-2`}>
+      <div className={`${cluster.compact} ${paddingTop.compact}`}>
         <Button type="submit" disabled={!isValid || isPending}>
           {isPending ? 'Submitting...' : isEditing ? 'Update Review' : 'Submit Review'}
         </Button>

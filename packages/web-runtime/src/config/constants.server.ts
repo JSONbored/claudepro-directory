@@ -8,24 +8,25 @@ import {
 } from '../data/config/constants.ts';
 
 import {
-  getAnimationConfig,
-  getAppSettings,
-  getPollingConfig,
-  getTimeoutConfig,
-} from "./static-configs.ts";
+  POLLING_CONFIG,
+  API_TIMEOUTS,
+  TEST_TIMEOUTS,
+  UI_TIMEOUTS,
+} from './unified-config.ts';
+import { animation } from '../design-system/tokens.ts';
 
 /**
  * Get current date configuration from database
  * Falls back to hardcoded values if database unavailable
  */
 export function getDateConfig() {
-  // Get app settings from static defaults
-  const config = getAppSettings();
+  // Get date config from DATE_CONFIG (which uses current date)
+  const now = new Date();
   return {
-    currentMonth: config['date.current_month'],
-    currentYear: config['date.current_year'],
-    currentDate: config['date.current_date'],
-    lastReviewed: config['date.last_reviewed'],
+    currentMonth: now.toISOString().slice(0, 7),
+    currentYear: now.getFullYear(),
+    currentDate: now.toISOString().split('T')[0],
+    lastReviewed: now.toISOString().split('T')[0],
     claudeModels: DATE_CONFIG.claudeModels,
   };
 }
@@ -46,19 +47,18 @@ export function getDateStrings() {
  * Returns values from static configuration defaults
  */
 export function getPollingIntervals() {
-  // Get polling config from static defaults
-  const config = getPollingConfig();
+  // Get polling config from unified-config
   return {
-    realtime: config['polling.realtime_ms'],
-    badges: config['polling.badges_ms'],
+    realtime: POLLING_CONFIG.realtime_ms,
+    badges: POLLING_CONFIG.badges_ms,
     status: {
-      health: config['polling.status.health_ms'],
-      api: config['polling.status.api_ms'],
-      database: config['polling.status.database_ms'],
+      health: POLLING_CONFIG['status.health_ms'],
+      api: POLLING_CONFIG['status.api_ms'],
+      database: POLLING_CONFIG['status.database_ms'],
     },
     analytics: {
-      views: config['polling.analytics.views_ms'],
-      stats: config['polling.analytics.stats_ms'],
+      views: POLLING_CONFIG['analytics.views_ms'],
+      stats: POLLING_CONFIG['analytics.stats_ms'],
     },
   };
 }
@@ -68,21 +68,20 @@ export function getPollingIntervals() {
  * Returns values from static configuration defaults
  */
 export function getAnimationDurations() {
-  // Get animation config from static defaults
-  const config = getAnimationConfig();
+  // Get animation config from design system tokens
   return {
     ticker: {
-      default: config['animation.ticker.default_ms'],
-      fast: config['animation.ticker.fast_ms'],
-      slow: config['animation.ticker.slow_ms'],
+      default: animation.ticker.default,
+      fast: animation.ticker.fast,
+      slow: animation.ticker.slow,
     },
     stagger: {
-      fast: config['animation.stagger.fast_ms'],
-      medium: config['animation.stagger.medium_ms'],
-      slow: config['animation.stagger.slow_ms'],
+      fast: animation.stagger.fast,
+      medium: animation.stagger.medium,
+      slow: animation.stagger.slow,
     },
     beam: {
-      default: config['animation.beam.default_ms'],
+      default: animation.borderBeam.default,
     },
   };
 }
@@ -92,24 +91,23 @@ export function getAnimationDurations() {
  * Returns values from static configuration defaults
  */
 export function getTimeouts() {
-  // Get timeout config from static defaults
-  const config = getTimeoutConfig();
+  // Get timeout config from unified-config and design system
   return {
     api: {
-      default: config['timeout.api.default_ms'],
-      long: config['timeout.api.long_ms'],
-      short: config['timeout.api.short_ms'],
+      default: API_TIMEOUTS.default_ms,
+      long: API_TIMEOUTS.long_ms,
+      short: API_TIMEOUTS.short_ms,
     },
     ui: {
-      debounce: config['timeout.ui.debounce_ms'],
-      tooltip: config['timeout.ui.tooltip_ms'],
-      animation: config['timeout.ui.animation_ms'],
-      transition: config['timeout.ui.transition_ms'],
+      debounce: UI_TIMEOUTS.debounce_ms,
+      tooltip: UI_TIMEOUTS.tooltip_ms,
+      animation: animation.duration.animation,
+      transition: animation.duration.transition,
     },
     test: {
-      default: config['timeout.test.default_ms'],
-      long: config['timeout.test.long_ms'],
-      network: config['timeout.test.network_ms'],
+      default: TEST_TIMEOUTS.default_ms,
+      long: TEST_TIMEOUTS.long_ms,
+      network: TEST_TIMEOUTS.network_ms,
     },
   };
 }

@@ -97,7 +97,7 @@ export function NewContentStat(props: NewContentStatProps) {
       >
         {/* Sparkle icon with subtle animation */}
         <motion.span
-          className="text-amber-500"
+          className={textColor.amber500}
           animate={{
             scale: [1, 1.15, 1],
             rotate: [0, 5, -5, 0],

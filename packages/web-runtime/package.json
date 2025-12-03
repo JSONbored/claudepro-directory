@@ -94,6 +94,10 @@
       "types": "./src/utils/request-context.ts",
       "default": "./src/utils/request-context.ts"
     },
+    "./utils/component-card-config": {
+      "types": "./src/utils/component-card-config.ts",
+      "default": "./src/utils/component-card-config.ts"
+    },
     "./logging/client": {
       "types": "./src/logging/client.ts",
       "default": "./src/logging/client.ts"

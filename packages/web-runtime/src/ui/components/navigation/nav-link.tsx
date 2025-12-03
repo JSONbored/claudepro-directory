@@ -31,8 +31,9 @@
  */
 
 import { absolute } from '../../../design-system/styles/position.ts';
-import { height } from '../../../design-system/styles/layout.ts';
+import { height, display, position, width } from '../../../design-system/styles/layout.ts';
 import { transition } from '../../../design-system/styles/interactive.ts';
+import { bgColor } from '../../../design-system/styles/colors.ts';
 import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
 import Link from 'next/link';
@@ -136,12 +137,12 @@ export function NavLink({
   ...props
 }: NavLinkProps) {
   const content = (
-    <span className="relative inline-block">
+    <span className={`${position.relative} ${display.inlineBlock}`}>
       {children}
       <span
-        className={`${absolute.bottomLeft} ${height.underline} bg-accent ${transition.slow} ${
-          active ? 'w-full' : 'w-0 group-hover:w-full'
-        }`}
+        className={`${absolute.bottomLeft} ${height.underline} ${bgColor.accent} ${transition.slow} ${
+          active ? width.full : width[0]
+        } group-hover:${width.full}`}
         aria-hidden="true"
       />
     </span>

@@ -13,9 +13,11 @@ import { AlertTriangle, Home, RefreshCw } from '../../icons.tsx';
 import type { ErrorBoundaryProps } from '../../types/component.types.ts';
 import { createErrorBoundaryFallback } from '../../client/error-handler.ts';
 // Design System imports
-import { cluster, gap, padding, marginTop } from '../../design-system/styles/layout.ts';
+import { cluster, gap, padding, marginTop, maxWidth, minHeight, display, alignItems, justify, width, spaceY, overflow } from '../../design-system/styles/layout.ts';
+import { cursor } from '../../design-system/styles/interactive.ts';
 import { iconSize, iconLeading } from '../../design-system/styles/icons.ts';
-import { size } from '../../design-system/styles/typography.ts';
+import { size, weight } from '../../design-system/styles/typography.ts';
+import { bgColor, textColor } from '../../design-system/styles/colors.ts';
 import { radius } from '../../design-system/styles/radius.ts';
 import { Button } from './button.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card.tsx';
@@ -38,12 +40,12 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   }, [resetErrorBoundary]);
 
   return (
-    <div className={`flex min-h-screen items-center justify-center bg-background ${padding.default}`}>
-      <Card className={'w-full max-w-2xl'}>
+    <div className={`${display.flex} ${minHeight.screen} ${alignItems.center} ${justify.center} ${bgColor.background} ${padding.default}`}>
+      <Card className={`${width.full} ${maxWidth['2xl']}`}>
         <CardHeader>
           <div className={cluster.default}>
             <AlertTriangle
-              className={`${iconSize.xl} text-destructive`}
+              className={`${iconSize.xl} ${textColor.destructive}`}
               aria-hidden="true"
             />
             <CardTitle as="h1" className={size['2xl']}>
@@ -54,21 +56,21 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
             An unexpected error occurred. The error has been logged and we&apos;ll look into it.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className={spaceY.comfortable}>
           {isDevelopment && error && (
-            <div className={`space-y-2 ${radius.lg} bg-muted ${padding.default}`}>
-              <p className={`font-semibold ${size.sm}`}>Error Details:</p>
-              <pre className={`overflow-auto ${size.xs}`}>{error.toString()}</pre>
+            <div className={`${spaceY.compact} ${radius.lg} ${bgColor.muted} ${padding.default}`}>
+              <p className={`${weight.semibold} ${size.sm}`}>Error Details:</p>
+              <pre className={`${overflow.auto} ${size.xs}`}>{error.toString()}</pre>
               {error.stack && (
                 <details className={size.xs}>
-                  <summary className="cursor-pointer font-semibold">Stack Trace</summary>
-                  <pre className={`${marginTop.compact} overflow-auto`}>{error.stack}</pre>
+                  <summary className={`${cursor.pointer} ${weight.semibold}`}>Stack Trace</summary>
+                  <pre className={`${marginTop.compact} ${overflow.auto}`}>{error.stack}</pre>
                 </details>
               )}
             </div>
           )}
 
-          <div className={`flex ${gap.default}`}>
+          <div className={`${display.flex} ${gap.default}`}>
             <Button onClick={handleReset} variant="default">
               <RefreshCw className={iconLeading.sm} />
               Try Again

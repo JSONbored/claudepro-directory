@@ -97,7 +97,7 @@ export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps
     nonEmptyCategories.push('Security' as Database['public']['Enums']['changelog_category']);
 
   return (
-    <article className={`max-w-none ${spaceY.relaxed}`}>
+    <article className={`${maxWidth.none} ${spaceY.relaxed}`}>
       {/* Category Badges */}
       {nonEmptyCategories.length > 0 && (
         <div className={`flex ${flexWrap.wrap} ${gap.compact} ${padding.yCompact}`}>

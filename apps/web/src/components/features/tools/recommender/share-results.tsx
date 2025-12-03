@@ -7,7 +7,7 @@
 
 import { logger } from '@heyclaude/web-runtime/core';
 import { Facebook, Linkedin, Mail, Share2, Twitter } from '@heyclaude/web-runtime/icons';
-import { cluster, iconSize, spaceY , gap } from '@heyclaude/web-runtime/design-system';
+import { cluster, iconSize, spaceY, gap, grid, maxWidth, flexGrow } from '@heyclaude/web-runtime/design-system';
 import { SimpleCopyButton } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -53,7 +53,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className={maxWidth.smMd}>
         <DialogHeader>
           <DialogTitle className={cluster.compact}>
             <Share2 className={iconSize.md} />
@@ -70,7 +70,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
             <Input
               readOnly={true}
               value={shareUrl}
-              className="flex-1"
+              className={flexGrow['1']}
               onClick={(e) => e.currentTarget.select()}
             />
             <SimpleCopyButton
@@ -79,7 +79,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               errorMessage="Failed to copy link"
               variant="outline"
               size="icon"
-              className="shrink-0"
+              className={flexGrow.shrink0}
               iconClassName={iconSize.sm}
               ariaLabel="Copy share link"
               onCopySuccess={() => {
@@ -89,7 +89,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           </div>
 
           {/* Social share buttons */}
-          <div className={`grid grid-cols-2 ${gap.default}`}>
+          <div className={grid.cols2}>
             <Button variant="outline" size="sm" asChild={true} className={`${gap.compact}`}>
               <a
                 href={shareLinks.twitter}

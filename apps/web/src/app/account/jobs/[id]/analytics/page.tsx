@@ -13,7 +13,7 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   between,
   bgColor,
-  gap,
+  grid,
   iconSize,
   jobStatusBadge,
   marginBottom,
@@ -24,10 +24,16 @@ import {
   size,
   spaceY,
   weight,
+  marginRight,
+  border,
+  borderColor,
+  textColor,
+  marginLeft,
+  listStyle,
 } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, Button ,
+import { UnifiedBadge, Button,
   Card,
   CardContent,
   CardDescription,
@@ -198,7 +204,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
       <div>
         <Button variant="ghost" size="sm" asChild className={marginBottom.default}>
           <Link href={ROUTES.ACCOUNT_JOBS}>
-            <ArrowLeft className={`mr-2 ${iconSize.sm}`} />
+            <ArrowLeft className={`${marginRight.compact} ${iconSize.sm}`} />
             Back to Jobs
           </Link>
         </Button>
@@ -209,7 +215,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
           </div>
           {job.slug ? <Button variant="outline" asChild>
               <Link href={`${ROUTES.JOBS}/${job.slug}`}>
-                <ExternalLink className={`mr-2 ${iconSize.sm}`} />
+                <ExternalLink className={`${marginRight.compact} ${iconSize.sm}`} />
                 View Listing
               </Link>
             </Button> : null}
@@ -226,7 +232,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
           </div>
         </CardHeader>
         <CardContent>
-          <div className={`grid grid-cols-2 ${gap.comfortable} ${size.sm}`}>
+          <div className={`${grid.cols2} ${size.sm}`}>
             <div>
               <p className={muted.default}>Company</p>
               <p className={weight.medium}>{job.company}</p>
@@ -302,11 +308,11 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
             )}
 
             {viewCount > 0 && clickCount === 0 && (
-              <div className={`${radius.lg} border border-yellow-500/20 bg-yellow-500/10 ${padding.default}`}>
-                <p className={`${size.sm} text-yellow-400`}>
+              <div className={`${radius.lg} ${border.default} ${borderColor['yellow/20']} ${bgColor.warning} ${padding.default}`}>
+                <p className={`${size.sm} ${textColor.warning400}`}>
                   Your listing is getting views but no clicks. Consider:
                 </p>
-                <ul className={`${marginTop.compact} ml-4 list-disc ${size.sm} text-yellow-400`}>
+                <ul className={`${marginTop.compact} ${marginLeft.comfortable} ${listStyle.disc} ${size.sm} ${textColor.warning400}`}>
                   <li>Making the job title more descriptive</li>
                   <li>Highlighting competitive benefits</li>
                   <li>Adding salary information</li>
@@ -315,8 +321,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
             )}
 
             {Number.parseFloat(ctr) > 5 && (
-              <div className={`${radius.lg} border border-green-500/20 bg-green-500/10 ${padding.default}`}>
-                <p className={`text-green-400 ${size.sm}`}>
+              <div className={`${radius.lg} ${border.default} ${borderColor['green/20']} ${bgColor.success} ${padding.default}`}>
+                <p className={`${textColor.success400} ${size.sm}`}>
                   Great performance! Your CTR of {ctr}% is above average. Keep it up!
                 </p>
               </div>
@@ -324,7 +330,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
 
             <div className={muted.sm}>
               <p className={`${marginBottom.tight} ${weight.medium}`}>Tips to improve visibility:</p>
-              <ul className={`ml-4 list-disc ${spaceY.tight}`}>
+              <ul className={`${marginLeft.comfortable} ${listStyle.disc} ${spaceY.tight}`}>
                 <li>Use clear, descriptive job titles</li>
                 <li>Include relevant technologies in tags</li>
                 <li>Specify remote/hybrid work options</li>

@@ -14,24 +14,33 @@
  */
 
 import {
+  alignItems,
   between,
   border,
   borderTop,
+  bgColor,
   cluster,
+  display,
+  flexWrap,
   gap,
+  grid,
+  height,
   hoverBg,
-  alignItems,
   justify,
+  leading,
   marginBottom,
   padding,
+  paddingLeft,
+  paddingTop,
+  radius,
   size,
   spaceY,
   srOnly,
   transition,
   weight,
-  flexWrap,
-  leading,
-  radius,
+  width,
+  cursor,
+  opacityLevel,
 } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
@@ -106,10 +115,10 @@ function SearchFilterPanelComponent({
 
   return (
     <section
-      className={`${spaceY.comfortable} ${radius.lg} ${border.light} bg-card/30 ${padding.default} md:${spaceY.relaxed} md:${padding.comfortable}`}
+      className={`${spaceY.comfortable} ${radius.lg} ${border.light} ${bgColor['card/30']} ${padding.default} md:${spaceY.relaxed} md:${padding.comfortable}`}
     >
       {/* Main Filters */}
-      <fieldset className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 md:${gap.relaxed} lg:grid-cols-3`}>
+      <fieldset className={grid.responsive123Filters}>
         <legend className={srOnly.default}>Filter by category, author, and date range</legend>
 
         {/* Category Filter */}
@@ -124,7 +133,7 @@ function SearchFilterPanelComponent({
               name="category"
             >
               <SelectTrigger
-                className="bg-background/50"
+                className={bgColor['background/50']}
                 id={categorySelectId}
                 aria-label="Filter by category"
               >
@@ -154,7 +163,7 @@ function SearchFilterPanelComponent({
               name="author"
             >
               <SelectTrigger
-                className="bg-background/50"
+                className={bgColor['background/50']}
                 id={authorSelectId}
                 aria-label="Filter by author"
               >
@@ -182,7 +191,7 @@ function SearchFilterPanelComponent({
             }
           >
             <SelectTrigger
-              className="bg-background/50"
+              className={bgColor['background/50']}
               id={dateRangeSelectId}
               aria-label="Filter by date range"
             >
@@ -201,17 +210,17 @@ function SearchFilterPanelComponent({
 
       {/* Popularity Slider */}
       <fieldset className={spaceY.compact}>
-        <legend className={`${weight.medium} ${size.sm} ${leading.none} peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}>
+        <legend className={`${weight.medium} ${size.sm} ${leading.none} peer-disabled:${cursor.notAllowed} peer-disabled:${opacityLevel[70]}`}>
           Popularity Range ({filters.popularity?.[0] || 0} - {filters.popularity?.[1] || 100})
         </legend>
-        <div className={`px-2 ${padding.yDefault}`}>
+        <div className={`${paddingLeft.compact} ${padding.yDefault}`}>
           <Slider
             value={filters.popularity || [0, 100]}
             onValueChange={(value) => onFilterChange('popularity', value as [number, number])}
             min={0}
             max={100}
             step={1}
-            className="w-full"
+            className={width.full}
             name="popularity-range"
             aria-label="Set popularity range"
             aria-valuetext={`Popularity range from ${filters.popularity?.[0] || 0} to ${filters.popularity?.[1] || 100}`}
@@ -222,10 +231,10 @@ function SearchFilterPanelComponent({
       {/* Tags - Organized in Scrollable Area */}
       {availableTags.length > 0 && (
         <fieldset className={spaceY.default}>
-          <div className={`${borderTop.light} pt-3`} />
+          <div className={`${borderTop.light} ${paddingTop.default}`} />
           <div>
             <div className={`${between.center} ${marginBottom.compact}`}>
-              <legend className={`${weight.medium} ${size.sm} ${leading.none} peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}>
+              <legend className={`${weight.medium} ${size.sm} ${leading.none} peer-disabled:${cursor.notAllowed} peer-disabled:${opacityLevel[70]}`}>
                 Tags
               </legend>
               {filters.tags && filters.tags.length > 0 && (
@@ -240,10 +249,10 @@ function SearchFilterPanelComponent({
               )}
             </div>
             <ScrollArea
-              className={`h-40 w-full ${radius.md} ${border.light} ${padding.default} md:h-48`}
+              className={`${height.scrollArea} ${width.full} ${radius.md} ${border.light} ${padding.default} md:${height.scrollAreaLg}`}
               aria-label="Select tags to filter by"
             >
-              <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+              <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
                 {availableTags.map((tag) => (
                   <button
                     key={tag}
@@ -257,7 +266,7 @@ function SearchFilterPanelComponent({
                     aria-pressed={filters.tags?.includes(tag)}
                     aria-label={`${filters.tags?.includes(tag) ? 'Remove' : 'Add'} ${tag} tag filter`}
                     type="button"
-                    className={`cursor-pointer ${transition.default}`}
+                    className={`${cursor.pointer} ${transition.default}`}
                   >
                     <UnifiedBadge
                       variant="base"
@@ -276,7 +285,7 @@ function SearchFilterPanelComponent({
 
       {/* Action Buttons */}
       {showActions && (
-        <fieldset className={cn('flex pt-6', borderTop.light, alignItems.center, justify.between)}>
+        <fieldset className={cn(display.flex, paddingTop.relaxed, borderTop.light, alignItems.center, justify.between)}>
           <legend className={srOnly.default}>Filter actions</legend>
           <Button
             variant="ghost"

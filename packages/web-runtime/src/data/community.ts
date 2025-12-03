@@ -99,7 +99,7 @@ export async function getCommunityDirectory(options: {
       {
         keyParts: ['community-directory', 'all', limit],
         tags: ['community', 'users'],
-        ttlKey: 'cache.community.ttl_seconds',
+        ttlKey: 'community',
         useAuth: false,
         fallback: null,
         logMeta: {
@@ -139,7 +139,9 @@ export async function getPublicUserProfile(input: {
   });
 
   try {
-    return await fetchCached(
+    const result = await fetchCached<
+      Database['public']['Functions']['get_user_profile']['Returns']
+    >(
       (client) => new CommunityService(client).getUserProfile({
         p_user_slug: slug,
         ...(viewerId ? { p_viewer_id: viewerId } : {})
@@ -147,14 +149,25 @@ export async function getPublicUserProfile(input: {
       {
         keyParts: viewerId ? ['user-profile', slug, 'viewer', viewerId] : ['user-profile', slug],
         tags: ['users', `user-${slug}`],
-        ttlKey: 'cache.user_profile.ttl_seconds',
+        ttlKey: 'user_profile',
         // CRITICAL: Use anonymous client for public profiles
         // The RPC handles privacy internally via p_viewer_id
         useAuth: false,
-        fallback: null,
+        fallback: {
+          profile: null,
+          stats: null,
+          collections: null,
+          contributions: null,
+          is_following: null,
+          is_owner: null,
+        },
         logMeta: { slug, hasViewer: Boolean(viewerId) },
       }
     );
+
+    // Return null if profile is null (user not found)
+    if (!result.profile) return null;
+    return result;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user profile detail');
     reqLogger.error('getPublicUserProfile failed', normalized, {
@@ -186,7 +199,9 @@ export async function getPublicCollectionDetail(input: {
   });
 
   try {
-    const data = await fetchCached(
+    const result = await fetchCached<
+      Database['public']['Functions']['get_user_collection_detail']['Returns']
+    >(
       (client) => new CommunityService(client).getUserCollectionDetail({
         p_user_slug: userSlug,
         p_collection_slug: collectionSlug,
@@ -197,10 +212,15 @@ export async function getPublicCollectionDetail(input: {
           ? ['collection-detail', userSlug, collectionSlug, 'viewer', viewerId]
           : ['collection-detail', userSlug, collectionSlug],
         tags: ['user-collections', `collection-${collectionSlug}`, `user-${userSlug}`],
-        ttlKey: 'cache.content_list.ttl_seconds',
+        ttlKey: 'content_list',
         // CRITICAL: Use anonymous client for public collections
         useAuth: false,
-        fallback: null,
+        fallback: {
+          user: null,
+          collection: null,
+          items: null,
+          is_owner: null,
+        },
         logMeta: {
           slug: userSlug,
           collectionSlug,
@@ -209,16 +229,9 @@ export async function getPublicCollectionDetail(input: {
       }
     );
 
-    if (!data) {
-      reqLogger.warn('getPublicCollectionDetail: RPC returned null', {
-        slug: userSlug,
-        collectionSlug,
-        ...(viewerId ? { viewerId } : {}),
-      });
-      return null;
-    }
-
-    return data;
+    // Return null if collection is null (not found)
+    if (!result.collection) return null;
+    return result;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user collection detail');
     reqLogger.error('getPublicCollectionDetail failed', normalized, {

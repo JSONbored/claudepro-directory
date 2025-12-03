@@ -19,14 +19,18 @@
  * @module components/layout/user-menu
  */
 
-import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
 import {
   bgColor,
+  borderColor,
   flexDir,
+  hoverBg,
+  hoverText,
   iconLeading,
   iconSize,
   alignItems,
   leading,
+  display,
   marginTop,
   muted,
   padding,
@@ -35,6 +39,8 @@ import {
   textColor,
   weight,
   dropdownWidth,
+  position,
+  cursor,
 } from '@heyclaude/web-runtime/design-system';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
@@ -75,7 +81,7 @@ interface UserMenuProps {
  *
  * @see useAuthenticatedUser
  * @see toasts
- * @see getAnimationConfig
+ * @see animation.spring.default — spring animation config
  */
 export function UserMenu({ className }: UserMenuProps) {
   const [signingOut, setSigningOut] = useState(false);
@@ -92,12 +98,7 @@ export function UserMenu({ className }: UserMenuProps) {
   const supabase = supabaseClient;
 
   useEffect(() => {
-    const config = getAnimationConfig();
-    setSpringDefault({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.default.stiffness'],
-      damping: config['animation.spring.default.damping'],
-    });
+    setSpringDefault(animation.spring.default);
   }, []);
 
   const handleSignOut = async () => {
@@ -125,7 +126,7 @@ export function UserMenu({ className }: UserMenuProps) {
   // Loading state
   if (loading) {
     return (
-      <div className={`flex ${alignItems.center} ${className}`}>
+      <div className={`${display.flex} ${alignItems.center} ${className}`}>
         <Skeleton size="lg" width="lg" rounded="full" className={iconSize.xl} />
       </div>
     );
@@ -139,11 +140,11 @@ export function UserMenu({ className }: UserMenuProps) {
           asChild={true}
           variant="ghost"
           size="sm"
-          className={`border-accent/20 ${bgColor['accent/10']} ${weight.medium} ${textColor.accent} ${size.xs} hover:bg-accent hover:text-white`}
+          className={`${borderColor['accent/20']} ${bgColor['accent/10']} ${weight.medium} ${textColor.accent} ${size.xs} ${hoverBg.accentSolid} ${hoverText.white}`}
         >
           <Link href="/login" aria-label="Get started - Sign in with GitHub">
             <UserIcon className={iconLeading.xs} />
-            <span className="hidden lg:inline">Get Started</span>
+            <span className={`${display.none} lg:inline`}>Get Started</span>
           </Link>
         </Button>
       </div>
@@ -174,12 +175,12 @@ export function UserMenu({ className }: UserMenuProps) {
           >
             <Button
               variant="ghost"
-              className={`relative ${iconSize.xl} ${radius.full} ${padding.none} hover:ring-2 hover:ring-accent/30`}
+              className={`${position.relative} ${iconSize.xl} ${radius.full} ${padding.none} hover:ring-2 hover:ring-accent/30`}
               aria-label={`User menu for ${displayName}`}
             >
               <Avatar className={iconSize.xl}>
                 {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName || 'User avatar'} />}
-                <AvatarFallback className={`bg-accent/20 ${weight.semibold} ${textColor.accent} ${size.sm}`}>
+                <AvatarFallback className={`${bgColor['accent/20']} ${weight.semibold} ${textColor.accent} ${size.sm}`}>
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -193,8 +194,8 @@ export function UserMenu({ className }: UserMenuProps) {
           forceMount={true}
         >
           {/* User Info */}
-          <DropdownMenuLabel className="font-normal">
-            <div className={`flex ${flexDir.col}`}>
+          <DropdownMenuLabel className={weight.normal}>
+            <div className={`${display.flex} ${flexDir.col}`}>
               <p className={`${weight.medium} ${size.sm} ${leading.none}`}>{displayName}</p>
               <p className={`${marginTop.tight} ${muted.default} ${size.xs} ${leading.none}`}>{user.email}</p>
             </div>
@@ -230,7 +231,7 @@ export function UserMenu({ className }: UserMenuProps) {
           <DropdownMenuItem
             onClick={handleSignOut}
             disabled={signingOut}
-            className={`cursor-pointer ${textColor.destructive} focus:text-destructive`}
+            className={`${cursor.pointer} ${textColor.destructive} focus:${textColor.destructive}`}
           >
             <LogOut className={iconLeading.sm} />
             <span>{signingOut ? 'Signing out...' : 'Sign out'}</span>

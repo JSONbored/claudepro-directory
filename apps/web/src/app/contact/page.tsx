@@ -1,7 +1,23 @@
 import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, marginBottom, marginTop, muted, weight , size , padding , gap , maxWidth, justify,
+import {
+  cluster,
+  container,
+  display,
+  iconSize,
+  justify,
+  marginBottom,
+  marginTop,
+  marginX,
+  maxWidth,
+  muted,
+  padding,
+  grid,
+  size,
+  textAlign,
+  weight,
+  width,
 } from '@heyclaude/web-runtime/design-system';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
@@ -75,13 +91,13 @@ export default function ContactPage() {
   }
 
   // Feature flags are now static defaults - no server/middleware dependency
-  // Terminal feature should be evaluated in middleware, not in page components
-   
+  // TODO: Terminal feature should be evaluated in middleware, not in page components
+  // See: Feature flag evaluation should move to middleware/config
   const terminalEnabled = false; // Default for static generation
 
   return (
-    <div className={`container mx-auto ${maxWidth['6xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
-      <div className={`${marginBottom.relaxed} text-center`}>
+    <div className={`${container.default} ${maxWidth['6xl']} ${padding.xDefault} ${padding.yRelaxed} sm:${padding.ySection}`}>
+      <div className={`${marginBottom.relaxed} ${textAlign.center}`}>
         <h1 className={`${marginBottom.default} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>Contact Us</h1>
         <p className={muted.lg}>
           {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
@@ -94,8 +110,8 @@ export default function ContactPage() {
       {/* Interactive Terminal (Feature Flagged) */}
       {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
       {terminalEnabled && (
-        <div className={`${marginBottom.section} flex ${justify.center}`}>
-          <div className={`w-full ${maxWidth['4xl']}`}>
+        <div className={`${marginBottom.section} ${display.flex} ${justify.center}`}>
+          <div className={`${width.full} ${maxWidth['4xl']}`}>
             <ContactTerminalErrorBoundary>
               <ContactTerminal />
             </ContactTerminalErrorBoundary>
@@ -106,14 +122,14 @@ export default function ContactPage() {
       {/* Traditional Contact Options */}
       {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
       <div className={terminalEnabled ? marginTop.section : ''}>
-        <h2 className={`${marginBottom.comfortable} text-center ${weight.semibold} ${size['2xl']}`}>
+        <h2 className={`${marginBottom.comfortable} ${textAlign.center} ${weight.semibold} ${size['2xl']}`}>
           {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
           {terminalEnabled ? 'Or reach us directly:' : 'Get in Touch'}
         </h2>
 
-        <div className={`grid ${gap.relaxed} md:grid-cols-2`}>
+        <div className={grid.responsiveForm}>
           {!(channels.github || channels.discord || channels.email) && (
-            <div className={`col-span-2 ${padding.yRelaxed} text-center ${muted.default}`}>
+            <div className={`col-span-2 ${padding.yRelaxed} ${textAlign.center} ${muted.default}`}>
               <p>Contact channels are currently being configured. Please check back soon.</p>
             </div>
           )}
@@ -208,7 +224,7 @@ export default function ContactPage() {
       </div>
 
       {/* Additional Information */}
-      <div className={`prose prose-invert mx-auto ${marginTop.section} ${maxWidth.none}`}>
+      <div className={`prose prose-invert ${marginX.auto} ${marginTop.section} ${maxWidth.none}`}>
         <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>Frequently Asked Questions</h2>
         <p className={marginBottom.default}>
           Before reaching out, you might find answers in our{' '}

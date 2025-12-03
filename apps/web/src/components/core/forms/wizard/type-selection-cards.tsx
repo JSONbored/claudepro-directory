@@ -17,30 +17,45 @@
 
 import { Bot, Brain, Code, FileCode, Sparkles, Terminal, Zap } from '@heyclaude/web-runtime/icons';
 import {
-  borderColor,
-  cluster,
-  gap,
-  iconSize,
+  absolute,
   alignItems,
+  bgColor,
+  borderColor,
+  categoryText,
+  cluster,
+  display,
+  flexGrow,
+  gap,
+  glowShadow,
+  grid,
+  iconSize,
+  justify,
   marginBottom,
   marginTop,
   muted,
   opacityLevel,
   overflow,
+  padding,
+  position,
   radius,
+  shadow,
   size,
+  spaceY,
+  squareSize,
+  submissionFormColors,
   textColor,
   transition,
   weight,
   zLayer,
-  justify,
-  flexGrow,
-  padding,
-  squareSize,
+  width,
+  textAlign,
+  borderWidth,
+  minWidth,
+  pointerEvents,
 } from '@heyclaude/web-runtime/design-system';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
 import { motion } from 'motion/react';
 import { useCallback, useState } from 'react';
 
@@ -49,7 +64,8 @@ interface TypeCard {
   label: string;
   description: string;
   icon: typeof Bot;
-  color: string;
+  colorClass: string; // Tailwind class for text color
+  colorValue: string; // OKLCH value for inline styles
   examples: string[];
 }
 
@@ -59,7 +75,8 @@ const TYPE_CARDS: TypeCard[] = [
     label: 'Agent',
     description: 'Claude system prompts and AI agents',
     icon: Bot,
-    color: TOKENS.colors.category.agents,
+    colorClass: categoryText.agents,
+    colorValue: submissionFormColors.category.agents,
     examples: ['React Expert', 'Code Reviewer', 'Writing Assistant'],
   },
   {
@@ -67,7 +84,8 @@ const TYPE_CARDS: TypeCard[] = [
     label: 'MCP Server',
     description: 'Model Context Protocol integrations',
     icon: Zap,
-    color: TOKENS.colors.category.mcp,
+    colorClass: categoryText.mcp,
+    colorValue: submissionFormColors.category.mcp,
     examples: ['Supabase MCP', 'GitHub MCP', 'File System'],
   },
   {
@@ -75,7 +93,8 @@ const TYPE_CARDS: TypeCard[] = [
     label: 'Rule',
     description: 'Expertise rules and specialized knowledge',
     icon: Brain,
-    color: TOKENS.colors.category.rules,
+    colorClass: categoryText.rules,
+    colorValue: submissionFormColors.category.rules,
     examples: ['TypeScript Best Practices', 'Accessibility Guide'],
   },
   {
@@ -83,7 +102,8 @@ const TYPE_CARDS: TypeCard[] = [
     label: 'Command',
     description: 'Shell commands and automation scripts',
     icon: Terminal,
-    color: TOKENS.colors.category.commands,
+    colorClass: categoryText.commands,
+    colorValue: submissionFormColors.category.commands,
     examples: ['Git aliases', 'Build scripts', 'Deploy commands'],
   },
   {
@@ -91,7 +111,8 @@ const TYPE_CARDS: TypeCard[] = [
     label: 'Hook',
     description: 'React hooks and reusable logic',
     icon: Code,
-    color: TOKENS.colors.category.hooks,
+    colorClass: categoryText.hooks,
+    colorValue: submissionFormColors.category.hooks,
     examples: ['useDebounce', 'useLocalStorage', 'useFetch'],
   },
   {
@@ -99,7 +120,8 @@ const TYPE_CARDS: TypeCard[] = [
     label: 'Statusline',
     description: 'Terminal status line configurations',
     icon: FileCode,
-    color: TOKENS.colors.category.statuslines,
+    colorClass: categoryText.statuslines,
+    colorValue: submissionFormColors.category.statuslines,
     examples: ['Starship config', 'Oh My Zsh theme'],
   },
   {
@@ -107,7 +129,8 @@ const TYPE_CARDS: TypeCard[] = [
     label: 'Skill',
     description: 'Claude skills and capabilities',
     icon: Sparkles,
-    color: TOKENS.colors.category.skills,
+    colorClass: categoryText.skills,
+    colorValue: submissionFormColors.category.skills,
     examples: ['API design', 'Database optimization'],
   },
 ];
@@ -129,10 +152,10 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
   );
 
   return (
-    <div className={cn('w-full', className)}>
+    <div className={cn(width.full, className)}>
       {/* Grid of Type Cards */}
       <motion.div
-        className={`grid ${gap.comfortable} sm:grid-cols-2 lg:grid-cols-3`}
+        className={grid.responsive123}
         initial="hidden"
         animate="visible"
         variants={{
@@ -164,33 +187,23 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
               className={cn(
-                `group relative ${overflow.hidden} ${radius.xl} border-2 ${padding.comfortable} text-left ${transition.all}`,
+                `group relative ${overflow.hidden} ${radius.xl} ${borderWidth['2']} ${padding.comfortable} ${textAlign.left} ${transition.all}`,
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                 isSelected
-                  ? 'border-accent-primary bg-accent-primary/10'
-                  : `${borderColor.border} bg-background-secondary hover:border-accent-primary/50`
+                  ? `${borderColor.accent} ${bgColor['accent/10']} ${shadow.md}`
+                  : isHovered
+                    ? `${borderColor['accent/50']} ${bgColor.muted} ${shadow.md}`
+                    : `${borderColor.border} ${bgColor.muted}`
               )}
               style={{
-                borderColor: isSelected
-                  ? TOKENS.colors.accent.primary
-                  : isHovered
-                    ? `${TOKENS.colors.accent.primary}80`
-                    : TOKENS.colors.border.default,
-                backgroundColor: isSelected
-                  ? `${TOKENS.colors.accent.primary}1a`
-                  : TOKENS.colors.background.secondary,
-                boxShadow: isSelected
-                  ? TOKENS.shadows.glow.orange
-                  : isHovered
-                    ? TOKENS.shadows.md
-                    : 'none',
+                boxShadow: isSelected ? glowShadow.orange : isHovered ? undefined : 'none',
               }}
             >
               {/* Background Gradient Overlay */}
               <motion.div
-                className={`pointer-events-none absolute inset-0 ${opacityLevel[0]} ${transition.opacity}`}
+                className={`${pointerEvents.none} ${absolute.inset} ${opacityLevel[0]} ${transition.opacity}`}
                 style={{
-                  background: `linear-gradient(135deg, ${card.color}10, transparent)`,
+                  background: `linear-gradient(135deg, ${card.colorValue}10, transparent)`,
                 }}
                 animate={{
                   opacity: isHovered || isSelected ? 1 : 0,
@@ -199,25 +212,22 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
               />
 
               {/* Content */}
-              <div className={`relative ${zLayer.raised}`}>
+              <div className={`${position.relative} ${zLayer.raised}`}>
                 {/* Icon and Badge */}
-                <div className={`${marginBottom.default} flex ${alignItems.start} ${justify.between}`}>
+                <div className={`${marginBottom.default} ${display.flex} ${alignItems.start} ${justify.between}`}>
                   <motion.div
-                    className={`flex ${iconSize['3xl']} ${alignItems.center} ${justify.center} ${radius.lg}`}
+                    className={`${display.flex} ${iconSize['3xl']} ${alignItems.center} ${justify.center} ${radius.lg}`}
                     style={{
-                      backgroundColor: `${card.color}20`,
+                      backgroundColor: `${card.colorValue}20`,
                     }}
                     animate={{
                       scale: isHovered ? 1.1 : 1,
                       rotate: isHovered ? 5 : 0,
                     }}
-                    transition={TOKENS.animations.spring.bouncy}
+                    transition={animation.spring.bouncy}
                   >
                     <Icon
-                      className={iconSize.lg}
-                      style={{
-                        color: card.color,
-                      }}
+                      className={cn(iconSize.lg, card.colorClass)}
                     />
                   </motion.div>
 
@@ -226,11 +236,10 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                     <motion.div
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
-                      transition={TOKENS.animations.spring.bouncy}
-                      className={`flex ${iconSize.lg} ${alignItems.center} ${justify.center} ${radius.full}`}
+                      transition={animation.spring.bouncy}
+                      className={cn(`${display.flex} ${iconSize.lg} ${alignItems.center} ${justify.center} ${radius.full}`, bgColor.accent)}
                       style={{
-                        backgroundColor: TOKENS.colors.accent.primary,
-                        boxShadow: TOKENS.shadows.glow.orange,
+                        boxShadow: glowShadow.orange,
                       }}
                     >
                       <svg
@@ -255,12 +264,9 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                   className={cn(
                     `${marginBottom.tight} ${weight.semibold} ${size.lg} ${transition.colors}`,
                     isSelected
-                      ? 'text-accent-primary'
-                      : 'text-foreground group-hover:text-accent-primary'
+                      ? textColor.accent
+                      : `${textColor.foreground} group-hover:${textColor.accent}`
                   )}
-                  style={{
-                    color: isSelected ? TOKENS.colors.accent.primary : undefined,
-                  }}
                 >
                   {card.label}
                 </h3>
@@ -271,7 +277,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                 </p>
 
                 {/* Examples */}
-                <div className="space-y-1.5">
+                <div className={spaceY.snug}>
                   {card.examples.slice(0, 2).map((example, index) => (
                     <motion.div
                       key={example}
@@ -289,7 +295,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                       <div
                         className={`${squareSize.dot} ${radius.full}`}
                         style={{
-                          backgroundColor: card.color,
+                          backgroundColor: card.colorValue,
                         }}
                       />
                       <span className={muted.default}>{example}</span>
@@ -300,9 +306,9 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
 
               {/* Hover Border Animation */}
               <motion.div
-                className={`pointer-events-none absolute inset-0 ${radius.xl} border-2`}
+                className={`${pointerEvents.none} ${absolute.inset} ${radius.xl} ${borderWidth['2']}`}
                 style={{
-                  borderColor: card.color,
+                  borderColor: card.colorValue,
                 }}
                 initial={{ opacity: 0 }}
                 animate={{
@@ -317,7 +323,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
 
       {/* Helper Text */}
       <motion.p
-        className={`${marginTop.comfortable} text-center ${muted.sm}`}
+        className={`${marginTop.comfortable} ${textAlign.center} ${muted.sm}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
@@ -334,8 +340,8 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
  */
 export function CompactTypeSelection({ selected, onSelect, className }: TypeSelectionCardsProps) {
   return (
-    <div className={cn('w-full', className)}>
-      <div className={`grid ${gap.compact}`}>
+    <div className={cn(width.full, className)}>
+      <div className={`${grid.base} ${gap.compact}`}>
         {TYPE_CARDS.map((card) => {
           const Icon = card.icon;
           const isSelected = selected === card.type;
@@ -347,47 +353,43 @@ export function CompactTypeSelection({ selected, onSelect, className }: TypeSele
               onClick={() => onSelect(card.type)}
               whileTap={{ scale: 0.98 }}
               className={cn(
-                `${cluster.default} ${radius.lg} border ${padding.compact} text-left ${transition.all}`,
+                `${cluster.default} ${radius.lg} border ${padding.compact} ${textAlign.left} ${transition.all}`,
                 isSelected
-                  ? 'border-accent-primary bg-accent-primary/10'
-                  : `${borderColor.border} bg-background-secondary hover:border-accent-primary/50`
+                  ? `border-accent-primary ${bgColor['accent/10']}`
+                  : `${borderColor.border} ${bgColor.secondary} hover:border-accent-primary/50`
               )}
               style={{
                 borderColor: isSelected
-                  ? TOKENS.colors.accent.primary
-                  : TOKENS.colors.border.default,
+                  ? submissionFormColors.accent.primary
+                  : submissionFormColors.border.default,
                 backgroundColor: isSelected
-                  ? `${TOKENS.colors.accent.primary}1a`
-                  : TOKENS.colors.background.secondary,
+                  ? `${submissionFormColors.accent.primary}1a`
+                  : submissionFormColors.background.secondary,
               }}
             >
               <div
-                className={`flex ${iconSize['2xl']} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.lg}`}
+                className={`${display.flex} ${iconSize['2xl']} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.lg}`}
                 style={{
-                  backgroundColor: `${card.color}20`,
+                  backgroundColor: `${card.colorValue}20`,
                 }}
               >
                 <Icon
-                  className={iconSize.md}
-                  style={{
-                    color: card.color,
-                  }}
+                  className={`${iconSize.md} ${card.colorClass}`}
                 />
               </div>
 
-              <div className={`min-w-0 ${flexGrow['1']}`}>
+              <div className={`${minWidth[0]} ${flexGrow['1']}`}>
                 <div className={`${weight.medium} ${size.sm}`}>{card.label}</div>
                 <div className={`truncate ${muted.default} ${size.xs}`}>{card.description}</div>
               </div>
 
               {isSelected && (
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="shrink-0">
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className={flexGrow.shrink0}>
                   <svg
-                    className={iconSize.md}
+                    className={`${iconSize.md} ${textColor.accent}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    style={{ color: TOKENS.colors.accent.primary }}
                   >
                     <path
                       strokeLinecap="round"

@@ -14,10 +14,9 @@ import { z } from 'zod';
 import { SOCIAL_LINKS } from '../../config/social-links.ts';
 import  { type SocialLinkKey } from '../../config/social-links.ts';
 import {
-  
   PAGINATION_CONFIG,
-  UI_ANIMATION,
 } from '../../config/unified-config.ts';
+import { animation } from '../../design-system/tokens.ts';
 
 /**
  * Application Information
@@ -116,8 +115,8 @@ export const GUIDE_CATEGORIES = {
  */
 export const UI_CONFIG = {
   animation: {
-    easing: UI_ANIMATION.easing,
-    duration: UI_ANIMATION.duration,
+    easing: animation.easing.easeInOut,
+    duration: animation.duration.slow,
   },
   pagination: PAGINATION_CONFIG,
 } as const;

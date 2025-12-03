@@ -10,23 +10,28 @@ import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertTriangle, CheckCircle, Loader2, Shield, Trash } from '@heyclaude/web-runtime/icons';
 import {
+  alignItems,
+  animate,
   bgColor,
   borderColor,
   cluster,
+  display,
   gap,
   helper,
+  hoverBg,
   iconLeading,
   iconSize,
-  alignItems,
   justify,
   marginTop,
   muted,
   padding,
   radius,
+  size,
   spaceY,
+  textAlign,
   transition,
   weight,
-  size,
+  textColor,
 } from '@heyclaude/web-runtime/design-system';
 import { errorToasts, successToasts } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -163,8 +168,8 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
 
   if (loading) {
     return (
-      <div className={`flex ${alignItems.center} ${justify.center} ${padding.yRelaxed}`}>
-        <Loader2 className={`${iconSize.xl} animate-spin ${muted.default}`} />
+      <div className={`${display.flex} ${alignItems.center} ${justify.center} ${padding.yRelaxed}`}>
+        <Loader2 className={`${iconSize.xl} ${animate.spin} ${muted.default}`} />
       </div>
     );
   }
@@ -179,7 +184,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
 
   if (factors.length === 0) {
     return (
-      <div className={`${radius.lg} border ${bgColor['muted/30']} ${padding.default} text-center ${muted.sm}`}>
+      <div className={`${radius.lg} border ${bgColor['muted/30']} ${padding.default} ${textAlign.center} ${muted.sm}`}>
         No MFA factors enrolled. Enable two-factor authentication to get started.
       </div>
     );
@@ -191,7 +196,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
         {factors.map((factor) => (
           <div
             key={factor.id}
-            className={`flex ${alignItems.center} ${justify.between} ${radius.lg} border ${padding.default} ${transition.colors} hover:bg-accent/5`}
+            className={`${display.flex} ${alignItems.center} ${justify.between} ${radius.lg} border ${padding.default} ${transition.colors} ${hoverBg.subtle}`}
           >
             <div className={cluster.comfortable}>
               <div className={`${radius.full} border ${bgColor['accent/5']} ${padding.compact}`}>
@@ -231,7 +236,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
                   setFactorToUnenroll(factor);
                   setUnenrollDialogOpen(true);
                 }}
-                className="text-destructive hover:bg-destructive/10"
+                className={`${textColor.destructive} ${hoverBg.destructive}`}
               >
                 <Trash className={iconLeading.sm} />
                 Remove
@@ -245,7 +250,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className={cluster.compact}>
-              <AlertTriangle className="text-destructive" />
+              <AlertTriangle className={textColor.destructive} />
               Remove MFA Factor?
             </DialogTitle>
             <DialogDescription>
@@ -272,7 +277,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
             <Button variant="destructive" onClick={handleUnenroll} disabled={unenrolling}>
               {unenrolling ? (
                 <>
-                  <Loader2 className={`${iconLeading.sm} animate-spin`} />
+                  <Loader2 className={`${iconLeading.sm} ${animate.spin}`} />
                   Removing...
                 </>
               ) : (

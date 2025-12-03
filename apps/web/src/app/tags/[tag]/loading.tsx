@@ -1,9 +1,14 @@
-import { emptyCard, marginBottom, marginTop, spaceY, radius , padding , gap , minHeight , maxWidth, bgColor,
+import { emptyCard, marginBottom, marginTop, spaceY, radius, padding, gap, grid, minHeight, maxWidth, bgColor,
   justify,
   flexWrap,
   squareSize,
   skeletonSize,
   skeleton,
+  display,
+  container,
+  marginX,
+  textAlign,
+  border,
 } from '@heyclaude/web-runtime/design-system';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 
@@ -25,16 +30,16 @@ export default function TagDetailLoading() {
     <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Hero Skeleton */}
       <section className={emptyCard.default}>
-        <div className={`container mx-auto ${padding.xDefault} ${padding.yHero}`}>
+        <div className={`${container.default} ${padding.xDefault} ${padding.yHero}`}>
           <Skeleton className={`${marginBottom.comfortable} ${skeletonSize.barMdDefault}`} />
-          
-          <div className={`mx-auto ${maxWidth['3xl']}`}>
-            <div className={`${marginBottom.comfortable} flex ${justify.center}`}>
+
+          <div className={`${marginX.auto} ${maxWidth['3xl']}`}>
+            <div className={`${marginBottom.comfortable} ${display.flex} ${justify.center}`}>
               <Skeleton className={`${squareSize.avatarXl} ${radius.full}`} />
             </div>
-            <Skeleton className={`${marginBottom.default} mx-auto ${skeletonSize.heroBar}`} />
-            <Skeleton className={`mx-auto ${skeletonSize.barLgMax}`} />
-            <div className={`${marginTop.default} flex ${justify.center} ${gap.compact}`}>
+            <Skeleton className={`${marginBottom.default} ${marginX.auto} ${skeletonSize.heroBar}`} />
+            <Skeleton className={`${marginX.auto} ${skeletonSize.barLgMax}`} />
+            <div className={`${marginTop.default} ${display.flex} ${justify.center} ${gap.compact}`}>
               <Skeleton className={skeletonSize.barLgDefault} />
               <Skeleton className={skeletonSize.barLgCompact} />
               <Skeleton className={skeletonSize.barLgComfortable} />
@@ -44,12 +49,12 @@ export default function TagDetailLoading() {
       </section>
 
       {/* Content Skeleton */}
-      <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
-        <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-4`}>
+      <div className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}>
+        <div className={grid.sidebar}>
           {/* Main content */}
           <div className="lg:col-span-3">
             {/* Filter tabs skeleton */}
-            <div className={`${marginBottom.comfortable} flex ${gap.compact}`}>
+            <div className={`${marginBottom.comfortable} ${display.flex} ${gap.compact}`}>
               <Skeleton className={skeletonSize.buttonCompact} />
               <Skeleton className={skeletonSize.buttonComfortable} />
               <Skeleton className={skeletonSize.buttonDefault} />
@@ -57,13 +62,13 @@ export default function TagDetailLoading() {
             </div>
 
             {/* Grid skeleton */}
-            <div className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 lg:grid-cols-3`}>
+            <div className={grid.responsive123}>
               {CONTENT_GRID_SKELETONS.map((id) => (
-                <div key={id} className={`${radius.lg} border ${padding.default}`}>
+                <div key={id} className={`${radius.lg} ${border.default} ${padding.default}`}>
                   <Skeleton className={`${marginBottom.compact} ${skeletonSize.barLgThreeQuarters}`} />
                   <Skeleton className={`${marginBottom.tight} ${skeleton.height.text} ${skeleton.width.full}`} />
                   <Skeleton className={`${marginBottom.default} ${skeletonSize.barResponsive}`} />
-                  <div className={`flex ${gap.compact}`}>
+                  <div className={`${display.flex} ${gap.compact}`}>
                     <Skeleton className={skeletonSize.barMdCompact} />
                     <Skeleton className={skeletonSize.barMdDefault} />
                   </div>
@@ -74,17 +79,17 @@ export default function TagDetailLoading() {
 
           {/* Sidebar skeleton */}
           <aside className={spaceY.comfortable}>
-            <div className={`${radius.lg} border ${padding.default}`}>
+            <div className={`${radius.lg} ${border.default} ${padding.default}`}>
               <Skeleton className={`${marginBottom.compact} ${skeletonSize.barMdComfortable}`} />
-              <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+              <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
                 {RELATED_TAG_SKELETONS.map((id) => (
                   <Skeleton key={id} className={skeletonSize.barLgDefault} />
                 ))}
               </div>
             </div>
-            <div className={`${radius.lg} border ${padding.default} text-center`}>
-              <Skeleton className={`mx-auto ${marginBottom.tight} ${skeletonSize.barComfortable}`} />
-              <Skeleton className={`mx-auto ${skeleton.height.button} ${skeleton.width.full}`} />
+            <div className={`${radius.lg} ${border.default} ${padding.default} ${textAlign.center}`}>
+              <Skeleton className={`${marginX.auto} ${marginBottom.tight} ${skeletonSize.barComfortable}`} />
+              <Skeleton className={`${marginX.auto} ${skeleton.height.button} ${skeleton.width.full}`} />
             </div>
           </aside>
         </div>

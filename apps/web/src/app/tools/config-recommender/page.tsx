@@ -19,28 +19,39 @@
 
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import {
+  alignItems,
+  bgColor,
+  bgGradient,
+  borderColor,
   cluster,
-  marginBottom,
-  marginTop,
+  container,
+  display,
+  flexGrow,
+  flexWrap,
+  gap,
+  gradientFrom,
+  gradientTo,
+  grid,
   iconLeading,
   iconSize,
+  justify,
+  marginBottom,
+  marginTop,
+  marginX,
+  maxWidth,
+  minHeight,
   muted,
-  weight,
-  size,
-  gap,
+  overflow,
   padding,
+  paddingBottom,
+  position,
   radius,
   row,
-  minHeight,
-  maxWidth,
-  bgColor,
+  size,
+  textAlign,
   textColor,
-  alignItems,
-  justify,
-  borderColor,
-  flexWrap,
-  overflow,
-  flexGrow,
+  weight,
+  bgClip,
 } from '@heyclaude/web-runtime/design-system';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
 import {
@@ -120,8 +131,8 @@ export default function ConfigRecommenderPage() {
     return (
       <div className={`${minHeight.screen} ${bgColor.background}`}>
         {/* Hero Section */}
-        <section className={`relative ${overflow.hidden} ${padding.xDefault} ${padding.yHero}`}>
-          <div className={`container mx-auto ${maxWidth['4xl']}`}>
+        <section className={`${position.relative} ${overflow.hidden} ${padding.xDefault} ${padding.yHero}`}>
+          <div className={`${container.default} ${maxWidth['4xl']}`}>
             {/* Badge */}
             <UnifiedBadge
               variant="base"
@@ -133,18 +144,18 @@ export default function ConfigRecommenderPage() {
             </UnifiedBadge>
 
             {/* Title */}
-            <h1 className={`${marginBottom.comfortable} bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text ${weight.bold} ${size['4xl']} ${textColor.transparent} md:${size['5xl']} lg:${size['6xl']}`}>
+            <h1 className={`${marginBottom.comfortable} ${bgGradient.toR} ${gradientFrom.foreground} ${gradientTo.foreground70} ${bgClip.text} ${weight.bold} ${size['4xl']} ${textColor.transparent} md:${size['5xl']} lg:${size['6xl']}`}>
               Find Your Perfect Claude Configuration
             </h1>
 
             {/* Description */}
-            <p className={`mx-auto ${marginBottom.relaxed} ${maxWidth['3xl']} ${muted.lg} md:${size.xl}`}>
+            <p className={`${marginX.auto} ${marginBottom.relaxed} ${maxWidth['3xl']} ${muted.lg} md:${size.xl}`}>
               Answer 7 quick questions and get personalized recommendations from our catalog of 147+
               configurations. Instant results, zero cost, tailored to your needs.
             </p>
 
             {/* Stats */}
-            <div className={`flex ${flexWrap.wrap} ${justify.center} ${gap.default}`}>
+            <div className={`${display.flex} ${flexWrap.wrap} ${justify.center} ${gap.default}`}>
               <UnifiedBadge variant="base" style="secondary" className={size.sm}>
                 <Clock className={iconLeading.xs} aria-hidden="true" />2 minutes
               </UnifiedBadge>
@@ -161,23 +172,23 @@ export default function ConfigRecommenderPage() {
         </section>
 
         {/* Quiz Section */}
-        <section className={`container mx-auto ${padding.xDefault} pb-16`}>
-          <div className={`mx-auto ${maxWidth['4xl']}`}>
+        <section className={`${container.default} ${padding.xDefault} ${paddingBottom.hero}`}>
+          <div className={`${marginX.auto} ${maxWidth['4xl']}`}>
             <QuizForm />
           </div>
         </section>
 
         {/* Benefits Section */}
-        <section className={`container mx-auto ${padding.xDefault} pb-16`}>
-          <div className={`mx-auto ${maxWidth['4xl']}`}>
-            <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['2xl']}`}>How It Works</h2>
+        <section className={`${container.default} ${padding.xDefault} ${paddingBottom.hero}`}>
+          <div className={`${marginX.auto} ${maxWidth['4xl']}`}>
+            <h2 className={`${marginBottom.relaxed} ${textAlign.center} ${weight.bold} ${size['2xl']}`}>How It Works</h2>
 
-            <div className={`grid ${gap.relaxed} md:grid-cols-3`}>
+            <div className={grid.responsive3Gap6}>
               <Card>
                 <CardHeader>
                   <CardTitle className={`${cluster.compact} ${size.lg}`}>
                     <span
-                      className={`flex ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${weight.bold} ${textColor.primaryForeground} ${size.sm}`}
+                      className={`${display.flex} ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${weight.bold} ${textColor.primaryForeground} ${size.sm}`}
                     >
                       1
                     </span>
@@ -196,7 +207,7 @@ export default function ConfigRecommenderPage() {
                 <CardHeader>
                   <CardTitle className={`${cluster.compact} ${size.lg}`}>
                     <span
-                      className={`flex ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${weight.bold} ${textColor.primaryForeground} ${size.sm}`}
+                      className={`${display.flex} ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${weight.bold} ${textColor.primaryForeground} ${size.sm}`}
                     >
                       2
                     </span>
@@ -215,7 +226,7 @@ export default function ConfigRecommenderPage() {
                 <CardHeader>
                   <CardTitle className={`${cluster.compact} ${size.lg}`}>
                     <span
-                      className={`flex ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${weight.bold} ${textColor.primaryForeground} ${size.sm}`}
+                      className={`${display.flex} ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${weight.bold} ${textColor.primaryForeground} ${size.sm}`}
                     >
                       3
                     </span>
@@ -234,9 +245,9 @@ export default function ConfigRecommenderPage() {
         </section>
 
         {/* Features Section */}
-        <section className={`container mx-auto ${padding.xDefault} pb-16`}>
-          <div className={`mx-auto ${maxWidth['4xl']}`}>
-            <Card className={`border-accent/20 ${bgColor['accent/5']}`}>
+        <section className={`${container.default} ${padding.xDefault} ${paddingBottom.hero}`}>
+          <div className={`${marginX.auto} ${maxWidth['4xl']}`}>
+            <Card className={`${borderColor['accent/20']} ${bgColor['accent/5']}`}>
               <CardHeader>
                 <CardTitle className={cluster.compact}>
                   <BarChart className={`${iconSize.md} ${textColor.primary}`} />
@@ -244,7 +255,7 @@ export default function ConfigRecommenderPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className={`grid ${gap.default} sm:grid-cols-2`}>
+                <ul className={grid.responsive2}>
                   <li className={`${row.compact}`}>
                     <Sparkles
                       className={`${iconSize.md} ${textColor.primary} ${marginTop.micro} ${flexGrow.shrink0}`}
@@ -290,7 +301,7 @@ export default function ConfigRecommenderPage() {
         </section>
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
-        <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+        <section className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
           <NewsletterCTAVariant source="content_page" variant="hero" />
         </section>
       </div>

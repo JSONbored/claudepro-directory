@@ -16,10 +16,15 @@ import { cn } from '../utils.ts';
 // Design System imports
 import { iconSize } from '../../design-system/styles/icons.ts';
 import { absolute } from '../../design-system/styles/position.ts';
-import { minWidth, padding } from '../../design-system/styles/layout.ts';
-import { size } from '../../design-system/styles/typography.ts';
+import { minWidth, padding, paddingLeft, paddingRight, display, alignItems, marginLeft, marginY, marginX, overflow, position, justify, height } from '../../design-system/styles/layout.ts';
+import { size, weight, tracking } from '../../design-system/styles/typography.ts';
+import { bgColor, textColor } from '../../design-system/styles/colors.ts';
+import { opacityLevel } from '../../design-system/styles/effects.ts';
+import { cursor } from '../../design-system/styles/interactive.ts';
+import { userSelect } from '../../design-system/styles/layout.ts';
 import { radius } from '../../design-system/styles/radius.ts';
-import { shadow } from '../../design-system/styles/effects.ts';
+import { shadow, zLayer } from '../../design-system/styles/effects.ts';
+import { transition } from '../../design-system/styles/interactive.ts';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -50,14 +55,14 @@ const DropdownMenuSubTrigger = ({
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
     className={cn(
-      `flex cursor-default select-none items-center ${radius.sm} px-2 py-1.5 ${size.sm} outline-none focus:bg-accent data-[state=open]:bg-accent`,
-      inset && 'pl-8',
+      `${display.flex} ${cursor.default} ${userSelect.none} ${alignItems.center} ${radius.sm} ${padding.xCompact} ${padding.ySnug} ${size.sm} outline-none focus:${bgColor.accent} data-[state=open]:${bgColor.accent}`,
+      inset && paddingLeft.loose,
       className
     )}
     {...props}
   >
     {children}
-    <ChevronRight className={`ml-auto ${iconSize.sm}`} />
+    <ChevronRight className={`${marginLeft.auto} ${iconSize.sm}`} />
   </DropdownMenuPrimitive.SubTrigger>
 );
 DropdownMenuSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayName;
@@ -72,7 +77,7 @@ const DropdownMenuSubContent = ({
   <DropdownMenuPrimitive.SubContent
     ref={ref}
     className={cn(
-      `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 ${minWidth.button} overflow-hidden ${radius.md} border bg-popover ${padding.micro} text-popover-foreground ${shadow.lg} data-[state=closed]:animate-out data-[state=open]:animate-in`,
+      `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ${zLayer.modal} ${minWidth.button} ${overflow.hidden} ${radius.md} border ${bgColor.popover} ${padding.micro} ${textColor.popoverForeground} ${shadow.lg} data-[state=closed]:animate-out data-[state=open]:animate-in`,
       className
     )}
     {...props}
@@ -107,7 +112,7 @@ const DropdownMenuContent = ({
       <DropdownMenuPrimitive.Content ref={ref} sideOffset={sideOffset} asChild={true} {...props}>
         <motion.div
           className={cn(
-            `z-50 ${minWidth.button} overflow-hidden ${radius.md} border bg-popover ${padding.micro} text-popover-foreground ${shadow.md} will-change-transform`,
+            `${zLayer.modal} ${minWidth.button} ${overflow.hidden} ${radius.md} border ${bgColor.popover} ${padding.micro} ${textColor.popoverForeground} ${shadow.md} will-change-transform`,
             'data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:animate-out',
             className
           )}
@@ -144,8 +149,8 @@ const DropdownMenuItem = ({
     <DropdownMenuPrimitive.Item ref={ref} asChild={true} {...props}>
       <motion.div
         className={cn(
-          `relative flex cursor-default select-none items-center ${radius.sm} px-2 py-1.5 ${size.sm} outline-none transition-colors focus:bg-orange-500/5 data-disabled:pointer-events-none data-disabled:opacity-50`,
-          inset && 'pl-8',
+          `${position.relative} ${display.flex} ${cursor.default} ${userSelect.none} ${alignItems.center} ${radius.sm} ${padding.xCompact} ${padding.ySnug} ${size.sm} outline-none ${transition.colors} focus:${bgColor['orange/5']} data-disabled:pointer-events-none data-disabled:${opacityLevel[50]}`,
+          inset && paddingLeft.loose,
           className
         )}
         variants={item}
@@ -169,14 +174,14 @@ const DropdownMenuCheckboxItem = ({
   <DropdownMenuPrimitive.CheckboxItem
     ref={ref}
     className={cn(
-      `relative flex cursor-default select-none items-center ${radius.sm} py-1.5 pr-2 pl-8 ${size.sm} outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50`,
+      `${position.relative} ${display.flex} ${cursor.default} ${userSelect.none} ${alignItems.center} ${radius.sm} ${padding.ySnug} ${paddingRight.compact} ${paddingLeft.loose} ${size.sm} outline-none ${transition.colors} focus:${bgColor.accent} focus:${textColor.accentForeground} data-disabled:pointer-events-none data-disabled:${opacityLevel[50]}`,
       className
     )}
     checked={checked ?? false}
     {...props}
   >
     <span
-      className={`${absolute.leftIcon} flex h-3.5 w-3.5 items-center justify-center`}
+      className={`${absolute.leftIcon} ${display.flex} ${iconSize.xsPlus} ${alignItems.center} ${justify.center}`}
     >
       <DropdownMenuPrimitive.ItemIndicator>
         <Check className={iconSize.sm} />
@@ -198,13 +203,13 @@ const DropdownMenuRadioItem = ({
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
     className={cn(
-      `relative flex cursor-default select-none items-center ${radius.sm} py-1.5 pr-2 pl-8 ${size.sm} outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50`,
+      `${position.relative} ${display.flex} ${cursor.default} ${userSelect.none} ${alignItems.center} ${radius.sm} ${padding.ySnug} ${paddingRight.compact} ${paddingLeft.loose} ${size.sm} outline-none ${transition.colors} focus:${bgColor.accent} focus:${textColor.accentForeground} data-disabled:pointer-events-none data-disabled:${opacityLevel[50]}`,
       className
     )}
     {...props}
   >
     <span
-      className={`${absolute.leftIcon} flex h-3.5 w-3.5 items-center justify-center`}
+      className={`${absolute.leftIcon} ${display.flex} ${iconSize.xsPlus} ${alignItems.center} ${justify.center}`}
     >
       <DropdownMenuPrimitive.ItemIndicator>
         <Circle className={`${iconSize.indicator} fill-current`} />
@@ -227,7 +232,7 @@ const DropdownMenuLabel = ({
 }) => (
   <DropdownMenuPrimitive.Label
     ref={ref}
-    className={cn(`px-2 py-1.5 font-semibold ${size.sm}`, inset && 'pl-8', className)}
+    className={cn(`${padding.xCompact} ${padding.ySnug} ${weight.semibold} ${size.sm}`, inset && paddingLeft.loose, className)}
     {...props}
   />
 );
@@ -242,7 +247,7 @@ const DropdownMenuSeparator = ({
 }) => (
   <DropdownMenuPrimitive.Separator
     ref={ref}
-    className={cn('-mx-1 my-1 h-px bg-muted', className)}
+    className={cn(`${marginX.neg1} ${marginY.tight} ${height.px} ${bgColor.muted}`, className)}
     {...props}
   />
 );
@@ -250,7 +255,7 @@ DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName;
 
 const DropdownMenuShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
-    <span className={cn(`ml-auto ${size.xs} tracking-widest opacity-60`, className)} {...props} />
+    <span className={cn(`${marginLeft.auto} ${size.xs} ${tracking.widest} ${opacityLevel[60]}`, className)} {...props} />
   );
 };
 DropdownMenuShortcut.displayName = 'DropdownMenuShortcut';

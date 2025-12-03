@@ -16,7 +16,25 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { border, cluster, row, spaceY, marginTop, muted, radius ,size , padding , weight, overflow,
+import {
+  border,
+  cluster,
+  display,
+  flexGrow,
+  hoverBg,
+  marginTop,
+  muted,
+  overflow,
+  padding,
+  paddingTop,
+  radius,
+  maxHeight,
+  row,
+  size,
+  spaceY,
+  textAlign,
+  weight,
+  cursor,
 } from '@heyclaude/web-runtime/design-system';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
 import { useFormSubmit } from '@heyclaude/web-runtime/hooks';
@@ -190,15 +208,15 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       />
 
       {/* Public Toggle */}
-      <div className={`${cluster.default} ${radius.lg} border ${padding.default}`}>
+      <div className={`${cluster.default} ${radius.lg} ${border.default} ${padding.default}`}>
         <Checkbox
           id={isPublicId}
           checked={isPublic}
           onCheckedChange={(checked) => setIsPublic(checked === true)}
           disabled={isPending}
         />
-        <div className="flex-1">
-          <Label htmlFor={isPublicId} className={`cursor-pointer ${weight.medium} ${size.base}`}>
+        <div className={flexGrow['1']}>
+          <Label htmlFor={isPublicId} className={`${cursor.pointer} ${weight.medium} ${size.base}`}>
             Public Collection
           </Label>
           <p className={muted.sm}>
@@ -216,11 +234,11 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
               Select bookmarks to add to this collection. You can add more later.
             </p>
           </div>
-          <div className={`max-h-64 ${spaceY.compact} ${overflow.yAuto} ${radius.lg} border ${padding.default}`}>
+          <div className={`${maxHeight[64]} ${spaceY.compact} ${overflow.yAuto} ${radius.lg} ${border.default} ${padding.default}`}>
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className={`${row.default} ${radius.md} ${padding.tight} hover:bg-accent`}
+                className={`${row.default} ${radius.md} ${padding.tight} ${hoverBg.accentSolid}`}
               >
                 <Checkbox
                   id={bookmark.id}
@@ -237,10 +255,10 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                   disabled={isPending}
                   className={marginTop.micro}
                 />
-                <div className="flex-1">
+                <div className={flexGrow['1']}>
                   <Label
                     htmlFor={bookmark.id}
-                    className={`cursor-pointer font-normal ${size.sm} ${cluster.compact}`}
+                    className={`${cursor.pointer} ${weight.normal} ${size.sm} ${cluster.compact}`}
                   >
                     <UnifiedBadge variant="base" style="outline" className={`${size.xs} capitalize`}>
                       {bookmark.content_type}
@@ -262,7 +280,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Empty bookmarks message */}
       {mode === 'create' && bookmarks.length === 0 && (
-        <div className={`${radius.lg} ${border.dashed} ${padding.comfortable} text-center`}>
+        <div className={`${radius.lg} ${border.dashed} ${padding.comfortable} ${textAlign.center}`}>
           <p className={muted.sm}>
             You don't have any bookmarks yet. Create the collection first and add bookmarks later.
           </p>
@@ -270,8 +288,8 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       )}
 
       {/* Actions */}
-      <div className={`${cluster.comfortable} pt-4`}>
-        <Button type="submit" disabled={isPending} className="flex-1 sm:flex-initial">
+      <div className={`${cluster.comfortable} ${paddingTop.comfortable}`}>
+        <Button type="submit" disabled={isPending} className={`${flexGrow['1']} sm:${display.flex}-initial`}>
           {isPending
             ? mode === 'create'
               ? 'Creating...'

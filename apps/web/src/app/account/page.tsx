@@ -15,6 +15,7 @@ import {
   cluster,
   flexDir,
   gap,
+  grid,
   iconSize,
   justify,
   marginBottom,
@@ -26,6 +27,10 @@ import {
   spaceY,
   textColor,
   weight,
+  display,
+  truncate,
+  textAlign,
+  hoverText,
 } from '@heyclaude/web-runtime/design-system';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -289,7 +294,7 @@ export default async function AccountDashboard() {
       </div>
 
       {/* Stats cards */}
-      <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-3`}>
+      <div className={grid.responsive13Gap4}>
         <Card>
           <CardHeader>
             <CardTitle className={size.sm}>Bookmarks</CardTitle>
@@ -360,7 +365,7 @@ export default async function AccountDashboard() {
         </CardContent>
       </Card>
 
-      <div className={`grid ${gap.relaxed} lg:grid-cols-[2fr_1fr]`}>
+      <div className={`${grid.twoThirdsOneThird} ${gap.relaxed}`}>
         <Card>
           <CardHeader>
             <CardTitle>Recently Saved</CardTitle>
@@ -394,20 +399,20 @@ export default async function AccountDashboard() {
                       key={`${item.category}-${item.slug}`}
                       className={`${radius.xl} border ${borderColor['border/60']} ${bgColor['muted/20']} ${padding.compact}`}
                     >
-                      <div className={`flex ${alignItems.start} ${justify.between} ${gap.default}`}>
+                      <div className={`${display.flex} ${alignItems.start} ${justify.between} ${gap.default}`}>
                         <div>
                           <p className={weight.semibold}>{item.title}</p>
-                          {item.description ? <p className={`line-clamp-2 ${muted.sm}`}>
+                          {item.description ? <p className={`${truncate.lines2} ${muted.sm}`}>
                               {item.description}
                             </p> : null}
                         </div>
-                        <div className={`flex ${flexDir.col} ${alignItems.end} ${gap.compact}`}>
+                        <div className={`${display.flex} ${flexDir.col} ${alignItems.end} ${gap.compact}`}>
                           <NavLink href={itemHref} className={`${weight.medium} ${size.sm}`}>
                             Explore →
                           </NavLink>
                           {similarHref ? <NavLink
                               href={similarHref}
-                              className={`${muted.default} ${size.xs} hover:text-foreground`}
+                              className={`${muted.default} ${size.xs} ${hoverText.foreground}`}
                             >
                               Explore similar →
                             </NavLink> : null}
@@ -451,7 +456,7 @@ function QuickActionRow({
   title: string;
 }) {
   return (
-    <div className={`flex ${alignItems.center} ${justify.between} ${gap.comfortable} ${radius.xl} border ${borderColor['border/50']} ${padding.compact}`}>
+    <div className={`${display.flex} ${alignItems.center} ${justify.between} ${gap.comfortable} ${radius.xl} border ${borderColor['border/50']} ${padding.compact}`}>
       <div>
         <p className={weight.medium}>{title}</p>
         <p className={muted.sm}>{description}</p>
@@ -473,12 +478,12 @@ function QuickActionRow({
  */
 function EmptyRecentlySavedState() {
   return (
-    <div className={`${radius['2xl']} ${border.dashedVisible} ${padding.comfortable} text-center`}>
+    <div className={`${radius['2xl']} ${border.dashedVisible} ${padding.comfortable} ${textAlign.center}`}>
       <p className={weight.medium}>No saved configs yet</p>
       <p className={muted.sm}>
         Browse the directory and bookmark your favorite configurations to see them here.
       </p>
-      <NavLink href={ROUTES.HOME} className={`${marginTop.default} inline-flex ${weight.semibold}`}>
+      <NavLink href={ROUTES.HOME} className={`${marginTop.default} ${display.inlineFlex} ${weight.semibold}`}>
         Explore directory →
       </NavLink>
     </div>

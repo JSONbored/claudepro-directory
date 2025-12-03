@@ -17,10 +17,18 @@
 'use client';
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { iconSize , shadow , shadowColor, backdrop , radius, borderColor,
+import { iconSize , shadow , shadowColor, backdrop , radius, borderColor, hoverBg,
   justify,
   textColor,
   alignItems,
+  display,
+  position,
+  bgColor,
+  border,
+  hoverBorder,
+  willChange,
+  focusRing,
+  ring,
 } from '@heyclaude/web-runtime/design-system';
 import type { SpeedDialAction } from '@heyclaude/web-runtime/types/component.types';
 import { motion } from 'motion/react';
@@ -69,7 +77,7 @@ export function SpeedDialItem({
         damping: 17,
         delay,
       }}
-      className={`relative flex ${iconSize['3xl']} ${alignItems.center} ${justify.center} ${radius.full} border ${borderColor['border/50']} bg-card/95 ${textColor.foreground} ${shadowColor.black} ${shadow.lg} ${backdrop.md} will-change-transform hover:border-accent/50 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background dark:${shadowColor.blackStrong} ${visibilityClasses}`}
+      className={`${position.relative} ${display.flex} ${iconSize['3xl']} ${alignItems.center} ${justify.center} ${radius.full} ${border.default} ${borderColor['border/50']} ${bgColor['card/95']} ${textColor.foreground} ${shadowColor.black} ${shadow.lg} ${backdrop.md} ${willChange.transform} ${hoverBorder.accent} ${hoverBg.accentSolid} hover:${textColor.accentForeground} ${focusRing.accentWithOffset} focus:${ring.accent20} dark:${shadowColor.blackStrong} ${visibilityClasses}`}
       aria-label={label}
       type="button"
     >
@@ -77,7 +85,7 @@ export function SpeedDialItem({
 
       {/* Badge indicator (notification count) - only show for notifications action */}
       {badge !== undefined && badge > 0 && label === 'Notifications' && (
-        <NotificationBadge className="-right-1 -top-1 absolute" />
+        <NotificationBadge className={`-right-1 -top-1 ${position.absolute}`} />
       )}
     </motion.button>
   );

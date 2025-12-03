@@ -15,6 +15,11 @@ import {
   transition,
   weight,
   flexDir,
+  hoverBg,
+  maxWidth,
+  textAlign,
+  display,
+  cursor,
 } from '@heyclaude/web-runtime/design-system';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { useEffect } from 'react';
@@ -53,8 +58,8 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <div className={`flex ${minHeight.screen} ${flexDir.col} ${alignItems.center} ${justify.center} ${padding.default} font-sans`}>
-          <div className={`max-w-md ${radius.lg} ${border.default} ${bgColor.card} ${padding.relaxed} text-center`}>
+        <div className={`${display.flex} ${minHeight.screen} ${flexDir.col} ${alignItems.center} ${justify.center} ${padding.default} font-sans`}>
+          <div className={`${maxWidth.md} ${radius.lg} ${border.default} ${bgColor.card} ${padding.relaxed} ${textAlign.center}`}>
             <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']} ${textColor.destructive}`}>Application Error</h2>
             <p className={`${marginBottom.comfortable} ${muted.default}`}>
               A critical error occurred. Please refresh the page or try again later.
@@ -62,7 +67,7 @@ export default function GlobalError({
             <button
               type="button"
               onClick={reset}
-              className={`cursor-pointer ${radius.md} border-none ${bgColor.primary} ${padding.xDefault} ${size.base} ${textColor.primaryForeground} ${transition.colors} hover:bg-primary/90`}
+              className={`${cursor.pointer} ${radius.md} ${border.none} ${bgColor.primary} ${padding.xDefault} ${size.base} ${textColor.primaryForeground} ${transition.colors} ${hoverBg.primaryMax}`}
             >
               Reset Application
             </button>

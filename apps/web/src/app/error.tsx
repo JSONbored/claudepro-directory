@@ -19,6 +19,10 @@ import {
   textColor,
   weight,
   flexWrap,
+  display,
+  width,
+  textAlign,
+  marginRight,
 } from '@heyclaude/web-runtime/design-system';
 import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
@@ -71,10 +75,10 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className={`flex ${minHeight.screen} ${alignItems.center} ${justify.center} ${bgColor.background} ${padding.xDefault}`}>
-      <Card className={`w-full ${maxWidth.lg} ${padding.relaxed} text-center`}>
+    <div className={`${display.flex} ${minHeight.screen} ${alignItems.center} ${justify.center} ${bgColor.background} ${padding.xDefault}`}>
+      <Card className={`${width.full} ${maxWidth.lg} ${padding.relaxed} ${textAlign.center}`}>
         <div className={marginBottom.comfortable}>
-          <div className={`${marginBottom.default} flex ${justify.center}`}>
+          <div className={`${marginBottom.default} ${display.flex} ${justify.center}`}>
             <div className={`${radius.full} ${bgColor['destructive/10']} ${padding.compact}`}>
               <AlertCircle className={`${iconSize['3xl']} ${textColor.destructive}`} aria-hidden="true" />
             </div>
@@ -85,19 +89,19 @@ export default function ErrorBoundary({
           </p>
         </div>
 
-        {isDevelopment && error.message ? <div className={`${marginBottom.comfortable} ${radius.md} ${bgColor.muted} ${padding.default} text-left`}>
+        {isDevelopment && error.message ? <div className={`${marginBottom.comfortable} ${radius.md} ${bgColor.muted} ${padding.default} ${textAlign.left}`}>
             <p className={`font-mono ${textColor.destructive} ${size.xs}`}>{error.message}</p>
             {error.digest ? <p className={`${marginTop.compact} font-mono ${muted.xs}`}>Digest: {error.digest}</p> : null}
           </div> : null}
 
         <div className={responsive.smRowGap}>
           <Button onClick={reset} size="lg">
-            <RefreshCw className={`mr-2 ${iconSize.sm}`} />
+            <RefreshCw className={`${marginRight.compact} ${iconSize.sm}`} />
             Try Again
           </Button>
           <Link href={ROUTES.HOME}>
             <Button variant="outline" size="lg">
-              <Home className={`mr-2 ${iconSize.sm}`} />
+              <Home className={`${marginRight.compact} ${iconSize.sm}`} />
               Back to Home
             </Button>
           </Link>
@@ -105,17 +109,17 @@ export default function ErrorBoundary({
 
         <div className={`${marginTop.relaxed} ${muted.sm}`}>
           <p className={marginBottom.tight}>Or explore:</p>
-          <div className={`flex ${flexWrap.wrap} ${gap.compact} ${justify.center}`}>
-            <Link href={ROUTES.AGENTS} className="hover:text-primary">
+          <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact} ${justify.center}`}>
+            <Link href={ROUTES.AGENTS} className={`hover:${textColor.primary}`}>
               Agents
             </Link>
             <span>•</span>
-            <Link href={ROUTES.MCP} className="hover:text-primary">
+            <Link href={ROUTES.MCP} className={`hover:${textColor.primary}`}>
               MCP Servers
             </Link>
             <span>•</span>
-            <Link href={ROUTES.GUIDES} className="hover:text-primary">
-              <Search className={`mr-1 inline ${iconSize.xs}`} />
+            <Link href={ROUTES.GUIDES} className={`hover:${textColor.primary}`}>
+              <Search className={`${marginRight.tight} ${display.inline} ${iconSize.xs}`} />
               Guides
             </Link>
           </div>

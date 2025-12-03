@@ -53,6 +53,7 @@ import {
   cluster,
   flexWrap,
   gap,
+  grid,
   hoverText,
   iconLeading,
   iconSize,
@@ -62,11 +63,21 @@ import {
   muted,
   padding,
   radius,
-  size,
+  responsiveText,
   spaceY,
   textColor,
   tracking,
   weight,
+  maxWidth,
+  display,
+  flexGrow,
+  position,
+  marginLeft,
+  width,
+  marginRight,
+  border,
+  sticky,
+  self,
 } from '@heyclaude/web-runtime/design-system';
 import type { ContentItem, CopyType } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
@@ -419,13 +430,13 @@ export function DetailHeaderActions({
       <motion.div
         whileHover={{ x: -2 }}
         whileTap={{ scale: 0.97 }}
-        className={`${marginBottom.default} inline-block`}
+        className={`${marginBottom.default} ${display.inlineBlock}`}
       >
         <Button
           variant="ghost"
           size="sm"
           onClick={() => router.back()}
-          className={`${muted.default} ${hoverText.foreground} -ml-2`}
+          className={`${muted.default} ${hoverText.foreground} -${marginLeft.compact}`}
         >
           <ArrowLeft className={iconLeading.sm} />
           Back
@@ -433,7 +444,7 @@ export function DetailHeaderActions({
       </motion.div>
 
       {/* Two-column hero layout for desktop */}
-      <div className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-[1fr_300px] lg:gap-10`}>
+      <div className={`${grid.sidebar300} ${gap.relaxed} ${gap.lgSection}`}>
         {/* Left column - Content info */}
         <div className={spaceY.comfortable}>
           {/* Badges - inline */}
@@ -451,22 +462,22 @@ export function DetailHeaderActions({
           </div>
 
           {/* Title - larger and more prominent */}
-          <h1 className={`${weight.bold} ${size['3xl']} ${tracking.tight} lg:${size['4xl']}`}>{displayTitle}</h1>
+          <h1 className={`${weight.bold} ${responsiveText['3xl']} ${tracking.tight} lg:text-4xl`}>{displayTitle}</h1>
 
           {/* Description - larger line height for readability */}
           {contentItem.description && (
-            <p className={`max-w-2xl ${size.lg} ${leading.relaxed} ${muted.default} lg:${size.xl}`}>
+            <p className={`${maxWidth['2xl']} ${responsiveText.lgXl} ${leading.relaxed} ${muted.default}`}>
               {contentItem.description}
             </p>
           )}
         </div>
 
         {/* Right column - Actions sidebar (sticky on desktop) */}
-        <aside className={`${spaceY.default} ${radius.lg} border ${borderColor['border/50']} ${bgColor['card/50']} ${padding.default} lg:sticky lg:top-24 lg:self-start`}>
+        <aside className={`${spaceY.default} ${radius.lg} ${border.default} ${borderColor['border/50']} ${bgColor['card/50']} ${padding.default} lg:${position.sticky} lg:${sticky.top24} lg:${self.start}`}>
           {/* Primary CTA - Full width */}
           {(!(primaryAction.type === 'download') || hasDownloadAvailable) && (
             <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.01 }}>
-              <Button onClick={() => handleActionClick(primaryAction)} className="w-full">
+              <Button onClick={() => handleActionClick(primaryAction)} className={width.full}>
                 {primaryAction.label}
               </Button>
             </motion.div>
@@ -483,7 +494,7 @@ export function DetailHeaderActions({
                     handleDownload('zip', contentItem, category, pulse);
                   }
                 }}
-                className="w-full"
+                className={width.full}
               >
                 <Download className={iconLeading.sm} />
                 {category === Constants.public.Enums.content_category[1] ? 'Download .mcpb' : 'Download'}
@@ -492,12 +503,12 @@ export function DetailHeaderActions({
           )}
 
           {/* Secondary actions row */}
-          <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
-            <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
+          <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
+            <motion.div whileTap={{ scale: 0.97 }} className={flexGrow['1']}>
               <Button
                 variant={pinned ? 'secondary' : 'outline'}
                 onClick={handleTogglePin}
-                className="w-full"
+                className={width.full}
                 size="sm"
               >
                 {pinned ? (
@@ -543,7 +554,7 @@ export function DetailHeaderActions({
               initialCount={'use_count' in contentItem && typeof contentItem.use_count === 'number' ? contentItem.use_count : 0}
               size="default"
               showCount={true}
-              className="w-full"
+              className={width.full}
             />
           )}
 
@@ -551,7 +562,7 @@ export function DetailHeaderActions({
           <Button
             variant="ghost"
             size="sm"
-            className={`w-full ${justify.start} ${muted.default}`}
+            className={`${width.full} ${justify.start} ${muted.default}`}
             onClick={openPinboardDrawer}
           >
             <Bookmark className={iconLeading.sm} />
@@ -562,17 +573,17 @@ export function DetailHeaderActions({
           {hasContent && (
             <>
               <div className={borderTop.light} />
-              <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+              <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
                 <motion.div
                   whileTap={{ scale: 0.97 }}
                   animate={copied ? { scale: [1, 1.05, 1] } : {}}
                   transition={{ duration: 0.3 }}
-                  className="flex-1"
+                  className={flexGrow['1']}
                 >
-                  <Button variant="outline" onClick={handleCopyContent} size="sm" className="w-full">
+                  <Button variant="outline" onClick={handleCopyContent} size="sm" className={width.full}>
                     {copied ? (
                       <>
-                        <Check className={`mr-2 ${iconSize.sm} ${textColor.green}`} />
+                        <Check className={`${marginRight.compact} ${iconSize.sm} ${textColor.green}`} />
                         Copied!
                       </>
                     ) : (
@@ -613,14 +624,14 @@ export function DetailHeaderActions({
                       }}
                       variant="outline"
                       size="sm"
-                      className="flex-1"
+                      className={flexGrow['1']}
                     />
                   );
                 })()}
               </div>
 
               {/* Download/Export row */}
-              <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+              <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
                 {(() => {
                   const safeCategory = sanitizePathSegment(category);
                   const safeSlug = sanitizePathSegment(contentItem.slug);
@@ -652,7 +663,7 @@ export function DetailHeaderActions({
                         }}
                         variant="outline"
                         size="sm"
-                        className="flex-1"
+                        className={flexGrow['1']}
                       />
                       <ContentActionButton
                         url={`/${safeCategory}/${safeSlug}.md`}
@@ -683,7 +694,7 @@ export function DetailHeaderActions({
                         }}
                         variant="outline"
                         size="sm"
-                        className="flex-1"
+                        className={flexGrow['1']}
                       />
                     </>
                   );
@@ -696,14 +707,14 @@ export function DetailHeaderActions({
           {secondaryActions && secondaryActions.length > 0 && (
             <>
               <div className={borderTop.light} />
-              <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+              <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
                 {secondaryActions.map((action) => (
                   <Button
                     key={action.label}
                     variant="outline"
                     size="sm"
                     onClick={() => handleActionClick(action)}
-                    className="flex-1"
+                    className={flexGrow['1']}
                   >
                     {action.label}
                   </Button>

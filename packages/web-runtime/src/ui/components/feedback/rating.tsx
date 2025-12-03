@@ -2,8 +2,9 @@
 
 import { Star as StarIcon } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
-import { gap, padding } from '../../../design-system/styles/layout.ts';
+import { gap, padding, display, alignItems } from '../../../design-system/styles/layout.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
+import { transition } from '../../../design-system/styles/interactive.ts';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import type { KeyboardEvent, MouseEvent, ReactElement, ReactNode } from 'react';
 import {
@@ -113,7 +114,7 @@ export const RatingButton = ({
       {cloneElement(icon, {
         size,
         className: cn(
-          'transition-colors duration-200',
+          `${transition.colors} duration-200`,
           isActive && 'fill-current',
           !readOnly && 'cursor-pointer'
         ),
@@ -238,7 +239,7 @@ export const Rating = ({
         aria-label={props['aria-label'] || defaultAriaLabel}
         aria-describedby={props['aria-describedby']}
         aria-invalid={props['aria-invalid']}
-        className={cn(`inline-flex items-center ${gap.micro}`, className)}
+        className={cn(`${display.inlineFlex} ${alignItems.center} ${gap.micro}`, className)}
         onMouseLeave={() => setHoverValue(null)}
         ref={containerRef}
         role="radiogroup"

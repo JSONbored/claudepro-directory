@@ -15,30 +15,40 @@ import type {
   InfoBoxProps,
 } from '@heyclaude/web-runtime/types/component.types';
 import {
+  alignItems,
   backdrop,
   between,
   bgColor,
   border,
   cluster,
+  display,
   flexGrow,
+  hoverBg,
+  iconColor,
   iconSize,
-  alignItems,
+  infoBoxColor,
   justify,
   leading,
   marginBottom,
   marginTop,
   muted,
   padding,
+  paddingLeft,
+  paddingTop,
   radius,
   radiusRight,
   row,
   size,
   spaceY,
+  textAlign,
   textColor,
   transition,
   weight,
+  width,
+  marginY,
+  marginLeft,
 } from '@heyclaude/web-runtime/design-system';
-import { cn, INFOBOX_COLORS, INFOBOX_ICON_COLORS } from '@heyclaude/web-runtime/ui';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { useCallback, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
@@ -136,7 +146,7 @@ function AccordionBox(props: AccordionVariant) {
   );
 
   return (
-    <section className="my-8" aria-label={title || 'Accordion section'}>
+    <section className={marginY.loose} aria-label={title || 'Accordion section'}>
       {title && (
         <div className={marginBottom.comfortable}>
           <h3 className={`${marginBottom.tight} ${weight.bold} ${size.xl}`}>{title}</h3>
@@ -155,13 +165,13 @@ function AccordionBox(props: AccordionVariant) {
             <button
               type="button"
               onClick={() => toggleItem(index)}
-              className="w-full text-left"
+              className={`${width.full} ${textAlign.left}`}
               aria-expanded={openItems.has(index)}
             >
-              <CardHeader className="transition-colors hover:bg-muted/30">
+              <CardHeader className={`${transition.colors} ${hoverBg.mutedLight}`}>
                 <CardTitle className={between.center} itemProp="name">
                   <span>{item.title}</span>
-                  <div className={`ml-4 ${flexGrow.shrink0}`}>
+                  <div className={`${marginLeft.comfortable} ${flexGrow.shrink0}`}>
                     {openItems.has(index) ? (
                       <ChevronUp
                         className={`${iconSize.sm} ${muted.default} ${transition.transform}`}
@@ -179,7 +189,7 @@ function AccordionBox(props: AccordionVariant) {
             </button>
 
             {openItems.has(index) && (
-              <CardContent className="pt-0" itemScope={true} itemType="https://schema.org/Answer">
+              <CardContent className={paddingTop.none} itemScope={true} itemType="https://schema.org/Answer">
                 <div itemProp="text">{item.content}</div>
               </CardContent>
             )}
@@ -213,7 +223,7 @@ function FAQBox(props: FAQVariant) {
   }
 
   return (
-    <section className={`my-8 ${spaceY.relaxed}`}>
+    <section className={`${marginY.loose} ${spaceY.relaxed}`}>
       <div className={marginBottom.comfortable}>
         <h2 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`}>{title}</h2>
         {description && <p className={muted.default}>{description}</p>}
@@ -224,14 +234,14 @@ function FAQBox(props: FAQVariant) {
           <Card key={faq.question} className={`${border.default} bg-code/50 ${backdrop.sm}`}>
             <CardHeader>
               <CardTitle className={`${row.default} ${weight.semibold} ${size.lg}`}>
-                <div className={`${marginTop.micro} flex ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['primary/10']}`}>
+                <div className={`${marginTop.micro} ${display.flex} ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['primary/10']}`}>
                   <span className={`${weight.bold} ${textColor.primary} ${size.sm}`}>Q</span>
                 </div>
                 {faq.question}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="pl-9">
+              <div className={paddingLeft.spacious}>
                 <div className={`${muted.default} ${leading.relaxed}`}>{faq.answer}</div>
               </div>
             </CardContent>
@@ -252,7 +262,7 @@ function FAQBox(props: FAQVariant) {
  * @returns A JSX element representing a schema.org `Note` with variant-specific colors and iconography
  *
  * @see UnifiedContentBox
- * @see INFOBOX_COLORS
+ * @see infoBoxColor from @heyclaude/web-runtime/design-system
  * @see InfoBoxVariant
  */
 function InfoBoxComponent(props: InfoBoxVariant) {
@@ -260,13 +270,11 @@ function InfoBoxComponent(props: InfoBoxVariant) {
   const { title, children, variant } = props;
 
   const currentVariant = variant || 'info';
-  const variantKey = currentVariant.toUpperCase() as keyof typeof INFOBOX_COLORS;
-
   const iconMap: Record<'info' | 'warning' | 'success' | 'error', React.ReactElement> = {
-    info: <Info className={cn(iconSize.md, INFOBOX_ICON_COLORS.INFO)} />,
-    warning: <AlertTriangle className={cn(iconSize.md, INFOBOX_ICON_COLORS.WARNING)} />,
-    success: <CheckCircle className={cn(iconSize.md, INFOBOX_ICON_COLORS.SUCCESS)} />,
-    error: <AlertTriangle className={cn(iconSize.md, INFOBOX_ICON_COLORS.ERROR)} />,
+    info: <Info className={cn(iconSize.md, iconColor.info)} />,
+    warning: <AlertTriangle className={cn(iconSize.md, iconColor.warning)} />,
+    success: <CheckCircle className={cn(iconSize.md, iconColor.success)} />,
+    error: <AlertTriangle className={cn(iconSize.md, iconColor.error)} />,
   };
 
   return (
@@ -274,7 +282,7 @@ function InfoBoxComponent(props: InfoBoxVariant) {
       itemScope={true}
       itemType="https://schema.org/Note"
       className={cn(
-  `my-6 ${radiusRight.lg} border-l-4 ${padding.comfortable}`, INFOBOX_COLORS[variantKey])}
+  `${marginY.relaxed} ${radiusRight.lg} ${padding.comfortable}`, infoBoxColor[currentVariant].default)}
     >
       {title && (
         <div className={cn(cluster.compact, marginBottom.compact)}>
@@ -307,14 +315,14 @@ function CalloutComponent(props: CalloutVariant) {
   const { type, title, children } = props;
 
   return (
-    <Alert className="my-6">
+    <Alert className={marginY.relaxed}>
       <div className={`${row.default}`}>
         {type === 'info' && <Info className={iconSize.sm} />}
         {type === 'warning' && <AlertTriangle className={iconSize.sm} />}
         {type === 'error' && <AlertTriangle className={iconSize.sm} />}
         {type === 'success' && <CheckCircle className={iconSize.sm} />}
         {type === 'tip' && <Zap className={iconSize.sm} />}
-        <div className="flex-1">
+        <div className={flexGrow['1']}>
           {title && <AlertTitle>{title}</AlertTitle>}
           <AlertDescription className={marginTop.compact}>{children}</AlertDescription>
         </div>

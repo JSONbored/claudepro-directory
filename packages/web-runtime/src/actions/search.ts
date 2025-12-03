@@ -39,7 +39,7 @@ export const getPopularSearches = rateLimitedAction
       {
         keyParts: ['popular-searches', parsedInput.limit],
         tags: ['search', 'popular-searches'],
-        ttlKey: 'cache.search_facets.ttl_seconds', // Reuse existing TTL config
+        ttlKey: 'search_facets', // Reuse existing TTL config
         fallback: [],
         logMeta: { limit: parsedInput.limit },
       }

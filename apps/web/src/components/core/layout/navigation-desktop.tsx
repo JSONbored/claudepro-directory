@@ -6,19 +6,24 @@
 
 import {
   absolute,
+  alignItems,
   bgColor,
   cluster,
+  display,
+  dropdownWidth,
   flexDir,
   flexItemText,
   gap,
   grid,
+  height,
   hoverBg,
   iconSize,
   iconWrapper,
-  alignItems,
   marginBottom,
+  marginLeft,
   muted,
   padding,
+  position,
   radius,
   row,
   size,
@@ -26,9 +31,12 @@ import {
   textColor,
   tracking,
   transition,
+  truncate,
   weight,
-  height,
-  dropdownWidth,
+  width,
+  marginY,
+  textDecoration,
+  transform,
 } from '@heyclaude/web-runtime/design-system';
 import { Briefcase, ChevronDown, Handshake, Users } from '@heyclaude/web-runtime/icons';
 import Link from 'next/link';
@@ -60,8 +68,8 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative ${padding.xTight} ${padding.yMicro} ${size.xs} ${weight.medium} ${transition.default} no-underline ${
-      active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground'
+    className: `group ${position.relative} ${padding.xTight} ${padding.yMicro} ${size.xs} ${weight.medium} ${transition.default} ${textDecoration.none} ${
+      active ? textColor.foreground : `${textColor.foreground}/80 hover:${textColor.foreground}`
     } ${className}`,
     ...(active && { 'aria-current': 'page' as const }),
     ...(onClick && { onClick }),
@@ -72,11 +80,11 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
 
   return (
     <PrefetchLink {...linkProps}>
-      <span className="relative inline-block">
+      <span className={`${position.relative} ${display.inlineBlock}`}>
         {children}
         <span
           className={`${absolute.bottomLeft} ${height.underline} ${bgColor.accent} ${transition.slow} ${
-            active ? 'w-full' : 'w-0 group-hover:w-full'
+            active ? width.full : `${width[0]} group-hover:${width.full}`
           }`}
           aria-hidden="true"
         />
@@ -105,7 +113,7 @@ interface NavigationDesktopProps {
 export function NavigationDesktop({ isActive, onCommandPaletteOpen }: NavigationDesktopProps) {
   return (
     <nav
-      className={`hidden xl:flex ${cluster.compact} ${size.xs}`}
+      className={`${display.none} xl:${display.flex} ${cluster.compact} ${size.xs}`}
       aria-label="Primary navigation"
     >
       {PRIMARY_NAVIGATION.map((link) => {
@@ -116,17 +124,17 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
               <DropdownMenuTrigger asChild={true}>
                 <button
                   type="button"
-                  className={`group relative flex ${alignItems.center} ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.sm} ${transition.default}`}
+                  className={`group ${position.relative} ${display.flex} ${alignItems.center} ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.sm} ${transition.default}`}
                   aria-label={`Open ${link.label} menu`}
                 >
-                  <span className="relative">
+                  <span className={position.relative}>
                     {link.label}
                     <span
-                      className={`${absolute.bottomLeft} ${height.underline} w-0 ${bgColor.accent} ${transition.slow} group-hover:w-full`}
+                      className={`${absolute.bottomLeft} ${height.underline} ${width[0]} ${bgColor.accent} ${transition.slow} group-hover:${width.full}`}
                       aria-hidden="true"
                     />
                   </span>
-                  <ChevronDown className={`ml-1 ${iconSize.xxs}`} />
+                  <ChevronDown className={`${marginLeft.tight} ${iconSize.xxs}`} />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className={`${dropdownWidth.lg} ${padding.compact}`}>
@@ -150,7 +158,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                           )}
                           <div className={flexItemText}>
                             <div
-                              className={`${cluster.snug} w-full truncate ${weight.medium} ${size.sm}`}
+                              className={`${cluster.snug} ${width.full} ${truncate.single} ${weight.medium} ${size.sm}`}
                             >
                               {child.label}
                               {child.isNew && (
@@ -161,7 +169,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                               )}
                             </div>
                             {child.description && (
-                              <div className={`line-clamp-1 ${size['3xs']} ${muted.default}`}>
+                              <div className={`${truncate.single} ${size['3xs']} ${muted.default}`}>
                                 {child.description}
                               </div>
                             )}
@@ -195,28 +203,28 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
         <DropdownMenuTrigger asChild={true}>
           <button
             type="button"
-            className={`group relative flex ${alignItems.center} ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.sm} ${transition.default}`}
+            className={`group ${position.relative} ${display.flex} ${alignItems.center} ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.sm} ${transition.default}`}
             aria-label="Open additional navigation menu"
           >
-            <span className="relative">
+            <span className={position.relative}>
               More
               <span
-                className={`${absolute.bottomLeft} ${height.underline} w-0 ${bgColor.accent} ${transition.slow} group-hover:w-full`}
+                className={`${absolute.bottomLeft} ${height.underline} ${width[0]} ${bgColor.accent} ${transition.slow} group-hover:${width.full}`}
                 aria-hidden="true"
               />
             </span>
-            <ChevronDown className="ml-1 h-2.5 w-2.5" />
+            <ChevronDown className={`${marginLeft.tight} ${iconSize.xs}`} />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className={`${dropdownWidth.xl} ${padding.default}`}>
           {/* 2-column grid for quick links */}
-          <div className={`${marginBottom.tight} grid grid-cols-2 ${gap.comfortable}`}>
+          <div className={`${marginBottom.tight} ${grid.cols2}`}>
             {SECONDARY_NAVIGATION.map((group) => (
               <div key={group.heading} className={spaceY.compact}>
-                <DropdownMenuLabel className={`px-2 ${padding.yMicro} ${weight.semibold} ${size['2xs']} ${muted.default} uppercase ${tracking.wider}`}>
+                <DropdownMenuLabel className={`${padding.xCompact} ${padding.yMicro} ${weight.semibold} ${size['2xs']} ${muted.default} ${transform.uppercase} ${tracking.wider}`}>
                   {group.heading}
                 </DropdownMenuLabel>
-                <DropdownMenuGroup className="space-y-0.5">
+                <DropdownMenuGroup className={spaceY.tight}>
                   {group.links.map((link) => {
                     const IconComponent = link.icon;
                     return (
@@ -235,9 +243,9 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                             </div>
                           )}
                           <div className={flexItemText}>
-                            <div className={`w-full truncate ${weight.medium} ${size.sm}`}>{link.label}</div>
+                            <div className={`${width.full} ${truncate.single} ${weight.medium} ${size.sm}`}>{link.label}</div>
                             {link.description && (
-                              <div className={`line-clamp-1 ${size['3xs']} ${muted.default}`}>
+                              <div className={`${truncate.single} ${size['3xs']} ${muted.default}`}>
                                 {link.description}
                               </div>
                             )}
@@ -252,40 +260,40 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
           </div>
 
           {/* Footer Links - Community, Partner Program, Consulting */}
-          <DropdownMenuSeparator className="my-2.5" />
+          <DropdownMenuSeparator className={marginY.between} />
           <div className={grid.cols3}>
             <Link
               href="/community"
               prefetch={true}
-              className={`group flex ${flexDir.col} ${alignItems.center} ${gap.compact} ${radius.lg} ${padding.compact} ${transition.colors} ${hoverBg.default}`}
+              className={`group ${display.flex} ${flexDir.col} ${alignItems.center} ${gap.compact} ${radius.lg} ${padding.compact} ${transition.colors} ${hoverBg.default}`}
             >
               <Users
-                className={`${iconSize.sm} ${muted.default} ${transition.colors} group-hover:text-accent`}
+                className={`${iconSize.sm} ${muted.default} ${transition.colors} group-hover:${textColor.accent}`}
                 aria-hidden="true"
               />
-              <div className={`${weight.medium} ${textColor.foreground} ${size.sm} ${transition.colors} group-hover:text-accent`}>
+              <div className={`${weight.medium} ${textColor.foreground} ${size.sm} ${transition.colors} group-hover:${textColor.accent}`}>
                 Community
               </div>
             </Link>
-            <Link href="/partner" prefetch={true} className={`group flex ${flexDir.col} ${alignItems.center} ${gap.compact} ${radius.lg} ${padding.compact} ${transition.colors} ${hoverBg.default}`}>
+            <Link href="/partner" prefetch={true} className={`group ${display.flex} ${flexDir.col} ${alignItems.center} ${gap.compact} ${radius.lg} ${padding.compact} ${transition.colors} ${hoverBg.default}`}>
               <Handshake
-                className={`${iconSize.sm} ${muted.default} ${transition.colors} group-hover:text-accent`}
+                className={`${iconSize.sm} ${muted.default} ${transition.colors} group-hover:${textColor.accent}`}
                 aria-hidden="true"
               />
-              <div className={`${weight.medium} ${textColor.foreground} ${size.sm} ${transition.colors} group-hover:text-accent`}>
+              <div className={`${weight.medium} ${textColor.foreground} ${size.sm} ${transition.colors} group-hover:${textColor.accent}`}>
                 Partner Program
               </div>
             </Link>
             <Link
               href="/consulting"
               prefetch={true}
-              className={`group flex ${flexDir.col} ${alignItems.center} ${gap.compact} ${radius.lg} ${padding.compact} ${transition.colors} ${hoverBg.default}`}
+              className={`group ${display.flex} ${flexDir.col} ${alignItems.center} ${gap.compact} ${radius.lg} ${padding.compact} ${transition.colors} ${hoverBg.default}`}
             >
               <Briefcase
-                className={`${iconSize.sm} ${muted.default} ${transition.colors} group-hover:text-accent`}
+                className={`${iconSize.sm} ${muted.default} ${transition.colors} group-hover:${textColor.accent}`}
                 aria-hidden="true"
               />
-              <div className={`${weight.medium} ${textColor.foreground} ${size.sm} ${transition.colors} group-hover:text-accent`}>
+              <div className={`${weight.medium} ${textColor.foreground} ${size.sm} ${transition.colors} group-hover:${textColor.accent}`}>
                 Consulting
               </div>
             </Link>

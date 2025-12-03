@@ -5,8 +5,19 @@
  * Shows placeholder cards matching the layout of ChangelogCard components.
  */
 
-import { cluster, spaceY, marginBottom , padding , gap , radius , maxWidth, bgColor,
+import {
+  bgColor,
+  cluster,
+  display,
   flexWrap,
+  gap,
+  grid,
+  marginBottom,
+  maxWidth,
+  padding,
+  radius,
+  spaceY,
+  width,
 } from '@heyclaude/web-runtime/design-system';
 import { PageHeaderSkeleton, Skeleton  } from '@heyclaude/web-runtime/ui';
 
@@ -37,7 +48,7 @@ export default function ChangelogLoading() {
       </div>
 
       {/* Category Filter Skeleton */}
-      <div className={`grid w-full ${gap.tight} lg:w-auto lg:grid-flow-col`}>
+      <div className={`${grid.base} ${width.full} ${gap.tight} lg:${width.auto} lg:grid-flow-col`}>
         {Array.from({ length: 7 }).map((_, index) => (
           <Skeleton key={`tab-${index + 1}`} size="lg" width="lg" rounded="md" />
         ))}
@@ -53,7 +64,7 @@ export default function ChangelogLoading() {
             </div>
             <Skeleton size="lg" width="2/3" className={marginBottom.tight} />
             <Skeleton size="sm" width="3xl" className={marginBottom.default} />
-            <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+            <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
               <Skeleton size="sm" width="xs" rounded="full" />
               <Skeleton size="sm" width="xs" rounded="full" />
               <Skeleton size="sm" width="xs" rounded="full" />

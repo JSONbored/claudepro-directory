@@ -52,12 +52,17 @@ import type {
 import {
   animateDuration,
   bgColor,
+  bgGradient,
   borderColor,
   borderLeft,
   borderTop,
   cluster,
   flexGrow,
   gap,
+  gradientFrom,
+  gradientVia,
+  gradientTo,
+  grid,
   iconSize,
   alignItems,
   justify,
@@ -69,6 +74,9 @@ import {
   opacityLevel,
   overflow,
   padding,
+  paddingTop,
+  paddingBottom,
+  paddingLeft,
   radius,
   radiusRight,
   row,
@@ -81,6 +89,17 @@ import {
   transition,
   weight,
   zLayer,
+  display,
+  position,
+  absolute,
+  textAlign,
+  height,
+  border,
+  marginLeft,
+  width,
+  pointerEvents,
+  marginY,
+  bgClip,
 } from '@heyclaude/web-runtime/design-system';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { Avatar, AvatarFallback, AvatarImage } from '@heyclaude/web-runtime/ui';
@@ -155,9 +174,9 @@ function CaseStudyVariant(props: CaseStudyProps) {
   const { company, industry, challenge, solution, results, metrics, testimonial, logo } = props;
 
   return (
-    <Card itemScope={true} itemType="https://schema.org/Article" className={`my-8 ${overflow.hidden}`}>
-      <CardHeader className="pb-4">
-        <div className={`flex ${alignItems.start} ${justify.between}`}>
+    <Card itemScope={true} itemType="https://schema.org/Article" className={`${marginY.loose} ${overflow.hidden}`}>
+      <CardHeader className={paddingBottom.comfortable}>
+        <div className={`${display.flex} ${alignItems.start} ${justify.between}`}>
           <div>
             <CardTitle className={`${size['2xl']}`} itemProp="headline">
               {company} Case Study
@@ -169,7 +188,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
             )}
           </div>
           {logo && (
-            <div className={`flex ${iconSize['4xl']} ${alignItems.center} ${justify.center} ${radius.lg} ${bgColor.muted}`}>
+            <div className={`${display.flex} ${iconSize['4xl']} ${alignItems.center} ${justify.center} ${radius.lg} ${bgColor.muted}`}>
               <BookOpen className={`${iconSize.xl} ${muted.default}`} />
             </div>
           )}
@@ -192,18 +211,18 @@ function CaseStudyVariant(props: CaseStudyProps) {
         </div>
 
         {metrics && Array.isArray(metrics) && metrics.length > 0 && (
-          <div className={`grid grid-cols-2 ${gap.comfortable} ${borderTop.default} pt-4 md:grid-cols-3`}>
+          <div className={`${grid.responsive23Gap4} ${borderTop.default} ${paddingTop.comfortable}`}>
             {metrics.map((metric) => (
-              <div key={metric.label} className="text-center">
-                <p className={`flex ${alignItems.center} ${justify.center} ${gap.tight} ${weight.bold} ${size['2xl']}`}>
+              <div key={metric.label} className={textAlign.center}>
+                <p className={`${display.flex} ${alignItems.center} ${justify.center} ${gap.tight} ${weight.bold} ${size['2xl']}`}>
                   {metric.value}
                   {metric.trend && (
                     <span
                       className={
                         metric.trend === 'up' || metric.trend === '+'
-                          ? 'text-green-500'
+                          ? textColor.green
                           : metric.trend === 'down'
-                            ? 'text-red-500'
+                            ? textColor.red
                             : 'text-gray-500'
                       }
                     >
@@ -222,7 +241,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
         )}
 
         {testimonial && (
-          <blockquote className={`rounded-r-lg ${borderLeft.accentPrimary} ${bgColor['muted/30']} ${padding.yCompact} pl-4`}>
+          <blockquote className={`${radiusRight.lg} ${borderLeft.accentPrimary} ${bgColor['muted/30']} ${padding.yCompact} ${paddingLeft.comfortable}`}>
             <p className={`${marginBottom.tight} ${muted.default} italic`}>"{testimonial.quote}"</p>
             <footer className={size.sm}>
               <cite className={`${weight.semibold} not-italic`}>{testimonial.author}</cite>
@@ -261,9 +280,9 @@ function FeatureGridVariant(props: FeatureGridProps) {
   const { features, title, description, columns } = props;
   const validFeatures = features;
   const gridCols: Record<2 | 3 | 4, string> = {
-    2: 'md:grid-cols-2',
-    3: 'md:grid-cols-3',
-    4: 'md:grid-cols-4',
+    2: grid.responsiveForm, // grid-cols-1 md:grid-cols-2 gap-4
+    3: grid.responsive13, // grid-cols-1 md:grid-cols-3 gap-6
+    4: grid.responsive4, // grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4
   };
 
   if (validFeatures.length === 0) {
@@ -271,7 +290,7 @@ function FeatureGridVariant(props: FeatureGridProps) {
   }
 
   return (
-    <section itemScope={true} itemType="https://schema.org/ItemList" className="my-8">
+    <section itemScope={true} itemType="https://schema.org/ItemList" className={marginY.loose}>
       <div className={marginBottom.comfortable}>
         <h2 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`} itemProp="name">
           {title}
@@ -283,14 +302,14 @@ function FeatureGridVariant(props: FeatureGridProps) {
         )}
       </div>
 
-      <div className={`grid grid-cols-1 ${gridCols[columns || 3]} ${gap.relaxed}`}>
+      <div className={gridCols[columns || 3]}>
         {validFeatures.map((feature, index) => (
           <Card
             key={feature.title}
             itemScope={true}
             itemType="https://schema.org/ListItem"
             className={
-              `group hover:-translate-y-1 relative h-full ${overflow.hidden} border ${borderColor[`border/50`]} bg-linear-to-br from-card/30 via-card/50 to-card/30 ${shadow.lg} ${transition.all} ${animateDuration.slow} hover:from-card/50 hover:via-card/70 hover:to-card/50 hover:${shadow.xl}`
+              `group hover:-translate-y-1 ${position.relative} ${height.full} ${overflow.hidden} ${border.default} ${borderColor[`border/50`]} ${bgGradient.toBR} ${gradientFrom.card30} ${gradientVia.card50} ${gradientTo.card30} ${shadow.lg} ${transition.all} ${animateDuration.slow} hover:${gradientFrom.card50} hover:${gradientVia.card70} hover:${gradientTo.card50} hover:${shadow.xl}`
             }
             style={{
               animationDelay: `${index * 50}ms`,
@@ -299,18 +318,18 @@ function FeatureGridVariant(props: FeatureGridProps) {
           >
             <div
               className={
-                `pointer-events-none absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/5 ${opacityLevel[0]} ${transition.opacity} ${animateDuration.slow} group-hover:opacity-100`
+                `${pointerEvents.none} ${absolute.inset} ${bgGradient.toBR} ${gradientFrom.primary5} ${gradientVia.transparent} ${gradientTo.primary5} ${opacityLevel[0]} ${transition.opacity} ${animateDuration.slow} group-hover:${opacityLevel[100]}`
               }
             />
 
             <CardHeader>
               <CardTitle
-                className={`relative ${zLayer.raised} flex ${alignItems.start} ${justify.between}`}
+                className={`${position.relative} ${zLayer.raised} ${display.flex} ${alignItems.start} ${justify.between}`}
                 itemProp="name"
               >
                 <span
                   className={
-                    `bg-linear-to-r from-foreground to-foreground/70 bg-clip-text ${weight.semibold} ${textColor.transparent}`
+                    `${bgGradient.toR} ${gradientFrom.foreground} ${gradientTo.foreground70} ${bgClip.text} ${weight.semibold} ${textColor.transparent}`
                   }
                 >
                   {feature.title}
@@ -319,14 +338,14 @@ function FeatureGridVariant(props: FeatureGridProps) {
                   <UnifiedBadge
                     variant="base"
                     style="secondary"
-                    className={`ml-2 ${borderColor['primary/30']} bg-linear-to-r from-primary/20 to-primary/30 ${shadow.sm}`}
+                    className={`${marginLeft.compact} ${borderColor['primary/30']} ${bgGradient.toR} ${gradientFrom.primary20} ${gradientTo.primary30} ${shadow.sm}`}
                   >
                     {feature.badge}
                   </UnifiedBadge>
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className={`relative ${zLayer.raised}`}>
+            <CardContent className={`${position.relative} ${zLayer.raised}`}>
               <p itemProp="description" className={`${muted.default} ${leading.relaxed}`}>
                 {feature.description}
               </p>
@@ -364,7 +383,7 @@ function TLDRVariant(props: TLDRSummaryProps) {
     <Card
       itemScope={true}
       itemType="https://schema.org/Article"
-      className={`my-8 ${borderLeft.accentPrimary} ${bgColor['primary/5']}`}
+      className={`${marginY.loose} ${borderLeft.accentPrimary} ${bgColor['primary/5']}`}
     >
       <CardHeader>
         <CardTitle className={cluster.compact}>
@@ -424,7 +443,7 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
     <blockquote
       itemScope={true}
       itemType="https://schema.org/Quotation"
-      className={`my-8 ${radiusRight.lg} ${borderLeft.accentPrimary} ${bgColor['muted/30']} ${padding.comfortable}`}
+      className={`${marginY.loose} ${radiusRight.lg} ${borderLeft.accentPrimary} ${bgColor['muted/30']} ${padding.comfortable}`}
     >
       <p itemProp="text" className={`${marginBottom.default} ${size.lg} italic ${leading.relaxed}`}>
         "{quote}"
@@ -491,7 +510,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
     <Card
       itemScope={true}
       itemType="https://schema.org/Table"
-      className={`my-8 ${borderLeft.accentHighlight} ${bgColor['accent/5']}`}
+      className={`${marginY.loose} ${borderLeft.accentHighlight} ${bgColor['accent/5']}`}
     >
       <CardHeader>
         <CardTitle className={cluster.compact}>
@@ -501,20 +520,20 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
         {description && <CardDescription itemProp="description">{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <div className={`grid ${gap.comfortable} ${columns === 2 ? 'md:grid-cols-2' : ''}`}>
+        <div className={`${grid.base} ${gap.comfortable} ${columns === 2 ? `md:${grid.responsiveForm.split(' ')[2]}` : ''}`}>
           {validItems.map((item, index) => (
             <div
               key={`${item.label}-${index}`}
               itemScope={true}
               itemType="https://schema.org/PropertyValue"
-              className={`${stack.compact} ${radius.lg} border ${bgColor['card/50']} ${padding.compact} sm:flex-row sm:items-start sm:gap-4`}
+              className={`${stack.compact} ${radius.lg} ${border.default} ${bgColor['card/50']} ${padding.compact} sm:${display.flex}-row sm:${alignItems.start} sm:gap-4`}
             >
-              <div className="sm:w-1/3">
+              <div className={width.smThird}>
                 <dt itemProp="name" className={`${weight.medium} ${muted.sm}`}>
                   {item.label}
                 </dt>
               </div>
-              <div className="sm:w-2/3">
+              <div className={width.smTwoThirds}>
                 <dd itemProp="value" className={`${marginBottom.micro} ${weight.semibold} ${textColor.foreground}`}>
                   {item.value}
                 </dd>
@@ -558,7 +577,7 @@ function ContentTabsVariant(props: ContentTabsProps) {
   const firstValue = defaultValue || validItems[0]?.value || '';
 
   return (
-    <section itemScope={true} itemType="https://schema.org/ItemList" className="my-8">
+    <section itemScope={true} itemType="https://schema.org/ItemList" className={marginY.loose}>
       {title && (
         <div className={marginBottom.comfortable}>
           <h3 className={`${marginBottom.tight} ${weight.bold} ${size.xl}`} itemProp="name">
@@ -572,15 +591,15 @@ function ContentTabsVariant(props: ContentTabsProps) {
         </div>
       )}
 
-      <Tabs defaultValue={firstValue} className="w-full">
+      <Tabs defaultValue={firstValue} className={width.full}>
         <TabsList
-          className={`grid h-auto w-full grid-cols-2 ${gap.tight} ${padding.micro} lg:grid-cols-3 xl:grid-cols-4`}
+          className={`${grid.responsive234Tabs} ${height.auto} ${width.full} ${padding.micro}`}
         >
           {validItems.map((item) => (
             <TabsTrigger
               key={item.value}
               value={item.value}
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className={`data-[state=active]:${bgColor.primary} data-[state=active]:${textColor.primaryForeground}`}
             >
               {item.label}
             </TabsTrigger>

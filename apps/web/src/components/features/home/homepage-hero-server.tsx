@@ -4,6 +4,11 @@ import { borderBottom, marginBottom, marginTop, cluster, muted, weight, size, ma
   justify,
   textColor,
   iconSize,
+  display,
+  position,
+  container,
+  marginX,
+  textAlign,
 } from '@heyclaude/web-runtime/design-system';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import dynamicImport from 'next/dynamic';
@@ -13,7 +18,7 @@ import { ParticlesBackground } from '@heyclaude/web-runtime/ui';
 const RollingText = dynamicImport(
   () => import('@heyclaude/web-runtime/ui').then((mod) => ({ default: mod.RollingText })),
   {
-    loading: () => <span className="text-accent">enthusiasts</span>,
+    loading: () => <span className={textColor.accent}>enthusiasts</span>,
   }
 );
 
@@ -34,22 +39,22 @@ export async function HomepageHeroServer({
   newThisWeekCount?: number;
 }) {
   return (
-    <section className={`relative ${borderBottom.light}`} aria-label="Homepage hero">
+    <section className={`${position.relative} ${borderBottom.light}`} aria-label="Homepage hero">
       {/* Particles Background */}
       <ParticlesBackground />
 
-      <div className={`container relative ${zLayer.raised} mx-auto ${padding.xDefault} ${padding.ySpacious} sm:py-16 lg:py-24`}>
-        <div className={`mx-auto ${maxWidth['3xl']} text-center`}>
-          <h1 className={`${marginBottom.default} ${weight.bold} ${size['3xl']} ${leading.tight} ${tracking.tight} sm:${marginBottom.comfortable} sm:${size['4xl']} sm:leading-tight lg:${size['5xl']} lg:leading-tight`}>
-            <span className="block">The ultimate directory for Claude</span>
+      <div className={`${container.default} ${position.relative} ${zLayer.raised} ${marginX.auto} ${padding.xDefault} ${padding.ySpacious} sm:${padding.yHero} lg:${padding.yXl}`}>
+        <div className={`${marginX.auto} ${maxWidth['3xl']} ${textAlign.center}`}>
+          <h1 className={`${marginBottom.default} ${weight.bold} ${size['3xl']} ${leading.tight} ${tracking.tight} sm:${marginBottom.comfortable} sm:${size['4xl']} sm:${leading.tight} lg:${size['5xl']} lg:${leading.tight}`}>
+            <span className={display.block}>The ultimate directory for Claude</span>
             <RollingText
               words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
               duration={3000}
-              className={`block ${textColor.accent}`}
+              className={`${display.block} ${textColor.accent}`}
             />
           </h1>
 
-          <p className={`mx-auto ${maxWidth['2xl']} ${muted.default} ${size.base} ${leading.relaxed} sm:${size.lg} lg:${size.xl}`}>
+          <p className={`${marginX.auto} ${maxWidth['2xl']} ${muted.default} ${size.base} ${leading.relaxed} sm:${size.lg} lg:${size.xl}`}>
             Join{' '}
             <NumberTicker value={memberCount} className={`${weight.semibold} ${textColor.accent}`} suffix="+" />{' '}
             members discovering and sharing the best Claude configurations. Explore expert rules,
@@ -59,7 +64,7 @@ export async function HomepageHeroServer({
 
           {/* New this week stat - subtle indicator */}
           {newThisWeekCount > 0 && (
-            <p className={`${cluster.tight} mx-auto ${marginTop.default} ${justify.center} ${size.sm}`}>
+            <p className={`${cluster.tight} ${marginX.auto} ${marginTop.default} ${justify.center} ${size.sm}`}>
               <Sparkles className={`${iconSize.xsPlus} ${textColor.amber}`} />
               <span className={`${weight.semibold} ${textColor.foreground}`}>{newThisWeekCount}</span>
               <span className={muted.sm}>new this week</span>

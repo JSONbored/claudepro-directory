@@ -24,6 +24,7 @@
 import { cn } from '../../utils.ts';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
+import { display } from '../../../design-system/styles/layout.ts';
 
 interface AnimatedGradientTextProps {
   children: ReactNode;
@@ -55,7 +56,7 @@ export function AnimatedGradientText({
 
   if (noAnimation) {
     return (
-      <span className={cn('inline-block', className)} style={gradientStyle}>
+      <span className={cn(display.inlineBlock, className)} style={gradientStyle}>
         {children}
       </span>
     );
@@ -63,7 +64,7 @@ export function AnimatedGradientText({
 
   return (
     <motion.span
-      className={cn('inline-block', className)}
+      className={cn(display.inlineBlock, className)}
       style={gradientStyle}
       animate={{
         backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
@@ -91,7 +92,7 @@ export function ShimmeringGradientText({
 }) {
   return (
     <motion.span
-      className={cn('inline-block', className)}
+      className={cn(display.inlineBlock, className)}
       style={{
         background: 'linear-gradient(90deg, #F97316, #FBBF24, #F97316)',
         backgroundSize: '200% 100%',
@@ -141,7 +142,7 @@ export function StaticGradientText({
 }) {
   return (
     <span
-      className={cn('inline-block', className)}
+      className={cn(display.inlineBlock, className)}
       style={{
         background: 'linear-gradient(135deg, #F97316, #FBBF24)',
         WebkitBackgroundClip: 'text',

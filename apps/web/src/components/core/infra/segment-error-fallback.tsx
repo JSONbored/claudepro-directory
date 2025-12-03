@@ -15,6 +15,12 @@ import {
   spaceY,
   textColor,
   weight,
+  minHeight,
+  width,
+  border,
+  borderColor,
+  whitespace,
+  fontFamily,
 } from '@heyclaude/web-runtime/design-system';
 import {
   Button,
@@ -74,15 +80,15 @@ export function SegmentErrorFallback({
   error,
 }: SegmentErrorFallbackProps) {
   return (
-    <div className={`flex min-h-[60vh] ${alignItems.center} ${justify.center} ${padding.xDefault} ${padding.ySection}`}>
-      <Card className={`w-full ${maxWidth['2xl']}`}>
+    <div className={`flex ${minHeight.viewport60} ${alignItems.center} ${justify.center} ${padding.xDefault} ${padding.ySection}`}>
+      <Card className={`${width.full} ${maxWidth['2xl']}`}>
         <CardHeader>
           <CardTitle className={`${size['2xl']}`}>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent className={spaceY.comfortable}>
           {onReset && (
-            <Button onClick={onReset} className="w-full sm:w-auto">
+            <Button onClick={onReset} className={`${width.full} sm:${width.auto}`}>
               {resetText}
             </Button>
           )}
@@ -93,7 +99,7 @@ export function SegmentErrorFallback({
                   key={`${link.href}-${link.label}`}
                   asChild={true}
                   variant={link.variant ?? 'outline'}
-                  className="w-full sm:w-auto"
+                  className={`${width.full} sm:${width.auto}`}
                 >
                   <Link href={link.href}>{link.label}</Link>
                 </Button>
@@ -101,13 +107,13 @@ export function SegmentErrorFallback({
             </div>
           )}
           {isDevelopment && error && (
-            <div className={`${radius.lg} border border-muted-foreground/30 border-dashed ${bgColor['muted/30']} ${padding.default}`}>
+            <div className={`${radius.lg} ${border.default} ${borderColor['mutedForeground/30']} ${border.dashed} ${bgColor['muted/30']} ${padding.default}`}>
               <p className={`${marginBottom.tight} ${weight.semibold} ${muted.sm}`}>Error details</p>
-              <pre className={`wrap-break-word whitespace-pre-wrap ${textColor.destructive} ${size.xs}`}>
+              <pre className={`wrap-break-word ${whitespace.preWrap} ${textColor.destructive} ${size.xs}`}>
                 {error.message}
               </pre>
               {error.digest && (
-                <p className={`${marginTop.compact} font-mono ${muted.default} ${size.xs}`}>
+                <p className={`${marginTop.compact} ${fontFamily.mono} ${muted.default} ${size.xs}`}>
                   Digest: {error.digest}
                 </p>
               )}

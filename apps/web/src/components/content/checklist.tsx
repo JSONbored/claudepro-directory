@@ -7,16 +7,18 @@
 
 import { AlertTriangle, BookOpen, CheckCircle } from '@heyclaude/web-runtime/icons';
 import {
+  alignItems,
   animateDuration,
   between,
   bgColor,
   borderColor,
   cluster,
+  display,
   flexGrow,
+  height,
   hoverBg,
   hoverBorder,
   iconSize,
-  alignItems,
   justify,
   marginBottom,
   marginTop,
@@ -29,6 +31,9 @@ import {
   textColor,
   transition,
   weight,
+  width,
+  borderWidth,
+  marginY,
 } from '@heyclaude/web-runtime/design-system';
 import type { ChecklistProps } from '@heyclaude/web-runtime/types/component.types';
 import React from 'react';
@@ -78,10 +83,10 @@ export function Checklist(props: ChecklistProps) {
     validItems.length > 0 ? Math.round((checkedItems.size / validItems.length) * 100) : 0;
 
   const priorityColors = {
-    critical: `text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/20 ${padding.xTight} ${padding.yHair} rounded`,
-    high: 'text-red-600 dark:text-red-400',
-    medium: 'text-yellow-600 dark:text-yellow-400',
-    low: 'text-green-600 dark:text-green-400',
+    critical: `${textColor.red700} dark:${textColor.red300} ${bgColor.red100} dark:${bgColor.red900} ${padding.xTight} ${padding.yHair} ${radius.default}`,
+    high: `${textColor.red600} dark:${textColor.red400}`,
+    medium: `${textColor.yellow600} dark:${textColor.yellow400}`,
+    low: `${textColor.green600} dark:${textColor.green400}`,
   };
 
   const typeIcons = {
@@ -91,7 +96,7 @@ export function Checklist(props: ChecklistProps) {
   };
 
   return (
-    <Card itemScope={true} itemType="https://schema.org/ItemList" className="my-8">
+    <Card itemScope={true} itemType="https://schema.org/ItemList" className={marginY.loose}>
       <CardHeader>
         <div className={between.center}>
           <CardTitle className={cluster.compact}>
@@ -106,9 +111,9 @@ export function Checklist(props: ChecklistProps) {
       </CardHeader>
       <CardContent>
         <div className={marginBottom.default}>
-          <div className={`h-2 w-full ${radius.full} ${bgColor.muted}`}>
+          <div className={`${height.slider} ${width.full} ${radius.full} ${bgColor.muted}`}>
             <div
-              className={`h-2 ${radius.full} ${bgColor.primary} ${transition.all} ${animateDuration.slow}`}
+              className={`${height.slider} ${radius.full} ${bgColor.primary} ${transition.all} ${animateDuration.slow}`}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -130,7 +135,7 @@ export function Checklist(props: ChecklistProps) {
                 aria-label={`Mark ${item.task} as ${checkedItems.has(index) ? 'incomplete' : 'complete'}`}
               >
                 <div
-                  className={`flex ${iconSize.md} ${alignItems.center} ${justify.center} rounded border-2 ${transition.colors} ${
+                  className={`${display.flex} ${iconSize.md} ${alignItems.center} ${justify.center} ${radius.default} ${borderWidth['2']} ${transition.colors} ${
                     checkedItems.has(index)
                       ? `${borderColor.primary} ${bgColor.primary}`
                       : `${borderColor.border} ${hoverBorder.primary}`
@@ -141,7 +146,7 @@ export function Checklist(props: ChecklistProps) {
                   )}
                 </div>
               </button>
-              <div className="flex-1">
+              <div className={flexGrow['1']}>
                 <div className={cluster.compact}>
                   <span
                     itemProp="name"

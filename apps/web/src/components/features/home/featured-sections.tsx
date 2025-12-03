@@ -6,9 +6,16 @@ import type { Database } from '@heyclaude/database-types';
 import { trackMissingData } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
-import { between, iconSize, stack, cluster, weight, size, gap, muted, zLayer, tracking,
+import { between, iconSize, stack, cluster, weight, size, grid, muted, zLayer, tracking,
   textColor,
   marginBottom,
+  position,
+  absolute,
+  height,
+  padding,
+  textAlign,
+  spaceY,
+  transform,
 } from '@heyclaude/web-runtime/design-system';
 import type {
   DisplayableContent,
@@ -71,14 +78,14 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             const showTrending = Boolean(slug && trendingSlugs.has(slug));
 
             return (
-              <div className="relative h-full">
+              <div className={`${position.relative} ${height.full}`}>
                 {(showNew || showTrending) && (
-                  <div className={`pointer-events-none absolute top-3 left-3 ${zLayer.raised} ${stack.compact}`}>
+                  <div className={`pointer-events-none ${absolute.topLeftOffset} ${zLayer.raised} ${stack.compact}`}>
                     {showNew && (
                       <UnifiedBadge
                         variant="base"
                         style="secondary"
-                        className={`${size['2xs']} uppercase ${tracking.wide}`}
+                        className={`${size['2xs']} ${transform.uppercase} ${tracking.wide}`}
                       >
                         New this week
                       </UnifiedBadge>
@@ -87,7 +94,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                       <UnifiedBadge
                         variant="base"
                         style="outline"
-                        className={`${size['2xs']} uppercase ${tracking.wide}`}
+                        className={`${size['2xs']} ${transform.uppercase} ${tracking.wide}`}
                       >
                         Trending
                       </UnifiedBadge>
@@ -136,9 +143,9 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
   }, [featuredCategories.length, categories, categoryConfigs, featuredJobs.length]);
 
   return (
-    <div className={`${marginBottom.hero} space-y-16`}>
+    <div className={`${marginBottom.hero} ${spaceY.loose}`}>
       {featuredCategories.length === 0 && (
-        <div className={`py-8 text-center ${muted.default}`}>
+        <div className={`${padding.yLoose} ${textAlign.center} ${muted.default}`}>
           No featured categories available.
         </div>
       )}
@@ -182,7 +189,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
               View all <ExternalLink className={iconSize.sm} />
             </Link>
           </div>
-          <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-2 lg:grid-cols-3`}>
+          <div className={grid.responsive3}>
             {featuredJobs.slice(0, 6).map((job) => (
               <JobCard key={job.slug} job={job} />
             ))}

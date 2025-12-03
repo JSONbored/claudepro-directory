@@ -9,6 +9,7 @@ import {
   bgColor,
   cluster,
   gap,
+  grid,
   iconLeading,
   iconSize,
   alignItems,
@@ -22,6 +23,13 @@ import {
   textColor,
   transition,
   weight,
+  padding,
+  display,
+  flexGrow,
+  marginRight,
+  textAlign,
+  height,
+  width,
 } from '@heyclaude/web-runtime/design-system';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -143,7 +151,7 @@ export default async function SponsorshipsPage() {
     });
     return (
       <div className={spaceY.relaxed}>
-        <div className="text-destructive">Failed to load sponsorships. Please try again later.</div>
+        <div className={textColor.destructive}>Failed to load sponsorships. Please try again later.</div>
       </div>
     );
   }
@@ -159,13 +167,13 @@ export default async function SponsorshipsPage() {
           </div>
           <Button variant="outline" asChild>
             <Link href={ROUTES.PARTNER}>
-              <TrendingUp className={`mr-2 ${iconSize.sm}`} />
+              <TrendingUp className={`${marginRight.compact} ${iconSize.sm}`} />
               Become a Sponsor
             </Link>
           </Button>
         </div>
         <Card>
-          <CardContent className={`py-12 text-center ${muted.default}`}>
+          <CardContent className={`${padding.ySection} ${textAlign.center} ${muted.default}`}>
             You haven't launched any sponsorship campaigns yet.
           </CardContent>
         </Card>
@@ -192,13 +200,13 @@ export default async function SponsorshipsPage() {
         </div>
         <Button variant="outline" asChild>
           <Link href={ROUTES.PARTNER}>
-            <TrendingUp className={`mr-2 ${iconSize.sm}`} />
+            <TrendingUp className={`${marginRight.compact} ${iconSize.sm}`} />
             Become a Sponsor
           </Link>
         </Button>
       </div>
 
-      <div className={`grid ${gap.comfortable}`}>
+      <div className={`${grid.base} ${gap.comfortable}`}>
         {orderedSponsorships.map((sponsorship) => {
           const isActive = isSponsorshipActive(sponsorship, now);
 
@@ -217,12 +225,12 @@ export default async function SponsorshipsPage() {
           return (
             <Card key={sponsorship.id}>
               <CardHeader>
-                <div className={`flex ${alignItems.start} ${justify.between}`}>
-                  <div className="flex-1">
+                <div className={`${display.flex} ${alignItems.start} ${justify.between}`}>
+                  <div className={flexGrow['1']}>
                     <div className={cluster.compact}>
                       <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
                       {isActive ? (
-                        <UnifiedBadge variant="base" className={`bg-green-500/10 ${textColor.green} dark:bg-green-500/20 dark:text-green-400`}>
+                        <UnifiedBadge variant="base" className={`${bgColor['green/10']} ${textColor.green} dark:${bgColor['green/20']} dark:${textColor.success400}`}>
                           Active
                         </UnifiedBadge>
                       ) : (
@@ -230,7 +238,7 @@ export default async function SponsorshipsPage() {
                           Inactive
                         </UnifiedBadge>
                       )}
-                      {hasHitLimit ? <UnifiedBadge variant="base" className={`bg-yellow-500/10 ${textColor.yellow} dark:bg-yellow-500/20 dark:text-yellow-400`}>
+                      {hasHitLimit ? <UnifiedBadge variant="base" className={`${bgColor.warning} ${textColor.warning400} dark:${bgColor['warning/20']} dark:${textColor.warning400}`}>
                           Limit Reached
                         </UnifiedBadge> : null}
                     </div>
@@ -253,7 +261,7 @@ export default async function SponsorshipsPage() {
 
               <CardContent>
                 {/* Quick stats */}
-                <div className={`${marginBottom.default} grid grid-cols-3 ${gap.comfortable}`}>
+                <div className={`${marginBottom.default} ${grid.cols3}`}>
                   <div>
                     <div
                       className={`${cluster.tight} ${marginBottom.micro} ${muted.xs}`}
@@ -290,7 +298,7 @@ export default async function SponsorshipsPage() {
 
                 {/* Progress bar if has limit */}
                 {sponsorship.impression_limit ? <div
-                    className={`h-2 w-full ${radius.full} ${bgColor.muted}`}
+                    className={`${height.slider} ${width.full} ${radius.full} ${bgColor.muted}`}
                     role="progressbar"
                     aria-valuenow={impressionCount}
                     aria-valuemin={0}
@@ -298,7 +306,7 @@ export default async function SponsorshipsPage() {
                     aria-label={`Impressions: ${impressionCount} of ${sponsorship.impression_limit}`}
                   >
                     <div
-                      className={`h-2 ${radius.full} ${bgColor.primary} ${transition.all}`}
+                      className={`${height.slider} ${radius.full} ${bgColor.primary} ${transition.all}`}
                       style={{
                         width: `${Math.min(100, (impressionCount / sponsorship.impression_limit) * 100)}%`,
                       }}

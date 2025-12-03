@@ -8,7 +8,8 @@
  * @module hooks/use-infinite-scroll
  */
 
-import { getHomepageConfigBundle, getTimeoutConfig } from '../config/static-configs.ts';
+import { INFINITE_SCROLL_CONFIG } from '../config/unified-config.ts';
+import { animation } from '../design-system/tokens.ts';
 import { logger } from '../entries/core.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -63,10 +64,9 @@ export function useInfiniteScroll({
   // Load static config defaults synchronously using lazy initialization
   // This ensures config is loaded before displayCount is initialized
   const [configDefaults] = useState(() => {
-    const bundle = getHomepageConfigBundle();
     return {
-      batchSize: bundle.appSettings?.['hooks.infinite_scroll.batch_size'] ?? 30,
-      threshold: bundle.appSettings?.['hooks.infinite_scroll.threshold'] ?? 0.1,
+      batchSize: INFINITE_SCROLL_CONFIG.batch_size,
+      threshold: INFINITE_SCROLL_CONFIG.threshold,
     };
   });
 
@@ -106,8 +106,7 @@ export function useInfiniteScroll({
     setIsLoading(true);
 
     // Get timeout config from static defaults
-    const config = getTimeoutConfig();
-    const delay = config['timeout.ui.transition_ms'] ?? 200;
+    const delay = animation.duration.transition;
     setTimeout(() => {
       setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
       setIsLoading(false);

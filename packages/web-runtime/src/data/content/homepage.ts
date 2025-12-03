@@ -31,7 +31,7 @@ export const getHomepageData = cache(
           // Next.js automatically handles serialization of keyParts array
           keyParts: ['homepage', ...categoryIds],
           tags: ['homepage', 'content', 'trending'],
-          ttlKey: 'cache.homepage.ttl_seconds',
+          ttlKey: 'homepage',
           fallback: null,
           logMeta: { categoryIds, categoryCount: categoryIds.length },
         }

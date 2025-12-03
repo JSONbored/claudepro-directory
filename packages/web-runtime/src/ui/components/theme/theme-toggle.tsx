@@ -36,12 +36,13 @@ import { useEffect, useRef, useState } from 'react';
 import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 import { logClientWarning } from '../../../errors.ts';
 import { logger } from '../../../logger.ts';
-import { getTimeoutConfig } from '../../../config/static-configs.ts';
+import { animation } from '../../../design-system/tokens.ts';
 import { useViewTransition } from '../../../hooks/use-view-transition.ts';
 import { Moon, Sun } from '../../../icons.tsx';
 // Design System imports
 import { cluster } from '../../../design-system/styles/layout.ts';
 import { iconSize } from '../../../design-system/styles/icons.ts';
+import { muted } from '../../../design-system/styles/typography.ts';
 import { Switch } from '../switch.tsx';
 
 /**
@@ -67,8 +68,7 @@ export function ThemeToggle() {
   // Load transition duration from config
   useEffect(() => {
     try {
-      const config = getTimeoutConfig();
-      setTransitionMs(config['timeout.ui.transition_ms']);
+      setTransitionMs(animation.duration.transition);
     } catch (error) {
       logClientWarning('ThemeToggle: failed to load transition config', error);
     }
@@ -200,7 +200,7 @@ export function ThemeToggle() {
 
   return (
     <div ref={containerRef} className={cluster.compact}>
-      <Sun className={`${iconSize.sm} text-muted-foreground`} aria-hidden="true" />
+      <Sun className={`${iconSize.sm} ${muted.default}`} aria-hidden="true" />
       <Switch
         checked={theme === 'dark'}
         onCheckedChange={(checked) => {
@@ -239,7 +239,7 @@ export function ThemeToggle() {
         onClick={handleToggle}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       />
-      <Moon className={`${iconSize.sm} text-muted-foreground`} aria-hidden="true" />
+      <Moon className={`${iconSize.sm} ${muted.default}`} aria-hidden="true" />
     </div>
   );
 }

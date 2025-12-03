@@ -36,6 +36,8 @@ import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 // @ts-expect-error - Dynamic import for custom plugin
 import architecturalRules from './eslint-plugin-architectural-rules.js';
+// @ts-expect-error - Dynamic import for custom plugin
+import designSystemRules from './eslint-plugin-design-system-rules.js';
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -64,6 +66,7 @@ export default tseslint.config(
     },
     plugins: {
       'architectural-rules': architecturalRules,
+      'design-system': designSystemRules,
       boundaries: eslintPluginBoundaries,
       jsdoc: eslintPluginJSDoc,
       'import-x': importPlugin,
@@ -210,6 +213,67 @@ export default tseslint.config(
       'perfectionist/sort-union-types': ['warn', { type: 'natural', order: 'asc' }],
       'perfectionist/sort-intersection-types': ['warn', { type: 'natural', order: 'asc' }],
       'perfectionist/sort-enums': ['warn', { type: 'natural', order: 'asc' }],
+
+      // ============================================
+      // Design System Enforcement Rules
+      // Enforce usage of @heyclaude/web-runtime/design-system utilities
+      // over inline Tailwind patterns. Full coverage for detection.
+      // ============================================
+      
+      // HIGH CONFIDENCE - error severity (clear patterns, no ambiguity)
+      'design-system/prefer-icon-size': 'error', // h-X w-X → iconSize.*
+      
+      // MEDIUM-HIGH CONFIDENCE - warn severity
+      'design-system/prefer-radius': 'warn', // rounded-* → radius.*
+      'design-system/prefer-shadow': 'warn', // shadow-* → shadow.*
+      'design-system/prefer-z-layer': 'warn', // z-* → zLayer.*
+      'design-system/prefer-margin-bottom': 'warn', // mb-* → marginBottom.*
+      'design-system/prefer-margin-top': 'warn', // mt-* → marginTop.*
+      'design-system/prefer-margin-right': 'warn', // mr-* → marginRight.*
+      'design-system/prefer-margin-left': 'warn', // ml-* → marginLeft.*
+      'design-system/prefer-margin-x': 'warn', // mx-* → marginX.*
+      'design-system/prefer-margin-y': 'warn', // my-* → marginY.*
+      'design-system/prefer-space-y': 'warn', // space-y-* → spaceY.*
+      'design-system/prefer-space-x': 'warn', // space-x-* → spaceX.*
+      'design-system/prefer-padding': 'warn', // p-*/px-*/py-* → padding.*
+      'design-system/prefer-gap': 'warn', // gap-* → gap.*
+      'design-system/prefer-hover-bg': 'warn', // hover:bg-* → hoverBg.*
+      'design-system/prefer-transition': 'warn', // transition-* → transition.*
+      'design-system/prefer-muted-text': 'warn', // text-muted-foreground → muted.*
+      'design-system/prefer-cursor': 'warn', // cursor-* → cursor.*
+      'design-system/prefer-opacity': 'warn', // opacity-* → opacityLevel[*]
+      'design-system/prefer-overflow': 'warn', // overflow-* → overflow.*
+      'design-system/prefer-leading': 'warn', // leading-* → leading.*
+      'design-system/prefer-tracking': 'warn', // tracking-* → tracking.*
+      'design-system/prefer-whitespace': 'warn', // whitespace-* → whitespace.*
+      'design-system/prefer-truncate': 'warn', // truncate/line-clamp-* → truncate.*
+      'design-system/prefer-animate': 'warn', // animate-* → animate.*
+      'design-system/prefer-weight': 'warn', // font-* → weight.*
+      'design-system/prefer-backdrop': 'warn', // backdrop-blur-* → backdrop.*
+      'design-system/prefer-pointer-events': 'warn', // pointer-events-* → pointerEvents.*
+      'design-system/prefer-object-fit': 'warn', // object-* → objectFit.*
+      'design-system/prefer-object-position': 'warn', // object-center/top/etc → objectPosition.*
+      'design-system/prefer-display': 'warn', // flex/grid/block/hidden → display.*
+      'design-system/prefer-position': 'warn', // absolute/relative/fixed/sticky → position.*
+      'design-system/prefer-inset': 'warn', // inset-0/top-0/left-0/etc → inset.*
+      'design-system/prefer-width': 'warn', // w-full/w-auto/etc → width.*
+      'design-system/prefer-height': 'warn', // h-full/h-auto/etc → height.*
+      'design-system/prefer-flex-direction': 'warn', // flex-row/flex-col → flexDir.*
+      'design-system/prefer-flex-wrap': 'warn', // flex-wrap/flex-nowrap → flexWrap.*
+      'design-system/prefer-flex-grow': 'warn', // flex-1/shrink-0/grow → flexGrow.*
+      'design-system/prefer-justify': 'warn', // justify-center/between/etc → justify.*
+      'design-system/prefer-align-items': 'warn', // items-center/start/etc → alignItems.*
+      'design-system/prefer-align-self': 'warn', // self-center/start/etc → self.*
+      'design-system/prefer-text-color': 'warn', // text-foreground/primary/etc → textColor.*
+      'design-system/prefer-bg-color': 'warn', // bg-background/accent/etc → bgColor.*
+      'design-system/prefer-border-color': 'warn', // border-border/primary/etc → borderColor.*
+      'design-system/prefer-user-select': 'warn', // select-none/text/all → userSelect.*
+      'design-system/prefer-text-align': 'warn', // text-left/center/right → textAlign.*
+      
+      // LOWER CONFIDENCE - off by default (enable as needed)
+      'design-system/prefer-text-size': 'off', // text-sm/xs/lg → size.* (many valid inline uses)
+      'design-system/prefer-stack': 'off', // flex flex-col gap-* → stack.* (complex detection)
+      'design-system/prefer-cluster': 'off', // flex items-center gap-* → cluster.* (complex detection)
 
       // ============================================
       // Logger & Error Instrumentation Rules

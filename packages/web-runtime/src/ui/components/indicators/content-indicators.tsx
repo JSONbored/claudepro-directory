@@ -18,11 +18,12 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { muted, size as textSize } from '../../../design-system/styles/typography.ts';
-import { gap, squareSize } from '../../../design-system/styles/layout.ts';
+import { muted, size as textSize, weight } from '../../../design-system/styles/typography.ts';
+import { gap, squareSize, display, alignItems, justify, flexDir, padding, position, inset } from '../../../design-system/styles/layout.ts';
 import { iconSize } from '../../../design-system/styles/icons.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
-import { shadowColor } from '../../../design-system/styles/effects.ts';
+import { shadowColor, zLayer, opacityLevel, blur } from '../../../design-system/styles/effects.ts';
+import { bgGradient, gradientFrom, gradientVia, gradientTo, bgColor, textColor } from '../../../design-system/styles/colors.ts';
 import { CheckCircle, Sparkles, User, Clock } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip.tsx';
@@ -104,19 +105,19 @@ export function getFreshnessLabel(date: string | null | undefined): string {
 
 const FRESHNESS_COLORS: Record<FreshnessTier, { dot: string; glow: string; text: string }> = {
   fresh: {
-    dot: 'bg-emerald-500',
+    dot: bgColor.emerald,
     glow: shadowColor.emerald,
-    text: 'text-emerald-600 dark:text-emerald-400',
+    text: textColor.emerald,
   },
   recent: {
-    dot: 'bg-amber-500',
+    dot: bgColor.amber,
     glow: shadowColor.amber,
-    text: 'text-amber-600 dark:text-amber-400',
+    text: textColor.amber,
   },
   stable: {
-    dot: 'bg-zinc-400 dark:bg-zinc-500',
+    dot: bgColor.zinc,
     glow: '',
-    text: 'text-zinc-500 dark:text-zinc-400',
+    text: textColor.zinc,
   },
 };
 
@@ -138,7 +139,7 @@ function FreshnessIndicator({ tier, label, size }: FreshnessIndicatorProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <motion.div
-          className="relative flex items-center justify-center"
+          className={`${position.relative} ${display.flex} ${alignItems.center} ${justify.center}`}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 500, damping: 25 }}
@@ -147,10 +148,10 @@ function FreshnessIndicator({ tier, label, size }: FreshnessIndicatorProps) {
           {tier === 'fresh' && (
             <motion.div
               className={cn(
-                `absolute ${radius.full}`,
+                `${position.absolute} ${radius.full}`,
                 dotSize,
                 colorClasses.dot,
-                'blur-sm opacity-60'
+                `${blur.sm} ${opacityLevel[60]}`
               )}
               animate={{
                 scale: [1, 1.5, 1],
@@ -166,7 +167,7 @@ function FreshnessIndicator({ tier, label, size }: FreshnessIndicatorProps) {
 
           {/* Main dot */}
           <motion.div
-            className={cn(`relative ${radius.full}`, dotSize, colorClasses.dot)}
+            className={cn(`${position.relative} ${radius.full}`, dotSize, colorClasses.dot)}
             animate={
               tier === 'fresh'
                 ? {
@@ -190,7 +191,7 @@ function FreshnessIndicator({ tier, label, size }: FreshnessIndicatorProps) {
         </motion.div>
       </TooltipTrigger>
       <TooltipContent side="top" className={textSize.xs}>
-        <div className={`flex items-center ${gap.snug}`}>
+        <div className={`${display.flex} ${alignItems.center} ${gap.snug}`}>
           <Clock className={iconSize.xs} />
           <span>Updated {label}</span>
         </div>
@@ -218,19 +219,19 @@ function SourceIndicator({ source, size }: SourceIndicatorProps) {
     official: {
       icon: CheckCircle,
       label: 'Official',
-      color: 'text-blue-500 dark:text-blue-400',
+      color: textColor.info,
       description: 'Verified by maintainers',
     },
     claudepro: {
       icon: CheckCircle,
       label: 'heyclaude',
-      color: 'text-violet-500 dark:text-violet-400',
+      color: textColor.purple,
       description: 'Curated by heyclaude',
     },
     community: {
       icon: User,
       label: 'Community',
-      color: 'text-zinc-500 dark:text-zinc-400',
+      color: textColor.zinc,
       description: 'Community contribution',
     },
   };
@@ -242,7 +243,7 @@ function SourceIndicator({ source, size }: SourceIndicatorProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <motion.div
-          className="relative"
+          className={position.relative}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.1 }}
@@ -251,7 +252,7 @@ function SourceIndicator({ source, size }: SourceIndicatorProps) {
           {/* Shine effect for official/claudepro */}
           {(source === 'official' || source === 'claudepro') && (
             <motion.div
-              className={`absolute inset-0 ${radius.full} bg-gradient-to-r from-transparent via-white/30 to-transparent`}
+              className={`${position.absolute} ${inset['0']} ${radius.full} ${bgGradient.toR} ${gradientFrom.transparent} ${gradientVia.white30} ${gradientTo.transparent}`}
               initial={{ x: '-100%', opacity: 0 }}
               animate={{ x: '100%', opacity: [0, 1, 0] }}
               transition={{
@@ -262,12 +263,12 @@ function SourceIndicator({ source, size }: SourceIndicatorProps) {
               }}
             />
           )}
-          <Icon className={cn(iconClass, config.color, 'relative z-10')} />
+          <Icon className={cn(iconClass, config.color, `${position.relative} ${zLayer.raised}`)} />
         </motion.div>
       </TooltipTrigger>
       <TooltipContent side="top" className={textSize.xs}>
-        <div className={`flex flex-col ${gap.micro}`}>
-          <span className="font-medium">{config.label}</span>
+        <div className={`${display.flex} ${flexDir.col} ${gap.micro}`}>
+          <span className={weight.medium}>{config.label}</span>
           <span className={muted.sm}>{config.description}</span>
         </div>
       </TooltipContent>
@@ -289,9 +290,9 @@ export function NewBadge({ size }: NewBadgeProps) {
   return (
     <motion.div
       className={cn(
-        `relative flex items-center ${gap.tight} ${radius.full} px-2 py-0.5`,
-        'bg-gradient-to-r from-violet-500/90 to-fuchsia-500/90',
-        'text-white font-semibold',
+        `${position.relative} ${display.flex} ${alignItems.center} ${gap.tight} ${radius.full} ${padding.xCompact} ${padding.yHair}`,
+        `${bgGradient.toR} ${gradientFrom.violet90} ${gradientTo.fuchsia90}`,
+        `${textColor.white} ${weight.semibold}`,
         textSizeClass
       )}
       initial={{ scale: 0, opacity: 0 }}
@@ -321,7 +322,7 @@ export function NewBadge({ size }: NewBadgeProps) {
 
       {/* Shimmer effect */}
       <motion.div
-        className={`absolute inset-0 ${radius.full} bg-gradient-to-r from-transparent via-white/20 to-transparent`}
+            className={`${position.absolute} ${inset['0']} ${radius.full} ${bgGradient.toR} ${gradientFrom.transparent} ${gradientVia.white20} ${gradientTo.transparent}`}
         initial={{ x: '-100%' }}
         animate={{ x: '200%' }}
         transition={{
@@ -371,7 +372,7 @@ export function ContentIndicators({
   }
 
   return (
-    <div className={cn(`flex items-center ${gap.snug}`, className)}>
+    <div className={cn(`${display.flex} ${alignItems.center} ${gap.snug}`, className)}>
       <AnimatePresence mode="popLayout">
         {/* New badge takes priority */}
         {shouldShowNew && (

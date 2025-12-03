@@ -35,6 +35,7 @@ import {
   flexDir,
   flexWrap,
   gap,
+  hoverBg,
   iconSize,
   alignItems,
   justify,
@@ -43,12 +44,26 @@ import {
   marginTop,
   muted,
   padding,
+  paddingTop,
+  paddingRight,
   radius,
   size,
   stack,
   textColor,
   transition,
   weight,
+  display,
+  position,
+  absolute,
+  sticky,
+  truncate,
+  height,
+  textAlign,
+  hoverBorder,
+  borderColor,
+  maxHeight,
+  overflow,
+  iconLeading,
 } from '@heyclaude/web-runtime/design-system';
 import { ChevronDown, ChevronUp, Clock, Trash, X } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
@@ -104,13 +119,13 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
         delay: index * 0.03, // Stagger by 30ms
         ease: 'easeOut',
       }}
-      className="group relative"
+      className={`group ${position.relative}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link
         href={href}
-        className={cn(stack.snug, `${radius.lg} ${border.light} ${bgColor.card} ${padding.xCompact} py-2.5`, transition.default, 'hover:border-accent/50 hover:bg-accent/5')}
+        className={cn(stack.snug, `${radius.lg} ${border.light} ${bgColor.card} ${padding.xCompact} ${padding.yBetween}`, transition.default, `${hoverBorder.accent} ${hoverBg.subtle}`)}
       >
         {/* Header: Badge + Time */}
         <div className={between.center}>
@@ -121,16 +136,16 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
         </div>
 
         {/* Title */}
-        <h4 className={`line-clamp-1 ${weight.medium} ${textColor.foreground} ${size.sm}`}>{item.title}</h4>
+        <h4 className={`${truncate.single} ${weight.medium} ${textColor.foreground} ${size.sm}`}>{item.title}</h4>
 
         {/* Description */}
-        <p className={`line-clamp-2 ${size['3xs']} ${muted.default} ${leading.tight}`}>
+        <p className={`${truncate.lines2} ${size['3xs']} ${muted.default} ${leading.tight}`}>
           {item.description}
         </p>
 
         {/* Tags (if present) */}
         {item.tags && item.tags.length > 0 && (
-          <div className={`${marginTop.tight} flex ${flexWrap.wrap} ${gap.tight}`}>
+          <div className={`${marginTop.tight} ${display.flex} ${flexWrap.wrap} ${gap.tight}`}>
             {item.tags.slice(0, 2).map((tag) => (
               <UnifiedBadge key={tag} variant="base" style="outline" className={size['2xs']}>
                 {tag}
@@ -157,7 +172,7 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
               e.stopPropagation();
               onRemove(item.category, item.slug);
             }}
-            className={`absolute top-2 right-2 flex ${iconSize.lg} ${alignItems.center} ${justify.center} ${radius.md} ${border.light} ${bgColor['background/95']} ${backdrop.sm} hover:border-destructive hover:bg-destructive/10 hover:text-destructive`}
+            className={`${absolute.topRightOffset} ${display.flex} ${iconSize.lg} ${alignItems.center} ${justify.center} ${radius.md} ${border.light} ${bgColor['background/95']} ${backdrop.sm} hover:${borderColor.destructive} ${hoverBg.destructive} hover:${textColor.destructive}`}
             aria-label={`Remove ${item.title} from recently viewed`}
           >
             <X className={iconSize.xs} />
@@ -188,8 +203,8 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
       className={cn(
-        `sticky top-20 hidden h-fit max-h-[calc(100vh-6rem)] w-72 ${flexDir.col} ${gap.default} ${radius.xl} ${border.light} ${bgColor['card/50']} ${padding.default} ${backdrop.sm} xl:flex`,
-        'overflow-hidden'
+        `${sticky.topNav} ${display.none} ${height.fit} ${maxHeight.sidebar} w-72 ${flexDir.col} ${gap.default} ${radius.xl} ${border.light} ${bgColor['card/50']} ${padding.default} ${backdrop.sm} xl:${display.flex}`,
+        overflow.hidden
       )}
     >
       {/* Header */}
@@ -204,10 +219,10 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
             variant="ghost"
             size="sm"
             onClick={clearAll}
-            className={`h-7 ${padding.xTight} ${size.xs}`}
+            className={`${height.buttonSm} ${padding.xTight} ${size.xs}`}
             aria-label="Clear all recently viewed"
           >
-            <Trash className={`mr-1 ${iconSize.xs}`} />
+            <Trash className={iconLeading.xs} />
             Clear
           </Button>
 
@@ -216,7 +231,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
             variant="ghost"
             size="sm"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`${iconSize.lgPlus} ${padding.none} xl:hidden`}
+            className={`${iconSize.lgPlus} ${padding.none} xl:${display.none}`}
             aria-label={isCollapsed ? 'Expand recently viewed' : 'Collapse recently viewed'}
           >
             {isCollapsed ? <ChevronDown className={iconSize.sm} /> : <ChevronUp className={iconSize.sm} />}
@@ -232,7 +247,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={cn(stack.compact, 'overflow-y-auto pr-1')}
+            className={cn(stack.compact, overflow.yAuto, paddingRight.tight)}
           >
             <AnimatePresence mode="popLayout">
               {recentlyViewed.map((item, index) => (
@@ -254,7 +269,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className={`${borderTop.faint} pt-3 text-center ${size['2xs']} ${muted.default}`}
+          className={`${borderTop.faint} ${paddingTop.default} ${textAlign.center} ${size['2xs']} ${muted.default}`}
         >
           Showing {recentlyViewed.length} of 10 max
         </motion.p>

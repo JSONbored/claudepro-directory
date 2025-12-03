@@ -10,12 +10,18 @@ import { iconSize, weight, muted, size, gap, spaceY, radius, borderColor,
   animateDuration,
   transition,
   bgColor,
+  hoverBg,
   justify,
   textColor,
   alignItems,
   flexGrow,
   padding,
+  paddingRight,
+  paddingTop,
   shadow,
+  display,
+  hoverText,
+  focusRing,
 } from '@heyclaude/web-runtime/design-system';
 import { Bell, X } from '@heyclaude/web-runtime/icons';
 import { motion } from 'motion/react';
@@ -64,31 +70,31 @@ export function NotificationItem({ notification }: NotificationItemProps) {
         type="button"
         onClick={handleDismiss}
         className={
-          `absolute top-2 right-2 ${radius.md} ${padding.micro} ${muted.default} ${transition.colors} ${animateDuration.fast} hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-accent`
+          `absolute top-2 right-2 ${radius.md} ${padding.micro} ${muted.default} ${transition.colors} ${animateDuration.fast} ${hoverBg.accentSolid} ${hoverText.foreground} ${focusRing.accent}`
         }
         aria-label="Dismiss notification"
       >
         <X className={iconSize.sm} />
       </button>
 
-      <div className={`flex ${gap.default} pr-6`}>
+      <div className={`${display.flex} ${gap.default} ${paddingRight.relaxed}`}>
         <div
-          className={`flex ${iconSize['2xl']} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${
+          className={`${display.flex} ${iconSize['2xl']} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${
             notification.type === 'announcement'
-              ? `bg-primary/10 ${textColor.primary}`
-              : `bg-accent/10 ${textColor.accent}`
+              ? `${bgColor['primary/10']} ${textColor.primary}`
+              : `${bgColor['accent/10']} ${textColor.accent}`
           }
           `}
         >
           <Bell className={iconSize.md} />
         </div>
 
-        <div className={`flex-1 ${spaceY.tight}`}>
+        <div className={`${flexGrow['1']} ${spaceY.tight}`}>
           <h4 className={`${weight.medium} ${textColor.foreground} ${size.sm}`}>{notification.title}</h4>
           <p className={`${muted.default} ${size.xs} ${leading.relaxed}`}>{notification.message}</p>
 
           {notification.action_label && (
-            <div className="pt-2">
+            <div className={paddingTop.compact}>
               {notification.action_href ? (
                 <Button asChild={true} variant="outline" size="sm">
                   <Link href={notification.action_href} onClick={handleActionClick}>

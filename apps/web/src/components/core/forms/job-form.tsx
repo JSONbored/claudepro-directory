@@ -12,18 +12,24 @@ import {
   between,
   bgColor,
   borderColor,
+  border,
   cursor,
   gap,
+  grid,
   iconSize,
   marginTop,
   muted,
   padding,
+  paddingLeft,
   radius,
   row,
   size,
   spaceY,
   textColor,
   weight,
+  display,
+  flexGrow,
+  listStyle,
 } from '@heyclaude/web-runtime/design-system';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import type { CreateJobInput } from '@heyclaude/web-runtime';
@@ -391,7 +397,7 @@ export function JobForm({
             defaultCompanyName={initialData?.company || undefined}
           />
 
-          <div className={`grid grid-cols-2 ${gap.comfortable}`}>
+          <div className={grid.cols2}>
             <FormField
               variant="select"
               label="Employment Type"
@@ -426,7 +432,7 @@ export function JobForm({
             </FormField>
           </div>
 
-          <div className={`grid grid-cols-2 ${gap.comfortable}`}>
+          <div className={grid.cols2}>
             <FormField
               variant="input"
               label="Location"
@@ -455,7 +461,7 @@ export function JobForm({
             </FormField>
           </div>
 
-          <div className={`grid grid-cols-2 ${gap.comfortable}`}>
+          <div className={grid.cols2}>
             <FormField
               variant="select"
               label="Category"
@@ -649,7 +655,7 @@ export function JobForm({
                 <p className={`${muted.default} ${size.xs} ${marginTop.compact}`}>{planInfoSubtitle}</p>
               )}
               {selectedPlanOption.benefits && (
-                <ul className={`${marginTop.compact} list-disc ${spaceY.tight} pl-4 ${muted.default} ${size.xs}`}>
+                <ul className={`${marginTop.compact} ${listStyle.disc} ${spaceY.tight} ${paddingLeft.comfortable} ${muted.default} ${size.xs}`}>
                   {selectedPlanOption.benefits.map((benefit) => (
                     <li key={benefit}>{benefit}</li>
                   ))}
@@ -662,24 +668,24 @@ export function JobForm({
             confirmation.
           </p>
 
-          <div className={`${marginTop.default} ${radius.lg} border border-orange-500/30 bg-orange-500/5 ${padding.default}`}>
+          <div className={`${marginTop.default} ${radius.lg} ${border.default} ${borderColor['orange/30']} ${bgColor['orange/5']} ${padding.default}`}>
             <div className={`${row.default}`}>
               <Checkbox
                 id={featuredCheckboxId}
                 checked={isFeatured}
                 onCheckedChange={(checked) => setIsFeatured(checked as boolean)}
               />
-              <div className="flex-1">
+              <div className={flexGrow['1']}>
                 <Label
                   htmlFor={featuredCheckboxId}
-                  className={`flex ${cursor.pointer} ${alignItems.center} ${gap.compact} ${weight.semibold} ${size.sm}`}
+                  className={`${display.flex} ${cursor.pointer} ${alignItems.center} ${gap.compact} ${weight.semibold} ${size.sm}`}
                 >
                   <Star className={`${iconSize.sm} ${textColor.orange}`} />
                   Make this a Featured Listing
                 </Label>
                 <p className={`${muted.default} ${size.xs} ${marginTop.tight}`}>{featuredUpsellDescription}</p>
                 {featuredUpgradeLabel && (
-                  <p className={`${marginTop.compact} ${weight.medium} ${textColor.orange} ${size.sm} dark:text-orange-400`}>
+                  <p className={`${marginTop.compact} ${weight.medium} ${textColor.orange400} ${size.sm}`}>
                     {featuredUpgradeLabel}
                   </p>
                 )}
@@ -693,7 +699,7 @@ export function JobForm({
       <input type="hidden" name="requirements" value={JSON.stringify(requirements)} />
       <input type="hidden" name="benefits" value={JSON.stringify(benefits)} />
 
-      <div className={`flex ${gap.comfortable}`}>
+      <div className={`${display.flex} ${gap.comfortable}`}>
         <Button
           type="submit"
           disabled={isPending || tags.length === 0 || requirements.length === 0}

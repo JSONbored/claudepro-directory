@@ -16,6 +16,12 @@ import {
   padding,
   size,
   weight,
+  border,
+  marginY,
+  textAlign,
+  textColor,
+  overflow,
+  width,
 } from '@heyclaude/web-runtime/design-system';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import {
@@ -47,9 +53,9 @@ export function ErrorTable(props: ErrorTableProps) {
   const validErrors = errors;
 
   const severityColors = {
-    critical: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
-    warning: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200',
-    info: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
+    critical: `${bgColor.red100Dark} ${textColor.red800Dark}`,
+    warning: `${bgColor.yellow100Dark} ${textColor.yellow800Dark}`,
+    info: `${bgColor.blue100Dark} ${textColor.blue800Dark}`,
   };
 
   const severityIcons = {
@@ -59,27 +65,27 @@ export function ErrorTable(props: ErrorTableProps) {
   };
 
   return (
-    <Card className="my-8">
+    <Card className={marginY.loose}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent className={padding.none}>
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className={overflow.xAuto}>
+          <table className={width.full}>
             <thead className={`${borderBottom.default} ${bgColor['muted/30']}`}>
               <tr>
-                <th className={`${padding.default} text-left ${weight.medium}`}>Error Code</th>
-                <th className={`${padding.default} text-left ${weight.medium}`}>Severity</th>
-                <th className={`${padding.default} text-left ${weight.medium}`}>Message</th>
-                <th className={`${padding.default} text-left ${weight.medium}`}>Solution</th>
+                <th className={`${padding.default} ${textAlign.left} ${weight.medium}`}>Error Code</th>
+                <th className={`${padding.default} ${textAlign.left} ${weight.medium}`}>Severity</th>
+                <th className={`${padding.default} ${textAlign.left} ${weight.medium}`}>Message</th>
+                <th className={`${padding.default} ${textAlign.left} ${weight.medium}`}>Solution</th>
               </tr>
             </thead>
             <tbody>
               {validErrors.map((error, index) => (
                 <tr
                   key={error.code}
-                  className={`${borderBottom.default} last:border-0 ${index % 2 === 0 ? 'bg-muted/10' : ''}`}
+                  className={`${borderBottom.default} last:${border.none} ${index % 2 === 0 ? bgColor['muted/10'] : ''}`}
                 >
                   <td className={`${padding.default} font-mono ${size.sm}`}>{error.code}</td>
                   <td className={padding.default}>

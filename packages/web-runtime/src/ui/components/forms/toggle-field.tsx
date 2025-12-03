@@ -41,7 +41,7 @@
  * Pattern Consolidated:
  * Before (14 lines):
  * ```tsx
- * <div className="flex items-center justify-between">
+ * <div className={`${display.flex} ${alignItems.center} ${justify.between}`}>
  *   <div>
  *     <Label>Public profile</Label>
  *     <p className={`${size.xs} text-muted-foreground ${marginTop.tight}`}>
@@ -74,8 +74,10 @@
 
 import { useId } from 'react';
 import { cn } from '../../utils.ts';
-import { marginTop } from '../../../design-system/styles/layout.ts';
-import { size } from '../../../design-system/styles/typography.ts';
+import { marginTop, display, alignItems, justify, flexGrow } from '../../../design-system/styles/layout.ts';
+import { size, weight, muted } from '../../../design-system/styles/typography.ts';
+import { opacityLevel } from '../../../design-system/styles/effects.ts';
+import { cursor } from '../../../design-system/styles/interactive.ts';
 import { Label } from '../label.tsx';
 import { Switch } from '../switch.tsx';
 
@@ -128,23 +130,23 @@ export function ToggleField({
   return (
     <div
       className={cn(
-        'flex items-center justify-between',
-        disabled && 'cursor-not-allowed opacity-50',
+        `${display.flex} ${alignItems.center} ${justify.between}`,
+        disabled && `${cursor.notAllowed} ${opacityLevel[50]}`,
         className
       )}
     >
       {/* Label + Description */}
-      <div className={cn('flex-1', labelClassName)}>
+      <div className={cn(flexGrow['1'], labelClassName)}>
         <Label
           htmlFor={id}
           className={cn(
-            `font-medium ${size.base}`,
-            disabled ? 'cursor-not-allowed' : 'cursor-pointer'
+            `${weight.medium} ${size.base}`,
+            disabled ? cursor.notAllowed : cursor.pointer
           )}
         >
           {label}
         </Label>
-        {description && <p className={`${marginTop.tight} text-muted-foreground ${size.xs}`}>{description}</p>}
+        {description && <p className={`${marginTop.tight} ${muted.default} ${size.xs}`}>{description}</p>}
       </div>
 
       {/* Switch */}

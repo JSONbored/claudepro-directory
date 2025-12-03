@@ -10,11 +10,30 @@ import { createMFAChallenge, listMFAFactors, verifyMFAChallenge } from '@heyclau
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
-import { iconLeading, iconSize, cluster, spaceY, helper, muted  , padding , size , radius, tracking,
-  bgColor,
-  justify,
+import {
   alignItems,
+  animate,
+  bgColor,
   borderColor,
+  cluster,
+  display,
+  height,
+  iconLeading,
+  iconSize,
+  justify,
+  maxWidth,
+  muted,
+  padding,
+  radius,
+  size,
+  spaceY,
+  textAlign,
+  tracking,
+  width,
+  helper,
+  ring,
+  border,
+  fontFamily,
 } from '@heyclaude/web-runtime/design-system';
 import { errorToasts } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useState } from 'react';
@@ -179,7 +198,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
         }
       }}
     >
-      <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+      <DialogContent className={maxWidth.smMd} onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className={cluster.compact}>
             <Shield className={iconSize.sm} />
@@ -198,8 +217,8 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
         )}
 
         {loading && factors.length === 0 ? (
-          <div className={`flex ${alignItems.center} ${justify.center} ${padding.yRelaxed}`}>
-            <Loader2 className={`${iconSize.xl} animate-spin ${muted.default}`} />
+          <div className={`${display.flex} ${alignItems.center} ${justify.center} ${padding.yRelaxed}`}>
+            <Loader2 className={`${iconSize.xl} ${animate.spin} ${muted.default}`} />
           </div>
         ) : (
           <div className={spaceY.comfortable}>
@@ -212,7 +231,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
                     const factor = factors.find((f) => f.id === e.target.value);
                     setSelectedFactor(factor || null);
                   }}
-                  className={`flex h-10 w-full ${radius.md} border ${borderColor.input} ${bgColor.background} ${padding.xCompact} ${padding.yCompact} ${size.sm} ring-offset-background`}
+                  className={`${display.flex} ${height.input} ${width.full} ${radius.md} ${border.default} ${borderColor.input} ${bgColor.background} ${padding.xCompact} ${padding.yCompact} ${size.sm} ${ring.offsetBackground}`}
                   disabled={loading}
                 >
                   {factors.map((factor) => (
@@ -239,7 +258,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
                   setError(null);
                 }}
                 placeholder="000000"
-                className={`text-center font-mono ${size.lg} ${tracking.widest}`}
+                className={`${textAlign.center} ${fontFamily.mono} ${size.lg} ${tracking.widest}`}
                 disabled={loading}
                 autoFocus={true}
                 onKeyDown={(e) => {
@@ -259,11 +278,11 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
                 });
               }}
               disabled={loading || verifyCode.length !== 6 || !selectedFactor}
-              className="w-full"
+              className={width.full}
             >
               {loading ? (
                 <>
-                  <Loader2 className={`${iconLeading.sm} animate-spin`} />
+                  <Loader2 className={`${iconLeading.sm} ${animate.spin}`} />
                   Verifying...
                 </>
               ) : (

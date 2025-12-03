@@ -6,6 +6,8 @@ import {
   iconSize,
   weight,
   padding,
+  paddingTop,
+  paddingBottom,
   zLayer,
   shadow,
   backdrop,
@@ -13,6 +15,7 @@ import {
   borderColor,
   flexDir,
   bgColor,
+  hoverBg,
   justify,
   textColor,
   alignItems,
@@ -20,6 +23,14 @@ import {
   buttonMinWidth,
   transition,
   size,
+  display,
+  flexGrow,
+  position,
+  width,
+  container,
+  truncate,
+  border,
+  hoverBorder,
 } from '@heyclaude/web-runtime/design-system';
 import {
   AlertTriangle,
@@ -107,7 +118,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
 
   /**
    * Z-Index Hierarchy:
-   * - z-[100]: Skip-to-content link (highest priority - accessibility)
+   * - zLayer.max: Skip-to-content link (highest priority - accessibility)
    * - zLayer.popover:  Announcement banner (above navigation, below skip link)
    * - zLayer.modal:    Navigation, dialogs, sheets, dropdowns
    * - zLayer.raised:    Component-level overlays (badges, cards)
@@ -121,22 +132,22 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
       aria-label="Site announcement"
       aria-live="polite"
       aria-atomic="true"
-      className={`relative ${zLayer.popover} hidden w-full ${padding.xCompact} pt-2 pb-2 md:block`}
+      className={`${position.relative} ${zLayer.popover} ${display.none} ${width.full} ${padding.xCompact} ${paddingTop.compact} ${paddingBottom.compact} md:${display.block}`}
     >
       {/* Rounded pill container */}
-      <div className="container mx-auto">
+      <div className={container.default}>
         <div
-          className={`${radius.full} border ${borderColor['accent/20']} ${bgColor['accent/10']} ${shadow.sm} ${backdrop.sm} ${transition.slow} hover:border-accent/30 hover:${shadow.md} motion-reduce:transition-none`}
+          className={`${radius.full} ${border.default} ${borderColor['accent/20']} ${bgColor['accent/10']} ${shadow.sm} ${backdrop.sm} ${transition.slow} ${hoverBorder.accent} hover:${shadow.md} motion-reduce:${transition.none}`}
         >
-          <div className={`px-4 ${padding.yCompact} md:px-6 md:py-2.5`}>
-            <div className={`flex ${flexDir.col} ${alignItems.center} ${justify.between} sm:flex-row`}>
+          <div className={`${padding.xComfortable} ${padding.yCompact} md:${padding.xRelaxed} md:${padding.yBetween}`}>
+            <div className={`${display.flex} ${flexDir.col} ${alignItems.center} ${justify.between} sm:${display.flex}-row`}>
               {/* Announcement Content */}
               <Announcement
                 variant={announcement.variant}
-                className={`flex-1 border-none ${bgColor.transparent} ${shadow.none}`}
+                className={`${flexGrow['1']} ${border.none} ${bgColor.transparent} ${shadow.none}`}
               >
                 {announcement.tag && (
-                  <AnnouncementTag className={`shrink-0 ${weight.bold} ${size['2xs']} sm:${size.xs}`}>
+                  <AnnouncementTag className={`${flexGrow.shrink0} ${weight.bold} ${size['2xs']} sm:${size.xs}`}>
                     {announcement.tag}
                   </AnnouncementTag>
                 )}
@@ -147,20 +158,20 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                       href={announcement.href}
                       className={`hover:underline ${cluster.snug} ${transition.default}`}
                     >
-                      <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
+                      <span className={`${truncate.lines2} sm:${truncate.single}`}>{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className={`${iconSize.xs} shrink-0 sm:${iconSize.sm}`}
+                          className={`${iconSize.xs} ${flexGrow.shrink0} sm:${iconSize.sm}`}
                           aria-hidden="true"
                         />
                       )}
                     </Link>
                   ) : (
                     <span className={cluster.snug}>
-                      <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
+                      <span className={`${truncate.lines2} sm:${truncate.single}`}>{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className={`${iconSize.xs} shrink-0 sm:${iconSize.sm}`}
+                          className={`${iconSize.xs} ${flexGrow.shrink0} sm:${iconSize.sm}`}
                           aria-hidden="true"
                         />
                       )}
@@ -175,10 +186,10 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   type="button"
                   onClick={dismiss}
                   aria-label="Dismiss announcement"
-                  className={`flex ${buttonMinHeight.icon} ${buttonMinWidth.icon} shrink-0 ${alignItems.center} ${justify.center} ${radius.full} ${transition.default} hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:${buttonMinHeight.iconMd} sm:${buttonMinWidth.iconMd}`}
+                  className={`${display.flex} ${buttonMinHeight.icon} ${buttonMinWidth.icon} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${transition.default} ${hoverBg.strong} focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:${buttonMinHeight.iconMd} sm:${buttonMinWidth.iconMd}`}
                 >
                   <X
-                    className={`${iconSize.xs} ${textColor.foreground} sm:h-4 sm:w-4`}
+                    className={`${iconSize.xs} ${textColor.foreground} sm:${iconSize.sm} sm:${iconSize.sm}`}
                     aria-hidden="true"
                   />
                 </button>

@@ -11,7 +11,7 @@
  * - Close button for user control
  */
 
-import { muted, radius, weight, shadow } from '@heyclaude/web-runtime/design-system';
+import { muted, radius, weight, shadow, textColor, bgColor, borderColor } from '@heyclaude/web-runtime/design-system';
 import { useTheme } from 'next-themes';
 import { Toaster as Sonner, toast } from 'sonner';
 
@@ -32,14 +32,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast:
-            `group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:${shadow.lg} group-[.toaster]:${radius.xl}`,
+            `group toast group-[.toaster]:${bgColor.background} group-[.toaster]:${textColor.foreground} group-[.toaster]:${borderColor.border} group-[.toaster]:${shadow.lg} group-[.toaster]:${radius.xl}`,
           description: `group-[.toast]:${muted.default}`,
           actionButton:
-            `group-[.toast]:bg-primary group-[.toast]:text-primary-foreground group-[.toast]:${radius.lg} group-[.toast]:${weight.medium}`,
+            `group-[.toast]:${bgColor.primary} group-[.toast]:${textColor.primaryForeground} group-[.toast]:${radius.lg} group-[.toast]:${weight.medium}`,
           cancelButton:
-            `group-[.toast]:bg-muted group-[.toast]:${muted.default} group-[.toast]:${radius.lg}`,
+            `group-[.toast]:${bgColor.muted} group-[.toast]:${muted.default} group-[.toast]:${radius.lg}`,
           closeButton:
-            `group-[.toast]:bg-background group-[.toast]:border-border group-[.toast]:${muted.default} group-[.toast]:hover:text-foreground`,
+            `group-[.toast]:${bgColor.background} group-[.toast]:${borderColor.border} group-[.toast]:${muted.default} group-[.toast]:hover:${textColor.foreground}`,
           success:
             'group-[.toaster]:border-green-500/20 group-[.toaster]:bg-green-50 dark:group-[.toaster]:bg-green-950/30',
           error:

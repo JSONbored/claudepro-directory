@@ -1,7 +1,8 @@
 import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight , size , gap, textColor,
+import { cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight , size , grid, textColor,
+  paddingBottom,
 } from '@heyclaude/web-runtime/design-system';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import {
@@ -185,9 +186,9 @@ export default async function ActivityPage() {
       </div>
 
       {/* Stats Overview - only render if summary is available */}
-      {hasSummary ? <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-2`}>
+      {hasSummary ? <div className={grid.responsiveForm}>
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className={paddingBottom.default}>
               <CardTitle className={size.sm}>Submissions</CardTitle>
             </CardHeader>
             <CardContent>

@@ -13,6 +13,7 @@ import {
   cluster,
   flexWrap,
   gap,
+  grid,
   iconSize,
   alignItems,
   justify,
@@ -27,6 +28,11 @@ import {
   weight,
   zLayer,
   squareSize,
+  maxWidth,
+  display,
+  position,
+  absolute,
+  borderWidth,
 } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
@@ -98,7 +104,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
   return (
     <motion.div
       className={cn(
-        'relative',
+        position.relative,
         overflow.hidden,
         radius['2xl'],
         'border',
@@ -115,14 +121,14 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
       {/* BorderBeam animation for visual interest */}
       <BorderBeam size={250} duration={20} colorFrom="#9333ea" colorTo="#a855f7" borderWidth={1} />
 
-      <div className={cn('relative grid lg:grid-cols-[1fr_auto]', zLayer.raised, gap.relaxed)}>
+      <div className={cn(`${position.relative} ${grid.hero}`, zLayer.raised, gap.relaxed)}>
         {/* Left: Content */}
         <div className={stack.default}>
           {/* Badge */}
           <motion.div variants={itemVariants}>
             <div
               className={cn(
-                `inline-flex border py-1.5 ${size.sm}`,
+                `${display.inlineFlex} border ${padding.ySnug} ${size.sm}`,
                 radius.full,
                 borderColor['primary/20'],
                 bgColor['primary/10'],
@@ -144,7 +150,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
           {/* Description */}
           <motion.p
-            className={cn('max-w-2xl', size.lg, muted.default)}
+            className={cn(maxWidth['2xl'], size.lg, muted.default)}
             variants={itemVariants}
           >
             Contribute to the largest Claude configuration library. No JSON formatting required - we
@@ -153,19 +159,19 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
           {/* Feature badges */}
           <motion.div
-            className={cn('flex', flexWrap.wrap, alignItems.center, gap.default, muted.sm)}
+            className={cn(display.flex, flexWrap.wrap, alignItems.center, gap.default, muted.sm)}
             variants={itemVariants}
           >
             <div className={cluster.snug}>
-              <CheckCircle className={cn(iconSize.sm, 'text-green-600')} />
+              <CheckCircle className={cn(iconSize.sm, textColor.green)} />
               <span>Auto PR creation</span>
             </div>
             <div className={cluster.snug}>
-              <Clock className={cn(iconSize.sm, 'text-blue-600')} />
+              <Clock className={cn(iconSize.sm, textColor.blue)} />
               <span>Fast review</span>
             </div>
             <div className={cluster.snug}>
-              <Users className={cn(iconSize.sm, 'text-purple-500')} />
+              <Users className={cn(iconSize.sm, textColor.purple500)} />
               <span>{stats.total}+ configs</span>
             </div>
           </motion.div>
@@ -173,17 +179,17 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
         {/* Right: Illustration (hidden on mobile) */}
         <motion.div
-          className={cn('hidden lg:flex', alignItems.center, justify.center)}
+          className={cn(`${display.none} lg:${display.flex}`, alignItems.center, justify.center)}
           variants={itemVariants}
         >
           <motion.div
-            className="relative"
+            className={position.relative}
             whileHover={{ scale: 1.05 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
             <div
               className={cn(
-                `${squareSize.avatar4xl} flex border`,
+                `${squareSize.avatar4xl} ${display.flex} border`,
                 radius['2xl'],
                 borderColor['primary/20'],
                 bgColor['primary/10'],
@@ -196,7 +202,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
             {/* Animated pulse ring */}
             <motion.div
-              className={cn('absolute inset-0 border-2', radius['2xl'], borderColor['primary/30'])}
+              className={cn(`${absolute.inset} ${borderWidth['2']}`, radius['2xl'], borderColor['primary/30'])}
               initial={{ scale: 1, opacity: 1 }}
               animate={{
                 scale: [1, 1.2, 1],

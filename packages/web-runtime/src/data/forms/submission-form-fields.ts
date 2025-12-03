@@ -138,7 +138,7 @@ async function fetchFieldsForContentType(
     {
       keyParts: ['submission-form-fields', contentType],
       tags: ['templates', `submission-${contentType}`],
-      ttlKey: 'cache.templates.ttl_seconds',
+      ttlKey: 'templates',
       fallback: null,
       logMeta: { contentType },
     }

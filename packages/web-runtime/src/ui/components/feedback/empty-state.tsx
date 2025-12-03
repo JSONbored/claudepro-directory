@@ -46,9 +46,11 @@ import {
 import { cn } from '../../utils.ts';
 // Design System imports - unified tokens and composable styles
 import { colors, animation } from '../../../design-system/tokens.ts';
-import { center, stack, responsive, padding, marginBottom } from '../../../design-system/styles/layout.ts';
+import { center, stack, responsive, padding, marginBottom, maxWidth, display, flexDir, alignItems, justify } from '../../../design-system/styles/layout.ts';
 import { iconSize } from '../../../design-system/styles/icons.ts';
-import { size } from '../../../design-system/styles/typography.ts';
+import { hoverBg, transition } from '../../../design-system/styles/interactive.ts';
+import { size, weight, muted, leading } from '../../../design-system/styles/typography.ts';
+import { bgColor, textColor, borderColor, textAlign } from '../../../design-system/styles/colors.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
 import type { IconComponent } from '../../../icons.tsx';
 import { motion } from 'motion/react';
@@ -161,7 +163,7 @@ export function EmptyState({
       return (
         <Link
           href={actionHref}
-          className={`inline-flex items-center justify-center ${radius.md} bg-accent px-6 py-3 ${size.sm} font-medium text-accent-foreground transition-colors hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`}
+          className={`${display.inlineFlex} ${alignItems.center} ${justify.center} ${radius.md} ${bgColor.accent} ${padding.xRelaxed} ${padding.yCompact} ${size.sm} ${weight.medium} ${textColor.accentForeground} ${transition.colors} ${hoverBg.max} focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`}
         >
           {actionLabel}
         </Link>
@@ -180,7 +182,7 @@ export function EmptyState({
       return (
         <Link
           href={secondaryActionHref}
-          className={`inline-flex items-center justify-center ${radius.md} border border-input bg-background px-6 py-3 ${size.sm} font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`}
+          className={`${display.inlineFlex} ${alignItems.center} ${justify.center} ${radius.md} border ${borderColor.input} ${bgColor.background} ${padding.xRelaxed} ${padding.yCompact} ${size.sm} ${weight.medium} ${transition.colors} ${hoverBg.accentSolid} hover:${textColor.accentForeground} focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`}
         >
           {secondaryActionLabel}
         </Link>
@@ -192,7 +194,7 @@ export function EmptyState({
   return (
     <motion.div
       {...containerAnimation}
-      className={cn('flex flex-col items-center justify-center px-4 py-16 text-center', className)}
+      className={cn(`${display.flex} ${flexDir.col} ${alignItems.center} ${justify.center} ${padding.xComfortable} ${padding.yHero} ${textAlign.center}`, className)}
     >
       {/* Animated Icon */}
       <motion.div
@@ -206,10 +208,10 @@ export function EmptyState({
       </motion.div>
 
       {/* Title */}
-      <h3 className={`${marginBottom.compact} font-semibold text-foreground ${size.xl}`}>{title}</h3>
+      <h3 className={`${marginBottom.compact} ${weight.semibold} ${textColor.foreground} ${size.xl}`}>{title}</h3>
 
       {/* Description */}
-      <p className={`${marginBottom.relaxed} max-w-md text-muted-foreground leading-relaxed`}>{description}</p>
+      <p className={`${marginBottom.relaxed} ${maxWidth.md} ${muted.default} ${leading.relaxed}`}>{description}</p>
 
       {/* Action Buttons */}
       {(actionLabel || secondaryActionLabel || renderAction || renderSecondaryAction) && (
@@ -241,7 +243,7 @@ export function CompactEmptyState({
 }) {
   return (
     <div
-      className={cn(center.column, 'px-4 py-8 text-center', className)}
+      className={cn(center.column, `${padding.xComfortable} ${padding.yLoose} ${textAlign.center}`, className)}
     >
       <div
         className={`${marginBottom.compact} ${radius.full} ${padding.compact}`}
@@ -255,8 +257,8 @@ export function CompactEmptyState({
           aria-hidden="true"
         />
       </div>
-      <h4 className={`${marginBottom.tight} font-medium text-foreground ${size.sm}`}>{title}</h4>
-      <p className={`text-muted-foreground ${size.xs} leading-relaxed`}>{description}</p>
+      <h4 className={`${marginBottom.tight} ${weight.medium} ${textColor.foreground} ${size.sm}`}>{title}</h4>
+      <p className={`${muted.default} ${size.xs} ${leading.relaxed}`}>{description}</p>
     </div>
   );
 }

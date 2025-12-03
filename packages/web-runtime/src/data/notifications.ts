@@ -10,8 +10,8 @@ import { generateRequestId } from '../utils/request-id.ts';
 export type ActiveNotificationRecord = Database['public']['Functions']['get_active_notifications']['Returns'][number];
 
 const DEFAULT_NOTIFICATION_TAG = 'notifications' as const;
-const TTL_KEY = 'cache.notifications.ttl_seconds' as const;
-const INVALIDATION_KEY = 'cache.invalidate.notifications' as const;
+const TTL_KEY = 'notifications' as const;
+const INVALIDATION_KEY = 'notifications' as const;
 
 export function getNotificationCacheTags(userId: string): string[] {
   const dynamicTags = getCacheInvalidateTags(INVALIDATION_KEY);

@@ -17,9 +17,14 @@
 
 import {
   bgColor,
+  bgGradient,
   borderColor,
   cluster,
   gap,
+  gradientFrom,
+  gradientVia,
+  gradientTo,
+  hoverBg,
   iconSize,
   alignItems,
   justify,
@@ -30,6 +35,10 @@ import {
   srOnly,
   textColor,
   weight,
+  display,
+  position,
+  absolute,
+  hoverText,
 } from '@heyclaude/web-runtime/design-system';
 import { Sparkles, X, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
@@ -230,8 +239,8 @@ export function NewSinceLastVisitBanner({
       {!isDismissed && (
         <motion.div
         className={cn(
-          `relative ${overflow.hidden} ${radius.xl} border border-violet-500/20`,
-          'bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-violet-500/10',
+          `${position.relative} ${overflow.hidden} ${radius.xl} border border-violet-500/20`,
+          `${bgGradient.toR} ${gradientFrom.violet10} ${gradientVia.fuchsia10} ${gradientTo.violet10}`,
           padding.default,
           className
         )}
@@ -242,16 +251,16 @@ export function NewSinceLastVisitBanner({
       >
         {/* Animated background shimmer */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+          className={`${absolute.inset} ${bgGradient.toR} ${gradientFrom.transparent} ${gradientVia.white5} ${gradientTo.transparent}`}
           animate={{ x: ['-100%', '200%'] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
         />
 
-        <div className={`relative flex ${alignItems.center} ${justify.between} ${gap.comfortable}`}>
+        <div className={`${position.relative} ${display.flex} ${alignItems.center} ${justify.between} ${gap.comfortable}`}>
           <div className={cluster.compact}>
             {/* Animated sparkle icon */}
             <motion.div
-              className={`${radius.full} bg-violet-500/20 ${padding.tight}`}
+              className={`${radius.full} ${bgColor['violet/20']} ${padding.tight}`}
               animate={{
                 scale: [1, 1.1, 1],
                 rotate: [0, 5, -5, 0],
@@ -268,7 +277,7 @@ export function NewSinceLastVisitBanner({
             <div>
               <p className={`${weight.semibold} ${textColor.foreground}`}>
                 <motion.span
-                  className="inline-block text-violet-500"
+                  className={`${display.inlineBlock} text-violet-500`}
                   initial={{ scale: 1 }}
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 0.5, delay: 0.3 }}
@@ -288,7 +297,7 @@ export function NewSinceLastVisitBanner({
                 variant="default"
                 size="sm"
                 onClick={onViewNew}
-                className="bg-violet-500 hover:bg-violet-600"
+                className={`${bgColor.violet} ${hoverBg.violetDarker}`}
               >
                 <TrendingUp className={iconSize.xs} />
                 View new
@@ -299,7 +308,7 @@ export function NewSinceLastVisitBanner({
               variant="ghost"
               size="icon"
               onClick={handleDismiss}
-              className={`${iconSize.xl} ${muted.default} hover:text-foreground`}
+              className={`${iconSize.xl} ${muted.default} ${hoverText.foreground}`}
             >
               <X className={iconSize.sm} />
               <span className={srOnly.default}>Dismiss</span>
@@ -336,8 +345,8 @@ export function TrendingFallback({ className }: TrendingFallbackProps) {
       transition={{ duration: 0.3 }}
     >
       <div className={cluster.compact}>
-        <div className={`${radius.full} bg-amber-500/20 ${padding.tight}`}>
-          <TrendingUp className={cn(iconSize.md, 'text-amber-500')} />
+        <div className={`${radius.full} ${bgColor['amber/20']} ${padding.tight}`}>
+          <TrendingUp className={cn(iconSize.md, textColor.amber500)} />
         </div>
         <div>
           <p className={`${weight.medium} ${textColor.foreground}`}>You're all caught up!</p>

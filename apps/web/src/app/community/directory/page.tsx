@@ -1,6 +1,6 @@
 import  { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
-import { marginBottom, muted, weight , size  , gap , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { marginBottom, muted, weight , size  , grid, padding , maxWidth, display, container, marginX, textAlign, height, width, colSpan, displayResponsive } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
@@ -37,6 +37,27 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
  * @see normalizeError
  * @see logger
  */
+// Helper to filter and map user records with required fields
+function normalizeUserList<T extends { bio?: null | string; created_at: null | string; id: null | string; image?: null | string; name: null | string; slug: null | string; tier: null | string; work?: null | string }>(
+  users: null | T[]
+) {
+  return (users ?? [])
+    .filter(
+      (u): u is T & { created_at: string; id: string; name: string; slug: string; tier: NonNullable<T['tier']>; } =>
+        Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
+    )
+    .map((u) => ({
+      id: u.id,
+      slug: u.slug,
+      name: u.name,
+      image: u.image ?? null,
+      bio: u.bio ?? null,
+      work: u.work ?? null,
+      tier: u.tier,
+      created_at: u.created_at,
+    }));
+}
+
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   // Generate single requestId for this component
   const requestId = generateRequestId();
@@ -74,79 +95,14 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
   };
 
   // Filter out items with null required fields and ensure types match UserProfile
-  const allUsers = (allUsersRaw ?? [])
-    .filter(
-      (
-        u
-      ): u is typeof u & {
-        created_at: string;
-        id: string;
-        name: string;
-        slug: string;
-        tier: NonNullable<typeof u.tier>;
-      } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
-    )
-    .map((u) => ({
-      id: u.id,
-      slug: u.slug,
-      name: u.name,
-      image: u.image,
-      bio: u.bio,
-      work: u.work,
-      tier: u.tier,
-      created_at: u.created_at,
-    }));
-
-  const topContributors = (topContributorsRaw ?? [])
-    .filter(
-      (
-        u
-      ): u is typeof u & {
-        created_at: string;
-        id: string;
-        name: string;
-        slug: string;
-        tier: NonNullable<typeof u.tier>;
-      } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
-    )
-    .map((u) => ({
-      id: u.id,
-      slug: u.slug,
-      name: u.name,
-      image: u.image,
-      bio: u.bio,
-      work: u.work,
-      tier: u.tier,
-      created_at: u.created_at,
-    }));
-
-  const newMembers = (newMembersRaw ?? [])
-    .filter(
-      (
-        u
-      ): u is typeof u & {
-        created_at: string;
-        id: string;
-        name: string;
-        slug: string;
-        tier: NonNullable<typeof u.tier>;
-      } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
-    )
-    .map((u) => ({
-      id: u.id,
-      slug: u.slug,
-      name: u.name,
-      image: u.image,
-      bio: u.bio,
-      work: u.work,
-      tier: u.tier,
-      created_at: u.created_at,
-    }));
+  const allUsers = normalizeUserList(allUsersRaw);
+  const topContributors = normalizeUserList(topContributorsRaw);
+  const newMembers = normalizeUserList(newMembersRaw);
 
   return (
-    <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
+    <div className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}>
       {/* Header */}
-      <div className={`mx-auto ${marginBottom.section} ${maxWidth['3xl']} text-center`}>
+      <div className={`${marginX.auto} ${marginBottom.section} ${maxWidth['3xl']} ${textAlign.center}`}>
         <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']}`}>Community Directory</h1>
         <p className={muted.lg}>
           Connect with Claude Code contributors, power users, and community experts
@@ -154,14 +110,14 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
       </div>
 
       {/* Two-column layout: Main content + Sidebar */}
-      <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-4`}>
+      <div className={grid.sidebar}>
         {/* Main Content - User Grid */}
-        <div className="lg:col-span-3">
+        <div className={colSpan.lg3}>
           <ProfileSearchClient users={allUsers} />
         </div>
 
         {/* Sidebar - Desktop only */}
-        <div className="hidden lg:block">
+        <div className={`${display.none} ${displayResponsive.lgBlock}`}>
           <ContributorsSidebar topContributors={topContributors} newMembers={newMembers} />
         </div>
       </div>
@@ -180,7 +136,7 @@ export default async function CommunityDirectoryPage({
   const searchQuery = resolvedParameters.q ?? '';
 
   return (
-    <Suspense fallback={<Skeleton size="xl" className="h-screen w-full" />}>
+    <Suspense fallback={<Skeleton size="xl" className={`${height.screen} ${width.full}`} />}>
       <CommunityDirectoryContent searchQuery={searchQuery} />
     </Suspense>
   );

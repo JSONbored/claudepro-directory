@@ -20,7 +20,7 @@ import { cache } from 'react';
  */
 export const getActiveAnnouncement = cache(
   async (): Promise<Database['public']['Tables']['announcements']['Row'] | null> => {
-    const ttl = getCacheTtl('cache.announcements.ttl_seconds');
+    const ttl = getCacheTtl('announcements');
 
     return unstable_cache(
       async () => {

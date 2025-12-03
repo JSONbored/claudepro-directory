@@ -130,6 +130,10 @@ export const gap = {
   section: 'gap-10',
   hero: 'gap-12',
   extra: 'gap-16',
+  /** gap-y-1 - Vertical gap only */
+  yTight: 'gap-y-1',
+  /** lg:gap-10 - Section gap at lg breakpoint */
+  lgSection: 'lg:gap-10',
 } as const;
 
 /**
@@ -203,6 +207,10 @@ export const gapResponsive = {
  * // ✅ NEW: className={grid.responsive3}
  */
 export const grid = {
+  // Base grid utility (just the grid class, no columns)
+  /** Base grid class (use with custom column definitions) */
+  base: 'grid',
+  
   // Fixed column grids (gap-4 default)
   /** 1 column, gap-4 */
   cols1: 'grid grid-cols-1 gap-4',
@@ -240,6 +248,10 @@ export const grid = {
   // Responsive grids
   /** Responsive: 1 → 2 columns, gap-4 */
   responsive2: 'grid grid-cols-1 sm:grid-cols-2 gap-4',
+  /** Responsive: 1 column at all breakpoints (explicit) */
+  responsive1: 'grid grid-cols-1 sm:grid-cols-1 gap-4',
+  /** Responsive: 1 → 3 columns, gap-4 */
+  responsive1To3: 'grid grid-cols-1 sm:grid-cols-3 gap-4',
   /** Responsive: 1 → 2 → 3 columns, gap-6 */
   responsive3: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6',
   /** Responsive: 1 → 2 → 3 → 4 columns, gap-4 */
@@ -252,16 +264,30 @@ export const grid = {
   responsive136: 'grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-4',
   /** Responsive: 1 → 2 → 3 columns, gap-4 */
   responsive123: 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4',
+  /** Responsive: 1 → 3 columns, gap-4 */
+  responsive13Gap4: 'grid grid-cols-1 md:grid-cols-3 gap-4',
   /** Responsive: 1 → 3 columns, gap-6 (V1: GRID_RESPONSIVE_1_3) */
   responsive13: 'grid grid-cols-1 md:grid-cols-3 gap-6',
+  /** Responsive: 2 → 3 columns, gap-4 */
+  responsive23Gap4: 'grid grid-cols-2 md:grid-cols-3 gap-4',
   /** Responsive: 1 → 2 columns for forms */
   responsiveForm: 'grid grid-cols-1 md:grid-cols-2 gap-4',
   /** Responsive: 1 → 2 columns with gap-6 */
   responsive2Gap6: 'grid grid-cols-1 sm:grid-cols-2 gap-6',
   /** Responsive: 1 → 3 columns with gap-6 */
   responsive3Gap6: 'grid grid-cols-1 md:grid-cols-3 gap-6',
+  /** Responsive: 2 → 3 → 4 columns (tabs), gap-2 */
+  responsive234Tabs: 'grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2',
   /** Responsive: 1 → 4 columns with gap-6 */
   responsive4Gap6: 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6',
+  /** Responsive: 1 → 3 columns (large gap), gap-8 */
+  responsive13Gap8: 'grid grid-cols-1 lg:grid-cols-3 gap-8',
+  /** Responsive: 1 → 2 → 3 → 6 columns (contributors), gap-4 */
+  responsive1236: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4',
+  /** Responsive: 1 → 2 → 3 columns (filters), gap-4 at sm, gap-6 at md */
+  responsive123Filters: 'grid grid-cols-1 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 gap-4',
+  /** Responsive: 1 → 2 → 4 columns, gap-relaxed */
+  responsive124Relaxed: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6',
 
   // Content grid patterns
   /** Content grid with tight gaps */
@@ -278,6 +304,24 @@ export const grid = {
   sidebar: 'grid grid-cols-1 lg:grid-cols-4 gap-6',
   /** 2-column auth layout */
   auth: 'grid grid-cols-1 lg:grid-cols-2',
+  
+  // Custom column definition grids (semantic patterns)
+  /** Sidebar layout: content + 300px sidebar */
+  sidebar300: 'grid grid-cols-1 lg:grid-cols-[1fr_300px]',
+  /** Sidebar layout: content + 320px sidebar */
+  sidebar320: 'grid grid-cols-1 lg:grid-cols-[1fr_320px]',
+  /** Timeline layout: auto width + flexible */
+  timeline: 'grid grid-cols-[auto_1fr]',
+  /** Two-column layout: 2/3 + 1/3 ratio */
+  twoThirdsOneThird: 'grid grid-cols-1 lg:grid-cols-[2fr_1fr]',
+  /** Footer layout: 1.5:2.5 ratio */
+  footer: 'grid grid-cols-1 lg:grid-cols-[1.5fr_2.5fr]',
+  /** Hero layout: flexible + auto */
+  hero: 'grid grid-cols-1 lg:grid-cols-[1fr_auto]',
+  /** Search layout: content + 18rem sidebar */
+  search: 'grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_18rem]',
+  /** Card header layout: flexible + auto */
+  cardHeader: 'grid grid-cols-[1fr_auto]',
 } as const;
 
 // =============================================================================
@@ -325,6 +369,10 @@ export const colSpan = {
   full: 'col-span-full',
   /** col-auto */
   auto: 'col-auto',
+  /** lg:col-span-2 - Responsive 2 columns at lg breakpoint */
+  lg2: 'lg:col-span-2',
+  /** lg:col-span-3 - Responsive 3 columns at lg breakpoint */
+  lg3: 'lg:col-span-3',
 } as const;
 
 /**
@@ -355,6 +403,60 @@ export const rowSpan = {
 } as const;
 
 // =============================================================================
+// MAX-WIDTH UTILITIES
+// =============================================================================
+
+/**
+ * Max-width constraints.
+ * 
+ * @migration Replaces inline `max-w-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="max-w-md"
+ * // ✅ NEW: className={maxWidth.md}
+ */
+export const maxWidth = {
+  none: 'max-w-none',
+  xs: 'max-w-xs',
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-xl',
+  '2xl': 'max-w-2xl',
+  '3xl': 'max-w-3xl',
+  '4xl': 'max-w-4xl',
+  '5xl': 'max-w-5xl',
+  '6xl': 'max-w-6xl',
+  '7xl': 'max-w-7xl',
+  full: 'max-w-full',
+  prose: 'max-w-prose',
+  screenSm: 'max-w-screen-sm',
+  screenMd: 'max-w-screen-md',
+  screenLg: 'max-w-screen-lg',
+  screenXl: 'max-w-screen-xl',
+  screen2xl: 'max-w-screen-2xl',
+  /** max-w-[200px] - Tooltip max width */
+  tooltip: 'max-w-[200px]',
+  /** max-w-[400px] - Newsletter form max width */
+  newsletterForm: 'max-w-[400px]',
+  /** max-w-32 - Small fixed max width */
+  32: 'max-w-32',
+  
+  // Responsive max-width patterns
+  /** sm:max-w-md - Responsive medium at sm breakpoint */
+  smMd: 'sm:max-w-md',
+  /** sm:max-w-lg - Responsive large at sm breakpoint */
+  smLg: 'sm:max-w-lg',
+  /** sm:max-w-sm - Responsive small at sm breakpoint */
+  smSm: 'sm:max-w-sm',
+  
+  // Custom arbitrary values
+  /** max-w-[150px] - Custom 150px max width */
+  '150px': 'max-w-[150px]',
+  /** max-w-[200px] - Custom 200px max width (alias for tooltip) */
+  '200px': 'max-w-[200px]',
+} as const;
+
+// =============================================================================
 // CONTAINER UTILITIES
 // =============================================================================
 
@@ -367,11 +469,11 @@ export const container = {
   /** Container with more padding */
   padded: 'container mx-auto px-4 sm:px-6 md:px-8',
   /** Narrow container for forms/prose */
-  narrow: 'max-w-2xl mx-auto px-4',
+  narrow: `${maxWidth['2xl']} mx-auto px-4`,
   /** Medium container */
-  medium: 'max-w-4xl mx-auto px-4',
+  medium: `${maxWidth['4xl']} mx-auto px-4`,
   /** Wide container */
-  wide: 'max-w-7xl mx-auto px-4',
+  wide: `${maxWidth['7xl']} mx-auto px-4`,
   /** Full width */
   full: 'w-full px-4',
 } as const;
@@ -407,6 +509,7 @@ export const spaceY = {
   compact: 'space-y-2',
   default: 'space-y-3',
   comfortable: 'space-y-4',
+  snug: 'space-y-1.5',
   relaxed: 'space-y-6',
   loose: 'space-y-8',
 } as const;
@@ -441,6 +544,8 @@ export const padding = {
   spacious: 'p-10',
   section: 'p-12',
   hero: 'p-16',
+  /** p-[1px] - 1px padding for scrollbar */
+  pixel1: 'p-[1px]',
   
   // X-axis (horizontal) - complete scale
   xNone: 'px-0',
@@ -448,6 +553,7 @@ export const padding = {
   xMicro: 'px-1',
   xSnug: 'px-1.5',
   xTight: 'px-2',
+  xBetween: 'px-2.5',
   xCompact: 'px-3',
   xDefault: 'px-4',
   xMedium: 'px-5',
@@ -462,11 +568,13 @@ export const padding = {
   yMicro: 'py-1',
   ySnug: 'py-1.5',
   yTight: 'py-2',
+  yBetween: 'py-2.5',
   yCompact: 'py-3',
   yDefault: 'py-4',
   yMedium: 'py-5',
   yComfortable: 'py-6',
   yRelaxed: 'py-8',
+  yLoose: 'py-12',
   ySpacious: 'py-10',
   ySection: 'py-12',
   yLargish: 'py-14',
@@ -589,6 +697,8 @@ export const paddingLeft = {
   snug: 'pl-1.5',
   /** pl-2 (8px) */
   compact: 'pl-2',
+  /** pl-2.5 (10px) */
+  between: 'pl-2.5',
   /** pl-3 (12px) */
   default: 'pl-3',
   /** pl-4 (16px) */
@@ -607,6 +717,8 @@ export const paddingLeft = {
   section: 'pl-12',
   /** pl-14 (56px) */
   hero: 'pl-14',
+  /** pl-10 (40px) - Icon padding */
+  icon: 'pl-10',
 } as const;
 
 /**
@@ -645,6 +757,8 @@ export const paddingRight = {
   spacious: 'pr-10',
   /** pr-12 (48px) */
   section: 'pr-12',
+  /** pr-10 (40px) - Icon padding */
+  icon: 'pr-10',
 } as const;
 
 /**
@@ -713,6 +827,8 @@ export const marginY = {
   tight: 'my-1',
   /** my-2 (8px) */
   compact: 'my-2',
+  /** my-2.5 (10px) - Between compact and default */
+  between: 'my-2.5',
   /** my-3 (12px) */
   default: 'my-3',
   /** my-4 (16px) */
@@ -746,6 +862,10 @@ export const marginX = {
   none: 'mx-0',
   /** mx-auto - Centers block elements */
   auto: 'mx-auto',
+  /** -mx-1 (negative 4px) */
+  neg1: '-mx-1',
+  /** -mx-4 (negative 16px) - Negative comfortable margin */
+  neg4: '-mx-4',
   /** mx-0.5 (2px) */
   micro: 'mx-0.5',
   /** mx-1 (4px) */
@@ -862,6 +982,54 @@ export const width = {
   twoThirds: 'w-2/3',
   quarter: 'w-1/4',
   threeQuarters: 'w-3/4',
+  /** w-2.5 - 10px - Scrollbar width */
+  scrollbar: 'w-2.5',
+  /** w-2.5 - 10px - Slider width (same as scrollbar) */
+  slider: 'w-2.5',
+  /** w-0 - Zero width */
+  0: 'w-0',
+  /** w-0.5 - 2px - Thin divider width */
+  hairline: 'w-0.5',
+  /** w-1.5 - 6px - Small dot width */
+  dot: 'w-1.5',
+  /** w-3.5 - 14px - Small icon width */
+  iconSm: 'w-3.5',
+  /** w-20 - 80px - Gradient fade width */
+  gradientFade: 'w-20',
+  /** w-48 - 192px - Standard dropdown/menu width */
+  menu: 'w-48',
+  /** w-48 - 192px - Standard dropdown/menu width (numeric alias) */
+  '48': 'w-48',
+  /** w-56 - 224px - Dropdown/popover width */
+  dropdown: 'w-56',
+  /** w-80 - 320px - Sidebar width */
+  sidebar: 'w-80',
+  
+  // Responsive fractional widths
+  /** sm:w-1/3 - One third width at sm breakpoint */
+  smThird: 'sm:w-1/3',
+  /** sm:w-2/3 - Two thirds width at sm breakpoint */
+  smTwoThirds: 'sm:w-2/3',
+  
+  // Skeleton/loading bar widths
+  /** w-16 - 64px - Small skeleton width */
+  skeletonSm: 'w-16',
+  /** w-24 - 96px - Compact skeleton width */
+  skeletonCompact: 'w-24',
+  /** w-32 - 128px - Default skeleton width */
+  skeletonDefault: 'w-32',
+  /** w-48 - 192px - Comfortable skeleton width */
+  skeletonComfortable: 'w-48',
+  /** w-64 - 256px - Large skeleton width */
+  skeletonLarge: 'w-64',
+  /** w-96 - 384px - Extra large skeleton width */
+  skeletonXl: 'w-96',
+  
+  // Additional fractional widths
+  /** w-4/5 - 80% width */
+  fourFifths: 'w-4/5',
+  /** w-5/6 - 83.33% width */
+  fiveSixths: 'w-5/6',
 } as const;
 
 // =============================================================================
@@ -888,6 +1056,34 @@ export const height = {
   max: 'h-max',
   fit: 'h-fit',
   
+  // Standard numeric heights (for inputs, buttons, etc.)
+  /** h-10 - 40px - Standard input/button height */
+  input: 'h-10',
+  /** h-12 - 48px - Search bar height */
+  search: 'h-12',
+  /** h-6 - 24px - Badge/icon height */
+  badge: 'h-6',
+  /** h-14 - 56px - Large input height */
+  inputLg: 'h-14',
+  /** h-16 - 64px - Hero element height */
+  hero: 'h-16',
+  /** h-9 - 36px - Small button height */
+  buttonSm: 'h-9',
+  /** h-11 - 44px - Large button height */
+  buttonLg: 'h-11',
+  /** h-2 - 8px - Slider track height */
+  slider: 'h-2',
+  /** h-2.5 - 10px - Scrollbar height */
+  scrollbar: 'h-2.5',
+  
+  // Skeleton/loading bar heights
+  /** h-3 - 12px - Extra small skeleton height */
+  skeletonXs: 'h-3',
+  /** h-4 - 16px - Small skeleton height */
+  skeletonSm: 'h-4',
+  /** h-8 - 32px - Large skeleton height */
+  skeletonLg: 'h-8',
+  
   // Viewport-based heights
   /** h-[40vh] - 40% viewport */
   viewport40: 'h-[40vh]',
@@ -913,6 +1109,22 @@ export const height = {
   divider: 'h-[1px]',
   /** h-[2px] - Underline/thick divider */
   underline: 'h-[2px]',
+  /** h-[0.5px] - Hairline divider */
+  hairline: 'h-[0.5px]',
+  /** h-1.5 - 6px - Small dot/indicator height */
+  dot: 'h-1.5',
+  /** h-3.5 - 14px - Small icon height */
+  iconSm: 'h-3.5',
+  /** h-20 - 80px - Gradient fade height */
+  gradientFade: 'h-20',
+  /** h-80 (320px) - Avatar 5xl size */
+  avatar5xl: 'h-80',
+  /** h-[300px] - Scroll area height */
+  scrollArea: 'h-[300px]',
+  /** h-[400px] - Large scroll area height */
+  scrollAreaLg: 'h-[400px]',
+  /** h-48 - 192px - Large image/card height */
+  imageLg: 'h-48',
 } as const;
 
 // =============================================================================
@@ -1300,46 +1512,6 @@ export const minWidth = {
 } as const;
 
 // =============================================================================
-// MAX-WIDTH UTILITIES
-// =============================================================================
-
-/**
- * Max-width constraints.
- * 
- * @migration Replaces inline `max-w-*` Tailwind classes
- * @example
- * // ❌ OLD: className="max-w-md"
- * // ✅ NEW: className={maxWidth.md}
- */
-export const maxWidth = {
-  none: 'max-w-none',
-  xs: 'max-w-xs',
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-  xl: 'max-w-xl',
-  '2xl': 'max-w-2xl',
-  '3xl': 'max-w-3xl',
-  '4xl': 'max-w-4xl',
-  '5xl': 'max-w-5xl',
-  '6xl': 'max-w-6xl',
-  '7xl': 'max-w-7xl',
-  full: 'max-w-full',
-  prose: 'max-w-prose',
-  screenSm: 'max-w-screen-sm',
-  screenMd: 'max-w-screen-md',
-  screenLg: 'max-w-screen-lg',
-  screenXl: 'max-w-screen-xl',
-  screen2xl: 'max-w-screen-2xl',
-  /** max-w-[200px] - Tooltip max width */
-  tooltip: 'max-w-[200px]',
-  /** max-w-[400px] - Newsletter form max width */
-  newsletterForm: 'max-w-[400px]',
-  /** max-w-32 - Small fixed max width */
-  32: 'max-w-32',
-} as const;
-
-// =============================================================================
 // MIN-HEIGHT UTILITIES
 // =============================================================================
 
@@ -1367,6 +1539,8 @@ export const minHeight = {
   dvh: 'min-h-dvh',
   
   // Pixel-based semantic heights
+  /** min-h-[150px] - Extra small content area */
+  xs: 'min-h-[150px]',
   /** min-h-[200px] - Small content area */
   sm: 'min-h-[200px]',
   /** min-h-[300px] - Medium content area */
@@ -1563,6 +1737,14 @@ export const flexGrow = {
   none: 'flex-none',
 } as const;
 
+/**
+ * Flex basis utilities.
+ */
+export const flexBasis = {
+  /** basis-10 - 2.5rem (40px) */
+  rem10: 'basis-10',
+} as const;
+
 // =============================================================================
 // JUSTIFY CONTENT
 // =============================================================================
@@ -1609,9 +1791,105 @@ export const alignItems = {
 } as const;
 
 /**
- * @deprecated Use `alignItems` instead. This alias exists for backward compatibility.
+ * Grid column start utilities.
+ * 
+ * @migration Replaces inline `col-start-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="col-start-2"
+ * // ✅ NEW: className={colStart['2']}
  */
-export const items = alignItems;
+export const colStart = {
+  /** col-start-1 */
+  '1': 'col-start-1',
+  /** col-start-2 */
+  '2': 'col-start-2',
+  /** col-start-3 */
+  '3': 'col-start-3',
+  /** col-start-4 */
+  '4': 'col-start-4',
+  /** col-auto */
+  auto: 'col-auto',
+} as const;
+
+/**
+ * Grid row start utilities.
+ * 
+ * @migration Replaces inline `row-start-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="row-start-1"
+ * // ✅ NEW: className={rowStart['1']}
+ */
+export const rowStart = {
+  /** row-start-1 */
+  '1': 'row-start-1',
+  /** row-start-2 */
+  '2': 'row-start-2',
+  /** row-start-3 */
+  '3': 'row-start-3',
+  /** row-auto */
+  auto: 'row-auto',
+} as const;
+
+/**
+ * Grid justify-self utilities.
+ * 
+ * @migration Replaces inline `justify-self-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="justify-self-end"
+ * // ✅ NEW: className={justifySelf.end}
+ */
+export const justifySelf = {
+  /** justify-self-start */
+  start: 'justify-self-start',
+  /** justify-self-end */
+  end: 'justify-self-end',
+  /** justify-self-center */
+  center: 'justify-self-center',
+  /** justify-self-stretch */
+  stretch: 'justify-self-stretch',
+} as const;
+
+/**
+ * Grid auto-rows utilities.
+ * 
+ * @migration Replaces inline `auto-rows-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="auto-rows-min"
+ * // ✅ NEW: className={gridAutoRows.min}
+ */
+export const gridAutoRows = {
+  /** auto-rows-min */
+  min: 'auto-rows-min',
+  /** auto-rows-max */
+  max: 'auto-rows-max',
+  /** auto-rows-auto */
+  auto: 'auto-rows-auto',
+  /** auto-rows-fr */
+  fr: 'auto-rows-fr',
+} as const;
+
+/**
+ * Grid template rows utilities.
+ * 
+ * @migration Replaces inline `grid-rows-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="grid-rows-[auto_auto]"
+ * // ✅ NEW: className={gridTemplateRows.autoAuto}
+ */
+export const gridTemplateRows = {
+  /** grid-rows-[auto_auto] - Two auto rows */
+  autoAuto: 'grid-rows-[auto_auto]',
+  /** grid-rows-1 */
+  '1': 'grid-rows-1',
+  /** grid-rows-2 */
+  '2': 'grid-rows-2',
+  /** grid-rows-3 */
+  '3': 'grid-rows-3',
+  /** grid-rows-4 */
+  '4': 'grid-rows-4',
+  /** grid-rows-6 */
+  '6': 'grid-rows-6',
+} as const;
 
 /**
  * Align self utilities.
@@ -1713,6 +1991,16 @@ export const inset = {
   left0: 'left-0',
   /** Full coverage */
   full: 'inset-0',
+  /** Top -1 (negative positioning) */
+  topNeg1: '-top-1',
+  /** Right -1 (negative positioning) */
+  rightNeg1: '-right-1',
+  /** Bottom -1 (negative positioning) */
+  bottomNeg1: '-bottom-1',
+  /** Left -1 (negative positioning) */
+  leftNeg1: '-left-1',
+  /** Negative inset 0.5 (for glow effects) */
+  neg05: '-inset-0.5',
 } as const;
 
 // =============================================================================
@@ -1737,10 +2025,29 @@ export const display = {
   grid: 'grid',
   /** Inline grid */
   inlineGrid: 'inline-grid',
-  /** Hidden */
-  hidden: 'hidden',
-  /** Contents */
-  contents: 'contents',
+  /** None */
+  none: 'hidden',
+} as const;
+
+// =============================================================================
+// ASPECT RATIO
+// =============================================================================
+
+/**
+ * Aspect ratio utilities.
+ * 
+ * @migration Replaces inline `aspect-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="aspect-square"
+ * // ✅ NEW: className={aspectRatio.square}
+ */
+export const aspectRatio = {
+  /** aspect-square - 1:1 ratio */
+  square: 'aspect-square',
+  /** aspect-video - 16:9 ratio */
+  video: 'aspect-video',
+  /** aspect-auto - Auto ratio */
+  auto: 'aspect-auto',
 } as const;
 
 // =============================================================================
@@ -1813,4 +2120,181 @@ export const userSelect = {
   all: 'select-all',
   /** Auto */
   auto: 'select-auto',
+} as const;
+
+/**
+ * CSS Transform utilities.
+ * 
+ * @migration Replaces inline `transform` Tailwind classes
+ * @example
+ * // ❌ OLD: className="transform"
+ * // ✅ NEW: className={cssTransform.enable}
+ */
+export const cssTransform = {
+  /** Enable CSS transforms */
+  enable: 'transform',
+  /** Disable CSS transforms */
+  none: 'transform-none',
+} as const;
+
+/**
+ * Transform translate utilities for common centering patterns.
+ * 
+ * @migration Replaces inline `-translate-x-1/2`, `-translate-y-1/2` Tailwind classes
+ * @example
+ * // ❌ OLD: className="-translate-x-1/2"
+ * // ✅ NEW: className={translate.centerX}
+ */
+export const translate = {
+  /** -translate-x-1/2 - Center horizontally */
+  centerX: '-translate-x-1/2',
+  /** -translate-y-1/2 - Center vertically */
+  centerY: '-translate-y-1/2',
+  /** -translate-x-1/2 -translate-y-1/2 - Center both axes */
+  center: '-translate-x-1/2 -translate-y-1/2',
+} as const;
+
+/**
+ * Transform scale utilities for hover/active states.
+ * 
+ * @migration Replaces inline `scale-[1.02]`, `scale-[0.98]` Tailwind classes
+ * @example
+ * // ❌ OLD: className="hover:scale-[1.02] active:scale-[0.98]"
+ * // ✅ NEW: className={scale.hover102Active98}
+ */
+export const scale = {
+  /** hover:scale-[1.02] - Slight scale on hover */
+  hover102: 'hover:scale-[1.02]',
+  /** active:scale-[0.98] - Slight shrink on active */
+  active98: 'active:scale-[0.98]',
+  /** hover:scale-[1.02] active:scale-[0.98] - Combined hover and active */
+  hover102Active98: 'hover:scale-[1.02] active:scale-[0.98]',
+} as const;
+
+/**
+ * Will-change utilities for performance optimization.
+ * 
+ * @migration Replaces inline `will-change-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="will-change-transform"
+ * // ✅ NEW: className={willChange.transform}
+ */
+export const willChange = {
+  /** Optimize for transform animations */
+  transform: 'will-change-transform',
+  /** Optimize for auto (browser decides) */
+  auto: 'will-change-auto',
+  /** Optimize for scroll position */
+  scroll: 'will-change-scroll',
+  /** Optimize for contents */
+  contents: 'will-change-contents',
+  /** Optimize for opacity */
+  opacity: 'will-change-opacity',
+} as const;
+
+/**
+ * CSS Containment utilities.
+ * 
+ * @migration Replaces inline `contain-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="contain-layout"
+ * // ✅ NEW: className={containment.layout}
+ */
+export const containment = {
+  /** contain-layout - Layout containment */
+  layout: 'contain-layout',
+  /** contain-paint - Paint containment */
+  paint: 'contain-paint',
+  /** contain-content - Content containment */
+  content: 'contain-content',
+  /** contain-strict - Strict containment */
+  strict: 'contain-strict',
+  /** contain-none - No containment */
+  none: 'contain-none',
+} as const;
+
+/**
+ * Transform origin utilities.
+ * 
+ * @migration Replaces inline `origin-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="origin-left"
+ * // ✅ NEW: className={transformOrigin.left}
+ */
+export const transformOrigin = {
+  /** Origin center */
+  center: 'origin-center',
+  /** Origin top */
+  top: 'origin-top',
+  /** Origin top right */
+  topRight: 'origin-top-right',
+  /** Origin right */
+  right: 'origin-right',
+  /** Origin bottom right */
+  bottomRight: 'origin-bottom-right',
+  /** Origin bottom */
+  bottom: 'origin-bottom',
+  /** Origin bottom left */
+  bottomLeft: 'origin-bottom-left',
+  /** Origin left */
+  left: 'origin-left',
+  /** Origin top left */
+  topLeft: 'origin-top-left',
+} as const;
+
+/**
+ * Resize utilities.
+ * 
+ * @migration Replaces inline `resize-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="resize-y"
+ * // ✅ NEW: className={resize.y}
+ */
+export const resize = {
+  /** Resize none */
+  none: 'resize-none',
+  /** Resize vertical */
+  y: 'resize-y',
+  /** Resize horizontal */
+  x: 'resize-x',
+  /** Resize both */
+  both: 'resize',
+} as const;
+
+/**
+ * Responsive display utilities.
+ */
+export const displayResponsive = {
+  /** sm:flex - Flex at sm breakpoint */
+  smFlex: 'sm:flex',
+  /** lg:block - Block at lg breakpoint */
+  lgBlock: 'lg:block',
+  /** max-md:hidden - Hidden at max-md breakpoint */
+  maxMdNone: 'max-md:hidden',
+} as const;
+
+/**
+ * Responsive flex direction utilities.
+ */
+export const flexDirResponsive = {
+  /** sm:flex-row - Row at sm breakpoint */
+  smRow: 'sm:flex-row',
+} as const;
+
+/**
+ * Responsive justify utilities.
+ */
+export const justifyResponsive = {
+  /** sm:justify-end - End at sm breakpoint */
+  smEnd: 'sm:justify-end',
+  /** max-md:justify-center - Center at max-md breakpoint */
+  maxMdCenter: 'max-md:justify-center',
+} as const;
+
+/**
+ * Responsive spaceX utilities.
+ */
+export const spaceXResponsive = {
+  /** sm:space-x-2 - Compact spacing at sm breakpoint */
+  smCompact: 'sm:space-x-2',
 } as const;

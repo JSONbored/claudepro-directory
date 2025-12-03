@@ -16,7 +16,7 @@ import { normalizeRpcResult } from './content-helpers.ts';
 const JOBS_CATEGORY = Constants.public.Enums.content_category[9] as string; // 'jobs'
 
 
-const COMPANY_DETAIL_TTL_KEY = 'cache.company_detail.ttl_seconds';
+const COMPANY_DETAIL_TTL_KEY = 'company_detail';
 
 type GetCompanyAdminProfileReturn =
   Database['public']['Functions']['get_company_admin_profile']['Returns'];
@@ -113,7 +113,7 @@ export async function getCompaniesList(
       {
         keyParts: ['companies-list', limit, offset],
         tags: ['companies', JOBS_CATEGORY],
-        ttlKey: 'cache.company_list.ttl_seconds',
+        ttlKey: 'company_list',
         fallback: { companies: [], total: 0 },
         logMeta: { limit, offset },
       }
@@ -216,7 +216,7 @@ export async function searchCompanies(query: string, limit = 10): Promise<Compan
   }
 
   const normalizedQuery = trimmed.toLowerCase();
-  const ttl = getCacheTtl('cache.company_search.ttl_seconds');
+  const ttl = getCacheTtl('company_search');
 
   try {
     return await unstable_cache(

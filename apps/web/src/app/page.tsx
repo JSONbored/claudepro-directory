@@ -14,6 +14,7 @@ import {
   bgColor,
   minHeight,
   overflow,
+  position,
 } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -52,12 +53,6 @@ export const revalidate = 3600;
  */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/');
-}
-
-interface HomePageProperties {
-  searchParams: Promise<{
-    q?: string;
-  }>;
 }
 
 /**
@@ -123,7 +118,7 @@ async function TopContributorsServer() {
  * @see HomepageHeroServer
  * @see HomepageContentServerWrapper
  */
-export default async function HomePage({ searchParams }: HomePageProperties) {
+export default async function HomePage() {
   const requestId = generateRequestId();
   const reqLogger = logger.child({
     requestId,
@@ -132,7 +127,6 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
     module: 'apps/web/src/app',
   });
 
-  await searchParams;
   reqLogger.info('HomePage: rendering homepage');
 
   // Fetch homepage data - React's cache() ensures subsequent calls are deduplicated
@@ -175,7 +169,7 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
 
   return (
     <div className={`${minHeight.screen} ${bgColor.background}`}>
-      <div className={`relative ${overflow.hidden}`}>
+      <div className={`${position.relative} ${overflow.hidden}`}>
         {/* Hero - renders with member count from initial fetch */}
         <HomepageHeroServer memberCount={memberCount} newThisWeekCount={newThisWeekCount} />
 
@@ -184,7 +178,7 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
         </LazySection>
 
         {/* Content - uses React-cached getHomepageData (cache hit) */}
-        <div className="relative">
+        <div className={position.relative}>
           <Suspense fallback={<HomePageLoading />}>
             <HomepageContentServerWrapper searchFiltersPromise={searchFiltersPromise} />
           </Suspense>

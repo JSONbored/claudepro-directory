@@ -50,7 +50,7 @@ export async function getContentDetailComplete(input: {
       {
         keyParts: ['content', category, slug, 'complete'],
         tags: generateContentTags(category, slug),
-        ttlKey: 'cache.content_detail.ttl_seconds',
+        ttlKey: 'content_detail',
         fallback: null,
         logMeta: { category, slug },
       }
@@ -92,7 +92,7 @@ export async function getContentDetailCore(input: {
       {
         keyParts: ['content', category, slug, 'core'],
         tags: generateContentTags(category, slug),
-        ttlKey: 'cache.content_detail.ttl_seconds',
+        ttlKey: 'content_detail',
         fallback: null,
         logMeta: { category, slug, type: 'core' },
       }
@@ -134,7 +134,7 @@ export async function getContentAnalytics(input: {
       {
         keyParts: ['content', category, slug, 'analytics'],
         tags: generateContentTags(category, slug),
-        ttlKey: 'cache.content_detail.ttl_seconds',
+        ttlKey: 'content_detail',
         fallback: null,
         logMeta: { category, slug, type: 'analytics' },
       }

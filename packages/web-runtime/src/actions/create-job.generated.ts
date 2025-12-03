@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const createJobSchema = z.object({
+export const createJobSchema = z.object({
   company: z.string().nullable().optional(),
   company_id: z.string().uuid().nullable().optional(),
   title: z.string().nullable().optional(),
@@ -75,7 +75,6 @@ export const createJob = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -94,7 +93,7 @@ export const createJob = authedAction
       const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
         cacheConfig,
-        invalidateKeys: ['cache.invalidate.job_create']
+        invalidateKeys: ['job_create']
       });
 
       

@@ -33,26 +33,43 @@ import {
   border,
   flexWrap,
   gap,
+  grid,
+  hoverBg,
   iconSize,
   alignItems,
   justify,
   leading,
   marginBottom,
+  marginLeft,
   marginTop,
+  marginX,
   muted,
   opacityLevel,
   overflow,
   padding,
+  paddingRight,
+  paddingTop,
+  position,
   radius,
   row,
   shadow,
   size,
   spaceY,
+  squareSize,
+  submissionFormColors,
+  textAlign,
   textColor,
   transition,
   weight,
-  squareSize,
+  display,
+  bgColor,
+  objectFit,
+  hoverBorder,
+  sticky,
+  width,
+  fontFamily,
 } from '@heyclaude/web-runtime/design-system';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
 import { useFieldHighlight, useFormTracking, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
@@ -76,8 +93,8 @@ import {
   Input,
   Textarea,
   toasts,
+  cn,
 } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -524,6 +541,10 @@ export default function WizardSubmissionPage() {
           'Failed to generate thumbnail'
         );
       } finally {
+        // Revoke blob URL to prevent memory leaks
+        if (previewUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(previewUrl);
+        }
         setIsUploadingThumbnail(false);
       }
     },
@@ -886,7 +907,7 @@ export default function WizardSubmissionPage() {
   return (
     <>
       {/* Inline Preview - Desktop Sidebar */}
-      <div className="hidden lg:sticky lg:top-24 lg:block lg:w-80">
+      <div className={`${display.none} lg:${position.sticky} lg:${sticky.top24} ${display.block} lg:${width.sidebar}`}>
         <InlinePreview formData={formData} qualityScore={qualityScore} />
       </div>
       <WizardLayout
@@ -906,7 +927,7 @@ export default function WizardSubmissionPage() {
 
         {/* Social Proof Bar - Bottom of wizard */}
         {Object.keys(socialProofStats).length > 0 && (
-          <div className={`${marginTop.relaxed} flex ${justify.center}`}>
+          <div className={`${marginTop.relaxed} ${display.flex} ${justify.center}`}>
             <SocialProofBar stats={socialProofStats} />
           </div>
         )}
@@ -937,22 +958,22 @@ function StepTypeSelection({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
-        className="text-center"
+        transition={animation.spring.smooth}
+        className={textAlign.center}
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className={`${marginBottom.default} inline-flex`}
+          transition={{ ...animation.spring.bouncy, delay: 0.2 }}
+          className={`${marginBottom.default} ${display.inlineFlex}`}
         >
-          <Sparkles className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
+          <Sparkles className={cn(iconSize['3xl'], textColor.accent)} />
         </motion.div>
         <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Choose Your Submission Type</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
           What would you like to share with the community?
         </p>
-        <div className={`${marginTop.default} flex ${justify.center}`}>
+        <div className={`${marginTop.default} ${display.flex} ${justify.center}`}>
           <StepSocialProof step={1} />
         </div>
       </motion.div>
@@ -1028,16 +1049,16 @@ function StepBasicInfo({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
-        className="text-center"
+        transition={animation.spring.smooth}
+        className={textAlign.center}
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className={`${marginBottom.default} inline-flex`}
+          transition={{ ...animation.spring.bouncy, delay: 0.2 }}
+          className={`${marginBottom.default} ${display.inlineFlex}`}
         >
-          <FileText className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
+          <FileText className={cn(iconSize['3xl'], textColor.accent)} />
         </motion.div>
         <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Tell us about it</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
@@ -1048,15 +1069,15 @@ function StepBasicInfo({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.1 }}
+        transition={{ ...animation.spring.smooth, delay: 0.1 }}
       >
         <Card
           style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
+            backgroundColor: submissionFormColors.background.secondary,
+            borderColor: submissionFormColors.border.light,
           }}
         >
-          <CardContent className={`${spaceY.relaxed} pt-6`}>
+          <CardContent className={`${spaceY.relaxed} ${paddingTop.relaxed}`}>
             <AnimatedFormField
               label="Name"
               id="wizard-name"
@@ -1077,7 +1098,7 @@ function StepBasicInfo({
                 onChange={(event) => onChange({ name: event.target.value })}
                 placeholder="e.g., React Query Expert"
                 maxLength={100}
-                className="pr-12"
+                className={paddingRight.section}
               />
             </AnimatedFormField>
 
@@ -1148,9 +1169,9 @@ function StepBasicInfo({
                 <div className={cluster.comfortable}>
                   <label
                     htmlFor="thumbnail-upload"
-                    className={`flex ${cursor.pointer} ${alignItems.center} ${gap.compact} ${radius.lg} ${border.dashed} ${padding.xDefault} ${padding.yCompact} ${transition.colors} hover:bg-accent/50`}
+                    className={`${display.flex} ${cursor.pointer} ${alignItems.center} ${gap.compact} ${radius.lg} ${border.dashed} ${padding.xDefault} ${padding.yCompact} ${transition.colors} ${hoverBg.stronger}`}
                     style={{
-                      borderColor: TOKENS.colors.border.light,
+                      borderColor: submissionFormColors.border.light,
                       ...(isUploadingThumbnail && { opacity: 0.6, pointerEvents: 'none' }),
                     }}
                   >
@@ -1162,7 +1183,7 @@ function StepBasicInfo({
                       id="thumbnail-upload"
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
-                      className="hidden"
+                      className={display.none}
                       disabled={isUploadingThumbnail}
                       onChange={(event) => {
                         const file = event.target.files?.[0];
@@ -1183,18 +1204,18 @@ function StepBasicInfo({
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      transition={TOKENS.animations.spring.smooth}
-                      className="relative inline-block"
+                      transition={animation.spring.smooth}
+                      className={`${position.relative} ${display.inlineBlock}`}
                     >
                       <div
-                        className={`relative ${squareSize.avatar4xl} ${overflow.hidden} ${radius.lg} border`}
-                        style={{ borderColor: TOKENS.colors.border.light }}
+                        className={`${position.relative} ${squareSize.avatar4xl} ${overflow.hidden} ${radius.lg} ${border.default}`}
+                        style={{ borderColor: submissionFormColors.border.light }}
                       >
                         <Image
                           src={thumbnailPreview}
                           alt="Thumbnail preview"
                           fill
-                          className="object-cover"
+                          className={objectFit.cover}
                           unoptimized={thumbnailPreview.startsWith('blob:')}
                         />
                       </div>
@@ -1203,7 +1224,7 @@ function StepBasicInfo({
                         onClick={onRemoveThumbnail}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        className={`-right-2 -top-2 absolute flex ${iconSize.lg} ${alignItems.center} ${justify.center} ${radius.full} bg-destructive text-destructive-foreground ${shadow.sm}`}
+                        className={`-right-2 -top-2 ${position.absolute} ${display.flex} ${iconSize.lg} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.destructive} ${textColor.destructiveForeground} ${shadow.sm}`}
                         disabled={isUploadingThumbnail}
                       >
                         <X className={iconSize.sm} />
@@ -1263,22 +1284,22 @@ function StepConfiguration({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
-        className="text-center"
+        transition={animation.spring.smooth}
+        className={textAlign.center}
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className={`${marginBottom.default} inline-flex`}
+          transition={{ ...animation.spring.bouncy, delay: 0.2 }}
+          className={`${marginBottom.default} ${display.inlineFlex}`}
         >
-          <Code className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
+          <Code className={cn(iconSize['3xl'], textColor.accent)} />
         </motion.div>
         <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Configuration Details</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
           Type-specific settings for your {submissionType}
         </p>
-        <div className={`${marginTop.default} flex ${justify.center}`}>
+        <div className={`${marginTop.default} ${display.flex} ${justify.center}`}>
           <StepSocialProof step={3} />
         </div>
       </motion.div>
@@ -1288,7 +1309,7 @@ function StepConfiguration({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...TOKENS.animations.spring.smooth, delay: 0.15 }}
+          transition={{ ...animation.spring.smooth, delay: 0.15 }}
         >
           <TemplateQuickSelectSkeleton />
         </motion.div>
@@ -1298,7 +1319,7 @@ function StepConfiguration({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...TOKENS.animations.spring.smooth, delay: 0.15 }}
+          transition={{ ...animation.spring.smooth, delay: 0.15 }}
         >
           <TemplateQuickSelect
             templates={templates}
@@ -1312,15 +1333,15 @@ function StepConfiguration({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.1 }}
+        transition={{ ...animation.spring.smooth, delay: 0.1 }}
       >
         <Card
           style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
+            backgroundColor: submissionFormColors.background.secondary,
+            borderColor: submissionFormColors.border.light,
           }}
         >
-          <CardContent className={`${spaceY.relaxed} pt-6`}>
+          <CardContent className={`${spaceY.relaxed} ${paddingTop.relaxed}`}>
             {submissionType === SUBMISSION_TYPE_AGENTS && (
               <>
                 <AnimatedFormField
@@ -1343,7 +1364,7 @@ function StepConfiguration({
                   />
                 </AnimatedFormField>
 
-                <div className={`grid ${gap.comfortable} sm:grid-cols-2`}>
+                <div className={grid.responsive2}>
                   <AnimatedFormField
                     label="Temperature"
                     id="wizard-temperature"
@@ -1481,7 +1502,7 @@ function StepConfiguration({
                   placeholder="#!/bin/bash..."
                   rows={6}
                   maxLength={1000}
-                  className="font-mono"
+                  className={fontFamily.mono}
                 />
               </AnimatedFormField>
             )}
@@ -1545,22 +1566,22 @@ function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
-        className="text-center"
+        transition={animation.spring.smooth}
+        className={textAlign.center}
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className={`${marginBottom.default} inline-flex`}
+          transition={{ ...animation.spring.bouncy, delay: 0.2 }}
+          className={`${marginBottom.default} ${display.inlineFlex}`}
         >
-          <Sparkles className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
+          <Sparkles className={cn(iconSize['3xl'], textColor.accent)} />
         </motion.div>
         <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Examples & Tags</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
           Help others understand and discover your submission
         </p>
-        <div className={`${marginTop.default} flex ${justify.center}`}>
+        <div className={`${marginTop.default} ${display.flex} ${justify.center}`}>
           <StepSocialProof step={4} />
         </div>
       </motion.div>
@@ -1568,14 +1589,14 @@ function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.1 }}
+        transition={{ ...animation.spring.smooth, delay: 0.1 }}
         className={spaceY.relaxed}
       >
         {/* Examples Section */}
         <Card
           style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
+            backgroundColor: submissionFormColors.background.secondary,
+            borderColor: submissionFormColors.border.light,
           }}
         >
           <CardHeader>
@@ -1590,7 +1611,7 @@ function StepExamplesTags({
             </p>
 
             {/* Add Example Input */}
-            <div className={`flex ${gap.compact}`}>
+            <div className={`${display.flex} ${gap.compact}`}>
               <Input
                 value={newExample}
                 onChange={(event) => setNewExample(event.target.value)}
@@ -1601,14 +1622,14 @@ function StepExamplesTags({
                   }
                 }}
                 placeholder="e.g., 'Create a React component'"
-                className="flex-1"
+                className={flexGrow['1']}
               />
               <Button
                 type="button"
                 onClick={addExample}
                 disabled={!newExample.trim()}
                 style={{
-                  backgroundColor: TOKENS.colors.accent.primary,
+                  backgroundColor: submissionFormColors.accent.primary,
                 }}
               >
                 <Plus className={iconSize.sm} />
@@ -1628,31 +1649,31 @@ function StepExamplesTags({
                         initial={{ opacity: 0, x: -20, scale: 0.9 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.9 }}
-                        transition={TOKENS.animations.spring.snappy}
-                        className={`group ${row.default} ${radius.lg} border ${padding.compact} ${transition.all} hover:border-accent-primary/50`}
+                        transition={animation.spring.snappy}
+                        className={`group ${row.default} ${radius.lg} ${border.default} ${padding.compact} ${transition.all} ${hoverBorder.accentPrimary50}`}
                         style={{
-                          backgroundColor: TOKENS.colors.background.primary,
-                          borderColor: TOKENS.colors.border.default,
+                          backgroundColor: submissionFormColors.background.primary,
+                          borderColor: submissionFormColors.border.default,
                         }}
                       >
                         <div
-                          className={`${marginTop.micro} flex ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${weight.bold} ${size.xs}`}
+                          className={`${marginTop.micro} ${display.flex} ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${weight.bold} ${size.xs}`}
                           style={{
-                            backgroundColor: `${TOKENS.colors.accent.primary}20`,
-                            color: TOKENS.colors.accent.primary,
+                            backgroundColor: `${submissionFormColors.accent.primary}20`,
+                            color: submissionFormColors.accent.primary,
                           }}
                         >
                           {index + 1}
                         </div>
-                        <span className={`flex-1 ${size.sm} ${leading.relaxed}`}>{example}</span>
+                        <span className={`${flexGrow['1']} ${size.sm} ${leading.relaxed}`}>{example}</span>
                         <motion.button
                           type="button"
                           onClick={() => removeExample(index)}
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className={`shrink-0 ${radius.full} ${padding.micro} ${opacityLevel[0]} ${transition.all} group-hover:opacity-100`}
+                          className={`${flexGrow.shrink0} ${radius.full} ${padding.micro} ${opacityLevel[0]} ${transition.all} group-hover:${opacityLevel[100]}`}
                           style={{
-                            color: TOKENS.colors.error.text,
+                            color: submissionFormColors.error.text,
                           }}
                         >
                           <X className={iconSize.sm} />
@@ -1665,12 +1686,12 @@ function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`${radius.lg} ${border.dashed} ${padding.relaxed} text-center`}
+                  className={`${radius.lg} ${border.dashed} ${padding.relaxed} ${textAlign.center}`}
                   style={{
-                    borderColor: TOKENS.colors.border.light,
+                    borderColor: submissionFormColors.border.light,
                   }}
                 >
-                  <Code className={`mx-auto ${marginBottom.compact} ${iconSize['2xl']} ${muted.default}`} />
+                  <Code className={`${marginX.auto} ${marginBottom.compact} ${iconSize['2xl']} ${muted.default}`} />
                   <p className={muted.sm}>
                     No examples yet. Add some to help users understand!
                   </p>
@@ -1685,19 +1706,19 @@ function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.2 }}
+        transition={{ ...animation.spring.smooth, delay: 0.2 }}
       >
         <Card
           style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
+            backgroundColor: submissionFormColors.background.secondary,
+            borderColor: submissionFormColors.border.light,
           }}
         >
           <CardHeader>
             <CardTitle className={cluster.compact}>
               <Tag className={iconSize.md} />
               Tags
-              <span className={`ml-auto font-normal ${muted.sm}`}>
+              <span className={`${marginLeft.auto} ${weight.normal} ${muted.sm}`}>
                 {data.tags.length} tags
               </span>
             </CardTitle>
@@ -1708,7 +1729,7 @@ function StepExamplesTags({
             </p>
 
             {/* Add Tag Input */}
-            <div className={`flex ${gap.compact}`}>
+            <div className={`${display.flex} ${gap.compact}`}>
               <Input
                 value={newTag}
                 onChange={(event) => setNewTag(event.target.value)}
@@ -1719,7 +1740,7 @@ function StepExamplesTags({
                   }
                 }}
                 placeholder="e.g., 'react', 'typescript', 'api'"
-                className="flex-1"
+                className={flexGrow['1']}
                 maxLength={30}
               />
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -1729,7 +1750,7 @@ function StepExamplesTags({
                   disabled={!newTag.trim()}
                   className={`${gap.compact}`}
                   style={{
-                    backgroundColor: TOKENS.colors.accent.primary,
+                    backgroundColor: submissionFormColors.accent.primary,
                   }}
                 >
                   <Plus className={iconSize.sm} />
@@ -1741,7 +1762,7 @@ function StepExamplesTags({
             {/* Tags List */}
             <AnimatePresence mode="popLayout">
               {data.tags.length > 0 ? (
-                <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+                <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
                   {data.tags.map((tag) => {
                     // Use tag content as key (tags should be unique)
                     const tagKey = `tag-${tag}`;
@@ -1751,16 +1772,16 @@ function StepExamplesTags({
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0 }}
-                        transition={TOKENS.animations.spring.bouncy}
+                        transition={animation.spring.bouncy}
                         whileHover={{ scale: 1.05 }}
                       >
                         <Badge
                           variant="secondary"
-                          className={`group ${gap.snug} pr-1 ${size.sm}`}
+                          className={`group ${gap.snug} ${paddingRight.tight} ${size.sm}`}
                           style={{
-                            backgroundColor: `${TOKENS.colors.accent.primary}15`,
-                            borderColor: `${TOKENS.colors.accent.primary}30`,
-                            color: TOKENS.colors.accent.primary,
+                            backgroundColor: `${submissionFormColors.accent.primary}15`,
+                            borderColor: `${submissionFormColors.accent.primary}30`,
+                            color: submissionFormColors.accent.primary,
                           }}
                         >
                           {tag}
@@ -1772,7 +1793,7 @@ function StepExamplesTags({
                                 removeTag(tagIndex);
                               }
                             }}
-                            className={`ml-1 ${radius.full} ${padding.hair} ${transition.colors} hover:bg-accent-primary/20`}
+                            className={`${marginLeft.tight} ${radius.full} ${padding.hair} ${transition.colors} ${hoverBg.accentPrimary}`}
                           >
                             <X className={iconSize.xs} />
                           </button>
@@ -1785,12 +1806,12 @@ function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`${radius.lg} ${border.dashed} ${padding.comfortable} text-center`}
+                  className={`${radius.lg} ${border.dashed} ${padding.comfortable} ${textAlign.center}`}
                   style={{
-                    borderColor: TOKENS.colors.border.light,
+                    borderColor: submissionFormColors.border.light,
                   }}
                 >
-                  <Tag className={`mx-auto ${marginBottom.tight} ${iconSize.xl} ${muted.default}`} />
+                  <Tag className={`${marginX.auto} ${marginBottom.tight} ${iconSize.xl} ${muted.default}`} />
                   <p className={muted.sm}>
                     No tags yet. Add tags to improve discoverability!
                   </p>

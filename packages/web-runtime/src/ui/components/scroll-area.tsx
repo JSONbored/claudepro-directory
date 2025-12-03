@@ -3,6 +3,10 @@
 import { cn } from '../utils.ts';
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
 import { radius } from '../../design-system/styles/radius.ts';
+import { transition } from '../../design-system/styles/interactive.ts';
+import { position, overflow, height, width, display, userSelect, flexDir, flexGrow, padding } from '../../design-system/styles/layout.ts';
+import { bgColor } from '../../design-system/styles/colors.ts';
+import { borderLeft, borderTop } from '../../design-system/styles/borders.ts';
 import type * as React from 'react';
 
 const ScrollArea = ({
@@ -15,10 +19,10 @@ const ScrollArea = ({
 }) => (
   <ScrollAreaPrimitive.Root
     ref={ref}
-    className={cn('relative overflow-hidden', className)}
+    className={cn(`${position.relative} ${overflow.hidden}`, className)}
     {...props}
   >
-    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+    <ScrollAreaPrimitive.Viewport className={`${height.full} ${width.full} ${radius.inherit}`}>
       {children}
     </ScrollAreaPrimitive.Viewport>
     <ScrollBar />
@@ -39,14 +43,14 @@ const ScrollBar = ({
     ref={ref}
     orientation={orientation}
     className={cn(
-      'flex touch-none select-none transition-colors',
-      orientation === 'vertical' && 'h-full w-2.5 border-l border-l-transparent p-[1px]',
-      orientation === 'horizontal' && 'h-2.5 flex-col border-t border-t-transparent p-[1px]',
+      `${display.flex} touch-none ${userSelect.none} ${transition.colors}`,
+      orientation === 'vertical' && `${height.full} ${width.scrollbar} ${borderLeft.transparent} ${padding.pixel1}`,
+      orientation === 'horizontal' && `${height.scrollbar} ${flexDir.col} ${borderTop.transparent} ${padding.pixel1}`,
       className
     )}
     {...props}
   >
-    <ScrollAreaPrimitive.ScrollAreaThumb className={`relative flex-1 ${radius.full} bg-border`} />
+    <ScrollAreaPrimitive.ScrollAreaThumb className={`${position.relative} ${flexGrow['1']} ${radius.full} ${bgColor.border}`} />
   </ScrollAreaPrimitive.ScrollAreaScrollbar>
 );
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;

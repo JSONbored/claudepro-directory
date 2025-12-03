@@ -6,10 +6,14 @@
 
 import type { Database } from '@heyclaude/database-types';
 import {
-  cluster,
-  gap,
-  iconSize,
   alignItems,
+  cluster,
+  display,
+  flexGrow,
+  gap,
+  hoverBg,
+  iconSize,
+  justify,
   muted,
   opacityLevel,
   overflow,
@@ -17,7 +21,12 @@ import {
   radius,
   size,
   spaceY,
-  justify,
+  textAlign,
+  width,
+  textColor,
+  maxHeight,
+  minWidth,
+  height,
 } from '@heyclaude/web-runtime/design-system';
 import {
   createCompany,
@@ -223,7 +232,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   return (
     <div className={spaceY.compact}>
       <Label htmlFor={buttonId}>
-        Company <span className="text-destructive">*</span>
+        Company <span className={textColor.destructive}>*</span>
       </Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild={true}>
@@ -232,7 +241,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className={`w-full ${justify.between}`}
+            className={`${width.full} ${justify.between}`}
           >
             {selectedCompany ? (
               <span className={cluster.compact}>
@@ -247,7 +256,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
             <Search className={`${iconSize.sm} ${opacityLevel[50]}`} />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className={`w-[400px] ${padding.none}`} align="start">
+        <PopoverContent className={`${minWidth.popover} ${padding.none}`} align="start">
           {showCreateForm ? (
             <form onSubmit={handleCreate} className={`${spaceY.default} ${padding.default}`}>
               <div className={spaceY.compact}>
@@ -269,8 +278,8 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                   placeholder="https://company.com"
                 />
               </div>
-              <div className={`flex ${gap.compact}`}>
-                <Button type="submit" size="sm" className="flex-1">
+              <div className={`${display.flex} ${gap.compact}`}>
+                <Button type="submit" size="sm" className={flexGrow['1']}>
                   Create
                 </Button>
                 <Button
@@ -292,18 +301,18 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                 placeholder="Search companies..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9"
+                className={height.buttonSm}
               />
               {isSearching ? (
                 <p className={`${muted.sm} ${padding.xTight} ${padding.yDefault}`}>Searching...</p>
               ) : companies.length > 0 ? (
-                <div className={`max-h-[200px] ${spaceY.tight} ${overflow.yAuto}`}>
+                <div className={`${maxHeight.dropdown} ${spaceY.tight} ${overflow.yAuto}`}>
                   {companies.map((company) => (
                     <button
                       key={company.id}
                       type="button"
                       onClick={() => handleSelect(company)}
-                      className={`flex w-full ${alignItems.center} ${gap.compact} ${radius.md} ${padding.xTight} ${padding.yCompact} text-left ${size.sm} hover:bg-accent`}
+                      className={`${display.flex} ${width.full} ${alignItems.center} ${gap.compact} ${radius.md} ${padding.xTight} ${padding.yCompact} ${textAlign.left} ${size.sm} ${hoverBg.accentSolid}`}
                     >
                       <Building2 className={iconSize.sm} />
                       <span>{company.name}</span>
@@ -316,7 +325,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className={width.full}
                 onClick={() => setShowCreateForm(true)}
               >
                 <Plus className={iconSize.sm} />

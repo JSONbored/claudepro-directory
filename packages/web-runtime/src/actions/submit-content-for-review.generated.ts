@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const submitContentForReviewSchema = z.object({
+export const submitContentForReviewSchema = z.object({
   submission_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills']),
   name: z.string(),
   description: z.string(),
@@ -52,7 +52,6 @@ export const submitContentForReview = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -64,9 +63,10 @@ export const submitContentForReview = authedAction
       
       revalidatePath(`/account/submissions`);
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.submission_create']
+        cacheConfig,
+        invalidateKeys: ['submission_create']
       });
 
       

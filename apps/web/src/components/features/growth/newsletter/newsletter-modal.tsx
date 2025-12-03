@@ -1,7 +1,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { responsive, spaceY, marginTop, muted ,size } from '@heyclaude/web-runtime/design-system';
+import { responsive, spaceY, marginTop, muted ,size, bgGradient, gradientFrom, gradientTo, maxWidth, flexGrow, display, marginX, textAlign, height, opacityLevel } from '@heyclaude/web-runtime/design-system';
 import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
@@ -165,7 +165,7 @@ export function NewsletterModal({
 
   return (
     <Sheet open={open} onOpenChange={handleDismiss}>
-      <SheetContent side="bottom" className="sm:mx-auto sm:max-w-md">
+      <SheetContent side="bottom" className={`sm:${marginX.auto} ${maxWidth.smMd}`}>
         <SheetHeader>
           <SheetTitle>{NEWSLETTER_CTA_CONFIG.headline}</SheetTitle>
           <SheetDescription>{NEWSLETTER_CTA_CONFIG.description}</SheetDescription>
@@ -179,7 +179,7 @@ export function NewsletterModal({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
-              className={`h-12 ${size.base}`}
+              className={`${height.search} ${size.base}`}
               autoComplete="email"
               aria-label="Email address"
               required={true}
@@ -191,8 +191,8 @@ export function NewsletterModal({
               type="submit"
               disabled={isSubmitting || !email.trim()}
               className={cn(
-                'flex-1 bg-linear-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90',
-                isSubmitting && 'opacity-50'
+                `${flexGrow['1']} ${bgGradient.toR} ${gradientFrom.accent} ${gradientTo.primary} hover:${gradientFrom.accent90} hover:${gradientTo.primary90}`,
+                isSubmitting && opacityLevel[50]
               )}
             >
               {isSubmitting ? 'Joining...' : NEWSLETTER_CTA_CONFIG.buttonText}
@@ -202,14 +202,14 @@ export function NewsletterModal({
               variant="ghost"
               onClick={handleMaybeLater}
               disabled={isSubmitting}
-              className="flex-1 sm:flex-initial"
+              className={`${flexGrow['1']} sm:${display.flex}-initial`}
             >
               Maybe later
             </Button>
           </div>
         </form>
 
-        <p className={`${marginTop.default} text-center ${muted.default} ${size.xs}`}>
+        <p className={`${marginTop.default} ${textAlign.center} ${muted.default} ${size.xs}`}>
           By subscribing, you agree to receive updates about Claude tools and resources.
         </p>
       </SheetContent>

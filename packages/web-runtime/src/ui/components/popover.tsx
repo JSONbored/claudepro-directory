@@ -1,9 +1,10 @@
 'use client';
 
 import { cn } from '../utils.ts';
-import { padding } from '../../design-system/styles/layout.ts';
+import { padding, width } from '../../design-system/styles/layout.ts';
 import { radius } from '../../design-system/styles/radius.ts';
-import { shadow } from '../../design-system/styles/effects.ts';
+import { shadow, zLayer } from '../../design-system/styles/effects.ts';
+import { bgColor, textColor } from '../../design-system/styles/colors.ts';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import type * as React from 'react';
 
@@ -26,7 +27,7 @@ const PopoverContent = ({
       align={align}
       sideOffset={sideOffset}
       className={cn(
-        `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-72 origin-[--radix-popover-content-transform-origin] ${radius.md} border bg-popover ${padding.default} text-popover-foreground ${shadow.md} outline-none data-[state=closed]:animate-out data-[state=open]:animate-in`,
+        `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ${zLayer.modal} ${width.dropdown} origin-[--radix-popover-content-transform-origin] ${radius.md} border ${bgColor.popover} ${padding.default} ${textColor.popoverForeground} ${shadow.md} outline-none data-[state=closed]:animate-out data-[state=open]:animate-in`,
         className
       )}
       {...props}

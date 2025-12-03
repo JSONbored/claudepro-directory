@@ -21,7 +21,7 @@ export async function getSimilarContent(input: {
     {
       keyParts: ['similar-content', contentType, contentSlug, limit],
       tags: ['content', 'similar', `content-${contentSlug}`],
-      ttlKey: 'cache.content_detail.ttl_seconds',
+      ttlKey: 'content_detail',
       fallback: null,
       logMeta: { contentType, contentSlug, limit },
     }

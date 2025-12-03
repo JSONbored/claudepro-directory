@@ -35,6 +35,8 @@ export const radius = {
   '3xl': 'rounded-3xl',
   /** Full/pill (9999px) */
   full: 'rounded-full',
+  /** Inherit border-radius from parent */
+  inherit: 'rounded-[inherit]',
 } as const;
 
 /**
@@ -102,4 +104,12 @@ export const radiusComposite = {
   avatar: 'rounded-full',
   /** Tag rounding (md) */
   tag: 'rounded-md',
+} as const;
+
+/**
+ * Responsive radius utilities.
+ */
+export const radiusResponsive = {
+  /** sm:rounded-lg - Large radius at sm breakpoint */
+  smLg: 'sm:rounded-lg',
 } as const;

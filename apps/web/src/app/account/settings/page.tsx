@@ -10,7 +10,7 @@ import {
   getUserSettings,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, spaceY, cluster, muted, marginBottom, weight ,size , gap , radius, squareSize } from '@heyclaude/web-runtime/design-system';
+import { between, spaceY, cluster, muted, marginBottom, weight, size, grid, radius, squareSize, helper, objectFit } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Button ,
   Card,
@@ -67,7 +67,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SettingsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -186,7 +186,7 @@ export default async function SettingsPage() {
     return (
       <div className={spaceY.relaxed}>
         <h1 className={`${weight.bold} ${size['3xl']}`}>Settings</h1>
-        <p className="text-destructive">Unable to load profile. Please try again later.</p>
+        <p className={helper.destructive}>Unable to load profile. Please try again later.</p>
       </div>
     );
   }
@@ -225,7 +225,7 @@ export default async function SettingsPage() {
           <CardDescription>Your account information</CardDescription>
         </CardHeader>
         <CardContent className={spaceY.comfortable}>
-          <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-2`}>
+          <div className={grid.responsiveForm}>
             <div>
               <p className={`${weight.medium} ${size.sm}`}>Email</p>
               <p className={muted.default}>{user.email}</p>
@@ -260,7 +260,7 @@ export default async function SettingsPage() {
                 alt={`${userData.name ?? 'User'}'s avatar`}
                 width={64}
                 height={64}
-                className={`${squareSize.avatarXl} ${radius.full} object-cover`}
+                className={`${squareSize.avatarXl} ${radius.full} ${objectFit.cover}`}
               />
               <div>
                 <p className={size.sm}>

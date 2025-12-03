@@ -21,6 +21,8 @@ import {
   alignItems,
   justify,
   padding,
+  paddingTop,
+  paddingBottom,
   radius,
   shadow,
   size,
@@ -31,6 +33,17 @@ import {
   backdrop,
   transition,
   paddingResponsive,
+  display,
+  position,
+  width,
+  container,
+  height,
+  minWidth,
+  focusRing,
+  srOnly,
+  willChange,
+  containment,
+  absolute,
 } from '@heyclaude/web-runtime/design-system';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, DiscordIcon } from '@heyclaude/web-runtime/icons';
@@ -114,7 +127,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
       {/* Skip to main content link for keyboard navigation (WCAG 2.1 AA) */}
       <a
         href="#main-content"
-        className={`sr-only ${transition.default} focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100 focus:${radius.md} focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground focus:${shadow.lg} focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background`}
+        className={`${srOnly.default} ${transition.default} focus:${srOnly.visible} focus:${position.absolute} focus:top-4 focus:left-4 focus:${zLayer.max} focus:${radius.md} focus:${bgColor.accent} focus:${padding.xComfortable} focus:${padding.yCompact} focus:${textColor.accentForeground} focus:${shadow.lg} ${focusRing.accentWithOffset}`}
       >
         Skip to main content
       </a>
@@ -127,10 +140,10 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
       />
 
       <motion.header
-        className={`${sticky.top} ${zLayer.modal} w-full ${padding.xCompact} pt-1 pb-3 will-change-transform contain-layout`}
+        className={`${sticky.top} ${zLayer.modal} ${width.full} ${padding.xCompact} ${paddingTop.tight} ${paddingBottom.default} ${willChange.transform} ${containment.layout}`}
         style={{ opacity: navOpacity }}
       >
-        <div className="container mx-auto">
+        <div className={container.default}>
           <motion.nav
             className={cn(
               `${radius['2xl']} border`,
@@ -145,8 +158,8 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
           >
             <div className={paddingResponsive.sm}>
               <div
-                className={`${between.center} transition-[height] ${transition.slow} will-change-auto ${
-                  isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
+                className={`${between.center} ${transition.height} ${transition.slow} ${willChange.auto} ${
+                  isScrolled ? `${height.buttonLg} md:${height.search}` : `${height.inputLg} md:${height.hero}`
                 }`}
               >
                 {/* Logo with Motion.dev scale animation - no size prop to avoid double animation */}
@@ -176,7 +189,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                     variant="ghost"
                     size="sm"
                     onClick={openPinboardDrawer}
-                    className={`relative ${buttonGhost.icon}`}
+                    className={`${position.relative} ${buttonGhost.icon}`}
                     aria-label={
                       pinCount > 0
                         ? `Open pinboard (${pinCount} saved)`
@@ -185,7 +198,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                   >
                     <Bookmark className={iconSize.xs} />
                     {pinCount > 0 && (
-                      <span className={`-right-1 -top-1 absolute flex h-4 min-w-4 ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${padding.xMicro} ${weight.semibold} ${size['2xs']} ${textColor.primaryForeground}`}>
+                      <span className={`${absolute.badge} ${display.flex} ${iconSize.sm} ${minWidth[4]} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.primary} ${padding.xMicro} ${weight.semibold} ${size['2xs']} ${textColor.primaryForeground}`}>
                         {pinCount > 99 ? '99+' : pinCount}
                       </span>
                     )}
@@ -200,7 +213,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                           asChild={true}
                           variant="outline"
                           size="sm"
-                          className={`hidden ${size.xs} md:flex`}
+                          className={`${display.none} ${size.xs} md:${display.flex}`}
                         >
                           <Link href={link.href} prefetch={true}>
                             {ActionIcon && <ActionIcon className={iconLeading.xs} />}
@@ -214,15 +227,15 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                     variant="ghost"
                     size="sm"
                     onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                    className={`hidden md:flex ${size.sm} ${weight.medium} ${buttonGhost.icon}`}
+                    className={`${display.none} md:${display.flex} ${size.sm} ${weight.medium} ${buttonGhost.icon}`}
                     aria-label="Join our Discord community"
                   >
                     <DiscordIcon className={iconSize.xs} />
                   </Button>
 
-                  <GitHubStarsButton className={`hidden ${size.xs} md:flex`} />
+                  <GitHubStarsButton className={`${display.none} ${size.xs} md:${display.flex}`} />
 
-                  <UserMenu className={'hidden md:flex'} />
+                  <UserMenu className={`${display.none} md:${display.flex}`} />
 
                   {/* Mobile Menu - Show ONLY below md: (< 768px) */}
                   <NavigationMobile isActive={isActive} isOpen={isOpen} onOpenChange={setIsOpen} />

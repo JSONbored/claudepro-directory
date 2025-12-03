@@ -27,6 +27,14 @@ import type {
 } from '@heyclaude/web-runtime/types/component.types';
 import { iconSize, stack, absolute, muted ,size  , padding , radius, bgColor,
   borderColor,
+  position,
+  resize,
+  paddingLeft,
+  paddingRight,
+  height,
+  width,
+  border,
+  translate,
 } from '@heyclaude/web-runtime/design-system';
 import { getResponsiveGridClass } from '@heyclaude/web-runtime/ui';
 import { Input } from '@heyclaude/web-runtime/ui';
@@ -79,10 +87,10 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
     <div className={`${stack.compact} ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       {Icon ? (
-        <div className="relative">
+        <div className={position.relative}>
           {iconPosition === 'left' && (
             <div
-              className={`${absolute.topHalfLeft} -translate-y-1/2 ${muted.default}`}
+              className={`${absolute.topHalfLeft} ${translate.centerY} ${muted.default}`}
             >
               <Icon className={iconSize.sm} />
             </div>
@@ -93,7 +101,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
             placeholder={field.placeholder}
             required={field.required}
             defaultValue={field.defaultValue}
-            className={iconPosition === 'left' ? 'pl-10' : iconPosition === 'right' ? 'pr-10' : ''}
+            className={iconPosition === 'left' ? paddingLeft.icon : iconPosition === 'right' ? paddingRight.icon : ''}
           />
           {iconPosition === 'right' && (
             <div
@@ -151,7 +159,7 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
         required={field.required}
         rows={field.rows || 4}
         defaultValue={field.defaultValue}
-        className={`${monoClass} resize-y`}
+        className={`${monoClass} ${resize.y}`}
       />
       {field.helpText && <p className={`${muted.default} ${size.xs}`}>{field.helpText}</p>}
     </div>
@@ -223,7 +231,7 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
         name={field.name}
         required={field.required}
         defaultValue={field.defaultValue}
-        className={`flex h-10 w-full ${radius.md} border ${borderColor.input} ${bgColor.background} ${padding.xCompact} ${padding.yCompact} ${size.sm}`}
+        className={`flex ${height.input} ${width.full} ${radius.md} ${border.default} ${borderColor.input} ${bgColor.background} ${padding.xCompact} ${padding.yCompact} ${size.sm}`}
       >
         {field.options.map((option) => (
           <option key={option.value} value={option.value}>

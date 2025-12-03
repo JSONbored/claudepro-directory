@@ -22,6 +22,10 @@ import {
   size,
   stack,
   weight,
+  textAlign,
+  overflow,
+  width,
+  textColor,
 } from '@heyclaude/web-runtime/design-system';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Check, TrendingUp } from '@heyclaude/web-runtime/icons';
@@ -54,7 +58,7 @@ export function JobsPromo() {
       animate={{ opacity: 1, y: 0 }}
       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
     >
-      <Card className={cn('overflow-hidden', borderColor['accent/20'])}>
+      <Card className={cn(overflow.hidden, borderColor['accent/20'])}>
         <CardContent className={cn(stack.default, padding.comfortable)}>
           {/* Hook with honest growth story */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
@@ -123,7 +127,7 @@ export function JobsPromo() {
                 transition={{ delay: 0.5 + i * 0.1 }}
               >
                 <Check
-                  className={cn(marginTop.micro, flexGrow.shrink0, iconSize.sm, 'text-accent')}
+                  className={cn(marginTop.micro, flexGrow.shrink0, iconSize.sm, textColor.accent)}
                 />
                 <span className={size.sm}>{text}</span>
               </motion.div>
@@ -138,14 +142,14 @@ export function JobsPromo() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Button asChild={true} className="w-full">
+            <Button asChild={true} className={width.full}>
               <Link href={ROUTES.PARTNER}>View Pricing & Post Job</Link>
             </Button>
           </motion.div>
 
           {/* Soft trust signal */}
           <motion.p
-            className={cn('text-center', muted.default, size.xs)}
+            className={cn(textAlign.center, muted.default, size.xs)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}

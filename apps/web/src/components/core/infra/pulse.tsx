@@ -22,7 +22,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { getPollingConfig } from '@heyclaude/web-runtime/config/static-configs';
+import { POLLING_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import {
   logger,
   logUnhandledPromise,
@@ -148,9 +148,8 @@ function ViewVariant({
 
   useEffect(() => {
     if (delay === undefined) {
-      // Get polling config from static defaults
-      const config = getPollingConfig();
-      setActualDelay(config['polling.realtime_ms']);
+      // Get polling config from unified-config
+      setActualDelay(POLLING_CONFIG.realtime_ms);
     }
   }, [delay]);
 

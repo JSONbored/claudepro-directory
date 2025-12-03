@@ -9,6 +9,8 @@
 
 import { cn } from '../../../ui/utils.ts';
 import { motion } from 'motion/react';
+import { pointerEvents, position, inset, overflow, height, width } from '../../../design-system/styles/layout.ts';
+import { bgColor } from '../../../design-system/styles/colors.ts';
 
 interface BorderBeamProps {
   className?: string;
@@ -32,12 +34,12 @@ export function BorderBeam({
   return (
     <div
       className={cn(
-        'pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]',
+        `${pointerEvents.none} ${position.absolute} ${inset['0']} ${overflow.hidden} rounded-[inherit]`,
         className
       )}
     >
       <motion.div
-        className="absolute inset-0"
+        className={`${position.absolute} ${inset['0']}`}
         style={{
           width: `${size}px`,
           height: `${size}px`,
@@ -63,13 +65,13 @@ export function BorderBeam({
         }}
       />
       <div
-        className="absolute inset-0 rounded-[inherit]"
+        className={`${position.absolute} ${inset['0']} rounded-[inherit]`}
         style={{
           padding: `${borderWidth}px`,
           background: 'transparent',
         }}
       >
-        <div className="h-full w-full rounded-[inherit] bg-background" />
+        <div className={`${height.full} ${width.full} rounded-[inherit] ${bgColor.background}`} />
       </div>
     </div>
   );

@@ -1,35 +1,46 @@
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
+  alignItems,
   animateDuration,
   between,
   bgColor,
   borderBottom,
+  container,
+  display,
   flexDir,
+  flexGrow,
   flexWrap,
   gap,
   grid,
   iconLeading,
   iconSize,
-  alignItems,
   justify,
   marginBottom,
+  marginRight,
   marginTop,
+  marginX,
   maxWidth,
   minHeight,
   muted,
   overflow,
   padding,
+  position,
   radius,
   row,
   shadow,
   size,
+  squareSize,
+  textAlign,
   textColor,
   tracking,
   transition,
+  truncate,
   weight,
   zLayer,
-  squareSize,
+  objectFit,
+  border,
+  groupHover,
 } from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
@@ -175,13 +186,72 @@ export default async function CompaniesPage() {
     companiesCount: companies.length,
   });
 
+  /**
+   * Renders company logo with validation for trusted sources
+   * Falls back to placeholder icon if logo is invalid or from untrusted source
+   */
+  function renderCompanyLogo(logo: null | string | undefined, name: null | string, priority: boolean) {
+    const placeholderIcon = (
+      <div className={`${display.flex} ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.lg} ${border.default} ${bgColor.accent}`}>
+        <Building className={`${iconSize.lg} ${muted.default}`} />
+      </div>
+    );
+
+    if (!logo) return placeholderIcon;
+
+    try {
+      const parsed = new URL(logo);
+      // Only allow HTTPS
+      if (parsed.protocol !== 'https:') {
+        return placeholderIcon;
+      }
+      // Allow Supabase storage (public bucket path) or common CDN domains
+      const isSupabaseHost =
+        parsed.hostname.endsWith('.supabase.co') ||
+        parsed.hostname.endsWith('.supabase.in');
+      const isCloudinary =
+        parsed.hostname === 'res.cloudinary.com' ||
+        /^[a-z0-9-]+\.cloudinary\.com$/.test(parsed.hostname);
+      const isAwsS3 =
+        /^[a-z0-9-]+\.s3\.amazonaws\.com$/.test(parsed.hostname) ||
+        /^s3\.[a-z0-9-]+\.amazonaws\.com$/.test(parsed.hostname);
+      const isTrustedSource =
+        (isSupabaseHost &&
+          parsed.pathname.startsWith('/storage/v1/object/public/')) ||
+        isCloudinary ||
+        isAwsS3;
+      if (!isTrustedSource) {
+        return placeholderIcon;
+      }
+          return (
+            <Image
+              src={logo}
+              alt={`${name ?? 'Company'} logo`}
+              width={48}
+              height={48}
+              className={`${squareSize.avatarLg} ${radius.lg} ${objectFit.cover}`}
+              priority={priority}
+            />
+          );
+    } catch (error: unknown) {
+      const normalized = normalizeError(error, 'Failed to render company logo');
+      reqLogger.warn('CompaniesPage: failed to render company logo', {
+        section: 'render-company-logo',
+        logo,
+        companyName: name,
+        err: normalized,
+      });
+      return placeholderIcon;
+    }
+  }
+
   return (
     <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Hero */}
-      <section className={`relative ${overflow.hidden} ${borderBottom.default}`}>
-        <div className={`container mx-auto ${padding.xDefault} py-20`}>
-          <div className={`mx-auto ${maxWidth['3xl']}`}>
-            <div className={`${marginBottom.comfortable} flex ${justify.center}`}>
+      <section className={`${position.relative} ${overflow.hidden} ${borderBottom.default}`}>
+        <div className={`${container.default} ${padding.xDefault} ${padding.yLarge}`}>
+          <div className={`${marginX.auto} ${maxWidth['3xl']}`}>
+            <div className={`${marginBottom.comfortable} ${display.flex} ${justify.center}`}>
               <div className={`${radius.full} ${bgColor['accent/10']} ${padding.compact}`}>
                 <Building className={`${iconSize.xl} ${textColor.primary}`} />
               </div>
@@ -189,11 +259,11 @@ export default async function CompaniesPage() {
 
             <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']} ${tracking.tight} sm:${size['5xl']}`}>Companies Directory</h1>
 
-            <p className={`mx-auto ${marginTop.default} ${maxWidth.xl} ${muted.default} ${size.lg}`}>
+            <p className={`${marginX.auto} ${marginTop.default} ${maxWidth.xl} ${muted.default} ${size.lg}`}>
               Discover companies building the future with Claude and Cursor
             </p>
 
-            <div className={`${marginBottom.relaxed} flex ${justify.center} ${gap.compact}`}>
+            <div className={`${marginBottom.relaxed} ${display.flex} ${justify.center} ${gap.compact}`}>
               <UnifiedBadge variant="base" style="secondary">
                 <Building className={iconLeading.xs} />
                 {companies.length} Companies
@@ -205,7 +275,7 @@ export default async function CompaniesPage() {
 
             <Button variant="outline" asChild>
               <Link href={ROUTES.ACCOUNT_COMPANIES}>
-                <Plus className={`mr-2 ${iconSize.sm}`} />
+                <Plus className={`${marginRight.compact} ${iconSize.sm}`} />
                 Add Your Company
               </Link>
             </Button>
@@ -214,18 +284,18 @@ export default async function CompaniesPage() {
       </section>
 
       {/* Companies Grid */}
-      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+      <section className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
         {companies.length === 0 ? (
           <Card>
-            <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+            <CardContent className={`${display.flex} ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
               <Building className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
               <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No companies yet</h3>
-              <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
+              <p className={`${marginBottom.default} ${maxWidth.md} ${textAlign.center} ${muted.default}`}>
                 Be the first company to join the directory!
               </p>
               <Button asChild>
                 <Link href={ROUTES.ACCOUNT_COMPANIES}>
-                  <Plus className={`mr-2 ${iconSize.sm}`} />
+                  <Plus className={`${marginRight.compact} ${iconSize.sm}`} />
                   Add Your Company
                 </Link>
               </Button>
@@ -235,8 +305,8 @@ export default async function CompaniesPage() {
           <div className={grid.responsive3}>
             {companies.map((company, index) => (
               <Card key={company.id} className={`card-gradient ${transition.all} ${animateDuration.default} hover:${shadow.lg}`}>
-                {company.featured ? <div className={`-top-2 -right-2 absolute ${zLayer.raised}`}>
-                    <UnifiedBadge variant="base" className={`bg-accent ${textColor.accentForeground}`}>
+                {company.featured ? <div className={`-top-2 -right-2 ${position.absolute} ${zLayer.raised}`}>
+                    <UnifiedBadge variant="base" className={`${bgColor.accent} ${textColor.accentForeground}`}>
                       <Star className={iconLeading.xs} />
                       Featured
                     </UnifiedBadge>
@@ -244,70 +314,12 @@ export default async function CompaniesPage() {
 
                   <CardHeader>
                   <div className={`${row.default}`}>
-                    {(() => {
-                      // Validate logo URL is safe (from trusted sources only)
-                      if (!company.logo) {
-                        return (
-                          <div className={`flex ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
-                            <Building className={`${iconSize.lg} ${muted.default}`} />
-                          </div>
-                        );
-                      }
-                      try {
-                        const parsed = new URL(company.logo);
-                        // Only allow HTTPS
-                        if (parsed.protocol !== 'https:') {
-                          return (
-                            <div className={`flex ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
-                              <Building className={`${iconSize.lg} ${muted.default}`} />
-                            </div>
-                          );
-                        }
-                        // Allow Supabase storage (public bucket path) or common CDN domains
-                        const isSupabaseHost =
-                          parsed.hostname.endsWith('.supabase.co') ||
-                          parsed.hostname.endsWith('.supabase.in');
-                        const isCloudinary =
-                          parsed.hostname === 'res.cloudinary.com' ||
-                          /^[a-z0-9-]+\.cloudinary\.com$/.test(parsed.hostname);
-                        const isAwsS3 =
-                          /^[a-z0-9-]+\.s3\.amazonaws\.com$/.test(parsed.hostname) ||
-                          /^s3\.[a-z0-9-]+\.amazonaws\.com$/.test(parsed.hostname);
-                        const isTrustedSource =
-                          (isSupabaseHost &&
-                            parsed.pathname.startsWith('/storage/v1/object/public/')) ||
-                          isCloudinary ||
-                          isAwsS3;
-                        if (!isTrustedSource) {
-                          return (
-                            <div className={`flex ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
-                              <Building className={`${iconSize.lg} ${muted.default}`} />
-                            </div>
-                          );
-                        }
-                        return (
-                          <Image
-                            src={company.logo}
-                            alt={`${company.name} logo`}
-                            width={48}
-                            height={48}
-                            className={`${squareSize.avatarLg} ${radius.lg} object-cover`}
-                            priority={index < 6}
-                          />
-                        );
-                      } catch {
-                        return (
-                          <div className={`flex ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
-                            <Building className={`${iconSize.lg} ${muted.default}`} />
-                          </div>
-                        );
-                      }
-                    })()}
-                    <div className="flex-1">
+                    {renderCompanyLogo(company.logo ?? null, company.name, index < 6)}
+                    <div className={flexGrow['1']}>
                       <CardTitle>
                         <Link
                           href={`/companies/${company.slug}`}
-                          className="transition-colors-smooth group-hover:text-accent"
+                          className={`${transition.colors} ${groupHover.accent}`}
                         >
                           {company.name}
                         </Link>
@@ -318,12 +330,12 @@ export default async function CompaniesPage() {
                 </CardHeader>
 
                 <CardContent>
-                  {company.description ? <p className={`${marginBottom.default} line-clamp-2 ${muted.sm}`}>
+                  {company.description ? <p className={`${marginBottom.default} ${truncate.lines2} ${muted.sm}`}>
                       {company.description}
                     </p> : null}
 
                   {/* Job Statistics from RPC/data layer (getCompanyProfile RPC) */}
-                  {company.stats && (company.stats.active_jobs ?? 0) > 0 ? <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.compact}`}>
+                  {company.stats && (company.stats.active_jobs ?? 0) > 0 ? <div className={`${marginBottom.default} ${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
                       <UnifiedBadge variant="base" style="secondary" className={size.xs}>
                         <Briefcase className={iconLeading.xs} />
                         {company.stats.active_jobs ?? 0} Active{' '}
@@ -375,7 +387,7 @@ export default async function CompaniesPage() {
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+      <section className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

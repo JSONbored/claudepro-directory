@@ -125,7 +125,7 @@ export async function getAllTagsWithCounts(options?: {
       {
         keyParts: ['all-tags', String(minCount), String(limit)],
         tags: ['tags', 'all-tags'],
-        ttlKey: 'cache.search_facets.ttl_seconds', // Reuse search facets TTL
+        ttlKey: 'search_facets', // Reuse search facets TTL
         fallback: [] as TagSummary[],
         logMeta: { source: 'getAllTagsWithCounts', minCount, limit },
       }
@@ -247,7 +247,7 @@ export async function getContentByTag(
       {
         keyParts: ['content-by-tag', tag, category ?? 'all', String(limit), String(offset)],
         tags: ['tags', `tag-${tag}`, 'content'],
-        ttlKey: 'cache.content_list.ttl_seconds',
+        ttlKey: 'content_list',
         fallback: fallbackResult,
         logMeta: { source: 'getContentByTag', tag, category, limit, offset },
       }

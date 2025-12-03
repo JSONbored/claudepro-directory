@@ -15,6 +15,7 @@
  */
 
 import { cn } from '../../utils.ts';
+import { display, position } from '../../../design-system/styles/layout.ts';
 import { motion, type Transition, useInView } from 'motion/react';
 import * as React from 'react';
 
@@ -105,7 +106,7 @@ export function RollingText({
   return (
     <span
       ref={localRef}
-      className={cn('relative inline-block', className)}
+      className={cn(`${position.relative} ${display.inlineBlock}`, className)}
       aria-live="polite"
       aria-atomic="true"
       style={{
@@ -114,12 +115,12 @@ export function RollingText({
       {...props}
     >
       <span className="sr-only">{currentWord}</span>
-      <span aria-hidden="true" className="inline-flex">
+      <span aria-hidden="true" className={display.inlineFlex}>
         {isMounted ? (
           characters.map((item, idx) => (
             <motion.span
               key={item.id}
-              className="inline-block"
+              className={display.inlineBlock}
               initial={isExiting ? EXIT_ANIMATION.initial : ENTRY_ANIMATION.initial}
               animate={
                 isInView
@@ -144,7 +145,7 @@ export function RollingText({
             </motion.span>
           ))
         ) : (
-          <span className="inline-block">{words[0]}</span>
+          <span className={display.inlineBlock}>{words[0]}</span>
         )}
       </span>
     </span>

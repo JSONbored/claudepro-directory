@@ -306,6 +306,29 @@ className={spaceX.compact}      // space-x-2
 | `hover:bg-accent/10` | `hoverBg.default` |
 | `border border-border` | `border.default` |
 | `border-b border-border` | `borderBottom.default` |
+| `flex` | `display.flex` |
+| `grid` | `display.grid` |
+| `hidden` | `display.hidden` |
+| `block` | `display.block` |
+| `inline-flex` | `display.inlineFlex` |
+| `inline-block` | `display.inlineBlock` |
+| `inline` | `display.inline` |
+| `flex-1` | `flexGrow['1']` |
+| `flex-row` | `flexDir.row` |
+| `flex-col` | `flexDir.col` |
+| `flex-col-reverse` | `flexDir.colReverse` |
+| `flex-row-reverse` | `flexDir.rowReverse` |
+| `flex-wrap` | `flexWrap.wrap` |
+| `flex-nowrap` | `flexWrap.nowrap` |
+| `justify-center` | `justify.center` |
+| `justify-between` | `justify.between` |
+| `justify-start` | `justify.start` |
+| `justify-end` | `justify.end` |
+| `space-x-2` | `spaceX.compact` |
+| `space-x-3` | `spaceX.default` |
+| `space-x-4` | `spaceX.comfortable` |
+| `overflow-hidden` | `overflow.hidden` |
+| `overflow-auto` | `overflow.auto` |
 
 ---
 

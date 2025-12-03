@@ -10,7 +10,7 @@
  * - Featured tags with 3D tilt effect
  * - Staggered entrance animations
  * - Category-based coloring
- * - SEO optimized with structured data
+ * - SEO optimized metadata
  */
 
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
@@ -29,6 +29,7 @@ import {
   gap,
   cluster,
   padding,
+  paddingBottom,
   radius,
   maxWidth,
   iconSize,
@@ -43,10 +44,24 @@ import {
   textColor,
   justify,
   borderColor,
+  border,
   flexWrap,
   overflow,
   tracking,
   squareSize,
+  container,
+  marginX,
+  marginRight,
+  textAlign,
+  animate,
+  display,
+  position,
+  absolute,
+  pointerEvents,
+  bgClip,
+  listStyle,
+  blur,
+  translate,
 } from '@heyclaude/web-runtime/design-system';
 import { Tag, Sparkles, TrendingUp, Layers } from '@heyclaude/web-runtime/icons';
 import {
@@ -106,13 +121,15 @@ export default async function TagsIndexPage() {
   });
 
   let tags: TagSummary[] = [];
+  let hadLoadError = false;
 
   try {
     tags = await getAllTagsWithCounts({ minCount: 1, limit: 500 });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load tags');
     reqLogger.error('TagsIndexPage: getAllTagsWithCounts failed', normalized);
-    // Continue with empty tags - show empty state
+    hadLoadError = true;
+    // Continue with empty tags - show error state
   }
 
   const totalItems = tags.reduce((sum, tag) => sum + tag.count, 0);
@@ -125,23 +142,23 @@ export default async function TagsIndexPage() {
   }));
 
   return (
-    <div className={`relative ${minHeight.screen} ${overflow.hidden} ${bgColor.background}`}>
+    <div className={`${position.relative} ${minHeight.screen} ${overflow.hidden} ${bgColor.background}`}>
       {/* Ambient background effects */}
-      <div className={`pointer-events-none absolute inset-0 -z-10 ${overflow.hidden}`}>
-        <div className={`absolute -left-40 -top-40 ${squareSize.heroLg} ${radius.full} ${bgColor['accent/5']} blur-3xl`} />
-        <div className={`absolute -bottom-40 -right-40 ${squareSize.heroXl} ${radius.full} ${bgColor['primary/5']} blur-3xl`} />
-        <div className={`absolute left-1/2 top-1/3 ${squareSize.hero} -translate-x-1/2 ${radius.full} ${bgColor['muted/30']} blur-3xl`} />
+      <div className={`${pointerEvents.none} ${absolute.inset} ${zLayer.behind10} ${overflow.hidden}`}>
+        <div className={`${position.absolute} -left-40 -top-40 ${squareSize.heroLg} ${radius.full} ${bgColor['accent/5']} ${blur['3xl']}`} />
+        <div className={`${position.absolute} -bottom-40 -right-40 ${squareSize.heroXl} ${radius.full} ${bgColor['primary/5']} ${blur['3xl']}`} />
+        <div className={`${absolute.centerY} left-1/2 ${squareSize.hero} ${translate.centerX} ${radius.full} ${bgColor['muted/30']} ${blur['3xl']}`} />
       </div>
 
       {/* Hero Section */}
       <section className={emptyCard.default} aria-labelledby="tags-title">
-        <div className={`container mx-auto ${padding.xDefault} py-20`}>
-          <div className={`mx-auto ${maxWidth['3xl']}`}>
+        <div className={`${container.default} ${padding.xDefault} ${padding.yLarge}`}>
+          <div className={`${marginX.auto} ${maxWidth['3xl']}`}>
             {/* Animated icon */}
-            <div className={`${marginBottom.comfortable} flex ${justify.center}`}>
-              <div className="relative">
-                <div className={`absolute inset-0 animate-pulse ${radius.full} ${bgColor['accent/20']} blur-xl`} />
-                <div className={`relative ${radius.full} ${bgGradient.toBR} ${gradientFrom.accent20} ${gradientTo.primary20} ${padding.default} ${backdrop.sm}`}>
+            <div className={`${marginBottom.comfortable} ${display.flex} ${justify.center}`}>
+              <div className={position.relative}>
+                <div className={`${absolute.inset} ${animate.pulse} ${radius.full} ${bgColor['accent/20']} ${blur.xl}`} />
+                <div className={`${position.relative} ${radius.full} ${bgGradient.toBR} ${gradientFrom.accent20} ${gradientTo.primary20} ${padding.default} ${backdrop.sm}`}>
                   <Tag className={`${iconSize['3xl']} ${textColor.primary}`} />
                 </div>
               </div>
@@ -149,12 +166,12 @@ export default async function TagsIndexPage() {
 
             <h1
               id="tags-title"
-              className={`${marginBottom.default} ${bgGradient.toR} ${gradientFrom.foreground} ${gradientVia.foreground} ${gradientTo.mutedForeground} bg-clip-text ${weight.bold} ${size['4xl']} ${tracking.tight} ${textColor.transparent} sm:${size['5xl']} md:${size['6xl']}`}
+              className={`${marginBottom.default} ${bgGradient.toR} ${gradientFrom.foreground} ${gradientVia.foreground} ${gradientTo.mutedForeground} ${bgClip.text} ${weight.bold} ${size['4xl']} ${tracking.tight} ${textColor.transparent} sm:${size['5xl']} md:${size['6xl']}`}
             >
               Explore by Topic
             </h1>
 
-            <p className={`mx-auto ${marginTop.default} ${maxWidth.xl} ${muted.lg}`}>
+            <p className={`${marginX.auto} ${marginTop.default} ${maxWidth.xl} ${muted.lg}`}>
               Discover{' '}
               <span className={`${weight.semibold} ${textColor.foreground}`}>{tags.length} topics</span>{' '}
               across{' '}
@@ -164,16 +181,16 @@ export default async function TagsIndexPage() {
               . Find exactly what you need, organized by what matters to you.
             </p>
 
-            <ul className={`${marginTop.comfortable} flex list-none ${flexWrap.wrap} ${justify.center} ${gap.compact}`}>
+            <ul className={`${marginTop.comfortable} ${display.flex} ${listStyle.none} ${flexWrap.wrap} ${justify.center} ${gap.compact}`}>
               <li>
                 <UnifiedBadge variant="base" style="secondary">
-                  <Sparkles className={`mr-1.5 ${iconSize.xsPlus}`} />
+                  <Sparkles className={`${marginRight.snug} ${iconSize.xsPlus}`} />
                   {tags.length} Tags
                 </UnifiedBadge>
               </li>
               <li>
                 <UnifiedBadge variant="base" style="outline">
-                  <Layers className={`mr-1.5 ${iconSize.xsPlus}`} />
+                  <Layers className={`${marginRight.snug} ${iconSize.xsPlus}`} />
                   Community Curated
                 </UnifiedBadge>
               </li>
@@ -183,10 +200,15 @@ export default async function TagsIndexPage() {
       </section>
 
       {/* Main Content */}
-      <div className={`container mx-auto ${padding.xDefault} pb-16`}>
-        {tags.length === 0 ? (
-          <Card className={`${bgColor['muted/50']} ${padding.section} text-center`}>
-            <Tag className={`mx-auto ${marginBottom.default} ${iconSize['4xl']} ${muted.default}/20`} />
+      <div className={`${container.default} ${padding.xDefault} ${paddingBottom.hero}`}>
+        {hadLoadError ? (
+          <Card className={`${bgColor['muted/50']} ${padding.section} ${textAlign.center}`}>
+            <Tag className={`${marginX.auto} ${marginBottom.default} ${iconSize['4xl']} ${muted.default}/20`} />
+            <p className={muted.lg}>We couldn't load tags, please try again.</p>
+          </Card>
+        ) : (tags.length === 0 ? (
+          <Card className={`${bgColor['muted/50']} ${padding.section} ${textAlign.center}`}>
+            <Tag className={`${marginX.auto} ${marginBottom.default} ${iconSize['4xl']} ${muted.default}/20`} />
             <p className={muted.lg}>No tags found.</p>
           </Card>
         ) : (
@@ -226,19 +248,19 @@ export default async function TagsIndexPage() {
               </div>
 
               {/* Animated Tag Cloud */}
-              <div className={`relative ${radius['2xl']} border ${borderColor['border/30']} ${bgGradient.toBR} ${gradientFrom.background} ${gradientVia.background} ${gradientTo.muted10} ${padding.relaxed} md:${padding.section}`}>
+              <div className={`${position.relative} ${radius['2xl']} ${border.default} ${borderColor['border/30']} ${bgGradient.toBR} ${gradientFrom.background} ${gradientVia.background} ${gradientTo.muted10} ${padding.relaxed} md:${padding.section}`}>
                 {/* Inner glow effect */}
-                <div className={`pointer-events-none absolute inset-0 ${radius['2xl']} ${bgGradient.toBR} ${gradientFrom.accent5} ${gradientVia.transparent} ${gradientTo.primary5}`} />
+                <div className={`${pointerEvents.none} ${absolute.inset} ${radius['2xl']} ${bgGradient.toBR} ${gradientFrom.accent5} ${gradientVia.transparent} ${gradientTo.primary5}`} />
 
                 <AnimatedTagCloud
                   tags={tagCloudItems}
                   maxTags={100}
-                  className={`relative ${zLayer.raised} min-h-[400px]`}
+                  className={`${position.relative} ${zLayer.raised} ${minHeight.lg}`}
                 />
               </div>
             </section>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );

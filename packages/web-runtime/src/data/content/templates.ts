@@ -22,7 +22,7 @@ export async function getContentTemplates(
     {
       keyParts: ['content-templates', category],
       tags: ['templates', `templates-${category}`],
-      ttlKey: 'cache.templates.ttl_seconds',
+      ttlKey: 'templates',
       fallback: null,
       logMeta: { category },
     }

@@ -24,12 +24,26 @@ export const hoverBg = {
   subtle: 'hover:bg-accent/5',
   /** Default hover */
   default: 'hover:bg-accent/10',
+  /** Medium hover (15% opacity) */
+  medium: 'hover:bg-accent/15',
   /** Strong hover */
   strong: 'hover:bg-accent/20',
+  /** Stronger hover (50% opacity) */
+  stronger: 'hover:bg-accent/50',
+  /** Very strong hover (80% opacity) */
+  veryStrong: 'hover:bg-accent/80',
+  /** Maximum hover (90% opacity) */
+  max: 'hover:bg-accent/90',
+  /** Solid accent hover (no opacity) */
+  accentSolid: 'hover:bg-accent',
+  /** Accent-primary variant hover */
+  accentPrimary: 'hover:bg-accent-primary/20',
   /** Muted hover */
   muted: 'hover:bg-muted/50',
   /** Muted lighter hover */
   mutedLight: 'hover:bg-muted/30',
+  /** Solid muted hover (no opacity) */
+  mutedSolid: 'hover:bg-muted',
   /** White subtle hover (dark backgrounds) */
   white5: 'hover:bg-white/5',
   /** White hover (dark backgrounds) */
@@ -38,10 +52,30 @@ export const hoverBg = {
   destructive: 'hover:bg-destructive/10',
   /** Destructive strong hover */
   destructiveStrong: 'hover:bg-destructive/20',
+  /** Destructive very strong hover (80% opacity) */
+  destructiveVeryStrong: 'hover:bg-destructive/80',
+  /** Destructive maximum hover (90% opacity) */
+  destructiveMax: 'hover:bg-destructive/90',
   /** Primary hover */
   primary: 'hover:bg-primary/10',
   /** Primary strong hover */
   primaryStrong: 'hover:bg-primary/20',
+  /** Primary very strong hover (80% opacity) */
+  primaryVeryStrong: 'hover:bg-primary/80',
+  /** Primary maximum hover (90% opacity) */
+  primaryMax: 'hover:bg-primary/90',
+  /** Secondary very strong hover (80% opacity) */
+  secondaryVeryStrong: 'hover:bg-secondary/80',
+  /** Amber subtle hover */
+  amberSubtle: 'hover:bg-amber-500/10',
+  /** Amber strong hover */
+  amberStrong: 'hover:bg-amber-500/20',
+  /** Violet hover */
+  violet: 'hover:bg-violet-500',
+  /** Violet darker hover */
+  violetDarker: 'hover:bg-violet-600',
+  /** Background solid hover */
+  backgroundSolid: 'hover:bg-background',
 } as const;
 
 /**
@@ -78,16 +112,32 @@ export const hoverText = {
 export const hoverBorder = {
   /** Hover to accent border */
   accent: 'hover:border-accent/50',
+  /** Hover to accent border (30% opacity) */
+  accent30: 'hover:border-accent/30',
+  /** Hover to accent-primary border (50% opacity) */
+  accentPrimary50: 'hover:border-accent-primary/50',
   /** Hover to medium border */
   medium: 'hover:border-border-medium',
   /** Hover to primary border */
-  primary: 'hover:border-primary/50',
+  primary: 'hover:border-primary/30',
   /** Hover to primary solid */
   primarySolid: 'hover:border-primary',
   /** Hover to foreground border */
   foreground: 'hover:border-foreground',
   /** Hover to border color */
   border: 'hover:border-border',
+  /** Hover to destructive border */
+  destructive: 'hover:border-destructive',
+  /** Hover to amber border (50% opacity) */
+  'amber/50': 'hover:border-amber-500/50',
+  /** Hover to green border (40% opacity) */
+  'green/40': 'hover:border-green-500/40',
+  /** Hover to blue border (40% opacity) */
+  'blue/40': 'hover:border-blue-500/40',
+  /** Hover to gray border (40% opacity) */
+  'gray/40': 'hover:border-gray-500/40',
+  /** Hover to accent border (40% opacity) */
+  'accent/40': 'hover:border-accent/40',
 } as const;
 
 // =============================================================================
@@ -106,6 +156,12 @@ export const focusRing = {
   offset: 'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
   /** Simple outline focus */
   outline: 'focus:outline-none focus:ring-2 focus:ring-accent',
+  /** Focus ring with accent and offset */
+  accentWithOffset: 'focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background',
+  /** Focus ring with accent/60 opacity */
+  accent60: 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60',
+  /** No focus ring */
+  none: 'focus:ring-0',
 } as const;
 
 // =============================================================================
@@ -120,6 +176,8 @@ export const activeScale = {
   down: 'active:scale-[0.98]',
   /** Smaller scale down */
   downSm: 'active:scale-[0.99]',
+  /** Larger scale down (for mobile buttons) */
+  downLg: 'active:scale-[0.97]',
   /** Scale up */
   up: 'active:scale-[1.02]',
 } as const;
@@ -181,6 +239,22 @@ export const groupHover = {
   underline: 'group-hover:underline',
   scale: 'group-hover:scale-105',
   visible: 'opacity-0 group-hover:opacity-100',
+} as const;
+
+/**
+ * Hover opacity effects.
+ */
+export const hoverOpacity = {
+  /** hover:opacity-100 - Full opacity on hover */
+  full: 'hover:opacity-100',
+  /** hover:opacity-80 - 80% opacity on hover */
+  '80': 'hover:opacity-80',
+  /** hover:opacity-70 - 70% opacity on hover */
+  '70': 'hover:opacity-70',
+  /** hover:opacity-60 - 60% opacity on hover */
+  '60': 'hover:opacity-60',
+  /** hover:opacity-50 - 50% opacity on hover */
+  '50': 'hover:opacity-50',
 } as const;
 
 // =============================================================================

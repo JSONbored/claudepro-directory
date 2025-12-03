@@ -4,9 +4,31 @@
 
 import { Constants } from '@heyclaude/database-types';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { borderBottom, cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , row , radius , minHeight, bgColor,
-  textColor,
+import {
+  bgColor,
+  borderBottom,
+  cluster,
+  container,
+  display,
+  flexGrow,
   flexWrap,
+  gap,
+  grid,
+  iconSize,
+  marginBottom,
+  marginRight,
+  marginTop,
+  maxWidth,
+  minHeight,
+  muted,
+  padding,
+  radius,
+  row,
+  size,
+  spaceY,
+  textColor,
+  weight,
+  width,
 } from '@heyclaude/web-runtime/design-system';
 import {
   ArrowLeft,
@@ -53,7 +75,6 @@ export const dynamicParams = true; /**
  *
  * @see getSafeMailtoUrl
  */
-
 function getSafeWebsiteUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
 
@@ -155,7 +176,7 @@ export async function generateMetadata({
   const { slug } = await params;
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const metadataLogger = logger.child({
     requestId: metadataRequestId,
@@ -198,7 +219,7 @@ export async function generateStaticParams() {
 
   // Generate requestId for static params generation (build-time)
   const staticParametersRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId: staticParametersRequestId,
@@ -217,7 +238,7 @@ export async function generateStaticParams() {
       return [{ slug: 'placeholder' }];
     }
 
-    return jobs.slice(0, MAX_STATIC_JOBS).map((job) => ({ slug: job.slug }));
+    return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
     reqLogger.error('JobPage: getJobs threw in generateStaticParams', normalized);
@@ -249,7 +270,7 @@ export default async function JobPage({ params }: PageProps) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const slug = validationResult.success ? validationResult.data.slug : String(rawParameters['slug']);
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -306,27 +327,27 @@ export default async function JobPage({ params }: PageProps) {
       <StructuredData route={`/jobs/${slug}`} />
 
       <div className={`${minHeight.screen} ${bgColor.background}`}>
-        <div className={`${borderBottom.light} bg-card/30`}>
-          <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
+        <div className={`${borderBottom.light} ${bgColor['card/30']}`}>
+          <div className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}>
             <Button variant="ghost" asChild className={marginBottom.comfortable}>
               <Link href={ROUTES.JOBS}>
-                <ArrowLeft className={`mr-2 ${iconSize.sm}`} />
+                <ArrowLeft className={`${marginRight.compact} ${iconSize.sm}`} />
                 Back to Jobs
               </Link>
             </Button>
 
-            <div className="max-w-4xl">
+            <div className={maxWidth['4xl']}>
               <div className={`${row.comfortable} ${marginBottom.comfortable}`}>
                 <div className={`${radius.lg} ${bgColor['accent/10']} ${padding.compact}`}>
                   <Building2 className={`${iconSize.lg} ${textColor.primary}`} />
                 </div>
-                <div className="flex-1">
+                <div className={flexGrow['1']}>
                   <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>{job.title}</h1>
                   <p className={`${muted.default} ${size.xl}`}>{job.company}</p>
                 </div>
               </div>
 
-              <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
+              <div className={`${marginBottom.default} ${display.flex} ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
                 <div className={cluster.tight}>
                   <MapPin className={iconSize.sm} />
                   <span>{job.location}</span>
@@ -349,7 +370,7 @@ export default async function JobPage({ params }: PageProps) {
                 </div>
               </div>
 
-              <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+              <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
                 {tags.map((skill: string) => (
                   <UnifiedBadge key={skill} variant="base" style="secondary">
                     {skill}
@@ -360,8 +381,8 @@ export default async function JobPage({ params }: PageProps) {
           </div>
         </div>
 
-        <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
-          <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-3`}>
+        <div className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
+          <div className={grid.responsive13Gap8}>
             <div className={`${spaceY.loose} lg:col-span-2`}>
               <Card>
                 <CardHeader>
@@ -423,9 +444,9 @@ export default async function JobPage({ params }: PageProps) {
                     // At this point, safeJobLink is validated and safe for use in external links
                     const validatedUrl: string = safeJobLink;
                     return (
-                      <Button className="w-full" asChild>
+                      <Button className={width.full} asChild>
                         <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className={`mr-2 ${iconSize.sm}`} />
+                          <ExternalLink className={`${marginRight.compact} ${iconSize.sm}`} />
                           Apply Now
                         </a>
                       </Button>
@@ -435,9 +456,9 @@ export default async function JobPage({ params }: PageProps) {
                     const safeMailtoUrl = getSafeMailtoUrl(job.contact_email);
                     if (!safeMailtoUrl) return null;
                     return (
-                      <Button variant="outline" className="w-full" asChild>
+                      <Button variant="outline" className={width.full} asChild>
                         <a href={safeMailtoUrl}>
-                          <Building2 className={`mr-2 ${iconSize.sm}`} />
+                          <Building2 className={`${marginRight.compact} ${iconSize.sm}`} />
                           Contact Company
                         </a>
                       </Button>

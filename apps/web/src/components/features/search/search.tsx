@@ -8,7 +8,7 @@
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import { UI_TIMEOUTS } from '@heyclaude/web-runtime/config/unified-config';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   Bookmark,
@@ -29,6 +29,20 @@ import { iconSize, absolute, radius, cluster, hoverBg, spaceY, marginBottom, mut
   textColor,
   alignItems,
   backdrop,
+  maxWidth,
+  display,
+  position,
+  textAlign,
+  width,
+  height,
+  paddingRight,
+  paddingLeft,
+  marginLeft,
+  cursor,
+  pointerEvents,
+  focusRing,
+  hoverText,
+  transform,
 } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
@@ -71,7 +85,7 @@ function getCategoryFromPathname(
 export type { FilterState };
 
 const SearchErrorFallback = () => (
-  <div className={`${padding.default} text-center ${muted.default}`}>Error loading search</div>
+  <div className={`${padding.default} ${textAlign.center} ${muted.default}`}>Error loading search</div>
 );
 
 /**
@@ -202,8 +216,7 @@ function UnifiedSearchComponent({
   );
 
   useEffect(() => {
-    const config = getTimeoutConfig();
-    setDebounceMs(config['timeout.ui.debounce_ms']);
+    setDebounceMs(UI_TIMEOUTS.debounce_ms);
   }, []);
 
   useEffect(() => {
@@ -324,11 +337,11 @@ function UnifiedSearchComponent({
   return (
     <ErrorBoundary fallback={SearchErrorFallback}>
       <search className={cn(
-  `w-full ${spaceY.comfortable}`, className)}>
+  `${width.full} ${spaceY.comfortable}`, className)}>
         <div className={spaceY.default}>
-          <div className="relative">
+          <div className={position.relative}>
             <div
-              className={`-translate-y-1/2 pointer-events-none ${absolute.topHalf} left-4 ${zLayer.raised}`}
+              className={`-translate-y-1/2 ${pointerEvents.none} ${absolute.topHalf} left-4 ${zLayer.raised}`}
             >
               <Search className={`${iconSize.md} ${textColor.accent}`} aria-hidden="true" />
             </div>
@@ -340,7 +353,7 @@ function UnifiedSearchComponent({
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               placeholder={placeholder}
               className={
-                `h-14 w-full ${borderColor['border/50']} ${bgColor[`card/50`]} pr-4 pl-12 ${size.base} ${backdrop.sm} ${transition.smooth} focus:border-accent/50 focus:bg-card`
+                `${height.inputLg} ${width.full} ${borderColor['border/50']} ${bgColor['card/50']} ${paddingRight.comfortable} ${paddingLeft.section} ${size.base} ${backdrop.sm} ${transition.smooth} focus:${borderColor['accent/50']} focus:${bgColor.card}`
               }
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
@@ -351,12 +364,12 @@ function UnifiedSearchComponent({
           {showPresetRail && (
             <section
               aria-labelledby={presetSectionLabelId}
-              className={`${radius.lg} border ${borderColor['border/60']} bg-card/40 ${padding.compact}`}
+              className={`${radius.lg} border ${borderColor['border/60']} ${bgColor['card/40']} ${padding.compact}`}
             >
-              <div className={`${marginBottom.compact} flex ${flexWrap.wrap} ${alignItems.center} ${justify.between} ${gap.default}`}>
+              <div className={`${marginBottom.compact} ${display.flex} ${flexWrap.wrap} ${alignItems.center} ${justify.between} ${gap.default}`}>
                 <p
                   id={presetSectionLabelId}
-                  className={`${weight.semibold} ${muted.default} ${size.xs} uppercase ${tracking.wide}`}
+                  className={`${weight.semibold} ${muted.default} ${size.xs} ${transform.uppercase} ${tracking.wide}`}
                 >
                   Saved searches
                 </p>
@@ -375,11 +388,11 @@ function UnifiedSearchComponent({
                 )}
               </div>
               {hasSavedSearches ? (
-                <ul className={`flex ${flexWrap.wrap} ${gap.compact}`} aria-live="polite">
+                <ul className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`} aria-live="polite">
                   {savedSearchPresets.map((preset) => (
                     <li
                       key={preset.id}
-                      className={`${cluster.tight} ${radius.full} border ${borderColor['border/60']} bg-background/80 ${padding.xTight} ${padding.yMicro}`}
+                      className={`${cluster.tight} ${radius.full} border ${borderColor['border/60']} ${bgColor['background/80']} ${padding.xTight} ${padding.yMicro}`}
                     >
                       <button
                         type="button"
@@ -388,8 +401,8 @@ function UnifiedSearchComponent({
                         className={cn(
                           `${cluster.compact} ${radius.full} ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.xs} ${transition.smooth} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 sm:${size.sm}`,
                           canSelectSavedSearches
-                            ? `text-foreground ${hoverBg.default}`
-                            : `cursor-not-allowed ${muted.default} ${opacityLevel[70]}`
+                            ? `${textColor.foreground} ${hoverBg.default}`
+                            : `${cursor.notAllowed} ${muted.default} ${opacityLevel[70]}`
                         )}
                         title={
                           preset.query
@@ -399,7 +412,7 @@ function UnifiedSearchComponent({
                         aria-label={`Apply preset ${preset.label}`}
                       >
                         <Bookmark className={`${iconSize.xsPlus} ${textColor.accent}`} aria-hidden="true" />
-                        <span className="max-w-32 truncate">{preset.label}</span>
+                        <span className={`${maxWidth[32]} truncate`}>{preset.label}</span>
                       </button>
                       {canRemoveSavedSearches && (
                         <button
@@ -409,7 +422,7 @@ function UnifiedSearchComponent({
                             event.stopPropagation();
                             handlePresetRemove(preset.id);
                           }}
-                          className={`${radius.full} ${padding.micro} ${muted.default} ${transition.colors} hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60`}
+                          className={`${radius.full} ${padding.micro} ${muted.default} ${transition.colors} ${hoverText.foreground} ${focusRing.accent60}`}
                           aria-label={`Remove preset ${preset.label}`}
                         >
                           <X className={iconSize.xs} aria-hidden="true" />
@@ -429,7 +442,7 @@ function UnifiedSearchComponent({
           )}
 
           {showFilters && (
-            <div className={`flex ${justify.end} ${gap.compact}`}>
+            <div className={`${display.flex} ${justify.end} ${gap.compact}`}>
               <Select
                 value={filters.sort || 'trending'}
                 onValueChange={(value) => handleSortChange(value as FilterState['sort'])}
@@ -438,7 +451,7 @@ function UnifiedSearchComponent({
                 <SelectTrigger
                   id={sortSelectId}
                   className={
-                    `h-10 w-auto ${borderColor.border} ${bgColor.background} ${padding.xDefault} ${transition.smooth} ${hoverBg.default}`
+                    `${height.input} ${width.auto} ${borderColor.border} ${bgColor.background} ${padding.xDefault} ${transition.smooth} ${hoverBg.default}`
                   }
                   aria-label="Sort configurations"
                 >
@@ -457,7 +470,7 @@ function UnifiedSearchComponent({
                 size="default"
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className={cn(
-                  `h-10 ${gap.compact} ${padding.xDefault} ${transition.smooth}`,
+                  `${height.input} ${gap.compact} ${padding.xDefault} ${transition.smooth}`,
                   isFilterOpen && `border-accent ${bgColor['accent/10']}`
                 )}
                 aria-expanded={isFilterOpen}
@@ -470,16 +483,16 @@ function UnifiedSearchComponent({
                   <UnifiedBadge
                     variant="base"
                     style="secondary"
-                    className={`ml-1 h-5 ${padding.xSnug} py-0`}
+                    className={`${marginLeft.tight} ${height.buttonSm} ${padding.xSnug} ${padding.yNone}`}
                     aria-label={`${activeFilterCount} active filters`}
                   >
                     {activeFilterCount}
                   </UnifiedBadge>
                 )}
                 {isFilterOpen ? (
-                  <ChevronUp className={`ml-1 ${iconSize.xs}`} aria-hidden="true" />
+                  <ChevronUp className={`${marginLeft.tight} ${iconSize.xs}`} aria-hidden="true" />
                 ) : (
-                  <ChevronDown className={`ml-1 ${iconSize.xs}`} aria-hidden="true" />
+                  <ChevronDown className={`${marginLeft.tight} ${iconSize.xs}`} aria-hidden="true" />
                 )}
               </Button>
             </div>

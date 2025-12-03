@@ -54,10 +54,13 @@ import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
 // Design System imports
 import { absolute } from '../../../design-system/styles/position.ts';
-import { cluster, wrap, gap, padding, marginTop, marginBottom } from '../../../design-system/styles/layout.ts';
+import { cluster, wrap, gap, padding, marginTop, marginBottom, display, flexGrow, alignItems, justify, flexDir, flexWrap, position, marginLeft, paddingBottom, paddingTop } from '../../../design-system/styles/layout.ts';
 import { card as cardStyles, cardPadding, cardHeader } from '../../../design-system/styles/cards.ts';
-import { muted, size } from '../../../design-system/styles/typography.ts';
+import { muted, size, weight, truncate } from '../../../design-system/styles/typography.ts';
+import { textColor } from '../../../design-system/styles/colors.ts';
+import { opacityLevel } from '../../../design-system/styles/effects.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
+import { transition } from '../../../design-system/styles/interactive.ts';
 import type { ReactNode, HTMLAttributes } from 'react';
 import { memo } from 'react';
 
@@ -203,7 +206,7 @@ export interface BaseCardProps {
   /**
    * Position in list (for sponsored tracking)
    */
-  position?: number;
+  listPosition?: number;
 
   /**
    * Custom click handler (called before navigation)
@@ -305,7 +308,7 @@ export const BaseCard = memo(
     customMetadataText,
     isSponsored,
     sponsoredId,
-    position,
+    listPosition,
     onBeforeNavigate,
     disableNavigation = false,
     showAuthor = true,
@@ -354,7 +357,7 @@ export const BaseCard = memo(
       // Card content wrapper - conditionally render with or without motion animations
       const cardElement = (
         <CardComponent
-          className={`${disableNavigation ? '' : cardStyles.interactive} ${variant === 'detailed' ? cardPadding.default : ''} ${variant === 'review' ? `${radius.lg} border ${cardPadding.compact}` : ''} ${compactMode ? cardPadding.compact : ''} ${className || ''} relative`}
+          className={`${disableNavigation ? '' : cardStyles.interactive} ${variant === 'detailed' ? cardPadding.default : ''} ${variant === 'review' ? `${radius.lg} border ${cardPadding.compact}` : ''} ${compactMode ? cardPadding.compact : ''} ${className || ''} ${position.relative}`}
           style={{
             ...viewTransitionStyle,
             contain: 'paint',
@@ -368,20 +371,20 @@ export const BaseCard = memo(
           {/* Top accent border for related content */}
           {topAccent && (
             <div
-              className={`${absolute.topFull} h-px bg-border opacity-70 transition-opacity group-hover:opacity-100`}
+              className={`${absolute.topFull} h-px bg-border ${opacityLevel[70]} ${transition.opacity} group-hover:opacity-100`}
             />
           )}
 
           <CardHeaderComponent
-            className={`${variant === 'review' ? `${marginBottom.compact} ${padding.none}` : 'pb-3'} ${compactMode ? cardHeader.tight : ''}`}
+            className={`${variant === 'review' ? `${marginBottom.compact} ${padding.none}` : paddingBottom.default} ${compactMode ? cardHeader.tight : ''}`}
           >
             {/* Custom header slot (for review avatar/rating, changelog date) */}
             {renderHeader?.()}
 
             {/* Standard header (config/collection cards) */}
             {!renderHeader && (
-              <div className={'flex items-start justify-between'}>
-                <div className="flex-1">
+              <div className={`${display.flex} ${alignItems.start} ${justify.between}`}>
+                <div className={flexGrow['1']}>
                   {/* Top badges slot (type, difficulty, sponsored, etc.) */}
                   {renderTopBadges && (
                     <div className={`${marginBottom.tight} ${cluster.compact}`}>
@@ -391,14 +394,14 @@ export const BaseCard = memo(
 
                   {/* Title */}
                   <CardTitleComponent
-                    className={`${size.lg} font-semibold text-foreground ${disableNavigation ? '' : 'transition-colors-smooth group-hover:text-accent'}`}
+                    className={`${size.lg} ${weight.semibold} ${textColor.foreground} ${disableNavigation ? '' : `${transition.colors} group-hover:${textColor.accent}`}`}
                   >
                     {displayTitle}
                   </CardTitleComponent>
 
                   {/* Description */}
                   {description && (
-                    <CardDescriptionComponent className={`${marginTop.tight} line-clamp-2 text-muted-foreground ${size.sm}`}>
+                    <CardDescriptionComponent className={`${marginTop.tight} ${truncate.lines2} ${muted.default} ${size.sm}`}>
                       {description}
                     </CardDescriptionComponent>
                   )}
@@ -406,7 +409,7 @@ export const BaseCard = memo(
 
                 {/* Right side: Indicators and Source badge */}
                 {(renderIndicators || source) && (
-                  <div className={`ml-2 ${cluster.tight}`}>
+                  <div className={`${marginLeft.compact} ${cluster.tight}`}>
                     {/* Content indicators (freshness, new badge) */}
                     {renderIndicators?.()}
 
@@ -434,7 +437,7 @@ export const BaseCard = memo(
           </CardHeaderComponent>
 
           <CardContentComponent
-            className={`${variant === 'review' ? padding.none : 'pt-0'} ${compactMode ? 'pt-0' : ''}`}
+            className={`${variant === 'review' ? padding.none : paddingTop.none} ${compactMode ? paddingTop.none : ''}`}
           >
             {/* Custom content slot (for review expandable text) */}
             {renderContent && <div className={marginBottom.compact}>{renderContent()}</div>}
@@ -466,7 +469,7 @@ export const BaseCard = memo(
                   <UnifiedBadge
                     variant="base"
                     style="outline"
-                    className={`border-muted-foreground/20 text-muted-foreground ${size.xs} font-semibold`}
+                    className={`border-muted-foreground/20 ${muted.default} ${size.xs} ${weight.semibold}`}
                   >
                     +{overflowCount}
                   </UnifiedBadge>
@@ -475,7 +478,7 @@ export const BaseCard = memo(
             )}
 
             {/* Footer: Metadata and Actions */}
-            <div className={`flex flex-col ${gap.compact} md:flex-row md:items-center md:justify-between`}>
+            <div className={`${display.flex} ${flexDir.col} ${gap.compact} md:${display.flex}-row md:${alignItems.center} md:${justify.between}`}>
               {/* Left side: Author and custom metadata */}
               {(showAuthor && author) || customMetadataText ? (
                 <div className={`${cluster.compact} ${muted.xs}`}>
@@ -486,7 +489,7 @@ export const BaseCard = memo(
                         href={authorProfileUrl || SOCIAL_LINK_SNAPSHOT.authorProfile}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="transition-colors hover:text-foreground hover:underline"
+                        className={`${transition.colors} hover:${textColor.foreground} hover:underline`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         {typeof author === 'string' ? author : author}
@@ -500,7 +503,7 @@ export const BaseCard = memo(
               )}
 
               {/* Right side: Metadata badges and actions */}
-              <div className={`${cluster.compact} ${size.xs} flex-nowrap`}>
+              <div className={`${cluster.compact} ${size.xs} ${flexWrap.nowrap}`}>
                 {/* Metadata badges slot (view count, item count, etc.) */}
                 {renderMetadataBadges?.()}
 
@@ -540,7 +543,7 @@ export const BaseCard = memo(
           <SponsoredPulse
             sponsoredId={sponsoredId}
             targetUrl={`${APP_CONFIG.url}${targetPath}`}
-            position={position}
+            position={listPosition}
             pageUrl={typeof window !== 'undefined' ? window.location.href : undefined}
           >
             {cardContent}
@@ -562,8 +565,8 @@ export const BaseCard = memo(
       // Return a minimal fallback
       return (
         <div className={`${radius.lg} border ${padding.default}`} role="article" aria-label={ariaLabel}>
-          <h3 className="font-semibold">{displayTitle}</h3>
-          {description && <p className={`${size.sm} text-muted-foreground`}>{description}</p>}
+          <h3 className={weight.semibold}>{displayTitle}</h3>
+          {description && <p className={`${size.sm} ${muted.default}`}>{description}</p>}
         </div>
       );
     }

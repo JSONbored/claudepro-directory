@@ -24,6 +24,11 @@ import {
   textColor,
   transition,
   weight,
+  display,
+  position,
+  height,
+  width,
+  borderWidth,
 } from '@heyclaude/web-runtime/design-system';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 
@@ -74,9 +79,9 @@ export function QuizProgress({
       </div>
 
       {/* Progress bar */}
-      <div className={`relative h-2 w-full ${overflow.hidden} ${radius.full} ${bgColor.muted}`}>
+      <div className={`${position.relative} ${height.slider} ${width.full} ${overflow.hidden} ${radius.full} ${bgColor.muted}`}>
         <div
-          className={`${absolute.topLeft} h-full ${bgColor.primary} ${transition.all} ${animateDuration.slow} ease-in-out`}
+          className={`${absolute.topLeft} ${height.full} ${bgColor.primary} ${transition.all} ${animateDuration.slow}`}
           style={{ width: `${percentComplete}%` }}
           role="progressbar"
           aria-valuenow={percentComplete}
@@ -91,12 +96,12 @@ export function QuizProgress({
         {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((step) => (
           <div
             key={step}
-            className={`flex ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${weight.medium} ${size.xs} ${transition.colors} ${
+            className={`${display.flex} ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${weight.medium} ${size.xs} ${transition.colors} ${
               step < currentQuestion
-                ? `bg-primary ${textColor.primaryForeground}`
+                ? `${bgColor.primary} ${textColor.primaryForeground}`
                 : step === currentQuestion
-                  ? `border-2 ${borderColor.primary} bg-primary/20 ${textColor.primary}`
-                  : `bg-muted ${muted.default}`
+                  ? `${borderWidth['2']} ${borderColor.primary} ${bgColor['primary/20']} ${textColor.primary}`
+                  : `${bgColor.muted} ${muted.default}`
             }`}
             title={`Question ${step}${step < currentQuestion ? ' (completed)' : step === currentQuestion ? ' (current)' : ''}`}
           >

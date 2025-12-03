@@ -12,7 +12,15 @@ import {
   logUnhandledPromise,
 } from '@heyclaude/web-runtime/core';
 import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';
-import { between, cluster, buttonGhost, iconSize, spaceY, muted, marginBottom, marginTop, weight, size, padding, textColor,
+import { between, cluster, buttonGhost, iconSize, spaceY, muted, marginBottom, marginTop, marginX, weight, size, padding, textColor,
+  marginLeft,
+  iconLeading,
+  paddingTop,
+  textAlign,
+  whitespace,
+  bgColor,
+  border,
+  radius,
 } from '@heyclaude/web-runtime/design-system';
 import type { ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
@@ -194,7 +202,7 @@ export function ReviewListSection({
             id={sortSelectId}
             value={sortBy}
             onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-            className={`rounded border ${padding.xTight} ${padding.yMicro} ${size.sm}`}
+            className={`${radius.md} ${border.default} ${padding.xTight} ${padding.yMicro} ${size.sm}`}
           >
             <option value="recent">Most Recent</option>
             <option value="helpful">Most Helpful</option>
@@ -206,12 +214,12 @@ export function ReviewListSection({
 
       {/* Reviews List */}
       {isLoading && page === 1 ? (
-        <div className="py-8 text-center">
+        <div className={`${padding.yLoose} ${textAlign.center}`}>
           <p className={muted.default}>Loading reviews...</p>
         </div>
       ) : (reviews ?? []).length === 0 ? (
-        <Card className={`bg-muted/50 ${padding.relaxed} text-center`}>
-          <Star className={`mx-auto ${marginBottom.compact} ${iconSize['3xl']} ${muted.default}/30`} aria-hidden="true" />
+        <Card className={`${bgColor['muted/50']} ${padding.relaxed} ${textAlign.center}`}>
+          <Star className={`${marginX.auto} ${marginBottom.compact} ${iconSize['3xl']} ${muted.default}/30`} aria-hidden="true" />
           <p className={muted.default}>No reviews yet. Be the first to review!</p>
         </Card>
       ) : (
@@ -234,7 +242,7 @@ export function ReviewListSection({
 
       {/* Load More */}
       {hasMore && !isLoading && (
-        <div className="pt-4 text-center">
+        <div className={`${paddingTop.comfortable} ${textAlign.center}`}>
           <Button variant="outline" onClick={handleLoadMore}>
             Load More Reviews
           </Button>
@@ -324,7 +332,7 @@ function ReviewCardItem({
           <div className={between.center}>
             <div className={cluster.tight}>
               <StarDisplay rating={review.rating ?? 0} size="sm" />
-              <span className={`ml-1 ${muted.default} ${size.xs}`}>
+              <span className={`${marginLeft.tight} ${muted.default} ${size.xs}`}>
                 {(review.rating ?? 0).toFixed(1)}
               </span>
             </div>
@@ -338,7 +346,7 @@ function ReviewCardItem({
           {/* Review Text */}
           {reviewText && (
             <div>
-              <p className={`whitespace-pre-wrap ${textColor.foreground} ${size.sm}`}>{displayText}</p>
+              <p className={`${whitespace.preWrap} ${textColor.foreground} ${size.sm}`}>{displayText}</p>
               {needsTruncation && (
                 <button
                   type="button"
@@ -352,7 +360,7 @@ function ReviewCardItem({
           )}
 
           {/* Actions */}
-          <div className={`${cluster.compact} pt-2`}>
+          <div className={`${cluster.compact} ${paddingTop.compact}`}>
             {/* Helpful Button */}
             {!isOwnReview && (
               <Button
@@ -372,7 +380,7 @@ function ReviewCardItem({
                 }}
                 className={buttonGhost.icon}
               >
-                <ThumbsUp className={`mr-1 ${iconSize.xsPlus}`} aria-hidden="true" />
+                <ThumbsUp className={iconLeading.xs} aria-hidden="true" />
                 Helpful ({review.helpful_count ?? 0})
               </Button>
             )}
@@ -386,16 +394,16 @@ function ReviewCardItem({
                   onClick={onEdit}
                   className={buttonGhost.icon}
                 >
-                  <Edit className={`mr-1 ${iconSize.xsPlus}`} aria-hidden="true" />
+                  <Edit className={iconLeading.xs} aria-hidden="true" />
                   Edit
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={onDelete}
-                  className={`${buttonGhost.icon} text-destructive hover:text-destructive`}
+                  className={`${buttonGhost.icon} ${textColor.destructive} hover:${textColor.destructive}`}
                 >
-                  <Trash className={`mr-1 ${iconSize.xsPlus}`} aria-hidden="true" />
+                  <Trash className={iconLeading.xs} aria-hidden="true" />
                   Delete
                 </Button>
               </>

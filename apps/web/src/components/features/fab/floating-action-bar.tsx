@@ -16,26 +16,37 @@
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
 import {
+  absolute,
+  alignItems,
   animate,
   backdrop,
   bgColor,
+  display,
+  displayResponsive,
+  fixed,
   gap,
+  justifyResponsive,
+  hoverBg,
   iconSize,
-  alignItems,
   justify,
   marginBottom,
   marginTop,
   muted,
   padding,
+  paddingBottom,
+  position,
   radius,
   shadow,
   shadowColor,
   size,
+  squareSize,
   stack,
+  textAlign,
   textColor,
   weight,
   zLayer,
-  squareSize,
+  minWidth,
+  fontFamily,
 } from '@heyclaude/web-runtime/design-system';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
@@ -291,7 +302,7 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`fixed inset-0 ${zLayer.overlay} bg-background/60 ${backdrop.sm}`}
+            className={`${fixed.inset} ${zLayer.overlay} ${bgColor['background/60']} ${backdrop.sm}`}
             aria-hidden="true"
           />
         )}
@@ -301,12 +312,12 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
       <div
         ref={fabRef}
         className={cn(
-          `fixed ${zLayer.modal}`,
+          `${position.fixed} ${zLayer.modal}`,
           // Desktop: Bottom right corner
-          'right-6 bottom-6',
+          fixed.right6Bottom6,
           // Mobile: Full-width bottom bar when expanded
-          'max-md:right-0 max-md:bottom-0 max-md:left-0',
-          isExpanded && 'max-md:px-4 max-md:pb-4'
+          fixed.mobileFullBottom,
+          isExpanded && `max-md:${padding.xComfortable} max-md:${paddingBottom.comfortable}`
         )}
       >
         {/* Speed Dial Items (expand upward on desktop) */}
@@ -320,9 +331,9 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
               className={cn(
                 marginBottom.compact, stack.compact,
                 // Mobile: Horizontal row above main button
-                `max-md:${marginBottom.tight} max-md:flex-row max-md:flex-wrap max-md:justify-center max-md:${gap.compact}`,
+                `max-md:${marginBottom.tight} max-md:${display.flex}-row max-md:${display.flex}-wrap max-md:${justify.center} max-md:${gap.compact}`,
                 // Mobile expanded: card background
-                `max-md:${radius['2xl']} max-md:bg-card/95 max-md:${padding.compact} max-md:${shadow.lg} max-md:backdrop-blur-md`
+                `max-md:${radius['2xl']} max-md:${bgColor['card/95']} max-md:${padding.compact} max-md:${shadow.lg} max-md:${backdrop.md}`
               )}
             >
               {visibleActions.map((action, index) => (
@@ -337,7 +348,7 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
         </AnimatePresence>
 
         {/* Main FAB Button */}
-        <div className={`flex ${justify.end} max-md:justify-center`}>
+        <div className={`${display.flex} ${justify.end} ${justifyResponsive.maxMdCenter}`}>
           <motion.button
             onClick={toggleExpanded}
             initial={{ scale: 0, opacity: 0 }}
@@ -350,11 +361,11 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
               damping: 17,
             }}
             className={cn(
-              `relative flex ${squareSize.touch2xl} ${alignItems.center} ${justify.center} ${radius.full}`,
-              `bg-accent ${textColor.accentForeground}`,
+              `${position.relative} ${display.flex} ${squareSize.touch2xl} ${alignItems.center} ${justify.center} ${radius.full}`,
+              `${bgColor.accent} ${textColor.accentForeground}`,
               `${shadowColor.accent} ${shadow.lg}`,
-              'backdrop-blur-md will-change-transform',
-              'hover:bg-accent/90',
+              `${backdrop.md} will-change-transform`,
+              hoverBg.max,
               'focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background',
               // Pulse animation for first visit
               showPulse && animate.pulse
@@ -385,7 +396,7 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
                   stiffness: 500,
                   damping: 20,
                 }}
-                className={`-right-1 -top-1 absolute flex h-5 min-w-5 ${alignItems.center} ${justify.center} ${radius.full} bg-destructive ${padding.xMicro} ${weight.bold} ${size['2xs']} ${textColor.destructive}-foreground ${shadow.md}`}
+                className={`${absolute.negRight1NegTop1} ${display.flex} ${iconSize.md} ${minWidth[5]} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.destructive} ${padding.xMicro} ${weight.bold} ${size['2xs']} ${textColor.destructiveForeground} ${shadow.md}`}
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </motion.span>
@@ -393,7 +404,7 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
 
             {/* Pulse ring animation */}
             {showPulse && (
-              <span className={`absolute inset-0 animate-ping ${radius.full} bg-accent/40`} />
+              <span className={`${absolute.inset} ${animate.ping} ${radius.full} ${bgColor['accent/40']}`} />
             )}
           </motion.button>
         </div>
@@ -405,10 +416,10 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className={`${marginTop.compact} text-center ${muted.default} ${size.xs} max-md:hidden`}
+              className={`${marginTop.compact} ${textAlign.center} ${muted.default} ${size.xs} ${displayResponsive.maxMdNone}`}
             >
-              Press <kbd className={`rounded ${bgColor.muted} ${padding.xSnug} ${padding.yHair} font-mono ${size['2xs']}`}>F</kbd> or{' '}
-              <kbd className={`rounded ${bgColor.muted} ${padding.xSnug} ${padding.yHair} font-mono ${size['2xs']}`}>Esc</kbd> to close
+              Press <kbd className={`${radius.default} ${bgColor.muted} ${padding.xSnug} ${padding.yHair} ${fontFamily.mono} ${size['2xs']}`}>F</kbd> or{' '}
+              <kbd className={`${radius.default} ${bgColor.muted} ${padding.xSnug} ${padding.yHair} ${fontFamily.mono} ${size['2xs']}`}>Esc</kbd> to close
             </motion.p>
           )}
         </AnimatePresence>

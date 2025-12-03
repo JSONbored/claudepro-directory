@@ -8,31 +8,42 @@ import  { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
+  alignItems,
   animateDuration,
   between,
   bgColor,
   borderBottom,
+  borderColor,
+  borderWidth,
   cluster,
+  container,
+  display,
   flexDir,
+  flexGrow,
   flexWrap,
   gap,
+  grid,
+  height,
   iconSize,
-  alignItems,
   justify,
   marginBottom,
   marginTop,
+  textColor,
   maxWidth,
   minHeight,
   muted,
   padding,
+  position,
   radius,
   row,
   size,
   spaceY,
-  textColor,
+  squareSize,
+  textAlign,
   transition,
   weight,
-  squareSize,
+  objectFit,
+  sticky,
 } from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
@@ -43,12 +54,14 @@ import {
   Users,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge,
+import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
+  CardTitle,
+  UnifiedBadge,
+} from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -226,8 +239,8 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
       <div className={`${minHeight.screen} ${bgColor.background}`}>
         {/* Company Header */}
-        <section className={`relative ${borderBottom.default}`}>
-          <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+        <section className={`${position.relative} ${borderBottom.default}`}>
+          <div className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
             <div className={`${row.relaxed}`}>
               {company.logo ? (
                 <Image
@@ -235,16 +248,16 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   alt={`${company.name} logo`}
                   width={96}
                   height={96}
-                  className={`${squareSize.avatar3xl} ${radius.lg} border-4 border-background object-cover`}
+                  className={`${squareSize.avatar3xl} ${radius.lg} ${borderWidth['4']} ${borderColor.border} ${objectFit.cover}`}
                   priority
                 />
               ) : (
-                <div className={`flex ${squareSize.avatar3xl} ${alignItems.center} ${justify.center} ${radius.lg} border-4 border-background ${bgColor.accent} ${weight.bold} ${size['2xl']}`}>
+                <div className={`${display.flex} ${squareSize.avatar3xl} ${alignItems.center} ${justify.center} ${radius.lg} ${borderWidth['4']} ${borderColor.border} ${bgColor.accent} ${weight.bold} ${size['2xl']}`}>
                   <Building className={iconSize['3xl']} />
                 </div>
               )}
 
-              <div className="flex-1">
+              <div className={flexGrow['1']}>
                 <div className={cluster.default}>
                   <h1 className={`${weight.bold} ${size['3xl']}`}>{company.name}</h1>
                   {company.featured ? <UnifiedBadge variant="base" style="default">
@@ -254,10 +267,10 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
                 {company.description ? <p className={`${marginTop.compact} ${maxWidth['3xl']} ${muted.default}`}>{company.description}</p> : null}
 
-                <div className={`${marginTop.default} flex ${flexWrap.wrap} ${alignItems.center} ${gap.comfortable} ${size.sm}`}>
+                <div className={`${marginTop.default} ${display.flex} ${flexWrap.wrap} ${alignItems.center} ${gap.comfortable} ${size.sm}`}>
                   <SafeWebsiteLink
                     url={company.website}
-                    className={`${cluster.tight} ${textColor.accent} hover:text-accent-hover ${transition.colors} ${animateDuration.default}`}
+                    className={`${cluster.tight} ${textColor.accent} hover:${textColor.accent} ${transition.colors} ${animateDuration.default}`}
                   >
                     <Globe className={iconSize.sm} />
                     Website
@@ -289,8 +302,8 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
         </section>
 
         {/* Content */}
-        <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
-          <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-[1fr_320px]`}>
+        <section className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
+          <div className={`${grid.sidebar320} ${gap.loose}`}>
             {/* Main content - Active jobs */}
             <div className={spaceY.relaxed}>
               <div className={between.center}>
@@ -301,10 +314,10 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
               {!active_jobs || active_jobs.length === 0 ? (
                 <Card>
-                  <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.yHero}`}>
+                  <CardContent className={`${display.flex} ${flexDir.col} ${alignItems.center} ${padding.yHero}`}>
                     <Briefcase className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
                     <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No Active Positions</h3>
-                    <p className={`${marginBottom.comfortable} ${maxWidth.md} text-center ${muted.default}`}>
+                    <p className={`${marginBottom.comfortable} ${maxWidth.md} ${textAlign.center} ${muted.default}`}>
                       This company doesn't have any job openings at the moment. Check back later!
                     </p>
                     <Link href={ROUTES.JOBS}>
@@ -315,7 +328,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   </CardContent>
                 </Card>
               ) : (
-                <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-2`}>
+                <div className={grid.responsiveForm}>
                   {active_jobs
                     .filter((job): job is typeof job & {
                       click_count: number;
@@ -379,7 +392,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
             </div>
 
             {/* Sidebar - Company stats */}
-            <aside className={`${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}>
+            <aside className={`${spaceY.relaxed} lg:${position.sticky} lg:${sticky.top24} lg:${height.fit}`}>
               <Card>
                 <CardHeader>
                   <CardTitle>Company Stats</CardTitle>
@@ -429,7 +442,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
               </Card>
 
               {/* CTA Card */}
-              <Card className={`border-accent/30 ${bgColor['accent/5']}`}>
+              <Card className={`${borderColor['accent/30']} ${bgColor['accent/5']}`}>
                 <CardHeader>
                   <CardTitle className={size.lg}>Interested in joining?</CardTitle>
                 </CardHeader>
@@ -439,7 +452,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                       ? 'Visit their website to learn more about the company and culture.'
                       : 'Check back regularly for new opportunities!'}
                   </p>
-                  <SafeWebsiteLink url={company.website} className={`text-accent hover:text-accent-hover ${transition.colors} ${animateDuration.default}`}>
+                  <SafeWebsiteLink url={company.website} className={`${textColor.accent} hover:${textColor.accent} ${transition.colors} ${animateDuration.default}`}>
                     Visit Website
                   </SafeWebsiteLink>
                 </CardContent>

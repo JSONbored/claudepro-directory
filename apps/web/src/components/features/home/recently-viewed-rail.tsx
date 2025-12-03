@@ -3,14 +3,17 @@
 import type { Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import {
+  alignItems,
   backdrop,
   bgColor,
   borderColor,
+  container,
+  display,
   flexWrap,
   gap,
   iconSize,
-  alignItems,
   justify,
+  marginX,
   maxWidth,
   muted,
   padding,
@@ -21,6 +24,7 @@ import {
   textColor,
   tracking,
   weight,
+  transform,
 } from '@heyclaude/web-runtime/design-system';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { ArrowRight, Trash } from '@heyclaude/web-runtime/icons';
@@ -145,11 +149,11 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
   return (
     <section
       aria-labelledby="recently-viewed-rail-heading"
-      className={cn('container mx-auto', spaceY.relaxed, padding.xDefault, padding.yRelaxed)}
+      className={cn(`${container.default}`, spaceY.relaxed, padding.xDefault, padding.yRelaxed)}
     >
       <div
         className={cn(
-          'mx-auto border',
+          `${marginX.auto} border`,
           maxWidth['7xl'],
           spaceY.relaxed,
           radius['2xl'],
@@ -160,14 +164,14 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
           backdrop.xl
         )}
       >
-        <div className={cn('flex', flexWrap.wrap, alignItems.center, justify.between, gap.default)}>
+        <div className={cn(display.flex, flexWrap.wrap, alignItems.center, justify.between, gap.default)}>
           <div>
-            <p className={cn('uppercase', muted.default, size.xs, tracking.wide)}>Keep exploring</p>
+            <p className={cn(transform.uppercase, muted.default, size.xs, tracking.wide)}>Keep exploring</p>
             <h2 id="recently-viewed-rail-heading" className={cn(weight.semibold, size['2xl'])}>
               Recently viewed
             </h2>
           </div>
-          <div className={cn('flex', flexWrap.wrap, gap.compact)}>
+          <div className={cn(display.flex, flexWrap.wrap, gap.compact)}>
             <Button
               variant="ghost"
               size="sm"
@@ -193,10 +197,10 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
 
         <div
           className={cn(
-            'grid',
+            display.grid,
             gap.comfortable,
-            railItems.length >= 3 && 'md:grid-cols-2 xl:grid-cols-3',
-            railItems.length < 3 && 'md:grid-cols-2'
+            railItems.length >= 3 && `md:${display.grid}-cols-2 xl:${display.grid}-cols-3`,
+            railItems.length < 3 && `md:${display.grid}-cols-2`
           )}
         >
           {railItems.map((item) => (

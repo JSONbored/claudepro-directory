@@ -11,6 +11,7 @@ import {
   muted,
   size,
   transition,
+  groupHover,
 } from '@heyclaude/web-runtime/design-system';
 import * as Icons from '@heyclaude/web-runtime/icons';
 import { useRouter } from 'next/navigation';
@@ -106,7 +107,7 @@ export function NavigationCommandMenu({
             <span>{item.title}</span>
             {item.description && (
               <span
-                className={`${muted.default} ${size.xs} ${transition.colors} group-hover:text-accent`}
+                className={`${muted.default} ${size.xs} ${transition.colors} ${groupHover.accent}`}
               >
                 {item.description}
               </span>

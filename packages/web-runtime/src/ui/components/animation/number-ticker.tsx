@@ -21,6 +21,7 @@
 import { cn } from '../../utils.ts';
 import { useSpring } from 'motion/react';
 import { memo, useEffect, useRef, useState } from 'react';
+import { display } from '../../../design-system/styles/layout.ts';
 
 interface NumberTickerProps {
   /**
@@ -104,7 +105,7 @@ function NumberTickerComponent({
 
   return (
     <span
-      className={cn('inline-block tabular-nums will-change-transform', className)}
+      className={cn(`${display.inlineBlock} tabular-nums will-change-transform`, className)}
       aria-live="polite"
       style={{
         // Prevent CLS by reserving space for final value

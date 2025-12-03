@@ -28,6 +28,7 @@ import {
   muted,
   opacityLevel,
   overflow,
+  display,
   padding,
   radius,
   iconSize,
@@ -37,9 +38,25 @@ import {
   weight,
   zLayer,
   skeletonSize,
+  glowShadow,
+  shadow,
+  submissionFormColors,
+  position,
+  absolute,
+  width,
+  height,
+  borderWidth,
+  marginLeft,
+  textAlign,
+  cursor,
+  pointerEvents,
+  whitespace,
+  minWidth,
+  marginX,
+  border,
 } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
 import { motion } from 'motion/react';
 
 export interface WizardStep {
@@ -72,90 +89,87 @@ export function ProgressIndicator({
   const progressPercentage = (completedSteps / steps.length) * 100;
 
   return (
-    <div className={cn('w-full', className)}>
+    <div className={cn(width.full, className)}>
       {/* Quality Score Badge (if provided) */}
       {qualityScore !== undefined && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`${marginBottom.default} flex ${alignItems.center} ${justify.between} ${radius.lg} border ${borderColor['border/50']} bg-background-secondary ${padding.compact}`}
-          style={{
-            borderColor: TOKENS.colors.border.light,
-            backgroundColor: TOKENS.colors.background.secondary,
-          }}
+          className={cn(`${marginBottom.default} ${display.flex} ${alignItems.center} ${justify.between} ${radius.lg} ${border.default} ${borderColor['border/50']} ${padding.compact}`)}
         >
           <span className={muted.sm}>Form Completion</span>
           <div className={cluster.compact}>
             <div className={`${skeletonSize.progressBar} ${overflow.hidden} ${radius.full} ${bgColor.background}`}>
               <motion.div
-                className={`h-full ${radius.full}`}
+                className={`${height.full} ${radius.full}`}
                 initial={{ width: 0 }}
                 animate={{ width: `${qualityScore}%` }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
                 style={{
-                  backgroundColor:
-                    qualityScore >= 90
-                      ? TOKENS.colors.success.text
-                      : qualityScore >= 70
-                        ? TOKENS.colors.accent.primary
-                        : qualityScore >= 40
-                          ? TOKENS.colors.warning.text
-                          : TOKENS.colors.error.text,
+                  style: {
+                    backgroundColor:
+                      qualityScore >= 90
+                        ? submissionFormColors.success.text
+                        : qualityScore >= 70
+                          ? submissionFormColors.accent.primary
+                          : qualityScore >= 40
+                            ? submissionFormColors.warning.text
+                            : submissionFormColors.error.text,
+                  },
                 }}
               />
             </div>
-            <span className={`min-w-[3ch] text-right ${weight.semibold} ${size.sm}`}>{qualityScore}%</span>
+            <span className={`${minWidth.char3} ${textAlign.right} ${weight.semibold} ${size.sm}`}>{qualityScore}%</span>
           </div>
         </motion.div>
       )}
 
       {/* Progress Bar */}
-      <div className={`relative ${marginBottom.relaxed} h-1 w-full ${overflow.hidden} ${radius.full} ${bgColor.background}`}>
+      <div className={`${position.relative} ${marginBottom.relaxed} ${height.slider} ${width.full} ${overflow.hidden} ${radius.full} ${bgColor.background}`}>
         <motion.div
-          className={`absolute top-0 left-0 h-full ${radius.full}`}
+          className={cn(`${absolute.topLeft} ${height.full} ${radius.full}`, bgColor.accent)}
           initial={{ width: 0 }}
           animate={{ width: `${progressPercentage}%` }}
-          transition={TOKENS.animations.spring.smooth}
+          transition={animation.spring.smooth}
           style={{
-            backgroundColor: TOKENS.colors.accent.primary,
-            boxShadow: TOKENS.shadows.glow.orange,
+            boxShadow: glowShadow.orange,
           }}
         />
       </div>
 
       {/* Step Indicators - Desktop */}
-      <div className={`hidden ${alignItems.center} ${justify.between} md:flex`}>
+      <div className={`${display.none} ${alignItems.center} ${justify.between} md:${display.flex}`}>
         {steps.map((step, index) => (
-          <div key={step.id} className={`flex ${flexGrow['1']} ${alignItems.center}`}>
+          <div key={step.id} className={`${display.flex} ${flexGrow['1']} ${alignItems.center}`}>
             {/* Step Circle */}
             <button
               type="button"
               onClick={() => step.isAccessible && onStepClick?.(step.number)}
               disabled={!step.isAccessible}
               className={cn(
-                `group relative flex ${iconSize['2xl']} ${alignItems.center} ${justify.center} ${radius.full} border-2 ${transition.all}`,
+                `group ${position.relative} ${display.flex} ${iconSize['2xl']} ${alignItems.center} ${justify.center} ${radius.full} ${borderWidth['2']} ${transition.all}`,
                 step.isCurrent && 'scale-110',
-                step.isAccessible && 'cursor-pointer hover:scale-110',
-                !step.isAccessible && `cursor-not-allowed ${opacityLevel[50]}`
+                step.isAccessible && `${cursor.pointer} hover:scale-110`,
+                !step.isAccessible && `${cursor.notAllowed} ${opacityLevel[50]}`
               )}
               style={{
                 borderColor:
                   step.isCompleted || step.isCurrent
-                    ? TOKENS.colors.accent.primary
-                    : TOKENS.colors.border.default,
+                    ? submissionFormColors.accent.primary
+                    : submissionFormColors.border.default,
                 backgroundColor: step.isCompleted
-                  ? TOKENS.colors.accent.primary
+                  ? submissionFormColors.accent.primary
                   : step.isCurrent
-                    ? TOKENS.colors.background.elevated
-                    : TOKENS.colors.background.secondary,
-                boxShadow: step.isCurrent ? TOKENS.shadows.glow.orange : 'none',
+                    ? submissionFormColors.background.elevated
+                    : submissionFormColors.background.secondary,
+                boxShadow: step.isCurrent ? glowShadow.orange : 'none',
               }}
             >
               {step.isCompleted ? (
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={TOKENS.animations.spring.bouncy}
+                  transition={animation.spring.bouncy}
                 >
                   <CheckCircle className={`${iconSize.md} ${textColor.white}`} />
                 </motion.div>
@@ -163,7 +177,7 @@ export function ProgressIndicator({
                 <span
                   className={cn(
                     `${weight.semibold} ${size.sm}`,
-                    step.isCurrent ? 'text-accent-primary' : muted.default
+                    step.isCurrent ? textColor.accent : muted.default
                   )}
                 >
                   {step.number}
@@ -173,11 +187,11 @@ export function ProgressIndicator({
               {/* Tooltip on hover */}
               {step.description && step.isAccessible && (
                 <div
-                  className={`-top-12 -translate-x-1/2 pointer-events-none absolute left-1/2 ${zLayer.modal} whitespace-nowrap ${radius.md} ${padding.xCompact} ${padding.ySnug} ${size.xs} ${opacityLevel[0]} ${transition.opacity} group-hover:opacity-100`}
+                  className={`-top-12 -translate-x-1/2 ${pointerEvents.none} ${absolute.centerX} ${zLayer.modal} ${whitespace.nowrap} ${radius.md} ${padding.xCompact} ${padding.ySnug} ${size.xs} ${opacityLevel[0]} ${transition.opacity} group-hover:${opacityLevel[100]}`}
                   style={{
-                    backgroundColor: TOKENS.colors.background.elevated,
-                    border: `1px solid ${TOKENS.colors.border.medium}`,
-                    boxShadow: TOKENS.shadows.lg,
+                    backgroundColor: submissionFormColors.background.elevated,
+                    border: `1px solid ${submissionFormColors.border.medium}`,
+                    boxShadow: shadow.lg,
                   }}
                 >
                   {step.description}
@@ -186,11 +200,11 @@ export function ProgressIndicator({
             </button>
 
             {/* Label */}
-            <div className={`ml-3 ${flexGrow['1']}`}>
+            <div className={`${marginLeft.default} ${flexGrow['1']}`}>
               <div
                 className={cn(
                   `${weight.medium} ${size.sm}`,
-                  step.isCurrent ? 'text-foreground' : muted.default
+                  step.isCurrent ? textColor.foreground : muted.default
                 )}
               >
                 {step.label}
@@ -199,20 +213,20 @@ export function ProgressIndicator({
 
             {/* Connector Line */}
             {index < steps.length - 1 && (
-              <div className={`relative mx-4 h-0.5 ${flexGrow['1']}`}>
+              <div className={`${position.relative} ${marginX.comfortable} ${height.hairline} ${flexGrow['1']}`}>
                 <div
-                  className={`absolute inset-0 ${radius.full}`}
-                  style={{ backgroundColor: TOKENS.colors.border.default }}
+                  className={`${absolute.inset} ${radius.full}`}
+                  style={{ backgroundColor: submissionFormColors.border.default }}
                 />
                 <motion.div
-                  className={`absolute inset-0 ${radius.full}`}
+                  className={`${absolute.inset} ${radius.full}`}
                   initial={{ scaleX: 0 }}
                   animate={{
                     scaleX: step.isCompleted ? 1 : 0,
                   }}
-                  transition={TOKENS.animations.spring.smooth}
+                  transition={animation.spring.smooth}
                   style={{
-                    backgroundColor: TOKENS.colors.accent.primary,
+                    backgroundColor: submissionFormColors.accent.primary,
                     transformOrigin: 'left',
                   }}
                 />
@@ -223,7 +237,7 @@ export function ProgressIndicator({
       </div>
 
       {/* Step Indicators - Mobile (Compact) */}
-      <div className={`flex ${alignItems.center} ${justify.center} ${gap.compact} md:hidden`}>
+      <div className={`${display.flex} ${alignItems.center} ${justify.center} ${gap.compact} md:${display.none}`}>
         {steps.map((step) => (
           <button
             key={step.id}
@@ -231,23 +245,23 @@ export function ProgressIndicator({
             onClick={() => step.isAccessible && onStepClick?.(step.number)}
             disabled={!step.isAccessible}
             className={cn(
-              `flex ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} border-2 ${transition.all}`,
+              `${display.flex} ${iconSize.xl} ${alignItems.center} ${justify.center} ${radius.full} ${borderWidth['2']} ${transition.all}`,
               step.isCurrent && 'scale-125',
-              step.isAccessible && 'cursor-pointer',
-              !step.isAccessible && `cursor-not-allowed ${opacityLevel[50]}`
+              step.isAccessible && cursor.pointer,
+              !step.isAccessible && `${cursor.notAllowed} ${opacityLevel[50]}`
             )}
-            style={{
-              borderColor:
-                step.isCompleted || step.isCurrent
-                  ? TOKENS.colors.accent.primary
-                  : TOKENS.colors.border.default,
-              backgroundColor: step.isCompleted
-                ? TOKENS.colors.accent.primary
-                : step.isCurrent
-                  ? TOKENS.colors.background.elevated
-                  : TOKENS.colors.background.secondary,
-              boxShadow: step.isCurrent ? TOKENS.shadows.glow.orange : 'none',
-            }}
+              style={{
+                borderColor:
+                  step.isCompleted || step.isCurrent
+                    ? submissionFormColors.accent.primary
+                    : submissionFormColors.border.default,
+                backgroundColor: step.isCompleted
+                  ? submissionFormColors.accent.primary
+                  : step.isCurrent
+                    ? submissionFormColors.background.elevated
+                    : submissionFormColors.background.secondary,
+                boxShadow: step.isCurrent ? glowShadow.orange : 'none',
+              }}
             aria-label={step.label}
             title={step.label}
           >
@@ -268,7 +282,7 @@ export function ProgressIndicator({
       </div>
 
       {/* Current Step Label - Mobile Only */}
-      <div className={`${marginTop.default} text-center md:hidden`}>
+      <div className={`${marginTop.default} ${textAlign.center} md:${display.none}`}>
         <div className={`${weight.medium} ${textColor.foreground} ${size.sm}`}>
           {steps.find((s) => s.isCurrent)?.label || 'Step'}
         </div>

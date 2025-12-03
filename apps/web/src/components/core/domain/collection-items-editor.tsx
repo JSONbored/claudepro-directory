@@ -17,23 +17,29 @@ import {
 import { isValidCategory, logClientWarning, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
 import {
+  alignItems,
   bgColor,
-  cluster,
-  gap,
-  iconSize,
   border,
-  items as alignItems,
+  cluster,
+  display,
+  flexGrow,
+  gap,
+  hoverBg,
+  iconSize,
   marginBottom,
   marginTop,
   muted,
   padding,
+  paddingBottom,
   radius,
   size,
   spaceY,
   stack,
+  textAlign,
   textColor,
   transition,
   weight,
+  marginY,
 } from '@heyclaude/web-runtime/design-system';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
@@ -243,9 +249,9 @@ export function CollectionItemManager({
   return (
     <div className={spaceY.comfortable}>
       {/* Add Item Section */}
-      <div className={`flex ${alignItems.end} ${gap.compact} pb-4`}>
-        <div className="flex-1">
-          <div className={`${marginBottom.tight} block ${weight.medium} ${size.sm}`}>Add Bookmark to Collection</div>
+      <div className={`${display.flex} ${alignItems.end} ${gap.compact} ${paddingBottom.comfortable}`}>
+        <div className={flexGrow['1']}>
+          <div className={`${marginBottom.tight} ${display.block} ${weight.medium} ${size.sm}`}>Add Bookmark to Collection</div>
           <Select value={selectedBookmarkId} onValueChange={setSelectedBookmarkId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a bookmark to add" />
@@ -280,11 +286,11 @@ export function CollectionItemManager({
         </Button>
       </div>
 
-      <Separator className="my-4" />
+      <Separator className={marginY.comfortable} />
 
       {/* Items List */}
       {items.length === 0 ? (
-        <div className={`${radius.lg} ${border.dashed} ${padding.ySection} text-center`}>
+        <div className={`${radius.lg} ${border.dashed} ${padding.ySection} ${textAlign.center}`}>
           <p className={muted.default}>
             No items in this collection yet. Add bookmarks above to get started.
           </p>
@@ -294,7 +300,7 @@ export function CollectionItemManager({
           {items.map((item: CollectionItem, index: number) => (
             <div
               key={item.id}
-              className={`${cluster.default} ${radius.lg} border ${bgColor.card} ${padding.compact} ${transition.colors} hover:bg-accent/50`}
+              className={`${cluster.default} ${radius.lg} border ${bgColor.card} ${padding.compact} ${transition.colors} ${hoverBg.stronger}`}
             >
               {/* Order Controls */}
               <div className={stack.tight}>
@@ -321,12 +327,12 @@ export function CollectionItemManager({
               </div>
 
               {/* Order Number */}
-              <div className={`w-8 text-center ${weight.medium} ${muted.sm}`}>
+              <div className={`w-8 ${textAlign.center} ${weight.medium} ${muted.sm}`}>
                 #{index + 1}
               </div>
 
               {/* Content Info */}
-              <div className="flex-1">
+              <div className={flexGrow['1']}>
                 <div className={cluster.compact}>
                   <UnifiedBadge variant="base" style="outline" className={`${size.xs} capitalize`}>
                     {item.content_type}
@@ -356,7 +362,7 @@ export function CollectionItemManager({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${iconSize.xl} ${padding.none} ${textColor.destructive} hover:text-destructive`}
+                  className={`${iconSize.xl} ${padding.none} ${textColor.destructive} hover:${textColor.destructive}`}
                   onClick={() => handleRemove(item.id)}
                   disabled={isPending}
                   aria-label="Remove item"

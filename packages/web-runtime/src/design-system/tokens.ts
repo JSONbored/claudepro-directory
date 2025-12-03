@@ -544,8 +544,8 @@ export const animation = {
     /** Snappy spring - quick response */
     snappy: {
       type: 'spring' as const,
-      stiffness: 600,
-      damping: 30,
+      stiffness: 400,
+      damping: 17,
     },
   },
 
@@ -557,6 +557,18 @@ export const animation = {
     slow: 300,
     slower: 500,
     slowest: 700,
+    /** Button animation duration */
+    button: 200,
+    /** Footer animation duration */
+    footer: 300,
+    /** Modal animation duration */
+    modal: 200,
+    /** Card animation duration */
+    card: 300,
+    /** Transition duration (general UI transitions) */
+    transition: 200,
+    /** Animation duration (general animations) */
+    animation: 300,
   },
 
   /** CSS duration values */
@@ -567,6 +579,12 @@ export const animation = {
     slow: '300ms',
     slower: '500ms',
     slowest: '700ms',
+    button: '200ms',
+    footer: '300ms',
+    modal: '200ms',
+    card: '300ms',
+    transition: '200ms',
+    animation: '300ms',
   },
 
   /** Easing functions */
@@ -624,11 +642,18 @@ export const animation = {
     },
   },
 
-  /** Stagger delay values */
+  /** Stagger delay values (in milliseconds for consistency with UI_ANIMATION) */
   stagger: {
-    fast: 0.05,
-    default: 0.1,
-    slow: 0.15,
+    /** Fast stagger - 100ms between items */
+    fast: 100,
+    /** Medium stagger - 200ms between items */
+    medium: 200,
+    /** Slow stagger - 300ms between items */
+    slow: 300,
+    /** Default stagger - same as fast */
+    default: 100,
+    /** Card stagger - 100ms between cards */
+    card: 100,
   },
 
   /** Ticker animation speeds */
@@ -641,6 +666,47 @@ export const animation = {
   /** Border beam animation */
   borderBeam: {
     default: 15000,
+  },
+
+  /** Confetti animation settings */
+  confetti: {
+    success: {
+      particleCount: 50,
+      spread: 60,
+      ticks: 150,
+      /** Success colors - green and gold */
+      colors: ['#10b981', '#fbbf24', '#34d399'],
+    },
+    celebration: {
+      particleCount: 100,
+      spread: 70,
+      ticks: 200,
+      /** Celebration colors - rainbow */
+      colors: ['#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'],
+    },
+    milestone: {
+      particleCount: 30,
+      spread: 100,
+      ticks: 200,
+      scalar: 1.2,
+      /** Milestone colors - gold tones */
+      colors: ['#fbbf24', '#f59e0b', '#fcd34d'],
+    },
+    subtle: {
+      particleCount: 30,
+      spread: 40,
+      ticks: 100,
+      /** Subtle colors - blue and purple */
+      colors: ['#3b82f6', '#8b5cf6'],
+    },
+  },
+
+  /** Component-specific animation values */
+  components: {
+    /** Button hover scale factor */
+    buttonHoverScale: 1.02,
+    /** Card hover lift distance in pixels */
+    cardHoverLift: '2px',
   },
 } as const;
 

@@ -24,8 +24,8 @@ Never read from `cacheConfigs()` directly. Instead, use the typed helpers from `
 ```ts
 import { getCacheTtl, getCacheInvalidateTags } from '@/src/lib/data/config/cache-config';
 
-const ttl = getCacheTtl('cache.content_detail.ttl_seconds');
-const tags = getCacheInvalidateTags('cache.invalidate.content_create');
+const ttl = getCacheTtl('content_detail');
+const tags = getCacheInvalidateTags('content_create');
 ```
 
 These helpers:

@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const createReviewSchema = z.object({
+export const createReviewSchema = z.object({
   content_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable().optional(),
   content_slug: z.string().nullable().optional(),
   rating: z.number().nullable().optional(),
@@ -48,7 +48,6 @@ export const createReview = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -62,9 +61,10 @@ export const createReview = authedAction
       revalidatePath(`/${result?.review?.content_type}`);
       revalidateTag(`reviews:${result?.review?.content_type}:${result?.review?.content_slug}`, 'default');
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.review_create']
+        cacheConfig,
+        invalidateKeys: ['review_create']
       });
 
       

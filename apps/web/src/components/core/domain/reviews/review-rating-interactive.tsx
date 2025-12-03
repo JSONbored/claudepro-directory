@@ -1,6 +1,6 @@
 'use client';
 
-import { cluster, muted, weight , gap } from '@heyclaude/web-runtime/design-system';
+import { cluster, muted, weight , gap, marginLeft } from '@heyclaude/web-runtime/design-system';
 import { Star } from '@heyclaude/web-runtime/icons';
 import type { ReviewRatingInteractiveProps } from '@heyclaude/web-runtime/types/component.types';
 import { Rating, RatingButton } from '@heyclaude/web-runtime/ui';
@@ -55,7 +55,7 @@ export function ReviewRatingInteractive({
         ))}
       </Rating>
       {showValue && (
-        <span className={`ml-1 ${weight.medium} ${muted.sm}`}>{value.toFixed(1)}</span>
+        <span className={`${marginLeft.tight} ${weight.medium} ${muted.sm}`}>{value.toFixed(1)}</span>
       )}
     </div>
   );

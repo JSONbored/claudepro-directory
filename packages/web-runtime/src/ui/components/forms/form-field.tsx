@@ -57,7 +57,9 @@
 
 import { useId, useState } from 'react';
 import { cn } from '../../utils.ts';
-import { size } from '../../../design-system/styles/typography.ts';
+import { size, muted } from '../../../design-system/styles/typography.ts';
+import { spaceY, marginLeft } from '../../../design-system/styles/layout.ts';
+import { textColor } from '../../../design-system/styles/colors.ts';
 import { Input } from '../input.tsx';
 import { Label } from '../label.tsx';
 import { Select, SelectContent, SelectTrigger, SelectValue } from '../select.tsx';
@@ -198,11 +200,11 @@ export function FormField(props: FormFieldProps) {
     props.variant === 'input' || props.variant === 'textarea' ? props.maxLength : undefined;
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn(spaceY.compact, className)}>
       {/* Label */}
       <Label htmlFor={fieldId}>
         {label}
-        {required && <span className="ml-1 text-destructive">*</span>}
+        {required && <span className={`${marginLeft.tight} ${textColor.destructive}`}>*</span>}
       </Label>
 
       {/* Field variant */}
@@ -283,21 +285,21 @@ export function FormField(props: FormFieldProps) {
 
       {/* Helper text */}
       {description && (
-        <p id={descriptionId} className={`text-muted-foreground ${size.xs}`}>
+        <p id={descriptionId} className={`${muted.default} ${size.xs}`}>
           {description}
         </p>
       )}
 
       {/* Character count */}
       {showCharCount && maxLength && (
-        <p id={charCountId} className={`text-muted-foreground ${size.xs}`}>
+        <p id={charCountId} className={`${muted.default} ${size.xs}`}>
           {currentCharCount}/{maxLength} characters
         </p>
       )}
 
       {/* Error message */}
       {error && errorMessage && (
-        <p id={errorId} className={`text-destructive ${size.xs}`} role="alert">
+        <p id={errorId} className={`${textColor.destructive} ${size.xs}`} role="alert">
           {errorMessage}
         </p>
       )}

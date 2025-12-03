@@ -40,7 +40,7 @@ export async function getSEOMetadata(route: string): Promise<null | {
     {
       keyParts: ['seo-metadata', route],
       tags: ['seo', `seo-${route}`],
-      ttlKey: 'cache.seo.ttl_seconds',
+      ttlKey: 'seo',
       fallback: null,
       logMeta: { route, include: 'metadata' },
     }
@@ -117,7 +117,7 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
     {
       keyParts: ['seo-metadata-schemas', route],
       tags: ['seo', `seo-${route}`, 'structured-data'],
-      ttlKey: 'cache.seo.ttl_seconds',
+      ttlKey: 'seo',
       fallback: null,
       logMeta: { route, include: 'metadata,schemas' },
     }

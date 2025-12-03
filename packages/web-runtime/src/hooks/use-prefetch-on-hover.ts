@@ -44,7 +44,7 @@
  */
 
 import { logClientWarning } from '../errors.ts';
-import { getTimeoutConfig } from '../config/static-configs.ts';
+import { animation } from '../design-system/tokens.ts';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 
@@ -103,8 +103,7 @@ export function usePrefetchOnHover(
 
   // Load prefetch delay from static defaults
   useEffect(() => {
-    const config = getTimeoutConfig();
-    DEFAULT_PREFETCH_DELAY = config['timeout.ui.prefetch_delay_ms'];
+    DEFAULT_PREFETCH_DELAY = animation.duration.slow; // 300ms
   }, []);
 
   const handleMouseEnter = useCallback(() => {

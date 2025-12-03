@@ -3,7 +3,8 @@
 /** Homepage client consuming homepageConfigs for runtime-tunable featured categories */
 
 import type { Database } from '@heyclaude/database-types';
-import { getHomepageConfigBundle } from '@heyclaude/web-runtime/config/static-configs';
+import { HOMEPAGE_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
 import {
   logUnhandledPromise,
   trackHomepageSectionError,
@@ -38,6 +39,15 @@ import {
   textColor,
   transition,
   weight,
+  display,
+  container,
+  marginX,
+  paddingTop,
+  paddingBottom,
+  whitespace,
+  minWidth,
+  border,
+  height,
 } from '@heyclaude/web-runtime/design-system';
 import type {
   DisplayableContent,
@@ -69,7 +79,7 @@ const UnifiedSearch = dynamic(
     })),
   {
     ssr: true, // SSR enabled: Search bar visible immediately
-    loading: () => <Skeleton size="xl" width="3xl" className="h-14" />,
+    loading: () => <Skeleton size="xl" width="3xl" className={height.inputLg} />,
   }
 );
 
@@ -158,20 +168,11 @@ function HomePageClientComponent({
     }
   }, [stats, categoryStatsConfig]);
 
-  // Get static config bundle
+  // Get homepage config from unified-config
   useEffect(() => {
-    let bundle;
-    try {
-      bundle = getHomepageConfigBundle();
-    } catch (error) {
-      // Log error but don't crash - fall back to server-provided data
-      console.warn('Failed to load homepage config bundle:', error);
-      bundle = null;
-    }
-    
-    // Extract featured categories from homepage config with defensive checks
-    const categories = Array.isArray(bundle?.homepageConfig?.['homepage.featured_categories'])
-      ? bundle.homepageConfig['homepage.featured_categories']
+    // Extract featured categories from homepage config
+    const categories = Array.isArray(HOMEPAGE_CONFIG.featured_categories)
+      ? HOMEPAGE_CONFIG.featured_categories
       : [];
 
     // Use static categories if available, otherwise fall back to server-provided categoryIds
@@ -191,12 +192,8 @@ function HomePageClientComponent({
       validCategories as readonly Database['public']['Enums']['content_category'][]
     );
 
-    // Extract animation config with fallbacks
-    setSpringDefault({
-      type: 'spring' as const,
-      stiffness: bundle?.animationConfig?.['animation.spring.default.stiffness'] ?? 400,
-      damping: bundle?.animationConfig?.['animation.spring.default.damping'] ?? 17,
-    });
+    // Extract animation config with fallbacks from design system tokens
+    setSpringDefault(animation.spring.default);
   }, [serverCategoryIds, initialData]);
 
   const fetchAllConfigs = useCallback(
@@ -419,8 +416,8 @@ function HomePageClientComponent({
   return (
     <>
       {/* Search Section */}
-      <section className={`container mx-auto ${padding.xDefault} pt-8 pb-12`}>
-        <div className={`mx-auto ${maxWidth['4xl']}`}>
+      <section className={`${container.default} ${padding.xDefault} ${paddingTop.loose} ${paddingBottom.section}`}>
+        <div className={`${marginX.auto} ${maxWidth['4xl']}`}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
             onSearch={handleSearch}
@@ -439,19 +436,19 @@ function HomePageClientComponent({
             <>
               {/* Mobile Stats - Compact horizontal scroll carousel */}
               <motion.div
-                className={`scrollbar-hide ${marginTop.comfortable} ${overflow.xAuto} md:hidden`}
+                className={`scrollbar-hide ${marginTop.comfortable} ${overflow.xAuto} md:${display.none}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <div className={`flex ${gap.default} ${padding.xDefault} pb-2`}>
+                <div className={`${display.flex} ${gap.default} ${padding.xDefault} ${paddingBottom.compact}`}>
                   {categoryStatsConfig.slice(0, 5).map(({ categoryId, icon: Icon, delay }) => {
                     const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
 
                     return (
                       <Link key={categoryId} href={categoryRoute}>
                         <motion.div
-                          className={`flex min-w-fit ${alignItems.center} ${gap.compact} whitespace-nowrap ${radius.lg} border ${borderColor['border/40']} ${bgColor['card/50']} ${padding.xDefault} py-2.5 ${backdrop.sm}`}
+                          className={`${display.flex} ${minWidth.fit} ${alignItems.center} ${gap.compact} ${whitespace.nowrap} ${radius.lg} ${border.default} ${borderColor['border/40']} ${bgColor['card/50']} ${padding.xDefault} ${padding.yBetween} ${backdrop.sm}`}
                           whileTap={{ scale: 0.95 }}
                           transition={springDefault}
                         >
@@ -479,7 +476,7 @@ function HomePageClientComponent({
               {/* Desktop Stats - Full layout (unchanged) */}
               <div
                 className={
-                  `${marginTop.comfortable} hidden ${flexWrap.wrap} ${justify.center} ${gap.compact} ${muted.default} ${size.xs} md:flex lg:${gap.default} lg:${size.sm}`
+                  `${marginTop.comfortable} ${display.none} ${flexWrap.wrap} ${justify.center} ${gap.compact} ${muted.default} ${size.xs} md:${display.flex} lg:${gap.default} lg:${size.sm}`
                 }
               >
                 {categoryStatsConfig.map(({ categoryId, icon: Icon, displayText, delay }) => {
@@ -494,7 +491,7 @@ function HomePageClientComponent({
                       aria-label={`View all ${displayText}`}
                     >
                       <motion.div
-                        className={`${cluster.snug} ${cursor.pointer} ${radius.md} border ${borderColor.transparent} ${padding.xTight} ${padding.yMicro} ${transition.colors}`}
+                        className={`${cluster.snug} ${cursor.pointer} ${radius.md} ${border.default} ${borderColor.transparent} ${padding.xTight} ${padding.yMicro} ${transition.colors}`}
                         whileHover={{
                           scale: 1.05,
                           y: -2,
@@ -508,10 +505,10 @@ function HomePageClientComponent({
                         }}
                       >
                         <Icon
-                          className={`${iconSize.sm} ${transition.colors} group-hover:text-accent`}
+                          className={`${iconSize.sm} ${transition.colors} ${groupHover.accent}`}
                           aria-hidden="true"
                         />
-                        <span className={`transition-colors ${groupHover.accent}`}>
+                        <span className={`${transition.colors} ${groupHover.accent}`}>
                           <NumberTicker
                             value={
                               typeof stats[categoryId] === 'number'
@@ -534,7 +531,7 @@ function HomePageClientComponent({
         </div>
       </section>
 
-      <section className={`container mx-auto ${padding.xDefault} pb-16`}>
+      <section className={`${container.default} ${padding.xDefault} ${paddingBottom.hero}`}>
         {/* Search Results Section - TanStack Virtual */}
         <LazySearchSection
           isSearching={isSearching}

@@ -23,9 +23,14 @@ import {
   radius,
   size,
   weight,
+  display,
+  border,
+  borderColor,
+  textColor,
+  bgColor,
 } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
 import { motion } from 'motion/react';
 
 interface SocialProofBadgeProps {
@@ -48,18 +53,18 @@ export function SocialProofBadge({
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={animation.spring.smooth}
         className={cn(
           `${cluster.compact} ${radius.lg} border border-purple-500/30`,
           `bg-purple-500/10 ${padding.xCompact} ${padding.yCompact}`,
           className
         )}
       >
-        <Award className={`${iconSize.sm} text-purple-400`} />
-        <div className={`flex ${flexDir.col}`}>
-          <span className={`${weight.medium} text-purple-300 ${size.xs}`}>Top Contributors</span>
+        <Award className={`${iconSize.sm} ${textColor.purple400}`} />
+        <div className={`${display.flex} ${flexDir.col}`}>
+          <span className={`${weight.medium} ${textColor.purple300} ${size.xs}`}>Top Contributors</span>
           {names.length > 0 && (
-            <span className={`${size['2xs']} text-purple-400/80`}>
+            <span className={`${size['2xs']} ${textColor.purple400_80}`}>
               {names.slice(0, 2).join(', ')}
               {names.length > 2 && ` +${names.length - 2}`}
             </span>
@@ -72,17 +77,17 @@ export function SocialProofBadge({
       <motion.div
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={animation.spring.smooth}
         className={cn(
-          `${cluster.compact} ${radius.lg} border border-blue-500/30`,
+          `${cluster.compact} ${radius.lg} ${border.default} ${borderColor['blue/30']}`,
           `bg-blue-500/10 ${padding.xCompact} ${padding.yCompact}`,
           className
         )}
       >
-        <TrendingUp className={`${iconSize.sm} text-blue-400`} />
-        <div className={`flex ${flexDir.col}`}>
-          <span className={`${weight.medium} text-blue-300 ${size.xs}`}>{count} submissions</span>
-          <span className={`${size['2xs']} text-blue-400/80`}>this week</span>
+        <TrendingUp className={`${iconSize.sm} ${textColor.blue400}`} />
+        <div className={`${display.flex} ${flexDir.col}`}>
+          <span className={`${weight.medium} ${textColor.blue300} ${size.xs}`}>{count} submissions</span>
+          <span className={`${size['2xs']} ${textColor.blue400_80}`}>this week</span>
         </div>
       </motion.div>
     ),
@@ -91,17 +96,17 @@ export function SocialProofBadge({
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={TOKENS.animations.spring.bouncy}
+        transition={animation.spring.bouncy}
         className={cn(
-          `${cluster.compact} ${radius.lg} border border-green-500/30`,
+          `${cluster.compact} ${radius.lg} ${border.default} ${borderColor['green/30']}`,
           `bg-green-500/10 ${padding.xCompact} ${padding.yCompact}`,
           className
         )}
       >
-        <CheckCircle className={`${iconSize.sm} text-green-400`} />
-        <div className={`flex ${flexDir.col}`}>
-          <span className={`${weight.medium} text-green-300 ${size.xs}`}>{percentage}% approved</span>
-          <span className={`${size['2xs']} text-green-400/80`}>success rate</span>
+        <CheckCircle className={`${iconSize.sm} ${textColor.green400}`} />
+        <div className={`${display.flex} ${flexDir.col}`}>
+          <span className={`${weight.medium} ${textColor.green300} ${size.xs}`}>{percentage}% approved</span>
+          <span className={`${size['2xs']} ${textColor.green400_80}`}>success rate</span>
         </div>
       </motion.div>
     ),
@@ -110,15 +115,15 @@ export function SocialProofBadge({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={animation.spring.smooth}
         className={cn(
-          `${cluster.compact} ${radius.lg} border border-amber-500/30`,
-          `bg-amber-500/10 ${padding.xCompact} ${padding.yCompact}`,
+          `${cluster.compact} ${radius.lg} ${border.default} ${borderColor['amber/30']}`,
+          `${bgColor['amber/10']} ${padding.xCompact} ${padding.yCompact}`,
           className
         )}
       >
-        <Users className={`${iconSize.sm} text-amber-400`} />
-        <span className={`${weight.medium} text-amber-300 ${size.xs}`}>
+        <Users className={`${iconSize.sm} ${textColor.amber400}`} />
+        <span className={`${weight.medium} ${textColor.amber300} ${size.xs}`}>
           Join {count.toLocaleString()} users
         </span>
       </motion.div>
@@ -146,9 +151,9 @@ export function SocialProofBar({ stats, className }: SocialProofBarProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={TOKENS.animations.spring.smooth}
+        transition={animation.spring.smooth}
       className={cn(
-  `flex ${flexWrap.wrap} ${alignItems.center} ${gap.compact}`, className)}
+  `${display.flex} ${flexWrap.wrap} ${alignItems.center} ${gap.compact}`, className)}
     >
       {stats.contributors && stats.contributors.count > 0 && (
         <SocialProofBadge
@@ -197,7 +202,7 @@ export function InlineSocialProof({
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={TOKENS.animations.spring.smooth}
+        transition={animation.spring.smooth}
       className={cn(`inline-${cluster.snug} ${muted.default} ${size.xs}`, className)}
     >
       {icons[icon]}

@@ -1,9 +1,12 @@
 'use client';
 
 import { cn } from '../../utils.ts';
-import { padding, squareSize } from '../../../design-system/styles/layout.ts';
-import { size } from '../../../design-system/styles/typography.ts';
+import { padding, squareSize, grid, display, flexDir, gap, width, overflow } from '../../../design-system/styles/layout.ts';
+import { size, weight, tracking } from '../../../design-system/styles/typography.ts';
+import { bgColor, borderColor } from '../../../design-system/styles/colors.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
+import { border, borderBottom } from '../../../design-system/styles/borders.ts';
+import { zLayer } from '../../../design-system/styles/effects.ts';
 import { type MotionProps, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -18,7 +21,7 @@ export const AnimatedSpan = ({ children, delay = 0, className, ...props }: Anima
     initial={{ opacity: 0, y: -5 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.3, delay: delay / 1000 }}
-    className={cn(`grid font-normal ${size.sm} tracking-tight`, className)}
+    className={cn(`${grid.base} ${weight.normal} ${size.sm} ${tracking.tight}`, className)}
     {...props}
   >
     {children}
@@ -81,7 +84,7 @@ export const TypingAnimation = ({
   return (
     <MotionComponent
       ref={elementRef}
-      className={cn(`font-normal ${size.sm} tracking-tight`, className)}
+      className={cn(`${weight.normal} ${size.sm} ${tracking.tight}`, className)}
       {...props}
     >
       {displayedText}
@@ -98,19 +101,19 @@ export const Terminal = ({ children, className }: TerminalProps) => {
   return (
     <div
       className={cn(
-        `z-0 w-full overflow-hidden ${radius.xl} border border-border bg-background`,
+        `${zLayer.base} ${width.full} ${overflow.hidden} ${radius.xl} ${border.default} ${borderColor.border} ${bgColor.background}`,
         className
       )}
     >
-      <div className={`flex flex-col gap-y-2 border-border border-b ${padding.default}`}>
-        <div className="flex flex-row gap-x-2">
-          <div className={`${squareSize.dotMd} ${radius.full} bg-red-500`} />
-          <div className={`${squareSize.dotMd} ${radius.full} bg-yellow-500`} />
-          <div className={`${squareSize.dotMd} ${radius.full} bg-green-500`} />
+      <div className={`${display.flex} ${flexDir.col} ${gap.compact} ${borderColor.border} ${borderBottom.default} ${padding.default}`}>
+        <div className={`${display.flex} ${flexDir.row} ${gap.compact}`}>
+          <div className={`${squareSize.dotMd} ${radius.full} ${bgColor.red}`} />
+          <div className={`${squareSize.dotMd} ${radius.full} ${bgColor.yellow}`} />
+          <div className={`${squareSize.dotMd} ${radius.full} ${bgColor.green}`} />
         </div>
       </div>
-      <pre className={`overflow-x-auto ${padding.default}`}>
-        <code className="grid gap-y-1">{children}</code>
+      <pre className={`${overflow.xAuto} ${padding.default}`}>
+        <code className={`${grid.base} ${gap.yTight}`}>{children}</code>
       </pre>
     </div>
   );

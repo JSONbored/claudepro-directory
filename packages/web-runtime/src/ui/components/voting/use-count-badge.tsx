@@ -8,9 +8,9 @@
  */
 
 import { Zap } from '../../../icons.tsx';
-import { cluster } from '../../../design-system/styles/layout.ts';
+import { cluster, display } from '../../../design-system/styles/layout.ts';
 import { iconSize } from '../../../design-system/styles/icons.ts';
-import { size as textSize } from '../../../design-system/styles/typography.ts';
+import { size as textSize, weight, muted } from '../../../design-system/styles/typography.ts';
 
 export interface UseCountBadgeProps {
   /** Number of users who marked "I use this" */
@@ -58,7 +58,7 @@ export function UseCountBadge({
       className={`
         ${cluster.tight}
         ${sizeClasses[size]}
-        text-muted-foreground
+        ${muted.default}
         ${className}
       `}
       title={`${count} ${count === 1 ? 'person uses' : 'people use'} this`}
@@ -69,10 +69,10 @@ export function UseCountBadge({
           aria-hidden="true" 
         />
       )}
-      <span className="font-medium">
+      <span className={weight.medium}>
         {formatCount(count)}
       </span>
-      <span className="hidden sm:inline">
+      <span className={`${display.none} sm:${display.inline}`}>
         {count === 1 ? 'uses this' : 'use this'}
       </span>
     </div>
@@ -99,11 +99,11 @@ export function UseCountBadgeCompact({
 
   return (
     <div
-      className={`${cluster.tight} ${textSize.xs} text-muted-foreground ${className}`}
+      className={`${cluster.tight} ${textSize.xs} ${muted.default} ${className}`}
       title={`${count} ${count === 1 ? 'person uses' : 'people use'} this`}
     >
       <Zap className={`${iconSize.xs} text-emerald-500`} aria-hidden="true" />
-      <span className="font-medium">{formatCount(count)}</span>
+      <span className={weight.medium}>{formatCount(count)}</span>
     </div>
   );
 }

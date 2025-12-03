@@ -7,6 +7,8 @@ import { Constants, type Database } from '@heyclaude/database-types';
 import  { type CreateJobInput } from '@heyclaude/web-runtime';
 import { updateJob } from '@heyclaude/web-runtime/actions';
 import { spaceY, muted, marginBottom, weight , size  , padding, tracking, radius,
+  bgColor,
+  textColor,
 } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -216,8 +218,8 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
         <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']} ${tracking.tight}`}>Edit Job Listing</h1>
         <p className={muted.default}>Update your job posting details</p>
       </div>
-      {hasInvalidData ? <div className={`${radius.md} bg-yellow-50 ${padding.default} dark:bg-yellow-900/20`}>
-          <p className={`${size.sm} text-yellow-800 dark:text-yellow-200`}>
+      {hasInvalidData ? <div className={`${radius.md} ${bgColor.yellowLight} ${padding.default} dark:${bgColor.yellowExtraDark}`}>
+          <p className={`${size.sm} ${textColor.warning400} dark:${textColor.warning400}`}>
             Some fields contain invalid data and couldn't be loaded. Please review and update.
           </p>
         </div> : null}

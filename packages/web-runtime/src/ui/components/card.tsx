@@ -6,10 +6,12 @@
 
 import { cn } from '../../ui/utils.ts';
 // Design System imports
-import { stack, gap } from '../../design-system/styles/layout.ts';
-import { size } from '../../design-system/styles/typography.ts';
+import { stack, gap, grid, display, alignItems, padding, paddingBottom, paddingTop, self, rowSpan, colStart, rowStart, justifySelf, gridAutoRows, gridTemplateRows } from '../../design-system/styles/layout.ts';
+import { size, weight, muted, leading } from '../../design-system/styles/typography.ts';
 import { radius } from '../../design-system/styles/radius.ts';
 import { shadow } from '../../design-system/styles/effects.ts';
+import { bgColor, textColor } from '../../design-system/styles/colors.ts';
+import { border } from '../../design-system/styles/borders.ts';
 import type * as React from 'react';
 import { memo } from 'react';
 
@@ -19,7 +21,7 @@ const Card = memo(function Card({ className, ...props }: React.ComponentProps<'d
       data-slot="card"
       className={cn(
         stack.loose,
-        `${radius.xl} border bg-card py-6 text-card-foreground ${shadow.sm}`,
+        `${radius.xl} ${border.default} ${bgColor.card} ${padding.yRelaxed} ${textColor.cardForeground} ${shadow.sm}`,
         className
       )}
       {...props}
@@ -32,7 +34,7 @@ const CardHeader = memo(function CardHeader({ className, ...props }: React.Compo
     <div
       data-slot="card-header"
       className={cn(
-        `@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start ${gap.compact} px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6`,
+        `@container/card-header ${grid.base} ${gridAutoRows.min} ${gridTemplateRows.autoAuto} ${alignItems.start} ${gap.compact} ${padding.xRelaxed} has-data-[slot=card-action]:${grid.cardHeader} [.border-b]:${paddingBottom.relaxed}`,
         className
       )}
       {...props}
@@ -57,7 +59,7 @@ const CardTitle = memo(function CardTitle({
   return (
     <Component
       data-slot="card-title"
-      className={cn('font-semibold leading-none', className)}
+      className={cn(`${weight.semibold} ${leading.none}`, className)}
       {...props}
     />
   );
@@ -70,7 +72,7 @@ const CardDescription = memo(function CardDescription({
   return (
     <div
       data-slot="card-description"
-      className={cn(`text-muted-foreground ${size.sm}`, className)}
+      className={cn(`${muted.default} ${size.sm}`, className)}
       {...props}
     />
   );
@@ -80,7 +82,7 @@ const CardAction = memo(function CardAction({ className, ...props }: React.Compo
   return (
     <div
       data-slot="card-action"
-      className={cn('col-start-2 row-span-2 row-start-1 self-start justify-self-end', className)}
+      className={cn(`${colStart['2']} ${rowSpan['2']} ${rowStart['1']} ${self.start} ${justifySelf.end}`, className)}
       {...props}
     />
   );
@@ -90,14 +92,14 @@ const CardContent = memo(function CardContent({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-  return <div data-slot="card-content" className={cn('px-6', className)} {...props} />;
+  return <div data-slot="card-content" className={cn(padding.xRelaxed, className)} {...props} />;
 });
 
 const CardFooter = memo(function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card-footer"
-      className={cn('flex items-center px-6 [.border-t]:pt-6', className)}
+      className={cn(`${display.flex} ${alignItems.center} ${padding.xRelaxed} [.border-t]:${paddingTop.relaxed}`, className)}
       {...props}
     />
   );

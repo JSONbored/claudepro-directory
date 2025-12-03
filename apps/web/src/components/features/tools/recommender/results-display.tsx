@@ -26,12 +26,17 @@ import {
   absolute,
   backdrop,
   bgColor,
+  bgGradient,
   between,
+  borderColor,
   cluster,
   flexDir,
   flexGrow,
   flexWrap,
   gap,
+  gradientFrom,
+  gradientTo,
+  grid,
   iconLeading,
   iconSize,
   alignItems,
@@ -43,6 +48,9 @@ import {
   opacityLevel,
   overflow,
   padding,
+  paddingTop,
+  pointerEvents,
+  height,
   radius,
   row,
   shadow,
@@ -52,6 +60,12 @@ import {
   transition,
   weight,
   zLayer,
+  display,
+  position,
+  textAlign,
+  marginX,
+  width,
+  transform,
 } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
@@ -182,19 +196,19 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
   return (
     <div className={spaceY.loose}>
-      <div className={`${spaceY.comfortable} text-center`}>
-        <div className={`flex ${alignItems.center} ${justify.center} ${gap.compact}`}>
+      <div className={`${spaceY.comfortable} ${textAlign.center}`}>
+        <div className={`${display.flex} ${alignItems.center} ${justify.center} ${gap.compact}`}>
           <Sparkles className={`${iconSize.lg} ${textColor.primary}`} />
           <h1 className={`${weight.bold} ${size['3xl']} md:${size['4xl']}`}>Your Personalized Recommendations</h1>
         </div>
 
-        <p className={`mx-auto ${maxWidth['2xl']} ${muted.lg}`}>
+        <p className={`${marginX.auto} ${maxWidth['2xl']} ${muted.lg}`}>
           Based on your preferences, we found{' '}
           <strong>{total_matches ?? 0} matching configurations</strong>. Here are the top{' '}
           {results?.length ?? 0} best fits for your needs.
         </p>
 
-        <div className={`flex flex-wrap ${alignItems.center} ${justify.center} ${gap.default}`}>
+        <div className={`${display.flex} ${flexWrap.wrap} ${alignItems.center} ${justify.center} ${gap.default}`}>
           <UnifiedBadge variant="base" style="secondary" className={size.sm}>
             <TrendingUp className={iconLeading.xs} />
             {(summary?.avg_match_score ?? 0).toFixed(0)}% Avg Match
@@ -208,7 +222,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </UnifiedBadge>
         </div>
 
-        <div className={`flex flex-wrap ${alignItems.center} ${justify.center} ${gap.default}`}>
+        <div className={`${display.flex} ${flexWrap.wrap} ${alignItems.center} ${justify.center} ${gap.default}`}>
           <Button
             variant="default"
             size="sm"
@@ -239,7 +253,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
       <Collapsible open={showRefinePanel} onOpenChange={setShowRefinePanel}>
         <CollapsibleTrigger asChild={true}>
-          <Button variant="ghost" size="sm" className={`w-full ${gap.compact}`}>
+          <Button variant="ghost" size="sm" className={`${width.full} ${gap.compact}`}>
             <Settings className={iconSize.sm} />
             Adjust Preferences
             <ChevronDown
@@ -267,7 +281,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   min={0}
                   max={100}
                   step={5}
-                  className="w-full"
+                  className={width.full}
                   aria-label="Minimum match score"
                 />
                 <p className={`${muted.default} ${size.xs}`}>
@@ -286,7 +300,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   min={3}
                   max={20}
                   step={1}
-                  className="w-full"
+                  className={width.full}
                   aria-label="Maximum number of results"
                 />
                 <p className={`${muted.default} ${size.xs}`}>
@@ -294,7 +308,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 </p>
               </div>
 
-              <div className="pt-4">
+              <div className={paddingTop.comfortable}>
                 <Separator className={marginBottom.default} />
                 <div className={`${between.center} ${size.sm}`}>
                   <span className={muted.default}>Showing results:</span>
@@ -308,22 +322,22 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </CollapsibleContent>
       </Collapsible>
 
-      <Card className="bg-accent/5">
+      <Card className={bgColor['accent/5']}>
         <CardHeader>
           <CardTitle className={size.lg}>Your Selections</CardTitle>
           <CardDescription>We matched configurations based on these preferences</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className={`grid ${gap.default} sm:grid-cols-2 md:grid-cols-3`}>
+          <div className={grid.responsive123}>
             <div>
               <span className={`${weight.medium} ${size.sm}`}>Use Case</span>
-              <p className={`${marginTop.tight} ${muted.sm} capitalize`}>
+              <p className={`${marginTop.tight} ${muted.sm} ${transform.capitalize}`}>
                 {String(answers.useCase).replace('-', ' ')}
               </p>
             </div>
             <div>
               <span className={`${weight.medium} ${size.sm}`}>Experience Level</span>
-              <p className={`${marginTop.tight} ${muted.sm} capitalize`}>
+              <p className={`${marginTop.tight} ${muted.sm} ${transform.capitalize}`}>
                 {String(answers.experienceLevel)}
               </p>
             </div>
@@ -356,7 +370,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             {answers.teamSize && (
               <div>
                 <span className={`${weight.medium} ${size.sm}`}>Team Size</span>
-                <p className={`${marginTop.tight} ${muted.sm} capitalize`}>
+                <p className={`${marginTop.tight} ${muted.sm} ${transform.capitalize}`}>
                   {String(answers.teamSize)}
                 </p>
               </div>
@@ -366,7 +380,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       </Card>
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-        <TabsList className={`h-auto ${flexWrap.wrap}`}>
+        <TabsList className={`${height.auto} ${flexWrap.wrap}`}>
           {categories.map((category) => {
             const count =
               category === 'all'
@@ -381,7 +395,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </TabsList>
 
         <TabsContent value={selectedCategory} className={marginTop.comfortable}>
-          <div className={`grid ${gap.relaxed} md:grid-cols-2 lg:grid-cols-3`}>
+          <div className={grid.responsive3}>
             {filteredResults
               .filter(
                 (
@@ -426,20 +440,20 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     ? result.author
                     : undefined;
                 const getMatchScoreColor = (score: number) => {
-                  if (score >= 90) return 'text-green-500';
-                  if (score >= 75) return 'text-blue-500';
-                  if (score >= 60) return 'text-yellow-500';
+                  if (score >= 90) return textColor.green;
+                  if (score >= 75) return textColor.blue;
+                  if (score >= 60) return textColor.yellow;
                   return muted.default;
                 };
                 const getMatchGradient = (score: number) => {
-                  if (score >= 90) return 'from-green-500/20 to-transparent';
-                  if (score >= 75) return 'from-blue-500/20 to-transparent';
-                  if (score >= 60) return 'from-yellow-500/20 to-transparent';
-                  return 'from-muted/20 to-transparent';
+                  if (score >= 90) return `${gradientFrom.green20} ${gradientTo.transparent}`;
+                  if (score >= 75) return `${gradientFrom.blue20} ${gradientTo.transparent}`;
+                  if (score >= 60) return `${gradientFrom.yellow20} ${gradientTo.transparent}`;
+                  return `${gradientFrom.muted20} ${gradientTo.transparent}`;
                 };
 
                 return (
-                  <div key={result.slug} className="relative">
+                  <div key={result.slug} className={position.relative}>
                     <div className={`${absolute.topRightOffsetXl} ${zLayer.raised}`}>
                       <TooltipProvider>
                         <Tooltip>
@@ -465,7 +479,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className={`bg-background/80 ${backdrop.sm}`}
+                          className={`${bgColor['background/80']} ${backdrop.sm}`}
                         >
                           <Award className={iconLeading.xs} />#{rank}
                         </UnifiedBadge>
@@ -481,7 +495,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </div>
 
                     <div
-                      className={`${absolute.inset} bg-gradient-to-br ${getMatchGradient(matchScore)} pointer-events-none ${opacityLevel[50]}`}
+                      className={`${absolute.inset} ${bgGradient.toBR} ${getMatchGradient(matchScore)} ${pointerEvents.none} ${opacityLevel[50]}`}
                     />
 
                     <Link href={targetPath}>
@@ -493,9 +507,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         {...(tags.length ? { tags } : {})}
                         maxVisibleTags={4}
                         {...(author ? { author } : {})}
-                        className={`relative ${overflow.hidden} ${transition.all} hover:${shadow.lg}`}
+                        className={`${position.relative} ${overflow.hidden} ${transition.all} hover:${shadow.lg}`}
                         renderTopBadges={() => (
-                          <UnifiedBadge variant="base" style="outline" className="w-fit capitalize">
+                          <UnifiedBadge variant="base" style="outline" className={`${width.fit} ${transform.capitalize}`}>
                             {result.category}
                           </UnifiedBadge>
                         )}
@@ -514,7 +528,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                             </div>
 
                             {reasons.length > 1 && (
-                              <div className={`flex ${flexWrap.wrap} ${gap.tight}`}>
+                              <div className={`${display.flex} ${flexWrap.wrap} ${gap.tight}`}>
                                 {reasons.slice(1, 4).map((reason) => (
                                   <UnifiedBadge
                                     key={`${result.slug}-${reason.message}`}
@@ -533,10 +547,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           <Button
                             variant="ghost"
                             size="sm"
-                            className={`group -mx-4 ${marginBottom.negativeDefault} ${marginTop.compact} w-full`}
+                            className={`group ${marginX.neg4} ${marginBottom.negativeDefault} ${marginTop.compact} ${width.full}`}
                             asChild={true}
                           >
-                            <span className={`flex ${alignItems.center} ${justify.center} ${gap.compact}`}>
+                            <span className={`${display.flex} ${alignItems.center} ${justify.center} ${gap.compact}`}>
                               View Details
                               <ArrowRight
                                 className={`${iconSize.sm} ${transition.transform} group-hover:translate-x-1`}
@@ -554,7 +568,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
           {filteredResults.length === 0 && (
             <Card>
-              <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${justify.center} ${padding.yRelaxed}`}>
+              <CardContent className={`${display.flex} ${flexDir.col} ${alignItems.center} ${justify.center} ${padding.yRelaxed}`}>
                 <p className={muted.default}>No results in this category</p>
               </CardContent>
             </Card>
@@ -562,7 +576,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </TabsContent>
       </Tabs>
 
-      <Card className={`border-primary/20 ${bgColor['primary/5']}`}>
+      <Card className={`${borderColor['primary/20']} ${bgColor['primary/5']}`}>
         <CardHeader>
           <CardTitle className={cluster.compact}>
             <Sparkles className={`${iconSize.md} ${textColor.primary}`} />
@@ -574,7 +588,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             Ready to start using these configurations? Click any card to view detailed setup
             instructions, examples, and documentation.
           </p>
-          <div className={`flex ${flexWrap.wrap} ${gap.default}`}>
+          <div className={`${display.flex} ${flexWrap.wrap} ${gap.default}`}>
             <Button asChild={true}>
               <Link href="/" className={`${gap.compact}`}>
                 Browse All Configs

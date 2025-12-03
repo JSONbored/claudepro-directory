@@ -45,6 +45,11 @@ import {
   tracking,
   transition,
   weight,
+  marginY,
+  paddingBottom,
+  alignItems,
+  truncate,
+  display,
 } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -220,14 +225,14 @@ export default async function ChangelogEntryPage({
         {/* Navigation */}
         <NavLink
           href={ROUTES.CHANGELOG}
-          className={`inline-flex items-center ${gap.compact} ${muted.sm}`}
+          className={`${display.inlineFlex} ${alignItems.center} ${gap.compact} ${muted.sm}`}
         >
           <ArrowLeft className={iconSize.sm} />
           <span>Back to Changelog</span>
         </NavLink>
 
         {/* Header */}
-        <header className={`${spaceY.comfortable} pb-6`}>
+        <header className={`${spaceY.comfortable} ${paddingBottom.relaxed}`}>
           <div className={`${cluster.default} ${muted.sm}`}>
             <Calendar className={iconSize.sm} />
             <time dateTime={entry.release_date}>
@@ -242,14 +247,14 @@ export default async function ChangelogEntryPage({
             <span className={muted.default}>Permanent link:</span>
             <a
               href={canonicalUrl}
-              className={`truncate ${textColor.primary} ${transition.colors} hover:text-primary/80`}
+              className={`${truncate.single} ${textColor.primary} ${transition.colors} hover:${textColor.primary}/80`}
             >
               {canonicalUrl}
             </a>
           </div>
         </header>
 
-        <Separator className="my-6" />
+        <Separator className={marginY.relaxed} />
 
         {/* Content */}
         <ChangelogContent entry={entry} />

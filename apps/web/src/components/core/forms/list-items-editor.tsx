@@ -31,6 +31,11 @@ import {
   padding,
   size,
   spaceY,
+  textColor,
+  marginLeft,
+  paddingRight,
+  radius,
+  border,
 } from '@heyclaude/web-runtime/design-system';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
@@ -267,13 +272,13 @@ export function ListItemManager(props: ListItemManagerProps) {
                   key={item}
                   variant="base"
                   style={props.badgeStyle || 'secondary'}
-                  className={`${gap.tight} pr-1`}
+                  className={`${gap.tight} ${paddingRight.tight}`}
                 >
                   {item}
                   <button
                     type="button"
                     onClick={() => handleRemove(index)}
-                    className="ml-1 hover:text-destructive"
+                    className={`${marginLeft.tight} hover:${textColor.destructive}`}
                     aria-label={`Remove ${item}`}
                     disabled={disabled}
                   >
@@ -293,7 +298,7 @@ export function ListItemManager(props: ListItemManagerProps) {
                 return (
                   <div
                     key={itemKey}
-                    className={cn(between.center, `rounded border ${padding.tight}`)}
+                    className={cn(between.center, radius.default, border.default, padding.tight)}
                   >
                     <span className={size.sm}>{item}</span>
                     <Button
@@ -323,21 +328,21 @@ export function ListItemManager(props: ListItemManagerProps) {
 
       {/* Min items error */}
       {showMinError && (
-        <p className={`text-destructive ${size.xs}`}>
+        <p className={`${textColor.destructive} ${size.xs}`}>
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       )}
 
       {/* Custom error message */}
       {errorMessage && (
-        <p className={`text-destructive ${size.xs}`} role="alert">
+        <p className={`${textColor.destructive} ${size.xs}`} role="alert">
           {errorMessage}
         </p>
       )}
 
       {/* Empty state message for required fields */}
       {minItems && items.length === 0 && (
-        <p className={`text-destructive ${size.xs}`}>
+        <p className={`${textColor.destructive} ${size.xs}`}>
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       )}

@@ -47,6 +47,8 @@ export const iconSize = {
   xs: 'h-3 w-3',
   /** h-3.5 w-3.5 - 14px - Between xs and sm */
   xsPlus: 'h-3.5 w-3.5',
+  /** h-3.5 w-3.5 - 14px - Small icon (alias for xsPlus) */
+  sm3_5: 'h-3.5 w-3.5',
   /** h-4 w-4 - 16px - Small (default for inline icons) */
   sm: 'h-4 w-4',
   /** h-5 w-5 - 20px - Medium */
@@ -169,3 +171,26 @@ export const successIndicator = 'h-4 w-4 text-green-500 mt-0.5';
  * Primary colored large icon.
  */
 export const iconPrimary = 'h-5 w-5 text-primary';
+
+// =============================================================================
+// ICON FILL
+// =============================================================================
+
+/**
+ * Icon fill utilities.
+ * 
+ * @migration Replaces inline `fill-current` patterns
+ * @example
+ * // ❌ OLD: className="fill-current"
+ * // ✅ NEW: className={iconFill.current}
+ */
+export const iconFill = {
+  /** fill-current - Inherits color from parent */
+  current: 'fill-current',
+  /** fill-none - No fill */
+  none: 'fill-none',
+  /** fill-amber-400 - Amber fill */
+  amber400: 'fill-amber-400',
+  /** fill-red-500/80 - Red fill with 80% opacity */
+  red500_80: 'fill-red-500/80',
+} as const;

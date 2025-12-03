@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const unlinkOAuthProviderSchema = z.object({
+export const unlinkOAuthProviderSchema = z.object({
   provider: z.enum(['discord', 'github', 'google'])
 });
 export type UnlinkOAuthProviderInput = z.infer<typeof unlinkOAuthProviderSchema>;
@@ -36,7 +36,6 @@ export const unlinkOAuthProvider = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -48,9 +47,10 @@ export const unlinkOAuthProvider = authedAction
       
       revalidatePath(`/account/settings`);
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.oauth_unlink']
+        cacheConfig,
+        invalidateKeys: ['oauth_unlink']
       });
 
       

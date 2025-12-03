@@ -28,10 +28,15 @@ import {
   radius,
   size,
   spaceY,
+  objectFit,
   sticky,
   textColor,
   transition,
   weight,
+  display,
+  position,
+  minWidth,
+  truncate,
 } from '@heyclaude/web-runtime/design-system';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -183,36 +188,36 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                 href={validatedUrl}
                 className={`${cluster.default} ${radius.lg} ${padding.tight} ${transition.colors} ${hoverBg.muted}`}
               >
-                <div className={`relative ${flexGrow.shrink0}`}>
+                <div className={`${position.relative} ${flexGrow.shrink0}`}>
                   {contributor.image ? (
                     <Image
                       src={contributor.image}
                       alt={displayName}
                       width={40}
                       height={40}
-                      className={`${iconSize['2xl']} ${radius.full} object-cover`}
+                      className={`${iconSize['2xl']} ${radius.full} ${objectFit.cover}`}
                     />
                   ) : (
-                    <div className={`flex ${iconSize['2xl']} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.accent} ${weight.bold} ${size.sm}`}>
+                    <div className={`${display.flex} ${iconSize['2xl']} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.accent} ${weight.bold} ${size.sm}`}>
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
                   {index < 3 && (
-                    <div className={`-bottom-1 -right-1 absolute ${radius.full} ${bgColor.background} ${padding.micro}`}>
+                    <div className={`-bottom-1 -right-1 ${position.absolute} ${radius.full} ${bgColor.background} ${padding.micro}`}>
                       <Medal
                         className={`${iconSize.xs} ${
                           index === 0
-                            ? 'text-amber-500'
+                            ? textColor.amber500
                             : index === 1
-                              ? 'text-slate-400'
-                              : 'text-amber-700'
+                              ? textColor.slate400
+                              : textColor.amber700
                         }`}
                       />
                     </div>
                   )}
                 </div>
-                <div className={`min-w-0 ${flexGrow['1']}`}>
-                  <p className={`truncate ${weight.medium} ${size.sm}`}>{displayName}</p>
+                <div className={`${minWidth[0]} ${flexGrow['1']}`}>
+                  <p className={`${truncate.single} ${weight.medium} ${size.sm}`}>{displayName}</p>
                   {contributor.total_contributions !== undefined && (
                     <div className={`${cluster.tight} ${muted.default} ${size.xs}`}>
                       <Award className={iconSize.xs} />
@@ -261,17 +266,17 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       alt={displayName}
                       width={32}
                       height={32}
-                      className={`${iconSize.xl} ${flexGrow.shrink0} ${radius.full} object-cover`}
+                      className={`${iconSize.xl} ${flexGrow.shrink0} ${radius.full} ${objectFit.cover}`}
                     />
                   ) : (
-                    <div className={`flex ${iconSize.xl} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.accent} ${weight.bold} ${size.xs}`}>
+                    <div className={`${display.flex} ${iconSize.xl} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.accent} ${weight.bold} ${size.xs}`}>
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <div className={`min-w-0 ${flexGrow['1']}`}>
-                    <p className={`truncate ${weight.medium} ${size.sm}`}>{displayName}</p>
+                  <div className={`${minWidth[0]} ${flexGrow['1']}`}>
+                    <p className={`${truncate.single} ${weight.medium} ${size.sm}`}>{displayName}</p>
                     {member.work && (
-                      <p className={`truncate ${muted.default} ${size.xs}`}>{member.work}</p>
+                      <p className={`${truncate.single} ${muted.default} ${size.xs}`}>{member.work}</p>
                     )}
                   </div>
                 </Link>

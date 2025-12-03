@@ -8,6 +8,10 @@
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import type { DiagnosticFlowProps } from '@heyclaude/web-runtime/types/component.types';
 import { cluster, iconSize, muted, spaceY, weight, size, gap, textColor, marginBottom,
+  bgColor,
+  paddingTop,
+  marginY,
+  listStyle,
 } from '@heyclaude/web-runtime/design-system';
 import React from 'react';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -79,7 +83,7 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
   const isComplete = currentStepData?.solution !== undefined;
 
   return (
-    <Card itemScope={true} itemType="https://schema.org/HowTo" className="my-8">
+    <Card itemScope={true} itemType="https://schema.org/HowTo" className={marginY.loose}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
@@ -89,7 +93,7 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
           {path.length > 0 && (
             <div className={`${muted.sm}`}>
               <p className={`${marginBottom.tight} ${weight.medium}`}>Diagnostic Path:</p>
-              <ol className={`list-inside list-decimal ${spaceY.tight}`}>
+              <ol className={`${listStyle.inside} ${listStyle.decimal} ${spaceY.tight}`}>
                 {path.map((step) => (
                   <li key={step}>{step}</li>
                 ))}
@@ -97,12 +101,12 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
             </div>
           )}
 
-          <Card className="bg-muted/30">
-            <CardContent className="pt-6">
+          <Card className={bgColor['muted/30']}>
+            <CardContent className={paddingTop.relaxed}>
               {isComplete ? (
                 <div className={spaceY.comfortable}>
                   <div
-                    className={`${cluster.compact} ${textColor.green} dark:text-green-400`}
+                    className={`${cluster.compact} ${textColor.green400}`}
                   >
                     <CheckCircle className={iconSize.md} />
                     <p className={weight.medium}>Solution Found:</p>

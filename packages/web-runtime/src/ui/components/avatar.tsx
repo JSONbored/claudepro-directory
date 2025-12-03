@@ -1,8 +1,9 @@
 'use client';
 
 import { cn } from '../utils.ts';
-import { squareSize } from '../../design-system/styles/layout.ts';
+import { squareSize, position, display, alignItems, justify, overflow, height, width, flexGrow, aspectRatio } from '../../design-system/styles/layout.ts';
 import { radius } from '../../design-system/styles/radius.ts';
+import { bgColor } from '../../design-system/styles/colors.ts';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import type * as React from 'react';
 
@@ -15,7 +16,7 @@ const Avatar = ({
 }) => (
   <AvatarPrimitive.Root
     ref={ref}
-    className={cn(`relative flex ${squareSize.avatarMd} shrink-0 overflow-hidden ${radius.full}`, className)}
+    className={cn(`${position.relative} ${display.flex} ${squareSize.avatarMd} ${flexGrow.shrink0} ${overflow.hidden} ${radius.full}`, className)}
     {...props}
   />
 );
@@ -30,7 +31,7 @@ const AvatarImage = ({
 }) => (
   <AvatarPrimitive.Image
     ref={ref}
-    className={cn('aspect-square h-full w-full', className)}
+    className={cn(`${aspectRatio.square} ${height.full} ${width.full}`, className)}
     {...props}
   />
 );
@@ -45,10 +46,10 @@ const AvatarFallback = ({
 }) => (
   <AvatarPrimitive.Fallback
     ref={ref}
-    className={cn(
-      `flex h-full w-full items-center justify-center ${radius.full} bg-muted`,
-      className
-    )}
+      className={cn(
+        `${display.flex} ${height.full} ${width.full} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.muted}`,
+        className
+      )}
     {...props}
   />
 );

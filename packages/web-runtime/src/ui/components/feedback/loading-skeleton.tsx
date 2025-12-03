@@ -31,40 +31,44 @@
 import { cn } from '../../utils.ts';
 // Design System imports
 import { absolute } from '../../../design-system/styles/position.ts';
-import { stack, cluster, wrap, grid, between, gap, padding, marginBottom, squareSize } from '../../../design-system/styles/layout.ts';
-import { size } from '../../../design-system/styles/typography.ts';
+import { stack, cluster, wrap, grid, between, gap, padding, marginBottom, squareSize, minHeight, display, flexGrow, alignItems, justify, position, overflow, flexWrap, spaceY, marginX, width, height } from '../../../design-system/styles/layout.ts';
+import { size, muted } from '../../../design-system/styles/typography.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
+import { bgGradient, bgColor, borderColor } from '../../../design-system/styles/colors.ts';
+import { borderBottom, borderTop, borderWidth } from '../../../design-system/styles/borders.ts';
+import { gradientFrom, gradientTo, gradientVia } from '../../../design-system/styles/colors.ts';
+import { animate } from '../../../design-system/styles/animation.ts';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 
-const skeletonVariants = cva('relative overflow-hidden bg-muted rounded', {
+const skeletonVariants = cva(`${position.relative} ${overflow.hidden} ${bgColor.muted} ${radius.default}`, {
   variants: {
     variant: {
-      default: 'bg-muted',
-      card: 'bg-card',
-      accent: 'bg-accent/20',
+      default: bgColor.muted,
+      card: bgColor.card,
+      accent: bgColor['accent/20'],
     },
     size: {
-      xs: 'h-3',
-      sm: 'h-4',
-      md: 'h-6',
-      lg: 'h-8',
-      xl: 'h-12',
+      xs: height.skeletonXs,
+      sm: height.skeletonSm,
+      md: height.badge,
+      lg: height.skeletonLg,
+      xl: height.search,
     },
     width: {
-      xs: 'w-16',
-      sm: 'w-24',
-      md: 'w-32',
-      lg: 'w-48',
-      xl: 'w-64',
-      '2xl': 'w-96',
-      '3xl': 'w-full',
-      '1/2': 'w-1/2',
-      '2/3': 'w-2/3',
-      '3/4': 'w-3/4',
-      '4/5': 'w-4/5',
-      '5/6': 'w-5/6',
+      xs: width.skeletonSm,
+      sm: width.skeletonCompact,
+      md: width.skeletonDefault,
+      lg: width.skeletonComfortable,
+      xl: width.skeletonLarge,
+      '2xl': width.skeletonXl,
+      '3xl': width.full,
+      '1/2': width.half,
+      '2/3': width.twoThirds,
+      '3/4': width.threeQuarters,
+      '4/5': width.fourFifths,
+      '5/6': width.fiveSixths,
     },
     rounded: {
       none: radius.none,
@@ -102,7 +106,7 @@ export function Skeleton({
     <div
       className={cn(
         skeletonVariants({ variant, size, width, rounded }),
-        noShimmer && 'animate-pulse',
+        noShimmer && animate.pulse,
         className
       )}
       {...props}
@@ -110,7 +114,7 @@ export function Skeleton({
       {/* Shimmer wave effect - only if not disabled */}
       {!noShimmer && (
         <motion.div
-          className={`${absolute.inset} bg-linear-to-r from-transparent via-white/10 to-transparent`}
+          className={`${absolute.inset} ${bgGradient.toR} ${gradientFrom.transparent} ${gradientVia.white10} ${gradientTo.transparent}`}
           animate={{
             x: ['-100%', '100%'],
           }}
@@ -130,10 +134,10 @@ export function Skeleton({
 
 function LoadingSkeleton() {
   return (
-    <div className={'flex min-h-screen items-center justify-center'}>
-      <div className={stack.comfortable + ' items-center'}>
-        <div className={`${squareSize.avatarLg} animate-spin ${radius.full} border-4 border-primary border-t-transparent`} />
-        <p className="text-muted-foreground">Loading...</p>
+    <div className={`${display.flex} ${minHeight.screen} ${alignItems.center} ${justify.center}`}>
+      <div className={`${stack.comfortable} ${alignItems.center}`}>
+        <div className={`${squareSize.avatarLg} ${animate.spin} ${radius.full} ${borderWidth['4']} ${borderColor.primary} ${borderTop.transparent}`} />
+        <p className={muted.default}>Loading...</p>
       </div>
     </div>
   );
@@ -150,7 +154,7 @@ function PageHeaderSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDi
 
 function ConfigCardSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn(`${radius.lg} border bg-card ${padding.comfortable}`, className)} {...props}>
+    <div className={cn(`${radius.lg} border ${bgColor.card} ${padding.comfortable}`, className)} {...props}>
       <Skeleton size="md" width="3/4" className={marginBottom.compact} />
       <Skeleton size="sm" width="3xl" className={marginBottom.compact} />
       <Skeleton size="sm" width="5/6" className={marginBottom.default} />
@@ -172,7 +176,7 @@ function ConfigGridSkeleton({
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('container mx-auto px-4 py-8', className)} {...props}>
+    <div className={cn(`container ${marginX.auto} ${padding.xComfortable} ${padding.yRelaxed}`, className)} {...props}>
       <PageHeaderSkeleton />
       <div className={grid.contentTight}>
         {[...Array(count)].map((_, i) => (
@@ -208,7 +212,7 @@ function ContentListSkeleton({
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('space-y-4', className)} {...props}>
+    <div className={cn(spaceY.comfortable, className)} {...props}>
       {[...Array(count)].map((_, i) => (
         <motion.div
           key={`content-skeleton-${i + 1}`}
@@ -225,8 +229,8 @@ function ContentListSkeleton({
               : {}
           }
         >
-          <div className={`${marginBottom.compact} flex items-start justify-between`}>
-            <div className="flex-1">
+          <div className={`${marginBottom.compact} ${display.flex} ${alignItems.start} ${justify.between}`}>
+            <div className={flexGrow['1']}>
               <Skeleton size="md" width="2/3" className={marginBottom.compact} />
               <Skeleton size="sm" width="3xl" />
             </div>
@@ -245,7 +249,7 @@ function ContentListSkeleton({
 
 function SearchBarSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn(`${marginBottom.relaxed} flex ${gap.comfortable}`, className)} {...props}>
+    <div className={cn(`${marginBottom.relaxed} ${display.flex} ${gap.comfortable}`, className)} {...props}>
       <Skeleton size="lg" width="3xl" />
       <Skeleton size="lg" width="lg" />
     </div>
@@ -261,18 +265,18 @@ function FilterBarSkeleton({
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(`space-y-6 ${radius.lg} border border-border/50 bg-card/30 ${padding.comfortable}`, className)}
+      className={cn(`${spaceY.relaxed} ${radius.lg} border ${borderColor.border}/50 ${bgColor.card}/30 ${padding.comfortable}`, className)}
       {...props}
     >
       <div className={between.center}>
         <Skeleton size="md" width="lg" />
         <Skeleton size="sm" width="sm" />
       </div>
-      <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-2 lg:grid-cols-4`}>
+      <div className={grid.responsive124Relaxed}>
         {[...Array(4)].map((_, i) => (
           <motion.div
             key={`filter-skeleton-${i + 1}`}
-            className="space-y-2"
+            className={spaceY.compact}
             initial={stagger ? { opacity: 0, y: 10 } : false}
             animate={stagger ? { opacity: 1, y: 0 } : {}}
             transition={
@@ -327,8 +331,8 @@ function TableSkeleton({
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn(`${radius.lg} border`, className)} {...props}>
-      <div className={`border-b ${padding.default}`}>
-        <div className={`grid ${gap.comfortable}`} style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+      <div className={`${borderBottom.default} ${padding.default}`}>
+        <div className={`${grid.base} ${gap.comfortable}`} style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
           {[...Array(columns)].map((_, i) => (
             <Skeleton key={`header-${i + 1}`} size="sm" width="sm" />
           ))}
@@ -337,7 +341,7 @@ function TableSkeleton({
       {[...Array(rows)].map((_, rowIndex) => (
         <motion.div
           key={`row-${rowIndex + 1}`}
-          className={`border-b ${padding.default} last:border-b-0`}
+          className={`${borderBottom.default} ${padding.default} last:border-b-0`}
           initial={stagger ? { opacity: 0, x: -10 } : false}
           animate={stagger ? { opacity: 1, x: 0 } : {}}
           transition={
@@ -350,7 +354,7 @@ function TableSkeleton({
               : {}
           }
         >
-          <div className={`grid ${gap.comfortable}`} style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+          <div className={`${grid.base} ${gap.comfortable}`} style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
             {[...Array(columns)].map((_, colIndex) => (
               <Skeleton key={`cell-${rowIndex + 1}-${colIndex + 1}`} size="sm" width="md" />
             ))}
@@ -379,7 +383,7 @@ function ImageSkeleton({
     tall: 'aspect-[1/2]',
   };
 
-  return <Skeleton className={cn(aspectClasses[aspectRatio], 'w-full', className)} {...props} />;
+  return <Skeleton className={cn(aspectClasses[aspectRatio], width.full, className)} {...props} />;
 }
 
 function FeaturedSectionSkeleton({
@@ -392,7 +396,7 @@ function FeaturedSectionSkeleton({
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('space-y-8', className)} {...props}>
+    <div className={cn(spaceY.loose, className)} {...props}>
       {/* Section Header */}
       <div className={between.center}>
         <Skeleton size="lg" width="lg" />
@@ -432,7 +436,7 @@ function HomepageStatsSkeleton({
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(`flex-wrap justify-center ${gap.comfortable} ${size.xs} lg:${gap.relaxed} lg:${size.sm}`, className)}
+      className={cn(`${flexWrap.wrap} ${justify.center} ${gap.comfortable} ${size.xs} lg:${gap.relaxed} lg:${size.sm}`, className)}
       {...props}
     >
       {[...Array(7)].map((_, i) => (

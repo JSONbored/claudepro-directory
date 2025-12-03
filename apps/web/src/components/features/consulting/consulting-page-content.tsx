@@ -19,12 +19,20 @@ import {
   maxWidth,
   muted,
   padding,
+  paddingLeft,
+  paddingTop,
   radius,
   shadow,
   size,
   spaceY,
   tracking,
   weight,
+  display,
+  overflow,
+  container,
+  marginX,
+  textAlign,
+  textColor,
 } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -50,21 +58,21 @@ export function ConsultingClient() {
   }, []);
 
   return (
-    <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed} sm:px-6 sm:py-16`}>
+    <div className={`${container.default} ${padding.xDefault} ${padding.yRelaxed} sm:${paddingLeft.relaxed} sm:${padding.yHero}`}>
       {/* Centered Note with Card Background */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-        className={`mx-auto ${marginBottom.relaxed} ${maxWidth['2xl']}`}
+        className={`${marginX.auto} ${marginBottom.relaxed} ${maxWidth['2xl']}`}
       >
-        <div className={`overflow-hidden ${radius.lg} ${border.default} ${bgColor['card/50']} ${padding.comfortable} ${shadow.sm} ${backdrop.sm} sm:${padding.relaxed}`}>
-          <div className={`${marginBottom.relaxed} ${spaceY.comfortable} text-center sm:${marginBottom.section} sm:${spaceY.relaxed}`}>
+        <div className={`${overflow.hidden} ${radius.lg} ${border.default} ${bgColor['card/50']} ${padding.comfortable} ${shadow.sm} ${backdrop.sm} sm:${padding.relaxed}`}>
+          <div className={`${marginBottom.relaxed} ${spaceY.comfortable} ${textAlign.center} sm:${marginBottom.section} sm:${spaceY.relaxed}`}>
             <h1 className={`${weight.bold} ${size['3xl']} ${tracking.tight} sm:${size['4xl']} md:${size['5xl']}`}>
               Let's Build Something Together
             </h1>
-            <p className={`mx-auto ${maxWidth.xl} ${size.base} ${muted.default} ${leading.relaxed} sm:${size.lg}`}>
-              I'm <strong className="text-foreground">ghost (JSONbored)</strong> — a
+            <p className={`${marginX.auto} ${maxWidth.xl} ${size.base} ${muted.default} ${leading.relaxed} sm:${size.lg}`}>
+              I'm <strong className={textColor.foreground}>ghost (JSONbored)</strong> — a
               multi-disciplined engineer who's spent years building infrastructure, applications,
               and systems that actually work.
             </p>
@@ -72,14 +80,14 @@ export function ConsultingClient() {
 
           <div className={`${spaceY.relaxed} ${muted.smRelaxed} sm:${spaceY.loose} sm:${size.base}`}>
             <p>
-              <strong className="text-foreground">What I do:</strong> Full-stack development,
+              <strong className={textColor.foreground}>What I do:</strong> Full-stack development,
               blockchain infrastructure, network engineering, systems administration, DevOps, AI/LLM
               engineering, and database design. I'm a jack-of-all-trades who ships production
               systems, not demos.
             </p>
 
             <p>
-              <strong className="text-foreground">Experience:</strong> Spent 3+ years running Cosmos
+              <strong className={textColor.foreground}>Experience:</strong> Spent 3+ years running Cosmos
               blockchain validators (securing $100MM+ in network assets). Built{' '}
               <Link href="/" className="link-accent-underline">
                 Claude Pro Directory
@@ -99,19 +107,19 @@ export function ConsultingClient() {
             </p>
 
             <p>
-              <strong className="text-foreground">Tech stack:</strong> I work with whatever tools
+              <strong className={textColor.foreground}>Tech stack:</strong> I work with whatever tools
               make sense for the job. Currently building with Next.js 16, React 19, TypeScript,
               PostgreSQL, and TailwindCSS v4 — but I've worked with many other stacks and adapt to
               your project's needs.
             </p>
 
             <p>
-              <strong className="text-foreground">Availability:</strong> I'm accepting new projects
+              <strong className={textColor.foreground}>Availability:</strong> I'm accepting new projects
               now. Book a free 15-minute discovery call below — I'll tell you honestly if I'm a good
               fit or not.
             </p>
 
-            <div className={`flex ${flexWrap.wrap} ${alignItems.center} ${justify.center} ${gap.default} pt-4 ${size.xs} sm:${gap.comfortable} sm:${size.sm}`}>
+            <div className={`${display.flex} ${flexWrap.wrap} ${alignItems.center} ${justify.center} ${gap.default} ${paddingTop.comfortable} ${size.xs} sm:${gap.comfortable} sm:${size.sm}`}>
               <a href="mailto:ghost@zeronode.sh" className="link-accent-underline">
                 ghost@zeronode.sh
               </a>
@@ -138,12 +146,12 @@ export function ConsultingClient() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
-        className={`mx-auto ${maxWidth['4xl']}`}
+        className={`${marginX.auto} ${maxWidth['4xl']}`}
       >
-        <h2 className={`${marginBottom.comfortable} text-center ${weight.bold} ${size['2xl']} sm:${marginBottom.relaxed} sm:${size['3xl']}`}>
+        <h2 className={`${marginBottom.comfortable} ${textAlign.center} ${weight.bold} ${size['2xl']} sm:${marginBottom.relaxed} sm:${size['3xl']}`}>
           Book Your Free Discovery Call
         </h2>
-        <div className={`overflow-hidden ${radius.lg} ${border.default} ${bgColor['card/50']} ${padding.default} ${shadow.sm} ${backdrop.sm} sm:${padding.comfortable}`}>
+        <div className={`${overflow.hidden} ${radius.lg} ${border.default} ${bgColor['card/50']} ${padding.default} ${shadow.sm} ${backdrop.sm} sm:${padding.comfortable}`}>
           <Cal
             calLink="jsonbored/heyclaude-consult"
             config={{

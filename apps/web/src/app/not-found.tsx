@@ -5,6 +5,7 @@ import {
   justify,
   minHeight,
   padding,
+  display,
 } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
@@ -36,7 +37,7 @@ export const revalidate = false;
  */
 export default function NotFound() {
   return (
-    <div className={cn('flex', minHeight.screen, alignItems.center, justify.center, bgColor.background, padding.xDefault)}>
+    <div className={cn(display.flex, minHeight.screen, alignItems.center, justify.center, bgColor.background, padding.xDefault)}>
       <NotFoundEmpty />
     </div>
   );

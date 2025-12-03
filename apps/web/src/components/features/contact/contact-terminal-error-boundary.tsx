@@ -25,6 +25,12 @@ import {
   spaceY,
   textColor,
   weight,
+  maxWidth,
+  minHeight,
+  display,
+  position,
+  textAlign,
+  marginX,
 } from '@heyclaude/web-runtime/design-system';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { Component, type ReactNode } from 'react';
@@ -66,22 +72,22 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
   override render() {
     if (this.state.hasError) {
       return (
-        <Terminal className={`relative flex min-h-[500px] ${flexDir.col}`}>
-          <div className={`flex ${flexGrow['1']} ${alignItems.center} ${justify.center} ${padding.relaxed}`}>
-            <div className={`max-w-md ${spaceY.comfortable} text-center`}>
-              <AlertTriangle className={`mx-auto ${iconSize['3xl']} ${textColor.destructive}`} />
+        <Terminal className={`${position.relative} ${display.flex} ${minHeight.terminal} ${flexDir.col}`}>
+          <div className={`${display.flex} ${flexGrow['1']} ${alignItems.center} ${justify.center} ${padding.relaxed}`}>
+            <div className={`${maxWidth.md} ${spaceY.comfortable} ${textAlign.center}`}>
+              <AlertTriangle className={`${marginX.auto} ${iconSize['3xl']} ${textColor.destructive}`} />
               <div className={spaceY.compact}>
                 <h3 className={`${weight.semibold} ${size.lg}`}>Terminal Error</h3>
                 <p className={muted.sm}>
                   Something went wrong with the interactive terminal.
                   {this.state.error?.message && (
-                    <span className={`${marginTop.compact} block font-mono ${textColor.destructive} ${size.xs}`}>
+                    <span className={`${marginTop.compact} ${display.block} font-mono ${textColor.destructive} ${size.xs}`}>
                       {this.state.error.message}
                     </span>
                   )}
                 </p>
               </div>
-              <div className={`flex ${justify.center} ${gap.compact}`}>
+              <div className={`${display.flex} ${justify.center} ${gap.compact}`}>
                 <Button
                   variant="outline"
                   size="sm"

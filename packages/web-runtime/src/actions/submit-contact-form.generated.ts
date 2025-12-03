@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const submitContactFormSchema = z.object({
+export const submitContactFormSchema = z.object({
   name: z.string(),
   email: z.string(),
   category: z.enum(['bug', 'feature', 'partnership', 'general', 'other']),
@@ -44,7 +44,6 @@ export const submitContactForm = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -57,9 +56,10 @@ export const submitContactForm = authedAction
       revalidatePath(`/admin/contact-submissions`);
       revalidateTag(`contact-submission-${result?.submission_id}`, 'default');
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.contact_submission']
+        cacheConfig,
+        invalidateKeys: ['contact_submission']
       });
 
       

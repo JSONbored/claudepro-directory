@@ -23,6 +23,12 @@ import {
   size,
   textColor,
   weight,
+  display,
+  position,
+  container,
+  marginX,
+  textAlign,
+  listStyle,
 } from '@heyclaude/web-runtime/design-system';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
@@ -56,6 +62,9 @@ export const revalidate = 900; /**
  * @see revalidate
  */
 
+/**
+ * Generate metadata for the trending page
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/trending');
 }
@@ -132,9 +141,9 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
   return (
     <div className={`${minHeight.screen} ${bgColor.background}`}>
-      <section className={`relative ${overflow.hidden} ${padding.xDefault} ${padding.yXl}`} aria-labelledby={pageTitleId}>
-        <div className="container mx-auto text-center">
-          <div className={`mx-auto ${maxWidth['3xl']}`}>
+      <section className={`${position.relative} ${overflow.hidden} ${padding.xDefault} ${padding.yXl}`} aria-labelledby={pageTitleId}>
+        <div className={`${container.default} ${textAlign.center}`}>
+          <div className={`${marginX.auto} ${maxWidth['3xl']}`}>
             <UnifiedBadge
               variant="base"
               style="outline"
@@ -148,12 +157,12 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
               Trending Configurations
             </h1>
 
-            <p className={`mx-auto ${marginTop.comfortable} ${maxWidth['2xl']} ${muted.lg}`}>
+            <p className={`${marginX.auto} ${marginTop.comfortable} ${maxWidth['2xl']} ${muted.lg}`}>
               Discover the most popular and trending Claude configurations in our community. Stay up
               to date with what developers are using and loving.
             </p>
 
-            <ul className={`flex ${flexWrap.wrap} ${gap.compact} list-none ${justify.center}`}>
+            <ul className={`${display.flex} ${flexWrap.wrap} ${gap.compact} ${listStyle.none} ${justify.center}`}>
               <li>
                 <UnifiedBadge variant="base" style="secondary">
                   <Clock className={iconLeading.xs} aria-hidden="true" />
@@ -178,7 +187,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
       </section>
 
       <section
-        className={`container mx-auto ${padding.xDefault} ${padding.yHero}`}
+        className={`${container.default} ${padding.xDefault} ${padding.yHero}`}
         aria-label="Trending configurations content"
       >
         <Suspense fallback={null}>
@@ -192,7 +201,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
         </Suspense>
       </section>
 
-      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+      <section className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
             <NewsletterCTAVariant
@@ -336,6 +345,6 @@ function toHomepageContentItem(input: {
     category: input.category,
     view_count: input.viewCount ?? 0,
     copy_count: input.copyCount ?? 0,
-    featured: input.featuredScore !== undefined,
+    featured: typeof input.featuredScore === 'number' && input.featuredScore > 0,
   };
 }

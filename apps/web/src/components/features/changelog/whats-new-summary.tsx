@@ -13,9 +13,14 @@ import type { Database } from '@heyclaude/database-types';
 import {
   animateDuration,
   bgColor,
+  bgGradient,
   cluster,
   flexWrap,
   gap,
+  gradientFrom,
+  gradientVia,
+  gradientTo,
+  hoverBg,
   iconSize,
   alignItems,
   justify,
@@ -23,6 +28,7 @@ import {
   marginTop,
   muted,
   overflow,
+  borderColor,
   padding,
   radius,
   size,
@@ -31,6 +37,13 @@ import {
   transition,
   weight,
   squareSize,
+  display,
+  flexGrow,
+  position,
+  truncate,
+  textAlign,
+  pointerEvents,
+  blur,
 } from '@heyclaude/web-runtime/design-system';
 import {
   Sparkles,
@@ -75,38 +88,38 @@ const CATEGORY_CONFIG: Record<
 > = {
   Added: {
     icon: Plus,
-    color: 'text-emerald-500',
-    bgColor: 'bg-emerald-500/10',
+    color: textColor.emerald,
+    bgColor: bgColor.success,
     label: 'New Features',
   },
   Changed: {
     icon: RefreshCw,
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-500/10',
+    color: textColor.blue,
+    bgColor: bgColor.info,
     label: 'Improvements',
   },
   Fixed: {
     icon: Settings,
-    color: 'text-amber-500',
-    bgColor: 'bg-amber-500/10',
+    color: textColor.amber,
+    bgColor: bgColor.warning,
     label: 'Bug Fixes',
   },
   Removed: {
     icon: Trash,
-    color: 'text-red-500',
-    bgColor: 'bg-red-500/10',
+    color: textColor.red,
+    bgColor: bgColor.error,
     label: 'Removed',
   },
   Deprecated: {
     icon: AlertTriangle,
-    color: 'text-orange-500',
-    bgColor: 'bg-orange-500/10',
+    color: textColor.orange,
+    bgColor: bgColor.warning,
     label: 'Deprecated',
   },
   Security: {
     icon: Shield,
-    color: 'text-purple-500',
-    bgColor: 'bg-purple-500/10',
+    color: textColor.purple500,
+    bgColor: bgColor['purple/10'],
     label: 'Security',
   },
 };
@@ -208,19 +221,19 @@ export function WhatsNewSummary({
       {/* Card */}
       <div
         className={cn(
-          `${radius.xl} border bg-gradient-to-br from-card via-card to-accent/5`,
+          `${radius.xl} border ${bgGradient.toBR} ${gradientFrom.card} ${gradientVia.card} ${gradientTo.accent5}`,
           `relative ${padding.comfortable} md:${padding.relaxed}`
         )}
       >
         {/* Decorative gradient blur */}
-        <div className={`pointer-events-none absolute -right-20 -top-20 ${squareSize.avatar5xl} ${radius.full} ${bgColor['accent/10']} blur-3xl`} />
-        <div className={`pointer-events-none absolute -bottom-20 -left-20 ${squareSize.avatar5xl} ${radius.full} ${bgColor['primary/10']} blur-3xl`} />
+        <div className={`${pointerEvents.none} ${position.absolute} -right-20 -top-20 ${squareSize.avatar5xl} ${radius.full} ${bgColor['accent/10']} ${blur['3xl']}`} />
+        <div className={`${pointerEvents.none} ${position.absolute} -bottom-20 -left-20 ${squareSize.avatar5xl} ${radius.full} ${bgColor['primary/10']} ${blur['3xl']}`} />
 
         {/* Header */}
-        <div className={`relative ${spaceY.comfortable}`}>
+        <div className={`${position.relative} ${spaceY.comfortable}`}>
           <div className={cluster.default}>
             <motion.div
-              className={`flex ${alignItems.center} ${justify.center} ${radius.full} bg-gradient-to-br from-amber-500/20 to-orange-500/20 ${padding.tight}`}
+              className={`${display.flex} ${alignItems.center} ${justify.center} ${radius.full} ${bgGradient.toBR} ${gradientFrom.amber20} ${gradientTo.orange20} ${padding.tight}`}
               animate={{ rotate: [0, 5, -5, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             >
@@ -236,7 +249,7 @@ export function WhatsNewSummary({
           </div>
 
           {/* Category breakdown */}
-          <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+          <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
             {activeCategories.map(([category, count], index) => {
               const config = CATEGORY_CONFIG[category];
               const Icon = config.icon;
@@ -269,19 +282,19 @@ export function WhatsNewSummary({
         {/* Featured entry preview */}
         {featuredEntry && (
           <motion.div
-            className={`relative ${marginTop.comfortable}`}
+            className={`${position.relative} ${marginTop.comfortable}`}
             initial={{ opacity: 0, y: 10 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
             transition={{ delay: 0.3, duration: 0.4 }}
           >
             <Link
               href={getTargetPath(featuredEntry.slug)}
-              className="group block"
+              className={`group ${display.block}`}
             >
               <div
                 className={cn(
-                  `${radius.lg} border bg-background/50 ${padding.default}`,
-                  `transition-all ${animateDuration.default} hover:border-primary/30 hover:bg-background`
+                  `${radius.lg} border ${bgColor['background/50']} ${padding.default}`,
+                  `${transition.all} ${animateDuration.default} hover:${borderColor['primary/30']} ${hoverBg.backgroundSolid}`
                 )}
               >
                 <div className={`${cluster.tight} ${muted.xs} ${marginBottom.tight}`}>
@@ -299,14 +312,14 @@ export function WhatsNewSummary({
                   <span>Latest</span>
                 </div>
 
-                <div className={`flex ${alignItems.center} ${justify.between} ${gap.comfortable}`}>
+                <div className={`${display.flex} ${alignItems.center} ${justify.between} ${gap.comfortable}`}>
                   <h3
-                    className={`${weight.semibold} ${size.base} group-hover:text-primary ${transition.colors} line-clamp-1`}
+                    className={`${weight.semibold} ${size.base} group-hover:${textColor.primary} ${transition.colors} ${truncate.single}`}
                   >
                     {featuredEntry.title}
                   </h3>
                   <motion.div
-                    className={`shrink-0 ${textColor.primary}`}
+                    className={`${flexGrow.shrink0} ${textColor.primary}`}
                     animate={{ x: [0, 4, 0] }}
                     transition={{
                       duration: 1.5,
@@ -325,7 +338,7 @@ export function WhatsNewSummary({
         {/* View all link */}
         {recentEntries.length > 1 && (
           <motion.p
-            className={`${marginTop.default} text-center`}
+            className={`${marginTop.default} ${textAlign.center}`}
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : { opacity: 0 }}
             transition={{ delay: 0.4 }}

@@ -26,7 +26,7 @@ export const getContentByCategory = cache(
       {
         keyParts: ['content', category],
         tags: generateContentTags(category),
-        ttlKey: 'cache.content_list.ttl_seconds',
+        ttlKey: 'content_list',
         fallback: [],
         logMeta: { category },
       }
@@ -54,7 +54,7 @@ export const getContentBySlug = cache(
        {
           keyParts: ['content', category, slug],
           tags: generateContentTags(category, slug),
-          ttlKey: 'cache.content_detail.ttl_seconds',
+          ttlKey: 'content_detail',
           fallback: null,
           logMeta: { category, slug },
        }
@@ -97,7 +97,7 @@ export const getAllContent = cache(
           filters?.limit ?? QUERY_LIMITS.content.default,
         ],
         tags: ['content-all'],
-        ttlKey: 'cache.content_list.ttl_seconds',
+        ttlKey: 'content_list',
         fallback: [] as Database['public']['CompositeTypes']['enriched_content_item'][],
         ...(filters ? { logMeta: { filters: toLogContextValue(filters as Record<string, unknown>) } } : {})
       }
@@ -121,7 +121,7 @@ export const getContentCount = cache(
       {
         keyParts: ['content-count', category ?? 'all'],
         tags: generateContentTags(category),
-        ttlKey: 'cache.content_list.ttl_seconds',
+        ttlKey: 'content_list',
         fallback: 0,
         logMeta: { category: category ?? 'all' }
       }
@@ -139,7 +139,7 @@ export const getTrendingContent = cache(
       {
         keyParts: ['trending', category ?? 'all', limit],
         tags: ['trending', ...(category ? [`trending-${category}`] : ['trending-all'])],
-        ttlKey: 'cache.content_list.ttl_seconds',
+        ttlKey: 'content_list',
         fallback: [],
         logMeta: { category: category ?? 'all', limit },
       }
@@ -183,7 +183,7 @@ export async function getTrendingPageData(
       {
         keyParts: ['trending-metrics', category ?? 'all', safeLimit],
         tags: ['trending', 'trending-page'],
-        ttlKey: 'cache.content_list.ttl_seconds',
+        ttlKey: 'content_list',
         fallback: [],
         logMeta: { category: category ?? 'all', limit: safeLimit },
       }
@@ -196,7 +196,7 @@ export async function getTrendingPageData(
       {
         keyParts: ['trending-popular', category ?? 'all', safeLimit],
         tags: ['trending', 'trending-popular'],
-        ttlKey: 'cache.content_list.ttl_seconds',
+        ttlKey: 'content_list',
         fallback: [],
         logMeta: { category: category ?? 'all', limit: safeLimit },
       }
@@ -210,7 +210,7 @@ export async function getTrendingPageData(
       {
         keyParts: ['trending-recent', category ?? 'all', safeLimit, 30],
         tags: ['trending', 'trending-recent'],
-        ttlKey: 'cache.content_list.ttl_seconds',
+        ttlKey: 'content_list',
         fallback: [],
         logMeta: { category: category ?? 'all', limit: safeLimit },
       }

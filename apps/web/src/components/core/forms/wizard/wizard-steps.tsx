@@ -19,34 +19,54 @@ import {
   X,
 } from '@heyclaude/web-runtime/icons';
 import {
+  absolute,
   backdrop,
+  bgColor,
+  border,
   cluster,
+  display,
+  fixed,
   flexDir,
+  flexGrow,
   flexWrap,
   gap,
+  glowShadow,
+  grid,
+  hoverBg,
   iconSize,
   alignItems,
+  justify,
   leading,
-  border,
   marginBottom,
   marginTop,
+  marginX,
   muted,
   opacityLevel,
   padding,
+  paddingRight,
+  paddingTop,
+  position,
   radius,
   row,
+  marginLeft,
   size,
   spaceY,
+  squareSize,
+  submissionFormColors,
+  textAlign,
   textColor,
   transition,
   weight,
+  width,
   zLayer,
-  justify,
-  flexGrow,
-  squareSize,
+  whitespace,
+  pointerEvents,
+  hoverBorder,
+  cssTransform,
 } from '@heyclaude/web-runtime/design-system';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useState } from 'react';
 import { Badge } from '@heyclaude/web-runtime/ui';
@@ -118,16 +138,16 @@ export function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
-        className="text-center"
+        transition={animation.spring.smooth}
+        className={textAlign.center}
       >
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className={`${marginBottom.default} inline-flex`}
+          transition={{ ...animation.spring.bouncy, delay: 0.2 }}
+          className={`${marginBottom.default} ${display.inlineFlex}`}
         >
-          <Sparkles className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
+          <Sparkles className={cn(iconSize['3xl'], textColor.accent)} />
         </motion.div>
         <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Examples & Tags</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
@@ -139,19 +159,19 @@ export function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.1 }}
+        transition={{ ...animation.spring.smooth, delay: 0.1 }}
       >
         <Card
           style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
+            backgroundColor: submissionFormColors.background.secondary,
+            borderColor: submissionFormColors.border.light,
           }}
         >
           <CardHeader>
             <CardTitle className={cluster.compact}>
               <Code className={iconSize.md} />
               Usage Examples
-              <span className={`ml-auto font-normal ${muted.sm}`}>
+              <span className={`${marginLeft.auto} ${weight.normal} ${muted.sm}`}>
                 {data.examples.length} / 10
               </span>
             </CardTitle>
@@ -162,7 +182,7 @@ export function StepExamplesTags({
             </p>
 
             {/* Add Example Input */}
-            <div className={`flex ${gap.compact}`}>
+            <div className={`${display.flex} ${gap.compact}`}>
               <Input
                 value={newExample}
                 onChange={(e) => setNewExample(e.target.value)}
@@ -173,7 +193,7 @@ export function StepExamplesTags({
                   }
                 }}
                 placeholder="e.g., 'Create a React component with TypeScript'"
-                className="flex-1"
+                className={flexGrow['1']}
                 maxLength={200}
               />
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -183,7 +203,7 @@ export function StepExamplesTags({
                   disabled={!newExample.trim() || data.examples.length >= 10}
                   className={`${gap.compact}`}
                   style={{
-                    backgroundColor: TOKENS.colors.accent.primary,
+                    backgroundColor: submissionFormColors.accent.primary,
                   }}
                 >
                   <Plus className={iconSize.sm} />
@@ -205,32 +225,30 @@ export function StepExamplesTags({
                         initial={{ opacity: 0, x: -20, scale: 0.9 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.9 }}
-                        transition={TOKENS.animations.spring.snappy}
-                        className={`group ${row.default} ${radius.lg} border ${padding.compact} ${transition.all} hover:border-accent-primary/50`}
+                        transition={animation.spring.snappy}
+                        className={`group ${row.default} ${radius.lg} ${border.default} ${padding.compact} ${transition.all} ${hoverBorder.accentPrimary50}`}
                         style={{
-                          backgroundColor: TOKENS.colors.background.primary,
-                          borderColor: TOKENS.colors.border.default,
+                          backgroundColor: submissionFormColors.background.primary,
+                          borderColor: submissionFormColors.border.default,
                         }}
                       >
                         <div
-                          className={`${marginTop.micro} flex ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${weight.bold} ${size.xs}`}
+                          className={`${marginTop.micro} ${display.flex} ${iconSize.lg} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${weight.bold} ${size.xs}`}
                           style={{
-                            backgroundColor: `${TOKENS.colors.accent.primary}20`,
-                            color: TOKENS.colors.accent.primary,
+                            backgroundColor: `${submissionFormColors.accent.primary}20`,
+                            color: submissionFormColors.accent.primary,
                           }}
                         >
                           {index + 1}
                         </div>
-                        <span className={`flex-1 ${size.sm} ${leading.relaxed}`}>{example}</span>
+                        <span className={`${flexGrow['1']} ${size.sm} ${leading.relaxed}`}>{example}</span>
                         <motion.button
                           type="button"
                           onClick={() => removeExample(index)}
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className={`shrink-0 ${radius.full} ${padding.micro} ${opacityLevel[0]} ${transition.all} group-hover:opacity-100`}
-                          style={{
-                            color: TOKENS.colors.error.text,
-                          }}
+                          className={`${flexGrow.shrink0} ${radius.full} ${padding.micro} ${opacityLevel[0]} ${transition.all} group-hover:${opacityLevel[100]}`}
+                          style={{ color: submissionFormColors.error.text }}
                         >
                           <X className={iconSize.sm} />
                         </motion.button>
@@ -242,12 +260,12 @@ export function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`${radius.lg} ${border.dashed} ${padding.relaxed} text-center`}
+                  className={`${radius.lg} ${border.dashed} ${padding.relaxed} ${textAlign.center}`}
                   style={{
-                    borderColor: TOKENS.colors.border.light,
+                    borderColor: submissionFormColors.border.light,
                   }}
                 >
-                  <Code className={`mx-auto ${marginBottom.compact} ${iconSize['2xl']} ${muted.default}`} />
+                  <Code className={`${marginX.auto} ${marginBottom.compact} ${iconSize['2xl']} ${muted.default}`} />
                   <p className={muted.sm}>
                     No examples yet. Add some to help users understand!
                   </p>
@@ -262,19 +280,19 @@ export function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.2 }}
+        transition={{ ...animation.spring.smooth, delay: 0.2 }}
       >
         <Card
           style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
+            backgroundColor: submissionFormColors.background.secondary,
+            borderColor: submissionFormColors.border.light,
           }}
         >
           <CardHeader>
             <CardTitle className={cluster.compact}>
               <Tag className={iconSize.md} />
               Tags
-              <span className={`ml-auto font-normal ${muted.sm}`}>
+              <span className={`${marginLeft.auto} ${weight.normal} ${muted.sm}`}>
                 {data.tags.length} tags
               </span>
             </CardTitle>
@@ -285,7 +303,7 @@ export function StepExamplesTags({
             </p>
 
             {/* Add Tag Input */}
-            <div className={`flex ${gap.compact}`}>
+            <div className={`${display.flex} ${gap.compact}`}>
               <Input
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
@@ -296,7 +314,7 @@ export function StepExamplesTags({
                   }
                 }}
                 placeholder="e.g., 'react', 'typescript', 'api'"
-                className="flex-1"
+                className={flexGrow['1']}
                 maxLength={30}
               />
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -306,7 +324,7 @@ export function StepExamplesTags({
                   disabled={!newTag.trim()}
                   className={`${gap.compact}`}
                   style={{
-                    backgroundColor: TOKENS.colors.accent.primary,
+                    backgroundColor: submissionFormColors.accent.primary,
                   }}
                 >
                   <Plus className={iconSize.sm} />
@@ -318,7 +336,7 @@ export function StepExamplesTags({
             {/* Tags List */}
             <AnimatePresence mode="popLayout">
               {data.tags.length > 0 ? (
-                <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+                <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
                   {data.tags.map((tag) => {
                     // Use tag content as key (tags should be unique)
                     const tagKey = `tag-${tag}`;
@@ -328,16 +346,16 @@ export function StepExamplesTags({
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0 }}
-                        transition={TOKENS.animations.spring.bouncy}
+                        transition={animation.spring.bouncy}
                         whileHover={{ scale: 1.05 }}
                       >
                         <Badge
                           variant="secondary"
-                          className={`group ${gap.snug} pr-1 ${size.sm}`}
+                          className={`group ${gap.snug} ${paddingRight.tight} ${size.sm}`}
                           style={{
-                            backgroundColor: `${TOKENS.colors.accent.primary}15`,
-                            borderColor: `${TOKENS.colors.accent.primary}30`,
-                            color: TOKENS.colors.accent.primary,
+                            backgroundColor: `${submissionFormColors.accent.primary}15`,
+                            borderColor: `${submissionFormColors.accent.primary}30`,
+                            color: submissionFormColors.accent.primary,
                           }}
                         >
                           {tag}
@@ -349,7 +367,7 @@ export function StepExamplesTags({
                                 removeTag(tagIndex);
                               }
                             }}
-                            className={`ml-1 ${radius.full} ${padding.hair} ${transition.colors} hover:bg-accent-primary/20`}
+                            className={`${marginLeft.tight} ${radius.full} ${padding.hair} ${transition.colors} ${hoverBg.accentPrimary}`}
                           >
                             <X className={iconSize.xs} />
                           </button>
@@ -362,12 +380,12 @@ export function StepExamplesTags({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`${radius.lg} ${border.dashed} ${padding.comfortable} text-center`}
+                  className={`${radius.lg} ${border.dashed} ${padding.comfortable} ${textAlign.center}`}
                   style={{
-                    borderColor: TOKENS.colors.border.light,
+                    borderColor: submissionFormColors.border.light,
                   }}
                 >
-                  <Tag className={`mx-auto ${marginBottom.tight} ${iconSize.xl} ${muted.default}`} />
+                  <Tag className={`${marginX.auto} ${marginBottom.tight} ${iconSize.xl} ${muted.default}`} />
                   <p className={muted.sm}>
                     No tags yet. Add tags to improve discoverability!
                   </p>
@@ -400,15 +418,15 @@ export function StepReviewSubmit({
   // Quality level
   const qualityLevel =
     qualityScore >= 90
-      ? { label: 'Perfect!', color: TOKENS.colors.success.text }
+      ? { label: 'Perfect!', color: textColor.success }
       : qualityScore >= 70
-        ? { label: 'Excellent', color: TOKENS.colors.accent.primary }
+        ? { label: 'Excellent', color: textColor.accent }
         : qualityScore >= 50
-          ? { label: 'Good', color: TOKENS.colors.warning.text }
-          : { label: 'Needs Work', color: TOKENS.colors.error.text };
+          ? { label: 'Good', color: textColor.warning }
+          : { label: 'Needs Work', color: textColor.error };
 
   return (
-    <div className={`relative ${spaceY.loose}`}>
+    <div className={`${position.relative} ${spaceY.loose}`}>
       {/* Celebration Overlay */}
       <AnimatePresence>
         {showCelebration && (
@@ -416,16 +434,13 @@ export function StepReviewSubmit({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`fixed inset-0 ${zLayer.modal} flex ${alignItems.center} ${justify.center} ${backdrop.sm}`}
-            style={{
-              backgroundColor: `${TOKENS.colors.background.primary}cc`,
-            }}
+            className={cn(`${fixed.inset} ${zLayer.modal} ${display.flex} ${alignItems.center} ${justify.center} ${backdrop.sm}`, bgColor.background, opacityLevel[80])}
           >
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
-              transition={TOKENS.animations.spring.bouncy}
-              className="text-center"
+              transition={animation.spring.bouncy}
+              className={textAlign.center}
             >
               <motion.div
                 animate={{
@@ -439,8 +454,7 @@ export function StepReviewSubmit({
                 }}
               >
                 <Rocket
-                  className={`mx-auto ${marginBottom.comfortable} ${squareSize.avatar3xl}`}
-                  style={{ color: TOKENS.colors.accent.primary }}
+                  className={`${marginX.auto} ${marginBottom.comfortable} ${squareSize.avatar3xl} ${textColor.accent}`}
                 />
               </motion.div>
               <h2 className={`${marginBottom.compact} ${weight.bold} ${size['4xl']}`}>Submission Complete!</h2>
@@ -465,15 +479,15 @@ export function StepReviewSubmit({
                       delay: i * 0.05,
                       ease: 'easeOut',
                     }}
-                    className={`-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/2 left-1/2 ${squareSize.indicator} ${radius.full}`}
-                    style={{
-                      backgroundColor: [
-                        TOKENS.colors.accent.primary,
-                        TOKENS.colors.success.text,
-                        TOKENS.colors.info.text,
-                        TOKENS.colors.warning.text,
-                      ][i % 4],
-                    }}
+                    className={cn(
+                      `-translate-x-1/2 -translate-y-1/2 ${pointerEvents.none} ${absolute.center} ${squareSize.indicator} ${radius.full}`,
+                      [
+                        bgColor.accent,
+                        bgColor.green,
+                        bgColor.blue,
+                        bgColor.yellow,
+                      ][i % 4]
+                    )}
                   />
                 );
               })}
@@ -486,16 +500,16 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
-        className="text-center"
+        transition={animation.spring.smooth}
+        className={textAlign.center}
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
-          className={`${marginBottom.default} inline-flex`}
+          transition={{ ...animation.spring.bouncy, delay: 0.2 }}
+          className={`${marginBottom.default} ${display.inlineFlex}`}
         >
-          <Eye className={iconSize['3xl']} style={{ color: TOKENS.colors.accent.primary }} />
+          <Eye className={cn(iconSize['3xl'], textColor.accent)} />
         </motion.div>
         <h2 className={`${weight.bold} ${size['3xl']} ${textColor.foreground}`}>Review & Submit</h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
@@ -507,33 +521,33 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.1 }}
+        transition={{ ...animation.spring.smooth, delay: 0.1 }}
       >
         <Card
           style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
+            backgroundColor: submissionFormColors.background.secondary,
+            borderColor: submissionFormColors.border.light,
           }}
         >
-          <CardContent className="pt-6">
-            <div className="text-center">
+          <CardContent className={paddingTop.relaxed}>
+            <div className={textAlign.center}>
               <p className={`${marginBottom.compact} ${muted.sm}`}>Submission Quality</p>
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={TOKENS.animations.spring.bouncy}
-                className={`${marginBottom.default} inline-flex`}
+                transition={animation.spring.bouncy}
+                className={`${marginBottom.default} ${display.inlineFlex}`}
               >
-                <div className="relative">
+                <div className={position.relative}>
                   {/* Circular Progress */}
-                  <svg className={`-rotate-90 ${iconSize.hero} transform`}>
+                  <svg className={`-rotate-90 ${iconSize.hero} ${cssTransform.enable}`}>
                     {/* Background Circle */}
                     <circle
                       cx="64"
                       cy="64"
                       r="56"
                       fill="none"
-                      stroke={TOKENS.colors.border.default}
+                      stroke={submissionFormColors.border.default}
                       strokeWidth="8"
                     />
                     {/* Progress Circle */}
@@ -556,7 +570,7 @@ export function StepReviewSubmit({
                   </svg>
 
                   {/* Score Text */}
-                  <div className={`absolute inset-0 flex ${flexDir.col} ${alignItems.center} ${justify.center}`}>
+                  <div className={`${absolute.inset} ${display.flex} ${flexDir.col} ${alignItems.center} ${justify.center}`}>
                     <motion.span
                       className={`${weight.bold} ${size['3xl']}`}
                       style={{ color: qualityLevel.color }}
@@ -564,7 +578,7 @@ export function StepReviewSubmit({
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{
                         delay: 0.5,
-                        ...TOKENS.animations.spring.bouncy,
+                        ...animation.spring.bouncy,
                       }}
                     >
                       {qualityScore}%
@@ -589,14 +603,14 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.2 }}
-        className={`grid ${gap.comfortable} sm:grid-cols-2`}
+        transition={{ ...animation.spring.smooth, delay: 0.2 }}
+        className={grid.responsive2}
       >
         {/* Basic Info Summary */}
         <Card
           style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
+            backgroundColor: submissionFormColors.background.secondary,
+            borderColor: submissionFormColors.border.light,
           }}
         >
           <CardHeader>
@@ -624,8 +638,8 @@ export function StepReviewSubmit({
         {/* Meta Summary */}
         <Card
           style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
+            backgroundColor: submissionFormColors.background.secondary,
+            borderColor: submissionFormColors.border.light,
           }}
         >
           <CardHeader>
@@ -655,19 +669,19 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.3 }}
+        transition={{ ...animation.spring.smooth, delay: 0.3 }}
       >
         <Card
           style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
+            backgroundColor: submissionFormColors.background.secondary,
+            borderColor: submissionFormColors.border.light,
           }}
         >
           <CardHeader>
             <CardTitle className={size.base}>Description</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className={`whitespace-pre-wrap ${size.sm} ${leading.relaxed}`}>{data.description}</p>
+            <p className={`${whitespace.preWrap} ${size.sm} ${leading.relaxed}`}>{data.description}</p>
           </CardContent>
         </Card>
       </motion.div>
@@ -676,18 +690,18 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.4 }}
+        transition={{ ...animation.spring.smooth, delay: 0.4 }}
       >
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button
             type="button"
             onClick={onSubmit}
             disabled={isSubmitting || qualityScore < 40}
-            className={`group relative w-full ${gap.default} ${padding.yComfortable} ${size.lg}`}
+            className={`group ${position.relative} ${width.full} ${gap.default} ${padding.yComfortable} ${size.lg}`}
             size="lg"
             style={{
-              backgroundColor: TOKENS.colors.accent.primary,
-              boxShadow: TOKENS.shadows.glow.orange,
+              backgroundColor: submissionFormColors.accent.primary,
+              boxShadow: glowShadow.orange,
             }}
           >
             {isSubmitting ? (
@@ -717,7 +731,7 @@ export function StepReviewSubmit({
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={`${marginTop.compact} text-center ${muted.sm}`}
+            className={`${marginTop.compact} ${textAlign.center} ${muted.sm}`}
           >
             Complete more fields to reach the minimum quality threshold
           </motion.p>

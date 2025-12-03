@@ -1,5 +1,38 @@
 import type { Database } from '@heyclaude/database-types';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+
+/**
+ * Singularize category title for button text and aria-labels
+ * Handles special cases like "MCP" that don't follow standard pluralization
+ */
+function singularizeTitle(title: string): string {
+  // Handle special cases that don't follow standard pluralization
+  const specialCases: Record<string, string> = {
+    'MCP': 'MCP',
+    'MCP Servers': 'MCP Server',
+    'Agents': 'Agent',
+    'Rules': 'Rule',
+    'Commands': 'Command',
+    'Hooks': 'Hook',
+    'Statuslines': 'Statusline',
+    'Skills': 'Skill',
+    'Collections': 'Collection',
+    'Guides': 'Guide',
+    'Jobs': 'Job',
+    'Changelog': 'Changelog',
+  };
+  
+  if (specialCases[title]) {
+    return specialCases[title];
+  }
+  
+  // Standard pluralization: remove trailing 's'
+  if (title.endsWith('s')) {
+    return title.slice(0, -1);
+  }
+  
+  return title;
+}
 import { Bookmark, Copy, ExternalLink, Eye, HelpCircle, Layers } from '@heyclaude/web-runtime/icons';
 import {
   cluster,
@@ -13,7 +46,11 @@ import {
   weight,
   size,
   gap,
+  grid,
   padding,
+  container,
+  marginX,
+  width,
   minHeight,
   maxWidth,
   backdrop,
@@ -22,9 +59,22 @@ import {
   overflow,
   tracking,
   bgColor,
+  bgGradient,
+  gradientFrom,
+  gradientVia,
+  gradientTo,
   justify,
   textColor,
   squareSize,
+  zLayer,
+  animate,
+  display,
+  position,
+  absolute,
+  bgClip,
+  listStyle,
+  translate,
+  blur,
 } from '@heyclaude/web-runtime/design-system';
 import type {
   ContentListServerProps,
@@ -159,23 +209,23 @@ function ContentHeroSection<T extends DisplayableContent>({
     : [];
 
   return (
-    <section className={`relative ${overflow.hidden}`} aria-labelledby={pageTitleId}>
+    <section className={`${position.relative} ${overflow.hidden}`} aria-labelledby={pageTitleId}>
       {/* Ambient background effects */}
-      <div className={`pointer-events-none absolute inset-0 -z-10 ${overflow.hidden}`}>
-        <div className={`absolute -left-40 -top-40 ${squareSize.heroLg} ${radius.full} ${bgColor['accent/5']} blur-3xl`} />
-        <div className={`absolute -bottom-40 -right-40 ${squareSize.heroXl} ${radius.full} ${bgColor['primary/5']} blur-3xl`} />
-        <div className={`absolute left-1/2 top-1/3 ${squareSize.hero} -translate-x-1/2 ${radius.full} ${bgColor['muted/20']} blur-3xl`} />
+      <div className={`pointer-events-none ${absolute.inset} ${zLayer.behind10} ${overflow.hidden}`}>
+        <div className={`${position.absolute} -left-40 -top-40 ${squareSize.heroLg} ${radius.full} ${bgColor['accent/5']} ${blur['3xl']}`} />
+        <div className={`${position.absolute} -bottom-40 -right-40 ${squareSize.heroXl} ${radius.full} ${bgColor['primary/5']} ${blur['3xl']}`} />
+        <div className={`${absolute.centerY} left-1/2 ${squareSize.hero} ${translate.centerX} ${radius.full} ${bgColor['muted/20']} ${blur['3xl']}`} />
       </div>
 
       <div className={emptyCard.default}>
-        <div className={`container mx-auto ${padding.xDefault} ${padding.yHero} md:py-20`}>
-          <div className={`mx-auto ${maxWidth['4xl']}`}>
+        <div className={`${container.default} ${padding.xDefault} ${padding.yHero} md:${padding.yLarge}`}>
+          <div className={`${marginX.auto} ${maxWidth['4xl']}`}>
             {/* Animated icon container */}
-            <div className={`${marginBottom.comfortable} flex ${justify.center}`}>
-              <div className="relative">
-                <div className={`absolute inset-0 animate-pulse ${radius.full} ${bgColor['accent/20']} blur-xl`} />
+            <div className={`${marginBottom.comfortable} ${display.flex} ${justify.center}`}>
+              <div className={position.relative}>
+                <div className={`${absolute.inset} ${animate.pulse} ${radius.full} ${bgColor['accent/20']} ${blur.xl}`} />
                 <div
-                  className={`relative ${radius.full} bg-gradient-to-br from-accent/20 to-primary/20 ${padding.default} ${backdrop.sm}`}
+                  className={`${position.relative} ${radius.full} ${bgGradient.toBR} ${gradientFrom.accent20} ${gradientTo.primary20} ${padding.default} ${backdrop.sm}`}
                   aria-hidden="true"
                 >
                   {(() => {
@@ -190,19 +240,19 @@ function ContentHeroSection<T extends DisplayableContent>({
             {/* Title with gradient */}
             <h1
               id={pageTitleId}
-              className={`${marginBottom.default} bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text ${weight.bold} ${size['4xl']} ${tracking.tight} ${textColor.transparent} sm:${size['5xl']}`}
+              className={`${marginBottom.default} ${bgGradient.toR} ${gradientFrom.foreground} ${gradientVia.foreground} ${gradientTo.mutedForeground} ${bgClip.text} ${weight.bold} ${size['4xl']} ${tracking.tight} ${textColor.transparent} sm:${size['5xl']}`}
             >
               {title}
             </h1>
 
             {/* Description */}
-            <p className={`mx-auto ${marginTop.default} ${maxWidth.xl} ${muted.lg}`}>
+            <p className={`${marginX.auto} ${marginTop.default} ${maxWidth.xl} ${muted.lg}`}>
               {description}
             </p>
 
             {/* Badges */}
             <ul
-              className={`${marginTop.comfortable} ${marginBottom.comfortable} flex list-none ${flexWrap.wrap} ${justify.center} ${gap.compact}`}
+              className={`${marginTop.comfortable} ${marginBottom.comfortable} ${display.flex} ${listStyle.none} ${flexWrap.wrap} ${justify.center} ${gap.compact}`}
             >
               {displayBadges.map((badge, idx) => (
                 <li key={badge.text || `badge-${idx}`}>
@@ -238,23 +288,23 @@ function ContentHeroSection<T extends DisplayableContent>({
               <Link
                 href={ROUTES.SUBMIT}
                 className={cluster.compact}
-                aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
+                aria-label={`Submit a new ${singularizeTitle(title).toLowerCase()}`}
               >
                 <ExternalLink className={iconSize.xs} aria-hidden="true" />
-                Submit {title.slice(0, -1)}
+                Submit {singularizeTitle(title)}
               </Link>
             </Button>
           </div>
 
           {/* Enhanced hero features for supported categories */}
           {isEnhanced && (
-            <div className={`mx-auto ${maxWidth['4xl']} ${spaceY.loose} ${marginTop.relaxed}`}>
+            <div className={`${marginX.auto} ${maxWidth['4xl']} ${spaceY.loose} ${marginTop.relaxed}`}>
               {/* Animated stats row */}
               {stats.length > 0 && (
                 <AnimatedStatsRow
                   stats={stats}
                   category={category}
-                  className={`mx-auto ${maxWidth['3xl']}`}
+                  className={`${marginX.auto} ${maxWidth['3xl']}`}
                 />
               )}
 
@@ -263,7 +313,7 @@ function ContentHeroSection<T extends DisplayableContent>({
                 items={items}
                 category={category}
                 maxTags={8}
-                className={`mx-auto ${maxWidth['2xl']}`}
+                className={`${marginX.auto} ${maxWidth['2xl']}`}
               />
             </div>
           )}
@@ -286,9 +336,9 @@ function ContentHeroSection<T extends DisplayableContent>({
  */
 function ContentSearchSkeleton() {
   return (
-    <div className={`w-full ${spaceY.comfortable}`}>
+    <div className={`${width.full} ${spaceY.comfortable}`}>
       <Skeleton size="xl" width="3xl" />
-      <div className={`flex ${justify.end} ${gap.compact}`}>
+      <div className={`${display.flex} ${justify.end} ${gap.compact}`}>
         <Skeleton size="lg" width="sm" />
         <Skeleton size="lg" width="xs" />
       </div>
@@ -340,8 +390,8 @@ export function ContentListServer<T extends DisplayableContent>({
         category={category ?? type}
       />
 
-      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`} aria-label={`${title} content and search`}>
-        <div className={`grid ${gap.loose} xl:grid-cols-[minmax(0,1fr)_18rem]`}>
+      <section className={`${container.default} ${padding.xDefault} ${padding.ySection}`} aria-label={`${title} content and search`}>
+        <div className={`${grid.search} ${gap.loose}`}>
           <div>
             <Suspense fallback={<ContentSearchSkeleton />}>
               <ContentSearchClient
@@ -363,7 +413,7 @@ export function ContentListServer<T extends DisplayableContent>({
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) with fade-in animation */}
-      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+      <section className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
             <NewsletterCTAVariant source="content_page" variant="hero" category={type} />

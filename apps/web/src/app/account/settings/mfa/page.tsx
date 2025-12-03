@@ -3,7 +3,8 @@
  * Allows users to manage their multi-factor authentication settings
  */
 
-import { iconSize, spaceY, cluster, marginTop, muted, weight , size } from '@heyclaude/web-runtime/design-system';
+import { hashUserId } from '@heyclaude/shared-runtime';
+import { iconSize, spaceY, cluster, marginTop, muted, weight, size } from '@heyclaude/web-runtime/design-system';
 import { Shield } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
@@ -62,8 +63,9 @@ export default async function MFASettingsPage() {
     redirect('/login');
   }
 
+  const userIdHash = hashUserId(user.id);
   reqLogger.info('MFASettingsPage: rendered for authenticated user', {
-    userIdHash: user.id, // userId is automatically hashed by redaction
+    userIdHash,
   });
 
   return (
@@ -95,14 +97,13 @@ export default async function MFASettingsPage() {
           <CardTitle>How it works</CardTitle>
           <CardDescription>Learn about two-factor authentication</CardDescription>
         </CardHeader>
-        <CardContent className={`${spaceY.compact} ${muted.sm}`}>
-          <p>
-            • Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password,
-            etc.)
-          </p>
-          <p>• Enter the 6-digit code from your app when signing in</p>
-          <p>• You can enroll multiple factors as backups</p>
-          <p>• Keep at least one factor active to maintain access</p>
+        <CardContent className={muted.sm}>
+          <ul className={`list-disc list-inside ${spaceY.compact}`}>
+            <li>Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password, etc.)</li>
+            <li>Enter the 6-digit code from your app when signing in</li>
+            <li>You can enroll multiple factors as backups</li>
+            <li>Keep at least one factor active to maintain access</li>
+          </ul>
         </CardContent>
       </Card>
     </div>

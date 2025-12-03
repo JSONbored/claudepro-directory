@@ -21,6 +21,7 @@ import {
   minWidth,
   muted,
   padding,
+  paddingBottom,
   radius,
   shadow,
   size,
@@ -29,6 +30,15 @@ import {
   tracking,
   weight,
   skeletonSize,
+  bgGradient,
+  gradientFrom,
+  gradientTo,
+  gradientVia,
+  display,
+  width,
+  textAlign,
+  marginX,
+  height,
 } from '@heyclaude/web-runtime/design-system';
 import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
@@ -165,17 +175,17 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <div
         className={cn(
-          'w-full',
+          width.full,
           `${radius.xl} border ${borderColor['border/50']}`,
-          'bg-card/50',
+          bgColor['card/50'],
           `${padding.xComfortable} ${padding.ySpacious} md:${padding.xSpacious} md:${padding.ySection} lg:${padding.xSpacious} lg:${padding.yLargish}`,
-          'text-center',
+          textAlign.center,
           className
         )}
       >
         {/* Icon */}
         <motion.div 
-          className={`${marginBottom.comfortable} inline-flex`}
+          className={`${marginBottom.comfortable} ${display.inlineFlex}`}
           initial={{ scale: 0.9, opacity: 0 }}
           whileInView={{ scale: 1, opacity: 1 }}
           viewport={{ once: true }}
@@ -188,7 +198,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
 
         {/* Headline */}
         <motion.h2 
-          className={`mx-auto ${marginBottom.compact} ${maxWidth.md} ${weight.semibold} ${size.xl} ${textColor.foreground} ${leading.tight} ${tracking.tight} md:${size['2xl']}`}
+          className={`${marginX.auto} ${marginBottom.compact} ${maxWidth.md} ${weight.semibold} ${size.xl} ${textColor.foreground} ${leading.tight} ${tracking.tight} md:${size['2xl']}`}
           initial={{ y: 10, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
@@ -199,7 +209,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
 
         {/* Description */}
         <motion.p 
-          className={`mx-auto ${marginBottom.comfortable} ${maxWidth.lg} ${muted.smRelaxed} md:${size.base}`}
+          className={`${marginX.auto} ${marginBottom.comfortable} ${maxWidth.lg} ${muted.smRelaxed} md:${size.base}`}
           initial={{ y: 10, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
@@ -210,28 +220,28 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
 
         {/* Form */}
         <motion.div 
-          className={`mx-auto ${maxWidth.sm}`}
+          className={`${marginX.auto} ${maxWidth.sm}`}
           initial={{ y: 10, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
         >
-          <NewsletterForm source={source} className="w-full" />
+          <NewsletterForm source={source} className={width.full} />
         </motion.div>
 
         {/* Footer info */}
         <motion.div 
-          className={`${marginTop.default} flex ${flexDir.col} ${alignItems.center} ${gap.compact}`}
+          className={`${marginTop.default} ${display.flex} ${flexDir.col} ${alignItems.center} ${gap.compact}`}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.25 }}
         >
           <div className={cluster.compact}>
-            <span className={`inline-flex h-1.5 w-1.5 ${radius.full} bg-green-500`} />
+            <span className={`${display.inlineFlex} ${height.slider} ${width.slider} ${radius.full} ${bgColor.green}`} />
             {isLoading ? (
               <span className={`${muted.default} ${size.xs}`}>
-                <span className={`inline-block ${skeletonSize.barXs} ${animate.pulse} rounded ${bgColor['muted/50']}`} />
+                <span className={`${display.inlineBlock} ${skeletonSize.barXs} ${animate.pulse} ${radius.default} ${bgColor['muted/50']}`} />
               </span>
             ) : (
               <span className={`${muted.default} ${size.xs}`}>{subscriberCount} subscribers</span>
@@ -247,14 +257,14 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <Card
         className={cn(
-          'border-primary/20 bg-linear-to-br from-primary/5 via-accent/5 to-background/95',
+          `${borderColor['primary/20']} ${bgGradient.toBR} ${gradientFrom.primary5} ${gradientVia.accent5} ${gradientTo.background95}`,
           `${shadow.lg} ${backdrop.sm}`,
           className
         )}
       >
-        <CardHeader className="pb-5">
+        <CardHeader className={paddingBottom.medium}>
           <div className={`${cluster.default} ${marginBottom.compact}`}>
-            <div className={`${radius.lg} border ${borderColor['primary/20']} ${bgColor['primary/10']} ${padding.between}`}>
+            <div className={`${radius.lg} ${border.default} ${borderColor['primary/20']} ${bgColor['primary/10']} ${padding.between}`}>
               <Mail className={`${iconSize.md} ${textColor.primary}`} aria-hidden="true" />
             </div>
             <CardTitle className={`${weight.bold} ${size.xl}`}>{finalHeadline}</CardTitle>
@@ -265,7 +275,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         </CardHeader>
         <CardContent className={spaceY.comfortable}>
           <NewsletterForm source={source} />
-          <div className={`text-center ${muted.default} ${size.xs}`}>
+          <div className={`${textAlign.center} ${muted.default} ${size.xs}`}>
             <span>{NEWSLETTER_CTA_CONFIG.footerText}</span>
           </div>
         </CardContent>
@@ -277,21 +287,21 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <div
         className={cn(
-          `flex ${flexDir.col} ${alignItems.stretch} ${justify.between} ${gap.comfortable} ${padding.default} sm:flex-row sm:items-center sm:${padding.medium}`,
+          `${display.flex} ${flexDir.col} ${alignItems.stretch} ${justify.between} ${gap.comfortable} ${padding.default} sm:${display.flex}-row sm:${alignItems.center} sm:${padding.medium}`,
           `${radius.lg} border ${borderColor[`border/50`]} ${bgColor['accent/5']}`,
           className
         )}
       >
-        <div className={`${cluster.default} min-w-0 ${flexGrow['1']}`}>
+        <div className={`${cluster.default} ${minWidth[0]} ${flexGrow['1']}`}>
           <Mail className={`${iconSize.md} ${flexGrow.shrink0} ${textColor.primary}`} aria-hidden="true" />
-          <div className={`min-w-0 ${flexGrow['1']}`}>
+          <div className={`${minWidth[0]} ${flexGrow['1']}`}>
             <p className={`truncate ${weight.medium} ${size.sm}`}>{finalHeadline}</p>
             <p className={`truncate ${muted.default} ${size.xs}`}>{finalDescription}</p>
           </div>
         </div>
         <NewsletterForm
           source={source}
-          className={`w-full sm:w-auto sm:${minWidth.newsletterForm} sm:${maxWidth.newsletterForm}`}
+          className={`${width.full} sm:${width.auto} sm:${minWidth.newsletterForm} sm:${maxWidth.newsletterForm}`}
         />
       </div>
     );
@@ -301,16 +311,16 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <Card
         className={cn(
-          `flex h-full ${shadow.lg} bg-linear-to-br from-primary/5 via-accent/5 to-background/95`,
+          `${display.flex} ${height.full} ${shadow.lg} ${bgGradient.toBR} ${gradientFrom.primary5} ${gradientVia.accent5} ${gradientTo.background95}`,
           flexDir.col,
           borderColor['primary/20'],
           backdrop.sm,
           className
         )}
       >
-        <CardHeader className="flex-1">
+        <CardHeader className={flexGrow['1']}>
           <div className={marginBottom.default}>
-            <div className={cn('inline-flex border', radius.lg, borderColor['primary/20'], bgColor['primary/10'], padding.compact)}>
+            <div className={cn(`${display.inlineFlex} border`, radius.lg, borderColor['primary/20'], bgColor['primary/10'], padding.compact)}>
               <Mail className={cn(iconSize.lg, textColor.primary)} aria-hidden="true" />
             </div>
           </div>
@@ -319,7 +329,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         </CardHeader>
         <CardContent className={spaceY.comfortable}>
           <NewsletterForm source={source} />
-          <div className="text-center">
+          <div className={textAlign.center}>
             <p className={cn(muted.default, size.xs)}>{NEWSLETTER_CTA_CONFIG.footerText}</p>
           </div>
         </CardContent>

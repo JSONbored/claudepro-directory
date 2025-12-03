@@ -10,7 +10,7 @@ export async function getNewsletterSubscriberCount(): Promise<null | number> {
     {
       keyParts: ['newsletter-count'],
       tags: ['newsletter', 'stats'],
-      ttlKey: 'cache.newsletter_count_ttl_s',
+      ttlKey: 'newsletter_count',
       fallback: 0,
       logMeta: { source: 'newsletter.actions' },
     }

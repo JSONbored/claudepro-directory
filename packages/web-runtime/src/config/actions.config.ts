@@ -36,7 +36,7 @@ export interface ActionConfig {
 
   /**
    * Cache keys to invalidate via static config.
-   * e.g. 'cache.invalidate.job_delete'
+   * e.g. 'job_delete' (simplified format, no 'cache.invalidate.' prefix)
    */
   invalidateCacheConfigKeys?: string[];
   
@@ -72,7 +72,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     category: 'content',
     revalidatePaths: ['/jobs', '/account/jobs'],
     revalidateTags: ['job-{result.job_id}', 'company-{result.company_id}', 'company-id-{result.company_id}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.job_create'],
+    invalidateCacheConfigKeys: ['job_create'],
     hooks: {
       onSuccess: './hooks/job-hooks.ts#onJobCreated'
     }
@@ -82,21 +82,21 @@ export const ACTIONS: Record<string, ActionConfig> = {
     category: 'content',
     revalidatePaths: ['/account/jobs', '/account/jobs/{job_id}/edit', '/jobs'],
     revalidateTags: ['job-{job_id}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.job_update']
+    invalidateCacheConfigKeys: ['job_update']
   },
   deleteJob: {
     rpc: 'delete_job',
     category: 'content',
     revalidatePaths: ['/jobs', '/account/jobs'],
     revalidateTags: ['job-{job_id}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.job_delete']
+    invalidateCacheConfigKeys: ['job_delete']
   },
   toggleJobStatus: {
     rpc: 'toggle_job_status',
     category: 'content',
     revalidatePaths: ['/jobs', '/account/jobs'],
     revalidateTags: ['job-{job_id}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.job_status']
+    invalidateCacheConfigKeys: ['job_status']
   },
 
   /**
@@ -107,7 +107,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     category: 'content',
     revalidatePaths: ['/account/companies', '/companies'],
     revalidateTags: ['company-{result.company.slug}', 'company-id-{result.company.id}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.company_create'],
+    invalidateCacheConfigKeys: ['company_create'],
     args: {
       p_action: 'create',
       p_update_data: null
@@ -118,7 +118,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     category: 'content',
     revalidatePaths: ['/account/companies', '/companies/{result.company.slug}', '/companies'],
     revalidateTags: ['company-{result.company.slug}', 'company-id-{result.company.id}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.company_update'],
+    invalidateCacheConfigKeys: ['company_update'],
     args: {
       p_action: 'update',
       p_create_data: null
@@ -129,7 +129,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     category: 'content',
     revalidatePaths: ['/companies', '/account/companies'],
     revalidateTags: ['company-{company_id}', 'company-id-{company_id}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.company_delete']
+    invalidateCacheConfigKeys: ['company_delete']
   },
 
   /**
@@ -139,7 +139,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     rpc: 'manage_collection',
     category: 'user',
     revalidatePaths: ['/account', '/account/library'],
-    invalidateCacheConfigKeys: ['cache.invalidate.collection_create'],
+    invalidateCacheConfigKeys: ['collection_create'],
     args: {
       p_action: 'create',
       p_update_data: null,
@@ -152,7 +152,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     rpc: 'manage_collection',
     category: 'user',
     revalidatePaths: ['/account', '/account/library', '/account/library/{result.collection.slug}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.collection_update'],
+    invalidateCacheConfigKeys: ['collection_update'],
     args: {
       p_action: 'update',
       p_create_data: null,
@@ -165,7 +165,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     rpc: 'manage_collection',
     category: 'user',
     revalidatePaths: ['/account', '/account/library'],
-    invalidateCacheConfigKeys: ['cache.invalidate.collection_delete'],
+    invalidateCacheConfigKeys: ['collection_delete'],
     args: {
       p_action: 'delete',
       p_create_data: null,
@@ -178,7 +178,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     rpc: 'manage_collection',
     category: 'user',
     revalidatePaths: ['/account/library', '/account/library/{result.collection.slug}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.collection_items'],
+    invalidateCacheConfigKeys: ['collection_items'],
     args: {
       p_action: 'add_item',
       p_create_data: null,
@@ -191,7 +191,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     rpc: 'manage_collection',
     category: 'user',
     revalidatePaths: ['/account/library', '/account/library/{result.collection.slug}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.collection_items'],
+    invalidateCacheConfigKeys: ['collection_items'],
     args: {
       p_action: 'remove_item',
       p_create_data: null,
@@ -204,7 +204,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     rpc: 'reorder_collection_items',
     category: 'user',
     revalidatePaths: ['/account/library'],
-    invalidateCacheConfigKeys: ['cache.invalidate.collection_items']
+    invalidateCacheConfigKeys: ['collection_items']
   },
 
   /**
@@ -215,7 +215,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     category: 'user',
     revalidatePaths: ['/{result.review.content_type}/{result.review.content_slug}', '/{result.review.content_type}'],
     revalidateTags: ['reviews:{result.review.content_type}:{result.review.content_slug}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.review_create'],
+    invalidateCacheConfigKeys: ['review_create'],
     args: {
       p_action: 'create',
       p_update_data: null,
@@ -227,7 +227,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     category: 'user',
     revalidatePaths: ['/{result.review.content_type}/{result.review.content_slug}', '/{result.review.content_type}'],
     revalidateTags: ['reviews:{result.review.content_type}:{result.review.content_slug}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.review_update'],
+    invalidateCacheConfigKeys: ['review_update'],
     args: {
       p_action: 'update',
       p_create_data: null,
@@ -239,7 +239,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     category: 'user',
     revalidatePaths: ['/{result.content_type}/{result.content_slug}', '/{result.content_type}'],
     revalidateTags: ['reviews:{result.content_type}:{result.content_slug}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.review_delete'],
+    invalidateCacheConfigKeys: ['review_delete'],
     args: {
       p_action: 'delete',
       p_create_data: null,
@@ -251,7 +251,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     category: 'user',
     revalidatePaths: ['/{result.content_type}/{result.content_slug}'],
     revalidateTags: ['reviews:{result.content_type}:{result.content_slug}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.review_helpful']
+    invalidateCacheConfigKeys: ['review_helpful']
   },
 
   /**
@@ -261,7 +261,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     rpc: 'submit_content_for_review',
     category: 'content',
     revalidatePaths: ['/account/submissions'],
-    invalidateCacheConfigKeys: ['cache.invalidate.submission_create']
+    invalidateCacheConfigKeys: ['submission_create']
   },
   
   /**
@@ -274,7 +274,7 @@ export const ACTIONS: Record<string, ActionConfig> = {
     returnStyle: 'first_row',
     revalidatePaths: ['/admin/contact-submissions'],
     revalidateTags: ['contact-submission-{result.submission_id}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.contact_submission'],
+    invalidateCacheConfigKeys: ['contact_submission'],
     hooks: {
       onSuccess: './hooks/contact-hooks.ts#onContactSubmission'
     }
@@ -288,19 +288,19 @@ export const ACTIONS: Record<string, ActionConfig> = {
     category: 'user',
     revalidatePaths: ['/account', '/account/library'],
     revalidateTags: ['user-bookmarks', 'user-{userId}', 'content-{content_slug}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.bookmark_create']
+    invalidateCacheConfigKeys: ['bookmark_create']
   },
   removeBookmark: {
     rpc: 'remove_bookmark',
     category: 'user',
     revalidatePaths: ['/account', '/account/library'],
     revalidateTags: ['user-bookmarks', 'user-{userId}', 'content-{content_slug}'],
-    invalidateCacheConfigKeys: ['cache.invalidate.bookmark_delete']
+    invalidateCacheConfigKeys: ['bookmark_delete']
   },
   unlinkOAuthProvider: {
     rpc: 'unlink_oauth_provider',
     category: 'user',
     revalidatePaths: ['/account/settings'],
-    invalidateCacheConfigKeys: ['cache.invalidate.oauth_unlink']
+    invalidateCacheConfigKeys: ['oauth_unlink']
   }
 };

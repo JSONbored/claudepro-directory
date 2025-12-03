@@ -9,24 +9,10 @@
  * - Functions that use Node.js APIs
  */
 
-// Static Config Getters (sync, client-safe)
+// Direct config exports from unified config (client-safe, single source of truth)
 export {
-  getTimeoutConfig,
-  getPollingConfig,
-  getNewsletterConfig,
-  getNewsletterConfigValue,
-  getAppSettings,
-  getRecentlyViewedConfig,
-  getAnimationConfig,
-  getHomepageConfigBundle,
-} from '../config/static-configs.ts';
-
-// Direct config exports from unified config (client-safe)
-export {
-  UI_ANIMATION,
   UI_TIMEOUTS,
   API_TIMEOUTS,
-  CONFETTI_CONFIG,
   POLLING_CONFIG,
   NEWSLETTER_CTA,
   NEWSLETTER_BEHAVIOR,
@@ -34,6 +20,9 @@ export {
   HOMEPAGE_CONFIG,
   INFINITE_SCROLL_CONFIG,
 } from '../config/unified-config.ts';
+
+// Design system tokens (for design values)
+export { animation } from '../design-system/tokens.ts';
 
 // Safe Utils
 export * from '../storage/image-utils.ts';

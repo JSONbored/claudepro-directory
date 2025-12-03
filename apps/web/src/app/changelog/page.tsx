@@ -37,6 +37,7 @@ import {
   textColor,
   tracking,
   weight,
+  marginX,
 } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -253,7 +254,7 @@ export default async function ChangelogPage() {
         </div>
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
-        <section className={`mx-auto ${padding.xDefault} ${padding.ySection}`}>
+        <section className={`${marginX.auto} ${padding.xDefault} ${padding.ySection}`}>
           <NewsletterCTAVariant
             source="content_page"
             variant="hero"

@@ -29,6 +29,11 @@ interface ActionConfig {
     onSuccess?: string;
   };
   inputSchema?: string;
+  /**
+   * Cache keys to invalidate via static config.
+   * Uses simplified format (e.g., 'job_delete') - no 'cache.invalidate.' prefix.
+   * These keys must exist in CACHE_INVALIDATION from unified-config.ts.
+   */
   invalidateCacheConfigKeys?: string[];
   returnStyle?: 'first_row';
   revalidatePaths?: string[];
@@ -319,7 +324,7 @@ export const ${actionName} = authedAction
       }
       
       // Lazy import server-only dependencies
-      ${hasRevalidatePath || hasRevalidateTag ? `const { revalidatePath, revalidateTag } = await import('next/cache');` : ''}
+      ${hasRevalidatePath || hasRevalidateTag ? `const { ${hasRevalidatePath ? 'revalidatePath' : ''}${hasRevalidatePath && hasRevalidateTag ? ', ' : ''}${hasRevalidateTag ? 'revalidateTag' : ''} } = await import('next/cache');` : ''}
       ${
         hasCacheInvalidation
           ? `

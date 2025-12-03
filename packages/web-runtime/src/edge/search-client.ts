@@ -237,7 +237,7 @@ async function executeSearch<T>(
     {
        keyParts: ['unified-search', options.query, options.filters?.limit ?? 10, ...(options.entities ?? ['content'])],
        tags: cacheTags,
-       ttlKey: 'cache.content_list.ttl_seconds',
+       ttlKey: 'content_list',
        fallback: {
            results: [],
            query: options.query,

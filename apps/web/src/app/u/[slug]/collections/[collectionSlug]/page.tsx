@@ -16,6 +16,7 @@ import {
   cluster,
   flexDir,
   gap,
+  grid,
   iconSize,
   alignItems,
   marginBottom,
@@ -23,19 +24,31 @@ import {
   minHeight,
   muted,
   padding,
+  paddingBottom,
   row,
   size,
   spaceY,
   weight,
+  maxWidth,
+  display,
+  flexGrow,
+  container,
+  width,
+  marginY,
 } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { NavLink, UnifiedBadge, Button ,
+import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle, Separator    } from '@heyclaude/web-runtime/ui';
+  CardTitle,
+  NavLink,
+  Separator,
+  UnifiedBadge,
+} from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -196,7 +209,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           collection_slug: collectionSlug,
         }}
       />
-      <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+      <div className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
         <div className={spaceY.relaxed}>
           {/* Navigation */}
           <Link href={`/u/${slug}`}>
@@ -222,7 +235,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                 </Link> : null}
             </div>
 
-            {collection?.description ? <p className={`max-w-3xl ${muted.default}`}>{collection.description}</p> : null}
+            {collection?.description ? <p className={`${maxWidth['3xl']} ${muted.default}`}>{collection.description}</p> : null}
 
             <div className={`${marginTop.compact} ${muted.sm}`}>
               Created by <NavLink href={`/u/${slug}`}>{profileUser?.name ?? slug}</NavLink> •{' '}
@@ -237,12 +250,12 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
             {!items || items.length === 0 ? (
               <Card>
-                <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+                <CardContent className={`${display.flex} ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
                   <p className={muted.default}>This collection is empty</p>
                 </CardContent>
               </Card>
             ) : (
-              <div className={`grid ${gap.comfortable}`}>
+              <div className={`${grid.base} ${gap.comfortable}`}>
                 {items
                   .filter(
                     (
@@ -260,10 +273,10 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                     <Card key={item.id}>
                       <CardHeader>
                         <div className={`${row.comfortable}`}>
-                          <div className={`w-8 ${weight.bold} ${size['2xl']} text-muted-foreground/50`}>
+                          <div className={`${width.fit} ${weight.bold} ${size['2xl']} ${muted.opacity50}`}>
                             {index + 1}
                           </div>
-                          <div className="flex-1">
+                          <div className={flexGrow['1']}>
                             <div className={cluster.compact}>
                               <UnifiedBadge variant="base" style="outline" className="capitalize">
                                 {item.content_type}
@@ -309,10 +322,10 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           </div>
 
           {/* Stats */}
-          <Separator className="my-6" />
-          <div className={`grid ${gap.comfortable} sm:grid-cols-3`}>
+          <Separator className={marginY.relaxed} />
+          <div className={grid.responsive3}>
             <Card>
-              <CardHeader className="pb-3">
+              <CardHeader className={paddingBottom.default}>
                 <CardTitle className={`${weight.medium} ${size.sm}`}>Total Items</CardTitle>
               </CardHeader>
               <CardContent>
@@ -320,7 +333,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
               </CardContent>
             </Card>
             <Card>
-              <CardHeader className="pb-3">
+              <CardHeader className={paddingBottom.default}>
                 <CardTitle className={`${weight.medium} ${size.sm}`}>Views</CardTitle>
               </CardHeader>
               <CardContent>
@@ -328,7 +341,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
               </CardContent>
             </Card>
             <Card>
-              <CardHeader className="pb-3">
+              <CardHeader className={paddingBottom.default}>
                 <CardTitle className={`${weight.medium} ${size.sm}`}>Created</CardTitle>
               </CardHeader>
               <CardContent>

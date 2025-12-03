@@ -4,12 +4,14 @@ import './micro-interactions.css';
 import './sugar-high.css';
 
 import { type Database } from '@heyclaude/database-types';
-import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
+import { COMPONENT_FLAGS } from '@heyclaude/web-runtime/config/unified-config';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { fontFamily } from '@heyclaude/web-runtime/design-system';
 import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
+import { mapComponentCardConfig } from '@heyclaude/web-runtime/utils/component-card-config';
 import { type Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
 import localFont from 'next/font/local';
@@ -208,8 +210,8 @@ export default async function RootLayout({
     });
   }
 
-  // Get component card config from static defaults
-  const componentCardConfig = getComponentCardConfig();
+  // Get component card config from unified-config
+  const componentCardConfig = mapComponentCardConfig(COMPONENT_FLAGS);
 
   return (
     <html
@@ -244,7 +246,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://vitals.vercel-insights.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
-      <body className="font-sans">
+      <body className={fontFamily.sans}>
         {/* Suspense boundary for structured data - streams after initial HTML */}
         <Suspense fallback={null}>
           <StructuredData route="/" />

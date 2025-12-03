@@ -2,7 +2,7 @@
 
 import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { iconSize } from '@heyclaude/web-runtime/design-system';
-import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import { UI_TIMEOUTS } from '@heyclaude/web-runtime/config/unified-config';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { Check, Copy } from 'lucide-react';
@@ -47,10 +47,7 @@ export function SimpleCopyButton({
 
       let resetDelay = 2000;
       try {
-        const result = await getTimeoutConfig();
-        if (result) {
-          resetDelay = result['timeout.ui.clipboard_reset_delay_ms'];
-        }
+        resetDelay = UI_TIMEOUTS.clipboard_reset_delay_ms;
       } catch (configError) {
         logClientWarning('SimpleCopyButton: failed to load timeout config', configError);
       }

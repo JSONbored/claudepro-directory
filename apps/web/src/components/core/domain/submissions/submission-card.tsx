@@ -1,6 +1,13 @@
 import { type Database } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/web-runtime/core';
-import { between, cluster, marginBottom, marginTop, muted, weight ,size , padding , gap, flexWrap,
+import { between, cluster, marginBottom, marginTop, muted, weight ,size , padding , gap,   flexWrap,
+  display,
+  flexGrow,
+  radius,
+  border,
+  bgColor,
+  textColor,
+  borderColor,
 } from '@heyclaude/web-runtime/design-system';
 import type { ReactElement } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -129,7 +136,7 @@ export function SubmissionCard({
     <Card key={submission.id ?? `submission-${index}`}>
       <CardHeader>
         <div className={between.start}>
-          <div className="flex-1">
+          <div className={flexGrow['1']}>
             <div className={cluster.compact}>
               {status ? (
                 getStatusBadge(status)
@@ -165,7 +172,7 @@ export function SubmissionCard({
       </CardHeader>
 
       <CardContent>
-        <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
+        <div className={`${marginBottom.default} ${display.flex} ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
           <div>
             Submitted {submission.created_at ? formatSubmissionDate(submission.created_at) : 'N/A'}
           </div>
@@ -184,15 +191,15 @@ export function SubmissionCard({
         </div>
 
         {status === 'rejected' && submission.rejection_reason && (
-          <div className={`${marginBottom.default} rounded border border-red-500/20 bg-red-500/10 ${padding.compact}`}>
-            <p className={`${marginBottom.micro} ${weight.medium} text-red-400 ${size.sm}`}>Rejection Reason:</p>
+          <div className={`${marginBottom.default} ${radius.default} ${border.default} ${borderColor['red/20']} ${bgColor.error} ${padding.compact}`}>
+            <p className={`${marginBottom.micro} ${weight.medium} ${textColor.error400} ${size.sm}`}>Rejection Reason:</p>
             <p className={muted.sm}>{submission.rejection_reason}</p>
           </div>
         )}
 
         {status === 'merged' && (
-          <div className={`${marginBottom.default} rounded border border-green-500/20 bg-green-500/10 ${padding.compact}`}>
-            <p className={`${weight.medium} text-green-400 ${size.sm}`}>
+          <div className={`${marginBottom.default} ${radius.default} ${border.default} ${borderColor['green/20']} ${bgColor.success} ${padding.compact}`}>
+            <p className={`${weight.medium} ${textColor.success400} ${size.sm}`}>
               🎉 Your contribution is now live on ClaudePro Directory!
             </p>
           </div>

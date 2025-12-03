@@ -73,16 +73,18 @@ import {
   Sparkles,
 } from '../../../icons.tsx';
 import type { ConfigCardProps, ContentItem } from '../../../types/component.types.ts';
-import { SEMANTIC_COLORS } from '../../colors.ts';
 import { ContentIndicators } from '../indicators/content-indicators.tsx';
 // Design System imports
-import { cluster, padding } from '../../../design-system/styles/layout.ts';
+import { cluster, padding, position, marginLeft } from '../../../design-system/styles/layout.ts';
 import { iconSize, iconLeading } from '../../../design-system/styles/icons.ts';
 import { buttonSize, buttonGhost } from '../../../design-system/styles/buttons.ts';
-import { badge, size } from '../../../design-system/styles/typography.ts';
+import { badge, size, weight, muted } from '../../../design-system/styles/typography.ts';
 import { collectionTypeBadge, difficultyBadge } from '../../../design-system/styles/badges.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
-import { shadow } from '../../../design-system/styles/effects.ts';
+import { shadow, opacityLevel } from '../../../design-system/styles/effects.ts';
+import { borderColor, bgColor, textColor } from '../../../design-system/styles/colors.ts';
+import { transition } from '../../../design-system/styles/interactive.ts';
+import { gradientFrom, gradientTo, stateColor } from '../../../design-system/styles/colors.ts';
 import { getDisplayTitle } from '../../utils.ts';
 import { toasts } from '../../../client/toast.ts';
 import { BaseCard, type BaseCardProps } from './base-card.tsx';
@@ -240,7 +242,7 @@ export const ConfigCard = memo(
       const hasTrackedHighlight = useRef(false);
 
       // Extract position metadata
-      const position: number | undefined =
+      const itemPosition: number | undefined =
         'position' in item && typeof item.position === 'number' ? item.position : undefined;
 
       // Track card clicks
@@ -256,7 +258,7 @@ export const ConfigCard = memo(
             metadata: {
               action: 'card_click',
               source: 'card_grid',
-              ...(position !== undefined && { position }),
+              ...(itemPosition !== undefined && { position: itemPosition }),
               ...(searchQuery?.trim() && { search_query: searchQuery.trim() }),
             },
           })
@@ -266,7 +268,7 @@ export const ConfigCard = memo(
               slug: item.slug ?? '',
             });
           });
-      }, [pulse, item.category, item.slug, position, searchQuery]);
+      }, [pulse, item.category, item.slug, itemPosition, searchQuery]);
 
       useEffect(() => {
         if (searchQuery?.trim() && !hasTrackedHighlight.current) {
@@ -666,7 +668,7 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="outline"
-                  className={`border-border/50 bg-muted/30 text-muted-foreground ${badge.default}`}
+                  className={`${borderColor['border/50']} ${bgColor['muted/30']} ${muted.default} ${badge.default}`}
                 >
                   {itemCount} {itemCount === 1 ? 'item' : 'items'}
                 </UnifiedBadge>
@@ -677,18 +679,18 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="secondary"
-                  className={`fade-in slide-in-from-top-2 animate-in ${cluster.tight} font-semibold ${shadow.sm} transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:${shadow.md} ${SEMANTIC_COLORS.FEATURED}`}
+                  className={`fade-in slide-in-from-top-2 animate-in ${cluster.tight} ${weight.semibold} ${shadow.sm} ${transition.all} duration-300 hover:${gradientFrom.amber15} hover:${gradientTo.yellow15} hover:${shadow.md} ${stateColor.featured.default}`}
                 >
                   {featuredRank && featuredRank <= 3 ? (
                     <Award
-                      className={`${iconSize.xs} text-amber-500`}
+                      className={`${iconSize.xs} ${textColor.amber}`}
                       aria-hidden="true"
                     />
                   ) : (
                     <Sparkles className={iconSize.xs} aria-hidden="true" />
                   )}
                   Featured
-                  {featuredRank && <span className={`${size.xs} opacity-75`}>#{featuredRank}</span>}
+                  {featuredRank && <span className={`${size.xs} ${opacityLevel[75]}`}>#{featuredRank}</span>}
                 </UnifiedBadge>
               )}
               {isSponsored && sponsorTier && (
@@ -697,7 +699,7 @@ export const ConfigCard = memo(
 
               {/* New indicator */}
               {'isNew' in item && item.isNew && (
-                <UnifiedBadge variant="new-indicator" label="New content" className="ml-0.5" />
+                <UnifiedBadge variant="new-indicator" label="New content" className={marginLeft.micro} />
               )}
             </>
           );
@@ -870,7 +872,7 @@ export const ConfigCard = memo(
 
             {/* Bookmark button */}
             {cardConfig.showBookmark && (
-              <div className="relative">
+              <div className={position.relative}>
                 {item.slug && (
                   <BookmarkButton
                     contentType={
@@ -892,7 +894,7 @@ export const ConfigCard = memo(
             )}
 
             {/* Pin button */}
-            <div className="relative">
+            <div className={position.relative}>
               <Button
                 variant={pinned ? 'secondary' : 'ghost'}
                 size="sm"
@@ -943,7 +945,7 @@ export const ConfigCard = memo(
 
             {/* Copy button */}
             {cardConfig.showCopyButton && (
-              <div className="relative">
+              <div className={position.relative}>
                 <SimpleCopyButton
                   content={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
                   successMessage="Link copied to clipboard!"
@@ -975,7 +977,7 @@ export const ConfigCard = memo(
             )}
 
             {/* View button */}
-            <div className="relative">
+            <div className={position.relative}>
               <Button
                 variant="ghost"
                 size="sm"
@@ -1029,7 +1031,7 @@ export const ConfigCard = memo(
       };
 
       return (
-        <div className="relative">
+        <div className={position.relative}>
           {/* BorderBeam animation */}
           {shouldShowBeam && (
             <BorderBeam
@@ -1057,11 +1059,11 @@ export const ConfigCard = memo(
       // Return minimal fallback
       return (
         <div className={`${radius.lg} border ${padding.default}`} role="article">
-          <h3 className="font-semibold">
+          <h3 className={weight.semibold}>
             {'title' in item && typeof item.title === 'string' ? item.title : 'Content'}
           </h3>
           {'description' in item && item.description && (
-            <p className={`${size.sm} text-muted-foreground`}>{item.description}</p>
+            <p className={`${size.sm} ${muted.default}`}>{item.description}</p>
           )}
         </div>
       );

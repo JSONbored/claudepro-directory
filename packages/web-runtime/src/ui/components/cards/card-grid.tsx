@@ -40,8 +40,8 @@ import { logUnhandledPromise } from '../../../entries/core.ts';
 import { useInfiniteScroll } from '../../../hooks/use-infinite-scroll.ts';
 import type { DisplayableContent } from '../../../types/component.types.ts';
 // Design System imports
-import { grid } from '../../../design-system/styles/layout.ts';
-import { size } from '../../../design-system/styles/typography.ts';
+import { grid, display, alignItems, justify, padding } from '../../../design-system/styles/layout.ts';
+import { size, muted } from '../../../design-system/styles/typography.ts';
 import { ErrorBoundary } from '../error-boundary.tsx';
 import { ConfigCard } from './config-card.tsx';
 import { motion } from 'motion/react';
@@ -175,16 +175,16 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
 
   if (safeItems.length === 0 && !loading) {
     return (
-      <output className="flex items-center justify-center py-12" aria-live="polite">
-        <p className={`${size.lg} text-muted-foreground`}>{emptyMessage}</p>
+      <output className={`${display.flex} ${alignItems.center} ${justify.center} ${padding.ySection}`} aria-live="polite">
+        <p className={`${size.lg} ${muted.default}`}>{emptyMessage}</p>
       </output>
     );
   }
 
   if (loading) {
     return (
-      <output className="flex items-center justify-center py-12" aria-live="polite">
-        <p className={`${size.lg} text-muted-foreground`}>{loadingMessage}</p>
+      <output className={`${display.flex} ${alignItems.center} ${justify.center} ${padding.ySection}`} aria-live="polite">
+        <p className={`${size.lg} ${muted.default}`}>{loadingMessage}</p>
       </output>
     );
   }
@@ -233,12 +233,12 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
       {infiniteScroll && (hasMore || serverHasMore) && (
         <div
           ref={sentinelRef}
-          className="flex items-center justify-center py-8"
+          className={`${display.flex} ${alignItems.center} ${justify.center} ${padding.yLoose}`}
           style={{ minHeight: '100px' }}
           aria-live="polite"
           aria-busy={isLoading}
         >
-          {isLoading && <p className={`${size.sm} text-muted-foreground`}>{loadingMessage}</p>}
+          {isLoading && <p className={`${size.sm} ${muted.default}`}>{loadingMessage}</p>}
         </div>
       )}
     </section>

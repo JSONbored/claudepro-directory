@@ -39,10 +39,11 @@
 import type { IconComponent } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
 // Design System imports
-import { cluster, padding, marginTop } from '../../../design-system/styles/layout.ts';
+import { cluster, padding, marginTop, flexGrow, overflow, position } from '../../../design-system/styles/layout.ts';
 import { iconSize } from '../../../design-system/styles/icons.ts';
 import { cardHeader, cardBody } from '../../../design-system/styles/cards.ts';
-import { size } from '../../../design-system/styles/typography.ts';
+import { size, weight, muted } from '../../../design-system/styles/typography.ts';
+import { textColor, bgColor, borderColor } from '../../../design-system/styles/colors.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
@@ -83,30 +84,30 @@ const THEME_CONFIG: Record<
   }
 > = {
   primary: {
-    border: 'border-primary/20',
-    iconBg: 'bg-primary/10',
-    iconText: 'text-primary',
+    border: borderColor['primary/20'],
+    iconBg: bgColor['primary/10'],
+    iconText: textColor.primary,
     beamFrom: '#9333ea',
     beamTo: '#a855f7',
   },
   blue: {
-    border: 'border-blue-500/20',
-    iconBg: 'bg-blue-500/10',
-    iconText: 'text-blue-500',
+    border: borderColor['blue/20'],
+    iconBg: bgColor.info,
+    iconText: textColor.blue500,
     beamFrom: '#3b82f6',
     beamTo: '#60a5fa',
   },
   green: {
-    border: 'border-green-500/20',
-    iconBg: 'bg-green-500/10',
-    iconText: 'text-green-500',
+    border: borderColor['green/20'],
+    iconBg: bgColor['green/10'],
+    iconText: textColor.green500,
     beamFrom: '#22c55e',
     beamTo: '#4ade80',
   },
   purple: {
-    border: 'border-purple-500/20',
-    iconBg: 'bg-purple-500/10',
-    iconText: 'text-purple-500',
+    border: borderColor['purple/20'],
+    iconBg: bgColor['purple/10'],
+    iconText: textColor.purple500,
     beamFrom: '#a855f7',
     beamTo: '#c084fc',
   },
@@ -145,7 +146,7 @@ export function FormSectionCard({
 
   return (
     <motion.div initial="hidden" animate="visible" variants={sectionVariants} className={className}>
-      <Card className={cn('relative overflow-hidden', themeConfig.border)}>
+      <Card className={cn(`${position.relative} ${overflow.hidden}`, themeConfig.border)}>
         {/* BorderBeam for active/focused sections */}
         {showBorderBeam && (
           <BorderBeam
@@ -165,21 +166,21 @@ export function FormSectionCard({
                 radius.lg,
                 padding.tight,
                 themeConfig.iconBg,
-                'shrink-0'
+                flexGrow.shrink0
               )}
             >
               <Icon className={cn(iconSize.md, themeConfig.iconText)} />
             </div>
 
             {/* Title and description */}
-            <div className="flex-1">
+            <div className={flexGrow['1']}>
               <CardTitle
-                className={cn(cluster.compact, `${size.lg} font-semibold`)}
+                className={cn(cluster.compact, `${size.lg} ${weight.semibold}`)}
               >
-                <span className={cn('font-semibold', themeConfig.iconText)}>{step}.</span>
+                <span className={cn(weight.semibold, themeConfig.iconText)}>{step}.</span>
                 {title}
               </CardTitle>
-              <p className={cn(`${size.sm} text-muted-foreground`, marginTop.micro)}>
+              <p className={cn(`${size.sm} ${muted.default}`, marginTop.micro)}>
                 {description}
               </p>
             </div>

@@ -27,9 +27,11 @@ import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 import { logClientErrorBoundary, logClientWarn } from '../../utils/client-logger.ts';
 import { usePulse } from '../../hooks/use-pulse.ts';
 // Design System imports
-import { responsive, padding, marginTop, marginBottom } from '../../design-system/styles/layout.ts';
-import { size as textSize } from '../../design-system/styles/typography.ts';
+import { responsive, padding, marginTop, marginBottom, maxWidth, minHeight, display, alignItems, justify, width, spaceY } from '../../design-system/styles/layout.ts';
+import { size as textSize, weight, muted, whitespace, fontFamily } from '../../design-system/styles/typography.ts';
+import { bgColor, textColor } from '../../design-system/styles/colors.ts';
 import { radius } from '../../design-system/styles/radius.ts';
+import { border } from '../../design-system/styles/borders.ts';
 import { Button } from './button.tsx';
 import {
   Card,
@@ -119,14 +121,14 @@ function SegmentErrorFallbackUI({
   }, [pulse, segment, error.digest, reset]);
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-2xl">
+    <div className={`${display.flex} ${minHeight.viewport60} ${alignItems.center} ${justify.center} ${padding.xComfortable} ${padding.ySection}`}>
+      <Card className={`${width.full} ${maxWidth['2xl']}`}>
         <CardHeader>
           <CardTitle className={textSize['2xl']}>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Button onClick={handleReset} className="w-full sm:w-auto">
+        <CardContent className={spaceY.comfortable}>
+          <Button onClick={handleReset} className={`${width.full} sm:${width.auto}`}>
             {resetText}
           </Button>
 
@@ -137,7 +139,7 @@ function SegmentErrorFallbackUI({
                   key={`${link.href}-${link.label}`}
                   asChild={true}
                   variant={link.variant ?? 'outline'}
-                  className="w-full sm:w-auto"
+                  className={`${width.full} sm:${width.auto}`}
                 >
                   <Link href={link.href}>{link.label}</Link>
                 </Button>
@@ -146,15 +148,15 @@ function SegmentErrorFallbackUI({
           )}
 
           {isDevelopment && error && (
-            <div className={`${radius.lg} border border-muted-foreground/30 border-dashed bg-muted/30 ${padding.default}`}>
-              <p className={`${marginBottom.compact} font-semibold text-muted-foreground ${textSize.sm}`}>
+            <div className={`${radius.lg} ${border.dashedSubtle} ${bgColor['muted/30']} ${padding.default}`}>
+              <p className={`${marginBottom.compact} ${weight.semibold} ${muted.default} ${textSize.sm}`}>
                 Error details
               </p>
-              <pre className={`wrap-break-word whitespace-pre-wrap text-destructive ${textSize.xs}`}>
+              <pre className={`${whitespace.wrapBreakWord} ${whitespace.preWrap} ${textColor.destructive} ${textSize.xs}`}>
                 {error.message}
               </pre>
               {error.digest && (
-                <p className={`${marginTop.compact} font-mono text-muted-foreground ${textSize.xs}`}>
+                <p className={`${marginTop.compact} ${fontFamily.mono} ${muted.default} ${textSize.xs}`}>
                   Digest: {error.digest}
                 </p>
               )}

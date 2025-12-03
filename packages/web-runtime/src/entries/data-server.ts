@@ -1,7 +1,7 @@
 // Update entry point
 export * from '../actions/safe-action.ts';
-// Export ParseStrategy and safeParse from data.ts (exports both value and type)
-export { ParseStrategy, safeParse } from '../data.ts';
+// Export ParseStrategy, safeParse, and date formatting utilities from data.ts
+export { ParseStrategy, safeParse, formatDate, formatRelativeDate, formatDistanceToNow, getLastUpdatedDate } from '../data.ts';
 // REMOVED: export * from '../actions/feature-flags.ts'; - Causes module-level evaluation during SSR, use lazy imports
 export * from '../storage/image-storage.ts';
 export * from '../storage/image-utils.ts';
@@ -12,24 +12,10 @@ export * from '../edge/search-client.ts';
 export * from '../seo/og.ts';
 export * from '../auth/get-authenticated-user.ts';
 
-// Static Config Getters (sync)
+// Direct config exports from unified config (single source of truth)
 export {
-  getTimeoutConfig,
-  getPollingConfig,
-  getNewsletterConfig,
-  getNewsletterConfigValue,
-  getAppSettings,
-  getRecentlyViewedConfig,
-  getAnimationConfig,
-  getHomepageConfigBundle,
-} from '../config/static-configs.ts';
-
-// Direct config exports from unified config
-export {
-  UI_ANIMATION,
   UI_TIMEOUTS,
   API_TIMEOUTS,
-  CONFETTI_CONFIG,
   POLLING_CONFIG,
   NEWSLETTER_CTA,
   NEWSLETTER_BEHAVIOR,
@@ -37,6 +23,9 @@ export {
   HOMEPAGE_CONFIG,
   INFINITE_SCROLL_CONFIG,
 } from '../config/unified-config.ts';
+
+// Design system tokens (for design values)
+export { animation } from '../design-system/tokens.ts';
 
 // Data Services (Server-Side)
 export * from '../data/content-helpers.ts';

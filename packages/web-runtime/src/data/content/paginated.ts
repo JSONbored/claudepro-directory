@@ -38,7 +38,9 @@ export const getPaginatedContent = cache(
   > => {
   const normalizedCategory = category ? toContentCategory(category) : undefined;
 
-  return fetchCached(
+  const result = await fetchCached<
+    Database['public']['Functions']['get_content_paginated_slim']['Returns']
+  >(
     (client) => new ContentService(client).getContentPaginatedSlim({
       ...(normalizedCategory ? { p_category: normalizedCategory } : {}),
       p_limit: limit,
@@ -47,10 +49,17 @@ export const getPaginatedContent = cache(
     {
       keyParts: ['content-paginated', normalizedCategory ?? category ?? 'all', limit, offset],
       tags: generateContentTags(normalizedCategory ?? null, null, ['content-paginated']),
-      ttlKey: 'cache.content_paginated.ttl_seconds',
-      fallback: null,
+      ttlKey: 'content_paginated',
+      fallback: {
+        items: null,
+        pagination: null,
+      },
       logMeta: { category: normalizedCategory ?? category ?? 'all', limit, offset },
     }
   );
+
+    // Return null if no items (not found or empty)
+    if (!result.items || result.items.length === 0) return null;
+    return result;
   }
 );

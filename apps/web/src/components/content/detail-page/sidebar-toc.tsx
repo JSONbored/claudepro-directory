@@ -23,6 +23,15 @@ import { focusRing, marginBottom, weight, muted, size, tracking,
   transition,
   padding,
   radius,
+  textColor,
+  bgColor,
+  truncate,
+  spaceY,
+  position,
+  absolute,
+  width,
+  textAlign,
+  transform,
 } from '@heyclaude/web-runtime/design-system';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -167,14 +176,14 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
   }
 
   return (
-    <nav className={cn('py-2', className)} aria-label="On this page">
+    <nav className={cn(padding.yCompact, className)} aria-label="On this page">
       {/* Header - Supabase style uppercase */}
-      <p className={`${marginBottom.compact} ${weight.medium} ${muted.default} ${size.xs} uppercase ${tracking.wider}`}>
+      <p className={`${marginBottom.compact} ${weight.medium} ${muted.default} ${size.xs} ${transform.uppercase} ${tracking.wider}`}>
         On this page
       </p>
 
       {/* Heading list with left border indicator */}
-      <ul className="space-y-0.5">
+      <ul className={spaceY.tight}>
         {normalizedHeadings.map((heading) => {
           const depthOffset = Math.max(heading.level - baseLevel, 0);
           const isActive = activeId === heading.id;
@@ -186,12 +195,12 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
                   focusRing.default,
-                  'group relative w-full text-left text-[13px]',
+                  `group ${position.relative} ${width.full} ${textAlign.left} text-[13px]`,
                   padding.ySnug,
                   leading.snug,
                   transition.colors,
-                  'hover:text-foreground',
-                  isActive ? 'text-foreground' : muted.default
+                  `hover:${textColor.foreground}`,
+                  isActive ? textColor.foreground : muted.default
                 )}
                 style={{
                   paddingLeft: `${0.75 + depthOffset * 0.75}rem`,
@@ -201,14 +210,14 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
                 {/* Left border indicator */}
                 <span
                   className={cn(
-                    `absolute top-0 bottom-0 left-0 w-0.5 ${radius.full} ${transition.all} ${animateDuration.default}`,
+                    `${absolute.topLeft} ${absolute.bottom0Value} ${absolute.left0Value} ${width.hairline} ${radius.full} ${transition.all} ${animateDuration.default}`,
                     isActive
-                      ? `bg-accent ${opacityLevel[100]}`
-                      : `bg-border ${opacityLevel[0]} group-hover:opacity-50`
+                      ? `${bgColor.accent} ${opacityLevel[100]}`
+                      : `${bgColor.border} ${opacityLevel[0]} group-hover:${opacityLevel[50]}`
                   )}
                   aria-hidden="true"
                 />
-                <span className="line-clamp-2">{heading.title}</span>
+                <span className={truncate.lines2}>{heading.title}</span>
               </button>
             </li>
           );

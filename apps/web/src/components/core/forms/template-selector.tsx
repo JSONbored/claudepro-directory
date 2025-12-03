@@ -19,6 +19,8 @@ import {
   size,
   weight,
   dropdownWidth,
+  cursor,
+  width,
 } from '@heyclaude/web-runtime/design-system';
 import { Button } from '@heyclaude/web-runtime/ui';
 import {
@@ -67,7 +69,7 @@ export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild={true}>
-        <Button variant="outline" className={`w-full ${justify.between}`} type="button">
+        <Button variant="outline" className={`${width.full} ${justify.between}`} type="button">
           <span className={cluster.compact}>
             <FileText className={iconSize.sm} />
             Use Template
@@ -83,7 +85,7 @@ export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps)
           <DropdownMenuItem
             key={template.id}
             onClick={() => onSelect(template)}
-            className={`cursor-pointer ${flexDir.col} ${alignItems.start} ${padding.yCompact}`}
+            className={`${cursor.pointer} ${flexDir.col} ${alignItems.start} ${padding.yCompact}`}
           >
             <div className={weight.medium}>{template.name}</div>
             <div className={`${marginTop.micro} ${muted.default} ${size.xs}`}>{template.description}</div>

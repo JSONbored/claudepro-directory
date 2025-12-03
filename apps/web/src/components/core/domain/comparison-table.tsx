@@ -12,6 +12,11 @@ import {
   padding,
   textColor,
   weight,
+  border,
+  marginY,
+  textAlign,
+  overflow,
+  width,
 } from '@heyclaude/web-runtime/design-system';
 import {
   Card,
@@ -63,7 +68,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
   };
 
   return (
-    <Card className="my-8">
+    <Card className={marginY.loose}>
       {(title || description) && (
         <CardHeader>
           {title && <CardTitle>{title}</CardTitle>}
@@ -71,13 +76,13 @@ export function ComparisonTable(props: ComparisonTableProps) {
         </CardHeader>
       )}
       <CardContent className={padding.none}>
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className={overflow.xAuto}>
+          <table className={width.full}>
             <thead className={borderBottom.default}>
               <tr>
-                <th className={`${padding.default} text-left ${weight.medium}`}>Feature</th>
+                <th className={`${padding.default} ${textAlign.left} ${weight.medium}`}>Feature</th>
                 {headers.map((header) => (
-                  <th key={header} className={`${padding.default} text-left ${weight.medium}`}>
+                  <th key={header} className={`${padding.default} ${textAlign.left} ${weight.medium}`}>
                     {header}
                   </th>
                 ))}
@@ -87,7 +92,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
               {validItems.map((item) => {
                 const options = [item.option1, item.option2, item.option3];
                 return (
-                  <tr key={item.feature} className={`${borderBottom.default} last:border-0`}>
+                  <tr key={item.feature} className={`${borderBottom.default} last:${border.none}`}>
                     <td className={`${padding.default} ${weight.medium}`}>{item.feature}</td>
                     {headers.map((header, index) => (
                       <td key={header} className={padding.default}>

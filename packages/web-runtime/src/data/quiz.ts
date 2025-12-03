@@ -14,7 +14,7 @@ export async function getQuizConfiguration(): Promise<null | QuizConfigurationRe
     {
       keyParts: ['quiz-config'],
       tags: ['quiz'],
-      ttlKey: 'cache.quiz.ttl_seconds',
+      ttlKey: 'quiz',
       useAuth: true,
       fallback: null,
       logMeta: { source: 'quiz.actions' },

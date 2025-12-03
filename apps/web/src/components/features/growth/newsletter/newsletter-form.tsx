@@ -5,9 +5,13 @@ import {
   animateDuration,
   backdrop,
   bgColor,
+  bgGradient,
   borderColor,
   cluster,
   flexGrow,
+  gradientFrom,
+  gradientVia,
+  gradientTo,
   helper,
   iconSize,
   opacityLevel,
@@ -19,12 +23,21 @@ import {
   textColor,
   transition,
   weight,
+  position,
+  absolute,
+  width,
+  cursor,
+  height,
+  whitespace,
+  minWidth,
+  buttonHeight,
+  activeScale,
 } from '@heyclaude/web-runtime/design-system';
-import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
+// Confetti is enabled
+const CONFETTI_ENABLED = true;
 import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { Mail } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { buttonHeight, minWidth } from '@heyclaude/web-runtime/design-system';
 import { useId, useState } from 'react';
 import { InlineSpinner } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
@@ -56,8 +69,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
     source,
     onSuccess: async () => {
       // Check confetti enabled (static config)
-      const confettiEnabled = checkConfettiEnabled();
-      if (confettiEnabled) {
+      if (CONFETTI_ENABLED) {
         fireConfetti('subtle');
       }
     },
@@ -71,10 +83,10 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={cn('w-full', className)}>
+    <form onSubmit={handleSubmit} className={cn(width.full, className)}>
       <div className={stack.default}>
         <div className={responsive.smRowGap}>
-          <div className={`relative ${flexGrow['1']}`}>
+          <div className={`${position.relative} ${flexGrow['1']}`}>
             <Input
               type="email"
               placeholder="your@email.com"
@@ -85,12 +97,12 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
               required={true}
               disabled={isSubmitting}
               className={cn(
-                `${buttonHeight.lg} min-w-0 ${padding.xMedium} ${size.base}`,
+                `${buttonHeight.lg} ${minWidth[0]} ${padding.xMedium} ${size.base}`,
                 `${borderColor['border/40']} ${bgColor['background/95']} ${backdrop.sm}`,
-                `${transition.all} ${animateDuration.default} ease-out`,
-                'focus:border-accent/50 focus:ring-2 focus:ring-accent/20',
-                error && 'border-destructive/50 focus:border-destructive focus:ring-destructive/20',
-                isSubmitting && `cursor-not-allowed ${opacityLevel[60]}`
+                `${transition.all} ${animateDuration.default}`,
+                `focus:${borderColor['accent/50']} focus:ring-2 focus:ring-accent/20`,
+                error && `${borderColor['destructive/50']} focus:${borderColor.destructive} focus:ring-destructive/20`,
+                isSubmitting && `${cursor.notAllowed} ${opacityLevel[60]}`
               )}
               aria-label="Email address"
               aria-invalid={!!error}
@@ -98,8 +110,8 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             />
             <div
               className={cn(
-                `absolute bottom-0 left-0 h-0.5 bg-linear-to-r from-accent to-primary ${transition.all} ${animateDuration.slow} ease-out`,
-                isFocused && !error ? `w-full ${opacityLevel[100]}` : `w-0 ${opacityLevel[0]}`
+                `${absolute.bottomLeft} ${height.hairline} ${bgGradient.toR} ${gradientFrom.accent} ${gradientTo.primary} ${transition.all} ${animateDuration.slow}`,
+                isFocused && !error ? `${width.full} ${opacityLevel[100]}` : `${width[0]} ${opacityLevel[0]}`
               )}
             />
           </div>
@@ -108,14 +120,14 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             disabled={isSubmitting || !email.trim()}
             size="lg"
             className={cn(
-              `${buttonHeight.lg} ${flexGrow.shrink0} whitespace-nowrap ${padding.xRelaxed}`,
-              `bg-linear-to-r from-accent via-accent to-primary ${weight.semibold} ${textColor.accentForeground}`,
-              `${shadow.md} ${transition.all} ${animateDuration.default} ease-out`,
-              `hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:${shadow.lg}`,
-              'active:scale-[0.98]',
+              `${buttonHeight.lg} ${flexGrow.shrink0} ${whitespace.nowrap} ${padding.xRelaxed}`,
+              `${bgGradient.toR} ${gradientFrom.accent} ${gradientVia.accent} ${gradientTo.primary} ${weight.semibold} ${textColor.accentForeground}`,
+              `${shadow.md} ${transition.all} ${animateDuration.default}`,
+              `hover:scale-[1.02] hover:${gradientFrom.accent90} hover:${gradientVia.accent90} hover:${gradientTo.primary90} hover:${shadow.lg}`,
+              activeScale.down,
               'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-              'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100',
-              `w-full sm:w-auto sm:${minWidth.newsletterButton}`
+              `disabled:${cursor.notAllowed} disabled:${opacityLevel[50]} disabled:hover:scale-100`,
+              `${width.full} sm:${width.auto} sm:${minWidth.newsletterButton}`
             )}
           >
             {isSubmitting ? (

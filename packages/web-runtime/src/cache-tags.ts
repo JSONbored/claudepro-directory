@@ -1,17 +1,16 @@
-import type { CacheConfig, CacheInvalidateKey, CacheInvalidateKeyLegacy } from './cache-config.ts';
+import type { CacheConfig, CacheInvalidateKey } from './cache-config.ts';
 import { getCacheInvalidateTags } from './cache-config.ts';
 import { revalidateTag } from 'next/cache';
 
-export type { CacheConfig, CacheInvalidateKey, CacheInvalidateKeyLegacy };
+export type { CacheConfig, CacheInvalidateKey };
 
 /**
  * Resolve invalidation keys to their tag arrays
- * Accepts both new format ('content_create') and legacy format ('cache.invalidate.content_create')
- * @param keys - Array of invalidation keys
+ * @param keys - Array of invalidation keys (e.g., 'content_create')
  * @param _cacheConfig - Deprecated: config is now loaded internally
  */
 export function resolveInvalidateTags(
-  keys: (CacheInvalidateKey | CacheInvalidateKeyLegacy)[] = [],
+  keys: CacheInvalidateKey[] = [],
   _cacheConfig?: CacheConfig
 ): string[] {
   if (!keys.length) {
@@ -31,7 +30,7 @@ export function resolveInvalidateTags(
 
 export interface InvalidateByKeysParams {
   cacheConfig?: CacheConfig;
-  invalidateKeys?: (CacheInvalidateKey | CacheInvalidateKeyLegacy)[];
+  invalidateKeys?: CacheInvalidateKey[];
   extraTags?: string[];
 }
 

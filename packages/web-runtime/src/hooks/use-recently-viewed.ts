@@ -34,10 +34,7 @@
  * ```
  */
 
-import {
-  getRecentlyViewedConfig,
-  getTimeoutConfig,
-} from '../config/static-configs.ts';
+import { RECENTLY_VIEWED_CONFIG, UI_TIMEOUTS } from '../config/unified-config.ts';
 import { normalizeError } from '../errors.ts';
 import { logger } from '../entries/core.ts';
 import { useCallback, useEffect, useRef } from 'react';
@@ -258,23 +255,12 @@ export function useRecentlyViewed(): UseRecentlyViewedReturn {
   useEffect(() => {
     if (isLoaded) return;
 
-    // Load configs from static defaults (only when not loaded)
-    const recentlyViewed = getRecentlyViewedConfig();
-    const timeout = getTimeoutConfig();
-    
-    const recentlyViewedConfig = recentlyViewed as {
-      'recently_viewed.max_items': number;
-      'recently_viewed.ttl_days': number;
-      'recently_viewed.max_description_length': number;
-      'recently_viewed.max_tags': number;
-    };
-    MAX_ITEMS = recentlyViewedConfig['recently_viewed.max_items'];
-    TTL_DAYS = recentlyViewedConfig['recently_viewed.ttl_days'];
-    MAX_DESCRIPTION_LENGTH = recentlyViewedConfig['recently_viewed.max_description_length'];
-    MAX_TAGS = recentlyViewedConfig['recently_viewed.max_tags'];
-    
-    const timeoutConfig = timeout as { 'timeout.ui.form_debounce_ms': number };
-    DEBOUNCE_MS = timeoutConfig['timeout.ui.form_debounce_ms'];
+    // Load configs from unified-config (only when not loaded)
+    MAX_ITEMS = RECENTLY_VIEWED_CONFIG.max_items;
+    TTL_DAYS = RECENTLY_VIEWED_CONFIG.ttl_days;
+    MAX_DESCRIPTION_LENGTH = RECENTLY_VIEWED_CONFIG.max_description_length;
+    MAX_TAGS = RECENTLY_VIEWED_CONFIG.max_tags;
+    DEBOUNCE_MS = UI_TIMEOUTS.form_debounce_ms;
 
     const loadedItems = loadFromStorage();
     setItems(loadedItems);

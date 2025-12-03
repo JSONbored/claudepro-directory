@@ -38,14 +38,15 @@
 
 import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
-import { getAnimationConfig } from '../../../config/static-configs.ts';
+import { animation } from '../../../design-system/tokens.ts';
 import { Bookmark, Copy as CopyIcon } from '../../../icons.tsx';
 // Design System imports
 import { absolute } from '../../../design-system/styles/position.ts';
 import { iconSize } from '../../../design-system/styles/icons.ts';
-import { padding } from '../../../design-system/styles/layout.ts';
+import { padding, display, alignItems, justify, position, paddingLeft, paddingRight, width } from '../../../design-system/styles/layout.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
-import { SEMANTIC_COLORS } from '../../colors.ts';
+import { zLayer } from '../../../design-system/styles/effects.ts';
+import { stateColor } from '../../../design-system/styles/colors.ts';
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import type { PanInfo } from 'motion/react';
 import type { ReactNode } from 'react';
@@ -81,12 +82,7 @@ export function SwipeableCardWrapper({
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const springSmooth = useMemo(() => {
     try {
-      const config = getAnimationConfig();
-      return {
-        type: 'spring' as const,
-        stiffness: config['animation.spring.smooth.stiffness'],
-        damping: config['animation.spring.smooth.damping'],
-      };
+      return animation.spring.smooth;
     } catch (error) {
       const normalized = normalizeError(error, 'SwipeableCardWrapper: Failed to load animation config');
       logger.warn('SwipeableCardWrapper: Failed to load animation config', {
@@ -170,23 +166,23 @@ export function SwipeableCardWrapper({
   }
 
   return (
-    <div className="relative">
+    <div className={position.relative}>
       {/* Swipe Indicator - Copy (Right) */}
       <motion.div
-        className={`pointer-events-none ${absolute.insetYLeft} z-0 flex w-20 items-center justify-start pl-4`}
+        className={`pointer-events-none ${absolute.insetYLeft} ${zLayer.base} ${display.flex} ${width.gradientFade} ${alignItems.center} ${justify.start} ${paddingLeft.comfortable}`}
         style={{ opacity: copyIndicatorOpacity }}
       >
-        <div className={`${radius.lg} ${padding.compact} ${SEMANTIC_COLORS.SWIPE_COPY}`}>
+        <div className={`${radius.lg} ${padding.compact} ${stateColor.swipe.copy}`}>
           <CopyIcon className={iconSize.md} aria-hidden="true" />
         </div>
       </motion.div>
 
       {/* Swipe Indicator - Bookmark (Left) */}
       <motion.div
-        className={`pointer-events-none ${absolute.insetYRight} z-0 flex w-20 items-center justify-end pr-4`}
+        className={`pointer-events-none ${absolute.insetYRight} ${zLayer.base} ${display.flex} ${width.gradientFade} ${alignItems.center} ${justify.end} ${paddingRight.comfortable}`}
         style={{ opacity: bookmarkIndicatorOpacity }}
       >
-        <div className={`${radius.lg} ${padding.compact} ${SEMANTIC_COLORS.SWIPE_BOOKMARK}`}>
+        <div className={`${radius.lg} ${padding.compact} ${stateColor.swipe.bookmark}`}>
           <Bookmark className={iconSize.md} aria-hidden="true" />
         </div>
       </motion.div>
@@ -227,7 +223,7 @@ export function SwipeableCardWrapper({
           }
         }}
         transition={springSmooth}
-        className="relative z-10"
+        className={`${position.relative} ${zLayer.raised}`}
       >
         {children}
       </motion.div>

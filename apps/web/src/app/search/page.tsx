@@ -8,10 +8,12 @@ import {
   generatePageMetadata,
   getHomepageData,
   getSearchFacets,
-  searchContent, getHomepageCategoryIds 
+  searchContent, getHomepageCategoryIds
 } from '@heyclaude/web-runtime/data';
 import {
+  container,
   gap,
+  grid,
   marginBottom,
   padding,
   size,
@@ -174,10 +176,10 @@ async function SearchResultsSection({
  */
 export default async function SearchPage({ searchParams }: SearchPageProperties) {
   const resolvedParameters = await searchParams;
-  
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -203,7 +205,7 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
   if (author) filters.p_authors = [author];
   filters.p_limit = 50;
 
-   
+
   const hasUserFilters =
     !!validatedSort ||
     (categories?.length ?? 0) > 0 ||
@@ -297,11 +299,11 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
   });
 
   return (
-    <main className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
+    <main className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}>
       <h1 className={`${marginBottom.relaxed} ${weight.bold} ${size['4xl']}`}>
-        {query ? `Search: "${query}"` : 'Search Claude Code Directory'}
+        {query ? `Search: "${query}"` : 'Search Claude Pro Directory'}
       </h1>
-      <div className={`grid ${gap.loose} xl:grid-cols-[minmax(0,1fr)_18rem]`}>
+      <div className={`${grid.search} ${gap.loose}`}>
         <Suspense
           fallback={
             <ContentSearchClient
@@ -353,12 +355,12 @@ function rankFacetValues(
 
   const counts = new Map<string, number>();
   for (const facet of facets) {
-    const weight = Math.max(1, facet.contentCount);
+    const facetWeight = Math.max(1, facet.contentCount);
     for (const rawValue of selector(facet)) {
       if (!rawValue) continue;
       const normalized = rawValue.trim();
       if (!normalized) continue;
-      counts.set(normalized, (counts.get(normalized) ?? 0) + weight);
+      counts.set(normalized, (counts.get(normalized) ?? 0) + facetWeight);
     }
   }
 

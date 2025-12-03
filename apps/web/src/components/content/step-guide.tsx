@@ -25,6 +25,18 @@ import {
   flexGrow,
   radius,
   shadow,
+  bgGradient,
+  gradientFrom,
+  gradientTo,
+  absolute,
+  width,
+  gradientVia,
+  animate,
+  position,
+  borderWidth,
+  paddingLeft,
+  marginY,
+  marginLeft,
 } from '@heyclaude/web-runtime/design-system';
 import type { StepByStepGuideProps } from '@heyclaude/web-runtime/types/component.types';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
@@ -59,7 +71,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
   );
 
   return (
-    <section itemScope={true} itemType="https://schema.org/HowTo" className="my-8">
+    <section itemScope={true} itemType="https://schema.org/HowTo" className={marginY.loose}>
       <div className={marginBottom.comfortable}>
         <h2 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`} itemProp="name">
           {title}
@@ -81,12 +93,12 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
         {highlightedSteps.map((step, index) => {
           const isLastStep = index === highlightedSteps.length - 1;
           return (
-            <div key={step.title} className="relative">
+            <div key={step.title} className={position.relative}>
               {/* Connecting line */}
               {!isLastStep && (
                 <div
                   className={
-                    'absolute top-14 bottom-0 left-5 w-0.5 bg-linear-to-b from-primary/50 to-primary/10'
+                    `${position.absolute} ${absolute.top14} ${absolute.bottom0Value} ${absolute.left5} ${width.hairline} ${bgGradient.toB} ${gradientFrom.primary50} ${gradientTo.primary10}`
                   }
                 />
               )}
@@ -94,14 +106,14 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
               <Card
                 itemScope={true}
                 itemType="https://schema.org/HowToStep"
-                className={`border-2 ${borderColor['primary/20']} bg-linear-to-br from-card via-card/80 to-transparent ${transition.all} ${animateDuration.slow} hover:${shadow['2xl']}`}
+                className={`${borderWidth['2']} ${borderColor['primary/20']} ${bgGradient.toBR} ${gradientFrom.card} ${gradientVia.card80} ${gradientTo.transparent} ${transition.all} ${animateDuration.slow} hover:${shadow['2xl']}`}
               >
                 <CardHeader>
                   <CardTitle className={cluster.comfortable} itemProp="name">
-                    <div className="relative">
+                    <div className={position.relative}>
                       <div
                         className={
-                          `flex ${iconSize['2xl']} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} bg-linear-to-br from-primary to-primary/70 ${shadow.lg}`
+                          `flex ${iconSize['2xl']} ${flexGrow.shrink0} ${alignItems.center} ${justify.center} ${radius.full} ${bgGradient.toBR} ${gradientFrom.primary} ${gradientTo.primary70} ${shadow.lg}`
                         }
                       >
                         <span className={`${weight.bold} ${size.base} ${textColor.primaryForeground}`}>
@@ -110,7 +122,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                       </div>
                       <div
                         className={
-                          `absolute inset-0 animate-ping ${radius.full} ${bgColor.primary} ${opacityLevel[20]}`
+                          `${absolute.inset} ${animate.ping} ${radius.full} ${bgColor.primary} ${opacityLevel[20]}`
                         }
                       />
                     </div>
@@ -119,14 +131,14 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                       <UnifiedBadge
                         variant="base"
                         style="secondary"
-                        className={`ml-auto ${borderColor['primary/30']} ${bgColor['primary/10']} ${textColor.primary}`}
+                        className={`${marginLeft.auto} ${borderColor['primary/30']} ${bgColor['primary/10']} ${textColor.primary}`}
                       >
                         ⏱ {step.time}
                       </UnifiedBadge>
                     )}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pl-14">
+                <CardContent className={paddingLeft.hero}>
                   {(step.content || step.description) && (
                     <div itemProp="text" className={`${marginBottom.comfortable} ${size.base} ${leading.relaxed}`}>
                       {(step.content as React.ReactNode) || (step.description as React.ReactNode)}

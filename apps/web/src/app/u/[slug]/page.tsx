@@ -11,11 +11,18 @@ import {
   getAuthenticatedUser,
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
-import { between, card, cluster, muted, iconSize, spaceY, marginBottom, marginTop, weight ,size  , gap , padding , row , minHeight , maxWidth , radius, bgColor,
+import { between, card, cluster, muted, iconSize, spaceY, marginBottom, marginTop, weight, size, grid, padding, paddingTop, row, minHeight, maxWidth, radius, bgColor,
   alignItems,
   justify,
   flexDir,
   squareSize,
+  truncate,
+  display,
+  position,
+  container,
+  borderWidth,
+  borderColor,
+  objectFit,
 } from '@heyclaude/web-runtime/design-system';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -225,9 +232,9 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
   return (
     <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Hero/Profile Header */}
-      <section className="relative">
-        <div className={`container mx-auto ${padding.xDefault}`}>
-          <div className={`flex ${alignItems.start} ${justify.between} pt-12`}>
+      <section className={position.relative}>
+        <div className={`${container.default} ${padding.xDefault}`}>
+          <div className={`${display.flex} ${alignItems.start} ${justify.between} ${paddingTop.section}`}>
             <div className={`${row.comfortable}`}>
               {profile?.image ? (
                 <Image
@@ -235,11 +242,11 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                   alt={`${sanitizeDisplayText(profile.name ?? slug, slug)}'s profile picture`}
                   width={96}
                   height={96}
-                  className={`${squareSize.avatar3xl} ${radius.full} border-4 border-background object-cover`}
+                  className={`${squareSize.avatar3xl} ${radius.full} ${borderWidth['4']} ${borderColor.border} ${objectFit.cover}`}
                   priority
                 />
               ) : (
-                <div className={`flex ${squareSize.avatar3xl} ${alignItems.center} ${justify.center} ${radius.full} border-4 border-background ${bgColor.accent} ${weight.bold} ${size['2xl']}`}>
+                <div className={`${display.flex} ${squareSize.avatar3xl} ${alignItems.center} ${justify.center} ${radius.full} ${borderWidth['4']} ${borderColor.border} ${bgColor.accent} ${weight.bold} ${size['2xl']}`}>
                   {(profile?.name ?? slug).charAt(0).toUpperCase()}
                 </div>
               )}
@@ -288,8 +295,8 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
       </section>
 
       {/* Content */}
-      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
-        <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-3`}>
+      <section className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
+        <div className={grid.responsive3Gap6}>
           {/* Stats sidebar */}
           <div className={spaceY.comfortable}>
             {/* Quick Stats Card */}
@@ -333,13 +340,13 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
 
               {!collections || collections.length === 0 ? (
                 <Card>
-                  <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+                  <CardContent className={`${display.flex} ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
                     <FolderOpen className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
                     <p className={muted.default}>No public collections yet</p>
                   </CardContent>
                 </Card>
               ) : (
-                <div className={`grid ${gap.comfortable} sm:grid-cols-2`}>
+                <div className={grid.responsive2}>
                   {collections
                     .filter(
                       (
@@ -353,7 +360,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         collection.slug !== null &&
                         collection.name !== null
                     )
-                    .map((collection) => {
+                    .flatMap((collection) => {
                       const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
                       if (!safeCollectionUrl) {
                         viewerLogger.warn('UserProfilePage: skipping collection with invalid slug', {
@@ -361,14 +368,14 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                           collectionName: collection.name ?? 'Unknown',
                           collectionSlug: collection.slug,
                         });
-                        return null;
+                        return [];
                       }
-                      return (
+                      return [
                         <Card key={collection.id} className={card.interactive}>
                           <NavLink href={safeCollectionUrl}>
                             <CardHeader>
                               <CardTitle className={size.lg}>{collection.name}</CardTitle>
-                              {collection.description ? <CardDescription className="line-clamp-2">
+                              {collection.description ? <CardDescription className={truncate.lines2}>
                                   {collection.description}
                                 </CardDescription> : null}
                             </CardHeader>
@@ -386,8 +393,8 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                               </div>
                             </CardContent>
                           </NavLink>
-                        </Card>
-                      );
+                        </Card>,
+                      ];
                     })}
                 </div>
               )}
@@ -396,7 +403,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
             {/* Content Contributions */}
             {contributions && contributions.length > 0 ? <div>
                 <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>Contributions</h2>
-                <div className={`grid ${gap.comfortable} sm:grid-cols-2 lg:grid-cols-3`}>
+                <div className={grid.responsive123}>
                   {contributions
                     .filter(
                       (
@@ -412,7 +419,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         item.slug !== null &&
                         item.name !== null
                     )
-                    .map((item) => {
+                    .flatMap((item) => {
                       const safeContentUrl = getSafeContentUrl(item.content_type, item.slug);
                       if (!safeContentUrl) {
                         viewerLogger.warn('UserProfilePage: skipping contribution with invalid type or slug', {
@@ -420,13 +427,13 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                           contentType: item.content_type,
                           contentSlug: item.slug,
                         });
-                        return null;
+                        return [];
                       }
-                      return (
+                      return [
                         <Card key={item.id} className={card.interactive}>
                           <NavLink href={safeContentUrl}>
                             <CardHeader>
-                              <div className={`${marginBottom.tight} flex ${alignItems.center} ${justify.between}`}>
+                              <div className={`${marginBottom.tight} ${display.flex} ${alignItems.center} ${justify.between}`}>
                                 <UnifiedBadge variant="base" style="secondary" className={size.xs}>
                                   {item.content_type}
                                 </UnifiedBadge>
@@ -435,7 +442,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                                   </UnifiedBadge> : null}
                               </div>
                               <CardTitle className={size.base}>{item.name}</CardTitle>
-                              <CardDescription className={`line-clamp-2 ${size.xs}`}>
+                              <CardDescription className={`${truncate.lines2} ${size.xs}`}>
                                 {item.description}
                               </CardDescription>
                             </CardHeader>
@@ -449,8 +456,8 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                               </div>
                             </CardContent>
                           </NavLink>
-                        </Card>
-                      );
+                        </Card>,
+                      ];
                     })}
                 </div>
               </div> : null}

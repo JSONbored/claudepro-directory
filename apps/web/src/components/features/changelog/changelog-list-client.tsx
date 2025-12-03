@@ -11,6 +11,7 @@ import type { Database } from '@heyclaude/database-types';
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { spaceY, marginTop, muted  , padding, justify,
   alignItems,
+  marginLeft,
 } from '@heyclaude/web-runtime/design-system';
 import { useState } from 'react';
 
@@ -109,7 +110,7 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
           <ChangelogTimeline
             entries={timelineEntries}
             getTargetPath={getTargetPath}
-            className="ml-1"
+            className={marginLeft.tight}
           />
         )}
       </TabsContent>

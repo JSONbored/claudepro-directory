@@ -57,6 +57,13 @@ export const body = {
 
 /**
  * Muted text styles (secondary color).
+ * 
+ * @migration Replaces inline `text-muted-foreground` and opacity variants
+ * @example
+ * // ❌ OLD: className="text-muted-foreground"
+ * // ✅ NEW: className={muted.default}
+ * // ❌ OLD: className="text-muted-foreground/30"
+ * // ✅ NEW: className={muted.opacity30}
  */
 export const muted = {
   /** Default muted */
@@ -69,6 +76,10 @@ export const muted = {
   xs: 'text-xs text-muted-foreground',
   /** Large muted */
   lg: 'text-lg text-muted-foreground leading-relaxed',
+  /** Muted with 30% opacity (very subtle) */
+  opacity30: 'text-muted-foreground/30',
+  /** Muted with 50% opacity (subtle) */
+  opacity50: 'text-muted-foreground/50',
 } as const;
 
 // =============================================================================
@@ -228,6 +239,41 @@ export const truncate = {
 } as const;
 
 /**
+ * Text transform utilities.
+ */
+export const transform = {
+  /** Uppercase text */
+  uppercase: 'uppercase',
+  /** Lowercase text */
+  lowercase: 'lowercase',
+  /** Capitalize text */
+  capitalize: 'capitalize',
+  /** No transform */
+  none: 'normal-case',
+} as const;
+
+/**
+ * Text decoration utilities.
+ * 
+ * @migration Replaces inline `no-underline`, `underline`, `underline-offset-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="no-underline"
+ * // ✅ NEW: className={textDecoration.none}
+ * // ❌ OLD: className="underline-offset-4"
+ * // ✅ NEW: className={textDecoration.offset4}
+ */
+export const textDecoration = {
+  /** No underline */
+  none: 'no-underline',
+  /** Underline */
+  underline: 'underline',
+  /** Line through */
+  lineThrough: 'line-through',
+  /** Underline offset 4 */
+  offset4: 'underline-offset-4',
+} as const;
+
+/**
  * Whitespace utilities.
  */
 export const whitespace = {
@@ -247,6 +293,51 @@ export const whitespace = {
   breakWords: 'break-words',
   /** Don't break words */
   breakNormal: 'break-normal',
+  /** Wrap and break words */
+  wrapBreakWord: 'break-words',
+} as const;
+
+/**
+ * List style utilities.
+ * 
+ * @migration Replaces inline `list-none`, `list-inside`, `list-decimal` Tailwind classes
+ * @example
+ * // ❌ OLD: className="list-none"
+ * // ✅ NEW: className={listStyle.none}
+ */
+export const listStyle = {
+  /** No list style */
+  none: 'list-none',
+  /** List inside */
+  inside: 'list-inside',
+  /** List outside */
+  outside: 'list-outside',
+  /** Decimal list */
+  decimal: 'list-decimal',
+  /** Disc list */
+  disc: 'list-disc',
+} as const;
+
+/**
+ * Font family utilities.
+ */
+export const fontFamily = {
+  /** Monospace font */
+  mono: 'font-mono',
+  /** Sans serif font */
+  sans: 'font-sans',
+  /** Serif font */
+  serif: 'font-serif',
+} as const;
+
+/**
+ * Font variant numeric utilities.
+ */
+export const fontVariantNumeric = {
+  /** Tabular numbers (monospaced digits) */
+  tabularNums: 'tabular-nums',
+  /** Normal numbers */
+  normalNums: 'normal-nums',
 } as const;
 
 // =============================================================================
@@ -268,6 +359,12 @@ export const responsiveText = {
   xl: 'text-xl sm:text-xl md:text-2xl lg:text-3xl',
   /** text-2xl sm:text-2xl md:text-3xl lg:text-4xl - 2XL responsive */
   '2xl': 'text-2xl sm:text-2xl md:text-3xl lg:text-4xl',
+  /** text-3xl sm:text-4xl - 3XL to 4XL responsive (page titles) */
+  '3xl': 'text-3xl sm:text-4xl',
+  
+  // Direct responsive patterns (base to lg breakpoint)
+  /** text-lg lg:text-xl - Large to extra large at lg breakpoint (body text) */
+  lgXl: 'text-lg lg:text-xl',
   
   // Semantic aliases (for backward compatibility)
   /** sm → base (alias for .sm) */
@@ -275,9 +372,11 @@ export const responsiveText = {
   /** base → lg (alias for .md) */
   baseLg: 'text-base sm:text-base md:text-lg',
   /** lg → xl → 2xl (alias for .lg) */
-  lgXl: 'text-lg sm:text-lg md:text-xl lg:text-2xl',
+  lgXl2xl: 'text-lg sm:text-lg md:text-xl lg:text-2xl',
   /** xl → 2xl → 3xl (alias for .xl) */
   xl2xl: 'text-xl sm:text-xl md:text-2xl lg:text-3xl',
   /** 2xl → 3xl → 4xl (alias for .2xl) */
   xl3xl: 'text-2xl sm:text-2xl md:text-3xl lg:text-4xl',
+  /** text-4xl lg:text-5xl - 4XL to 5XL at lg breakpoint */
+  '4xlTo5xl': 'text-4xl lg:text-5xl',
 } as const;

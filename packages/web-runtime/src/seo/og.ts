@@ -6,16 +6,7 @@
  */
 
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { APP_CONFIG } from '@heyclaude/shared-runtime';
-
-/**
- * OpenGraph image dimensions
- * Standard social media dimensions (1200x630)
- */
-export const OG_IMAGE_DIMENSIONS = {
-  width: 1200,
-  height: 630,
-} as const;
+import { APP_CONFIG, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
 
 /**
  * Generate OpenGraph image URL for any page path
@@ -49,8 +40,8 @@ export function generateOGMetadata(path: string, alt: string) {
     images: [
       {
         url: generateOGImageUrl(path),
-        width: OG_IMAGE_DIMENSIONS.width,
-        height: OG_IMAGE_DIMENSIONS.height,
+        width: OG_DIMENSIONS.width,
+        height: OG_DIMENSIONS.height,
         alt,
         type: 'image/png', // Edge function returns PNG, not WebP
       },
@@ -71,8 +62,8 @@ export function generateTwitterMetadata(path: string, alt: string) {
     images: [
       {
         url: generateOGImageUrl(path),
-        width: OG_IMAGE_DIMENSIONS.width,
-        height: OG_IMAGE_DIMENSIONS.height,
+        width: OG_DIMENSIONS.width,
+        height: OG_DIMENSIONS.height,
         alt,
       },
     ],

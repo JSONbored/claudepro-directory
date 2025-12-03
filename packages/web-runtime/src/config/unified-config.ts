@@ -85,51 +85,14 @@ export const CLAUDE_DESKTOP_PATHS = {
 // UI CONFIGURATION
 // =============================================================================
 
-/** Animation settings */
-export const UI_ANIMATION = {
-  'easing': 'ease-in-out',
-  'duration': 300,
-  'button.duration': 200,
-  'button.hover_scale': 1.02,
-  'footer.duration': 300,
-  'modal.duration': 200,
-  'card.hover_lift': '2px',
-  // Animation ticker
-  'ticker.default_ms': 1500,
-  'ticker.fast_ms': 1000,
-  'ticker.slow_ms': 2000,
-  // Stagger animations
-  'stagger.fast_ms': 100,
-  'stagger.medium_ms': 200,
-  'stagger.slow_ms': 300,
-  'card.stagger_ms': 100,
-  // Border beam
-  'beam.default_ms': 15000,
-  // Spring physics
-  'spring.default.stiffness': 400,
-  'spring.default.damping': 17,
-  'spring.bouncy.stiffness': 500,
-  'spring.bouncy.damping': 20,
-  'spring.smooth.stiffness': 300,
-  'spring.smooth.damping': 25,
-} as const;
-
-/** Confetti animation settings */
-export const CONFETTI_CONFIG = {
-  'success.particle_count': 50,
-  'success.spread': 60,
-  'success.ticks': 150,
-  'celebration.particle_count': 100,
-  'celebration.spread': 70,
-  'celebration.ticks': 200,
-  'milestone.particle_count': 30,
-  'milestone.spread': 100,
-  'milestone.ticks': 200,
-  'milestone.scalar': 1.2,
-  'subtle.particle_count': 30,
-  'subtle.spread': 40,
-  'subtle.ticks': 100,
-} as const;
+// NOTE: UI_ANIMATION and CONFETTI_CONFIG have been moved to V2 design system
+// Import from '@heyclaude/web-runtime/design-system/tokens' instead:
+// - animation.spring.* (for spring physics)
+// - animation.duration.* (for durations)
+// - animation.ticker.* (for ticker speeds)
+// - animation.stagger.* (for stagger delays)
+// - animation.borderBeam.* (for border beam)
+// - animation.confetti.* (for confetti settings)
 
 /** Pagination settings */
 export const PAGINATION_CONFIG = {
@@ -630,23 +593,3 @@ export const POLLING_CONFIG = {
   newsletter_count_ms: 300000,
 } as const;
 
-// =============================================================================
-// BACKWARD COMPATIBILITY EXPORTS
-// =============================================================================
-
-/**
- * Legacy GENERATED_CONFIG export for backward compatibility.
- * New code should import specific config objects above.
- * @deprecated Use specific config exports instead
- */
-export const GENERATED_CONFIG = {
-  ui_config: {
-    animation: { easing: UI_ANIMATION.easing, duration: UI_ANIMATION.duration },
-    pagination: PAGINATION_CONFIG,
-  },
-  app_config: APP_CONFIG,
-  date_config: DATE_CONFIG,
-  social_links: SOCIAL_LINKS,
-} as const;
-
-export type GeneratedConfig = typeof GENERATED_CONFIG;

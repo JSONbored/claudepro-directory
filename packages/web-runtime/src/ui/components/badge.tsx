@@ -1,20 +1,23 @@
 import { cn } from '../utils.ts';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { size } from '../../design-system/styles/typography.ts';
+import { hoverBg, transition } from '../../design-system/styles/interactive.ts';
+import { size, weight } from '../../design-system/styles/typography.ts';
 import { radius } from '../../design-system/styles/radius.ts';
+import { display, alignItems, padding } from '../../design-system/styles/layout.ts';
+import { textColor, bgColor } from '../../design-system/styles/colors.ts';
 import type * as React from 'react';
 
 const badgeVariants = cva(
-  `inline-flex items-center ${radius.full} border px-2.5 py-0.5 ${size.xs} font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`,
+  `${display.inlineFlex} ${alignItems.center} ${radius.full} border ${padding.xBetween} ${padding.yHair} ${size.xs} ${weight.semibold} ${transition.colors} focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`,
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
+        default: `border-transparent ${bgColor.primary} ${textColor.primaryForeground} ${hoverBg.primaryVeryStrong}`,
         secondary:
-          'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          `border-transparent ${bgColor.secondary} ${textColor.secondaryForeground} ${hoverBg.secondaryVeryStrong}`,
         destructive:
-          'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
-        outline: 'text-foreground',
+          `border-transparent ${bgColor.destructive} ${textColor.destructiveForeground} ${hoverBg.destructiveVeryStrong}`,
+        outline: textColor.foreground,
       },
     },
     defaultVariants: {

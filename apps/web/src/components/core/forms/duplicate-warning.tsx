@@ -1,8 +1,8 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { iconSize, muted } from '@heyclaude/web-runtime/design-system';
-import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import { iconSize, muted, borderColor, bgColor, textColor } from '@heyclaude/web-runtime/design-system';
+import { UI_TIMEOUTS } from '@heyclaude/web-runtime/config/unified-config';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
@@ -48,7 +48,7 @@ function useDebounce<T>(value: T, delay: number): T {
  * @param props.name - The name to evaluate for genericness; names shorter than 3 characters are ignored.
  * @returns A JSX element with a suggestion Alert when a generic name is detected, or `null` when no warning is needed.
  *
- * @see getTimeoutConfig — loads the debounce delay used for name evaluation
+ * @see UI_TIMEOUTS.form_debounce_ms — debounce delay used for name evaluation
  * @see useDebounce — debounces `name` before performing the check
  * @see Alert, AlertTitle, AlertDescription, AlertTriangle — UI primitives used to render the suggestion
  */
@@ -58,8 +58,7 @@ export function GenericNameWarning({ contentType: _contentType, name }: GenericN
 
   // Load debounce value from config
   useEffect(() => {
-    const config = getTimeoutConfig();
-    setDebounceMs(config['timeout.ui.form_debounce_ms']);
+    setDebounceMs(UI_TIMEOUTS.form_debounce_ms);
   }, []);
 
   const debouncedName = useDebounce(name, debounceMs);
@@ -101,9 +100,9 @@ export function GenericNameWarning({ contentType: _contentType, name }: GenericN
   }
 
   return (
-    <Alert className="border-yellow-500/20 bg-yellow-500/5">
-      <AlertTriangle className={`${iconSize.sm} text-yellow-400`} />
-      <AlertTitle className="text-yellow-400">Suggestion</AlertTitle>
+    <Alert className={`${borderColor['yellow/20']} ${bgColor.warning}`}>
+      <AlertTriangle className={`${iconSize.sm} ${textColor.warning400}`} />
+      <AlertTitle className={textColor.warning400}>Suggestion</AlertTitle>
       <AlertDescription>
         <p className={muted.sm}>{warning}</p>
       </AlertDescription>

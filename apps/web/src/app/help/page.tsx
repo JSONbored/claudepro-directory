@@ -1,10 +1,34 @@
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, hoverBg, transition, spaceY, marginBottom, marginTop, muted, iconSize, weight, radius ,size , padding , gap , row , maxWidth, bgColor,
-  textColor,
+import {
+  bgColor,
   borderColor,
+  cluster,
+  container,
   cursor,
-  justify,
+  display,
   flexGrow,
+  gap,
+  grid,
+  height,
+  hoverBg,
+  iconSize,
+  justify,
+  marginBottom,
+  marginTop,
+  marginX,
+  maxWidth,
+  muted,
+  padding,
+  paddingTop,
+  radius,
+  responsiveText,
+  row,
+  size,
+  spaceY,
+  textAlign,
+  textColor,
+  transition,
+  weight,
 } from '@heyclaude/web-runtime/design-system';
 import {
   BookOpen,
@@ -122,10 +146,10 @@ const commonQuestions = [
  */
 export default function HelpPage() {
   return (
-    <div className={`container mx-auto ${maxWidth['6xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
-      <div className={`${marginBottom.section} text-center`}>
-        <h1 className={`${marginBottom.default} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>Help Center</h1>
-        <p className={`mx-auto ${maxWidth['2xl']} ${muted.lg}`}>
+    <div className={`${container.default} ${maxWidth['6xl']} ${padding.xDefault} ${padding.yRelaxed} sm:${padding.ySection}`}>
+      <div className={`${marginBottom.section} ${textAlign.center}`}>
+        <h1 className={`${marginBottom.default} ${weight.bold} ${responsiveText['3xl']}`}>Help Center</h1>
+        <p className={`${marginX.auto} ${maxWidth['2xl']} ${muted.lg}`}>
           Find answers, guides, and resources to get the most out of {APP_CONFIG.name}
         </p>
       </div>
@@ -133,7 +157,7 @@ export default function HelpPage() {
       {/* Help Topics Grid */}
       <section className={marginBottom.hero}>
         <h2 className={`${marginBottom.comfortable} ${weight.semibold} ${size['2xl']}`}>Browse by Topic</h2>
-        <div className={`grid ${gap.relaxed} md:grid-cols-2 lg:grid-cols-4`}>
+        <div className={grid.responsive4}>
           {helpTopics.map((topic) => (
             <Card key={topic.title}>
               <CardHeader>
@@ -147,7 +171,7 @@ export default function HelpPage() {
                 <ul className={spaceY.compact}>
                   {topic.links.map((link) => (
                     <li key={link.label}>
-                      <NavLink href={link.href} className={`${cluster.tight} ${size.sm}`}>
+                      <NavLink href={link.href} className={`${display.inlineFlex} ${gap.tight} ${size.sm}`}>
                         {link.label} →
                       </NavLink>
                     </li>
@@ -173,7 +197,7 @@ export default function HelpPage() {
               </CardHeader>
               <CardContent>
                 <p className={`${marginBottom.compact} ${muted.default}`}>{item.answer}</p>
-                {item.link ? <NavLink href={item.link.href} className={`inline-flex ${cluster.tight}`}>
+                {item.link ? <NavLink href={item.link.href} className={`${display.inlineFlex} ${gap.tight}`}>
                     {item.link.label} →
                   </NavLink> : null}
               </CardContent>
@@ -185,11 +209,11 @@ export default function HelpPage() {
       {/* Quick Actions */}
       <section className={marginBottom.relaxed}>
         <h2 className={`${marginBottom.comfortable} ${weight.semibold} ${size['2xl']}`}>Quick Actions</h2>
-        <div className={`grid ${gap.comfortable} md:grid-cols-3`}>
-          <Link href="/search" className="block">
+        <div className={grid.responsive13Gap4}>
+          <Link href="/search" className={display.block}>
             <HoverCard variant="strong">
-              <Card className={`h-full ${cursor.pointer}`}>
-                <CardContent className="pt-6">
+              <Card className={`${height.full} ${cursor.pointer}`}>
+                <CardContent className={paddingTop.relaxed}>
                   <div className={`${marginBottom.micro} ${cluster.default}`}>
                     <Search className={`${iconSize.lg} ${textColor.accent}`} />
                     <h3 className={weight.semibold}>Search</h3>
@@ -200,10 +224,10 @@ export default function HelpPage() {
             </HoverCard>
           </Link>
 
-          <Link href="/guides" className="block">
+          <Link href="/guides" className={display.block}>
             <HoverCard variant="strong">
-              <Card className={`h-full ${cursor.pointer}`}>
-                <CardContent className="pt-6">
+              <Card className={`${height.full} ${cursor.pointer}`}>
+                <CardContent className={paddingTop.relaxed}>
                   <div className={`${marginBottom.micro} ${cluster.default}`}>
                     <BookOpen className={`${iconSize.lg} ${textColor.accent}`} />
                     <h3 className={weight.semibold}>Guides</h3>
@@ -214,10 +238,10 @@ export default function HelpPage() {
             </HoverCard>
           </Link>
 
-          <Link href="/contact" className="block">
+          <Link href="/contact" className={display.block}>
             <HoverCard variant="strong">
-              <Card className={`h-full ${cursor.pointer}`}>
-                <CardContent className="pt-6">
+              <Card className={`${height.full} ${cursor.pointer}`}>
+                <CardContent className={paddingTop.relaxed}>
                   <div className={`${marginBottom.micro} ${cluster.default}`}>
                     <MessageSquare className={`${iconSize.lg} ${textColor.accent}`} />
                     <h3 className={weight.semibold}>Contact Support</h3>
@@ -231,15 +255,15 @@ export default function HelpPage() {
       </section>
 
       {/* Still Need Help */}
-      <Card className={`border-accent/20 ${bgColor['accent/5']}`}>
-        <CardContent className="pt-6">
-          <div className="text-center">
+      <Card className={`${borderColor['accent/20']} ${bgColor['accent/5']}`}>
+        <CardContent className={paddingTop.relaxed}>
+          <div className={textAlign.center}>
             <h2 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>Still need help?</h2>
             <p className={`${marginBottom.default} ${muted.default}`}>Our community is here to assist you</p>
-            <div className={`flex ${justify.center} ${gap.comfortable}`}>
+            <div className={`${display.flex} ${justify.center} ${gap.comfortable}`}>
               <NavLink
                 href="/contact"
-                className={`inline-flex ${cluster.compact} ${radius.lg} ${bgColor.accent} ${padding.xCompact} ${padding.yCompact} ${textColor.accentForeground} ${transition.colors} hover:bg-accent/90`}
+                className={`${display.inlineFlex} ${gap.compact} ${radius.lg} ${bgColor.accent} ${padding.xCompact} ${padding.yCompact} ${textColor.accentForeground} ${transition.colors} ${hoverBg.max}`}
               >
                 <MessageSquare className={iconSize.sm} />
                 Contact Us

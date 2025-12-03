@@ -10,28 +10,28 @@
  * - Motion.dev powered (useScroll + useSpring for smooth physics)
  * - GPU-accelerated animations (60fps guaranteed)
  * - Respects prefers-reduced-motion
- * - Configurable position, color, height
+ * - Configurable placement, color, height
  * - Zero performance overhead
  *
  * Usage:
  * ```tsx
  * <ReadProgress /> // Default: top, accent color, 2px height
- * <ReadProgress position="bottom" color="primary" height={4} />
+ * <ReadProgress placement="bottom" color="primary" height={4} />
  * ```
  *
  * @module components/content/read-progress
  */
 
-import { bgColor } from '@heyclaude/web-runtime/design-system';
+import { bgColor, position, transformOrigin } from '@heyclaude/web-runtime/design-system';
 import { motion, useScroll, useSpring } from 'motion/react';
 import { useEffect, useState } from 'react';
 
 export interface ReadProgressProps {
   /**
-   * Position of the progress bar
+   * Placement of the progress bar
    * @default 'below-nav' (positions below sticky navigation)
    */
-  position?: 'top' | 'bottom' | 'below-nav';
+  placement?: 'top' | 'bottom' | 'below-nav';
 
   /**
    * Color variant (maps to CSS variables)
@@ -78,7 +78,7 @@ export interface ReadProgressProps {
  * @see ReadProgressPresets
  */
 export function ReadProgress({
-  position = 'below-nav',
+  placement = 'below-nav',
   color = 'accent',
   height = 5,
   zIndex = 51,
@@ -101,7 +101,7 @@ export function ReadProgress({
   useEffect(() => {
     setIsMounted(true);
 
-    if (position !== 'below-nav') {
+    if (placement !== 'below-nav') {
       return;
     }
 
@@ -137,7 +137,7 @@ export function ReadProgress({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [position]);
+  }, [placement]);
 
   // Don't render on server or before mount
   if (!isMounted) {
@@ -145,20 +145,20 @@ export function ReadProgress({
   }
 
   // Don't render below-nav mode until navHeight is measured
-  if (position === 'below-nav' && (navHeight === 0 || navWidth === 0)) {
+  if (placement === 'below-nav' && (navHeight === 0 || navWidth === 0)) {
     return null;
   }
 
-  // Calculate position based on mode
-  const getPositionStyle = () => {
-    if (position === 'below-nav') {
+  // Calculate placement style based on mode
+  const getPlacementStyle = () => {
+    if (placement === 'below-nav') {
       return {
         top: `${navHeight}px`, // Position directly below the navbar
         left: `${navLeft}px`,
         width: `${navWidth}px`,
       };
     }
-    if (position === 'top') {
+    if (placement === 'top') {
       return { top: 0 };
     }
     return { bottom: 0 };
@@ -173,9 +173,9 @@ export function ReadProgress({
 
   return (
     <motion.div
-      className={`pointer-events-none fixed origin-left ${colorClass}`}
+      className={`pointer-events-none ${position.fixed} ${transformOrigin.left} ${colorClass}`}
       style={{
-        ...getPositionStyle(),
+        ...getPlacementStyle(),
         height: `${height}px`,
         scaleX,
         zIndex,
@@ -208,7 +208,7 @@ export const ReadProgressPresets = {
   /**
    * Bottom: Progress bar at bottom (useful if sticky header at top)
    */
-  bottom: () => <ReadProgress position="bottom" />,
+  bottom: () => <ReadProgress placement="bottom" />,
 
   /**
    * Subtle: Very thin, less distracting

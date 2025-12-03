@@ -5,7 +5,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
-import { borderTop } from '@heyclaude/web-runtime/design-system';
+import { borderTop, bgColor, paddingTop } from '@heyclaude/web-runtime/design-system';
 import type {
   ContentItem,
   ProcessedSectionData,
@@ -132,7 +132,7 @@ export function TabSectionRenderer({
           description="Key capabilities and functionality"
           items={features}
           category={validCategory}
-          dotColor="bg-primary"
+          dotColor={bgColor.primary}
         />
       );
     }
@@ -147,7 +147,7 @@ export function TabSectionRenderer({
           description="Prerequisites and dependencies"
           items={requirements}
           category={validCategory}
-          dotColor="bg-orange-500"
+          dotColor={bgColor.orange}
         />
       );
     }
@@ -162,7 +162,7 @@ export function TabSectionRenderer({
           description="Common scenarios and applications"
           items={useCases}
           category={validCategory}
-          dotColor="bg-accent"
+          dotColor={bgColor.accent}
         />
       );
     }
@@ -207,7 +207,7 @@ export function TabSectionRenderer({
           title="Troubleshooting"
           description="Common issues and solutions"
           items={troubleshooting}
-          dotColor="bg-red-500"
+          dotColor={bgColor.red}
         />
       );
 
@@ -225,7 +225,7 @@ export function TabSectionRenderer({
           description="Important security considerations"
           items={securityItems}
           category={validCategory}
-          dotColor="bg-orange-500"
+          dotColor={bgColor.orange}
         />
       );
     }
@@ -235,7 +235,7 @@ export function TabSectionRenderer({
       const validSlug = item.slug ?? '';
       if (!validSlug) return null;
       return (
-        <div className={`${borderTop.default} pt-8`}>
+        <div className={`${borderTop.default} ${paddingTop.loose}`}>
           <ReviewListSection contentType={validCategory} contentSlug={validSlug} />
         </div>
       );

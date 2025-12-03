@@ -20,12 +20,34 @@ import {
   Terminal,
   Zap,
 } from '@heyclaude/web-runtime/icons';
-import { borderBottom, cluster, iconSize, hoverBg, spaceY, marginBottom, marginTop, muted, weight, size, gap, padding, row, radius, flexWrap,
-  leading,
-  transition,
+import {
   bgColor,
-  textColor,
+  borderBottom,
+  cluster,
+  display,
+  flexGrow,
+  flexWrap,
+  gap,
+  hoverBg,
+  iconSize,
+  leading,
+  marginBottom,
+  marginRight,
+  marginTop,
+  muted,
+  padding,
+  paddingBottom,
+  radius,
+  row,
   shadow,
+  size,
+  spaceY,
+  textColor,
+  transition,
+  weight,
+  width,
+  height,
+  radiusTop,
 } from '@heyclaude/web-runtime/design-system';
 import type { UnifiedSectionProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
@@ -160,17 +182,17 @@ function CodeGroupTabs({
   return (
     <div className={spaceY.default}>
       {/* Tab buttons */}
-      <div className={`flex ${flexWrap.wrap} ${gap.tight} ${borderBottom.default} pb-2`}>
+      <div className={`${display.flex} ${flexWrap.wrap} ${gap.tight} ${borderBottom.default} ${paddingBottom.compact}`}>
         {blocks.map((block, index) => (
           <button
             key={`${block.label}-${index}`}
             type="button"
             onClick={() => setActiveIndex(index)}
             className={cn(
-              `rounded-t-md ${padding.xCompact} ${padding.ySnug} ${weight.medium} ${size.xs} ${transition.colors}`,
+              `${radiusTop.md} ${padding.xCompact} ${padding.ySnug} ${weight.medium} ${size.xs} ${transition.colors}`,
               activeIndex === index
-                ? `bg-accent/20 ${textColor.accentForeground}`
-                : `${muted.default} ${hoverBg.muted} hover:text-foreground`
+                ? `${bgColor['accent/20']} ${textColor.accentForeground}`
+                : `${muted.default} ${hoverBg.muted} hover:${textColor.foreground}`
             )}
           >
             {block.label}
@@ -198,7 +220,7 @@ function CodeGroupTabs({
                   onDownload?.();
                 }}
               >
-                <Download className={`mr-2 ${iconSize.sm}`} />
+                <Download className={`${marginRight.compact} ${iconSize.sm}`} />
                 Download {activeBlock.filename}
               </Button>
             </div>
@@ -222,7 +244,7 @@ function List({ items, color }: { items: string[]; color: string }) {
     <ul className={spaceY.compact}>
       {items.map((item) => (
         <li key={item.slice(0, 50)} className={`${row.default}`}>
-          <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 ${radius.full}`, color)} />
+          <div className={cn(`${marginTop.compact} ${height.dot} ${width.dot} ${flexGrow.shrink0} ${radius.full}`, color)} />
           <span className={`${size.sm} ${leading.relaxed}`}>{item}</span>
         </li>
       ))}
@@ -256,13 +278,13 @@ function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: stri
       {items.map((item, index) =>
         typeof item === 'string' ? (
           <li key={getEnhancedListKey(item, index)} className={`${row.default}`}>
-            <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 ${radius.full}`, color)} />
+            <div className={cn(`${marginTop.compact} ${height.dot} ${width.dot} ${flexGrow.shrink0} ${radius.full}`, color)} />
             <span className={`${size.sm} ${leading.relaxed}`}>{item}</span>
           </li>
         ) : (
           <li key={getEnhancedListKey(item, index)} className={spaceY.compact}>
             <div className={`${row.default}`}>
-              <div className={cn(`${marginTop.compact} h-1.5 w-1.5 shrink-0 ${radius.full}`, color)} />
+              <div className={cn(`${marginTop.compact} ${iconSize.xs} ${flexGrow.shrink0} ${radius.full}`, color)} />
               <div className={spaceY.tight}>
                 <p className={`${weight.medium} ${textColor.foreground} ${size.sm}`}>{item.issue}</p>
                 <p className={muted.smRelaxed}>{item.solution}</p>
@@ -324,7 +346,7 @@ function Platform({
             </div>
           ) : (
             <div key={getStepKey(step, index)} className={`${row.default}`}>
-              <div className={`${marginTop.compact} h-1.5 w-1.5 shrink-0 ${radius.full} ${bgColor.primary}`} />
+              <div className={`${marginTop.compact} ${iconSize.xs} ${flexGrow.shrink0} ${radius.full} ${bgColor.primary}`} />
               <span className={`${size.sm} ${leading.relaxed}`}>{step.text}</span>
             </div>
           )
@@ -416,7 +438,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           {...(props.category && { category: props.category })}
           {...(props.className && { className: props.className })}
         >
-          <List items={props.items} color={props.dotColor || 'bg-primary'} />
+          <List items={props.items} color={props.dotColor || bgColor.primary} />
         </Wrapper>
       );
     }
@@ -431,7 +453,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           {...(props.icon && { icon: props.icon })}
           {...(props.className && { className: props.className })}
         >
-          <EnhancedList items={props.items} color={props.dotColor || 'bg-red-500'} />
+          <EnhancedList items={props.items} color={props.dotColor || bgColor.red} />
         </Wrapper>
       );
     }
@@ -462,7 +484,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   trackDownload();
                 }}
               >
-                <Download className={`mr-2 ${iconSize.sm}`} />
+                <Download className={`${marginRight.compact} ${iconSize.sm}`} />
                 Download {props.filename}
               </Button>
             </div>
@@ -501,7 +523,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     trackDownload();
                   }}
                 >
-                  <Download className={`mr-2 ${iconSize.sm}`} />
+                  <Download className={`${marginRight.compact} ${iconSize.sm}`} />
                   Download {block.filename}
                 </Button>
               </div>
@@ -579,7 +601,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                           trackDownload();
                         }}
                       >
-                        <Download className={`mr-2 ${iconSize.sm}`} />
+                        <Download className={`${marginRight.compact} ${iconSize.sm}`} />
                         Download {ex.filename}
                       </Button>
                     </div>
@@ -621,7 +643,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                           trackDownload();
                         }}
                       >
-                        <Download className={`mr-2 ${iconSize.sm}`} />
+                        <Download className={`${marginRight.compact} ${iconSize.sm}`} />
                         Download {c.filename}
                       </Button>
                     </div>
@@ -718,7 +740,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   trackDownload();
                 }}
               >
-                <Download className={`mr-2 ${iconSize.sm}`} />
+                <Download className={`${marginRight.compact} ${iconSize.sm}`} />
                 Download {props.filename}
               </Button>
             </div>
@@ -756,7 +778,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             {d.requirements && d.requirements.length > 0 && (
               <div>
                 <h4 className={`${marginBottom.tight} ${weight.medium}`}>Requirements</h4>
-                <List items={d.requirements} color="bg-orange-500" />
+                <List items={d.requirements} color={bgColor.orange} />
               </div>
             )}
           </div>

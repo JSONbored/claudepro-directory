@@ -12,10 +12,19 @@
  * @module components/features/community/top-contributors
  */
 
-import { Users } from '@heyclaude/web-runtime/icons';
-import { iconSize, cluster, weight, size, gap, padding, textColor, marginBottom,
+import {
+  cluster,
+  container,
+  grid,
+  iconSize,
+  marginBottom,
+  padding,
+  size,
+  textColor,
+  weight,
 } from '@heyclaude/web-runtime/design-system';
 import { memo } from 'react';
+import { Users } from '@heyclaude/web-runtime/icons';
 import {
   ProfileCard,
   type UserProfile,
@@ -49,13 +58,13 @@ function TopContributorsComponent({
   }
 
   return (
-    <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+    <section className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
       <div className={`${marginBottom.comfortable} ${cluster.default}`}>
         <Users className={`${iconSize.lg} ${textColor.accent}`} />
         <h2 className={`${weight.bold} ${size['2xl']}`}>{title}</h2>
       </div>
 
-      <div className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6`}>
+      <div className={grid.responsive1236}>
         {displayedContributors.map((contributor) => (
           <ProfileCard
             key={contributor.slug}

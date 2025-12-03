@@ -14,7 +14,7 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError, ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
-import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
@@ -46,15 +46,32 @@ import {
   weight,
   size,
   gap,
+  grid,
   padding,
-  radius,
+  whitespace,
+  border,
+  borderColor,
   bgColor,
+  height,
+  width,
+  marginRight,
+  paddingTop,
+  paddingRight,
+  paddingLeft,
+  radius,
   textColor,
   alignItems,
   flexDir,
   flexGrow,
-  borderColor,
   maxWidth,
+  minHeight,
+  display,
+  position,
+  absolute,
+  minWidth,
+  pointerEvents,
+  resize,
+  fontFamily,
 } from '@heyclaude/web-runtime/design-system';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
@@ -206,17 +223,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   });
 
   useEffect(() => {
-    const config = getAnimationConfig();
-    setSpringSmooth({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.smooth.stiffness'],
-      damping: config['animation.spring.smooth.damping'],
-    });
-    setSpringBouncy({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.bouncy.stiffness'],
-      damping: config['animation.spring.bouncy.damping'],
-    });
+    setSpringSmooth(animation.spring.smooth);
+    setSpringBouncy(animation.spring.bouncy);
   }, []);
 
   /**
@@ -486,9 +494,9 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={springSmooth}
         >
-          <Card className={`${marginBottom.comfortable} border-green-500/20 bg-green-500/5`}>
-            <CardContent className={'pt-6'}>
-              <div className={`flex ${flexDir.col} ${alignItems.start} ${gap.default} sm:flex-row`}>
+          <Card className={`${marginBottom.comfortable} ${borderColor['green/20']} ${bgColor['green/5']}`}>
+            <CardContent className={paddingTop.relaxed}>
+              <div className={`${display.flex} ${flexDir.col} ${alignItems.start} ${gap.default} sm:${display.flex}-row`}>
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
@@ -498,9 +506,9 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     className={`${iconSize.lg} ${textColor.green} ${marginTop.micro} ${flexGrow.shrink0}`}
                   />
                 </motion.div>
-                <div className={`min-w-0 ${flexGrow['1']}`}>
+                <div className={`${minWidth[0]} ${flexGrow['1']}`}>
                   <motion.p
-                    className={`${weight.semibold} ${textColor.green} ${size.lg} dark:text-green-400`}
+                    className={`${weight.semibold} ${textColor.green} ${size.lg} dark:${textColor.green400}`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
@@ -542,14 +550,14 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           theme="primary"
           showBorderBeam={false}
         >
-          <div className={`grid ${gap.comfortable} sm:grid-cols-2`}>
+          <div className={grid.responsive2}>
             <div className={stack.compact}>
               <Label htmlFor={`${formId}-type`}>Content Type *</Label>
-              <div className="relative">
+              <div className={position.relative}>
                 <Layers
                   className={cn(
                     iconSize.sm,
-                    '-translate-y-1/2 pointer-events-none absolute top-1/2 left-3',
+                    `-translate-y-1/2 ${pointerEvents.none} ${absolute.topHalfLeft}`,
                     muted.default
                   )}
                 />
@@ -562,7 +570,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   }}
                   required={true}
                   className={
-                    `flex h-10 w-full ${radius.md} border ${borderColor.input} ${bgColor.background} ${padding.yCompact} pr-3 pl-10 ${size.sm}`
+                    `${display.flex} ${height.input} ${width.full} ${radius.md} ${border.default} ${borderColor.input} ${bgColor.background} ${padding.yCompact} ${paddingRight.default} ${paddingLeft.spacious} ${size.sm}`
                   }
                 >
                   {SUBMISSION_CONTENT_TYPES.map((type) => (
@@ -599,7 +607,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   {name.length}/100
                 </span>
               </div>
-              <div className="relative">
+              <div className={position.relative}>
                 <Input
                   id={`${formId}-name`}
                   name="name"
@@ -608,16 +616,16 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   placeholder={nameFieldConfig.placeholder}
                   required={nameFieldConfig.required ?? true}
                   maxLength={100}
-                  className="pr-10"
+                  className={paddingRight.spacious}
                 />
                 {name.length > 3 && (
                   <motion.div
-                    className="-translate-y-1/2 absolute top-1/2 right-3"
+                    className={`-translate-y-1/2 ${absolute.topHalfRight}`}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={springBouncy}
                   >
-                    <CheckCircle className={cn(iconSize.sm, 'text-green-600')} />
+                    <CheckCircle className={cn(iconSize.sm, textColor.green600)} />
                   </motion.div>
                 )}
               </div>
@@ -630,12 +638,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
             {/* Description Field with Markdown Preview */}
             <div className={stack.compact}>
               <Label htmlFor={`${formId}-description`}>Description *</Label>
-              <Tabs defaultValue="write" className="w-full">
-                <TabsList className="w-full">
-                  <TabsTrigger value="write" className="flex-1">
+              <Tabs defaultValue="write" className={width.full}>
+                <TabsList className={width.full}>
+                  <TabsTrigger value="write" className={flexGrow['1']}>
                     Write
                   </TabsTrigger>
-                  <TabsTrigger value="preview" className="flex-1">
+                  <TabsTrigger value="preview" className={flexGrow['1']}>
                     Preview
                   </TabsTrigger>
                 </TabsList>
@@ -648,7 +656,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     placeholder="Describe what your configuration does and how to use it..."
                     required={true}
                     rows={6}
-                    className="resize-y font-sans"
+                    className={`${resize.y} ${fontFamily.sans}`}
                   />
                   <p className={cn(`${muted.default} ${size.xs}`, marginBottom.micro)}>
                     Supports markdown formatting (bold, italic, lists, links, code blocks)
@@ -657,12 +665,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                 <TabsContent value="preview" className={marginTop.compact}>
                   <div
                     className={cn(
-                      `min-h-[150px] ${radius.md} border ${borderColor.input} ${bgColor.background} ${padding.default}`,
+                      `${minHeight.xs} ${radius.md} border ${borderColor.input} ${bgColor.background} ${padding.default}`,
                       `prose prose-sm dark:prose-invert ${maxWidth.none}`
                     )}
                   >
                     {description ? (
-                      <p className="whitespace-pre-wrap">{description}</p>
+                      <p className={whitespace.preWrap}>{description}</p>
                     ) : (
                       <p className={muted.default}>
                         Nothing to preview yet. Write something in the Write tab!
@@ -719,15 +727,15 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
         {/* Enhanced Submit Button */}
         <motion.div
-          className={`${responsive.smRowGap} pt-2 sm:pt-4`}
+          className={`${responsive.smRowGap} ${paddingTop.compact} sm:${paddingTop.comfortable}`}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <Button type="submit" disabled={isPending} className={`w-full ${flexGrow['1']} sm:flex-initial`}>
+          <Button type="submit" disabled={isPending} className={`${width.full} ${flexGrow['1']} sm:${display.flex}-initial`}>
             {isPending ? (
               <>
                 <motion.div
-                  className="mr-2"
+                  className={marginRight.compact}
                   animate={{ opacity: [1, 0.5, 1], rotate: [0, 360] }}
                   transition={{
                     duration: 1,
@@ -749,10 +757,10 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         </motion.div>
 
         {/* Info Box */}
-        <div className={`${radius.lg} border border-blue-500/20 bg-blue-500/10 ${padding.compact} sm:${padding.default}`}>
+        <div className={`${radius.lg} ${border.default} ${borderColor['blue/20']} ${bgColor['blue/10']} ${padding.compact} sm:${padding.default}`}>
           <div className={`${cluster.compact} sm:${gap.default}`}>
             <Github className={`${iconSize.md} text-blue-400 ${marginTop.micro} ${flexGrow.shrink0}`} />
-            <div className={`min-w-0 ${flexGrow['1']}`}>
+            <div className={`${minWidth[0]} ${flexGrow['1']}`}>
               <p className={`${weight.medium} text-blue-400 ${size.sm}`}>How it works</p>
               <p className={`${marginTop.tight} ${muted.sm}`}>
                 We'll automatically create a Pull Request with your submission. Our team reviews for

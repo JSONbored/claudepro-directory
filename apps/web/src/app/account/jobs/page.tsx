@@ -12,10 +12,12 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   between,
   bgColor,
+  borderColor,
   cluster,
   flexDir,
   flexWrap,
   gap,
+  grid,
   iconLeading,
   iconSize,
   alignItems,
@@ -31,6 +33,10 @@ import {
   spaceY,
   textColor,
   weight,
+  display,
+  flexGrow,
+  marginRight,
+  textAlign,
 } from '@heyclaude/web-runtime/design-system';
 import {
   BarChart,
@@ -42,12 +48,18 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, Button ,
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle, Alert, AlertDescription, AlertTitle   } from '@heyclaude/web-runtime/ui';
+  CardTitle,
+  UnifiedBadge,
+} from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
 
@@ -308,8 +320,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
           'type' in item &&
           typeof item['type'] === 'string'
         );
-      })
-      .map((item) => item);
+      });
   })();
 
   if (jobs.length === 0) {
@@ -371,14 +382,14 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   ) => {
     if (tier === 'featured') {
       return (
-        <UnifiedBadge variant="base" className={`${bgColor['green/10']} ${textColor.green} dark:${bgColor['green/20']} dark:text-green-400`}>
+        <UnifiedBadge variant="base" className={`${bgColor['green/10']} ${textColor.green} dark:${bgColor['green/20']} dark:${textColor.success400}`}>
           Featured
         </UnifiedBadge>
       );
     }
     if (plan === 'subscription') {
       return (
-        <UnifiedBadge variant="base" className={`${bgColor['purple/10']} ${textColor.purple} dark:${bgColor['purple/20']} dark:text-purple-400`}>
+        <UnifiedBadge variant="base" className={`${bgColor['purple/10']} ${textColor.purple} dark:${bgColor['purple/20']} ${textColor.purple400}`}>
           Subscription
         </UnifiedBadge>
       );
@@ -389,7 +400,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   return (
     <div className={spaceY.relaxed}>
       {paymentStatus === 'success' && (
-        <Alert className="border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-200/30 dark:bg-emerald-950/40 dark:text-emerald-100">
+        <Alert className={`${borderColor.emerald200Dark} ${bgColor.emerald50Dark} ${textColor.emerald900Dark}`}>
           <CheckCircle className={`${iconSize.sm} ${textColor.emerald}`} />
           <AlertTitle>Payment confirmed</AlertTitle>
           <AlertDescription className={`${spaceY.tight} ${size.sm}`}>
@@ -415,7 +426,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
         </div>
         <Button asChild>
           <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
-            <Plus className={`mr-2 ${iconSize.sm}`} />
+            <Plus className={`${marginRight.compact} ${iconSize.sm}`} />
             Post a Job
           </Link>
         </Button>
@@ -423,22 +434,22 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
 
       {jobs.length === 0 ? (
         <Card>
-          <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+          <CardContent className={`${display.flex} ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
             <Briefcase className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
             <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No job listings yet</h3>
-            <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
+            <p className={`${marginBottom.default} ${maxWidth.md} ${textAlign.center} ${muted.default}`}>
               Post your first job listing to reach talented developers in the Claude community
             </p>
             <Button asChild>
               <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
-                <Plus className={`mr-2 ${iconSize.sm}`} />
+                <Plus className={`${marginRight.compact} ${iconSize.sm}`} />
                 Post Your First Job
               </Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className={`grid ${gap.comfortable}`}>
+        <div className={`${grid.base} ${gap.comfortable}`}>
           {jobs.map((job) => {
             const summary = billingSummaryMap.get(job.id);
             const planLabel = resolvePlanLabel(summary?.plan ?? job.plan);
@@ -475,8 +486,8 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
             return (
               <Card key={job.id}>
                 <CardHeader>
-                  <div className={`flex ${alignItems.start} ${justify.between}`}>
-                    <div className="flex-1">
+                  <div className={`${display.flex} ${alignItems.start} ${justify.between}`}>
+                    <div className={flexGrow['1']}>
                       <div className={cluster.compact}>
                         <UnifiedBadge
                           variant="base"
@@ -496,7 +507,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                 </CardHeader>
 
                 <CardContent>
-                  <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
+                  <div className={`${marginBottom.default} ${display.flex} ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
                     <div className={cluster.tight}>
                       <Eye className={iconSize.sm} />
                       {job.view_count ?? 0} views

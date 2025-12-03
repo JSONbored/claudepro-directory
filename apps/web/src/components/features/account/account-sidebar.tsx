@@ -19,11 +19,18 @@ import {
   TrendingUp,
   User as UserIcon,
 } from '@heyclaude/web-runtime/icons';
-import { borderBottom, muted, iconSize, spaceY, cluster, weight, size, padding, radius, bgColor,
+import { borderBottom, muted, iconSize, spaceY, cluster, weight, size, padding, paddingBottom, radius, bgColor,
   justify,
   alignItems,
   marginBottom,
   squareSize,
+  display,
+  flexGrow,
+  height,
+  width,
+  objectFit,
+  marginRight,
+  textColor,
 } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card } from '@heyclaude/web-runtime/ui';
@@ -134,28 +141,28 @@ export async function AccountSidebar({
   ];
 
   return (
-    <Card className={`h-fit ${padding.default} md:col-span-1`}>
-      <div className={`${marginBottom.comfortable} ${cluster.default} ${borderBottom.default} pb-4`}>
+    <Card className={`${height.fit} ${padding.default} md:col-span-1`}>
+      <div className={`${marginBottom.comfortable} ${cluster.default} ${borderBottom.default} ${paddingBottom.comfortable}`}>
         {profile?.image ? (
           <Image
             src={profile.image}
             alt={`${profile.name ?? 'User'}'s avatar`}
             width={48}
             height={48}
-            className={`${squareSize.avatarLg} ${radius.full} object-cover`}
+            className={`${squareSize.avatarLg} ${radius.full} ${objectFit.cover}`}
             unoptimized
             priority
           />
         ) : (
-          <div className={`flex ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.accent}`}>
+          <div className={`${display.flex} ${squareSize.avatarLg} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.accent}`}>
             <UserIcon className={iconSize.lg} />
           </div>
         )}
-        <div className="flex-1">
+        <div className={flexGrow['1']}>
           <p className={weight.medium}>{profile?.name ?? userNameMetadata}</p>
           <p className={`${muted.default} ${size.xs}`}>{user.email ?? ''}</p>
           {profile?.slug ? (
-            <Link href={`/u/${profile.slug}`} className={`text-accent ${size.xs} hover:underline`}>
+            <Link href={`/u/${profile.slug}`} className={`${textColor.accent} ${size.xs} hover:underline`}>
               View Profile
             </Link>
           ) : null}
@@ -165,8 +172,8 @@ export async function AccountSidebar({
       <nav className={spaceY.compact}>
         {navigation.map((item) => (
           <Link key={item.name} href={item.href}>
-            <Button variant="ghost" className={`w-full ${justify.start} ${size.sm}`}>
-              <item.icon className={`mr-2 ${iconSize.sm}`} />
+            <Button variant="ghost" className={`${width.full} ${justify.start} ${size.sm}`}>
+              <item.icon className={`${marginRight.compact} ${iconSize.sm}`} />
               {item.name}
             </Button>
           </Link>

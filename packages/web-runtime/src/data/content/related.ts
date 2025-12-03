@@ -42,7 +42,9 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
     };
   }
 
-  const data = await fetchCached(
+  const data = await fetchCached<
+    Database['public']['Functions']['get_related_content']['Returns']
+  >(
     (client) => new ContentService(client).getRelatedContent({
         p_category: category,
         p_slug: currentSlug,
@@ -53,7 +55,7 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
     {
       keyParts: ['related-content', category, currentSlug, input.limit ?? 3],
       tags: generateContentTags(category, null, ['related-content']),
-      ttlKey: 'cache.related_content.ttl_seconds',
+      ttlKey: 'related_content',
       fallback: [],
       logMeta: { category: category, slug: currentSlug },
     }

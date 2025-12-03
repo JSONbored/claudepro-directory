@@ -2,6 +2,8 @@
 
 import { cn } from '../../utils.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
+import { position, display, padding } from '../../../design-system/styles/layout.ts';
+import { bgColor } from '../../../design-system/styles/colors.ts';
 import {
   type HTMLMotionProps,
   motion,
@@ -53,7 +55,7 @@ function HighlightText({
         display: 'inline',
       }}
       className={cn(
-        `relative inline-block ${radius.lg} bg-orange-400 px-2 py-1 dark:bg-orange-500/50`,
+        `${position.relative} ${display.inlineBlock} ${radius.lg} ${bgColor.orange400} ${padding.xCompact} ${padding.yTight} dark:${bgColor['orange/50']}`,
         className
       )}
       {...props}

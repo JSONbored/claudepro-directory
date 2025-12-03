@@ -11,17 +11,27 @@ import {
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
 import {
-  cluster,
-  gap,
-  iconSize,
   alignItems,
+  bgColor,
+  cluster,
+  container,
+  gap,
+  grid,
+  height,
+  iconSize,
   maxWidth,
   muted,
   padding,
+  position,
   radius,
   size,
   spaceY,
+  textAlign,
+  textColor,
   weight,
+  width,
+  minWidth,
+  sticky,
 } from '@heyclaude/web-runtime/design-system';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import {
@@ -284,44 +294,29 @@ export default async function SubmitPage() {
   };
   const recentMerged = (dashboardData?.recent ?? [])
     .filter((submission) => isValidRecentSubmission(submission))
-    .flatMap((submission) => {
-      // Type guard ensures these are non-null, but add a defensive runtime check
-      const id = submission.id;
-      const mergedAt = submission.merged_at;
-      const contentName = submission.content_name;
-      if (!id || !mergedAt || !contentName) {
-        reqLogger.warn('SubmitPage: skipping invalid recent submission data', {
-          section: 'submission-dashboard',
-          submissionId: id,
-        });
-        return [];
-      }
-      return [
-        {
-          id,
-          content_name: contentName,
-          content_type: mapSubmissionTypeToContentCategory(submission.content_type),
-          merged_at: mergedAt,
-          merged_at_formatted: formatTimeAgo(mergedAt),
-          user:
-            submission.user?.name && submission.user.slug
-              ? { name: submission.user.name, slug: submission.user.slug }
-              : null,
-        },
-      ];
-    });
+    .map((submission) => ({
+      id: submission.id,
+      content_name: submission.content_name,
+      content_type: mapSubmissionTypeToContentCategory(submission.content_type),
+      merged_at: submission.merged_at,
+      merged_at_formatted: formatTimeAgo(submission.merged_at),
+      user:
+        submission.user?.name && submission.user.slug
+          ? { name: submission.user.name, slug: submission.user.slug }
+          : null,
+    }));
 
   return (
-    <div className={`container mx-auto ${maxWidth['7xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
+    <div className={`${container.default} ${maxWidth['7xl']} ${padding.xDefault} ${padding.yRelaxed} sm:${padding.ySection}`}>
       {/* Hero Header with animations */}
       <SubmitPageHero stats={stats} />
 
-      <div className={`grid ${alignItems.start} ${gap.relaxed} lg:grid-cols-[2fr_1fr] lg:${gap.loose}`}>
-        <div className="w-full min-w-0">
+      <div className={`${grid.twoThirdsOneThird} ${alignItems.start} ${gap.relaxed} lg:${gap.loose}`}>
+        <div className={`${width.full} ${minWidth[0]}`}>
           <SubmitFormClient formConfig={formConfig} templates={templates} />
         </div>
 
-        <aside className={`w-full ${spaceY.comfortable} sm:${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}>
+        <aside className={`${width.full} ${spaceY.comfortable} sm:${spaceY.relaxed} lg:${position.sticky} lg:${sticky.top24} lg:${height.fit}`}>
           {/* Job Promo Card - Priority #1 */}
           <JobsPromo />
 
@@ -333,25 +328,25 @@ export default async function SubmitPage() {
                 Community Stats
               </CardTitle>
             </CardHeader>
-            <CardContent className={`grid grid-cols-3 ${gap.compact}`}>
+            <CardContent className={grid.cols3}>
               {/* Total */}
               <div className={cn(
-  `${radius.lg} ${padding.compact} text-center`, 'bg-blue-500/10')}>
-                <div className={`${weight.bold} ${size['2xl']} text-blue-400`}>{stats.total}</div>
+  `${radius.lg} ${padding.compact} ${textAlign.center}`, bgColor.info)}>
+                <div className={`${weight.bold} ${size['2xl']} ${textColor.info400}`}>{stats.total}</div>
                 <div className={cn(muted.default, size.xs)}>Total</div>
               </div>
 
               {/* Pending */}
               <div className={cn(
-  `${radius.lg} ${padding.compact} text-center`, 'bg-yellow-500/10')}>
-                <div className={`${weight.bold} ${size['2xl']} text-yellow-400`}>{stats.pending}</div>
+  `${radius.lg} ${padding.compact} ${textAlign.center}`, bgColor.warning)}>
+                <div className={`${weight.bold} ${size['2xl']} ${textColor.warning400}`}>{stats.pending}</div>
                 <div className={cn(muted.default, size.xs)}>Pending</div>
               </div>
 
               {/* This Week */}
               <div className={cn(
-  `${radius.lg} ${padding.compact} text-center`, 'bg-green-500/10')}>
-                <div className={`${weight.bold} ${size['2xl']} text-green-400`}>{stats.merged_this_week}</div>
+  `${radius.lg} ${padding.compact} ${textAlign.center}`, bgColor.success)}>
+                <div className={`${weight.bold} ${size['2xl']} ${textColor.success400}`}>{stats.merged_this_week}</div>
                 <div className={cn(muted.default, size.xs)}>This Week</div>
               </div>
             </CardContent>
@@ -374,7 +369,7 @@ export default async function SubmitPage() {
       </div>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+      <section className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

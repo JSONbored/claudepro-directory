@@ -1,6 +1,6 @@
 'use client';
 
-import { getTimeoutConfig } from '../config/static-configs.ts';
+// Animation tokens not needed - using explicit values for clarity
 import { logger, normalizeError } from '../entries/core.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -82,8 +82,7 @@ export function useCopyToClipboard(
     if (configLoadedRef.current) return;
     configLoadedRef.current = true;
 
-    const config = getTimeoutConfig();
-    DEFAULT_CLIPBOARD_RESET_DELAY = config['timeout.ui.clipboard_reset_delay_ms'];
+    DEFAULT_CLIPBOARD_RESET_DELAY = 2000; // animation.duration.slow * 6.67, but keeping explicit value for clarity
   }, []);
 
   // Cleanup timeout on unmount
@@ -208,14 +207,7 @@ export function useButtonSuccess(options: UseButtonSuccessOptions = {}): UseButt
   const { duration } = options;
 
   // Load config synchronously per hook instance (static config, no async needed)
-  const defaultDuration = (() => {
-    try {
-      const config = getTimeoutConfig();
-      return config['timeout.ui.button_success_duration_ms'] ?? 2000;
-    } catch {
-      return 2000; // Safe fallback
-    }
-  })();
+  const defaultDuration = 2000; // animation.duration.slow * 6.67, but keeping explicit value for clarity
 
   const actualDuration = duration ?? defaultDuration;
   const [isSuccess, setIsSuccess] = useState(false);

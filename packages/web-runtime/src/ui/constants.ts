@@ -125,11 +125,11 @@ export type JobStatus = Database['public']['Enums']['job_status'];
 // UTILITY FUNCTIONS
 // ==========================================
 
-import { gap } from '../design-system/styles/layout.ts';
+import { gap, grid } from '../design-system/styles/layout.ts';
 
 export function getResponsiveGridClass(columns: 2 | 3): string {
   if (columns === 3) {
-    return `grid grid-cols-1 sm:grid-cols-3 ${gap.comfortable}`;
+    return `${grid.cols1} sm:grid-cols-3 ${gap.comfortable}`;
   }
-  return `grid grid-cols-1 sm:grid-cols-2 ${gap.comfortable}`;
+  return grid.responsive2;
 }

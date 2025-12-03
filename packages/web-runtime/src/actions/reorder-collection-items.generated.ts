@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const reorderCollectionItemsSchema = z.object({
+export const reorderCollectionItemsSchema = z.object({
   collection_id: z.string().uuid(),
   items: z.array(z.any())
 });
@@ -39,7 +39,6 @@ export const reorderCollectionItems = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -51,9 +50,10 @@ export const reorderCollectionItems = authedAction
       
       revalidatePath(`/account/library`);
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.collection_items']
+        cacheConfig,
+        invalidateKeys: ['collection_items']
       });
 
       

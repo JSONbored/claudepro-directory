@@ -5,7 +5,7 @@
  * No server imports, synchronous calls for client components
  *
  * Note: Toast messages use hardcoded defaults for client-side performance.
- * Server components can use toastConfigs from static-configs.ts if needed.
+ * Server components can use TOAST_MESSAGES from unified-config.ts if needed.
  */
 
 import { toast } from 'sonner';

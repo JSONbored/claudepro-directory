@@ -15,9 +15,15 @@ import {
 import {
   getCategoryConfig,
 } from '@heyclaude/web-runtime/data';
-import { borderTop, marginBottom, marginTop, muted, weight, size, spaceY  , gap , padding , minHeight , maxWidth, bgColor,
+import { borderTop, marginBottom, marginTop, muted, weight, size, spaceY, grid, padding, paddingTop, paddingBottom, minHeight, maxWidth, bgColor,
+  position,
+  container,
+  textAlign,
+  sticky,
+  self,
+  colSpan,
 } from '@heyclaude/web-runtime/design-system';
-import { 
+import {
   highlightCode,
   detectLanguage,
   generateFilename,
@@ -280,7 +286,7 @@ export async function UnifiedDetailPage({
     | null
   > => {
     // GUIDES: Skip content processing - structured sections rendered separately
-    if (item.category === Constants.public.Enums.content_category[7]) { // 'guides'
+    if (item.category === Constants.public.Enums.content_category[8]) { // 'guides'
       return null;
     }
 
@@ -298,7 +304,7 @@ export async function UnifiedDetailPage({
     try {
       // Parse markdown to extract individual code blocks
       const codeBlocks = extractCodeBlocksFromMarkdown(content);
-      
+
       // If we found code blocks, process each separately using shared-runtime utilities
       if (codeBlocks.length > 0) {
         const processedBlocks = codeBlocks.map((block: ExtractedCodeBlock, index: number) => {
@@ -865,8 +871,8 @@ export async function UnifiedDetailPage({
   if (!config) {
     return (
       <div className={`${minHeight.screen} ${bgColor.background}`}>
-        <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
-          <div className="text-center">
+        <div className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}>
+          <div className={textAlign.center}>
             <h1 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>Configuration Not Found</h1>
             <p className={`${marginBottom.comfortable} ${muted.default}`}>
               No configuration found for content type: {item.category}
@@ -925,12 +931,12 @@ export async function UnifiedDetailPage({
 
         {/* Main content with sidebar */}
         <div
-          className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}
+          className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}
           style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
         >
-          <div id="detail-main-content" className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-3`}>
+          <div id="detail-main-content" className={grid.responsive13Gap8}>
             {/* Primary content */}
-            <div className="lg:col-span-2">
+            <div className={colSpan.lg2}>
               <TabbedDetailLayout
                 item={item}
                 config={serializableConfig as typeof config}
@@ -941,7 +947,7 @@ export async function UnifiedDetailPage({
             </div>
 
             {/* Sidebars - TOC + Related content + Recently Viewed */}
-            <aside className={`${spaceY.relaxed} lg:sticky lg:top-24 lg:self-start`}>
+            <aside className={`${spaceY.relaxed} lg:${position.sticky} lg:${sticky.top24} lg:${self.start}`}>
               {/* On This Page - Supabase-style minimal TOC */}
               {headingMetadata && headingMetadata.length >= 2 && (
                 <SidebarToc headings={headingMetadata} />
@@ -987,7 +993,7 @@ export async function UnifiedDetailPage({
           </div>
         </div>
 
-        <div className={`container mx-auto ${padding.xDefault} pb-8`}>
+        <div className={`${container.default} ${padding.xDefault} ${paddingBottom.loose}`}>
           <NewsletterScrollTrigger
             source="content_page"
             {...(item.category ? { category: item.category } : {})}
@@ -1028,7 +1034,7 @@ export async function UnifiedDetailPage({
       )}
 
       {shouldRenderQuickActionsBar && (
-        <div className={`container mx-auto ${padding.xDefault} pt-4`}>
+        <div className={`${container.default} ${padding.xDefault} ${paddingTop.comfortable}`}>
           <DetailQuickActionsBar
             item={contentItem}
             metadata={metadata}
@@ -1041,10 +1047,10 @@ export async function UnifiedDetailPage({
 
       {/* Main content */}
       <div
-        className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}
+        className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}
         style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
       >
-        <div id="detail-main-content" className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-3`}>
+        <div id="detail-main-content" className={grid.responsive13Gap8}>
           {/* Primary content */}
           <div className={`${spaceY.loose} lg:col-span-2`}>
             {/* COLLECTIONS: Render collection-specific sections */}
@@ -1067,19 +1073,19 @@ export async function UnifiedDetailPage({
                       blocks: typeof contentData;
                       markdownBefore: string | null;
                     };
-                    
+
                     const groupedSections: GroupedSection[] = [];
                     let currentGroup: typeof contentData = [];
                     let groupMarkdownBefore: string | null = null;
-                    
+
                     for (let i = 0; i < contentData.length; i++) {
                       const block = contentData[i];
                       if (!block) continue;
-                      
+
                       // Check if this block has substantial markdown before it (>50 chars of actual content)
-                      const hasSubstantialMarkdownBefore = block.markdownBefore && 
+                      const hasSubstantialMarkdownBefore = block.markdownBefore &&
                         block.markdownBefore.replace(/\s+/g, ' ').trim().length > 50;
-                      
+
                       if (hasSubstantialMarkdownBefore && currentGroup.length > 0) {
                         // End current group and start new one
                         groupedSections.push({
@@ -1097,7 +1103,7 @@ export async function UnifiedDetailPage({
                         currentGroup.push(block);
                       }
                     }
-                    
+
                     // Don't forget the last group
                     if (currentGroup.length > 0) {
                       groupedSections.push({
@@ -1106,7 +1112,7 @@ export async function UnifiedDetailPage({
                         markdownBefore: groupMarkdownBefore,
                       });
                     }
-                    
+
                     // Render grouped sections
                     return groupedSections.map((section, sectionIndex) => (
                       <div key={`content-section-${sectionIndex}`} className={spaceY.comfortable}>
@@ -1116,7 +1122,7 @@ export async function UnifiedDetailPage({
                             <p>{section.markdownBefore}</p>
                           </div>
                         )}
-                        
+
                         {section.type === 'group' ? (
                           // Render as tabbed code group
                           <UnifiedSection
@@ -1181,7 +1187,7 @@ export async function UnifiedDetailPage({
                 description="Key capabilities and functionality"
                 items={features}
                 category={category}
-                dotColor="bg-primary"
+                dotColor={bgColor.primary}
               />
             )}
 
@@ -1193,7 +1199,7 @@ export async function UnifiedDetailPage({
                 description="Prerequisites and dependencies"
                 items={requirements}
                 category={category}
-                dotColor="bg-orange-500"
+                dotColor={bgColor.orange}
               />
             )}
 
@@ -1235,7 +1241,7 @@ export async function UnifiedDetailPage({
                 description="Common scenarios and applications"
                 items={useCases}
                 category={category}
-                dotColor="bg-accent"
+                dotColor={bgColor.accent}
               />
             )}
 
@@ -1247,7 +1253,7 @@ export async function UnifiedDetailPage({
                 description="Important security considerations"
                 items={securityItems}
                 category={category}
-                dotColor="bg-orange-500"
+                dotColor={bgColor.orange}
               />
             )}
 
@@ -1258,7 +1264,7 @@ export async function UnifiedDetailPage({
                 title="Troubleshooting"
                 description="Common issues and solutions"
                 items={troubleshooting as Array<string | { issue: string; solution: string }>}
-                dotColor="bg-red-500"
+                dotColor={bgColor.red}
               />
             )}
 
@@ -1269,7 +1275,7 @@ export async function UnifiedDetailPage({
 
             {/* Reviews & Ratings Section */}
             {isValidCategory(item.category) && item.category && item.slug && (
-              <div className={`${marginTop.section} ${borderTop.default} pt-12`}>
+              <div className={`${marginTop.section} ${borderTop.default} ${paddingTop.section}`}>
                 <ReviewListSection contentType={item.category} contentSlug={item.slug} />
               </div>
             )}
@@ -1282,7 +1288,7 @@ export async function UnifiedDetailPage({
           </div>
 
           {/* Sidebars - TOC + Related content + Recently Viewed */}
-          <aside className={`${spaceY.relaxed} lg:sticky lg:top-24 lg:self-start`}>
+            <aside className={`${spaceY.relaxed} lg:${position.sticky} lg:${sticky.top24} lg:${self.start}`}>
             {/* On This Page - Supabase-style minimal TOC */}
             {shouldRenderDetailToc && headingMetadata && headingMetadata.length >= 2 && (
               <SidebarToc headings={headingMetadata} />

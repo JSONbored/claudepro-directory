@@ -2,12 +2,24 @@
 
 /** Homepage tabs consuming homepageConfigs for runtime-tunable tab categories */
 
-import { getHomepageConfigBundle } from '@heyclaude/web-runtime/config/static-configs';
+import { HOMEPAGE_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { type UnifiedCategoryConfig } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
-import { stack, spaceY, muted, weight, size, gap, padding, zLayer, overflow, marginBottom,
+import { stack, spaceY, muted, weight, size, gap, padding, zLayer, overflow,   marginBottom,
+  display,
+  position,
+  absolute,
+  width,
+  height,
+  textAlign,
+  paddingTop,
+  minWidth,
+  whitespace,
+  pointerEvents,
+  transform,
 } from '@heyclaude/web-runtime/design-system';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { type FC, memo, useEffect, useMemo, useState } from 'react';
@@ -44,22 +56,16 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
     damping: 17,
   });
 
-  // Get static config bundle
+  // Get homepage config from unified-config
   useEffect(() => {
-    const bundle = getHomepageConfigBundle();
-    
     // Extract tab categories from homepage config
-    const categories = Array.isArray(bundle.homepageConfig['homepage.tab_categories'])
-      ? bundle.homepageConfig['homepage.tab_categories']
+    const categories = Array.isArray(HOMEPAGE_CONFIG.tab_categories)
+      ? HOMEPAGE_CONFIG.tab_categories
       : [];
     setTabCategories(categories.map((value) => String(value)));
 
-    // Extract animation config
-    setSpringDefault({
-      type: 'spring' as const,
-      stiffness: bundle.animationConfig['animation.spring.default.stiffness'],
-      damping: bundle.animationConfig['animation.spring.default.damping'],
-    });
+    // Extract animation config from design system tokens
+    setSpringDefault(animation.spring.default);
   }, []);
 
   const contentTabs = useMemo(
@@ -77,8 +83,8 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className={spaceY.loose}>
       {/* Tabs with horizontal scroll on mobile/tablet */}
-      <TabsList className={`scrollbar-hide w-full ${gap.tight} ${overflow.xAuto} lg:grid lg:w-auto lg:auto-cols-fr lg:grid-flow-col`}>
-        <div className="flex min-w-max lg:contents lg:min-w-0">
+      <TabsList className={`scrollbar-hide ${width.full} ${gap.tight} ${overflow.xAuto} lg:${display.grid} lg:${width.auto} lg:auto-cols-fr lg:grid-flow-col`}>
+        <div className={`${display.flex} ${minWidth.max} lg:contents lg:${minWidth[0]}`}>
           {tabCategories.map((tab) => {
             let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
 
@@ -93,7 +99,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               <motion.div key={tab} whileTap={{ scale: 0.95 }} transition={springDefault}>
                 <TabsTrigger
                   value={tab}
-                  className={`whitespace-nowrap ${padding.xCompact} ${size.xs} sm:px-4 sm:${size.sm}`}
+                  className={`${whitespace.nowrap} ${padding.xCompact} ${size.xs} sm:${padding.xDefault} sm:${size.sm}`}
                 >
                   {displayName}
                 </TabsTrigger>
@@ -126,14 +132,14 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
                 const showTrending = Boolean(slug && trendingSlugs.has(slug));
 
                 return (
-                  <div className="relative h-full">
+                  <div className={`${position.relative} ${height.full}`}>
                     {(showNew || showTrending) && (
-                      <div className={`pointer-events-none absolute top-3 left-3 ${zLayer.raised} ${stack.compact}`}>
+                      <div className={`${pointerEvents.none} ${absolute.topLeftOffset} ${zLayer.raised} ${stack.compact}`}>
                         {showNew && (
                           <UnifiedBadge
                             variant="base"
                             style="secondary"
-                            className={`${size['2xs']} uppercase`}
+                            className={`${size['2xs']} ${transform.uppercase}`}
                           >
                             New this week
                           </UnifiedBadge>
@@ -142,7 +148,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
                           <UnifiedBadge
                             variant="base"
                             style="outline"
-                            className={`${size['2xs']} uppercase`}
+                            className={`${size['2xs']} ${transform.uppercase}`}
                           >
                             Trending
                           </UnifiedBadge>
@@ -166,20 +172,20 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
 
       {/* Community tab with custom content */}
       <TabsContent value="community" className={spaceY.relaxed}>
-        <div className={`${marginBottom.relaxed} text-center`}>
+        <div className={`${marginBottom.relaxed} ${textAlign.center}`}>
           <h3 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`}>Featured Contributors</h3>
           <p className={muted.default}>
             Meet the experts creating amazing Claude configurations
           </p>
         </div>
 
-        <div className="text-center">
+        <div className={textAlign.center}>
           <p className={`${marginBottom.comfortable} ${muted.lg}`}>
             Coming soon! Featured contributors who create amazing Claude configurations.
           </p>
         </div>
 
-        <div className={'pt-8 text-center'}>
+        <div className={`${paddingTop.loose} ${textAlign.center}`}>
           <Button variant="outline" asChild={true}>
             <Link href={ROUTES.COMMUNITY}>View All Contributors</Link>
           </Button>

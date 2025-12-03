@@ -28,7 +28,9 @@ import {
   cluster,
   emptyCard,
   flexWrap,
+  grid,
   gap,
+  hoverBg,
   iconSize,
   justify,
   marginBottom,
@@ -38,12 +40,24 @@ import {
   muted,
   padding,
   radius,
-  size,
   spaceY,
   textColor,
   tracking,
   transition,
   weight,
+  display,
+  position,
+  sticky,
+  self,
+  cursor,
+  container,
+  marginX,
+  textAlign,
+  marginLeft,
+  marginRight,
+  width,
+  responsiveText,
+  size,
 } from '@heyclaude/web-runtime/design-system';
 import { Tag, ArrowLeft, Filter } from '@heyclaude/web-runtime/icons';
 import {
@@ -166,17 +180,17 @@ function RelatedTagsSidebar({
   return (
     <Card>
       <CardContent className={padding.default}>
-        <h3 className={`${marginBottom.compact} ${weight.semibold}`}>Related Tags</h3>
-        <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+        <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.base}`}>Related Tags</h3>
+        <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
           {relatedTags.map((tag) => (
             <Link key={tag.tag} href={`/tags/${encodeURIComponent(tag.tag)}`}>
               <UnifiedBadge
                 variant="base"
                 style="outline"
-                className={`cursor-pointer ${transition.colors} hover:bg-accent`}
+                className={`${cursor.pointer} ${transition.colors} ${hoverBg.accentSolid}`}
               >
                 {formatTagForDisplay(tag.tag)}
-                <span className={`ml-1 ${muted.default}`}>({tag.count})</span>
+                <span className={`${marginLeft.tight} ${muted.default}`}>({tag.count})</span>
               </UnifiedBadge>
             </Link>
           ))}
@@ -209,7 +223,7 @@ function CategoryFilterTabs({
   tag: string;
 }) {
   return (
-    <div className={`${marginBottom.comfortable} flex ${flexWrap.wrap} ${gap.compact}`}>
+    <div className={`${marginBottom.comfortable} ${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
       <Link href={`/tags/${encodeURIComponent(tag)}`}>
         <Button
           variant={activeCategory === null ? 'secondary' : 'outline'}
@@ -364,11 +378,10 @@ export default async function TagDetailPage({
 
   // Calculate category counts for filter tabs
   const categoryCounts = new Map<ContentCategory, number>();
-  if (tagMetadata?.categories) {
-    // We need to get counts per category - for now, just mark categories as having content
-    for (const cat of tagMetadata.categories) {
-      categoryCounts.set(cat, 1); // Placeholder - actual count would require additional query
-    }
+  // Count actual items per category from the content results
+  for (const item of contentResult.items) {
+    const currentCount = categoryCounts.get(item.category) ?? 0;
+    categoryCounts.set(item.category, currentCount + 1);
   }
 
   // Display content - use arrow function to avoid passing reference directly
@@ -378,18 +391,18 @@ export default async function TagDetailPage({
     <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Hero Section */}
       <section className={emptyCard.default} aria-labelledby="tag-title">
-        <div className={`container mx-auto ${padding.xDefault} ${padding.yHero}`}>
+        <div className={`${container.default} ${padding.xDefault} ${padding.yHero}`}>
           {/* Back link */}
           <Link
             href="/tags"
-            className={`${cluster.compact} ${marginBottom.comfortable} inline-flex ${muted.default} ${transition.colors} hover:text-foreground`}
+            className={`${cluster.compact} ${marginBottom.comfortable} ${display.inlineFlex} ${muted.default} ${transition.colors} hover:${textColor.foreground}`}
           >
             <ArrowLeft className={iconSize.sm} />
             <span>All Tags</span>
           </Link>
 
-          <div className={`mx-auto ${maxWidth['3xl']}`}>
-            <div className={`${marginBottom.comfortable} flex ${justify.center}`}>
+          <div className={`${marginX.auto} ${maxWidth['3xl']}`}>
+            <div className={`${marginBottom.comfortable} ${display.flex} ${justify.center}`}>
               <div className={`${radius.full} ${bgColor['primary/10']} ${padding.compact}`} aria-hidden="true">
                 <Tag className={`${iconSize['2xl']} ${textColor.primary}`} />
               </div>
@@ -397,19 +410,19 @@ export default async function TagDetailPage({
 
             <h1
               id="tag-title"
-              className={`${marginBottom.default} ${weight.bold} ${size['4xl']} ${tracking.tight} sm:${size['5xl']}`}
+              className={`${marginBottom.default} ${weight.bold} ${responsiveText['4xlTo5xl']} ${tracking.tight}`}
             >
               {displayTag}
             </h1>
 
-            <p className={`mx-auto ${marginTop.default} ${maxWidth.xl} ${muted.lg}`}>
+            <p className={`${marginX.auto} ${marginTop.default} ${maxWidth.xl} ${muted.lg} ${size.lg}`}>
               {contentResult.totalCount}{' '}
               {contentResult.totalCount === 1 ? 'item' : 'items'} tagged with "
               {displayTag}"
               {activeCategory ? ` in ${CATEGORY_LABELS[activeCategory]}` : null}
             </p>
 
-            {tagMetadata?.categories && tagMetadata.categories.length > 0 ? <div className={`${marginTop.default} flex ${flexWrap.wrap} ${justify.center} ${gap.compact}`}>
+            {tagMetadata?.categories && tagMetadata.categories.length > 0 ? <div className={`${marginTop.default} ${display.flex} ${flexWrap.wrap} ${justify.center} ${gap.compact}`}>
                 {tagMetadata.categories.map((category) => (
                   <UnifiedBadge key={category} variant="base" style="outline">
                     {CATEGORY_LABELS[category]}
@@ -421,8 +434,8 @@ export default async function TagDetailPage({
       </section>
 
       {/* Main Content */}
-      <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
-        <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-4`}>
+      <div className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}>
+        <div className={grid.sidebar}>
           {/* Main content area */}
           <div className="lg:col-span-3">
             {/* Category Filter Tabs */}
@@ -438,9 +451,9 @@ export default async function TagDetailPage({
 
             {/* Content Grid */}
             {displayItems.length === 0 ? (
-              <Card className={`bg-muted/50 ${padding.relaxed} text-center`}>
-                <Tag className={`mx-auto ${marginBottom.compact} ${iconSize['3xl']} text-muted-foreground/30`} />
-                <p className={muted.default}>
+              <Card className={`${bgColor['muted/50']} ${padding.relaxed} ${textAlign.center}`}>
+                <Tag className={`${marginX.auto} ${marginBottom.compact} ${iconSize['3xl']} ${muted.opacity30}`} />
+                <p className={`${muted.default} ${size.base}`}>
                   No content found for this tag
                   {activeCategory ? ` in ${CATEGORY_LABELS[activeCategory]}` : null}.
                 </p>
@@ -460,18 +473,18 @@ export default async function TagDetailPage({
           </div>
 
           {/* Sidebar */}
-          <aside className={`${spaceY.comfortable} lg:sticky lg:top-24 lg:self-start`}>
+          <aside className={`${spaceY.comfortable} lg:${position.sticky} lg:${sticky.top24} lg:${self.start}`}>
             <RelatedTagsSidebar currentTag={tag} allTags={allTags} />
 
             {/* Browse all tags CTA */}
             <Card>
-              <CardContent className={`${padding.default} text-center`}>
-                <p className={`${marginBottom.compact} ${muted.sm}`}>
+              <CardContent className={`${padding.default} ${textAlign.center}`}>
+                <p className={`${marginBottom.compact} ${muted.sm} ${size.sm}`}>
                   Explore more topics
                 </p>
                 <Link href="/tags">
-                  <Button variant="outline" size="sm" className="w-full">
-                    <Tag className={`mr-2 ${iconSize.sm}`} />
+                  <Button variant="outline" size="sm" className={width.full}>
+                    <Tag className={`${marginRight.compact} ${iconSize.sm}`} />
                     Browse All Tags
                   </Button>
                 </Link>

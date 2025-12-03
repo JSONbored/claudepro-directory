@@ -8,18 +8,23 @@
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
 import {
-  bgColor,
-  iconSize,
   alignItems,
+  animate,
+  bgColor,
+  display,
+  iconSize,
   justify,
   marginBottom,
+  marginX,
   maxWidth,
   minHeight,
   muted,
   padding,
   radius,
   stack,
+  textAlign,
   textColor,
+  width,
 } from '@heyclaude/web-runtime/design-system';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
@@ -209,16 +214,16 @@ export default function OAuthLinkCallbackPage({
 
   if (status === 'loading') {
     return (
-      <div className={`flex ${minHeight.screen} ${alignItems.center} ${justify.center} ${padding.default}`}>
-        <Card className={`w-full ${maxWidth.md}`}>
-          <CardHeader className="text-center">
+      <div className={`${display.flex} ${minHeight.screen} ${alignItems.center} ${justify.center} ${padding.default}`}>
+        <Card className={`${width.full} ${maxWidth.md}`}>
+          <CardHeader className={textAlign.center}>
             <CardTitle>Linking Account</CardTitle>
             <CardDescription>
               Please wait while we redirect you to {provider ?? 'the provider'}...
             </CardDescription>
           </CardHeader>
-          <CardContent className={`flex ${alignItems.center} ${justify.center} ${padding.yRelaxed}`}>
-            <Loader2 className={`${iconSize.xl} animate-spin ${muted.default}`} />
+          <CardContent className={`${display.flex} ${alignItems.center} ${justify.center} ${padding.yRelaxed}`}>
+            <Loader2 className={`${iconSize.xl} ${animate.spin} ${muted.default}`} />
           </CardContent>
         </Card>
       </div>
@@ -227,11 +232,11 @@ export default function OAuthLinkCallbackPage({
 
   // status can only be 'error' at this point (TypeScript narrows the type)
   return (
-    <div className={`flex ${minHeight.screen} ${alignItems.center} ${justify.center} ${padding.default}`}>
-      <Card className={`w-full ${maxWidth.md}`}>
-        <CardHeader className="text-center">
+    <div className={`${display.flex} ${minHeight.screen} ${alignItems.center} ${justify.center} ${padding.default}`}>
+      <Card className={`${width.full} ${maxWidth.md}`}>
+        <CardHeader className={textAlign.center}>
           <div
-            className={`mx-auto ${marginBottom.default} flex ${iconSize['3xl']} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['destructive/10']}`}
+            className={`${marginX.auto} ${marginBottom.default} ${display.flex} ${iconSize['3xl']} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor['destructive/10']}`}
           >
             <AlertCircle className={`${iconSize.lg} ${textColor.destructive}`} />
           </div>

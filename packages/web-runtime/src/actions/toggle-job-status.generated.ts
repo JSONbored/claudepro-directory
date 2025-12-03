@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const toggleJobStatusSchema = z.object({
+export const toggleJobStatusSchema = z.object({
   job_id: z.string().uuid(),
   new_status: z.enum(['draft', 'pending_payment', 'pending_review', 'active', 'expired', 'rejected', 'deleted'])
 });
@@ -39,7 +39,6 @@ export const toggleJobStatus = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -53,9 +52,10 @@ export const toggleJobStatus = authedAction
       revalidatePath(`/account/jobs`);
       revalidateTag(`job-${parsedInput.job_id}`, 'default');
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.job_status']
+        cacheConfig,
+        invalidateKeys: ['job_status']
       });
 
       

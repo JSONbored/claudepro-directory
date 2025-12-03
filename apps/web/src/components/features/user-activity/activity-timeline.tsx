@@ -9,8 +9,10 @@ import { Card, CardContent } from '@heyclaude/web-runtime/ui';
 type Activity = Database['public']['CompositeTypes']['user_activity_timeline_item'];
 
 import { logger } from '@heyclaude/web-runtime/core';
-import { spaceY, muted, marginTop, weight, iconSize  , padding , row, flexGrow,
+import { spaceY, muted, marginTop, weight, iconSize  , padding , row, flexGrow, hoverBg, transition,
   size,
+  textAlign,
+  minWidth,
 } from '@heyclaude/web-runtime/design-system';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 
@@ -29,7 +31,7 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
   if (!displayActivities || displayActivities.length === 0) {
     return (
       <Card>
-        <CardContent className={`py-12 text-center ${muted.default}`}>
+        <CardContent className={`${padding.ySection} ${textAlign.center} ${muted.default}`}>
           No activity yet
         </CardContent>
       </Card>
@@ -75,10 +77,10 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
           }
 
           return (
-            <Card key={activity.id} className="transition-colors hover:bg-accent/5">
+            <Card key={activity.id} className={`${transition.colors} ${hoverBg.subtle}`}>
               <CardContent className={`${row.default} ${padding.default}`}>
                 <Icon className={`${marginTop.tight} ${iconSize.md} ${flexGrow.shrink0} ${muted.default}`} />
-                <div className={`min-w-0 ${flexGrow['1']}`}>
+                <div className={`${minWidth[0]} ${flexGrow['1']}`}>
                   <p className={size.sm}>
                     <span className={muted.default}>{config.label}</span>{' '}
                     <span className={weight.medium}>{title}</span>

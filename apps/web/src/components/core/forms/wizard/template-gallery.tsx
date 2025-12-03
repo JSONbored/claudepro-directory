@@ -24,25 +24,62 @@ import {
   Users,
   Zap,
 } from '@heyclaude/web-runtime/icons';
-import { stack, iconSize, cluster, animate, spaceY, muted, weight, size, gap, padding, row, radius, transition, zLayer, textColor,
+import {
+  absolute,
   alignItems,
-  border,
-  borderTop,
-  flexWrap,
-  overflow,
+  animate,
   animateDuration,
-  opacityLevel,
   bgColor,
-  justify,
-  shadow,
-  shadowColor,
+  bgGradient,
+  border,
+  borderColor,
+  borderTop,
+  cluster,
+  cursor,
+  display,
   flexGrow,
+  flexWrap,
+  gap,
+  gradientFrom,
+  gradientTo,
+  gradientVia,
+  grid,
+  height,
+  hoverBg,
+  hoverBorder,
+  iconFill,
+  iconSize,
+  justify,
   marginBottom,
   marginTop,
+  marginX,
+  minWidth,
+  muted,
+  opacityLevel,
+  overflow,
+  padding,
+  paddingBottom,
+  paddingTop,
+  pointerEvents,
+  position,
+  radius,
+  row,
+  shadow,
+  shadowColor,
+  size,
   skeletonSize,
+  spaceY,
+  stack,
+  textAlign,
+  textColor,
+  transition,
+  truncate,
+  weight,
+  width,
+  zLayer,
 } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, AlertDescription } from '@heyclaude/web-runtime/ui';
@@ -114,23 +151,23 @@ export function TemplateGallery({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={TOKENS.animations.spring.smooth}
+      transition={animation.spring.smooth}
       className={cn(spaceY.relaxed, className)}
     >
       {/* Header */}
-      <div className={`flex ${alignItems.center} ${justify.between}`}>
+      <div className={`${display.flex} ${alignItems.center} ${justify.between}`}>
         <div className={cluster.default}>
           <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
-            transition={TOKENS.animations.spring.bouncy}
+            transition={animation.spring.bouncy}
             className={cn(
-              `flex ${iconSize['2xl']} ${alignItems.center} ${justify.center} ${radius.xl}`,
-              'bg-linear-to-br from-amber-500/20 to-orange-500/20',
-              'border border-amber-500/30'
+              `${display.flex} ${iconSize['2xl']} ${alignItems.center} ${justify.center} ${radius.xl}`,
+              `${bgGradient.toBR} ${gradientFrom.amber20} ${gradientTo.orange20}`,
+              `${border.default} ${borderColor['amber/30']}`
             )}
           >
-            <Sparkles className={cn(iconSize.md, TOKENS.colors.accent)} />
+            <Sparkles className={cn(iconSize.md, textColor.accent)} />
           </motion.div>
           <div>
             <h3 className={`${weight.semibold} ${size.lg}`}>Popular Templates</h3>
@@ -149,12 +186,12 @@ export function TemplateGallery({
 
       {/* Category tabs (if multiple categories exist) */}
       {categories.length > 1 && (
-        <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+        <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
           <Button
             variant={selectedCategory === null ? 'default' : 'outline'}
             size="sm"
             onClick={() => setSelectedCategory(null)}
-            className="h-8"
+            className={height.input}
           >
             All
           </Button>
@@ -164,7 +201,7 @@ export function TemplateGallery({
               variant={selectedCategory === cat ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSelectedCategory(cat)}
-              className="h-8"
+              className={height.input}
             >
               {cat}
             </Button>
@@ -174,7 +211,7 @@ export function TemplateGallery({
 
       {/* Templates grid */}
       <AnimatePresence mode="popLayout">
-        <motion.div layout={true} className={`grid ${gap.comfortable} sm:grid-cols-2 lg:grid-cols-3`}>
+        <motion.div layout={true} className={grid.responsive123}>
           {filteredTemplates.map((template, index) => (
             <TemplateCard
               key={template.id}
@@ -191,9 +228,9 @@ export function TemplateGallery({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`${radius.xl} ${border.dashed} ${padding.section} text-center`}
+          className={`${radius.xl} ${border.dashed} ${padding.section} ${textAlign.center}`}
         >
-          <Sparkles className={`mx-auto ${marginBottom.compact} ${iconSize['3xl']} ${muted.default}/50`} />
+          <Sparkles className={`${marginX.auto} ${marginBottom.compact} ${iconSize['3xl']} ${muted.opacity50}`} />
           <p className={muted.default}>No templates found for this category.</p>
         </motion.div>
       )}
@@ -258,30 +295,30 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ ...TOKENS.animations.spring.smooth, delay: index * 0.05 }}
+      transition={{ ...animation.spring.smooth, delay: index * 0.05 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
       <Card
         className={cn(
-          `group relative ${overflow.hidden} ${transition.all} ${animateDuration.slow}`,
+          `group ${position.relative} ${overflow.hidden} ${transition.all} ${animateDuration.slow}`,
           `hover:${shadowColor.amber} hover:${shadow.lg}`,
-          'hover:border-amber-500/50',
-          'cursor-pointer'
+          hoverBorder['amber/50'],
+          cursor.pointer
         )}
         onClick={onApply}
       >
         {/* Badges overlay */}
-        <div className={`absolute top-3 right-3 ${zLayer.raised} ${stack.snug}`}>
+        <div className={`${absolute.topRightOffset} ${zLayer.raised} ${stack.snug}`}>
           {stats.featured && (
             <Badge
               variant="secondary"
               className={cn(
-                `${gap.tight} border-amber-500/50 bg-amber-500/10`,
+                `${gap.tight} ${borderColor['amber/50']} ${bgColor.warning}`,
                 `text-amber-300 ${shadow.sm}`
               )}
             >
-              <Star className={`${iconSize.xs} fill-current`} />
+              <Star className={`${iconSize.xs} ${iconFill.current}`} />
               Featured
             </Badge>
           )}
@@ -301,8 +338,8 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
             <Badge
               variant="secondary"
               className={cn(
-                `${gap.tight} border-green-500/50 bg-green-500/10`,
-                `text-green-300 ${shadow.sm}`
+                `${gap.tight} ${borderColor['green/50']} ${bgColor.success}`,
+                `${textColor.success400} ${shadow.sm}`
               )}
             >
               <TrendingUp className={iconSize.xs} />
@@ -311,15 +348,15 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
           )}
         </div>
 
-        <CardHeader className="pb-3">
-          <CardTitle className={`flex ${alignItems.start} ${justify.between} ${gap.compact} ${size.base}`}>
-            <span className="line-clamp-2">{template.name}</span>
+        <CardHeader className={paddingBottom.default}>
+          <CardTitle className={`${display.flex} ${alignItems.start} ${justify.between} ${gap.compact} ${size.base}`}>
+            <span className={truncate.lines2}>{template.name}</span>
             <motion.div
               animate={{
                 x: isHovered ? 4 : 0,
                 opacity: isHovered ? 1 : 0.6,
               }}
-              transition={TOKENS.animations.spring.snappy}
+              transition={animation.spring.snappy}
             >
               <ArrowRight className={`${iconSize.sm} ${flexGrow.shrink0} ${textColor.amber}`} />
             </motion.div>
@@ -329,19 +366,19 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
         <CardContent className={spaceY.comfortable}>
           {/* Description */}
           {template.description && (
-            <p className={`line-clamp-2 ${muted.sm}`}>{template.description}</p>
+            <p className={`${truncate.lines2} ${muted.sm}`}>{template.description}</p>
           )}
 
           {/* Tags */}
           {tags.length > 0 && (
-            <div className={`flex ${flexWrap.wrap} ${gap.snug}`}>
+            <div className={`${display.flex} ${flexWrap.wrap} ${gap.snug}`}>
               {tags.slice(0, 3).map((tag: string) => (
-                <Badge key={tag} variant="outline" className={`h-6 ${size.xs}`}>
+                <Badge key={tag} variant="outline" className={`${height.badge} ${size.xs}`}>
                   {tag}
                 </Badge>
               ))}
               {tags.length > 3 && (
-                <Badge variant="outline" className={`h-6 ${size.xs}`}>
+                <Badge variant="outline" className={`${height.badge} ${size.xs}`}>
                   +{tags.length - 3}
                 </Badge>
               )}
@@ -349,7 +386,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
           )}
 
           {/* Stats bar */}
-          <div className={`flex ${alignItems.center} ${justify.between} ${borderTop.default} pt-3`}>
+          <div className={`${display.flex} ${alignItems.center} ${justify.between} ${borderTop.default} ${paddingTop.default}`}>
             {/* Usage count and rating */}
             <div className={cluster.default}>
               <div className={`${cluster.snug} ${muted.default} ${size.xs}`}>
@@ -363,8 +400,8 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
                 </span>
               </div>
               {stats.averageRating && stats.averageRating > 0 && (
-                <div className={`${cluster.tight} text-amber-400 ${size.xs}`}>
-                  <Star className={`${iconSize.xs} fill-current`} />
+                <div className={`${cluster.tight} ${textColor.amber400} ${size.xs}`}>
+                  <Star className={`${iconSize.xs} ${iconFill.current}`} />
                   <span>{stats.averageRating.toFixed(1)}</span>
                 </div>
               )}
@@ -375,8 +412,8 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
               size="sm"
               variant="ghost"
               className={cn(
-                `h-7 ${gap.snug} ${padding.xTight} ${size.xs}`,
-                'text-amber-500 hover:bg-amber-500/10 hover:text-amber-400'
+                `${height.buttonSm} ${gap.snug} ${padding.xTight} ${size.xs}`,
+                `${textColor.amber} ${hoverBg.amberSubtle} hover:${textColor.warning400}`
               )}
               onClick={(e) => {
                 e.stopPropagation();
@@ -392,14 +429,14 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
         {/* Hover gradient overlay */}
         <motion.div
           className={cn(
-            'pointer-events-none absolute inset-0',
-            'bg-linear-to-br from-amber-500/5 via-transparent to-orange-500/5',
-            'opacity-0'
+            `${pointerEvents.none} ${absolute.inset}`,
+            `${bgGradient.toBR} ${gradientFrom.amber5} ${gradientVia.transparent} ${gradientTo.orange5}`,
+            opacityLevel[0]
           )}
           animate={{
             opacity: isHovered ? 1 : 0,
           }}
-          transition={TOKENS.animations.spring.smooth}
+          transition={animation.spring.smooth}
         />
       </Card>
     </motion.div>
@@ -465,7 +502,7 @@ export function TemplateQuickSelect({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={TOKENS.animations.spring.smooth}
+      transition={animation.spring.smooth}
       className={cn(spaceY.default, className)}
     >
       {/* Onboarding Tooltip */}
@@ -474,11 +511,11 @@ export function TemplateQuickSelect({
           initial={{ opacity: 0, scale: 0.95, y: -10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: -10 }}
-          transition={TOKENS.animations.spring.bouncy}
+          transition={animation.spring.bouncy}
         >
-          <Alert className="border-amber-500/50 bg-amber-500/10">
+          <Alert className={`${borderColor['amber/50']} ${bgColor.warning}`}>
             <Info className={`${iconSize.sm} ${textColor.amber}`} />
-            <AlertDescription className={`flex ${alignItems.start} ${justify.between} ${gap.default}`}>
+            <AlertDescription className={`${display.flex} ${alignItems.start} ${justify.between} ${gap.default}`}>
               <span className={size.sm}>
                 <strong className={weight.semibold}>💡 Pro tip:</strong> Save time by starting with a
                 proven template. Click any template below to auto-fill your form with best
@@ -488,7 +525,7 @@ export function TemplateQuickSelect({
                 variant="ghost"
                 size="sm"
                 onClick={handleDismissOnboarding}
-                className={`h-6 ${padding.xTight} ${size.xs} hover:bg-amber-500/20`}
+                className={`${height.badge} ${padding.xTight} ${size.xs} ${hoverBg.amberStrong}`}
               >
                 Got it
               </Button>
@@ -496,9 +533,9 @@ export function TemplateQuickSelect({
           </Alert>
         </motion.div>
       )}
-      <div className={`flex ${alignItems.center} ${justify.between}`}>
+      <div className={`${display.flex} ${alignItems.center} ${justify.between}`}>
         <div className={cluster.compact}>
-          <Sparkles className={cn(iconSize.sm, TOKENS.colors.accent)} />
+          <Sparkles className={cn(iconSize.sm, textColor.accent)} />
           <span className={`${weight.medium} ${size.sm}`}>Quick Start Templates</span>
         </div>
         {hasMore && (
@@ -506,7 +543,7 @@ export function TemplateQuickSelect({
             variant="ghost"
             size="sm"
             onClick={() => setExpanded(!expanded)}
-            className={`h-7 ${size.xs}`}
+            className={`${height.buttonSm} ${size.xs}`}
           >
             {expanded ? 'Show Less' : `View All (${allTemplates.length})`}
           </Button>
@@ -523,14 +560,14 @@ export function TemplateQuickSelect({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{
-                ...TOKENS.animations.spring.smooth,
+                ...animation.spring.smooth,
                 delay: index * 0.05,
               }}
               onClick={() => onApplyTemplate(template)}
               className={cn(
-                `flex w-full ${alignItems.start} ${gap.default} ${radius.lg} border ${padding.compact}`,
-                `text-left ${transition.all} ${animateDuration.default}`,
-                'hover:border-amber-500/50 hover:bg-accent/50',
+                `${display.flex} ${width.full} ${alignItems.start} ${gap.default} ${radius.lg} ${border.default} ${padding.compact}`,
+                `${textAlign.left} ${transition.all} ${animateDuration.default}`,
+                `${hoverBorder['amber/50']} ${hoverBg.stronger}`,
                 'group'
               )}
             >
@@ -538,13 +575,13 @@ export function TemplateQuickSelect({
                 className={cn(
                   `${marginTop.micro} ${iconSize.sm} ${flexGrow.shrink0}`,
                   `${muted.default} ${transition.colors}`,
-                  'group-hover:text-amber-500'
+                  `group-hover:${textColor.amber}`
                 )}
               />
-              <div className={`min-w-0 ${flexGrow['1']} ${spaceY.tight}`}>
-                <div className={`line-clamp-1 ${weight.medium} ${size.sm}`}>{template.name}</div>
+              <div className={`${minWidth[0]} ${flexGrow['1']} ${spaceY.tight}`}>
+                <div className={`${truncate.single} ${weight.medium} ${size.sm}`}>{template.name}</div>
                 {template.description && (
-                  <div className={`line-clamp-1 ${muted.default} ${size.xs}`}>
+                  <div className={`${truncate.single} ${muted.default} ${size.xs}`}>
                     {template.description}
                   </div>
                 )}
@@ -552,8 +589,8 @@ export function TemplateQuickSelect({
               <ArrowRight
                 className={cn(
                   `${marginTop.micro} ${iconSize.sm} ${flexGrow.shrink0} ${opacityLevel[0]}`,
-                  `text-amber-500 ${transition.all}`,
-                  'group-hover:translate-x-1 group-hover:opacity-100'
+                  `${textColor.amber500} ${transition.all}`,
+                  `group-hover:translate-x-1 group-hover:${opacityLevel[100]}`
                 )}
               />
             </motion.button>
@@ -571,16 +608,16 @@ export function TemplateQuickSelectSkeleton({ className }: { className?: string 
   return (
     <div className={cn(spaceY.default, className)}>
       <div className={cluster.compact}>
-        <div className={`${iconSize.sm} ${animate.pulse} rounded ${bgColor.muted}`} />
-        <div className={`${skeletonSize.barComfortable} ${animate.pulse} rounded ${bgColor.muted}`} />
+        <div className={`${iconSize.sm} ${animate.pulse} ${radius.default} ${bgColor.muted}`} />
+        <div className={`${skeletonSize.barComfortable} ${animate.pulse} ${radius.default} ${bgColor.muted}`} />
       </div>
       <div className={spaceY.compact}>
         {[1, 2, 3].map((i) => (
-          <div key={i} className={`${row.default} ${radius.lg} border ${padding.compact}`}>
+          <div key={i} className={`${row.default} ${radius.lg} ${border.default} ${padding.compact}`}>
             <div className={`${marginTop.micro} ${iconSize.sm} ${animate.pulse} ${radius.full} ${bgColor.muted}`} />
-            <div className={`flex-1 ${spaceY.compact}`}>
-              <div className={`${skeletonSize.barThreeQuarters} ${animate.pulse} rounded ${bgColor.muted}`} />
-              <div className={`h-3 w-full ${animate.pulse} rounded ${bgColor.muted}`} />
+            <div className={`${flexGrow['1']} ${spaceY.compact}`}>
+              <div className={`${skeletonSize.barThreeQuarters} ${animate.pulse} ${radius.default} ${bgColor.muted}`} />
+              <div className={`${height.slider} ${width.full} ${animate.pulse} ${radius.default} ${bgColor.muted}`} />
             </div>
           </div>
         ))}

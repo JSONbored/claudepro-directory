@@ -14,9 +14,12 @@
 
 'use client';
 
-import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { animation } from '@heyclaude/web-runtime/design-system/tokens';
 import { absolute, iconSize, weight ,size , shadow , radius, justify,
   alignItems,
+  display,
+  bgColor,
+  textColor,
 } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
@@ -33,7 +36,7 @@ interface NotificationBadgeProps {
  * @param className - Optional additional CSS classes applied to the badge container.
  * @returns The badge element showing the unread count (capped at "9+") with an ARIA live label, or `null` when notifications are disabled or there are no unread notifications.
  * @see NotificationFAB
- * @see getAnimationConfig
+ * @see animation.spring.bouncy — spring animation config
  */
 export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
   const { unreadCount, flags } = useNotificationsContext();
@@ -44,12 +47,7 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
   });
 
   useEffect(() => {
-    const config = getAnimationConfig();
-    setSpringBouncy({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.bouncy.stiffness'],
-      damping: config['animation.spring.bouncy.damping'],
-    });
+    setSpringBouncy(animation.spring.bouncy);
   }, []);
 
   if (!flags.enableNotifications) return null;
@@ -63,7 +61,7 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         transition={springBouncy}
-        className={`${absolute.badge} flex ${iconSize.md} ${alignItems.center} ${justify.center} ${radius.full} bg-destructive ${weight.medium} text-destructive-foreground ${size.xs} ${shadow.md} ${className}
+        className={`${absolute.badge} ${display.flex} ${iconSize.md} ${alignItems.center} ${justify.center} ${radius.full} ${bgColor.destructive} ${weight.medium} ${textColor.destructiveForeground} ${size.xs} ${shadow.md} ${className}
         `}
         aria-live="polite"
         aria-label={`${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`}

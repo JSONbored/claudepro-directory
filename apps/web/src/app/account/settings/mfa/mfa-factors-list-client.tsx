@@ -1,6 +1,6 @@
 'use client';
 
-import { iconLeading, spaceY, justify,
+import { iconLeading, spaceY, justify, display,
 } from '@heyclaude/web-runtime/design-system';
 import { Shield } from '@heyclaude/web-runtime/icons';
 import { Button  } from '@heyclaude/web-runtime/ui';
@@ -31,7 +31,7 @@ export function MFAFactorsListClient() {
 
   return (
     <div className={spaceY.comfortable}>
-      <div className={`flex ${justify.end}`}>
+      <div className={`${display.flex} ${justify.end}`}>
         <Button onClick={() => setEnrollDialogOpen(true)}>
           <Shield className={iconLeading.sm} />
           Add Authenticator

@@ -7,6 +7,7 @@ import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants
 import {
   cluster,
   gap,
+  grid,
   iconSize,
   alignItems,
   justify,
@@ -16,6 +17,9 @@ import {
   size,
   spaceY,
   weight,
+  paddingBottom,
+  display,
+  flexGrow,
 } from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -177,8 +181,8 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
           </Button>
         </Link>
 
-        <div className={`flex ${alignItems.start} ${justify.between}`}>
-          <div className="flex-1">
+        <div className={`${display.flex} ${alignItems.start} ${justify.between}`}>
+          <div className={flexGrow['1']}>
             <div className={`${cluster.compact} ${marginBottom.tight}`}>
               <h1 className={`${weight.bold} ${size['3xl']}`}>{collection.name}</h1>
               {collection.is_public ? <UnifiedBadge variant="base" style="outline" className={size.xs}>
@@ -230,9 +234,9 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       </Card>
 
       {/* Stats */}
-      <div className={`grid ${gap.comfortable} sm:grid-cols-3`}>
+      <div className={`${grid.responsive1To3} ${gap.comfortable}`}>
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className={paddingBottom.default}>
             <CardTitle className={`${weight.medium} ${size.sm}`}>Total Items</CardTitle>
           </CardHeader>
           <CardContent>
@@ -240,7 +244,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className={paddingBottom.default}>
             <CardTitle className={`${weight.medium} ${size.sm}`}>Views</CardTitle>
           </CardHeader>
           <CardContent>
@@ -248,7 +252,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className={paddingBottom.default}>
             <CardTitle className={`${weight.medium} ${size.sm}`}>Visibility</CardTitle>
           </CardHeader>
           <CardContent>

@@ -19,7 +19,7 @@ const PROMISE_REJECTED_STATUS = 'rejected' as const;
 // Note: getLayoutFlags is exported from data-client.ts (client-safe entry point)
 // Do not export from here to avoid 'use server' restrictions
 
-const NAVIGATION_TTL_KEY = 'cache.navigation.ttl_seconds';
+const NAVIGATION_TTL_KEY = 'navigation';
 
 export async function getNavigationMenu(
   requestId?: string

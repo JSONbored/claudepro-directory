@@ -67,6 +67,8 @@ export const borderTop = {
   none: 'border-t-0',
   /** border-t border-border */
   default: 'border-t border-border',
+  /** border-t border-transparent */
+  transparent: 'border-t border-transparent',
   /** border-t border-border/30 - Very subtle top border */
   faint: 'border-t border-border/30',
   /** border-t border-border/40 - Subtle top border */
@@ -115,6 +117,8 @@ export const borderLeft = {
   none: 'border-l-0',
   /** border-l border-border */
   default: 'border-l border-border',
+  /** border-l border-transparent */
+  transparent: 'border-l border-transparent',
   /** border-l border-border/30 - Very subtle */
   faint: 'border-l border-border/30',
   /** border-l border-border/50 - Light */
@@ -252,6 +256,7 @@ export const borderWidth = {
   '0': 'border-0',
   '1': 'border',
   '2': 'border-2',
+  '3': 'border-[3px]',
   '4': 'border-4',
   '8': 'border-8',
 } as const;

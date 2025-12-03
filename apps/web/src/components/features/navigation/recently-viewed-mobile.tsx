@@ -12,6 +12,8 @@ import {
   muted,
   overflow,
   padding,
+  paddingLeft,
+  paddingBottom,
   radius,
   shadow,
   size,
@@ -21,6 +23,12 @@ import {
   zLayer,
   bgColor,
   textColor,
+  display,
+  position,
+  height,
+  truncate,
+  border,
+  transform,
 } from '@heyclaude/web-runtime/design-system';
 import { Clock, Trash, X } from '@heyclaude/web-runtime/icons';
 import Link from 'next/link';
@@ -90,7 +98,7 @@ export function RecentlyViewedMobileTray() {
     <>
       <button
         type="button"
-        className={`-translate-x-1/2 fixed bottom-20 left-1/2 ${zLayer.overlay} ${cluster.compact} ${radius.full} border ${borderColor['border/60']} bg-card/90 ${padding.xDefault} ${padding.yCompact} ${size.sm} ${shadow.lg} ${backdrop.default} md:hidden`}
+        className={`-translate-x-1/2 ${position.fixed} bottom-20 left-1/2 ${zLayer.overlay} ${cluster.compact} ${radius.full} ${border.default} ${borderColor['border/60']} ${bgColor['card/90']} ${padding.xDefault} ${padding.yCompact} ${size.sm} ${shadow.lg} ${backdrop.default} md:${display.none}`}
         onClick={() => setOpen(true)}
       >
         <Clock className={iconSize.sm} aria-hidden="true" />
@@ -98,12 +106,12 @@ export function RecentlyViewedMobileTray() {
       </button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="bottom" className={`h-[80vh] ${overflow.yAuto} ${padding.xNone} md:hidden`}>
-          <SheetHeader className="px-6">
+        <SheetContent side="bottom" className={`${height.viewport80} ${overflow.yAuto} ${padding.xNone} md:${display.none}`}>
+          <SheetHeader className={paddingLeft.relaxed}>
             <SheetTitle>Recently Viewed</SheetTitle>
             <SheetDescription>Your locally saved browsing history.</SheetDescription>
           </SheetHeader>
-          <div className={`${spaceY.comfortable} ${padding.xComfortable} pb-6`}>
+          <div className={`${spaceY.comfortable} ${padding.xComfortable} ${paddingBottom.relaxed}`}>
             <div className={`${cluster.compact} ${muted.sm}`}>
               <Button variant="ghost" size="sm" onClick={clearAll} className={`${gap.compact}`}>
                 <Trash className={iconSize.sm} aria-hidden="true" />
@@ -118,11 +126,11 @@ export function RecentlyViewedMobileTray() {
               {sortedItems.map((item) => (
                 <li
                   key={`${item.category}-${item.slug}`}
-                  className={`${radius.xl} border ${borderColor['border/50']} ${padding.default}`}
+                  className={`${radius.xl} ${border.default} ${borderColor['border/50']} ${padding.default}`}
                 >
                   <div className={between.center}>
                     <div>
-                      <p className={`${muted.default} ${size.xs} uppercase`}>{item.category}</p>
+                      <p className={`${muted.default} ${size.xs} ${transform.uppercase}`}>{item.category}</p>
                       <Link
                         href={`/${getCategoryRoute(item.category)}/${item.slug}`}
                         className={`${weight.semibold} ${size.base} ${textColor.primary} hover:underline`}
@@ -133,7 +141,7 @@ export function RecentlyViewedMobileTray() {
                     </div>
                     <button
                       type="button"
-                      className={`${muted.default} ${transition.colors} hover:text-destructive`}
+                      className={`${muted.default} ${transition.colors} hover:${textColor.destructive}`}
                       onClick={() => removeItem(item.category, item.slug)}
                       aria-label={`Remove ${item.title} from recently viewed`}
                     >
@@ -141,12 +149,12 @@ export function RecentlyViewedMobileTray() {
                     </button>
                   </div>
                   {item.description && (
-                    <p className={`${marginTop.compact} line-clamp-3 ${muted.sm}`}>
+                    <p className={`${marginTop.compact} ${truncate.lines3} ${muted.sm}`}>
                       {item.description}
                     </p>
                   )}
                   {item.tags && item.tags.length > 0 && (
-                    <div className={`${marginTop.compact} flex ${flexWrap.wrap} ${gap.compact} ${muted.default} ${size.xs}`}>
+                    <div className={`${marginTop.compact} ${display.flex} ${flexWrap.wrap} ${gap.compact} ${muted.default} ${size.xs}`}>
                       {item.tags.slice(0, 3).map((tag) => (
                         <span key={tag} className={`${radius.full} ${bgColor.muted} ${padding.xTight} ${padding.yHair}`}>
                           #{tag}

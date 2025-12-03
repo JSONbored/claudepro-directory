@@ -8,10 +8,14 @@ import {
   bgColor,
   borderBottom,
   cluster,
-  gap,
+  container,
+  display,
+  grid,
   justify,
   minHeight,
   padding,
+  transition,
+  textColor,
 } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
@@ -96,9 +100,9 @@ export default async function AccountLayout({ children }: { children: React.Reac
   return (
     <div className={`${minHeight.screen} ${bgColor.background}`}>
       <div className={`${borderBottom.default} ${padding.xDefault} ${padding.yDefault}`}>
-        <div className={`container mx-auto flex ${alignItems.center} ${justify.between}`}>
+        <div className={`${container.default} ${display.flex} ${alignItems.center} ${justify.between}`}>
           <div className={`${cluster.compact} group`}>
-            <Link href="/" className="transition-colors-smooth group-hover:text-accent">
+            <Link href="/" className={`${transition.colors} group-hover:${textColor.accent}`}>
               ← Back to Directory
             </Link>
           </div>
@@ -108,8 +112,8 @@ export default async function AccountLayout({ children }: { children: React.Reac
         </div>
       </div>
 
-      <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
-        <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-4`}>
+      <div className={`${container.default} ${padding.xDefault} ${padding.yRelaxed}`}>
+        <div className={grid.sidebar}>
           {/* Sidebar with Suspense - data fetching doesn't block page navigation */}
           <Suspense fallback={<AccountSidebarSkeleton />}>
             <AccountSidebar

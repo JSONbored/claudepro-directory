@@ -3,9 +3,20 @@
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import { cluster, marginBottom, muted, weight ,size  , gap , padding  , zLayer , shadow , backdrop , radius , spaceY, borderColor,
   flexWrap,
+  flexGrow,
   tracking,
   justify,
   alignItems,
+  display,
+  position,
+  sticky,
+  bgColor,
+  iconSize,
+  whitespace,
+  border,
+  srOnly,
+  flexBasis,
+  transform,
 } from '@heyclaude/web-runtime/design-system';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
@@ -58,34 +69,34 @@ export function DetailQuickActionsBar({
   return (
     <section
       className={cn(
-  `sticky top-16 ${zLayer.sticky} ${marginBottom.relaxed} ${spaceY.default}`, className)}
+  `${sticky.topNav} ${zLayer.sticky} ${marginBottom.relaxed} ${spaceY.default}`, className)}
       aria-label="Quick actions"
     >
       <a
         href="#detail-main-content"
-        className={`focus-visible:-top-3 sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:left-3 focus-visible:z-30 focus-visible:${radius.md} focus-visible:bg-background/90 focus-visible:px-3 focus-visible:py-2 focus-visible:${size.sm} focus-visible:${shadow.lg}`}
+        className={`focus-visible:-top-3 ${srOnly.default} focus-visible:${srOnly.visible} focus-visible:${position.absolute} focus-visible:left-3 focus-visible:${zLayer.sticky} focus-visible:${radius.md} focus-visible:${bgColor['background/90']} focus-visible:${padding.xDefault} focus-visible:${padding.yCompact} focus-visible:${size.sm} focus-visible:${shadow.lg}`}
       >
         Skip quick actions
       </a>
-      <div className={`${radius['2xl']} border ${borderColor['border/60']} bg-card/80 ${padding.compact} ${shadow.sm} ${backdrop.default} supports-[backdrop-filter]:bg-card/60`}>
-        <div className={`${marginBottom.tight} flex ${alignItems.center} ${justify.between} ${gap.default} ${muted.default} ${size.xs} uppercase ${tracking.wide}`}>
+      <div className={`${radius['2xl']} ${border.default} ${borderColor['border/60']} ${bgColor['card/80']} ${padding.compact} ${shadow.sm} ${backdrop.default} supports-[backdrop-filter]:${bgColor['card/60']}`}>
+        <div className={`${marginBottom.tight} ${display.flex} ${alignItems.center} ${justify.between} ${gap.default} ${muted.default} ${size.xs} ${transform.uppercase} ${tracking.wide}`}>
           <div className={cluster.compact}>
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+            <Sparkles className={iconSize.xsPlus} aria-hidden="true" />
             <span>Quick actions</span>
           </div>
           <span className={`${weight.semibold} ${muted.default}/80`}>{quickActions.length}</span>
         </div>
-        <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+        <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
           {quickActions.map((action) => (
             <Button
               key={action.key}
               type="button"
               variant="secondary"
               size="sm"
-              className={`grow basis-[10rem] ${justify.center} ${gap.compact} whitespace-nowrap`}
+              className={`${flexGrow.grow} ${flexBasis.rem10} ${justify.center} ${gap.compact} ${whitespace.nowrap}`}
               onClick={action.onClick}
             >
-              <span className={`h-1.5 w-1.5 ${radius.full} bg-primary/70`} aria-hidden="true" />
+              <span className={`${iconSize.xs} ${radius.full} ${bgColor['primary/70']}`} aria-hidden="true" />
               <span className={`${weight.semibold} ${size.sm}`}>{action.label}</span>
             </Button>
           ))}

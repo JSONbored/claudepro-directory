@@ -23,7 +23,9 @@
  */
 
 import { Star } from '../../../icons.tsx';
-import { iconSize } from '../../../design-system/styles/icons.ts';
+import { iconSize, iconFill } from '../../../design-system/styles/icons.ts';
+import { muted } from '../../../design-system/styles/typography.ts';
+import { textColor } from '../../../design-system/styles/colors.ts';
 
 /** Size variants for star icons */
 export type StarSize = 'sm' | 'md' | 'lg';
@@ -65,8 +67,8 @@ export function StarDisplay({
           key={`star-${i + 1}`}
           className={`${SIZE_CLASSES[size]} ${
             showFilled && i < Math.round(rating)
-              ? 'fill-amber-400 text-amber-400'
-              : 'fill-none text-muted-foreground/30'
+              ? `${iconFill.amber400} ${textColor.amber400}`
+              : `${iconFill.none} ${muted.opacity30}`
           }`}
           aria-hidden="true"
         />

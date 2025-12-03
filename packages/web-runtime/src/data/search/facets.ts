@@ -59,7 +59,7 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
       {
         keyParts: ['search-facets'],
         tags: ['search', 'search-facets'],
-        ttlKey: 'cache.search_facets.ttl_seconds',
+        ttlKey: 'search_facets',
         fallback: [] as SearchFacetSummary[],
         logMeta: { source: 'getSearchFacets' },
       }

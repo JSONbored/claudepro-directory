@@ -5,15 +5,23 @@
  */
 
 import {
-  cluster,
   absolute,
-  weight,
-  size,
-  padding,
-  overflow,
   bgColor,
+  cluster,
+  display,
   height,
+  overflow,
+  padding,
+  position,
+  size,
   transition,
+  weight,
+  width,
+  whitespace,
+  scroll,
+  textDecoration,
+  hoverText,
+  textColor,
 } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { PrefetchLink } from '@heyclaude/web-runtime/ui';
@@ -34,8 +42,8 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative ${padding.xTight} ${padding.yMicro} ${size.xs} ${weight.medium} ${transition.default} no-underline ${
-      active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground'
+    className: `group ${position.relative} ${padding.xTight} ${padding.yMicro} ${size.xs} ${weight.medium} ${transition.default} ${textDecoration.none} ${
+      active ? textColor.foreground : `${textColor.foreground80} ${hoverText.foreground}`
     } ${className}`,
     ...(active && { 'aria-current': 'page' as const }),
     ...(onClick && { onClick }),
@@ -46,11 +54,11 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
 
   return (
     <PrefetchLink {...linkProps}>
-      <span className="relative inline-block">
+      <span className={`${position.relative} ${display.inlineBlock}`}>
         {children}
         <span
           className={`${absolute.bottomLeft} ${height.underline} ${bgColor.accent} ${transition.slow} ${
-            active ? 'w-full' : 'w-0 group-hover:w-full'
+            active ? width.full : `${width[0]} group-hover:${width.full}`
           }`}
           aria-hidden="true"
         />
@@ -79,13 +87,13 @@ interface NavigationTabletProps {
 export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTabletProps) {
   return (
     <motion.nav
-      className={`scrollbar-hide hidden snap-x snap-mandatory ${overflow.xAuto} md:flex xl:hidden`}
+      className={`${scroll.hideScrollbar} ${display.none} ${scroll.snapX} ${scroll.snapMandatory} ${overflow.xAuto} md:${display.flex} xl:${display.none}`}
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       aria-label="Tablet navigation"
     >
-      <div className={`flex ${cluster.tight} ${padding.xTight}`}>
+      <div className={`${display.flex} ${cluster.tight} ${padding.xTight}`}>
         {PRIMARY_NAVIGATION.slice(0, 5).map((link, index) => (
           <motion.div
             key={link.href}
@@ -97,7 +105,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
             <NavLink
               href={link.href}
               isActive={isActive}
-              className={`whitespace-nowrap ${padding.xCompact} ${padding.yCompact} ${size.xs}`}
+              className={`${whitespace.nowrap} ${padding.xCompact} ${padding.yCompact} ${size.xs}`}
             >
               {link.label}
             </NavLink>
@@ -107,7 +115,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
           variant="ghost"
           size="sm"
           onClick={onMobileMenuOpen}
-          className={`whitespace-nowrap ${size.xs}`}
+          className={`${whitespace.nowrap} ${size.xs}`}
           aria-label="Open more navigation options"
         >
           More

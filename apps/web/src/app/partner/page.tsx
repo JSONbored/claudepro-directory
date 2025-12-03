@@ -4,6 +4,7 @@ import {
   bgColor,
   flexDir,
   gap,
+  grid,
   iconLeading,
   iconSize,
   alignItems,
@@ -14,6 +15,8 @@ import {
   muted,
   overflow,
   padding,
+  paddingTop,
+  paddingBottom,
   radius,
   row,
   size,
@@ -22,6 +25,18 @@ import {
   tracking,
   weight,
   responsiveText,
+  display,
+  position,
+  container,
+  marginX,
+  textAlign,
+  marginRight,
+  width,
+  borderWidth,
+  borderColor,
+  bgGradient,
+  gradientFrom,
+  gradientTo,
 } from '@heyclaude/web-runtime/design-system';
 import {
   BarChart,
@@ -102,7 +117,7 @@ export default async function PartnerPage() {
       launch: {
         discountPercent: 20,
         enabled: false,
-        endDate: '',
+        endDate: 'TBD',
       },
     };
   }
@@ -114,9 +129,9 @@ export default async function PartnerPage() {
   const partnerCtas = getPartnerCtas();
 
   return (
-    <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
+    <div className={`${container.default} ${padding.xDefault} ${padding.ySection}`}>
       {/* Hero Section */}
-      <div className={`mx-auto ${marginBottom.section} ${maxWidth['5xl']}`}>
+      <div className={`${marginX.auto} ${marginBottom.section} ${maxWidth['5xl']}`}>
         <h1
           className={`${marginBottom.default} ${responsiveText['2xl']} ${tracking.tight}`}
         >
@@ -128,9 +143,9 @@ export default async function PartnerPage() {
         </p>
 
         {/* Real-Time Stats */}
-        <div className={`mx-auto ${marginBottom.relaxed} grid ${maxWidth['3xl']} grid-cols-3 ${gap.comfortable}`}>
+        <div className={`${marginX.auto} ${marginBottom.relaxed} ${grid.cols3} ${maxWidth['3xl']}`}>
           <Card>
-            <CardContent className="pt-6 pb-6">
+            <CardContent className={`${paddingTop.relaxed} ${paddingBottom.relaxed}`}>
               <p
                 className={`${marginBottom.micro} ${weight.semibold} ${size['2xl']} ${textColor.primary}`}
               >
@@ -140,7 +155,7 @@ export default async function PartnerPage() {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="pt-6 pb-6">
+            <CardContent className={`${paddingTop.relaxed} ${paddingBottom.relaxed}`}>
               <p
                 className={`${marginBottom.micro} ${weight.semibold} ${size['2xl']} ${textColor.primary}`}
               >
@@ -150,7 +165,7 @@ export default async function PartnerPage() {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="pt-6 pb-6">
+            <CardContent className={`${paddingTop.relaxed} ${paddingBottom.relaxed}`}>
               <p
                 className={`${marginBottom.micro} ${weight.semibold} ${size['2xl']} ${textColor.primary}`}
               >
@@ -164,11 +179,11 @@ export default async function PartnerPage() {
 
       {/* Launch Pricing Banner */}
       <Card
-        className={`mx-auto ${marginBottom.section} ${maxWidth['4xl']}`}
+        className={`${marginX.auto} ${marginBottom.section} ${maxWidth['4xl']}`}
       >
-        <CardContent className="pt-6 pb-6">
+        <CardContent className={`${paddingTop.relaxed} ${paddingBottom.relaxed}`}>
           <div
-            className={`flex ${flexDir.col} ${alignItems.center} ${gap.default} text-center md:flex-row md:justify-between md:text-left`}
+            className={`${display.flex} ${flexDir.col} ${alignItems.center} ${gap.default} ${textAlign.center} md:${display.flex}-row md:${justify.between} md:${textAlign.left}`}
           >
             <div className={`${row.default}`}>
               <div className={`${radius.full} ${bgColor['primary/10']} ${padding.tight}`}>
@@ -183,7 +198,7 @@ export default async function PartnerPage() {
                 </p>
               </div>
             </div>
-            <UnifiedBadge variant="base" className={`border-primary/20 ${bgColor['primary/10']} ${textColor.primary}`}>
+            <UnifiedBadge variant="base" className={`${borderColor['primary/20']} ${bgColor['primary/10']} ${textColor.primary}`}>
               <Clock className={iconLeading.xs} />
               Limited Time
             </UnifiedBadge>
@@ -192,21 +207,21 @@ export default async function PartnerPage() {
       </Card>
 
       {/* Pricing Options */}
-      <div className={`mx-auto ${marginBottom.hero} ${maxWidth['5xl']}`}>
-        <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['3xl']}`}>Simple, Transparent Pricing</h2>
-        <div className={`grid ${gap.loose} md:grid-cols-2`}>
+      <div className={`${marginX.auto} ${marginBottom.hero} ${maxWidth['5xl']}`}>
+        <h2 className={`${marginBottom.relaxed} ${textAlign.center} ${weight.bold} ${size['3xl']}`}>Simple, Transparent Pricing</h2>
+        <div className={grid.responsiveForm}>
           {/* Job Listings */}
           <HoverCard variant="strong">
-            <Card className={`relative ${overflow.hidden} border-2`}>
+            <Card className={`${position.relative} ${overflow.hidden} ${borderWidth['2']}`}>
               <CardHeader>
-                <div className={`${marginBottom.default} flex ${alignItems.start} ${justify.between}`}>
-                  <div className={`${radius.lg} bg-blue-500/10 ${padding.compact}`}>
+                <div className={`${marginBottom.default} ${display.flex} ${alignItems.start} ${justify.between}`}>
+                  <div className={`${radius.lg} ${bgColor.info} ${padding.compact}`}>
                     <Briefcase className={`${iconSize.lg} ${textColor.blue}`} />
                   </div>
                   <UnifiedBadge
                     variant="base"
                     style="outline"
-                    className="border-blue-500/20 bg-blue-500/5"
+                    className={`${borderColor['blue/20']} ${bgColor['info/5']}`}
                   >
                     Most Popular
                   </UnifiedBadge>
@@ -219,7 +234,7 @@ export default async function PartnerPage() {
               <CardContent className={spaceY.relaxed}>
                 {/* Pricing */}
                 <div className={`${radius.lg} border ${bgColor['muted/30']} ${padding.default}`}>
-                  <div className={`${marginBottom.tight} flex ${alignItems.baseline} ${gap.compact}`}>
+                  <div className={`${marginBottom.tight} ${display.flex} ${alignItems.baseline} ${gap.compact}`}>
                     <span className={`${weight.bold} ${muted.default} ${size.xl} line-through`}>
                       ${pricing.jobs.regular}
                     </span>
@@ -258,9 +273,9 @@ export default async function PartnerPage() {
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" asChild>
+                <Button className={width.full} size="lg" asChild>
                   <a href={partnerCtas.jobListing.href}>
-                    <Mail className={`mr-2 ${iconSize.sm}`} />
+                    <Mail className={`${marginRight.compact} ${iconSize.sm}`} />
                     Post a Job
                   </a>
                 </Button>
@@ -270,16 +285,16 @@ export default async function PartnerPage() {
 
           {/* Sponsored Listings */}
           <HoverCard variant="strong">
-            <Card className={`relative ${overflow.hidden} border-2`}>
+            <Card className={`${position.relative} ${overflow.hidden} ${borderWidth['2']}`}>
               <CardHeader>
-                <div className={`${marginBottom.default} flex ${alignItems.start} ${justify.between}`}>
+                <div className={`${marginBottom.default} ${display.flex} ${alignItems.start} ${justify.between}`}>
                   <div className={`${radius.lg} bg-purple-500/10 ${padding.compact}`}>
                     <Megaphone className={`${iconSize.lg} ${textColor.purple}`} />
                   </div>
                   <UnifiedBadge
                     variant="base"
                     style="outline"
-                    className="border-purple-500/20 bg-purple-500/5"
+                    className={`${borderColor['purple/20']} ${bgColor['purple/5']}`}
                   >
                     High ROI
                   </UnifiedBadge>
@@ -292,7 +307,7 @@ export default async function PartnerPage() {
               <CardContent className={spaceY.relaxed}>
                 {/* Pricing */}
                 <div className={`${radius.lg} border ${bgColor['muted/30']} ${padding.default}`}>
-                  <div className={`${marginBottom.tight} flex ${alignItems.baseline} ${gap.compact}`}>
+                  <div className={`${marginBottom.tight} ${display.flex} ${alignItems.baseline} ${gap.compact}`}>
                     <span className={`${weight.bold} ${muted.default} ${size.xl} line-through`}>
                       ${pricing.sponsored.regular}
                     </span>
@@ -329,9 +344,9 @@ export default async function PartnerPage() {
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" variant="default" asChild>
+                <Button className={width.full} size="lg" variant="default" asChild>
                   <a href={partnerCtas.sponsoredListing.href}>
-                    <Mail className={`mr-2 ${iconSize.sm}`} />
+                    <Mail className={`${marginRight.compact} ${iconSize.sm}`} />
                     Get Featured
                   </a>
                 </Button>
@@ -342,11 +357,11 @@ export default async function PartnerPage() {
       </div>
 
       {/* Why Advertise Here */}
-      <div className={`mx-auto ${marginBottom.hero} ${maxWidth['4xl']}`}>
-        <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['2xl']}`}>Why Claude Pro Directory?</h2>
-        <div className={`grid ${gap.relaxed} md:grid-cols-3`}>
+      <div className={`${marginX.auto} ${marginBottom.hero} ${maxWidth['4xl']}`}>
+        <h2 className={`${marginBottom.relaxed} ${textAlign.center} ${weight.bold} ${size['2xl']}`}>Why Claude Pro Directory?</h2>
+        <div className={grid.responsive3Gap6}>
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className={paddingTop.relaxed}>
               <Eye className={`${marginBottom.compact} ${iconSize.xl} ${textColor.primary}`} />
               <p className={`${marginBottom.tight} ${weight.semibold}`}>Highly Engaged Audience</p>
               <p className={`${muted.sm}`}>
@@ -355,7 +370,7 @@ export default async function PartnerPage() {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className={paddingTop.relaxed}>
               <MousePointer className={`${marginBottom.compact} ${iconSize.xl} ${textColor.primary}`} />
               <p className={`${marginBottom.tight} ${weight.semibold}`}>Quality Over Quantity</p>
               <p className={`${muted.sm}`}>
@@ -364,7 +379,7 @@ export default async function PartnerPage() {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className={paddingTop.relaxed}>
               <BarChart className={`${marginBottom.compact} ${iconSize.xl} ${textColor.primary}`} />
               <p className={`${marginBottom.tight} ${weight.semibold}`}>Transparent Analytics</p>
               <p className={`${muted.sm}`}>
@@ -376,11 +391,11 @@ export default async function PartnerPage() {
       </div>
 
       {/* FAQ / Common Questions */}
-      <div className={`mx-auto ${marginBottom.hero} ${maxWidth['3xl']}`}>
-        <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['2xl']}`}>Frequently Asked Questions</h2>
+      <div className={`${marginX.auto} ${marginBottom.hero} ${maxWidth['3xl']}`}>
+        <h2 className={`${marginBottom.relaxed} ${textAlign.center} ${weight.bold} ${size['2xl']}`}>Frequently Asked Questions</h2>
         <div className={spaceY.comfortable}>
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className={paddingTop.relaxed}>
               <p className={`${marginBottom.tight} ${weight.semibold}`}>How quickly can I get started?</p>
               <p className={`${muted.sm}`}>
                 Email us today, and we'll have your listing live within 24 hours. No lengthy
@@ -389,7 +404,7 @@ export default async function PartnerPage() {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className={paddingTop.relaxed}>
               <p className={`${marginBottom.tight} ${weight.semibold}`}>Can I cancel anytime?</p>
               <p className={`${muted.sm}`}>
                 Yes, absolutely. No contracts, no commitments. Just email us and we'll process your
@@ -398,7 +413,7 @@ export default async function PartnerPage() {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className={paddingTop.relaxed}>
               <p className={`${marginBottom.tight} ${weight.semibold}`}>Do you offer bulk pricing?</p>
               <p className={`${muted.sm}`}>
                 Yes! Email us for custom pricing if you need multiple job listings or sponsored
@@ -410,9 +425,9 @@ export default async function PartnerPage() {
       </div>
 
       {/* Final CTA */}
-      <div className={`mx-auto ${maxWidth['2xl']}`}>
-        <Card className="border-primary/20 bg-linear-to-r from-primary/10 to-primary/5">
-          <CardContent className="pt-8 pb-8">
+      <div className={`${marginX.auto} ${maxWidth['2xl']}`}>
+        <Card className={`${borderColor['primary/20']} ${bgGradient.toR} ${gradientFrom.primary10} ${gradientTo.primary5}`}>
+          <CardContent className={`${paddingTop.loose} ${paddingBottom.loose}`}>
             <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>
               Ready to Reach {heroStats.monthlyVisitors.toLocaleString()}+ AI Engineers?
             </h2>
@@ -422,7 +437,7 @@ export default async function PartnerPage() {
             </p>
             <Button size="lg" asChild>
               <a href={partnerCtas.partnershipInquiry.href}>
-                <Mail className={`mr-2 ${iconSize.sm}`} />
+                <Mail className={`${marginRight.compact} ${iconSize.sm}`} />
                 Email: {partnerContacts.partnerEmail}
               </a>
             </Button>

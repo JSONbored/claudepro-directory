@@ -10,7 +10,7 @@ import { authedAction } from './safe-action';
 import { runRpc } from './run-rpc-instance';
 import type { Database } from '@heyclaude/database-types';
 
-const deleteReviewSchema = z.object({
+export const deleteReviewSchema = z.object({
   delete_id: z.string().uuid().optional()
 });
 export type DeleteReviewInput = z.infer<typeof deleteReviewSchema>;
@@ -40,7 +40,6 @@ export const deleteReview = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
       
       const { nextInvalidateByKeys } = await import('../cache-tags');
@@ -54,9 +53,10 @@ export const deleteReview = authedAction
       revalidatePath(`/${result?.content_type}`);
       revalidateTag(`reviews:${result?.content_type}:${result?.content_slug}`, 'default');
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.review_delete']
+        cacheConfig,
+        invalidateKeys: ['review_delete']
       });
 
       

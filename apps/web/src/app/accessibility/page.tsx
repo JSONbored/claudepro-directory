@@ -1,7 +1,7 @@
 import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { marginBottom, marginTop, muted, weight ,size  , padding , spaceY , maxWidth } from '@heyclaude/web-runtime/design-system';
+import { marginBottom, marginTop, muted, weight ,size  , padding , spaceY , maxWidth, container, paddingLeft } from '@heyclaude/web-runtime/design-system';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import  { type Metadata } from 'next';
 
@@ -38,7 +38,7 @@ export default function AccessibilityPage() {
   const channels = getContactChannels();
 
   return (
-    <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
+    <div className={`${container.default} ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:${padding.ySection}`}>
       <div className={`prose prose-invert ${maxWidth.none}`}>
         <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>Accessibility Statement</h1>
         <p className={`${marginBottom.relaxed} ${muted.default}`}>Page generated: {lastUpdated}</p>
@@ -75,7 +75,7 @@ export default function AccessibilityPage() {
 
           <div className={marginBottom.comfortable}>
             <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>Keyboard Navigation</h3>
-            <ul className={`list-disc ${spaceY.compact} pl-6`}>
+            <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
               <li>All interactive elements are keyboard accessible</li>
               <li>Skip to main content link for screen reader users</li>
               <li>Keyboard shortcuts (⌘K/Ctrl+K for search)</li>
@@ -85,7 +85,7 @@ export default function AccessibilityPage() {
 
           <div className={marginBottom.comfortable}>
             <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>Visual Design</h3>
-            <ul className={`list-disc ${spaceY.compact} pl-6`}>
+            <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
               <li>High contrast color ratios (WCAG AA compliant)</li>
               <li>Dark mode support for reduced eye strain</li>
               <li>Responsive design that works at different zoom levels</li>
@@ -96,7 +96,7 @@ export default function AccessibilityPage() {
 
           <div className={marginBottom.comfortable}>
             <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>Screen Reader Support</h3>
-            <ul className={`list-disc ${spaceY.compact} pl-6`}>
+            <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
               <li>Semantic HTML structure</li>
               <li>ARIA labels and descriptions where appropriate</li>
               <li>Alternative text for all meaningful images</li>
@@ -107,7 +107,7 @@ export default function AccessibilityPage() {
 
           <div className={marginBottom.comfortable}>
             <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>Content</h3>
-            <ul className={`list-disc ${spaceY.compact} pl-6`}>
+            <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
               <li>Clear and simple language</li>
               <li>Descriptive link text</li>
               <li>Consistent navigation</li>
@@ -122,7 +122,7 @@ export default function AccessibilityPage() {
             Despite our efforts, some areas may not be fully accessible. We are actively working to
             address these:
           </p>
-          <ul className={`list-disc ${spaceY.compact} pl-6`}>
+          <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
             <li>Some third-party embedded content may not be fully accessible</li>
             <li>Complex interactive components are being continuously improved</li>
             <li>Some user-generated content may not meet accessibility standards</li>
@@ -132,7 +132,7 @@ export default function AccessibilityPage() {
         <section className={marginBottom.relaxed}>
           <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>Testing and Validation</h2>
           <p className={marginBottom.default}>We regularly test our website using:</p>
-          <ul className={`list-disc ${spaceY.compact} pl-6`}>
+          <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
             <li>Automated accessibility testing tools</li>
             <li>Screen reader testing (NVDA, JAWS, VoiceOver)</li>
             <li>Keyboard-only navigation testing</li>
@@ -144,7 +144,7 @@ export default function AccessibilityPage() {
         <section className={marginBottom.relaxed}>
           <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>Compatible Technologies</h2>
           <p className={marginBottom.default}>Our website is designed to be compatible with:</p>
-          <ul className={`list-disc ${spaceY.compact} pl-6`}>
+          <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
             <li>Modern web browsers (Chrome, Firefox, Safari, Edge)</li>
             <li>Screen readers (NVDA, JAWS, VoiceOver, TalkBack)</li>
             <li>Browser extensions for accessibility</li>
@@ -158,7 +158,7 @@ export default function AccessibilityPage() {
             We welcome feedback on the accessibility of {APP_CONFIG.name}. If you encounter any
             accessibility barriers or have suggestions for improvement, please let us know:
           </p>
-          <ul className={`list-disc ${spaceY.compact} pl-6`}>
+          <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
             <li>
               Email:{' '}
               <NavLink href={`mailto:${channels.email}`} external>
@@ -192,7 +192,7 @@ export default function AccessibilityPage() {
         <section className={marginBottom.relaxed}>
           <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>Ongoing Improvements</h2>
           <p className={marginBottom.default}>Accessibility is an ongoing effort. We regularly:</p>
-          <ul className={`list-disc ${spaceY.compact} pl-6`}>
+          <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
             <li>Review and update our accessibility practices</li>
             <li>Train our team on accessibility best practices</li>
             <li>Conduct accessibility audits of new features</li>
@@ -207,7 +207,7 @@ export default function AccessibilityPage() {
             This accessibility statement was created using automated and manual testing methods,
             including:
           </p>
-          <ul className={`list-disc ${spaceY.compact} pl-6`}>
+          <ul className={`list-disc ${spaceY.compact} ${paddingLeft.relaxed}`}>
             <li>Self-evaluation using WCAG 2.1 criteria</li>
             <li>Automated accessibility testing tools (axe, Lighthouse)</li>
             <li>Manual testing with assistive technologies</li>

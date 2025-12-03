@@ -1,11 +1,15 @@
 'use client';
 
 import { cn } from '../utils.ts';
-import { focusRing } from '../../design-system/styles/interactive.ts';
+import { focusRing, transition, cursor } from '../../design-system/styles/interactive.ts';
 import { iconSize } from '../../design-system/styles/icons.ts';
-import { componentSize } from '../../design-system/styles/layout.ts';
+import { componentSize, display, alignItems, flexGrow, pointerEvents } from '../../design-system/styles/layout.ts';
 import { radius } from '../../design-system/styles/radius.ts';
 import { shadow } from '../../design-system/styles/effects.ts';
+import { bgColor } from '../../design-system/styles/colors.ts';
+import { borderColor } from '../../design-system/styles/colors.ts';
+import { opacityLevel } from '../../design-system/styles/effects.ts';
+import { borderWidth } from '../../design-system/styles/borders.ts';
 import * as SwitchPrimitives from '@radix-ui/react-switch';
 import type * as React from 'react';
 
@@ -18,7 +22,7 @@ const Switch = ({
 }) => (
   <SwitchPrimitives.Root
     className={cn(
-      `peer inline-flex ${componentSize.switch} shrink-0 cursor-pointer items-center ${radius.full} border-2 border-transparent transition-colors ${focusRing.default} focus-visible:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed data-[state=checked]:bg-primary data-[state=unchecked]:bg-input`,
+      `peer ${display.inlineFlex} ${componentSize.switch} ${flexGrow.shrink0} ${cursor.pointer} ${alignItems.center} ${radius.full} ${borderWidth['2']} ${borderColor.transparent} ${transition.colors} ${focusRing.default} focus-visible:ring-offset-background disabled:${opacityLevel[50]} disabled:cursor-not-allowed data-[state=checked]:${bgColor.primary} data-[state=unchecked]:${bgColor.input}`,
       className
     )}
     {...props}
@@ -26,7 +30,7 @@ const Switch = ({
   >
     <SwitchPrimitives.Thumb
       className={cn(
-        `pointer-events-none block ${iconSize.md} ${radius.full} bg-background ${shadow.lg} ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0`
+        `${pointerEvents.none} ${display.block} ${iconSize.md} ${radius.full} ${bgColor.background} ${shadow.lg} ring-0 ${transition.transform} data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0`
       )}
     />
   </SwitchPrimitives.Root>

@@ -10,10 +10,14 @@
  */
 
 // Design System imports
-import { grid, stack, cluster, padding, marginBottom, gap } from '../../../design-system/styles/layout.ts';
+import { grid, stack, cluster, padding, marginBottom, gap, maxWidth, minHeight, display, alignItems, justify, flexWrap, flexGrow, paddingTop, paddingBottom, marginX, height, container, colSpan } from '../../../design-system/styles/layout.ts';
+import { borderBottom } from '../../../design-system/styles/borders.ts';
 import { iconSize } from '../../../design-system/styles/icons.ts';
-import { size as textSize } from '../../../design-system/styles/typography.ts';
+import { size as textSize, muted } from '../../../design-system/styles/typography.ts';
+import { bgColor, borderColor, textAlign } from '../../../design-system/styles/colors.ts';
 import { radius } from '../../../design-system/styles/radius.ts';
+import { border, borderWidth, borderTop } from '../../../design-system/styles/borders.ts';
+import { animate } from '../../../design-system/styles/animation.ts';
 import { getSkeletonKeys } from '../../../skeleton-keys.ts';
 import {
   ConfigCardSkeleton,
@@ -59,7 +63,7 @@ const SKELETON_CONFIGS: Record<string, SkeletonConfig> = {
   grid2: {
     cardsPerRow: 2,
     totalCards: 6,
-    gridClass: `grid grid-cols-1 md:grid-cols-2 ${gap.relaxed}`,
+    gridClass: `${grid.responsiveForm} ${gap.relaxed}`,
   },
   // List view (changelog, activity)
   list: {
@@ -84,14 +88,14 @@ export function CategoryLoading({
   const config = SKELETON_CONFIGS[selectedVariant] as SkeletonConfig;
 
   return (
-    <div className={`container mx-auto ${padding.xDefault} py-8`}>
+    <div className={`${container.default} ${paddingTop.loose} ${paddingBottom.loose}`}>
       {/* Header */}
       <PageHeaderSkeleton />
 
       {/* Search bar (optional) */}
       {showSearch && (
         <div className={marginBottom.relaxed}>
-          <Skeleton size="lg" width="3xl" className="h-12" />
+          <Skeleton size="lg" width="3xl" className={height.search} />
         </div>
       )}
 
@@ -111,26 +115,26 @@ export function CategoryLoading({
  */
 export function DetailPageLoading() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Header */}
-      <div className="border-border/50 border-b bg-card/30">
-        <div className={`container mx-auto ${padding.xDefault} py-8`}>
+      <div className={`${borderColor['border/50']} ${borderBottom.default} ${bgColor['card/30']}`}>
+        <div className={`${container.default} ${padding.yRelaxed}`}>
           {/* Back button */}
           <Skeleton size="sm" width="sm" className={marginBottom.comfortable} />
 
           {/* Title section */}
           <div
-            className={`${marginBottom.comfortable} flex items-start ${cluster.default}`}
+            className={`${marginBottom.comfortable} ${display.flex} ${alignItems.start} ${cluster.default}`}
           >
-            <Skeleton size="xl" width="xs" className="shrink-0" />
-            <div className={`flex-1 ${stack.comfortable}`}>
+            <Skeleton size="xl" width="xs" className={flexGrow.shrink0} />
+            <div className={`${flexGrow['1']} ${stack.comfortable}`}>
               <Skeleton size="xl" width="3/4" />
               <Skeleton size="md" width="3xl" />
             </div>
           </div>
 
           {/* Metadata badges */}
-          <div className={`flex flex-wrap ${cluster.compact}`}>
+          <div className={`${display.flex} ${flexWrap.wrap} ${cluster.compact}`}>
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />
@@ -140,14 +144,14 @@ export function DetailPageLoading() {
 
       {/* Content with sidebar */}
       <div
-        className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}
+        className={`${container.default} ${padding.ySection}`}
       >
-        <div className={`grid grid-cols-1 ${cluster.loose} lg:grid-cols-3`}>
+        <div className={grid.responsive13Gap8}>
           {/* Main content */}
-          <div className={`${stack.loose} lg:col-span-2`}>
+          <div className={`${stack.loose} ${colSpan.lg2}`}>
             {/* Content card */}
             <div
-              className={`${stack.comfortable} ${radius.lg} border ${padding.comfortable}`}
+              className={`${stack.comfortable} ${radius.lg} ${border.default} ${padding.comfortable}`}
             >
               <Skeleton size="md" width="3xl" />
               <Skeleton size="sm" width="3xl" />
@@ -157,7 +161,7 @@ export function DetailPageLoading() {
 
             {/* Code block skeleton */}
             <div
-              className={`${stack.comfortable} ${radius.lg} border ${padding.comfortable}`}
+              className={`${stack.comfortable} ${radius.lg} ${border.default} ${padding.comfortable}`}
             >
               <Skeleton size="sm" width="sm" />
               <div className={stack.tight}>
@@ -171,7 +175,7 @@ export function DetailPageLoading() {
           {/* Sidebar */}
           <div className={stack.loose}>
             <div
-              className={`${stack.comfortable} ${radius.lg} border ${padding.comfortable}`}
+              className={`${stack.comfortable} ${radius.lg} ${border.default} ${padding.comfortable}`}
             >
               <Skeleton size="md" width="sm" />
               <Skeleton size="sm" width="3xl" />
@@ -190,21 +194,21 @@ export function DetailPageLoading() {
  */
 export function GuideDetailLoading() {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-border/50 border-b bg-card/30">
-        <div className={`container mx-auto ${padding.xDefault} py-8`}>
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
+      <div className={`${borderColor['border/50']} ${borderBottom.default} ${bgColor['card/30']}`}>
+        <div className={`${container.default} ${padding.yRelaxed}`}>
           <Skeleton size="sm" width="sm" className={marginBottom.comfortable} />
-          <div className="max-w-4xl">
+          <div className={maxWidth['4xl']}>
             <div
-              className={`${marginBottom.comfortable} flex items-start ${cluster.default}`}
+              className={`${marginBottom.comfortable} ${display.flex} ${alignItems.start} ${cluster.default}`}
             >
               <Skeleton size="xl" width="xs" />
-              <div className={`flex-1 ${stack.comfortable}`}>
+              <div className={`${flexGrow['1']} ${stack.comfortable}`}>
                 <Skeleton size="xl" width="3/4" />
                 <Skeleton size="md" width="3xl" />
               </div>
             </div>
-            <div className={`flex flex-wrap ${cluster.compact}`}>
+            <div className={`${display.flex} ${flexWrap.wrap} ${cluster.compact}`}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={KEYS_5[i]} size="sm" width="xs" rounded="full" />
               ))}
@@ -214,12 +218,12 @@ export function GuideDetailLoading() {
       </div>
 
       <div
-        className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}
+        className={`${container.default} ${padding.ySection}`}
       >
-        <div className={`grid grid-cols-1 ${cluster.loose} lg:grid-cols-3`}>
-          <div className={`${stack.loose} lg:col-span-2`}>
+        <div className={grid.responsive13Gap8}>
+          <div className={`${stack.loose} ${colSpan.lg2}`}>
             <div
-              className={`${stack.comfortable} ${radius.lg} border ${padding.comfortable}`}
+              className={`${stack.comfortable} ${radius.lg} ${border.default} ${padding.comfortable}`}
             >
               {Array.from({ length: 12 }).map((_, i) => (
                 <Skeleton key={KEYS_12[i]} size="sm" width={i % 4 === 0 ? '2/3' : '3xl'} />
@@ -228,7 +232,7 @@ export function GuideDetailLoading() {
           </div>
           <div className={stack.loose}>
             <div
-              className={`${stack.comfortable} ${radius.lg} border ${padding.comfortable}`}
+              className={`${stack.comfortable} ${radius.lg} ${border.default} ${padding.comfortable}`}
             >
               <Skeleton size="md" width="sm" />
               {Array.from({ length: 3 }).map((_, i) => (
@@ -267,25 +271,25 @@ export function SearchResultsLoading() {
  */
 export function HomePageLoading() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${minHeight.screen} ${bgColor.background}`}>
       {/* Hero */}
-      <section className="border-border/50 border-b">
-        <div className={`container mx-auto ${padding.xDefault} py-16 text-center`}>
+      <section className={`${borderColor['border/50']} ${borderBottom.default}`}>
+        <div className={`${container.default} ${padding.yHero} ${textAlign.center}`}>
           <Skeleton
             size="xl"
             width="3/4"
-            className={`mx-auto ${marginBottom.comfortable} h-16`}
+            className={`${marginX.auto} ${marginBottom.comfortable} ${height.hero}`}
           />
-          <Skeleton size="md" width="2/3" className="mx-auto" />
+          <Skeleton size="md" width="2/3" className={marginX.auto} />
         </div>
       </section>
 
       {/* Search */}
-      <div className={`container mx-auto ${padding.xDefault} py-8`}>
-        <div className="mx-auto max-w-4xl">
-          <Skeleton size="lg" width="3xl" className={`${marginBottom.comfortable} h-14`} />
+      <div className={`${container.default} ${paddingTop.loose} ${paddingBottom.loose}`}>
+        <div className={`${marginX.auto} ${maxWidth['4xl']}`}>
+          <Skeleton size="lg" width="3xl" className={`${marginBottom.comfortable} ${height.inputLg}`} />
           {/* Stats */}
-          <div className={`flex flex-wrap justify-center ${cluster.default}`}>
+          <div className={`${display.flex} ${flexWrap.wrap} ${justify.center} ${cluster.default}`}>
             {Array.from({ length: 7 }).map((_, i) => (
               <Skeleton key={KEYS_7[i]} size="sm" width="sm" />
             ))}
@@ -294,10 +298,10 @@ export function HomePageLoading() {
       </div>
 
       {/* Content sections */}
-      <div className={`container mx-auto ${padding.xDefault} pb-16`}>
+      <div className={`${container.default} ${paddingBottom.hero}`}>
         {Array.from({ length: 3 }).map((_, sectionIndex) => (
           <div key={KEYS_3[sectionIndex]} className={marginBottom.section}>
-            <div className={`${marginBottom.comfortable} flex items-center justify-between`}>
+            <div className={`${marginBottom.comfortable} ${display.flex} ${alignItems.center} ${justify.between}`}>
               <Skeleton size="lg" width="lg" />
               <Skeleton size="sm" width="sm" />
             </div>
@@ -318,7 +322,7 @@ export function HomePageLoading() {
  */
 export function ChangelogListLoading() {
   return (
-    <div className={`container mx-auto ${padding.xDefault} py-8`}>
+    <div className={`${container.default} ${paddingTop.loose} ${paddingBottom.loose}`}>
       <PageHeaderSkeleton />
       <ContentListSkeleton count={8} />
     </div>
@@ -358,19 +362,19 @@ export function InlineSpinner({
   };
 
   const borderClasses = {
-    sm: 'border-2',
-    md: 'border-2',
-    lg: 'border-3',
+    sm: borderWidth['2'],
+    md: borderWidth['2'],
+    lg: borderWidth['3'],
   };
 
   return (
-    <div className={`flex items-center ${gap.compact} ${className}`}>
+    <div className={`${display.flex} ${alignItems.center} ${gap.compact} ${className}`}>
       <output
-        className={`${sizeClasses[size]} ${borderClasses[size]} animate-spin ${radius.full} border-primary border-t-transparent`}
+        className={`${sizeClasses[size]} ${borderClasses[size]} ${animate.spin} ${radius.full} ${borderColor.primary} ${borderTop.transparent}`}
         aria-label={message || 'Loading'}
         aria-live="polite"
       />
-      {message && <span className={`text-muted-foreground ${textSize.sm}`}>{message}</span>}
+      {message && <span className={`${muted.default} ${textSize.sm}`}>{message}</span>}
     </div>
   );
 }
@@ -446,20 +450,20 @@ export function createCategoryLoading(config: CategoryLoadingConfig = {}) {
 
   function CustomCategoryLoading() {
     return (
-      <div className={`container mx-auto ${padding.xDefault} py-8`}>
+      <div className={`${container.default} ${paddingTop.loose} ${paddingBottom.loose}`}>
         {/* Header */}
         <PageHeaderSkeleton />
 
         {/* Search bar (optional) */}
         {showSearch && (
           <div className={marginBottom.relaxed}>
-            <Skeleton size="lg" width="3xl" className="h-12" />
+            <Skeleton size="lg" width="3xl" className={height.search} />
           </div>
         )}
 
         {/* Filter bar (optional) */}
         {showFilters && (
-          <div className={`${marginBottom.comfortable} flex flex-wrap ${gap.compact}`}>
+          <div className={`${marginBottom.comfortable} ${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="sm" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />

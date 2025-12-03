@@ -22,6 +22,7 @@ import {
   cursor,
   flexDir,
   gap,
+  hoverBg,
   iconLeading,
   iconSize,
   justify,
@@ -37,6 +38,18 @@ import {
   transition,
   weight,
   squareSize,
+  display,
+  position,
+  marginLeft,
+  borderWidth,
+  textAlign,
+  height,
+  width,
+  border,
+  opacityLevel,
+  objectFit,
+  ring,
+  focusRing,
 } from '@heyclaude/web-runtime/design-system';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
@@ -340,19 +353,19 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
           <div className={spaceY.compact}>
             <label htmlFor={logoUploadId} className={`${weight.medium} ${size.sm}`}>
               Company Logo
-              <span className={`ml-1 font-normal ${muted.default} ${size.xs}`}>
+              <span className={`${marginLeft.tight} ${weight.normal} ${muted.default} ${size.xs}`}>
                 (max 200KB, 512x512px, WebP/PNG/JPG)
               </span>
             </label>
 
             {logoPreview ? (
               <div className={`${row.comfortable}`}>
-                <div className={`relative ${squareSize.avatar3xl} ${overflow.hidden} ${radius.lg} border`}>
+                <div className={`${position.relative} ${squareSize.avatar3xl} ${overflow.hidden} ${radius.lg} ${border.default}`}>
                   <Image
                     src={logoPreview}
                     alt="Company logo preview"
                     fill={true}
-                    className="object-cover"
+                    className={objectFit.cover}
                   />
                 </div>
                 <div className={stack.compact}>
@@ -384,8 +397,8 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 </div>
               </div>
             ) : (
-              <label htmlFor={logoUploadId} className={`flex ${cursor.pointer} ${flexDir.col} ${alignItems.center} ${justify.center} ${radius.lg} border-2 border-dashed border-muted-foreground/25 ${bgColor['muted/50']} ${padding.relaxed} ${transition.colors} hover:border-muted-foreground/50 hover:bg-muted`}>
-                <div className={`${stack.compact} ${alignItems.center} text-center`}>
+              <label htmlFor={logoUploadId} className={`${display.flex} ${cursor.pointer} ${flexDir.col} ${alignItems.center} ${justify.center} ${radius.lg} ${borderWidth['2']} ${border.dashed} ${borderColor['mutedForeground/25']} ${bgColor['muted/50']} ${padding.relaxed} ${transition.colors} hover:${borderColor['mutedForeground/50']} ${hoverBg.mutedSolid}`}>
+                <div className={`${stack.compact} ${alignItems.center} ${textAlign.center}`}>
                   <FileText className={`${iconSize.xl} ${muted.default}`} />
                   <div>
                     <p className={`${weight.medium} ${size.sm}`}>
@@ -472,7 +485,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 type="checkbox"
                 checked={useCursorDate}
                 onChange={(e) => setUseCursorDate(e.target.checked)}
-                className="rounded"
+                className={radius.default}
               />
               Using Claude since specific date
             </label>
@@ -481,14 +494,14 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 type="date"
                 name="using_cursor_since"
                 defaultValue={initialData?.using_cursor_since || ''}
-                className={`flex h-10 w-full ${radius.md} border ${borderColor.input} ${bgColor.background} ${padding.xCompact} ${padding.yCompact} ${size.sm} ring-offset-background file:border-0 file:bg-transparent file:font-medium file:${size.sm} placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
+                className={`${display.flex} ${height.input} ${width.full} ${radius.md} ${border.default} ${borderColor.input} ${bgColor.background} ${padding.xCompact} ${padding.yCompact} ${size.sm} ${ring.offsetBackground} file:${border.none} file:bg-transparent file:${weight.medium} file:${size.sm} placeholder:${muted.default} ${focusRing.default} disabled:${cursor.notAllowed} disabled:${opacityLevel[50]}`}
               />
             )}
           </div>
         </CardContent>
       </Card>
 
-      <div className={`flex ${gap.comfortable}`}>
+      <div className={`${display.flex} ${gap.comfortable}`}>
         <Button type="submit" disabled={isPending}>
           {isPending ? 'Saving...' : mode === 'create' ? 'Create Company' : 'Save Changes'}
         </Button>

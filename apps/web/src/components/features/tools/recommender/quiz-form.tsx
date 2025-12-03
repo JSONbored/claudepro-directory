@@ -16,6 +16,7 @@ import {
   borderColor,
   cluster,
   gap,
+  grid,
   helper,
   iconLeading,
   iconSize,
@@ -32,6 +33,14 @@ import {
   textColor,
   transition,
   weight,
+  display,
+  position,
+  borderWidth,
+  textAlign,
+  marginY,
+  marginLeft,
+  cursor,
+  hoverBorder,
 } from '@heyclaude/web-runtime/design-system';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
@@ -324,7 +333,7 @@ export function QuizForm() {
 
   if (!quizConfig) {
     return (
-      <div className={`flex ${alignItems.center} ${justify.center} ${padding.section}`}>
+      <div className={`${display.flex} ${alignItems.center} ${justify.center} ${padding.section}`}>
         <InlineSpinner size="lg" />
       </div>
     );
@@ -358,7 +367,7 @@ export function QuizForm() {
         percentComplete={progressPercentage}
       />
 
-      <Card className={`relative ${overflow.hidden}`}>
+      <Card className={`${position.relative} ${overflow.hidden}`}>
         <CardHeader>
           <CardTitle className={cluster.compact}>
             <span className={muted.sm}>
@@ -417,7 +426,7 @@ export function QuizForm() {
                   )}
                 </div>
 
-                <Card className={`border-primary/20 ${bgColor['primary/5']}`}>
+                <Card className={`${borderColor['primary/20']} ${bgColor['primary/5']}`}>
                   <CardHeader>
                     <CardTitle className={`${cluster.compact} ${size.lg}`}>
                       <Sparkles className={`${iconSize.md} ${textColor.primary}`} />
@@ -444,7 +453,7 @@ export function QuizForm() {
               })}
             >
               <div
-                className={`grid ${gap.default} ${currentQuestionData.options.length > 3 ? 'sm:grid-cols-2' : ''}`}
+                className={`${grid.base} ${gap.default} ${currentQuestionData.options.length > 3 ? `sm:${grid.responsive2.split(' ')[2]}` : ''}`}
               >
                 {currentQuestionData.options.map((option) => {
                   if (!fieldKey) return null;
@@ -472,12 +481,12 @@ export function QuizForm() {
                         }
                       }}
                       disabled={!canSelect}
-                      className={`${radius.lg} border-2 ${padding.default} text-left ${transition.all} ${
+                      className={`${radius.lg} ${borderWidth['2']} ${padding.default} ${textAlign.left} ${transition.all} ${
                         isSelected
                           ? `${borderColor.primary} ${bgColor['primary/5']}`
                           : canSelect
-                            ? `${borderColor.border} hover:border-primary/50`
-                            : `cursor-not-allowed ${borderColor.border} ${opacityLevel[50]}`
+                            ? `${borderColor.border} ${hoverBorder.primary}`
+                            : `${cursor.notAllowed} ${borderColor.border} ${opacityLevel[50]}`
                       }`}
                     >
                       <div className={weight.medium}>{option.label}</div>
@@ -492,7 +501,7 @@ export function QuizForm() {
             </QuestionCard>
           )}
 
-          <Separator className="my-6" />
+          <Separator className={marginY.relaxed} />
           <div className={between.center}>
             <Button
               type="button"
@@ -507,7 +516,7 @@ export function QuizForm() {
             {currentQuestion < totalQuestions ? (
               <Button type="button" onClick={goToNext} disabled={isPending}>
                 Next
-                <ArrowRight className={`ml-2 ${iconSize.sm}`} />
+                <ArrowRight className={`${marginLeft.compact} ${iconSize.sm}`} />
               </Button>
             ) : (
               <Button

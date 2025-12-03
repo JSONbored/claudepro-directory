@@ -31,6 +31,8 @@ export const shadow = {
   '2xl': 'shadow-2xl',
   /** Inner shadow for inset effects */
   inner: 'shadow-inner',
+  /** Accent glow shadow (orange rgba) */
+  accentGlow: 'shadow-[0_10px_40px_-20px_rgba(255,138,76,0.8)]',
 } as const;
 
 /**
@@ -72,6 +74,21 @@ export const shadowColor = {
   orange: 'shadow-orange-500/50',
 } as const;
 
+/**
+ * Hover shadow utilities (for interactive glows).
+ * 
+ * @migration Replaces inline `hover:shadow-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="hover:shadow-[0_10px_40px_-20px_rgba(255,138,76,0.6)]"
+ * // ✅ NEW: className={hoverShadow.accentGlow}
+ */
+export const hoverShadow = {
+  /** Accent glow on hover (orange rgba) */
+  accentGlow: 'hover:shadow-[0_10px_40px_-20px_rgba(255,138,76,0.6)]',
+  /** Accent glow on hover (stronger) */
+  accentGlowStrong: 'hover:shadow-[0_10px_40px_-20px_rgba(255,138,76,0.8)]',
+} as const;
+
 // =============================================================================
 // Z-INDEX LAYERS
 // =============================================================================
@@ -90,6 +107,8 @@ export const shadowColor = {
 export const zLayer = {
   /** Below everything (backgrounds) - z-[-1] */
   behind: 'z-[-1]',
+  /** Behind elements (ambient effects) - -z-10 */
+  behind10: '-z-10',
   /** Base layer - z-0 */
   base: 'z-0',
   /** Slightly elevated (cards, dropdowns) - z-10 */
@@ -177,6 +196,8 @@ export const opacityLevel = {
   60: 'opacity-60',
   /** Prominent */
   70: 'opacity-70',
+  /** Strong (75%) */
+  75: 'opacity-75',
   /** Strong */
   80: 'opacity-80',
   /** Near full */
@@ -239,6 +260,11 @@ export const gradient = {
 
 /**
  * Glow effects for interactive/highlighted elements.
+ * 
+ * @migration Replaces SUBMISSION_FORM_TOKENS.shadows.glow
+ * @example
+ * // ❌ OLD: style={{ boxShadow: TOKENS.shadows.glow.orange }}
+ * // ✅ NEW: style={{ boxShadow: glowShadow.orange }}
  */
 export const glow = {
   /** Accent glow */
@@ -253,6 +279,30 @@ export const glow = {
   warning: 'shadow-lg shadow-yellow-500/20',
   /** Error glow */
   error: 'shadow-lg shadow-red-500/20',
+} as const;
+
+/**
+ * Glow shadow values for inline styles (OKLCH colors).
+ * Used in submission form wizard components.
+ * 
+ * @migration Replaces SUBMISSION_FORM_TOKENS.shadows.glow
+ * @example
+ * // ❌ OLD: style={{ boxShadow: TOKENS.shadows.glow.orange }}
+ * // ✅ NEW: style={{ boxShadow: glowShadow.orange }}
+ */
+export const glowShadow = {
+  /** Orange glow (Claude accent) */
+  orange: '0 0 0 4px oklch(74% 0.2 35 / 0.15)',
+  /** Green glow (success) */
+  green: '0 0 0 4px oklch(72% 0.19 145 / 0.15)',
+  /** Red glow (error) */
+  red: '0 0 0 4px oklch(70% 0.195 25 / 0.15)',
+  /** Blue glow (info) */
+  blue: '0 0 0 4px oklch(78% 0.168 250 / 0.15)',
+  /** Soft glow (subtle) */
+  soft: '0 8px 32px -4px oklch(60% 0.2 280 / 0.15)',
+  /** Medium glow (more visible) */
+  medium: '0 12px 48px -8px oklch(60% 0.2 280 / 0.25)',
 } as const;
 
 // =============================================================================
@@ -379,4 +429,48 @@ export const outlinePattern = {
   success: 'outline outline-2 outline-green-500',
   /** Selection outline */
   selected: 'outline outline-2 outline-accent',
+} as const;
+
+// =============================================================================
+// RING UTILITIES (for focus rings and decorative rings)
+// =============================================================================
+
+/**
+ * Ring utilities for focus states and decorative rings.
+ * 
+ * @migration Replaces inline `ring-*`, `ring-offset-*` Tailwind classes
+ * @example
+ * // ❌ OLD: className="ring-2 ring-accent/20 ring-offset-2 ring-offset-background"
+ * // ✅ NEW: className={ring.accent20}
+ */
+export const ring = {
+  /** ring-2 ring-accent/20 ring-offset-2 ring-offset-background - Accent ring with offset */
+  accent20: 'ring-2 ring-accent/20 ring-offset-2 ring-offset-background',
+  /** ring-offset-background - Ring offset background color */
+  offsetBackground: 'ring-offset-background',
+  /** ring-0 - No ring */
+  none: 'ring-0',
+} as const;
+
+// =============================================================================
+// BACKGROUND CLIP UTILITIES
+// =============================================================================
+
+/**
+ * Background clip utilities for text gradients.
+ * 
+ * @migration Replaces inline `bg-clip-text` Tailwind classes
+ * @example
+ * // ❌ OLD: className="bg-clip-text"
+ * // ✅ NEW: className={bgClip.text}
+ */
+export const bgClip = {
+  /** Clip background to text */
+  text: 'bg-clip-text',
+  /** Clip background to padding box */
+  padding: 'bg-clip-padding',
+  /** Clip background to content box */
+  content: 'bg-clip-content',
+  /** Clip background to border box */
+  border: 'bg-clip-border',
 } as const;

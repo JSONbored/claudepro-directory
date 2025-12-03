@@ -16,26 +16,35 @@ import {
 } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, ExternalLink, Github, Heart, Rss, Sparkles } from '@heyclaude/web-runtime/icons';
 import {
+  alignItems,
+  bgColor,
+  borderColor,
   borderTop,
   cluster,
+  container,
+  display,
   flexDir,
   gap,
+  grid,
   iconSize,
+  justify,
   label,
   leading,
   link as linkStyle,
   marginBottom,
+  marginRight,
   marginTop,
+  maxWidth,
   muted,
   padding,
+  paddingTop,
   radius,
   spaceY,
+  textColor,
   transition,
   weight,
-  bgColor,
-  justify,
-  textColor,
-  alignItems,
+  iconFill,
+  textDecoration,
 } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -143,9 +152,9 @@ function FooterComponent() {
 
   return (
     <footer className={`${borderTop.light} ${bgColor.background}`}>
-      <div className={`container mx-auto ${padding.xDefault} ${padding.ySpacious} lg:py-12`}>
+      <div className={`${container.default} ${padding.xDefault} ${padding.ySpacious} lg:${padding.ySection}`}>
         {/* Main footer content - Two section layout */}
-        <div className={`grid grid-cols-1 ${gap.section} lg:grid-cols-[1.5fr_2.5fr] lg:${gap.extra}`}>
+        <div className={`${grid.footer} ${gap.section} lg:${gap.extra}`}>
           
           {/* Left section - Brand & Social */}
           <motion.div
@@ -161,7 +170,7 @@ function FooterComponent() {
             </div>
             
             {/* Description */}
-            <p className={`max-w-sm ${muted.sm} ${leading.relaxed}`}>
+            <p className={`${maxWidth.sm} ${muted.sm} ${leading.relaxed}`}>
               {APP_CONFIG.description}
             </p>
 
@@ -176,7 +185,7 @@ function FooterComponent() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${muted.default} ${transition.colors} hover:text-foreground`}
+                  className={`${muted.default} ${transition.colors} hover:${textColor.foreground}`}
                   aria-label={social.label}
                 >
                   <social.icon className={iconSize.md} />
@@ -189,16 +198,16 @@ function FooterComponent() {
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={`border-accent/20 ${bgColor['accent/5']} ${textColor.accent}`}
+              className={`${borderColor['accent/20']} ${bgColor['accent/5']} ${textColor.accent}`}
             >
-              <ExternalLink className={`mr-1.5 ${iconSize.xs}`} />
+              <ExternalLink className={`${marginRight.snug} ${iconSize.xs}`} />
               Open Source
             </UnifiedBadge>
           </motion.div>
 
           {/* Right section - Navigation grid */}
           <motion.div
-            className={`grid grid-cols-2 ${gap.loose} sm:grid-cols-4`}
+            className={grid.responsive124}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -207,7 +216,7 @@ function FooterComponent() {
             {/* Browse column */}
             <div>
               <h3 className={`${marginBottom.default} ${label.sectionHeader}`}>Browse</h3>
-              <ul className="space-y-2.5">
+              <ul className={spaceY.snug}>
                 {browseLinks.map((link) => (
                   <li key={link.href}>
                     <Link
@@ -224,12 +233,12 @@ function FooterComponent() {
             {/* Resources column */}
             <div>
               <h3 className={`${marginBottom.default} ${label.sectionHeader}`}>Resources</h3>
-              <ul className="space-y-2.5">
+              <ul className={spaceY.snug}>
                 {resourceLinks.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className={`inline-${cluster.snug} ${linkStyle.mutedSm}`}
+                      className={`${display.inlineFlex} ${cluster.snug} ${linkStyle.mutedSm}`}
                     >
                       {link.icon && <link.icon className={iconSize.xsPlus} />}
                       <span>{link.label}</span>
@@ -242,7 +251,7 @@ function FooterComponent() {
             {/* Support column */}
             <div>
               <h3 className={`${marginBottom.default} ${label.sectionHeader}`}>Support</h3>
-              <ul className="space-y-2.5">
+              <ul className={spaceY.snug}>
                 {supportLinks.map((link) => (
                   <li key={link.href}>
                     <Link
@@ -259,7 +268,7 @@ function FooterComponent() {
             {/* Legal column */}
             <div>
               <h3 className={`${marginBottom.default} ${label.sectionHeader}`}>Legal</h3>
-              <ul className="space-y-2.5">
+              <ul className={spaceY.snug}>
                 {legalLinks.map((link) => (
                   <li key={link.href}>
                     <Link
@@ -277,23 +286,23 @@ function FooterComponent() {
 
         {/* Bottom bar - Modern divider and layout */}
         <motion.div
-          className={`${marginTop.section} ${borderTop.faint} pt-8`}
+          className={`${marginTop.section} ${borderTop.faint} ${paddingTop.loose}`}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
         >
-          <div className={`flex ${flexDir.col} ${alignItems.center} ${justify.between} ${gap.comfortable} md:flex-row`}>
+          <div className={`${display.flex} ${flexDir.col} ${alignItems.center} ${justify.between} ${gap.comfortable} md:${display.flex}-row`}>
             {/* Left - Copyright with heart */}
             <div className={`${cluster.snug} ${muted.sm}`}>
               <span>© {currentYear}</span>
-              <span className="text-border">•</span>
+              <span className={textColor.border}>•</span>
               <span>Made with</span>
-              <Heart className={`${iconSize.sm} fill-red-500/80 ${textColor.red}/80`} />
+              <Heart className={`${iconSize.sm} ${iconFill.red500_80} ${textColor.red80}`} />
               <span>by</span>
               <Link 
                 href="/consulting" 
-                className={`${weight.medium} ${textColor.foreground} underline-offset-4 hover:underline`}
+                className={`${weight.medium} ${textColor.foreground} ${textDecoration.offset4} hover:${textDecoration.underline}`}
               >
                 JSONbored
               </Link>

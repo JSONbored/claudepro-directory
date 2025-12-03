@@ -4,6 +4,9 @@
  */
 
 import { cluster, iconSize, marginBottom, muted, weight ,size  , padding, justify,
+  bgColor,
+  width,
+  textAlign,
 } from '@heyclaude/web-runtime/design-system';
 import { Star } from '@heyclaude/web-runtime/icons';
 import type { ReviewHistogramProps } from '@heyclaude/web-runtime/types/component.types';
@@ -61,8 +64,8 @@ export function ReviewRatingHistogram({
 
   if (totalReviews === 0) {
     return (
-      <Card className={`bg-muted/50 ${padding.comfortable}`}>
-        <div className="text-center">
+      <Card className={`${bgColor['muted/50']} ${padding.comfortable}`}>
+        <div className={textAlign.center}>
           <div className={`${cluster.compact} ${marginBottom.tight} ${justify.center}`}>
             <Star className={`${iconSize.xl} ${muted.default}/30`} aria-hidden="true" />
           </div>
@@ -90,7 +93,7 @@ export function ReviewRatingHistogram({
       {/* Chart: Rating Distribution */}
       <div>
         <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.sm}`}>Rating Distribution</h3>
-        <ChartContainer height="200px" className="w-full">
+        <ChartContainer height="200px" className={width.full}>
           <HorizontalBarChart
             data={chartData}
             height={200}

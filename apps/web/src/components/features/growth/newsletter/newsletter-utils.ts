@@ -1,4 +1,4 @@
-import { getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
+import { NEWSLETTER_BEHAVIOR, NEWSLETTER_CTA } from '@heyclaude/web-runtime/config/unified-config';
 import { ensureString, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 
 /**
@@ -136,11 +136,33 @@ export function getContextualMessage(
 }
 
 /**
- * Load newsletter config from static defaults
+ * Load newsletter config from unified-config
  * Call this once and pass to getCTAVariantCopy/getContextualMessage
+ * Returns legacy-compatible format for backward compatibility
  */
 export async function loadNewsletterConfig(): Promise<NewsletterConfig> {
-  // Get newsletter config from static defaults
-  const config = getNewsletterConfig();
-  return config as NewsletterConfig;
+  // Build legacy-compatible config from unified-config
+  return {
+    'newsletter.cta.aggressive.headline': NEWSLETTER_CTA['aggressive.headline'],
+    'newsletter.cta.social_proof.headline': NEWSLETTER_CTA['social_proof.headline'],
+    'newsletter.cta.value_focused.headline': NEWSLETTER_CTA['value_focused.headline'],
+    'newsletter.cta.aggressive.description': NEWSLETTER_CTA['aggressive.description'],
+    'newsletter.cta.social_proof.description': NEWSLETTER_CTA['social_proof.description'],
+    'newsletter.cta.value_focused.description': NEWSLETTER_CTA['value_focused.description'],
+    'newsletter.contextual.agents.headline': NEWSLETTER_CTA['contextual.agents.headline'],
+    'newsletter.contextual.agents.description': NEWSLETTER_CTA['contextual.agents.description'],
+    'newsletter.contextual.mcp.headline': NEWSLETTER_CTA['contextual.mcp.headline'],
+    'newsletter.contextual.mcp.description': NEWSLETTER_CTA['contextual.mcp.description'],
+    'newsletter.contextual.guides.headline': NEWSLETTER_CTA['contextual.guides.headline'],
+    'newsletter.contextual.guides.description': NEWSLETTER_CTA['contextual.guides.description'],
+    'newsletter.footer_text': NEWSLETTER_CTA.footer_text,
+    'newsletter.show_subscriber_count': NEWSLETTER_BEHAVIOR.show_subscriber_count,
+    'newsletter.footer_bar.show_after_delay_ms': NEWSLETTER_BEHAVIOR.footer_bar_show_after_delay_ms,
+    'newsletter.scroll_trigger.min_scroll_height_px': NEWSLETTER_BEHAVIOR.scroll_trigger_min_scroll_height_px,
+    'newsletter.max_retries': NEWSLETTER_BEHAVIOR.max_retries,
+    'newsletter.initial_retry_delay_ms': NEWSLETTER_BEHAVIOR.initial_retry_delay_ms,
+    'newsletter.retry_backoff_multiplier': NEWSLETTER_BEHAVIOR.retry_backoff_multiplier,
+    'newsletter.show_footer_bar': NEWSLETTER_BEHAVIOR.show_footer_bar,
+    'newsletter.show_scroll_trigger': NEWSLETTER_BEHAVIOR.show_scroll_trigger,
+  } as NewsletterConfig;
 }

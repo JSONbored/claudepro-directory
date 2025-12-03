@@ -14,13 +14,17 @@
  * - Works with all variants (default, destructive, outline, secondary, ghost, link)
  */
 
-import { UI_ANIMATION } from '../../config/unified-config.ts';
+import { animation } from '../../design-system/tokens.ts';
 import { cn } from '../../ui/utils.ts';
 // Design System imports
-import { padding, gap, squareSize } from '../../design-system/styles/layout.ts';
-import { focusRing, hoverBg, hoverText } from '../../design-system/styles/interactive.ts';
-import { size } from '../../design-system/styles/typography.ts';
+import { padding, gap, squareSize, display, position, overflow, flexGrow, alignItems, justify, height, pointerEvents } from '../../design-system/styles/layout.ts';
+import { whitespace } from '../../design-system/styles/typography.ts';
+import { focusRing, hoverBg, hoverText, transition } from '../../design-system/styles/interactive.ts';
+import { size, weight } from '../../design-system/styles/typography.ts';
+import { textColor, bgColor, borderColor } from '../../design-system/styles/colors.ts';
 import { radius } from '../../design-system/styles/radius.ts';
+import { border } from '../../design-system/styles/borders.ts';
+import { opacityLevel } from '../../design-system/styles/effects.ts';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'motion/react';
@@ -35,21 +39,21 @@ interface RippleType {
 }
 
 const buttonVariants = cva(
-  `inline-flex items-center justify-center ${gap.compact} whitespace-nowrap ${radius.md} ${size.sm} font-medium ring-offset-background transition-colors ${focusRing.default} disabled:opacity-50 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0`,
+  `${display.inlineFlex} ${alignItems.center} ${justify.center} ${gap.compact} ${whitespace.nowrap} ${radius.md} ${size.sm} ${weight.medium} ring-offset-background ${transition.colors} ${focusRing.default} disabled:${opacityLevel[50]} disabled:${pointerEvents.none} [&_svg]:${pointerEvents.none} [&_svg]:size-4 [&_svg]:${flexGrow.shrink0}`,
   {
     variants: {
       variant: {
-        default: 'bg-accent text-accent-foreground hover:bg-accent/90',
-        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: `border border-input bg-background ${hoverBg.default} ${hoverText.accent}`,
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        default: `${bgColor.accent} ${textColor.accentForeground} ${hoverBg.max}`,
+        destructive: `${bgColor.destructive} ${textColor.destructiveForeground} ${hoverBg.destructiveMax}`,
+        outline: `${border.default} ${borderColor.input} ${bgColor.background} ${hoverBg.default} ${hoverText.accent}`,
+        secondary: `${bgColor.secondary} ${textColor.secondaryForeground} ${hoverBg.secondaryVeryStrong}`,
         ghost: `${hoverBg.default} ${hoverText.accent}`,
-        link: 'text-primary underline-offset-4 hover:underline',
+        link: `${textColor.primary} underline-offset-4 hover:underline`,
       },
       size: {
-        default: `h-10 ${padding.xDefault}`,
-        sm: `h-9 ${radius.md} px-3`,
-        lg: `h-11 ${radius.md} px-8`,
+        default: `${height.input} ${padding.xDefault}`,
+        sm: `${height.buttonSm} ${radius.md} ${padding.xCompact}`,
+        lg: `${height.buttonLg} ${radius.md} ${padding.xRelaxed}`,
         icon: squareSize.avatarMd,
       },
     },
@@ -67,11 +71,7 @@ export interface ButtonProps
 }
 
 /** Spring animation config from unified config */
-const springDefault = {
-  type: 'spring' as const,
-  stiffness: UI_ANIMATION['spring.default.stiffness'],
-  damping: UI_ANIMATION['spring.default.damping'],
-};
+const springDefault = animation.spring.default;
 
 const Button = ({
   className,
@@ -129,7 +129,7 @@ const Button = ({
   // Button element with ripple
   const buttonElement = (
     <Comp
-      className={cn(buttonVariants({ variant, size, className }), 'relative overflow-hidden')}
+      className={cn(buttonVariants({ variant, size, className }), `${position.relative} ${overflow.hidden}`)}
       ref={ref}
       disabled={disabled}
       onClick={handleClick}
@@ -140,7 +140,7 @@ const Button = ({
         {ripples.map((ripple) => (
           <motion.span
             key={ripple.id}
-            className={`pointer-events-none absolute ${radius.full} bg-white/30`}
+            className={`${pointerEvents.none} ${position.absolute} ${radius.full} ${bgColor['white/30']}`}
             style={{
               left: ripple.x,
               top: ripple.y,

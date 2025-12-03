@@ -1,7 +1,8 @@
 'use client';
 
 import { cn } from '../utils.ts';
-import { height } from '../../design-system/styles/layout.ts';
+import { height, width, flexGrow } from '../../design-system/styles/layout.ts';
+import { borderColor } from '../../design-system/styles/colors.ts';
 import * as SeparatorPrimitive from '@radix-ui/react-separator';
 import type * as React from 'react';
 
@@ -19,10 +20,10 @@ const Separator = ({
     decorative={decorative}
     orientation={orientation}
     className={cn(
-      'shrink-0 bg-border',
+      `${flexGrow.shrink0} ${borderColor.border}`,
       orientation === 'horizontal'
-        ? `${height.divider} w-full`
-        : `h-full w-[1px]`,
+        ? `${height.divider} ${width.full}`
+        : `${height.full} w-[1px]`,
       className
     )}
     {...props}

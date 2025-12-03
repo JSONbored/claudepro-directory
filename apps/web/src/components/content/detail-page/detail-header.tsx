@@ -4,7 +4,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
-import { borderBottom, marginBottom, padding, backdrop,
+import { borderBottom, marginBottom, padding, backdrop, container, marginX,
 } from '@heyclaude/web-runtime/design-system';
 import type {
   ContentItem,
@@ -59,7 +59,7 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
 
   return (
     <div className={`${borderBottom.default} bg-code/50 ${backdrop.sm}`}>
-      <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
+      <div className={`${container.default} ${marginX.auto} ${padding.xDefault} ${padding.yRelaxed}`}>
         {/* Breadcrumbs - minimal navigation trail */}
         <Breadcrumbs
           categoryLabel={categoryLabel}

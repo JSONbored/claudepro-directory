@@ -2,9 +2,14 @@
 
 import { Search } from '../../icons.tsx';
 import { cn } from '../utils.ts';
-import { maxHeight, gap, padding } from '../../design-system/styles/layout.ts';
+import { maxHeight, gap, padding, paddingLeft, paddingTop, display, flexDir, alignItems, overflow, position, marginRight, width, height, marginLeft, flexGrow, marginX } from '../../design-system/styles/layout.ts';
 import { iconSize } from '../../design-system/styles/icons.ts';
-import { size } from '../../design-system/styles/typography.ts';
+import { size, weight, muted, tracking } from '../../design-system/styles/typography.ts';
+import { bgColor, textColor, textAlign } from '../../design-system/styles/colors.ts';
+import { borderBottom } from '../../design-system/styles/borders.ts';
+import { opacityLevel } from '../../design-system/styles/effects.ts';
+import { cursor } from '../../design-system/styles/interactive.ts';
+import { userSelect, pointerEvents } from '../../design-system/styles/layout.ts';
 import { radius } from '../../design-system/styles/radius.ts';
 import { shadow } from '../../design-system/styles/effects.ts';
 import type { DialogProps } from '@radix-ui/react-dialog';
@@ -28,7 +33,7 @@ const Command = ({
   <CommandPrimitive
     ref={ref}
     className={cn(
-      `flex h-full w-full flex-col overflow-hidden ${radius.md} bg-popover text-popover-foreground`,
+      `${display.flex} ${height.full} ${width.full} ${flexDir.col} ${overflow.hidden} ${radius.md} ${bgColor.popover} ${textColor.popoverForeground}`,
       className
     )}
     {...props}
@@ -39,14 +44,14 @@ Command.displayName = CommandPrimitive.displayName;
 const CommandDialog = ({ children, ...props }: DialogProps) => {
   return (
     <Dialog {...props}>
-      <DialogContent className={`overflow-hidden ${padding.none} ${shadow.lg}`}>
+      <DialogContent className={`${overflow.hidden} ${padding.none} ${shadow.lg}`}>
         <VisuallyHidden>
           <DialogTitle>Command Menu</DialogTitle>
           <DialogDescription>
             Type a command or search for items using the keyboard
           </DialogDescription>
         </VisuallyHidden>
-        <Command className="[&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group]]:px-2 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-2 **:[[cmdk-item]]:py-3">
+        <Command className={`[&_[cmdk-group]:not([hidden])_~[cmdk-group]]:${paddingTop.none} [&_[cmdk-input-wrapper]_svg]:${iconSize.sm} [&_[cmdk-input-wrapper]_svg]:${iconSize.sm} [&_[cmdk-item]_svg]:${iconSize.sm} [&_[cmdk-item]_svg]:${iconSize.sm} **:[[cmdk-group-heading]]:${padding.xTight} **:[[cmdk-group-heading]]:${weight.medium} **:[[cmdk-group-heading]]:${muted.default} **:[[cmdk-group]]:${padding.xTight} **:[[cmdk-input]]:${height.search} **:[[cmdk-item]]:${padding.xTight} **:[[cmdk-item]]:${padding.yDefault}`}>
           {children}
         </Command>
       </DialogContent>
@@ -61,12 +66,12 @@ const CommandInput = ({
 }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
   ref?: React.Ref<React.ElementRef<typeof CommandPrimitive.Input>>;
 }) => (
-  <div className={'flex items-center border-b px-3'} cmdk-input-wrapper="">
-    <Search className={`mr-2 ${iconSize.sm} shrink-0 opacity-50`} />
+  <div className={`${display.flex} ${alignItems.center} ${borderBottom.default} ${paddingLeft.default}`} cmdk-input-wrapper="">
+    <Search className={`${marginRight.compact} ${iconSize.sm} ${flexGrow.shrink0} ${opacityLevel[50]}`} />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        `flex h-11 w-full ${radius.md} bg-transparent py-3 ${size.sm} outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50`,
+        `${display.flex} ${height.buttonLg} ${width.full} ${radius.md} ${bgColor.transparent} ${padding.yCompact} ${size.sm} outline-none placeholder:${muted.default} disabled:cursor-not-allowed disabled:${opacityLevel[50]}`,
         className
       )}
       {...props}
@@ -85,7 +90,7 @@ const CommandList = ({
 }) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn(`${maxHeight.dropdown} overflow-y-auto overflow-x-hidden`, className)}
+    className={cn(`${maxHeight.dropdown} ${overflow.yAuto} ${overflow.xHidden}`, className)}
     {...props}
   />
 );
@@ -97,7 +102,7 @@ const CommandEmpty = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Empty> & {
   ref?: React.Ref<React.ElementRef<typeof CommandPrimitive.Empty>>;
-}) => <CommandPrimitive.Empty ref={ref} className={`py-6 text-center ${size.sm}`} {...props} />;
+}) => <CommandPrimitive.Empty ref={ref} className={`${padding.yComfortable} ${textAlign.center} ${size.sm}`} {...props} />;
 
 CommandEmpty.displayName = CommandPrimitive.Empty.displayName;
 
@@ -111,7 +116,7 @@ const CommandGroup = ({
   <CommandPrimitive.Group
     ref={ref}
     className={cn(
-      `overflow-hidden ${padding.micro} text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group-heading]]:${size.xs}`,
+      `${overflow.hidden} ${padding.micro} ${textColor.foreground} **:[[cmdk-group-heading]]:${padding.xTight} **:[[cmdk-group-heading]]:${padding.ySnug} **:[[cmdk-group-heading]]:${weight.medium} **:[[cmdk-group-heading]]:${muted.default} **:[[cmdk-group-heading]]:${size.xs}`,
       className
     )}
     {...props}
@@ -129,7 +134,7 @@ const CommandSeparator = ({
 }) => (
   <CommandPrimitive.Separator
     ref={ref}
-    className={cn('-mx-1 h-px bg-border', className)}
+    className={cn(`${marginX.neg1} ${height.px} ${bgColor.border}`, className)}
     {...props}
   />
 );
@@ -145,7 +150,7 @@ const CommandItem = ({
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-        `relative flex cursor-default select-none items-center ${gap.compact} ${radius.sm} px-2 py-1.5 ${size.sm} outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0`,
+        `${position.relative} ${display.flex} ${cursor.default} ${userSelect.none} ${alignItems.center} ${gap.compact} ${radius.sm} ${paddingLeft.compact} ${padding.ySnug} ${size.sm} outline-none data-[disabled=true]:${pointerEvents.none} data-[selected='true']:${bgColor.accent} data-[selected=true]:${textColor.accentForeground} data-[disabled=true]:${opacityLevel[50]} [&_svg]:${pointerEvents.none} [&_svg]:size-4 [&_svg]:${flexGrow.shrink0}`,
       className
     )}
     {...props}
@@ -157,7 +162,7 @@ CommandItem.displayName = CommandPrimitive.Item.displayName;
 const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
-      className={cn(`ml-auto text-muted-foreground ${size.xs} tracking-widest`, className)}
+      className={cn(`${marginLeft.auto} ${muted.default} ${size.xs} ${tracking.widest}`, className)}
       {...props}
     />
   );

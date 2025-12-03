@@ -15,14 +15,23 @@
 import type { Database } from '@heyclaude/database-types';
 import {
   animateDuration,
+  bgGradient,
   cluster,
   flexDir,
   flexWrap,
   gap,
+  gradientFrom,
+  gradientVia,
+  gradientTo,
+  grid,
   iconSize,
   marginBottom,
   muted,
   padding,
+  absolute,
+  inset,
+  width,
+  paddingBottom,
   shadow,
   shadowColor,
   size,
@@ -33,6 +42,13 @@ import {
   justify,
   alignItems,
   radius,
+  display,
+  position,
+  truncate,
+  textColor,
+  borderColor,
+  opacityLevel,
+  hoverBorder,
 } from '@heyclaude/web-runtime/design-system';
 import { Calendar, ChevronRight } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
@@ -54,27 +70,27 @@ const CATEGORY_COLORS: Record<ChangelogCategory, { dot: string; glow: string; bo
     cssColor: 'rgb(16 185 129)', // emerald-500
   },
   Changed: {
-    dot: 'bg-blue-500',
+    dot: bgColor.blue,
     glow: shadowColor.blue,
-    border: 'border-blue-500/30',
+    border: borderColor['blue/30'],
     cssColor: 'rgb(59 130 246)', // blue-500
   },
   Fixed: {
-    dot: 'bg-amber-500',
+    dot: bgColor.amber,
     glow: shadowColor.amber,
-    border: 'border-amber-500/30',
+    border: borderColor['amber/30'],
     cssColor: 'rgb(245 158 11)', // amber-500
   },
   Removed: {
-    dot: 'bg-red-500',
+    dot: bgColor.red,
     glow: shadowColor.red,
-    border: 'border-red-500/30',
+    border: borderColor['red/30'],
     cssColor: 'rgb(239 68 68)', // red-500
   },
   Deprecated: {
-    dot: 'bg-orange-500',
+    dot: bgColor.orange,
     glow: shadowColor.orange,
-    border: 'border-orange-500/30',
+    border: borderColor['orange/30'],
     cssColor: 'rgb(249 115 22)', // orange-500
   },
   Security: {
@@ -100,7 +116,7 @@ function TimelineDot({ category, isInView, index }: TimelineDotProps) {
 
   return (
     <motion.div
-      className={`relative flex ${alignItems.center} ${justify.center}`}
+      className={`${position.relative} ${display.flex} ${alignItems.center} ${justify.center}`}
       initial={{ scale: 0, opacity: 0 }}
       animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
       transition={{
@@ -113,9 +129,9 @@ function TimelineDot({ category, isInView, index }: TimelineDotProps) {
       {/* Outer glow ring */}
       <motion.div
         className={cn(
-          `absolute ${iconSize.lg} ${radius.full}`,
+          `${position.absolute} ${iconSize.lg} ${radius.full}`,
           colors.dot,
-          'opacity-20 blur-sm'
+          `${opacityLevel[20]} blur-sm`
         )}
         animate={
           isInView
@@ -136,7 +152,7 @@ function TimelineDot({ category, isInView, index }: TimelineDotProps) {
       {/* Main dot */}
       <motion.div
         className={cn(
-          `relative ${iconSize.xs} ${radius.full}`,
+          `${position.relative} ${iconSize.xs} ${radius.full}`,
           colors.dot,
           shadow.lg,
           colors.glow
@@ -189,7 +205,7 @@ export function TimelineEntry({ entry, index, targetPath }: TimelineEntryProps) 
   return (
     <motion.div
       ref={ref}
-      className={`relative grid grid-cols-[auto_1fr] ${gap.relaxed}`}
+      className={`${position.relative} ${grid.timeline} ${gap.relaxed}`}
       initial={{ opacity: 0, x: -20 }}
       animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
       transition={{
@@ -199,11 +215,11 @@ export function TimelineEntry({ entry, index, targetPath }: TimelineEntryProps) 
       }}
     >
       {/* Timeline column */}
-      <div className={`relative flex ${flexDir.col} ${alignItems.center}`}>
+      <div className={`${position.relative} ${display.flex} ${flexDir.col} ${alignItems.center}`}>
         {/* Connecting line (above) */}
         {index > 0 && (
           <motion.div
-            className="absolute bottom-1/2 top-0 w-0.5 bg-gradient-to-b from-border/50 to-border"
+            className={`${position.absolute} ${absolute.bottomHalf} ${inset.top0} ${width.hairline} ${bgGradient.toB} ${gradientFrom.border50} ${gradientTo.border}`}
             initial={{ scaleY: 0 }}
             animate={isInView ? { scaleY: 1 } : { scaleY: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -216,7 +232,7 @@ export function TimelineEntry({ entry, index, targetPath }: TimelineEntryProps) 
 
         {/* Connecting line (below) */}
         <motion.div
-          className="absolute top-1/2 bottom-0 w-0.5 bg-gradient-to-b from-border to-border/50"
+          className={`${position.absolute} ${absolute.topHalf} ${absolute.bottom0Value} ${width.hairline} ${bgGradient.toB} ${gradientFrom.border} ${gradientTo.border50}`}
           initial={{ scaleY: 0 }}
           animate={isInView ? { scaleY: 1 } : { scaleY: 0 }}
           transition={{ duration: 0.3, delay: index * 0.1 + 0.2 }}
@@ -226,7 +242,7 @@ export function TimelineEntry({ entry, index, targetPath }: TimelineEntryProps) 
 
       {/* Content */}
       <motion.div
-        className="pb-12"
+        className={paddingBottom.section}
         initial={{ opacity: 0, y: 10 }}
         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
         transition={{ duration: 0.4, delay: index * 0.1 + 0.1 }}
@@ -244,30 +260,30 @@ export function TimelineEntry({ entry, index, targetPath }: TimelineEntryProps) 
         </div>
 
         {/* Card */}
-        <Link href={targetPath} className="group block">
+        <Link href={targetPath} className={`group ${display.block}`}>
           <motion.div
             className={cn(
               `${radius.xl} border ${bgColor.card} ${padding.medium} ${transition.all} ${animateDuration.default}`,
-              `hover:${shadow.lg} hover:border-primary/30`,
+              `hover:${shadow.lg} ${hoverBorder.primary}`,
               colors.border
             )}
             whileHover={{ scale: 1.01, y: -2 }}
             whileTap={{ scale: 0.99 }}
           >
             {/* Title */}
-            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.lg} group-hover:text-primary ${transition.colors}`}>
+            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.lg} group-hover:${textColor.primary} ${transition.colors}`}>
               {entry.title}
             </h3>
 
             {/* TL;DR */}
             {entry.tldr && (
-              <p className={cn(muted.sm, marginBottom.compact, 'line-clamp-2')}>
+              <p className={cn(muted.sm, marginBottom.compact, truncate.lines2)}>
                 {entry.tldr}
               </p>
             )}
 
             {/* Categories */}
-            <div className={`flex ${flexWrap.wrap} ${gap.compact} ${marginBottom.compact}`}>
+            <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact} ${marginBottom.compact}`}>
               {Object.keys(entry.changes ?? {}).map((cat) => {
                 const catColors = CATEGORY_COLORS[cat as ChangelogCategory];
                 if (!catColors) return null;
@@ -275,7 +291,7 @@ export function TimelineEntry({ entry, index, targetPath }: TimelineEntryProps) 
                   <span
                     key={cat}
                     className={cn(
-                      `${radius.full} px-2.5 ${padding.yHair} ${size.xs} ${weight.medium}`,
+                      `${radius.full} ${padding.xBetween} ${padding.yHair} ${size.xs} ${weight.medium}`,
                       catColors.dot,
                       'text-white'
                     )}
@@ -287,7 +303,7 @@ export function TimelineEntry({ entry, index, targetPath }: TimelineEntryProps) 
             </div>
 
             {/* Read more */}
-            <div className={cn(cluster.tight, `text-primary ${size.sm} ${weight.medium}`)}>
+            <div className={cn(cluster.tight, textColor.primary, size.sm, weight.medium)}>
               <span>Read more</span>
               <motion.div
                 animate={{ x: [0, 4, 0] }}
@@ -347,9 +363,9 @@ interface ChangelogTimelineProps {
  */
 export function ChangelogTimeline({ entries, getTargetPath, className }: ChangelogTimelineProps) {
   return (
-    <div className={cn('relative', className)}>
+    <div className={cn(position.relative, className)}>
       {/* Background line */}
-      <div className="absolute left-[5px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-border via-border to-transparent" />
+      <div className={`${position.absolute} ${absolute.left5px} ${inset.top0} ${absolute.bottom0Value} ${width.hairline} ${bgGradient.toB} ${gradientFrom.border} ${gradientVia.border} ${gradientTo.transparent}`} />
 
       {/* Entries */}
       <div className={spaceY.default}>

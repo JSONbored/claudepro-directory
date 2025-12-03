@@ -8,20 +8,29 @@ import type { Database } from '@heyclaude/database-types';
 import {
   alignItems,
   bgColor,
+  bgGradient,
   borderColor,
   cluster,
+  display,
   flexDir,
   flexGrow,
   gap,
+  gradientFrom,
+  gradientTo,
   iconSize,
   justify,
   marginBottom,
   muted,
   padding,
+  paddingLeft,
   radius,
   size,
   textColor,
   weight,
+  width,
+  marginY,
+  minWidth,
+  border,
 } from '@heyclaude/web-runtime/design-system';
 import { getContentItemUrl, isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { getRelatedContent } from '@heyclaude/web-runtime/data';
@@ -200,17 +209,17 @@ export function RelatedContentClient({
     <section
       itemScope={true}
       itemType="https://schema.org/ItemList"
-      className="my-12"
+      className={marginY.section}
       aria-label="Related content"
     >
       {showTitle && (
-        <div className={`${marginBottom.relaxed} ${radius.xl} border ${borderColor['primary/20']} bg-gradient-to-r from-primary/5 to-primary/10 ${padding.default} sm:${padding.comfortable}`}>
-          <div className={`flex ${flexDir.col} ${alignItems.start} ${justify.between} ${gap.comfortable} sm:flex-row sm:items-center`}>
+        <div className={`${marginBottom.relaxed} ${radius.xl} ${border.default} ${borderColor['primary/20']} ${bgGradient.toR} ${gradientFrom.primary5} ${gradientTo.primary10} ${padding.default} sm:${padding.comfortable}`}>
+          <div className={`${display.flex} ${flexDir.col} ${alignItems.start} ${justify.between} ${gap.comfortable} sm:${display.flex}-row sm:${alignItems.center}`}>
             <div className={`${cluster.default} sm:${gap.comfortable}`}>
-              <div className={`shrink-0 ${radius.lg} ${bgColor['primary/10']} ${padding.tight}`}>
-                <Sparkles className={`${iconSize.md} ${textColor.primary} sm:h-6 sm:w-6`} />
+              <div className={`${flexGrow.shrink0} ${radius.lg} ${bgColor['primary/10']} ${padding.tight}`}>
+                <Sparkles className={`${iconSize.md} ${textColor.primary} sm:${iconSize.lg} sm:${iconSize.lg}`} />
               </div>
-              <div className="min-w-0">
+              <div className={minWidth[0]}>
                 <h2 className={`${marginBottom.micro} ${weight.bold} ${textColor.foreground} ${size.xl} sm:${size['2xl']}`} itemProp="name">
                   {title}
                 </h2>
@@ -222,7 +231,7 @@ export function RelatedContentClient({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={`shrink-0 ${borderColor['primary/30']} ${bgColor['primary/10']} ${padding.xTight} ${padding.yMicro} ${weight.medium} ${textColor.primary} ${size.xs} sm:px-3 sm:${size.sm}`}
+              className={`${flexGrow.shrink0} ${borderColor['primary/30']} ${bgColor['primary/10']} ${padding.xTight} ${padding.yMicro} ${weight.medium} ${textColor.primary} ${size.xs} sm:${paddingLeft.default} sm:${size.sm}`}
             >
               AI Powered
             </UnifiedBadge>
@@ -257,9 +266,9 @@ export function RelatedContentClient({
               compactMode={true}
               ariaLabel={`Related: ${relatedItem.title}`}
               renderTopBadges={() => (
-                <div className={`flex w-full ${alignItems.center} ${justify.between} ${gap.compact}`}>
+                <div className={`${display.flex} ${width.full} ${alignItems.center} ${justify.between} ${gap.compact}`}>
                   <UnifiedBadge
-                    className={`${categoryBadge} ${flexGrow.shrink0} border ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.xs} sm:px-3 sm:${size.sm}`}
+                    className={`${categoryBadge} ${flexGrow.shrink0} ${border.default} ${padding.xTight} ${padding.yMicro} ${weight.medium} ${size.xs} sm:${paddingLeft.default} sm:${size.sm}`}
                     variant="base"
                     style="secondary"
                   >
@@ -269,7 +278,7 @@ export function RelatedContentClient({
                     <UnifiedBadge
                       variant="base"
                       style={matchBadge.variant}
-                      className={`shrink-0 border ${padding.xSnug} ${padding.yMicro} ${weight.medium} ${size['2xs']} sm:px-2 sm:${size.xs}`}
+                      className={`${flexGrow.shrink0} ${border.default} ${padding.xSnug} ${padding.yMicro} ${weight.medium} ${size['2xs']} sm:${paddingLeft.compact} sm:${size.xs}`}
                     >
                       {matchBadge.label}
                     </UnifiedBadge>

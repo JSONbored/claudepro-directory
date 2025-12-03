@@ -19,6 +19,7 @@ import {
   flexGrow,
   flexWrap,
   gap,
+  grid,
   iconLeading,
   iconSize,
   alignItems,
@@ -34,6 +35,11 @@ import {
   textColor,
   weight,
   squareSize,
+  display,
+  marginRight,
+  textAlign,
+  objectFit,
+  border,
 } from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
@@ -222,6 +228,66 @@ export default async function CompaniesPage() {
     companiesCount: companies.length,
   });
 
+  /**
+   * Renders company logo with validation for trusted sources
+   * Falls back to placeholder icon if logo is invalid or from untrusted source
+   */
+  function renderCompanyLogo(logo: null | string, companyName: string, priority: boolean) {
+    const placeholderIcon = (
+      <div className={`${display.flex} ${squareSize.avatarXl} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
+        <Building2 className={`${iconSize.xl} ${muted.default}`} />
+      </div>
+    );
+
+    if (!logo) return placeholderIcon;
+
+    try {
+      const parsed = new URL(logo);
+      // Only allow HTTPS
+      if (parsed.protocol !== 'https:') {
+        return placeholderIcon;
+      }
+      // Allow Supabase storage (public bucket path) or common CDN domains
+      // Restrict to specific CDN patterns to prevent subdomain abuse
+      const isSupabaseHost =
+        parsed.hostname.endsWith('.supabase.co') ||
+        parsed.hostname.endsWith('.supabase.in');
+      const isCloudinary =
+        parsed.hostname === 'res.cloudinary.com' ||
+        /^[a-z0-9-]+\.cloudinary\.com$/.test(parsed.hostname);
+      const isAwsS3 =
+        /^[a-z0-9-]+\.s3\.amazonaws\.com$/.test(parsed.hostname) ||
+        /^s3\.[a-z0-9-]+\.amazonaws\.com$/.test(parsed.hostname);
+      const isTrustedSource =
+        (isSupabaseHost &&
+          parsed.pathname.startsWith('/storage/v1/object/public/')) ||
+        isCloudinary ||
+        isAwsS3;
+      if (!isTrustedSource) {
+        return placeholderIcon;
+      }
+      return (
+        <Image
+          src={logo}
+          alt={`${companyName} logo`}
+          width={64}
+          height={64}
+          className={`${squareSize.avatarXl} ${radius.lg} ${border.default} ${objectFit.cover}`}
+          priority={priority}
+        />
+      );
+    } catch (error: unknown) {
+      const normalized = normalizeError(error, 'Failed to render company logo');
+      userLogger.warn('CompaniesPage: failed to render company logo', {
+        section: 'render-company-logo',
+        logo: logo,
+        companyName: companyName,
+        err: normalized,
+      });
+      return placeholderIcon;
+    }
+  }
+
   return (
     <div className={spaceY.relaxed}>
       <div className={between.center}>
@@ -233,7 +299,7 @@ export default async function CompaniesPage() {
         </div>
         <Button asChild>
           <Link href={`${ROUTES.ACCOUNT_COMPANIES}/new`}>
-            <Plus className={`mr-2 ${iconSize.sm}`} />
+            <Plus className={`${marginRight.compact} ${iconSize.sm}`} />
             Add Company
           </Link>
         </Button>
@@ -241,22 +307,22 @@ export default async function CompaniesPage() {
 
       {companies.length === 0 ? (
         <Card>
-          <CardContent className={`flex ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
+          <CardContent className={`${display.flex} ${flexDir.col} ${alignItems.center} ${padding.ySection}`}>
             <Building2 className={`${marginBottom.default} ${iconSize['3xl']} ${muted.default}`} />
             <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No companies yet</h3>
-            <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
+            <p className={`${marginBottom.default} ${maxWidth.md} ${textAlign.center} ${muted.default}`}>
               Create a company profile to showcase your organization and post job listings
             </p>
             <Button asChild>
               <Link href={`${ROUTES.ACCOUNT_COMPANIES}/new`}>
-                <Plus className={`mr-2 ${iconSize.sm}`} />
+                <Plus className={`${marginRight.compact} ${iconSize.sm}`} />
                 Create Your First Company
               </Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className={`grid ${gap.comfortable}`}>
+        <div className={`${grid.base} ${gap.comfortable}`}>
           {companies
             .filter(
               (
@@ -274,69 +340,10 @@ export default async function CompaniesPage() {
               return (
                 <Card key={company.id}>
                   <CardHeader>
-                    <div className={`flex ${alignItems.start} ${justify.between}`}>
-                      <div className={`flex ${flexGrow['1']} ${alignItems.start} ${gap.comfortable}`}>
-                        {(() => {
-                          // Validate logo URL is safe (should be from Supabase storage or trusted domain)
-                          if (!company.logo) {
-                            return (
-                              <div className={`flex ${squareSize.avatarXl} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
-                                <Building2 className={`${iconSize.xl} ${muted.default}`} />
-                              </div>
-                            );
-                          }
-                          try {
-                            const parsed = new URL(company.logo);
-                            // Only allow HTTPS
-                            if (parsed.protocol !== 'https:') {
-                              return (
-                                <div className={`flex ${squareSize.avatarXl} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
-                                  <Building2 className={`${iconSize.xl} ${muted.default}`} />
-                                </div>
-                              );
-                            }
-                            // Allow Supabase storage (public bucket path) or common CDN domains
-                            // Restrict to specific CDN patterns to prevent subdomain abuse
-                            const isSupabaseHost =
-                              parsed.hostname.endsWith('.supabase.co') ||
-                              parsed.hostname.endsWith('.supabase.in');
-                            const isCloudinary =
-                              parsed.hostname === 'res.cloudinary.com' ||
-                              /^[a-z0-9-]+\.cloudinary\.com$/.test(parsed.hostname);
-                            const isAwsS3 =
-                              /^[a-z0-9-]+\.s3\.amazonaws\.com$/.test(parsed.hostname) ||
-                              /^s3\.[a-z0-9-]+\.amazonaws\.com$/.test(parsed.hostname);
-                            const isTrustedSource =
-                              (isSupabaseHost &&
-                                parsed.pathname.startsWith('/storage/v1/object/public/')) ||
-                              isCloudinary ||
-                              isAwsS3;
-                            if (!isTrustedSource) {
-                              return (
-                                <div className={`flex ${squareSize.avatarXl} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
-                                  <Building2 className={`${iconSize.xl} ${muted.default}`} />
-                                </div>
-                              );
-                            }
-                            return (
-                              <Image
-                                src={company.logo}
-                                alt={`${company.name} logo`}
-                                width={64}
-                                height={64}
-                                className={`${squareSize.avatarXl} ${radius.lg} border object-cover`}
-                                priority={index === 0}
-                              />
-                            );
-                          } catch {
-                            return (
-                              <div className={`flex ${squareSize.avatarXl} ${alignItems.center} ${justify.center} ${radius.lg} border ${bgColor.accent}`}>
-                                <Building2 className={`${iconSize.xl} ${muted.default}`} />
-                              </div>
-                            );
-                          }
-                        })()}
-                        <div className="flex-1">
+                    <div className={`${display.flex} ${alignItems.start} ${justify.between}`}>
+                      <div className={`${display.flex} ${flexGrow['1']} ${alignItems.start} ${gap.comfortable}`}>
+                        {renderCompanyLogo(company.logo, company.name, index === 0)}
+                        <div className={flexGrow['1']}>
                           <div className={cluster.compact}>
                             <CardTitle>{company.name}</CardTitle>
                             {company.featured ? <UnifiedBadge variant="base" style="default">
@@ -390,7 +397,7 @@ export default async function CompaniesPage() {
                                 href={validatedUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`${marginTop.compact} inline-flex items-center ${gap.tight} ${size.sm} ${textColor.primary} hover:underline`}
+                                className={`${marginTop.compact} ${display.inlineFlex} ${alignItems.center} ${gap.tight} ${size.sm} ${textColor.primary} hover:underline`}
                               >
                                 <ExternalLink className={iconSize.xs} />
                                 {displayText}
@@ -403,7 +410,7 @@ export default async function CompaniesPage() {
                   </CardHeader>
 
                   <CardContent>
-                    <div className={`${marginBottom.default} flex ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
+                    <div className={`${marginBottom.default} ${display.flex} ${flexWrap.wrap} ${gap.comfortable} ${muted.sm}`}>
                       <div className={cluster.tight}>
                         <Briefcase className={iconSize.sm} />
                         {company.stats?.active_jobs ?? 0} active job

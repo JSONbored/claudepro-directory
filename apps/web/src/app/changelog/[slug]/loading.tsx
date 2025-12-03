@@ -6,6 +6,9 @@
  */
 
 import { spaceY, cluster, marginBottom , padding , gap , radius , maxWidth, flexWrap,
+  marginY,
+  paddingBottom,
+  display,
 } from '@heyclaude/web-runtime/design-system';
 import { Skeleton, Separator  } from '@heyclaude/web-runtime/ui';
 
@@ -28,7 +31,7 @@ export default function ChangelogEntryLoading() {
       <Skeleton size="sm" width="xs" />
 
       {/* Header Skeleton */}
-      <header className={`${spaceY.comfortable} pb-6`}>
+      <header className={`${spaceY.comfortable} ${paddingBottom.relaxed}`}>
         {/* Date */}
         <div className={cluster.default}>
           <Skeleton size="sm" width="xs" />
@@ -45,7 +48,7 @@ export default function ChangelogEntryLoading() {
         </div>
       </header>
 
-      <Separator className="my-6" />
+      <Separator className={marginY.relaxed} />
 
       {/* Content Skeleton */}
       <div className={spaceY.relaxed}>
@@ -56,7 +59,7 @@ export default function ChangelogEntryLoading() {
         </div>
 
         {/* Category Badges */}
-        <div className={`flex ${flexWrap.wrap} ${gap.compact}`}>
+        <div className={`${display.flex} ${flexWrap.wrap} ${gap.compact}`}>
           {Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={`category-${index + 1}`} size="sm" width="xs" rounded="full" />
           ))}

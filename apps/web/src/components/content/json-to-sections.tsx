@@ -6,7 +6,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/web-runtime/core';
-import { borderBottom, borderLeft, hoverBg, transition, spaceY, marginBottom, marginTop, muted, weight, radius ,size , padding , gap , opacityLevel } from '@heyclaude/web-runtime/design-system';
+import { borderBottom, borderLeft, hoverBg, transition, spaceY, marginBottom, marginTop, muted, weight, radius ,size , padding , gap , grid, opacityLevel, textColor, border, paddingLeft, cursor, overflow, transform } from '@heyclaude/web-runtime/design-system';
 import { useEffect, useState } from 'react';
 import { Checklist } from '@/src/components/content/checklist';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
@@ -423,10 +423,10 @@ function render_section(section: Section, index: number): React.ReactNode {
       return (
         <div key={key} id={section.id} className={section.className}>
           {section.title && <h3 className={`${marginBottom.default} ${weight.semibold} ${size.lg}`}>{section.title}</h3>}
-          <div className={`overflow-hidden ${radius.lg} border`}>
+          <div className={`${overflow.hidden} ${radius.lg} border`}>
             {section.tabs.map((tab: CodeTab, idx: number) => (
-              <details key={`${tab.label}-${idx}`} className={`${borderBottom.default} last:border-0`}>
-                <summary className={`cursor-pointer ${padding.xDefault} ${padding.yCompact} ${weight.medium} ${hoverBg.muted}`}>
+              <details key={`${tab.label}-${idx}`} className={`${borderBottom.default} last:${border.none}`}>
+                <summary className={`${cursor.pointer} ${padding.xDefault} ${padding.yCompact} ${weight.medium} ${hoverBg.muted}`}>
                   {tab.label} {tab.filename && `• ${tab.filename}`}
                 </summary>
                 <div className={padding.default}>
@@ -562,10 +562,10 @@ function render_section(section: Section, index: number): React.ReactNode {
           {section.description && (
             <p className={`${marginBottom.default} ${muted.default}`}>{section.description}</p>
           )}
-          <div className={`overflow-hidden ${radius.lg} border`}>
+          <div className={`${overflow.hidden} ${radius.lg} border`}>
             {section.items.map((item: TabItem, idx: number) => (
-              <details key={`${item.value}-${idx}`} className={`${borderBottom.default} last:border-0`}>
-                <summary className={`cursor-pointer ${padding.xDefault} ${padding.yCompact} ${weight.medium} ${hoverBg.muted}`}>
+              <details key={`${item.value}-${idx}`} className={`${borderBottom.default} last:${border.none}`}>
+                <summary className={`${cursor.pointer} ${padding.xDefault} ${padding.yCompact} ${weight.medium} ${hoverBg.muted}`}>
                   {item.label}
                 </summary>
                 <TrustedHTML html={item.content} className={padding.default} />
@@ -617,7 +617,7 @@ function render_section(section: Section, index: number): React.ReactNode {
           {section.title && <h3 className={`${marginBottom.default} ${weight.semibold} ${size.lg}`}>{section.title}</h3>}
           <div className={spaceY.relaxed}>
             {section.steps.map((step: StepItem) => (
-              <div key={step.number} className={`${borderLeft.accentPrimary} pl-6`}>
+              <div key={step.number} className={`${borderLeft.accentPrimary} ${paddingLeft.relaxed}`}>
                 <h4 className={`${marginBottom.tight} ${weight.semibold} ${size.lg}`}>
                   Step {step.number}: {step.title}
                 </h4>
@@ -668,7 +668,7 @@ function render_section(section: Section, index: number): React.ReactNode {
             <p className={`${marginBottom.default} ${muted.default}`}>{section.description}</p>
           )}
           {section.resources && section.resources.length > 0 && (
-            <div className={`grid ${gap.comfortable}`}>
+            <div className={`${grid.base} ${gap.comfortable}`}>
               {section.resources.map((r: ResourceItem) => {
                 // Defensive defaulting: infer external flag from URL pattern if not provided
                 // Prevents silent link disabling when external flag is undefined but URL is clearly external
@@ -700,7 +700,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                     >
                       <h4 className={`${marginBottom.micro} ${weight.semibold}`}>{r.title}</h4>
                       <p className={`${marginBottom.tight} ${muted.sm}`}>{r.description}</p>
-                      <span className={`text-destructive ${size.xs} uppercase`}>
+                      <span className={`${textColor.destructive} ${size.xs} ${transform.uppercase}`}>
                         {r.type} • Invalid URL
                       </span>
                     </div>
@@ -719,7 +719,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                   >
                     <h4 className={`${marginBottom.micro} ${weight.semibold}`}>{r.title}</h4>
                     <p className={`${marginBottom.tight} ${muted.sm}`}>{r.description}</p>
-                    <span className={`text-primary ${size.xs} uppercase`}>{r.type}</span>
+                    <span className={`${textColor.primary} ${size.xs} ${transform.uppercase}`}>{r.type}</span>
                   </a>
                 );
               })}
