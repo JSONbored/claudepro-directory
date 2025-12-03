@@ -187,7 +187,7 @@
     "@types/canvas-confetti": "^1.6.4",
     "@types/dompurify": "^3.0.5",
     "@types/react": "19.2.5",
-    "next": "16.0.4",
+    "next": "16.0.7",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   }
