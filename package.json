@@ -93,7 +93,7 @@
     "validate:next-config": "tsx packages/web-runtime/src/utils/validate-next-config.ts",
     "validate:client-server": "tsx packages/web-runtime/src/utils/validate-client-server-boundaries.ts",
     "validate:build": "pnpm validate:next-config && pnpm validate:client-server",
-    "validate:build:full": "pnpm type-check && pnpm lint && pnpm validate:build",
+    "validate:build:full": "pnpm type-check:build && pnpm lint:build && pnpm validate:build",
     "test": "vitest run",
     "test:watch": "vitest",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\" && pnpm lint:eslint --fix",

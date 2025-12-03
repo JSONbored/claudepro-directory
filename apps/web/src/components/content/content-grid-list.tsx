@@ -31,9 +31,9 @@ import { NewsletterCTAVariant } from '@/src/components/features/growth/newslette
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { Button } from '@heyclaude/web-runtime/ui';
+import { aggregateContentStats } from '@heyclaude/web-runtime/utils/content-stats';
 import {
   AnimatedStatsRow,
-  aggregateContentStats,
   CategoryTagStrip,
 } from '@/src/components/features/category';
 import { NewContentBadge } from '@/src/components/features/indicators';

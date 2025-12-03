@@ -36,7 +36,29 @@ export async function getAuthenticatedUserFromClient(
 
     if (error) {
       const normalized = normalizeError(error, 'Failed to fetch authenticated user');
-      logger.error(`${contextLabel}: supabase auth getUser failed`, normalized);
+      
+      // AuthSessionMissingError is expected for anonymous users - don't log as error
+      // Check error name and message to identify auth session missing errors
+      const errorName = error.name || '';
+      const errorMessage = error.message || '';
+      const isAuthSessionMissing = 
+        errorName === 'AuthSessionMissingError' || 
+        errorMessage.includes('Auth session missing') ||
+        errorMessage.includes('session missing');
+      
+      if (isAuthSessionMissing && !options?.requireUser) {
+        // Expected behavior for anonymous users - silently return null user
+        return {
+          user: null,
+          isAuthenticated: false,
+        };
+      }
+      
+      // Log other auth errors or when user is required
+      if (!isAuthSessionMissing || options?.requireUser) {
+        logger.error(`${contextLabel}: supabase auth getUser failed`, normalized);
+      }
+      
       if (options?.requireUser) {
         throw normalized;
       }

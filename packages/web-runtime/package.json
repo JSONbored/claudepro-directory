@@ -90,6 +90,10 @@
       "types": "./src/utils/heading-normalization.ts",
       "default": "./src/utils/heading-normalization.ts"
     },
+    "./utils/content-stats": {
+      "types": "./src/utils/content-stats.ts",
+      "default": "./src/utils/content-stats.ts"
+    },
     "./utils/request-context": {
       "types": "./src/utils/request-context.ts",
       "default": "./src/utils/request-context.ts"

@@ -255,7 +255,6 @@ export default async function ChangelogPage() {
               changes: entry.changes as null | Record<string, unknown>,
             }))}
             daysBack={7}
-            getTargetPath={(slug) => `/changelog/${slug}`}
           />
 
           {/* Client-side filtered list */}

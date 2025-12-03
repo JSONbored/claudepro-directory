@@ -225,29 +225,6 @@ export function AnimatedStatsRow({ stats, category, className }: AnimatedStatsRo
   );
 }
 
-/**
- * Utility to aggregate stats from content items
- */
-export function aggregateContentStats(items: Array<{
-  view_count?: number | null;
-  bookmark_count?: number | null;
-  copy_count?: number | null;
-  use_count?: number | null;
-}>): {
-  totalViews: number;
-  totalBookmarks: number;
-  totalCopies: number;
-  totalUses: number;
-  itemCount: number;
-} {
-  return items.reduce(
-    (acc, item) => ({
-      totalViews: acc.totalViews + (item.view_count ?? 0),
-      totalBookmarks: acc.totalBookmarks + (item.bookmark_count ?? 0),
-      totalCopies: acc.totalCopies + (item.copy_count ?? 0),
-      totalUses: acc.totalUses + (item.use_count ?? 0),
-      itemCount: acc.itemCount + 1,
-    }),
-    { totalViews: 0, totalBookmarks: 0, totalCopies: 0, totalUses: 0, itemCount: 0 }
-  );
-}
+// aggregateContentStats has been moved to @heyclaude/web-runtime/utils/content-stats
+// Re-export for backward compatibility
+export { aggregateContentStats } from '@heyclaude/web-runtime/utils/content-stats';

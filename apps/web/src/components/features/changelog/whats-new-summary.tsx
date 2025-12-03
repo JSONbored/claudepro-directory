@@ -52,8 +52,6 @@ interface WhatsNewSummaryProps {
   entries: ChangelogEntry[];
   /** Number of days to look back (default: 7) */
   daysBack?: number;
-  /** Target path builder */
-  getTargetPath?: (slug: string) => string;
   /** Optional className */
   className?: string;
 }
@@ -147,7 +145,6 @@ function getFeaturedEntry(entries: ChangelogEntry[]): ChangelogEntry | null {
 export function WhatsNewSummary({
   entries,
   daysBack = 7,
-  getTargetPath = (slug) => `/changelog/${slug}`,
   className,
 }: WhatsNewSummaryProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -264,7 +261,7 @@ export function WhatsNewSummary({
             transition={{ delay: 0.3, duration: 0.4 }}
           >
             <Link
-              href={getTargetPath(featuredEntry.slug)}
+              href={`/changelog/${featuredEntry.slug}`}
               className="group block"
             >
               <div
