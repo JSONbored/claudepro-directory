@@ -278,6 +278,7 @@ export async function getTagMetadata(tag: string): Promise<null | TagSummary> {
   return allTags.find((t) => t.tag === tag) ?? null;
 }
 
-// Re-export utility functions from tags-utils.ts
-// These are NOT server actions - they're simple utilities
-export { formatTagForDisplay, formatTagForUrl } from './tags-utils.ts';
+// Note: Utility functions (formatTagForDisplay, formatTagForUrl) are exported
+// from tags-utils.ts via data-server.ts and data-client.ts entry points.
+// They cannot be re-exported here because this file has 'use server' directive
+// which only allows async function exports.
