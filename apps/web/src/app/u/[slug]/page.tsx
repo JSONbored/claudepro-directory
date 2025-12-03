@@ -3,7 +3,7 @@
  * Single RPC call to get_user_profile() replaces 6+ separate queries
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import {
@@ -11,16 +11,35 @@ import {
   getAuthenticatedUser,
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
-import { between, card, cluster, muted, iconSize, spaceY, marginBottom, marginTop, weight ,size  , gap , padding , row , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  card,
+  cluster,
+  muted,
+  iconSize,
+  spaceY,
+  marginBottom,
+  marginTop,
+  weight,
+  size,
+  gap,
+  padding,
+  row,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { NavLink, UnifiedBadge,
+import {
+  NavLink,
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
@@ -86,13 +105,13 @@ function sanitizeDisplayText(text: null | string | undefined, fallback: string):
   let sanitized = text.replaceAll(/[<>]/g, '');
   // Remove control characters and dangerous Unicode by filtering character codes
   const dangerousChars = new Set([
-    0x20_2E,
-    0x20_2D,
-    0x20_2C,
-    0x20_2B,
-    0x20_2A, // RTL override marks
-    0x20_0E,
-    0x20_0F, // Left-to-right/right-to-left marks
+    0x20_2e,
+    0x20_2d,
+    0x20_2c,
+    0x20_2b,
+    0x20_2a, // RTL override marks
+    0x20_0e,
+    0x20_0f, // Left-to-right/right-to-left marks
     0x20_66,
     0x20_67,
     0x20_68,
@@ -102,8 +121,8 @@ function sanitizeDisplayText(text: null | string | undefined, fallback: string):
     .filter((char) => {
       const code = char.codePointAt(0) ?? 0;
       // Allow tab (0x09), newline (0x0a), and printable characters outside control ranges
-      const isControl = code < 0x20 || (code >= 0x7F && code <= 0x9F);
-      const isPrintable = code === 0x09 || code === 0x0A || !isControl;
+      const isControl = code < 0x20 || (code >= 0x7f && code <= 0x9f);
+      const isPrintable = code === 0x09 || code === 0x0a || !isControl;
       return isPrintable && !dangerousChars.has(code);
     })
     .join('');
@@ -152,7 +171,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -175,9 +194,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
   });
 
   // Create child logger with viewer context if available
-  const viewerLogger = currentUser?.id 
-    ? reqLogger.child({ viewerId: currentUser.id })
-    : reqLogger;
+  const viewerLogger = currentUser?.id ? reqLogger.child({ viewerId: currentUser.id }) : reqLogger;
 
   // Section: User Profile Fetch
   let profileData: Database['public']['Functions']['get_user_profile']['Returns'] | null = null;
@@ -223,11 +240,13 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                   alt={`${sanitizeDisplayText(profile.name ?? slug, slug)}'s profile picture`}
                   width={96}
                   height={96}
-                  className="h-24 w-24 rounded-full border-4 border-background object-cover"
+                  className="border-background h-24 w-24 rounded-full border-4 object-cover"
                   priority
                 />
               ) : (
-                <div className={`flex h-24 w-24 items-center justify-center rounded-full border-4 border-background bg-accent ${weight.bold} ${size['2xl']}`}>
+                <div
+                  className={`border-background bg-accent flex h-24 w-24 items-center justify-center rounded-full border-4 ${weight.bold} ${size['2xl']}`}
+                >
                   {(profile?.name ?? slug).charAt(0).toUpperCase()}
                 </div>
               )}
@@ -239,7 +258,9 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                 {(() => {
                   const sanitizedBio = profile?.bio ? sanitizeDisplayText(profile.bio, '') : '';
                   return sanitizedBio ? (
-                    <p className={`${marginTop.compact} ${maxWidth['2xl']} ${size.sm}`}>{sanitizedBio}</p>
+                    <p className={`${marginTop.compact} ${maxWidth['2xl']} ${size.sm}`}>
+                      {sanitizedBio}
+                    </p>
                   ) : null;
                 })()}
 
@@ -251,26 +272,30 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                   <span>•</span>
                   <div>{following_count ?? 0} following</div>
 
-                  {profile?.website ? <>
+                  {profile?.website ? (
+                    <>
                       <span>•</span>
-                      <NavLink
-                        href={profile.website}
-                        external
-                        className={cluster.tight}
-                      >
+                      <NavLink href={profile.website} external className={cluster.tight}>
                         <Globe className={iconSize.sm} />
                         Website
                       </NavLink>
-                    </> : null}
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>
 
-            {currentUser && profile && currentUser.id !== profile.id && profile.id && profile.slug ? <FollowButton
+            {currentUser &&
+            profile &&
+            currentUser.id !== profile.id &&
+            profile.id &&
+            profile.slug ? (
+              <FollowButton
                 userId={profile.id}
                 userSlug={profile.slug}
                 initialIsFollowing={is_following ?? false}
-              /> : null}
+              />
+            ) : null}
           </div>
         </div>
       </section>
@@ -317,7 +342,9 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
           <div className={`${spaceY.relaxed} md:col-span-2`}>
             {/* Public Collections */}
             <div>
-              <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>Public Collections</h2>
+              <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>
+                Public Collections
+              </h2>
 
               {!collections || collections.length === 0 ? (
                 <Card>
@@ -344,11 +371,14 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                     .map((collection) => {
                       const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
                       if (!safeCollectionUrl) {
-                        viewerLogger.warn('UserProfilePage: skipping collection with invalid slug', {
-                          collectionId: collection.id,
-                          collectionName: collection.name ?? 'Unknown',
-                          collectionSlug: collection.slug,
-                        });
+                        viewerLogger.warn(
+                          'UserProfilePage: skipping collection with invalid slug',
+                          {
+                            collectionId: collection.id,
+                            collectionName: collection.name ?? 'Unknown',
+                            collectionSlug: collection.slug,
+                          }
+                        );
                         return null;
                       }
                       return (
@@ -356,14 +386,14 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                           <NavLink href={safeCollectionUrl}>
                             <CardHeader>
                               <CardTitle className="text-lg">{collection.name}</CardTitle>
-                              {collection.description ? <CardDescription className="line-clamp-2">
+                              {collection.description ? (
+                                <CardDescription className="line-clamp-2">
                                   {collection.description}
-                                </CardDescription> : null}
+                                </CardDescription>
+                              ) : null}
                             </CardHeader>
                             <CardContent>
-                              <div
-                                className={`${between.center} ${size.sm}`}
-                              >
+                              <div className={`${between.center} ${size.sm}`}>
                                 <span className={muted.default}>
                                   {collection.item_count ?? 0}{' '}
                                   {(collection.item_count ?? 0) === 1 ? 'item' : 'items'}
@@ -382,8 +412,11 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
             </div>
 
             {/* Content Contributions */}
-            {contributions && contributions.length > 0 ? <div>
-                <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>Contributions</h2>
+            {contributions && contributions.length > 0 ? (
+              <div>
+                <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>
+                  Contributions
+                </h2>
                 <div className={`grid ${gap.comfortable} sm:grid-cols-2 lg:grid-cols-3`}>
                   {contributions
                     .filter(
@@ -403,24 +436,31 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                     .map((item) => {
                       const safeContentUrl = getSafeContentUrl(item.content_type, item.slug);
                       if (!safeContentUrl) {
-                        viewerLogger.warn('UserProfilePage: skipping contribution with invalid type or slug', {
-                          contentId: item.id,
-                          contentType: item.content_type,
-                          contentSlug: item.slug,
-                        });
+                        viewerLogger.warn(
+                          'UserProfilePage: skipping contribution with invalid type or slug',
+                          {
+                            contentId: item.id,
+                            contentType: item.content_type,
+                            contentSlug: item.slug,
+                          }
+                        );
                         return null;
                       }
                       return (
                         <Card key={item.id} className={card.interactive}>
                           <NavLink href={safeContentUrl}>
                             <CardHeader>
-                              <div className={`${marginBottom.tight} flex items-center justify-between`}>
+                              <div
+                                className={`${marginBottom.tight} flex items-center justify-between`}
+                              >
                                 <UnifiedBadge variant="base" style="secondary" className="text-xs">
                                   {item.content_type}
                                 </UnifiedBadge>
-                                {item.featured ? <UnifiedBadge variant="base" style="default" className="text-xs">
+                                {item.featured ? (
+                                  <UnifiedBadge variant="base" style="default" className="text-xs">
                                     Featured
-                                  </UnifiedBadge> : null}
+                                  </UnifiedBadge>
+                                ) : null}
                               </div>
                               <CardTitle className="text-base">{item.name}</CardTitle>
                               <CardDescription className={`line-clamp-2 ${size.xs}`}>
@@ -428,9 +468,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                               </CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div
-                                className={`${cluster.compact} ${muted.xs}`}
-                              >
+                              <div className={`${cluster.compact} ${muted.xs}`}>
                                 <span>{item.view_count ?? 0} views</span>
                                 <span>•</span>
                                 <span>{item.download_count ?? 0} downloads</span>
@@ -441,7 +479,8 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                       );
                     })}
                 </div>
-              </div> : null}
+              </div>
+            ) : null}
           </div>
         </div>
       </section>

@@ -1,6 +1,6 @@
 /**
  * 500 Error Page - Server Error
- * 
+ *
  * This page is shown when a server error occurs (500 status code).
  * Next.js will automatically use this page for server errors.
  */
@@ -8,12 +8,18 @@
 'use client';
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { responsive, muted, marginBottom, weight, size  , padding , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
-import { AlertCircle, Home, RefreshCw } from '@heyclaude/web-runtime/icons';
 import {
-  generateRequestId,
-  logClientError,
-} from '@heyclaude/web-runtime/logging/client';
+  responsive,
+  muted,
+  marginBottom,
+  weight,
+  size,
+  padding,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
+import { AlertCircle, Home, RefreshCw } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logClientError } from '@heyclaude/web-runtime/logging/client';
 import { Button, Card } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -50,17 +56,20 @@ export default function ServerError() {
   }, []);
 
   return (
-    <div className={`flex ${minHeight.screen} items-center justify-center bg-background ${padding.xDefault}`}>
+    <div
+      className={`flex ${minHeight.screen} bg-background items-center justify-center ${padding.xDefault}`}
+    >
       <Card className={`w-full ${maxWidth.lg} ${padding.relaxed} text-center`}>
         <div className={marginBottom.comfortable}>
           <div className={`${marginBottom.default} flex justify-center`}>
-            <div className={`rounded-full bg-destructive/10 ${padding.compact}`}>
-              <AlertCircle className="h-12 w-12 text-destructive" aria-hidden="true" />
+            <div className={`bg-destructive/10 rounded-full ${padding.compact}`}>
+              <AlertCircle className="text-destructive h-12 w-12" aria-hidden="true" />
             </div>
           </div>
           <h1 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`}>Server Error</h1>
           <p className={muted.default}>
-            We encountered an error while processing your request. Our team has been notified and is working on a fix.
+            We encountered an error while processing your request. Our team has been notified and is
+            working on a fix.
           </p>
         </div>
 

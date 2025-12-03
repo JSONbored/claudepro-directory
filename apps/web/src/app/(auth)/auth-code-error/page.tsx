@@ -1,19 +1,18 @@
-import  { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
+import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { stack, size, maxWidth } from '@heyclaude/web-runtime/design-system';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-} from '@heyclaude/web-runtime/logging/server';
-import { Button ,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
@@ -84,10 +83,8 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
   return (
     <Card className={`w-full ${maxWidth.md}`}>
       <CardHeader className="text-center">
-        <div
-          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
-        >
-          <AlertCircle className="h-6 w-6 text-destructive" />
+        <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+          <AlertCircle className="text-destructive h-6 w-6" />
         </div>
         <CardTitle className={`${size['2xl']}`}>Authentication Error</CardTitle>
         <CardDescription>

@@ -6,8 +6,15 @@
  */
 
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
-import { iconSize, stack, muted, padding, minHeight, maxWidth } from '@heyclaude/web-runtime/design-system';
+import { isValidProvider, validateNextParameter } from '@heyclaude/web-runtime';
+import {
+  iconSize,
+  stack,
+  muted,
+  padding,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
 import {
@@ -15,12 +22,14 @@ import {
   logClientError,
   logClientWarn,
 } from '@heyclaude/web-runtime/logging/client';
-import { Button ,
+import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 
@@ -113,7 +122,10 @@ export default function OAuthLinkCallbackPage({
           // Guard redirect with mounted check and store timeout ID for cleanup
           redirectTimeoutId = setTimeout(() => {
             if (!mounted) return; // Don't redirect if component unmounted
-            const next = validateNextParameter(searchParameters.get('next'), '/account/connected-accounts');
+            const next = validateNextParameter(
+              searchParameters.get('next'),
+              '/account/connected-accounts'
+            );
             router.push(
               `/login?redirect=${encodeURIComponent(`/auth/link/${rawProvider}?next=${encodeURIComponent(next)}`)}`
             );
@@ -123,7 +135,10 @@ export default function OAuthLinkCallbackPage({
 
         // Get the next redirect URL with validation
         // Validate 'next' parameter to prevent open redirects (matches server-side validation)
-        const next = validateNextParameter(searchParameters.get('next'), '/account/connected-accounts');
+        const next = validateNextParameter(
+          searchParameters.get('next'),
+          '/account/connected-accounts'
+        );
         const callbackUrl = new URL(`${globalThis.location.origin}/auth/callback`);
         callbackUrl.searchParams.set('next', next);
         callbackUrl.searchParams.set('link', 'true'); // Flag to indicate this is a linking flow
@@ -145,7 +160,9 @@ export default function OAuthLinkCallbackPage({
             provider: rawProvider,
           });
           setStatus('error');
-          setErrorMessage(normalizeError(error, 'Failed to link account. Please try again.').message);
+          setErrorMessage(
+            normalizeError(error, 'Failed to link account. Please try again.').message
+          );
           return;
         }
 
@@ -217,9 +234,7 @@ export default function OAuthLinkCallbackPage({
     <div className={`flex ${minHeight.screen} items-center justify-center ${padding.default}`}>
       <Card className={`w-full ${maxWidth.md}`}>
         <CardHeader className="text-center">
-          <div
-            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
-          >
+          <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
             <AlertCircle className={`${iconSize.lg} text-destructive`} />
           </div>
           <CardTitle>Account Linking Failed</CardTitle>

@@ -4,10 +4,26 @@
  * Leverages get_company_profile() RPC + company_job_stats materialized view
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, muted, iconSize, spaceY, marginBottom, marginTop, weight ,size  , gap , padding , row , radius , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  cluster,
+  muted,
+  iconSize,
+  spaceY,
+  marginBottom,
+  marginTop,
+  weight,
+  size,
+  gap,
+  padding,
+  row,
+  radius,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building,
@@ -17,13 +33,15 @@ import {
   Users,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge,
+import {
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -114,7 +132,7 @@ export async function generateStaticParams() {
 
   // Generate requestId for static params generation (build-time)
   const staticParamsRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId: staticParamsRequestId,
@@ -169,7 +187,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -197,7 +215,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
       <div className={`${minHeight.screen} bg-background`}>
         {/* Company Header */}
-        <section className="relative border-border border-b">
+        <section className="relative border-b border-border">
           <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
             <div className={`${row.relaxed}`}>
               {company.logo ? (
@@ -206,11 +224,13 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   alt={`${company.name} logo`}
                   width={96}
                   height={96}
-                  className={`h-24 w-24 ${radius.lg} border-4 border-background object-cover`}
+                  className={`h-24 w-24 ${radius.lg} border-background border-4 object-cover`}
                   priority
                 />
               ) : (
-                <div className={`flex h-24 w-24 items-center justify-center ${radius.lg} border-4 border-background bg-accent ${weight.bold} ${size['2xl']}`}>
+                <div
+                  className={`flex h-24 w-24 items-center justify-center ${radius.lg} border-background bg-accent border-4 ${weight.bold} ${size['2xl']}`}
+                >
                   <Building className="h-12 w-12" />
                 </div>
               )}
@@ -218,41 +238,55 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
               <div className="flex-1">
                 <div className={cluster.default}>
                   <h1 className={`${weight.bold} ${size['3xl']}`}>{company.name}</h1>
-                  {company.featured ? <UnifiedBadge variant="base" style="default">
+                  {company.featured ? (
+                    <UnifiedBadge variant="base" style="default">
                       Featured
-                    </UnifiedBadge> : null}
+                    </UnifiedBadge>
+                  ) : null}
                 </div>
 
-                {company.description ? <p className={`${marginTop.compact} ${maxWidth['3xl']} ${muted.default}`}>{company.description}</p> : null}
+                {company.description ? (
+                  <p className={`${marginTop.compact} ${maxWidth['3xl']} ${muted.default}`}>
+                    {company.description}
+                  </p>
+                ) : null}
 
-                <div className={`${marginTop.default} flex flex-wrap items-center ${gap.comfortable} ${size.sm}`}>
+                <div
+                  className={`${marginTop.default} flex flex-wrap items-center ${gap.comfortable} ${size.sm}`}
+                >
                   <SafeWebsiteLink
                     url={company.website}
-                    className={`${cluster.tight} text-accent hover:text-accent-hover transition-colors duration-200`}
+                    className={`${cluster.tight} text-accent transition-colors duration-200 hover:text-accent-hover`}
                   >
                     <Globe className={iconSize.sm} />
                     Website
                   </SafeWebsiteLink>
 
-                  {company.industry ? <div className={cluster.tight}>
+                  {company.industry ? (
+                    <div className={cluster.tight}>
                       <TrendingUp className={iconSize.sm} />
                       {company.industry}
-                    </div> : null}
+                    </div>
+                  ) : null}
 
                   {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
-                  {company.size ? <div className={cluster.tight}>
+                  {company.size ? (
+                    <div className={cluster.tight}>
                       <Users className={iconSize.sm} />
                       {company.size}
-                    </div> : null}
+                    </div>
+                  ) : null}
 
-                  {company.using_cursor_since ? <div className={cluster.tight}>
+                  {company.using_cursor_since ? (
+                    <div className={cluster.tight}>
                       <Calendar className={iconSize.sm} />
                       Using Claude since{' '}
                       {new Date(company.using_cursor_since).toLocaleDateString('en-US', {
                         month: 'short',
                         year: 'numeric',
                       })}
-                    </div> : null}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -274,8 +308,12 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                 <Card>
                   <CardContent className={`flex flex-col items-center ${padding.yHero}`}>
                     <Briefcase className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
-                    <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No Active Positions</h3>
-                    <p className={`${marginBottom.comfortable} ${maxWidth.md} text-center ${muted.default}`}>
+                    <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>
+                      No Active Positions
+                    </h3>
+                    <p
+                      className={`${marginBottom.comfortable} ${maxWidth.md} text-center ${muted.default}`}
+                    >
                       This company doesn't have any job openings at the moment. Check back later!
                     </p>
                     <Link href={ROUTES.JOBS}>
@@ -288,21 +326,24 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
               ) : (
                 <div className={`grid grid-cols-1 ${gap.relaxed} md:grid-cols-2`}>
                   {active_jobs
-                    .filter((job): job is typeof job & {
-                      click_count: number;
-                      company: string;
-                      experience: Database['public']['Enums']['experience_level'];
-                      expires_at: string;
-                      id: string;
-                      plan: Database['public']['Enums']['job_plan'];
-                      posted_at: string;
-                      slug: string;
-                      title: string;
-                      view_count: number;
-                      workplace: Database['public']['Enums']['workplace_type'];
-                    } => {
-                      return Boolean(
-                        job.id &&
+                    .filter(
+                      (
+                        job
+                      ): job is typeof job & {
+                        click_count: number;
+                        company: string;
+                        experience: Database['public']['Enums']['experience_level'];
+                        expires_at: string;
+                        id: string;
+                        plan: Database['public']['Enums']['job_plan'];
+                        posted_at: string;
+                        slug: string;
+                        title: string;
+                        view_count: number;
+                        workplace: Database['public']['Enums']['workplace_type'];
+                      } => {
+                        return Boolean(
+                          job.id &&
                           job.slug &&
                           job.title &&
                           job.company &&
@@ -313,8 +354,9 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                           job.expires_at &&
                           job.view_count !== null &&
                           job.click_count !== null
-                      );
-                    })
+                        );
+                      }
+                    )
                     .map((job) => {
                       return (
                         <JobCard
@@ -364,20 +406,26 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
                   <div className={between.center}>
                     <span className={`${muted.sm}`}>Active Openings</span>
-                    <span className={`${weight.semibold} text-green-600`}>{stats?.active_jobs ?? 0}</span>
+                    <span className={`${weight.semibold} text-green-600`}>
+                      {stats?.active_jobs ?? 0}
+                    </span>
                   </div>
 
-                  {stats && (stats.remote_jobs ?? 0) > 0 ? <div className={between.center}>
+                  {stats && (stats.remote_jobs ?? 0) > 0 ? (
+                    <div className={between.center}>
                       <span className={`${muted.sm}`}>Remote Positions</span>
                       <span className={weight.semibold}>{stats.remote_jobs ?? 0}</span>
-                    </div> : null}
+                    </div>
+                  ) : null}
 
-                  {stats?.avg_salary_min ? <div className={between.center}>
+                  {stats?.avg_salary_min ? (
+                    <div className={between.center}>
                       <span className={`${muted.sm}`}>Avg. Salary</span>
                       <span className={weight.semibold}>
                         ${(stats.avg_salary_min / 1000).toFixed(0)}k+
                       </span>
-                    </div> : null}
+                    </div>
+                  ) : null}
 
                   <div className={between.center}>
                     <span className={`${muted.sm}`}>Total Views</span>
@@ -386,7 +434,8 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                     </span>
                   </div>
 
-                  {stats?.latest_job_posted_at ? <div className={between.center}>
+                  {stats?.latest_job_posted_at ? (
+                    <div className={between.center}>
                       <span className={`${muted.sm}`}>Latest Posting</span>
                       <span className={`${weight.semibold} ${size.sm}`}>
                         {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
@@ -395,7 +444,8 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                           year: 'numeric',
                         })}
                       </span>
-                    </div> : null}
+                    </div>
+                  ) : null}
                 </CardContent>
               </Card>
 
@@ -410,7 +460,10 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                       ? 'Visit their website to learn more about the company and culture.'
                       : 'Check back regularly for new opportunities!'}
                   </p>
-                  <SafeWebsiteLink url={company.website} className="text-accent hover:text-accent-hover transition-colors duration-200">
+                  <SafeWebsiteLink
+                    url={company.website}
+                    className="text-accent hover:text-accent-hover transition-colors duration-200"
+                  >
                     Visit Website
                   </SafeWebsiteLink>
                 </CardContent>

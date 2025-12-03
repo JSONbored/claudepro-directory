@@ -9,7 +9,23 @@ import {
   getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, jobStatusBadge, iconSize, spaceY, muted, marginBottom, marginTop, iconLeading, weight, radius ,size , padding , gap , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  cluster,
+  jobStatusBadge,
+  iconSize,
+  spaceY,
+  muted,
+  marginBottom,
+  marginTop,
+  iconLeading,
+  weight,
+  radius,
+  size,
+  padding,
+  gap,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import {
   BarChart,
   Briefcase,
@@ -20,12 +36,18 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, Button ,
+import {
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle, Alert, AlertDescription, AlertTitle   } from '@heyclaude/web-runtime/ui';
+  CardTitle,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
 
@@ -71,9 +93,7 @@ function humanizeStatus(value?: null | string): string {
   return toTitleCase(value);
 }
 
-function resolvePlanLabel(
-  plan?: Database['public']['Enums']['job_plan'] | null
-): string {
+function resolvePlanLabel(plan?: Database['public']['Enums']['job_plan'] | null): string {
   if (!plan) {
     return JOB_PLAN_LABELS['one-time'];
   }
@@ -88,9 +108,7 @@ function resolvePlanLabel(
  *
  * @see JOB_TIER_LABELS
  */
-function resolveTierLabel(
-  tier?: Database['public']['Enums']['job_tier'] | null
-): string {
+function resolveTierLabel(tier?: Database['public']['Enums']['job_tier'] | null): string {
   if (!tier) {
     return JOB_TIER_LABELS.standard;
   }
@@ -122,7 +140,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface MyJobsPageProperties {
-  searchParams?: Promise<{ job_id?: string; payment?: string; }>;
+  searchParams?: Promise<{ job_id?: string; payment?: string }>;
 }
 
 /**
@@ -153,7 +171,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -340,14 +358,20 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   ) => {
     if (tier === 'featured') {
       return (
-        <UnifiedBadge variant="base" className="bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400">
+        <UnifiedBadge
+          variant="base"
+          className="bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400"
+        >
           Featured
         </UnifiedBadge>
       );
     }
     if (plan === 'subscription') {
       return (
-        <UnifiedBadge variant="base" className="bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">
+        <UnifiedBadge
+          variant="base"
+          className="bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400"
+        >
           Subscription
         </UnifiedBadge>
       );
@@ -394,7 +418,9 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
         <Card>
           <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
             <Briefcase className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
-            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No job listings yet</h3>
+            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>
+              No job listings yet
+            </h3>
             <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
               Post your first job listing to reach talented developers in the Claude community
             </p>
@@ -427,17 +453,17 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                 ]
                   .filter(Boolean)
                   .join(' • ')
-              : (job.expires_at
+              : job.expires_at
                 ? `Active until ${formatRelativeDate(job.expires_at)}`
-                : null);
+                : null;
             const paymentCopy =
               summary?.last_payment_at && summary.last_payment_amount !== null
                 ? `${formatPriceLabel(summary.last_payment_amount, false)} • Received ${formatRelativeDate(
                     summary.last_payment_at
                   )}`
-                : (summary?.last_payment_at
+                : summary?.last_payment_at
                   ? `Last payment ${formatRelativeDate(summary.last_payment_at)}`
-                  : null);
+                  : null;
             const showBillingCard =
               Boolean(planPriceLabel ?? renewalCopy ?? paymentCopy) || Boolean(summary);
 
@@ -465,15 +491,22 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                 </CardHeader>
 
                 <CardContent>
-                  <div className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}>
+                  <div
+                    className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}
+                  >
                     <div className={cluster.tight}>
                       <Eye className={iconSize.sm} />
                       {job.view_count ?? 0} views
                     </div>
                     {job.posted_at ? <div>Posted {formatRelativeDate(job.posted_at)}</div> : null}
-                    {job.expires_at ? <div>Expires {formatRelativeDate(job.expires_at)}</div> : null}
+                    {job.expires_at ? (
+                      <div>Expires {formatRelativeDate(job.expires_at)}</div>
+                    ) : null}
                   </div>
-                  {showBillingCard ? <div className={`${marginBottom.default} ${radius.lg} border border-muted border-dashed bg-muted/20 ${padding.compact} ${size.xs} sm:text-sm`}>
+                  {showBillingCard ? (
+                    <div
+                      className={`${marginBottom.default} ${radius.lg} border-muted bg-muted/20 border border-dashed ${padding.compact} ${size.xs} sm:text-sm`}
+                    >
                       <div className={between.center}>
                         <span className={`${weight.semibold} text-foreground`}>Billing</span>
                         <UnifiedBadge variant="base" style="outline" className="capitalize">
@@ -485,7 +518,8 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                         {renewalCopy ? <p>{renewalCopy}</p> : null}
                         {paymentCopy ? <p>{paymentCopy}</p> : null}
                       </div>
-                    </div> : null}
+                    </div>
+                  ) : null}
 
                   <div className={cluster.compact}>
                     <Button variant="outline" size="sm" asChild>
@@ -502,12 +536,14 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                       </Link>
                     </Button>
 
-                    {job.slug ? <Button variant="ghost" size="sm" asChild>
+                    {job.slug ? (
+                      <Button variant="ghost" size="sm" asChild>
                         <Link href={`/jobs/${job.slug}`}>
                           <ExternalLink className={iconLeading.xs} />
                           View
                         </Link>
-                      </Button> : null}
+                      </Button>
+                    ) : null}
 
                     {(() => {
                       const status = job.status;

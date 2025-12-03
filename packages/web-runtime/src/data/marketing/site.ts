@@ -7,7 +7,7 @@ import { cache } from 'react';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import { generateRequestId } from '../../utils/request-id.ts';
-import { getContentCount } from "../content/index.ts";
+import { getContentCount } from '../content/index.ts';
 
 const DESCRIPTION_FALLBACK =
   'Open-source directory of Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.';
@@ -17,10 +17,12 @@ const HERO_DEFAULTS: VisitorStats = {
   monthlyPageViews: 16_000,
 };
 
-const VERCEL_ANALYTICS_TOKEN = (env as Record<string, unknown>)['VERCEL_WEB_ANALYTICS_TOKEN'] as string | undefined;
+const VERCEL_ANALYTICS_TOKEN = (env as Record<string, unknown>)['VERCEL_WEB_ANALYTICS_TOKEN'] as
+  | string
+  | undefined;
 const VERCEL_PROJECT_ID =
-  (env as Record<string, unknown>)['VERCEL_PROJECT_ID'] as string | undefined ??
-  (env as Record<string, unknown>)['NEXT_PUBLIC_VERCEL_PROJECT_ID'] as string | undefined;
+  ((env as Record<string, unknown>)['VERCEL_PROJECT_ID'] as string | undefined) ??
+  ((env as Record<string, unknown>)['NEXT_PUBLIC_VERCEL_PROJECT_ID'] as string | undefined);
 
 interface VisitorStats {
   monthlyPageViews: number;
@@ -52,7 +54,7 @@ class VisitorStatsError extends Error {
 
 /**
  * Get visitor stats from Vercel Analytics API.
- * 
+ *
  * CRITICAL: This uses a throw-outside-cache pattern to prevent caching of error states.
  * - Success: Data is cached for 1 hour
  * - Error: Throws VisitorStatsError which is caught OUTSIDE the cache, returning defaults without caching
@@ -71,7 +73,7 @@ async function getVisitorStats(): Promise<VisitorStats> {
         });
 
         const { trackPerformance } = await import('../../utils/performance-metrics.ts');
-        
+
         // Missing credentials is a config issue, not a transient error - safe to cache defaults
         if (!(VERCEL_ANALYTICS_TOKEN && VERCEL_PROJECT_ID)) {
           requestLogger.debug('Vercel Analytics credentials not configured, using defaults');
@@ -97,7 +99,9 @@ async function getVisitorStats(): Promise<VisitorStats> {
               });
 
               if (!response.ok) {
-                throw new Error(`Vercel analytics error: ${response.status} ${response.statusText}`);
+                throw new Error(
+                  `Vercel analytics error: ${response.status} ${response.statusText}`
+                );
               }
 
               const data = (await response.json()) as VercelAnalyticsResponse;
@@ -114,7 +118,7 @@ async function getVisitorStats(): Promise<VisitorStats> {
               logLevel: 'info',
             }
           );
-          
+
           return result;
         } catch (error) {
           // CRITICAL: Throw error instead of returning fallback to prevent caching
@@ -136,10 +140,14 @@ async function getVisitorStats(): Promise<VisitorStats> {
       return HERO_DEFAULTS;
     }
     // Unexpected error - log and return fallback
-    logger.error('Unexpected visitor stats error', normalizeError(error, 'Unexpected visitor stats error'), {
-      operation: 'getVisitorStats',
-      module: 'data/marketing/site',
-    });
+    logger.error(
+      'Unexpected visitor stats error',
+      normalizeError(error, 'Unexpected visitor stats error'),
+      {
+        operation: 'getVisitorStats',
+        module: 'data/marketing/site',
+      }
+    );
     return HERO_DEFAULTS;
   }
 }

@@ -4,9 +4,16 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import  { type CreateJobInput } from '@heyclaude/web-runtime';
+import { type CreateJobInput } from '@heyclaude/web-runtime';
 import { updateJob } from '@heyclaude/web-runtime/actions';
-import { spaceY, muted, marginBottom, weight , size  , padding } from '@heyclaude/web-runtime/design-system';
+import {
+  spaceY,
+  muted,
+  marginBottom,
+  weight,
+  size,
+  padding,
+} from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
@@ -14,7 +21,7 @@ import {
   getPaymentPlanCatalog,
   getUserJobById,
 } from '@heyclaude/web-runtime/server';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
@@ -32,7 +39,9 @@ interface EditJobPageMetadataProperties {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: EditJobPageMetadataProperties): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: EditJobPageMetadataProperties): Promise<Metadata> {
   const { id } = await params;
   return generatePageMetadata('/account/jobs/:id/edit', { params: { id } });
 }
@@ -56,10 +65,10 @@ interface EditJobPageProperties {
  */
 export default async function EditJobPage({ params }: EditJobPageProperties) {
   const { id } = await params;
-  
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -83,7 +92,7 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
   const userLogger = reqLogger.child({
     userId: user.id, // Redaction will automatically hash this
   });
-  
+
   userLogger.info('EditJobPage: authentication successful', {
     section: 'authentication',
   });
@@ -130,7 +139,7 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
 
     // Generate requestId for server action (separate from page render)
     const actionRequestId = generateRequestId();
-    
+
     // Create request-scoped child logger for server action
     const actionLogger = logger.child({
       requestId: actionRequestId,
@@ -158,7 +167,10 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
     }
 
     if (!result.data) {
-      const normalized = normalizeError(new Error('updateJob returned no data'), 'updateJob returned no data');
+      const normalized = normalizeError(
+        new Error('updateJob returned no data'),
+        'updateJob returned no data'
+      );
       actionLogger.error('EditJobPage: updateJob returned no data', normalized);
       throw normalized;
     }
@@ -212,14 +224,18 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
   return (
     <div className={spaceY.relaxed}>
       <div>
-        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']} tracking-tight`}>Edit Job Listing</h1>
+        <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']} tracking-tight`}>
+          Edit Job Listing
+        </h1>
         <p className={muted.default}>Update your job posting details</p>
       </div>
-      {hasInvalidData ? <div className={`rounded-md bg-yellow-50 ${padding.default} dark:bg-yellow-900/20`}>
+      {hasInvalidData ? (
+        <div className={`rounded-md bg-yellow-50 ${padding.default} dark:bg-yellow-900/20`}>
           <p className="text-sm text-yellow-800 dark:text-yellow-200">
             Some fields contain invalid data and couldn't be loaded. Please review and update.
           </p>
-        </div> : null}
+        </div>
+      ) : null}
       <JobForm
         initialData={{
           title: job.title,

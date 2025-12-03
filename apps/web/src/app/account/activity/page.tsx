@@ -1,20 +1,28 @@
 import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight , size , gap } from '@heyclaude/web-runtime/design-system';
-import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { Button ,
+  cluster,
+  iconSize,
+  spaceY,
+  muted,
+  marginBottom,
+  marginTop,
+  weight,
+  size,
+  gap,
+} from '@heyclaude/web-runtime/design-system';
+import { GitPullRequest } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
@@ -178,7 +186,8 @@ export default async function ActivityPage() {
       </div>
 
       {/* Stats Overview - only render if summary is available */}
-      {hasSummary ? <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-2`}>
+      {hasSummary ? (
+        <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-2`}>
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Submissions</CardTitle>
@@ -193,7 +202,8 @@ export default async function ActivityPage() {
               <p className={`${marginTop.tight} ${muted.xs}`}>Merged</p>
             </CardContent>
           </Card>
-        </div> : null}
+        </div>
+      ) : null}
 
       {/* Timeline - only render if timeline is available */}
       {hasTimeline ? (

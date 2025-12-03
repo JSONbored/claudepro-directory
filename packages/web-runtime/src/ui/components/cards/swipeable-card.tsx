@@ -44,7 +44,7 @@ import { Bookmark, Copy as CopyIcon } from '../../../icons.tsx';
 import { absolute } from '../../../design-system/styles/position.ts';
 import { iconSize } from '../../../design-system/styles/icons.ts';
 import { SEMANTIC_COLORS } from '../../colors.ts';
-import { motion, useMotionValue, useTransform } from 'motion/react';
+import { motion, useMotionValue, useTransform, type PanInfo } from 'motion/react';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -195,7 +195,7 @@ export function SwipeableCardWrapper({
         dragElastic={0.2}
         dragMomentum={false}
         style={{ x }}
-        onDragEnd={(_event, info) => {
+        onDragEnd={(_event: PointerEvent | MouseEvent | TouchEvent | KeyboardEvent, info: PanInfo) => {
           try {
             // Swipe right threshold: 100px
             if (info.offset.x > 100 && onSwipeRight) {

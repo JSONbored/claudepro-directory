@@ -1,6 +1,19 @@
 import { getPartnerContactChannels, getPartnerCtas } from '@heyclaude/web-runtime/core';
 import { getPartnerHeroStats, getPartnerPricing } from '@heyclaude/web-runtime/data';
-import { iconSize, muted, spaceY, marginBottom, iconLeading, weight ,size  , gap , padding , row , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  iconSize,
+  muted,
+  spaceY,
+  marginBottom,
+  iconLeading,
+  weight,
+  size,
+  gap,
+  padding,
+  row,
+  radius,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import {
   BarChart,
   Briefcase,
@@ -12,18 +25,18 @@ import {
   MousePointer,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { RESPONSIVE_PATTERNS, UnifiedBadge, HoverCard , Button ,
+  RESPONSIVE_PATTERNS,
+  UnifiedBadge,
+  HoverCard,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 
 /**
  * Dynamic Rendering Required
@@ -101,9 +114,7 @@ export default async function PartnerPage() {
     <div className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
       {/* Hero Section */}
       <div className={`mx-auto mb-12 ${maxWidth['5xl']}`}>
-        <h1
-          className={`mb-4 ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL} tracking-tight`}
-        >
+        <h1 className={`mb-4 ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL} tracking-tight`}>
           Reach {heroStats.monthlyVisitors.toLocaleString()}+ Claude AI Developers
         </h1>
         <p className={`${marginBottom.comfortable} ${muted.lg}`}>
@@ -115,9 +126,7 @@ export default async function PartnerPage() {
         <div className={`mx-auto mb-8 grid ${maxWidth['3xl']} grid-cols-3 ${gap.comfortable}`}>
           <Card>
             <CardContent className="pt-6 pb-6">
-              <p
-                className={`${marginBottom.micro} ${weight.semibold} ${size['2xl']} text-primary`}
-              >
+              <p className={`${marginBottom.micro} ${weight.semibold} ${size['2xl']} text-primary`}>
                 {heroStats.monthlyVisitors.toLocaleString()}+
               </p>
               <p className={`${muted.sm}`}>Monthly Visitors</p>
@@ -125,9 +134,7 @@ export default async function PartnerPage() {
           </Card>
           <Card>
             <CardContent className="pt-6 pb-6">
-              <p
-                className={`${marginBottom.micro} ${weight.semibold} ${size['2xl']} text-primary`}
-              >
+              <p className={`${marginBottom.micro} ${weight.semibold} ${size['2xl']} text-primary`}>
                 {heroStats.monthlyPageViews.toLocaleString()}+
               </p>
               <p className={`${muted.sm}`}>Page Views</p>
@@ -135,9 +142,7 @@ export default async function PartnerPage() {
           </Card>
           <Card>
             <CardContent className="pt-6 pb-6">
-              <p
-                className={`${marginBottom.micro} ${weight.semibold} ${size['2xl']} text-primary`}
-              >
+              <p className={`${marginBottom.micro} ${weight.semibold} ${size['2xl']} text-primary`}>
                 {configCount.toLocaleString()}+
               </p>
               <p className={`${muted.sm}`}>Configurations</p>
@@ -147,16 +152,14 @@ export default async function PartnerPage() {
       </div>
 
       {/* Launch Pricing Banner */}
-      <Card
-        className={`mx-auto mb-12 ${maxWidth['4xl']}`}
-      >
+      <Card className={`mx-auto mb-12 ${maxWidth['4xl']}`}>
         <CardContent className="pt-6 pb-6">
           <div
             className={`flex flex-col items-center ${gap.default} text-center md:flex-row md:justify-between md:text-left`}
           >
             <div className={`${row.default}`}>
-              <div className={`rounded-full bg-primary/10 ${padding.tight}`}>
-                <Sparkles className="h-5 w-5 text-primary" />
+              <div className={`bg-primary/10 rounded-full ${padding.tight}`}>
+                <Sparkles className="text-primary h-5 w-5" />
               </div>
               <div>
                 <p className={`${weight.semibold} ${size.lg}`}>
@@ -177,7 +180,9 @@ export default async function PartnerPage() {
 
       {/* Pricing Options */}
       <div className={`mx-auto mb-16 ${maxWidth['5xl']}`}>
-        <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['3xl']}`}>Simple, Transparent Pricing</h2>
+        <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['3xl']}`}>
+          Simple, Transparent Pricing
+        </h2>
         <div className={`grid ${gap.loose} md:grid-cols-2`}>
           {/* Job Listings */}
           <HoverCard variant="strong">
@@ -202,7 +207,7 @@ export default async function PartnerPage() {
               </CardHeader>
               <CardContent className={spaceY.relaxed}>
                 {/* Pricing */}
-                <div className={`${radius.lg} border bg-muted/30 ${padding.default}`}>
+                <div className={`${radius.lg} bg-muted/30 border ${padding.default}`}>
                   <div className={`${marginBottom.tight} flex items-baseline ${gap.compact}`}>
                     <span className={`${weight.bold} ${muted.default} ${size.xl} line-through`}>
                       ${pricing.jobs.regular}
@@ -275,7 +280,7 @@ export default async function PartnerPage() {
               </CardHeader>
               <CardContent className={spaceY.relaxed}>
                 {/* Pricing */}
-                <div className={`${radius.lg} border bg-muted/30 ${padding.default}`}>
+                <div className={`${radius.lg} bg-muted/30 border ${padding.default}`}>
                   <div className={`${marginBottom.tight} flex items-baseline ${gap.compact}`}>
                     <span className={`${weight.bold} ${muted.default} ${size.xl} line-through`}>
                       ${pricing.sponsored.regular}
@@ -327,11 +332,13 @@ export default async function PartnerPage() {
 
       {/* Why Advertise Here */}
       <div className={`mx-auto mb-16 ${maxWidth['4xl']}`}>
-        <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['2xl']}`}>Why Claude Pro Directory?</h2>
+        <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['2xl']}`}>
+          Why Claude Pro Directory?
+        </h2>
         <div className={`grid ${gap.relaxed} md:grid-cols-3`}>
           <Card>
             <CardContent className="pt-6">
-              <Eye className={`${marginBottom.compact} h-8 w-8 text-primary`} />
+              <Eye className={`${marginBottom.compact} text-primary h-8 w-8`} />
               <p className={`${marginBottom.tight} ${weight.semibold}`}>Highly Engaged Audience</p>
               <p className={`${muted.sm}`}>
                 5.3 pages/visit average • Engineers actively building with Claude AI
@@ -340,16 +347,14 @@ export default async function PartnerPage() {
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <MousePointer className={`${marginBottom.compact} h-8 w-8 text-primary`} />
+              <MousePointer className={`${marginBottom.compact} text-primary h-8 w-8`} />
               <p className={`${marginBottom.tight} ${weight.semibold}`}>Quality Over Quantity</p>
-              <p className={`${muted.sm}`}>
-                Focused community of AI engineers, not random traffic
-              </p>
+              <p className={`${muted.sm}`}>Focused community of AI engineers, not random traffic</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <BarChart className={`${marginBottom.compact} h-8 w-8 text-primary`} />
+              <BarChart className={`${marginBottom.compact} text-primary h-8 w-8`} />
               <p className={`${marginBottom.tight} ${weight.semibold}`}>Transparent Analytics</p>
               <p className={`${muted.sm}`}>
                 Real-time dashboard with views, clicks, and engagement metrics
@@ -361,11 +366,15 @@ export default async function PartnerPage() {
 
       {/* FAQ / Common Questions */}
       <div className={`mx-auto mb-16 ${maxWidth['3xl']}`}>
-        <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['2xl']}`}>Frequently Asked Questions</h2>
+        <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['2xl']}`}>
+          Frequently Asked Questions
+        </h2>
         <div className={spaceY.comfortable}>
           <Card>
             <CardContent className="pt-6">
-              <p className={`${marginBottom.tight} ${weight.semibold}`}>How quickly can I get started?</p>
+              <p className={`${marginBottom.tight} ${weight.semibold}`}>
+                How quickly can I get started?
+              </p>
               <p className={`${muted.sm}`}>
                 Email us today, and we'll have your listing live within 24 hours. No lengthy
                 onboarding process.
@@ -383,7 +392,9 @@ export default async function PartnerPage() {
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <p className={`${marginBottom.tight} ${weight.semibold}`}>Do you offer bulk pricing?</p>
+              <p className={`${marginBottom.tight} ${weight.semibold}`}>
+                Do you offer bulk pricing?
+              </p>
               <p className={`${muted.sm}`}>
                 Yes! Email us for custom pricing if you need multiple job listings or sponsored
                 placements.
@@ -395,7 +406,7 @@ export default async function PartnerPage() {
 
       {/* Final CTA */}
       <div className={`mx-auto ${maxWidth['2xl']}`}>
-        <Card className="border-primary/20 bg-linear-to-r from-primary/10 to-primary/5">
+        <Card className="border-primary/20 from-primary/10 to-primary/5 bg-linear-to-r">
           <CardContent className="pt-8 pb-8">
             <h2 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>
               Ready to Reach {heroStats.monthlyVisitors.toLocaleString()}+ AI Engineers?

@@ -1,6 +1,6 @@
 import 'server-only';
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 
 import { isBuildTime } from '../../build-time.ts';
 import { getHomepageConfigBundle } from '../../config/static-configs.ts';
@@ -64,7 +64,7 @@ export function getHomepageTabCategories(): readonly string[] {
 
   const categories = config['homepage.tab_categories'];
   const result = Array.isArray(categories) ? categories.map(String) : [];
-  
+
   reqLogger.debug('getHomepageTabCategories: loaded categories', {
     categoryCount: result.length,
   });

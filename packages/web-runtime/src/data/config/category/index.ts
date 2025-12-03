@@ -1,18 +1,9 @@
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 
-import  {
-  type CategoryStatsConfig,
-  type UnifiedCategoryConfig,
-} from '../../../types/category.ts';
+import { type CategoryStatsConfig, type UnifiedCategoryConfig } from '../../../types/category.ts';
 
-import {
-  
-  
-  CATEGORY_CONFIGS,
-  
-} from './category-config.ts';
+import { CATEGORY_CONFIGS } from './category-config.ts';
 import { getTabConfigForCategory } from './default-tab-configs.ts';
-
 
 export const getCategoryConfigs = (): Record<
   Database['public']['Enums']['content_category'],
@@ -38,12 +29,6 @@ export const getCategoryConfig = (
   };
 };
 
-
-
-
-
-
-
 export { VALID_CATEGORIES, isValidCategory } from '../../../utils/category-validation.ts';
 
 export const getCategoryStatsConfig = (): readonly CategoryStatsConfig[] => {
@@ -55,7 +40,6 @@ export const getCategoryStatsConfig = (): readonly CategoryStatsConfig[] => {
     delay: index * 100,
   }));
 };
-
 
 /**
  * Compute the total sum of numeric resource counts in the provided stats map.

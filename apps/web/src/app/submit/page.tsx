@@ -10,15 +10,23 @@ import {
   getSubmissionDashboard,
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
-import { cluster, iconSize, muted, animate, weight, radius ,size  , gap , padding , spaceY , maxWidth } from '@heyclaude/web-runtime/design-system';
-import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { cn, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  cluster,
+  iconSize,
+  muted,
+  animate,
+  weight,
+  radius,
+  size,
+  gap,
+  padding,
+  spaceY,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
+import { TrendingUp } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { cn, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
@@ -28,9 +36,11 @@ import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
     loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
@@ -141,7 +151,6 @@ function isValidRecentSubmission(submission: unknown): submission is {
     submission.merged_at !== null
   );
 }
-
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/submit');
@@ -312,7 +321,9 @@ export default async function SubmitPage() {
     });
 
   return (
-    <div className={`container mx-auto ${maxWidth['7xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
+    <div
+      className={`container mx-auto ${maxWidth['7xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}
+    >
       {/* Hero Header with animations */}
       <SubmitPageHero stats={stats} />
 
@@ -321,7 +332,9 @@ export default async function SubmitPage() {
           <SubmitFormClient formConfig={formConfig} templates={templates} />
         </div>
 
-        <aside className={`w-full ${spaceY.comfortable} sm:${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}>
+        <aside
+          className={`w-full ${spaceY.comfortable} sm:${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}
+        >
           {/* Job Promo Card - Priority #1 */}
           <JobsPromo />
 
@@ -341,14 +354,20 @@ export default async function SubmitPage() {
               </div>
 
               {/* Pending */}
-              <div className={cn('${radius.lg} ${padding.compact} text-center', 'bg-yellow-500/10')}>
-                <div className={`${weight.bold} ${size['2xl']} text-yellow-400`}>{stats.pending}</div>
+              <div
+                className={cn('${radius.lg} ${padding.compact} text-center', 'bg-yellow-500/10')}
+              >
+                <div className={`${weight.bold} ${size['2xl']} text-yellow-400`}>
+                  {stats.pending}
+                </div>
                 <div className={cn(muted.default, 'text-xs')}>Pending</div>
               </div>
 
               {/* This Week */}
               <div className={cn('${radius.lg} ${padding.compact} text-center', 'bg-green-500/10')}>
-                <div className={`${weight.bold} ${size['2xl']} text-green-400`}>{stats.merged_this_week}</div>
+                <div className={`${weight.bold} ${size['2xl']} text-green-400`}>
+                  {stats.merged_this_week}
+                </div>
                 <div className={cn(muted.default, 'text-xs')}>This Week</div>
               </div>
             </CardContent>

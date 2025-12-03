@@ -1,10 +1,17 @@
 import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { marginBottom, padding, stack, muted, weight , size , maxWidth } from '@heyclaude/web-runtime/design-system';
-import { NavLink  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
-
+import {
+  marginBottom,
+  padding,
+  stack,
+  muted,
+  weight,
+  size,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
+import { NavLink } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/terms');
@@ -35,14 +42,16 @@ export default function TermsPage() {
   const channels = getContactChannels();
 
   return (
-    <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
+    <div
+      className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}
+    >
       <div className={`prose prose-invert ${maxWidth.none}`}>
-        <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>
+        <h1
+          className={`${marginBottom.comfortable} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}
+        >
           Terms of Service
         </h1>
-        <p className={`${marginBottom.relaxed} ${muted.default}`}>
-          Last updated: {lastUpdated}
-        </p>
+        <p className={`${marginBottom.relaxed} ${muted.default}`}>Last updated: {lastUpdated}</p>
 
         <section className={marginBottom.relaxed}>
           <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
@@ -76,7 +85,9 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>3. User Content</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            3. User Content
+          </h2>
           <p className={marginBottom.default}>
             You retain ownership of content you submit to {APP_CONFIG.name}. By submitting content,
             you grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, modify,
@@ -113,7 +124,9 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>6. Disclaimers</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            6. Disclaimers
+          </h2>
           <p className={marginBottom.default}>
             The service is provided "AS IS" and "AS AVAILABLE" without warranties of any kind,
             either express or implied, including but not limited to implied warranties of
@@ -170,7 +183,9 @@ export default function TermsPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>11. Contact Us</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            11. Contact Us
+          </h2>
           <p className={marginBottom.default}>
             If you have questions about these Terms of Service, please{' '}
             <NavLink href={`mailto:${channels.email}`} external>

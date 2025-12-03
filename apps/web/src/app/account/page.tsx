@@ -1,4 +1,4 @@
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { ensureStringArray } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -7,17 +7,31 @@ import {
   getContentDetailCore,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  spaceY,
+  muted,
+  marginBottom,
+  marginTop,
+  weight,
+  size,
+  gap,
+  padding,
+} from '@heyclaude/web-runtime/design-system';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import  { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { NavLink, UnifiedBadge, Button ,
+import { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
+import {
+  NavLink,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
@@ -214,8 +228,8 @@ export default async function AccountDashboard() {
     homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage']
   ): Record<string, HomepageContentItem[]> {
     if (
-      homepageData?.content === null || 
-      homepageData?.content === undefined || 
+      homepageData?.content === null ||
+      homepageData?.content === undefined ||
       typeof homepageData.content !== 'object'
     ) {
       return {};
@@ -242,11 +256,11 @@ export default async function AccountDashboard() {
   // Section: Recommendations
   const recommendations = candidateRecommendations
     .filter(
-      (item) => 
-        typeof item.slug === 'string' && 
-        item.slug !== '' && 
-        !bookmarkedSlugs.has(`${item.category}/${item.slug}`) && 
-        typeof item.title === 'string' && 
+      (item) =>
+        typeof item.slug === 'string' &&
+        item.slug !== '' &&
+        !bookmarkedSlugs.has(`${item.category}/${item.slug}`) &&
+        typeof item.title === 'string' &&
         item.title !== ''
     )
     .slice(0, 3);
@@ -286,7 +300,7 @@ export default async function AccountDashboard() {
           </CardHeader>
           <CardContent>
             <div className={cluster.compact}>
-              <Bookmark className="h-5 w-5 text-primary" />
+              <Bookmark className="text-primary h-5 w-5" />
               <span className={`${weight.bold} ${size['3xl']}`}>{bookmarkCount ?? 0}</span>
             </div>
             <p className={`${marginTop.compact} ${muted.xs}`}>Saved items</p>
@@ -317,7 +331,7 @@ export default async function AccountDashboard() {
           </CardHeader>
           <CardContent>
             <div className={cluster.compact}>
-              <Calendar className="h-5 w-5 text-primary" />
+              <Calendar className="text-primary h-5 w-5" />
               <span className={`${weight.bold} ${size['3xl']}`}>{accountAge}</span>
             </div>
             <p className={`${marginTop.compact} ${muted.xs}`}>Days active</p>
@@ -332,11 +346,13 @@ export default async function AccountDashboard() {
           <CardDescription>Common tasks and features</CardDescription>
         </CardHeader>
         <CardContent className={spaceY.default}>
-          {resumeBookmarkHref ? <QuickActionRow
+          {resumeBookmarkHref ? (
+            <QuickActionRow
               title="Resume latest bookmark"
               description="Continue where you left off"
               href={resumeBookmarkHref}
-            /> : null}
+            />
+          ) : null}
           <QuickActionRow
             title="View all bookmarks"
             description={`You have ${bookmarkCount ?? 0} saved configurations`}
@@ -382,25 +398,27 @@ export default async function AccountDashboard() {
                   return (
                     <li
                       key={`${item.category}-${item.slug}`}
-                      className={`rounded-xl border border-border/60 bg-muted/20 ${padding.compact}`}
+                      className={`border-border/60 bg-muted/20 rounded-xl border ${padding.compact}`}
                     >
                       <div className={`flex items-start justify-between ${gap.default}`}>
                         <div>
                           <p className={weight.semibold}>{item.title}</p>
-                          {item.description ? <p className={`line-clamp-2 ${muted.sm}`}>
-                              {item.description}
-                            </p> : null}
+                          {item.description ? (
+                            <p className={`line-clamp-2 ${muted.sm}`}>{item.description}</p>
+                          ) : null}
                         </div>
                         <div className={`flex flex-col items-end ${gap.compact}`}>
                           <NavLink href={itemHref} className={`${weight.medium} ${size.sm}`}>
                             Explore →
                           </NavLink>
-                          {similarHref ? <NavLink
+                          {similarHref ? (
+                            <NavLink
                               href={similarHref}
                               className={`${muted.default} ${size.xs} hover:text-foreground`}
                             >
                               Explore similar →
-                            </NavLink> : null}
+                            </NavLink>
+                          ) : null}
                         </div>
                       </div>
                     </li>
@@ -429,7 +447,9 @@ function QuickActionRow({
   title: string;
 }) {
   return (
-    <div className={`flex items-center justify-between ${gap.comfortable} rounded-xl border border-border/50 ${padding.compact}`}>
+    <div
+      className={`flex items-center justify-between ${gap.comfortable} border-border/50 rounded-xl border ${padding.compact}`}
+    >
       <div>
         <p className={weight.medium}>{title}</p>
         <p className={muted.sm}>{description}</p>
@@ -443,7 +463,9 @@ function QuickActionRow({
 
 function EmptyRecentlySavedState() {
   return (
-    <div className={`rounded-2xl border border-border/70 border-dashed ${padding.comfortable} text-center`}>
+    <div
+      className={`border-border/70 rounded-2xl border border-dashed ${padding.comfortable} text-center`}
+    >
       <p className={weight.medium}>No saved configs yet</p>
       <p className={muted.sm}>
         Browse the directory and bookmark your favorite configurations to see them here.

@@ -3,7 +3,7 @@
  *
  * Returns static default flag values.
  * All flags are version-controlled in code.
- * 
+ *
  * This file is safe to use in both server and client components since it only returns static values.
  */
 
@@ -35,10 +35,9 @@ export interface LayoutFlags {
   useFloatingActionBar: boolean;
 }
 
-
 /**
  * Default flag values (primary source of truth - no external service dependency)
- * 
+ *
  * FAB Actions:
  * - Submit: Navigate to /submit page
  * - Search: Focus the search input (⌘K)
@@ -47,11 +46,11 @@ export interface LayoutFlags {
  * - Notifications: Show notification badge (mobile only)
  */
 const DEFAULT_FLAGS: LayoutFlags = {
-  useFloatingActionBar: true,   // ✅ Enable the FAB
-  fabSubmitAction: true,        // ✅ Show "Submit Content" action
-  fabSearchAction: true,        // ✅ Show "Search (⌘K)" action
-  fabScrollToTop: true,         // ✅ Show "Scroll to top" action
-  fabNotifications: true,       // ✅ Show notifications (mobile)
+  useFloatingActionBar: true, // ✅ Enable the FAB
+  fabSubmitAction: true, // ✅ Show "Submit Content" action
+  fabSearchAction: true, // ✅ Show "Search (⌘K)" action
+  fabScrollToTop: true, // ✅ Show "Scroll to top" action
+  fabNotifications: true, // ✅ Show notifications (mobile)
   notificationsProvider: true,
   notificationsSheet: true,
   notificationsToasts: true,

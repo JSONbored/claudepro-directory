@@ -14,7 +14,7 @@ import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
 } from '@heyclaude/web-runtime/ui';
-import { motion } from 'motion/react';
+import { motion, type PanInfo } from 'motion/react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
@@ -120,7 +120,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
           className={`${absolute.topHalf} -translate-x-1/2 left-1/2 h-1 w-12 cursor-grab rounded-full bg-border/50 active:cursor-grabbing`}
           drag="y"
           dragConstraints={{ top: 0, bottom: 50 }}
-          onDragEnd={(_, info) => {
+          onDragEnd={(_: PointerEvent | MouseEvent | TouchEvent | KeyboardEvent, info: PanInfo) => {
             if (info.offset.y > 100) onOpenChange(false);
           }}
           whileDrag={{ scale: 1.2, backgroundColor: 'hsl(var(--accent))' }}

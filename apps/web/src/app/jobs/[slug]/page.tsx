@@ -4,7 +4,21 @@
 
 import { Constants } from '@heyclaude/database-types';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , row , radius , minHeight } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  iconSize,
+  spaceY,
+  muted,
+  marginBottom,
+  marginTop,
+  weight,
+  size,
+  gap,
+  padding,
+  row,
+  radius,
+  minHeight,
+} from '@heyclaude/web-runtime/design-system';
 import {
   ArrowLeft,
   Building2,
@@ -17,10 +31,17 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/server';
-import  { type PageProps } from '@heyclaude/web-runtime/types/app.schema';
+import { type PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
-import { UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import {
+  UnifiedBadge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -150,7 +171,7 @@ export async function generateMetadata({
   const { slug } = await params;
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const metadataLogger = logger.child({
     requestId: metadataRequestId,
@@ -195,7 +216,7 @@ export async function generateStaticParams() {
 
   // Generate requestId for static params generation (build-time)
   const staticParametersRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId: staticParametersRequestId,
@@ -245,8 +266,10 @@ export default async function JobPage({ params }: PageProps) {
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const slug = validationResult.success ? validationResult.data.slug : String(rawParameters['slug']);
-  
+  const slug = validationResult.success
+    ? validationResult.data.slug
+    : String(rawParameters['slug']);
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -303,7 +326,7 @@ export default async function JobPage({ params }: PageProps) {
       <StructuredData route={`/jobs/${slug}`} />
 
       <div className={`${minHeight.screen} bg-background`}>
-        <div className="border-border/50 border-b bg-card/30">
+        <div className="border-b border-border/50 bg-card/30">
           <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
             <Button variant="ghost" asChild className={marginBottom.comfortable}>
               <Link href={ROUTES.JOBS}>
@@ -315,15 +338,19 @@ export default async function JobPage({ params }: PageProps) {
             <div className="max-w-4xl">
               <div className={`${row.comfortable} mb-6`}>
                 <div className={`${radius.lg} bg-accent/10 ${padding.compact}`}>
-                  <Building2 className="h-6 w-6 text-primary" />
+                  <Building2 className="text-primary h-6 w-6" />
                 </div>
                 <div className="flex-1">
-                  <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>{job.title}</h1>
+                  <h1 className={`${marginBottom.tight} ${weight.bold} ${size['3xl']}`}>
+                    {job.title}
+                  </h1>
                   <p className={`${muted.default} ${size.xl}`}>{job.company}</p>
                 </div>
               </div>
 
-              <div className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}>
+              <div
+                className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}
+              >
                 <div className={cluster.tight}>
                   <MapPin className={iconSize.sm} />
                   <span>{job.location}</span>

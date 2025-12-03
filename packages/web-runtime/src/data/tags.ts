@@ -7,7 +7,7 @@
  * Provides functions to get all tags with counts and content filtered by tag.
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { logger, normalizeError } from '../index.ts';
@@ -67,10 +67,10 @@ export interface TaggedContentResult {
  */
 function normalizeTagRow(row: TagWithCounts): null | TagSummary {
   if (!row.tag) return null;
-  
+
   // row.categories can be null from the database, but individual elements are strings
   const categoriesArray = row.categories ?? [];
-  
+
   return {
     tag: row.tag,
     count: row.usage_count ?? 0,
@@ -278,19 +278,6 @@ export async function getTagMetadata(tag: string): Promise<null | TagSummary> {
   return allTags.find((t) => t.tag === tag) ?? null;
 }
 
-/**
- * Format tag for display (capitalize words, replace hyphens with spaces)
- */
-export function formatTagForDisplay(tag: string): string {
-  return tag
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
-/**
- * Format tag for URL (lowercase, hyphenated)
- */
-export function formatTagForUrl(tag: string): string {
-  return tag.toLowerCase().replaceAll(/\s+/g, '-');
-}
+// Re-export utility functions from tags-utils.ts
+// These are NOT server actions - they're simple utilities
+export { formatTagForDisplay, formatTagForUrl } from './tags-utils.ts';

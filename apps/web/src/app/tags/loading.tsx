@@ -1,9 +1,42 @@
-import { emptyCard, marginBottom, marginTop, radius , padding , gap , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  emptyCard,
+  marginBottom,
+  marginTop,
+  radius,
+  padding,
+  gap,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 
 // Static skeleton IDs to avoid array index keys
-const POPULAR_TAG_SKELETONS = ['pt-1', 'pt-2', 'pt-3', 'pt-4', 'pt-5', 'pt-6', 'pt-7', 'pt-8', 'pt-9', 'pt-10'] as const;
-const TAG_GRID_SKELETONS = ['tg-1', 'tg-2', 'tg-3', 'tg-4', 'tg-5', 'tg-6', 'tg-7', 'tg-8', 'tg-9', 'tg-10', 'tg-11', 'tg-12'] as const;
+const POPULAR_TAG_SKELETONS = [
+  'pt-1',
+  'pt-2',
+  'pt-3',
+  'pt-4',
+  'pt-5',
+  'pt-6',
+  'pt-7',
+  'pt-8',
+  'pt-9',
+  'pt-10',
+] as const;
+const TAG_GRID_SKELETONS = [
+  'tg-1',
+  'tg-2',
+  'tg-3',
+  'tg-4',
+  'tg-5',
+  'tg-6',
+  'tg-7',
+  'tg-8',
+  'tg-9',
+  'tg-10',
+  'tg-11',
+  'tg-12',
+] as const;
 
 export default function TagsLoading() {
   return (
@@ -39,7 +72,9 @@ export default function TagsLoading() {
 
         {/* Grid Skeleton */}
         <Skeleton className="mb-4 h-6 w-24" />
-        <div className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4`}>
+        <div
+          className={`grid grid-cols-1 ${gap.comfortable} sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4`}
+        >
           {TAG_GRID_SKELETONS.map((id) => (
             <div key={id} className={`${radius.lg} border ${padding.default}`}>
               <Skeleton className="mb-2 h-5 w-32" />

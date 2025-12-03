@@ -1,11 +1,22 @@
 import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, marginBottom, marginTop, muted, weight , size , padding , gap , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  iconSize,
+  marginBottom,
+  marginTop,
+  muted,
+  weight,
+  size,
+  padding,
+  gap,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
-import { NavLink, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { NavLink, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
@@ -26,7 +37,7 @@ export const revalidate = 86_400;
 export default function ContactPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -57,13 +68,17 @@ export default function ContactPage() {
 
   // Feature flags are now static defaults - no server/middleware dependency
   // Terminal feature should be evaluated in middleware, not in page components
-   
+
   const terminalEnabled = false; // Default for static generation
 
   return (
-    <div className={`container mx-auto ${maxWidth['6xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
+    <div
+      className={`container mx-auto ${maxWidth['6xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}
+    >
       <div className={`${marginBottom.relaxed} text-center`}>
-        <h1 className={`${marginBottom.default} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>Contact Us</h1>
+        <h1 className={`${marginBottom.default} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>
+          Contact Us
+        </h1>
         <p className={muted.lg}>
           {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
           {terminalEnabled
@@ -99,7 +114,8 @@ export default function ContactPage() {
             </div>
           )}
           {/* GitHub Discussions */}
-          {channels.github ? <Card>
+          {channels.github ? (
+            <Card>
               <CardHeader>
                 <CardTitle className={cluster.compact}>
                   <Github className={iconSize.md} />
@@ -118,10 +134,12 @@ export default function ContactPage() {
                   Visit Discussions →
                 </NavLink>
               </CardContent>
-            </Card> : null}
+            </Card>
+          ) : null}
 
           {/* Discord Community */}
-          {channels.discord ? <Card>
+          {channels.discord ? (
+            <Card>
               <CardHeader>
                 <CardTitle className={cluster.compact}>
                   <DiscordIcon className={iconSize.md} />
@@ -132,18 +150,16 @@ export default function ContactPage() {
                 <p className={`${marginBottom.default} ${muted.default}`}>
                   Chat with other users, get help, and stay updated on the latest developments.
                 </p>
-                <NavLink
-                  href={channels.discord}
-                  external
-                  className={cluster.compact}
-                >
+                <NavLink href={channels.discord} external className={cluster.compact}>
                   Join Discord →
                 </NavLink>
               </CardContent>
-            </Card> : null}
+            </Card>
+          ) : null}
 
           {/* GitHub Issues */}
-          {channels.github ? <Card>
+          {channels.github ? (
+            <Card>
               <CardHeader>
                 <CardTitle className={cluster.compact}>
                   <MessageSquare className={iconSize.md} />
@@ -162,10 +178,12 @@ export default function ContactPage() {
                   Create Issue →
                 </NavLink>
               </CardContent>
-            </Card> : null}
+            </Card>
+          ) : null}
 
           {/* Email */}
-          {channels.email ? <Card>
+          {channels.email ? (
+            <Card>
               <CardHeader>
                 <CardTitle className={cluster.compact}>
                   <Mail className={iconSize.md} />
@@ -176,33 +194,36 @@ export default function ContactPage() {
                 <p className={`${marginBottom.default} ${muted.default}`}>
                   For private inquiries, partnerships, or other matters, reach us via email.
                 </p>
-                <NavLink
-                  href={`mailto:${channels.email}`}
-                  external
-                  className={cluster.compact}
-                >
+                <NavLink href={`mailto:${channels.email}`} external className={cluster.compact}>
                   {channels.email} →
                 </NavLink>
               </CardContent>
-            </Card> : null}
+            </Card>
+          ) : null}
         </div>
       </div>
 
       {/* Additional Information */}
       <div className={`prose prose-invert mx-auto mt-12 ${maxWidth.none}`}>
-        <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>Frequently Asked Questions</h2>
+        <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+          Frequently Asked Questions
+        </h2>
         <p className={marginBottom.default}>
           Before reaching out, you might find answers in our{' '}
           <NavLink href="/help">Help Center</NavLink>.
         </p>
 
-        <h2 className={`${marginTop.relaxed} mb-4 ${weight.semibold} ${size['2xl']}`}>Response Time</h2>
+        <h2 className={`${marginTop.relaxed} mb-4 ${weight.semibold} ${size['2xl']}`}>
+          Response Time
+        </h2>
         <p className={marginBottom.default}>
           We typically respond to inquiries within 24-48 hours during business days. For urgent
           matters, please use GitHub Issues or Discord for faster community support.
         </p>
 
-        <h2 className={`${marginTop.relaxed} mb-4 ${weight.semibold} ${size['2xl']}`}>Contributing</h2>
+        <h2 className={`${marginTop.relaxed} mb-4 ${weight.semibold} ${size['2xl']}`}>
+          Contributing
+        </h2>
         <p className={marginBottom.default}>
           Interested in contributing to {APP_CONFIG.name}? Check out our{' '}
           <NavLink href="/submit">submission guidelines</NavLink> or{' '}

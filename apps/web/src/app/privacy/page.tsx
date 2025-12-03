@@ -1,10 +1,17 @@
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { marginBottom, muted, weight , size  , padding , spaceY , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  marginBottom,
+  muted,
+  weight,
+  size,
+  padding,
+  spaceY,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { NavLink } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
-
+import { type Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/privacy');
@@ -20,13 +27,21 @@ export default function PrivacyPage() {
   const lastUpdated = getLastUpdatedDate();
 
   return (
-    <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
+    <div
+      className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}
+    >
       <div className={`prose prose-invert ${maxWidth.none}`}>
-        <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>Privacy Policy</h1>
+        <h1
+          className={`${marginBottom.comfortable} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}
+        >
+          Privacy Policy
+        </h1>
         <p className={`${marginBottom.relaxed} ${muted.default}`}>Last updated: {lastUpdated}</p>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>1. Information We Collect</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            1. Information We Collect
+          </h2>
           <p className={marginBottom.default}>
             We collect information that you provide directly to us when using {APP_CONFIG.name}:
           </p>
@@ -39,7 +54,9 @@ export default function PrivacyPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>2. How We Use Your Information</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            2. How We Use Your Information
+          </h2>
           <p className={marginBottom.default}>We use the information we collect to:</p>
           <ul className={`list-disc ${spaceY.compact} pl-6`}>
             <li>Provide, maintain, and improve our services</li>
@@ -51,7 +68,9 @@ export default function PrivacyPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>3. Information Sharing</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            3. Information Sharing
+          </h2>
           <p className={marginBottom.default}>
             We do not sell your personal information. We may share your information only in the
             following circumstances:
@@ -65,7 +84,9 @@ export default function PrivacyPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>4. Cookies and Tracking</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            4. Cookies and Tracking
+          </h2>
           <p className={marginBottom.default}>
             We use cookies and similar tracking technologies to collect and track information about
             your activity on our service. You can control cookies through your browser settings.
@@ -76,7 +97,9 @@ export default function PrivacyPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>5. Data Security</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            5. Data Security
+          </h2>
           <p className={marginBottom.default}>
             We implement appropriate technical and organizational measures to protect your personal
             information. However, no method of transmission over the internet is 100% secure.
@@ -84,7 +107,9 @@ export default function PrivacyPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>6. Your Rights</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            6. Your Rights
+          </h2>
           <p className={marginBottom.default}>You have the right to:</p>
           <ul className={`list-disc ${spaceY.compact} pl-6`}>
             <li>Access and receive a copy of your personal data</li>
@@ -96,7 +121,9 @@ export default function PrivacyPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>7. Children's Privacy</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            7. Children's Privacy
+          </h2>
           <p className={marginBottom.default}>
             Our service is not directed to children under 13 years of age. We do not knowingly
             collect personal information from children under 13.
@@ -104,7 +131,9 @@ export default function PrivacyPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>8. Changes to This Policy</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            8. Changes to This Policy
+          </h2>
           <p className={marginBottom.default}>
             We may update this Privacy Policy from time to time. We will notify you of any changes
             by posting the new Privacy Policy on this page and updating the "Last updated" date.
@@ -112,7 +141,9 @@ export default function PrivacyPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>9. Contact Us</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            9. Contact Us
+          </h2>
           <p className={marginBottom.default}>
             If you have questions about this Privacy Policy, please{' '}
             <NavLink href="/contact">contact us</NavLink>.

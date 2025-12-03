@@ -10,7 +10,22 @@ import {
   getUserLibrary,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, iconSize, hoverBg, transition, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  cluster,
+  iconSize,
+  hoverBg,
+  transition,
+  spaceY,
+  muted,
+  marginBottom,
+  marginTop,
+  weight,
+  size,
+  gap,
+  padding,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Bookmark as BookmarkIcon,
   ExternalLink,
@@ -19,15 +34,22 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { NavLink, UnifiedBadge, Button ,
+import {
+  NavLink,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle, Tabs, TabsContent, TabsList, TabsTrigger    } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
-
 
 /**
  * Dynamic Rendering Required
@@ -58,7 +80,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function LibraryPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -203,7 +225,9 @@ export default async function LibraryPage() {
             <Card>
               <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
                 <BookmarkIcon className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
-                <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No bookmarks yet</h3>
+                <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>
+                  No bookmarks yet
+                </h3>
                 <p className={`max-w-md text-center ${muted.default}`}>
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
@@ -226,7 +250,11 @@ export default async function LibraryPage() {
                           </UnifiedBadge>
                           <CardTitle className="text-lg">{bookmark.content_slug}</CardTitle>
                         </div>
-                        {bookmark.notes ? <CardDescription className={marginTop.compact}>{bookmark.notes}</CardDescription> : null}
+                        {bookmark.notes ? (
+                          <CardDescription className={marginTop.compact}>
+                            {bookmark.notes}
+                          </CardDescription>
+                        ) : null}
                       </div>
                       <NavLink
                         href={`/${bookmark.content_type}/${bookmark.content_slug}`}
@@ -258,8 +286,12 @@ export default async function LibraryPage() {
             <Card>
               <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
                 <FolderOpen className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
-                <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No collections yet</h3>
-                <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
+                <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>
+                  No collections yet
+                </h3>
+                <p
+                  className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}
+                >
                   Organize your bookmarks into custom collections! Group related configurations
                   together and share them with others.
                 </p>
@@ -274,21 +306,28 @@ export default async function LibraryPage() {
           ) : (
             <div className={`grid ${gap.comfortable} sm:grid-cols-2`}>
               {collections.map((collection) => (
-                <Card key={collection.id} className={`cursor-pointer ${transition.default} ${hoverBg.muted} hover:shadow-md`}>
+                <Card
+                  key={collection.id}
+                  className={`cursor-pointer ${transition.default} ${hoverBg.muted} hover:shadow-md`}
+                >
                   <Link href={`/account/library/${collection.slug}`}>
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className={`${cluster.compact} mb-2`}>
-                            <Layers className="h-4 w-4 text-primary" />
-                            {collection.is_public ? <UnifiedBadge variant="base" style="outline" className="text-xs">
+                            <Layers className="text-primary h-4 w-4" />
+                            {collection.is_public ? (
+                              <UnifiedBadge variant="base" style="outline" className="text-xs">
                                 Public
-                              </UnifiedBadge> : null}
+                              </UnifiedBadge>
+                            ) : null}
                           </div>
                           <CardTitle className="text-lg">{collection.name}</CardTitle>
-                          {collection.description ? <CardDescription className={`${marginTop.compact} line-clamp-2`}>
+                          {collection.description ? (
+                            <CardDescription className={`${marginTop.compact} line-clamp-2`}>
                               {collection.description}
-                            </CardDescription> : null}
+                            </CardDescription>
+                          ) : null}
                         </div>
                       </div>
                     </CardHeader>

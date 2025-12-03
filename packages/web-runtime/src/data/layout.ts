@@ -1,7 +1,7 @@
 'use server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { cache } from 'react';
 
 import { fetchCached } from '../cache/fetch-cached';
@@ -33,20 +33,17 @@ export async function getNavigationMenu(
   });
 
   try {
-    return await fetchCached(
-      (client) => new MiscService(client).getNavigationMenu(),
-      {
-        keyParts: ['navigation-menu'],
-        tags: ['navigation', 'ui'],
-        ttlKey: NAVIGATION_TTL_KEY,
-        fallback: {
-          primary: null,
-          secondary: null,
-          actions: null,
-        },
-        logMeta: { namespace: 'navigation' },
-      }
-    );
+    return await fetchCached((client) => new MiscService(client).getNavigationMenu(), {
+      keyParts: ['navigation-menu'],
+      tags: ['navigation', 'ui'],
+      ttlKey: NAVIGATION_TTL_KEY,
+      fallback: {
+        primary: null,
+        secondary: null,
+        actions: null,
+      },
+      logMeta: { namespace: 'navigation' },
+    });
   } catch (error) {
     // Log error if fetchCached fails unexpectedly (e.g., cache system error)
     // Note: fetchCached handles service call errors internally and returns fallback

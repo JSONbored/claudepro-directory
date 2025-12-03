@@ -1,7 +1,7 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { cache } from 'react';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
@@ -26,7 +26,8 @@ export const getHomepageData = cache(
 
     try {
       return await fetchCached(
-        (client) => new ContentService(client).getHomepageOptimized({ p_category_ids: [...categoryIds] }),
+        (client) =>
+          new ContentService(client).getHomepageOptimized({ p_category_ids: [...categoryIds] }),
         {
           // Next.js automatically handles serialization of keyParts array
           keyParts: ['homepage', ...categoryIds],

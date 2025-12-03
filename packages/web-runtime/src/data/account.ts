@@ -1,7 +1,7 @@
 'use server';
 
 import { AccountService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { z } from 'zod';
 
@@ -51,17 +51,14 @@ export async function getAccountDashboard(
 export async function getUserLibrary(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_library']['Returns'] | null> {
-  return fetchCached(
-    (client) => new AccountService(client).getUserLibrary({ p_user_id: userId }),
-    {
-      keyParts: ['library', userId],
-      tags: ['users', `user-${userId}`, 'user-bookmarks'],
-      ttlKey: ACCOUNT_TTL_KEY,
-      useAuth: true,
-      fallback: null,
-      logMeta: { userId },
-    }
-  );
+  return fetchCached((client) => new AccountService(client).getUserLibrary({ p_user_id: userId }), {
+    keyParts: ['library', userId],
+    tags: ['users', `user-${userId}`, 'user-bookmarks'],
+    ttlKey: ACCOUNT_TTL_KEY,
+    useAuth: true,
+    fallback: null,
+    logMeta: { userId },
+  });
 }
 
 export async function getUserBookmarksForCollections(
@@ -129,7 +126,8 @@ export async function getCollectionDetail(
   slug: string
 ): Promise<Database['public']['Functions']['get_collection_detail_with_items']['Returns'] | null> {
   return fetchCached(
-    (client) => new AccountService(client).getCollectionDetailWithItems({ p_user_id: userId, p_slug: slug }),
+    (client) =>
+      new AccountService(client).getCollectionDetailWithItems({ p_user_id: userId, p_slug: slug }),
     {
       keyParts: ['collection', userId, slug],
       tags: ['users', `user-${userId}`, 'collections', `collection-${slug}`],
@@ -162,7 +160,11 @@ export async function getSponsorshipAnalytics(
   sponsorshipId: string
 ): Promise<Database['public']['Functions']['get_sponsorship_analytics']['Returns'] | null> {
   return fetchCached(
-    (client) => new AccountService(client).getSponsorshipAnalytics({ p_user_id: userId, p_sponsorship_id: sponsorshipId }),
+    (client) =>
+      new AccountService(client).getSponsorshipAnalytics({
+        p_user_id: userId,
+        p_sponsorship_id: sponsorshipId,
+      }),
     {
       keyParts: ['sponsorship', userId, sponsorshipId],
       tags: ['users', `user-${userId}`, 'sponsorships', `sponsorship-${sponsorshipId}`],
@@ -220,10 +222,11 @@ export async function getSubmissionDashboard(
   contributorsLimit = 5
 ): Promise<Database['public']['Functions']['get_submission_dashboard']['Returns'] | null> {
   return fetchCached(
-    (client) => new AccountService(client).getSubmissionDashboard({
-      p_recent_limit: recentLimit,
-      p_contributors_limit: contributorsLimit,
-    }),
+    (client) =>
+      new AccountService(client).getSubmissionDashboard({
+        p_recent_limit: recentLimit,
+        p_contributors_limit: contributorsLimit,
+      }),
     {
       keyParts: ['submission-dashboard', recentLimit, contributorsLimit],
       tags: ['submissions', 'dashboard', 'content'],
@@ -237,11 +240,11 @@ export async function getSubmissionDashboard(
 
 /**
  * Account Dashboard Bundle - Shared data per request
- * 
+ *
  * Fetches dashboard, user library, and homepage data in parallel to reduce
  * duplicate data fetching across account pages. This ensures each request
  * only fetches shared data once, improving performance and reducing Supabase load.
- * 
+ *
  * @param userId - Authenticated user ID
  * @param categoryIds - Homepage category IDs (optional, defaults to getHomepageCategoryIds)
  * @returns Bundle containing dashboard, library, and homepage data
@@ -259,16 +262,16 @@ export async function getAccountDashboardBundle(
   // Lazy import to avoid circular dependencies
   const { getHomepageData } = await import('./content/homepage.ts');
   const { getHomepageCategoryIds } = await import('./config/category/index.ts');
-  
+
   const finalCategoryIds = categoryIds ?? getHomepageCategoryIds;
-  
+
   // Fetch all three data sources in parallel
   const [dashboard, library, homepage] = await Promise.all([
     getAccountDashboard(userId),
     getUserLibrary(userId),
     getHomepageData(finalCategoryIds),
   ]);
-  
+
   return {
     dashboard,
     library,

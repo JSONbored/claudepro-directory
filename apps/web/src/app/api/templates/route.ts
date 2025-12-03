@@ -6,10 +6,15 @@
  *
  * Runtime: Node.js (required for Supabase client with service role)
  */
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
-import { generateRequestId, logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+  createErrorResponse,
+} from '@heyclaude/web-runtime/logging/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -17,7 +22,7 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   // Generate single requestId for this API request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,

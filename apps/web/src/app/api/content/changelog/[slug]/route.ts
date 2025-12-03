@@ -13,15 +13,17 @@ import {
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient, badRequestResponse, getOnlyCorsHeaders, buildCacheHeaders  } from '@heyclaude/web-runtime/server';
+import {
+  createSupabaseAnonClient,
+  badRequestResponse,
+  getOnlyCorsHeaders,
+  buildCacheHeaders,
+} from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({
     requestId,

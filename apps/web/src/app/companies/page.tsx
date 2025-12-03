@@ -1,6 +1,22 @@
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, grid, animate, marginBottom, muted, iconLeading, iconSize, weight, radius ,size  , gap , padding , row , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  grid,
+  animate,
+  marginBottom,
+  muted,
+  iconLeading,
+  iconSize,
+  weight,
+  radius,
+  size,
+  gap,
+  padding,
+  row,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building,
@@ -10,23 +26,27 @@ import {
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, Button ,
+import {
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 
-
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
     loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
@@ -101,7 +121,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function CompaniesPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -143,16 +163,20 @@ export default async function CompaniesPage() {
   return (
     <div className={`${minHeight.screen} bg-background`}>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border">
+      <section className="border-border relative overflow-hidden border-b">
         <div className={`container mx-auto ${padding.xDefault} py-20`}>
           <div className={`mx-auto ${maxWidth['3xl']}`}>
             <div className={`${marginBottom.comfortable} flex justify-center`}>
-              <div className={`rounded-full bg-accent/10 ${padding.compact}`}>
-                <Building className="h-8 w-8 text-primary" />
+              <div className={`bg-accent/10 rounded-full ${padding.compact}`}>
+                <Building className="text-primary h-8 w-8" />
               </div>
             </div>
 
-            <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']} tracking-tight sm:text-5xl`}>Companies Directory</h1>
+            <h1
+              className={`${marginBottom.default} ${weight.bold} ${size['4xl']} tracking-tight sm:text-5xl`}
+            >
+              Companies Directory
+            </h1>
 
             <p className={`mx-auto mt-4 ${maxWidth.xl} ${muted.default} ${size.lg}`}>
               Discover companies building the future with Claude and Cursor
@@ -184,7 +208,9 @@ export default async function CompaniesPage() {
           <Card>
             <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
               <Building className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
-              <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No companies yet</h3>
+              <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>
+                No companies yet
+              </h3>
               <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
                 Be the first company to join the directory!
               </p>
@@ -199,21 +225,28 @@ export default async function CompaniesPage() {
         ) : (
           <div className={grid.responsive3}>
             {companies.map((company, index) => (
-              <Card key={company.id} className="card-gradient transition-all duration-200 hover:shadow-lg">
-                {company.featured ? <div className="-top-2 -right-2 absolute z-10">
+              <Card
+                key={company.id}
+                className="card-gradient transition-all duration-200 hover:shadow-lg"
+              >
+                {company.featured ? (
+                  <div className="absolute -top-2 -right-2 z-10">
                     <UnifiedBadge variant="base" className="bg-accent text-accent-foreground">
                       <Star className={iconLeading.xs} />
                       Featured
                     </UnifiedBadge>
-                  </div> : null}
+                  </div>
+                ) : null}
 
-                  <CardHeader>
+                <CardHeader>
                   <div className={`${row.default}`}>
                     {(() => {
                       // Validate logo URL is safe (from trusted sources only)
                       if (!company.logo) {
                         return (
-                          <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
+                          <div
+                            className={`flex h-12 w-12 items-center justify-center ${radius.lg} bg-accent border`}
+                          >
                             <Building className={`h-6 w-6 ${muted.default}`} />
                           </div>
                         );
@@ -223,7 +256,9 @@ export default async function CompaniesPage() {
                         // Only allow HTTPS
                         if (parsed.protocol !== 'https:') {
                           return (
-                            <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
+                            <div
+                              className={`flex h-12 w-12 items-center justify-center ${radius.lg} bg-accent border`}
+                            >
                               <Building className={`h-6 w-6 ${muted.default}`} />
                             </div>
                           );
@@ -245,7 +280,9 @@ export default async function CompaniesPage() {
                           isAwsS3;
                         if (!isTrustedSource) {
                           return (
-                            <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
+                            <div
+                              className={`flex h-12 w-12 items-center justify-center ${radius.lg} bg-accent border`}
+                            >
                               <Building className={`h-6 w-6 ${muted.default}`} />
                             </div>
                           );
@@ -262,7 +299,9 @@ export default async function CompaniesPage() {
                         );
                       } catch {
                         return (
-                          <div className={`flex h-12 w-12 items-center justify-center ${radius.lg} border bg-accent`}>
+                          <div
+                            className={`flex h-12 w-12 items-center justify-center ${radius.lg} bg-accent border`}
+                          >
                             <Building className={`h-6 w-6 ${muted.default}`} />
                           </div>
                         );
@@ -277,18 +316,23 @@ export default async function CompaniesPage() {
                           {company.name}
                         </Link>
                       </CardTitle>
-                      {company.industry ? <CardDescription>{company.industry}</CardDescription> : null}
+                      {company.industry ? (
+                        <CardDescription>{company.industry}</CardDescription>
+                      ) : null}
                     </div>
                   </div>
                 </CardHeader>
 
                 <CardContent>
-                  {company.description ? <p className={`${marginBottom.default} line-clamp-2 ${muted.sm}`}>
+                  {company.description ? (
+                    <p className={`${marginBottom.default} line-clamp-2 ${muted.sm}`}>
                       {company.description}
-                    </p> : null}
+                    </p>
+                  ) : null}
 
                   {/* Job Statistics from RPC/data layer (getCompanyProfile RPC) */}
-                  {company.stats && (company.stats.active_jobs ?? 0) > 0 ? <div className={`${marginBottom.default} flex flex-wrap ${gap.compact}`}>
+                  {company.stats && (company.stats.active_jobs ?? 0) > 0 ? (
+                    <div className={`${marginBottom.default} flex flex-wrap ${gap.compact}`}>
                       <UnifiedBadge variant="base" style="secondary" className="text-xs">
                         <Briefcase className={iconLeading.xs} />
                         {company.stats.active_jobs ?? 0} Active{' '}
@@ -307,13 +351,16 @@ export default async function CompaniesPage() {
                           {company.stats.remote_jobs ?? 0} Remote
                         </UnifiedBadge>
                       )}
-                    </div> : null}
+                    </div>
+                  ) : null}
 
                   <div className={between.center}>
                     {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
-                    {company.size ? <UnifiedBadge variant="base" style="outline" className="text-xs">
+                    {company.size ? (
+                      <UnifiedBadge variant="base" style="outline" className="text-xs">
                         {company.size} employees
-                      </UnifiedBadge> : null}
+                      </UnifiedBadge>
+                    ) : null}
 
                     {(() => {
                       const safeWebsiteUrl = getSafeWebsiteUrl(company.website);

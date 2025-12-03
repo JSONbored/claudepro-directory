@@ -21,7 +21,8 @@ import { iconSize, iconLeading } from '../../design-system/styles/icons.ts';
 import { Button } from './button.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card.tsx';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
-import { useCallback } from 'react';
+import type { ComponentType, ErrorInfo } from 'react';
+import React, { useCallback } from 'react';
 
 /**
  * ErrorFallback component using web-runtime UI primitives
@@ -89,7 +90,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
  */
 export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
   const handleError = useCallback(
-    (error: Error, errorInfo: { componentStack?: string | null }) => {
+    (error: Error, errorInfo: ErrorInfo) => {
       // Use centralized error handler for consistent logging and tracking
       createErrorBoundaryFallback(error, {
         componentStack: errorInfo.componentStack || '',
@@ -98,12 +99,19 @@ export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
     []
   );
 
+  // Type assertion needed for React 19 compatibility with react-error-boundary v6
+  const ErrorBoundaryComponent = ReactErrorBoundary as unknown as ComponentType<{
+    FallbackComponent: ComponentType<ErrorFallbackProps>;
+    onError: (error: Error, errorInfo: ErrorInfo) => void;
+    children: React.ReactNode;
+  }>;
+
   return (
-    <ReactErrorBoundary
+    <ErrorBoundaryComponent
       FallbackComponent={fallback || ErrorFallback}
       onError={handleError}
     >
       {children}
-    </ReactErrorBoundary>
+    </ErrorBoundaryComponent>
   );
 }

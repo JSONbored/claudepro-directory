@@ -1,6 +1,13 @@
-import { spaceY, marginBottom, radius, padding, row , gap , minHeight } from '@heyclaude/web-runtime/design-system';
-import { getSkeletonKeys, Skeleton  } from '@heyclaude/web-runtime/ui';
-
+import {
+  spaceY,
+  marginBottom,
+  radius,
+  padding,
+  row,
+  gap,
+  minHeight,
+} from '@heyclaude/web-runtime/design-system';
+import { getSkeletonKeys, Skeleton } from '@heyclaude/web-runtime/ui';
 
 const CODE_LINE_KEYS = getSkeletonKeys(8);
 
@@ -20,7 +27,7 @@ export default function Loading() {
   return (
     <div className={`${minHeight.screen} bg-background`}>
       {/* Header */}
-      <div className="border-border/50 border-b bg-card/30">
+      <div className="border-b border-border/50 bg-card/30">
         <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
           {/* Back button */}
           <Skeleton size="sm" width="sm" className={marginBottom.comfortable} />

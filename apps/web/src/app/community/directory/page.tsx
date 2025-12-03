@@ -1,9 +1,17 @@
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
-import { marginBottom, muted, weight , size  , gap , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  marginBottom,
+  muted,
+  weight,
+  size,
+  gap,
+  padding,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
@@ -20,7 +28,7 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   // Generate single requestId for this component
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -127,7 +135,9 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
     <div className={`container mx-auto ${padding.xDefault} ${padding.yRelaxed}`}>
       {/* Header */}
       <div className={`mx-auto ${marginBottom.section} ${maxWidth['3xl']} text-center`}>
-        <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']}`}>Community Directory</h1>
+        <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']}`}>
+          Community Directory
+        </h1>
         <p className={muted.lg}>
           Connect with Claude Code contributors, power users, and community experts
         </p>

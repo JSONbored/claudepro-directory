@@ -4,17 +4,29 @@ import {
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, iconSize, spaceY, muted, marginTop, weight ,size , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  iconSize,
+  spaceY,
+  muted,
+  marginTop,
+  weight,
+  size,
+  gap,
+} from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, SimpleCopyButton,
+import {
+  UnifiedBadge,
+  SimpleCopyButton,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -54,10 +66,10 @@ export async function generateMetadata({ params }: CollectionPageProperties): Pr
  */
 export default async function CollectionDetailPage({ params }: CollectionPageProperties) {
   const { slug } = await params;
-  
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -161,11 +173,15 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
           <div className="flex-1">
             <div className={`${cluster.compact} mb-2`}>
               <h1 className={`${weight.bold} ${size['3xl']}`}>{collection.name}</h1>
-              {collection.is_public ? <UnifiedBadge variant="base" style="outline" className="text-xs">
+              {collection.is_public ? (
+                <UnifiedBadge variant="base" style="outline" className="text-xs">
                   Public
-                </UnifiedBadge> : null}
+                </UnifiedBadge>
+              ) : null}
             </div>
-            {collection.description ? <p className={muted.default}>{collection.description}</p> : null}
+            {collection.description ? (
+              <p className={muted.default}>{collection.description}</p>
+            ) : null}
             <div className={`${marginTop.compact} ${muted.sm}`}>
               {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
               {collection.view_count} views
@@ -173,7 +189,8 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
           </div>
 
           <div className={cluster.compact}>
-            {shareUrl ? <SimpleCopyButton
+            {shareUrl ? (
+              <SimpleCopyButton
                 content={shareUrl}
                 label="Share"
                 successMessage="Link copied to clipboard!"
@@ -181,7 +198,8 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
                 size="sm"
                 className={cluster.compact}
                 iconClassName="h-4 w-4"
-              /> : null}
+              />
+            ) : null}
             <Link href={`/account/library/${slug}/edit`}>
               <Button variant="outline" size="sm" className={cluster.compact}>
                 <Edit className={iconSize.sm} />
@@ -232,7 +250,9 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
             <CardTitle className={`${weight.medium} ${size.sm}`}>Visibility</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`${weight.bold} ${size['2xl']}`}>{collection.is_public ? 'Public' : 'Private'}</div>
+            <div className={`${weight.bold} ${size['2xl']}`}>
+              {collection.is_public ? 'Public' : 'Private'}
+            </div>
           </CardContent>
         </Card>
       </div>

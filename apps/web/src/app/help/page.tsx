@@ -1,5 +1,21 @@
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, hoverBg, transition, spaceY, marginBottom, marginTop, muted, iconSize, weight, radius ,size , padding , gap , row , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  hoverBg,
+  transition,
+  spaceY,
+  marginBottom,
+  marginTop,
+  muted,
+  iconSize,
+  weight,
+  radius,
+  size,
+  padding,
+  gap,
+  row,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import {
   BookOpen,
   Code,
@@ -8,9 +24,15 @@ import {
   MessageSquare,
   Search,
 } from '@heyclaude/web-runtime/icons';
-import { NavLink, HoverCard , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
+import {
+  NavLink,
+  HoverCard,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-
 
 /**
  * Static Generation: Help page is fully static content
@@ -115,9 +137,13 @@ const commonQuestions = [
  */
 export default function HelpPage() {
   return (
-    <div className={`container mx-auto ${maxWidth['6xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
+    <div
+      className={`container mx-auto ${maxWidth['6xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}
+    >
       <div className={`${marginBottom.section} text-center`}>
-        <h1 className={`${marginBottom.default} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>Help Center</h1>
+        <h1 className={`${marginBottom.default} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>
+          Help Center
+        </h1>
         <p className={`mx-auto ${maxWidth['2xl']} ${muted.lg}`}>
           Find answers, guides, and resources to get the most out of {APP_CONFIG.name}
         </p>
@@ -125,13 +151,15 @@ export default function HelpPage() {
 
       {/* Help Topics Grid */}
       <section className={marginBottom.hero}>
-        <h2 className={`${marginBottom.comfortable} ${weight.semibold} ${size['2xl']}`}>Browse by Topic</h2>
+        <h2 className={`${marginBottom.comfortable} ${weight.semibold} ${size['2xl']}`}>
+          Browse by Topic
+        </h2>
         <div className={`grid ${gap.relaxed} md:grid-cols-2 lg:grid-cols-4`}>
           {helpTopics.map((topic) => (
             <Card key={topic.title}>
               <CardHeader>
                 <CardTitle className={`${cluster.compact} ${size.base}`}>
-                  <topic.icon className="h-5 w-5 text-accent" />
+                  <topic.icon className="text-accent h-5 w-5" />
                   {topic.title}
                 </CardTitle>
               </CardHeader>
@@ -154,21 +182,25 @@ export default function HelpPage() {
 
       {/* Common Questions */}
       <section className={marginBottom.hero}>
-        <h2 className={`${marginBottom.comfortable} ${weight.semibold} ${size['2xl']}`}>Common Questions</h2>
+        <h2 className={`${marginBottom.comfortable} ${weight.semibold} ${size['2xl']}`}>
+          Common Questions
+        </h2>
         <div className={spaceY.relaxed}>
           {commonQuestions.map((item) => (
             <Card key={item.question}>
               <CardHeader>
                 <CardTitle className={`${row.compact} ${size.lg}`}>
-                  <HelpCircle className={`${marginTop.micro} h-5 w-5 shrink-0 text-accent`} />
+                  <HelpCircle className={`${marginTop.micro} text-accent h-5 w-5 shrink-0`} />
                   {item.question}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className={`${marginBottom.compact} ${muted.default}`}>{item.answer}</p>
-                {item.link ? <NavLink href={item.link.href} className={`inline-${cluster.tight}`}>
+                {item.link ? (
+                  <NavLink href={item.link.href} className={`inline-${cluster.tight}`}>
                     {item.link.label} →
-                  </NavLink> : null}
+                  </NavLink>
+                ) : null}
               </CardContent>
             </Card>
           ))}
@@ -177,14 +209,16 @@ export default function HelpPage() {
 
       {/* Quick Actions */}
       <section className={marginBottom.relaxed}>
-        <h2 className={`${marginBottom.comfortable} ${weight.semibold} ${size['2xl']}`}>Quick Actions</h2>
+        <h2 className={`${marginBottom.comfortable} ${weight.semibold} ${size['2xl']}`}>
+          Quick Actions
+        </h2>
         <div className={`grid ${gap.comfortable} md:grid-cols-3`}>
           <Link href="/search" className="block">
             <HoverCard variant="strong">
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">
                   <div className={`${marginBottom.micro} ${cluster.default}`}>
-                    <Search className="h-6 w-6 text-accent" />
+                    <Search className="text-accent h-6 w-6" />
                     <h3 className={weight.semibold}>Search</h3>
                   </div>
                   <p className={muted.sm}>Find configurations and resources</p>
@@ -198,7 +232,7 @@ export default function HelpPage() {
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">
                   <div className={`${marginBottom.micro} ${cluster.default}`}>
-                    <BookOpen className="h-6 w-6 text-accent" />
+                    <BookOpen className="text-accent h-6 w-6" />
                     <h3 className={weight.semibold}>Guides</h3>
                   </div>
                   <p className={muted.sm}>Browse tutorials and how-tos</p>
@@ -212,7 +246,7 @@ export default function HelpPage() {
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">
                   <div className={`${marginBottom.micro} ${cluster.default}`}>
-                    <MessageSquare className="h-6 w-6 text-accent" />
+                    <MessageSquare className="text-accent h-6 w-6" />
                     <h3 className={weight.semibold}>Contact Support</h3>
                   </div>
                   <p className={muted.sm}>Get help from our team</p>
@@ -227,19 +261,23 @@ export default function HelpPage() {
       <Card className="border-accent/20 bg-accent/5">
         <CardContent className="pt-6">
           <div className="text-center">
-            <h2 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>Still need help?</h2>
-            <p className={`${marginBottom.default} ${muted.default}`}>Our community is here to assist you</p>
+            <h2 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>
+              Still need help?
+            </h2>
+            <p className={`${marginBottom.default} ${muted.default}`}>
+              Our community is here to assist you
+            </p>
             <div className={`flex justify-center ${gap.comfortable}`}>
               <NavLink
                 href="/contact"
-                className={`inline-${cluster.compact} ${radius.lg} bg-accent ${padding.xCompact} ${padding.yCompact} text-accent-foreground transition-colors hover:bg-accent/90`}
+                className={`inline-${cluster.compact} ${radius.lg} bg-accent ${padding.xCompact} ${padding.yCompact} text-accent-foreground hover:bg-accent/90 transition-colors`}
               >
                 <MessageSquare className={iconSize.sm} />
                 Contact Us
               </NavLink>
               <Link
                 href="/community"
-                className={`${cluster.compact} ${radius.lg} border border-accent/20 ${padding.xCompact} ${padding.yCompact} ${transition.colors} ${hoverBg.default}`}
+                className={`${cluster.compact} ${radius.lg} border-accent/20 border ${padding.xCompact} ${padding.yCompact} ${transition.colors} ${hoverBg.default}`}
               >
                 Join Community
               </Link>

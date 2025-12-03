@@ -1,6 +1,6 @@
 /**
  * Homepage - Streaming SSR with React Cache Deduplication
- * 
+ *
  * CACHING ARCHITECTURE:
  * - React's cache() deduplicates getHomepageData calls within the same request
  * - unstable_cache provides cross-request caching in fetchCached
@@ -8,18 +8,18 @@
  * - ISR revalidation at 1 hour matches CACHE_TTL.homepage
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { trackRPCFailure } from '@heyclaude/web-runtime/core';
-import { animate, radius , minHeight } from '@heyclaude/web-runtime/design-system';
+import { animate, radius, minHeight } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getHomepageCategoryIds,
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
-import  { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
 import { HomePageLoading } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 
@@ -32,9 +32,11 @@ import { RecentlyViewedRail } from '@/src/components/features/home/recently-view
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
     loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
@@ -42,10 +44,10 @@ const NewsletterCTAVariant = dynamicImport(
 
 /**
  * Rendering & Caching
- * 
+ *
  * ISR: 1 hour (3600s) - Matches CACHE_TTL.homepage
  * Homepage data (featured content, member count, stats) is cached for 1 hour.
- * 
+ *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#revalidate
  */
 export const revalidate = 3600;
@@ -62,7 +64,7 @@ interface HomePageProperties {
 
 /**
  * Top Contributors Server Component
- * 
+ *
  * NOTE: This calls getHomepageData which is deduplicated via React's cache()
  * The data is already fetched in the main page component, so this is a cache hit.
  */
@@ -148,8 +150,10 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
   const newThisWeekCount = (() => {
     // Early return if no homepage data
     if (!homepageResult) return 0;
-    
-    const content = homepageResult.content as undefined | { categoryData?: Record<string, Array<{ date_added?: string }>> };
+
+    const content = homepageResult.content as
+      | undefined
+      | { categoryData?: Record<string, Array<{ date_added?: string }>> };
     if (!content?.categoryData) return 0;
 
     const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;

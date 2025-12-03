@@ -3,18 +3,18 @@ import './view-transitions.css';
 import './micro-interactions.css';
 import './sugar-high.css';
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
 import dynamicImport from 'next/dynamic';
 import localFont from 'next/font/local';
-import { ThemeProvider } from 'next-themes';
+import { ThemeProvider, type ThemeProviderProps } from 'next-themes';
 import { Suspense } from 'react';
 import { Toaster } from 'sonner';
 
@@ -27,9 +27,11 @@ import { NotificationsProvider } from '@/src/components/providers/notifications-
 
 const NotificationToastHandler = dynamicImport(
   () =>
-    import('@/src/components/features/notifications/notification-toast-handler').then((module_) => ({
-      default: module_.NotificationToastHandler,
-    })),
+    import('@/src/components/features/notifications/notification-toast-handler').then(
+      (module_) => ({
+        default: module_.NotificationToastHandler,
+      })
+    ),
   {
     loading: () => null,
   }
@@ -177,7 +179,7 @@ export default async function RootLayout({
 }>) {
   // Generate single requestId for this layout request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -245,12 +247,14 @@ export default async function RootLayout({
         </Suspense>
         <ComponentConfigContextProvider value={componentCardConfig}>
           <ThemeProvider
-            attribute="data-theme"
-            defaultTheme="dark"
-            enableSystem
-            storageKey="claudepro-theme"
-            disableTransitionOnChange={false}
-            enableColorScheme={false}
+            {...({
+              attribute: 'data-theme',
+              defaultTheme: 'dark',
+              enableSystem: true,
+              storageKey: 'claudepro-theme',
+              disableTransitionOnChange: false,
+              enableColorScheme: false,
+            } as ThemeProviderProps)}
           >
             <PostCopyEmailProvider>
               <NotificationsProvider>

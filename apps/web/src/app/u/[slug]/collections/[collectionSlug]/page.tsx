@@ -4,22 +4,41 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import  { type CollectionDetailData } from '@heyclaude/web-runtime/core';
+import { type CollectionDetailData } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getPublicCollectionDetail,
 } from '@heyclaude/web-runtime/data';
-import { between, cluster, iconSize, spaceY, muted, marginBottom, marginTop, weight ,size  , gap , padding , row , minHeight } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  cluster,
+  iconSize,
+  spaceY,
+  muted,
+  marginBottom,
+  marginTop,
+  weight,
+  size,
+  gap,
+  padding,
+  row,
+  minHeight,
+} from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { NavLink, UnifiedBadge, Button ,
+import {
+  NavLink,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle, Separator    } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+  Separator,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -41,7 +60,7 @@ function isValidSlug(slug: string): boolean {
   return /^[a-zA-Z0-9-_]+$/.test(slug);
 }
 
-function getSafeContentLink(item: { content_slug: string; content_type: string; }): null | string {
+function getSafeContentLink(item: { content_slug: string; content_type: string }): null | string {
   if (isValidContentType(item.content_type) && isValidSlug(item.content_slug)) {
     return `/${item.content_type}/${item.content_slug}`;
   }
@@ -49,15 +68,17 @@ function getSafeContentLink(item: { content_slug: string; content_type: string; 
 }
 
 interface PublicCollectionPageProperties {
-  params: Promise<{ collectionSlug: string; slug: string; }>;
+  params: Promise<{ collectionSlug: string; slug: string }>;
 }
 
-export async function generateMetadata({ params }: PublicCollectionPageProperties): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PublicCollectionPageProperties): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
 
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const metadataLogger = logger.child({
     requestId: metadataRequestId,
@@ -110,7 +131,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -126,9 +147,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   });
 
   // Create child logger with viewer context if available
-  const viewerLogger = currentUser?.id 
-    ? reqLogger.child({ viewerId: currentUser.id })
-    : reqLogger;
+  const viewerLogger = currentUser?.id ? reqLogger.child({ viewerId: currentUser.id }) : reqLogger;
 
   // Section: Collection Detail Fetch
   let collectionData: CollectionDetailData | null = null;
@@ -185,19 +204,25 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <div>
             <div className={`${between.center} mb-2`}>
               <div className={cluster.compact}>
-                <h1 className={`${weight.bold} ${size['3xl']}`}>{collection?.name ?? 'Untitled Collection'}</h1>
+                <h1 className={`${weight.bold} ${size['3xl']}`}>
+                  {collection?.name ?? 'Untitled Collection'}
+                </h1>
                 <UnifiedBadge variant="base" style="outline">
                   Public
                 </UnifiedBadge>
               </div>
-              {is_owner ? <Link href={`/account/library/${collection?.slug}`}>
+              {is_owner ? (
+                <Link href={`/account/library/${collection?.slug}`}>
                   <Button variant="outline" size="sm">
                     Manage Collection
                   </Button>
-                </Link> : null}
+                </Link>
+              ) : null}
             </div>
 
-            {collection?.description ? <p className={`max-w-3xl ${muted.default}`}>{collection.description}</p> : null}
+            {collection?.description ? (
+              <p className={`max-w-3xl ${muted.default}`}>{collection.description}</p>
+            ) : null}
 
             <div className={`${marginTop.compact} ${muted.sm}`}>
               Created by <NavLink href={`/u/${slug}`}>{profileUser?.name ?? slug}</NavLink> •{' '}
@@ -208,7 +233,9 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
           {/* Collection Items */}
           <div>
-            <h2 className={`${marginBottom.default} ${weight.semibold} ${size.xl}`}>Items in this Collection</h2>
+            <h2 className={`${marginBottom.default} ${weight.semibold} ${size.xl}`}>
+              Items in this Collection
+            </h2>
 
             {!items || items.length === 0 ? (
               <Card>
@@ -227,9 +254,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                       content_type: string;
                       id: string;
                     } =>
-                      item.id !== null &&
-                      item.content_type !== null &&
-                      item.content_slug !== null
+                      item.id !== null && item.content_type !== null && item.content_slug !== null
                   )
                   .map((item, index) => (
                     <Card key={item.id}>
@@ -245,7 +270,11 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                               </UnifiedBadge>
                               <CardTitle className="text-lg">{item.content_slug}</CardTitle>
                             </div>
-                            {item.notes ? <CardDescription className={marginTop.compact}>{item.notes}</CardDescription> : null}
+                            {item.notes ? (
+                              <CardDescription className={marginTop.compact}>
+                                {item.notes}
+                              </CardDescription>
+                            ) : null}
                           </div>
                           {(() => {
                             const safeLink = getSafeContentLink({
@@ -254,11 +283,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                             });
                             return safeLink ? (
                               <Link href={safeLink}>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className={cluster.compact}
-                                >
+                                <Button variant="ghost" size="sm" className={cluster.compact}>
                                   <ExternalLink className={iconSize.sm} />
                                   View
                                 </Button>

@@ -5,7 +5,7 @@
 
 import 'server-only';
 
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import {
   generateRequestId,
@@ -13,11 +13,13 @@ import {
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient,
+import {
+  createSupabaseAnonClient,
   badRequestResponse,
   jsonResponse,
   getOnlyCorsHeaders,
-  buildCacheHeaders } from '@heyclaude/web-runtime/server';
+  buildCacheHeaders,
+} from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
@@ -67,12 +69,13 @@ export async function GET(request: NextRequest) {
     });
 
     const supabase = createSupabaseAnonClient();
-    const rpcArgs: DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'] = {
-      ...(category === undefined ? {} : { p_category: category }),
-      p_limit: limitParam,
-      p_offset: offsetParam,
-    };
-    
+    const rpcArgs: DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'] =
+      {
+        ...(category === undefined ? {} : { p_category: category }),
+        p_limit: limitParam,
+        p_offset: offsetParam,
+      };
+
     const { data, error } = await supabase.rpc('get_content_paginated_slim', rpcArgs);
 
     if (error) {

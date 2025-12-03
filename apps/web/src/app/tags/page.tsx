@@ -14,10 +14,7 @@
  */
 
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
-import {
-  getAllTagsWithCounts,
-  type TagSummary,
-} from '@heyclaude/web-runtime/data';
+import { getAllTagsWithCounts, type TagSummary } from '@heyclaude/web-runtime/data';
 import {
   emptyCard,
   marginBottom,
@@ -34,13 +31,9 @@ import {
   minHeight,
 } from '@heyclaude/web-runtime/design-system';
 import { Tag, Sparkles, TrendingUp, Layers } from '@heyclaude/web-runtime/icons';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, Card  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { UnifiedBadge, Card } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 
 import {
   AnimatedTagCloud,
@@ -64,8 +57,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: `Browse Tags - ${APP_CONFIG.name}`,
-    description:
-      'Explore all tags and discover Claude AI tools organized by topic.',
+    description: 'Explore all tags and discover Claude AI tools organized by topic.',
     type: 'website',
   },
 };
@@ -99,12 +91,12 @@ export default async function TagsIndexPage() {
   }));
 
   return (
-    <div className={`relative ${minHeight.screen} overflow-hidden bg-background`}>
+    <div className={`relative ${minHeight.screen} bg-background overflow-hidden`}>
       {/* Ambient background effects */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-accent/5 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-muted/30 blur-3xl" />
+        <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-accent/5 blur-3xl" />
+        <div className="absolute -right-40 -bottom-40 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute top-1/3 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-muted/30 blur-3xl" />
       </div>
 
       {/* Hero Section */}
@@ -114,16 +106,18 @@ export default async function TagsIndexPage() {
             {/* Animated icon */}
             <div className={`${marginBottom.comfortable} flex justify-center`}>
               <div className="relative">
-                <div className="absolute inset-0 animate-pulse rounded-full bg-accent/20 blur-xl" />
-                <div className={`relative rounded-full bg-gradient-to-br from-accent/20 to-primary/20 ${padding.default} backdrop-blur-sm`}>
-                  <Tag className="h-12 w-12 text-primary" />
+                <div className="bg-accent/20 absolute inset-0 animate-pulse rounded-full blur-xl" />
+                <div
+                  className={`from-accent/20 to-primary/20 relative rounded-full bg-gradient-to-br ${padding.default} backdrop-blur-sm`}
+                >
+                  <Tag className="text-primary h-12 w-12" />
                 </div>
               </div>
             </div>
 
             <h1
               id="tags-title"
-              className={`${marginBottom.default} bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text ${weight.bold} ${size['4xl']} tracking-tight text-transparent sm:text-5xl md:text-6xl`}
+              className={`${marginBottom.default} from-foreground via-foreground to-muted-foreground bg-gradient-to-r bg-clip-text ${weight.bold} ${size['4xl']} tracking-tight text-transparent sm:text-5xl md:text-6xl`}
             >
               Explore by Topic
             </h1>
@@ -138,7 +132,9 @@ export default async function TagsIndexPage() {
               . Find exactly what you need, organized by what matters to you.
             </p>
 
-            <ul className={`${marginTop.comfortable} flex list-none flex-wrap justify-center ${gap.compact}`}>
+            <ul
+              className={`${marginTop.comfortable} flex list-none flex-wrap justify-center ${gap.compact}`}
+            >
               <li>
                 <UnifiedBadge variant="base" style="secondary">
                   <Sparkles className="mr-1.5 h-3.5 w-3.5" />
@@ -169,15 +165,13 @@ export default async function TagsIndexPage() {
             <section aria-labelledby="featured-tags-title">
               <div className={`${marginBottom.comfortable} ${cluster.default}`}>
                 <div className={`${radius.lg} bg-primary/10 ${padding.tight}`}>
-                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <TrendingUp className="text-primary h-5 w-5" />
                 </div>
                 <div>
                   <h2 id="featured-tags-title" className={`${weight.semibold} ${size.xl}`}>
                     Trending Topics
                   </h2>
-                  <p className={muted.sm}>
-                    Most popular tags by usage
-                  </p>
+                  <p className={muted.sm}>Most popular tags by usage</p>
                 </div>
               </div>
               <FeaturedTagsGrid tags={tagCloudItems} />
@@ -187,7 +181,7 @@ export default async function TagsIndexPage() {
             <section aria-labelledby="all-tags-title">
               <div className={`${marginBottom.comfortable} ${cluster.default}`}>
                 <div className={`${radius.lg} bg-accent/10 ${padding.tight}`}>
-                  <Tag className="h-5 w-5 text-accent" />
+                  <Tag className="text-accent h-5 w-5" />
                 </div>
                 <div>
                   <h2 id="all-tags-title" className={`${weight.semibold} ${size.xl}`}>
@@ -200,9 +194,11 @@ export default async function TagsIndexPage() {
               </div>
 
               {/* Animated Tag Cloud */}
-              <div className={`relative rounded-2xl border border-border/30 bg-gradient-to-br from-background via-background to-muted/10 ${padding.relaxed} md:p-12`}>
+              <div
+                className={`border-border/30 from-background via-background to-muted/10 relative rounded-2xl border bg-gradient-to-br ${padding.relaxed} md:p-12`}
+              >
                 {/* Inner glow effect */}
-                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-accent/5 via-transparent to-primary/5" />
+                <div className="from-accent/5 to-primary/5 pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br via-transparent" />
 
                 <AnimatedTagCloud
                   tags={tagCloudItems}

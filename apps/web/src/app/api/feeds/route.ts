@@ -5,7 +5,7 @@
 
 import 'server-only';
 
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
@@ -14,7 +14,12 @@ import {
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient, badRequestResponse, getOnlyCorsHeaders, buildCacheHeaders  } from '@heyclaude/web-runtime/server';
+import {
+  createSupabaseAnonClient,
+  badRequestResponse,
+  getOnlyCorsHeaders,
+  buildCacheHeaders,
+} from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
@@ -57,7 +62,7 @@ async function generateFeedPayload(
   category: null | string,
   supabase: ReturnType<typeof createSupabaseAnonClient>,
   reqLogger: ReturnType<typeof logger.child>
-): Promise<{ contentType: string; source: string; xml: string; }> {
+): Promise<{ contentType: string; source: string; xml: string }> {
   if (category === 'changelog') {
     if (type === 'rss') {
       const rpcArgs = {

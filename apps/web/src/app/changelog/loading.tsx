@@ -5,9 +5,16 @@
  * Shows placeholder cards matching the layout of ChangelogCard components.
  */
 
-import { cluster, spaceY, marginBottom , padding , gap , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
-import { PageHeaderSkeleton, Skeleton  } from '@heyclaude/web-runtime/ui';
-
+import {
+  cluster,
+  spaceY,
+  marginBottom,
+  padding,
+  gap,
+  radius,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
+import { PageHeaderSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
 
 /**
  * Render a loading skeleton for the changelog page.
@@ -45,7 +52,10 @@ export default function ChangelogLoading() {
       {/* Changelog Cards Skeleton */}
       <div className={spaceY.relaxed}>
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={`changelog-skeleton-${index + 1}`} className={`${radius.lg} border bg-card ${padding.comfortable}`}>
+          <div
+            key={`changelog-skeleton-${index + 1}`}
+            className={`${radius.lg} bg-card border ${padding.comfortable}`}
+          >
             <div className={`${marginBottom.compact} ${cluster.compact}`}>
               <Skeleton size="sm" width="xs" />
               <Skeleton size="sm" width="sm" />

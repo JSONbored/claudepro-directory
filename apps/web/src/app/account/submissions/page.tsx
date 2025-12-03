@@ -5,16 +5,33 @@ import {
   getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, iconSize, submissionBadge, spaceY, muted, marginBottom, marginTop, iconLeading, weight ,size  , gap , padding , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  iconSize,
+  submissionBadge,
+  spaceY,
+  muted,
+  marginBottom,
+  marginTop,
+  iconLeading,
+  weight,
+  size,
+  gap,
+  padding,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, Button ,
+import {
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
@@ -38,13 +55,13 @@ export async function generateMetadata(): Promise<Metadata> {
 // Dangerous Unicode characters that could be used for attacks
 // Using Set for O(1) lookup performance instead of O(n) array includes
 const dangerousCharsSet = new Set([
-  0x20_2E,
-  0x20_2D,
-  0x20_2C,
-  0x20_2B,
-  0x20_2A, // RTL override marks
-  0x20_0E,
-  0x20_0F, // Left-to-right/right-to-left marks
+  0x20_2e,
+  0x20_2d,
+  0x20_2c,
+  0x20_2b,
+  0x20_2a, // RTL override marks
+  0x20_0e,
+  0x20_0f, // Left-to-right/right-to-left marks
   0x20_66,
   0x20_67,
   0x20_68,
@@ -82,7 +99,7 @@ function formatSubmissionDate(dateString: string): string {
 
 function extractPrComponents(
   url: null | string | undefined
-): null | { owner: string; prNumber: string; repo: string; } {
+): null | { owner: string; prNumber: string; repo: string } {
   if (!url || typeof url !== 'string') return null;
 
   // Disallow control characters, invisible chars, and dangerous unicode
@@ -90,8 +107,8 @@ function extractPrComponents(
     const code = url.codePointAt(index);
     if (
       code === undefined ||
-      (code >= 0x0 && code <= 0x1F) ||
-      (code >= 0x7F && code <= 0x9F) ||
+      (code >= 0x0 && code <= 0x1f) ||
+      (code >= 0x7f && code <= 0x9f) ||
       dangerousCharsSet.has(code)
     ) {
       return null;
@@ -151,9 +168,7 @@ function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
 const ALLOWED_TYPES = Constants.public.Enums.submission_type;
 
 // Typed copy for use as submission_type array
-const ALLOWED_TYPES_ARRAY: Database['public']['Enums']['submission_type'][] = [
-  ...ALLOWED_TYPES,
-];
+const ALLOWED_TYPES_ARRAY: Database['public']['Enums']['submission_type'][] = [...ALLOWED_TYPES];
 
 // Strict content slug validation - only alphanumeric, hyphens, underscores
 function isValidSlug(slug: string): boolean {
@@ -193,7 +208,7 @@ function getSafeContentUrl(
 export default async function SubmissionsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -357,7 +372,9 @@ export default async function SubmissionsPage() {
     status: Database['public']['Enums']['submission_status']
   ): null | { href: string } {
     const safeUrl = getSafeContentUrl(type, slug);
-    return safeUrl && status === Constants.public.Enums.submission_status[4] ? { href: safeUrl } : null; // 'merged'
+    return safeUrl && status === Constants.public.Enums.submission_status[4]
+      ? { href: safeUrl }
+      : null; // 'merged'
   }
 
   // Log any submissions with missing IDs for data integrity monitoring
@@ -390,7 +407,9 @@ export default async function SubmissionsPage() {
         <Card>
           <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
             <Send className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
-            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No submissions yet</h3>
+            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>
+              No submissions yet
+            </h3>
             <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
               Share your Claude configurations with the community! Your contributions help everyone
               build better AI workflows.
@@ -430,9 +449,7 @@ export default async function SubmissionsPage() {
       <Card className="border-blue-500/20 bg-blue-500/5">
         <CardContent className="pt-6">
           <div className={`flex ${gap.default}`}>
-            <GitPullRequest
-              className={`${iconSize.md} text-blue-600 mt-0.5 shrink-0`}
-            />
+            <GitPullRequest className={`${iconSize.md} mt-0.5 shrink-0 text-blue-600`} />
             <div className="flex-1">
               <p className={`${weight.medium} text-blue-400 ${size.sm}`}>How it works</p>
               <p className={`${marginTop.tight} ${muted.sm}`}>

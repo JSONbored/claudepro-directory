@@ -5,15 +5,27 @@ import {
   getSponsorshipAnalytics,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, absolute, spaceY, muted, weight ,size , padding , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  absolute,
+  spaceY,
+  muted,
+  weight,
+  size,
+  padding,
+  gap,
+} from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, Button ,
+import {
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -60,7 +72,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -184,9 +196,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
           <h1 className={`${weight.bold} ${size['3xl']}`}>Sponsorship Analytics</h1>
         </div>
-        <p className={muted.default}>
-          Detailed performance metrics for your sponsored content
-        </p>
+        <p className={muted.default}>Detailed performance metrics for your sponsored content</p>
       </div>
 
       {/* Overview Stats */}
@@ -213,9 +223,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             value: `${ctr}%`,
             change: 'Clicks / Impressions',
             trend:
-              Number.parseFloat(ctr) > 2
-                ? 'up'
-                : (Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down'),
+              Number.parseFloat(ctr) > 2 ? 'up' : Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down',
           },
           {
             label: 'Avg. Daily Views',
@@ -253,9 +261,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
             <div>
               <p className={`${weight.medium} ${size.sm}`}>End Date</p>
-              <p className={muted.default}>
-                {new Date(sponsorship.end_date).toLocaleDateString()}
-              </p>
+              <p className={muted.default}>{new Date(sponsorship.end_date).toLocaleDateString()}</p>
             </div>
 
             <div>
@@ -300,9 +306,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                   </div>
                   <div className={`col-span-10 grid grid-cols-2 ${gap.tight}`}>
                     {/* Impressions bar */}
-                    <div className="relative h-8 overflow-hidden rounded bg-muted">
+                    <div className="bg-muted relative h-8 overflow-hidden rounded">
                       <div
-                        className={`${absolute.topLeft} h-full bg-primary/30 transition-all`}
+                        className={`${absolute.topLeft} bg-primary/30 h-full transition-all`}
                         style={{ width: `${(impressions / maxImpressions) * 100}%` }}
                       />
                       <div
@@ -312,9 +318,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                       </div>
                     </div>
                     {/* Clicks bar */}
-                    <div className="relative h-8 overflow-hidden rounded bg-muted">
+                    <div className="bg-muted relative h-8 overflow-hidden rounded">
                       <div
-                        className={`${absolute.topLeft} h-full bg-accent/50 transition-all`}
+                        className={`${absolute.topLeft} bg-accent/50 h-full transition-all`}
                         style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
                       />
                       <div

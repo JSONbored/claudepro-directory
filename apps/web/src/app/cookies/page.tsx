@@ -1,9 +1,16 @@
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { marginBottom, weight, muted ,size  , padding , spaceY , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  marginBottom,
+  weight,
+  muted,
+  size,
+  padding,
+  spaceY,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { NavLink } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
-
+import { type Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/cookies');
@@ -19,13 +26,21 @@ export default function CookiesPage() {
   const lastUpdated = getLastUpdatedDate();
 
   return (
-    <div className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}>
+    <div
+      className={`container mx-auto ${maxWidth['4xl']} ${padding.xDefault} ${padding.yRelaxed} sm:py-12`}
+    >
       <div className={`prose prose-invert ${maxWidth.none}`}>
-        <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}>Cookie Policy</h1>
+        <h1
+          className={`${marginBottom.comfortable} ${weight.bold} ${size['3xl']} sm:${size['4xl']}`}
+        >
+          Cookie Policy
+        </h1>
         <p className={`${marginBottom.relaxed} ${muted.default}`}>Last updated: {lastUpdated}</p>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>1. What Are Cookies</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            1. What Are Cookies
+          </h2>
           <p className={marginBottom.default}>
             Cookies are small text files that are placed on your device when you visit our website.
             They help us provide you with a better experience by remembering your preferences and
@@ -34,7 +49,9 @@ export default function CookiesPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>2. How We Use Cookies</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            2. How We Use Cookies
+          </h2>
           <p className={marginBottom.default}>We use cookies for the following purposes:</p>
           <ul className={`list-disc ${spaceY.compact} pl-6`}>
             <li>
@@ -56,10 +73,14 @@ export default function CookiesPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>3. Types of Cookies We Use</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            3. Types of Cookies We Use
+          </h2>
 
           <div className={marginBottom.comfortable}>
-            <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>Essential Cookies</h3>
+            <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>
+              Essential Cookies
+            </h3>
             <p className={marginBottom.tight}>
               These cookies are necessary for the website to function and cannot be disabled:
             </p>
@@ -71,8 +92,12 @@ export default function CookiesPage() {
           </div>
 
           <div className={marginBottom.comfortable}>
-            <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>Analytics Cookies</h3>
-            <p className={marginBottom.tight}>We use privacy-focused analytics to understand usage patterns:</p>
+            <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>
+              Analytics Cookies
+            </h3>
+            <p className={marginBottom.tight}>
+              We use privacy-focused analytics to understand usage patterns:
+            </p>
             <ul className={`list-disc ${spaceY.tight} pl-6`}>
               <li>Umami Analytics (privacy-focused, no personal data tracked)</li>
               <li>Vercel Analytics (performance monitoring)</li>
@@ -80,7 +105,9 @@ export default function CookiesPage() {
           </div>
 
           <div className={marginBottom.comfortable}>
-            <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>Preference Cookies</h3>
+            <h3 className={`${marginBottom.compact} ${weight.semibold} ${size.xl}`}>
+              Preference Cookies
+            </h3>
             <p className={marginBottom.tight}>These cookies remember your choices:</p>
             <ul className={`list-disc ${spaceY.tight} pl-6`}>
               <li>Theme preference (dark/light mode)</li>
@@ -90,8 +117,12 @@ export default function CookiesPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>4. Third-Party Cookies</h2>
-          <p className={marginBottom.default}>We use the following third-party services that may set cookies:</p>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            4. Third-Party Cookies
+          </h2>
+          <p className={marginBottom.default}>
+            We use the following third-party services that may set cookies:
+          </p>
           <ul className={`list-disc ${spaceY.compact} pl-6`}>
             <li>
               <strong>Vercel:</strong> Hosting and performance monitoring
@@ -106,11 +137,17 @@ export default function CookiesPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>5. Managing Cookies</h2>
-          <p className={marginBottom.default}>You can control and manage cookies in several ways:</p>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            5. Managing Cookies
+          </h2>
+          <p className={marginBottom.default}>
+            You can control and manage cookies in several ways:
+          </p>
 
           <div className={marginBottom.default}>
-            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.lg}`}>Browser Settings</h3>
+            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.lg}`}>
+              Browser Settings
+            </h3>
             <p className={marginBottom.tight}>Most browsers allow you to:</p>
             <ul className={`list-disc ${spaceY.tight} pl-6`}>
               <li>View and delete cookies</li>
@@ -122,7 +159,9 @@ export default function CookiesPage() {
           </div>
 
           <div className={marginBottom.default}>
-            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.lg}`}>Browser-Specific Instructions</h3>
+            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.lg}`}>
+              Browser-Specific Instructions
+            </h3>
             <ul className={`list-disc ${spaceY.tight} pl-6`}>
               <li>
                 <strong>Chrome:</strong> Settings → Privacy and Security → Cookies and other site
@@ -143,7 +182,9 @@ export default function CookiesPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>6. Impact of Disabling Cookies</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            6. Impact of Disabling Cookies
+          </h2>
           <p className={marginBottom.default}>
             If you disable cookies, some features of our website may not function properly:
           </p>
@@ -155,7 +196,9 @@ export default function CookiesPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>7. Updates to This Policy</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            7. Updates to This Policy
+          </h2>
           <p className={marginBottom.default}>
             We may update this Cookie Policy from time to time. Any changes will be posted on this
             page with an updated "Last updated" date.
@@ -163,7 +206,9 @@ export default function CookiesPage() {
         </section>
 
         <section className={marginBottom.relaxed}>
-          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>8. Contact Us</h2>
+          <h2 className={`${marginBottom.default} ${weight.semibold} ${size['2xl']}`}>
+            8. Contact Us
+          </h2>
           <p className={marginBottom.default}>
             If you have questions about our use of cookies, please{' '}
             <NavLink href="/contact">contact us</NavLink> or review our{' '}

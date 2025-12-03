@@ -15,7 +15,6 @@ import { normalizeRpcResult } from './content-helpers.ts';
 
 const JOBS_CATEGORY = Constants.public.Enums.content_category[9] as string; // 'jobs'
 
-
 const COMPANY_DETAIL_TTL_KEY = 'cache.company_detail.ttl_seconds';
 
 type GetCompanyAdminProfileReturn =
@@ -109,7 +108,8 @@ export async function getCompaniesList(
 
   try {
     return await fetchCached(
-      (client) => new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
+      (client) =>
+        new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
       {
         keyParts: ['companies-list', limit, offset],
         tags: ['companies', JOBS_CATEGORY],
@@ -151,7 +151,7 @@ class CompanySearchError extends Error {
 
 /**
  * Internal function that performs company search.
- * 
+ *
  * CRITICAL: This function throws on error instead of returning empty array,
  * to prevent caching of error states when used inside unstable_cache.
  */
@@ -167,7 +167,7 @@ async function fetchCompanySearchResultsInternal(
   });
 
   const { trackPerformance } = await import('../utils/performance-metrics');
-  
+
   try {
     const { result } = await trackPerformance(
       async () => {
@@ -187,7 +187,7 @@ async function fetchCompanySearchResultsInternal(
         logLevel: 'info',
       }
     );
-    
+
     return result;
   } catch (error) {
     // CRITICAL: Throw error instead of returning empty array to prevent caching
@@ -203,7 +203,7 @@ async function fetchCompanySearchResultsInternal(
 
 /**
  * Search for companies by query string.
- * 
+ *
  * CRITICAL: Uses throw-outside-cache pattern to prevent caching of error states.
  * - Success: Results are cached for the configured TTL
  * - Error: Throws CompanySearchError which is caught OUTSIDE the cache, returning [] without caching
@@ -234,12 +234,16 @@ export async function searchCompanies(query: string, limit = 10): Promise<Compan
       return [];
     }
     // Unexpected error - log and return empty
-    logger.error('Unexpected company search error', normalizeError(error, 'Unexpected company search error'), {
-      operation: 'searchCompanies',
-      module: 'data/companies',
-      query: trimmed,
-      limit,
-    });
+    logger.error(
+      'Unexpected company search error',
+      normalizeError(error, 'Unexpected company search error'),
+      {
+        operation: 'searchCompanies',
+        module: 'data/companies',
+        query: trimmed,
+        limit,
+      }
+    );
     return [];
   }
 }

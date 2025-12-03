@@ -1,7 +1,11 @@
 import 'server-only';
 
 import { SearchService } from '@heyclaude/data-layer';
-import { Constants, type Database as DatabaseGenerated, type Json } from '@heyclaude/database-types';
+import {
+  Constants,
+  type Database as DatabaseGenerated,
+  type Json,
+} from '@heyclaude/database-types';
 import {
   highlightSearchTerms,
   highlightSearchTermsArray,
@@ -9,7 +13,12 @@ import {
   validateLimit,
   validateQueryString,
 } from '@heyclaude/shared-runtime';
-import { generateRequestId, logger, createErrorResponse, toLogContextValue } from '@heyclaude/web-runtime/logging/server';
+import {
+  generateRequestId,
+  logger,
+  createErrorResponse,
+  toLogContextValue,
+} from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   badRequestResponse,
@@ -19,14 +28,14 @@ import {
   handleOptionsRequest,
   enqueuePulseEventServer,
 } from '@heyclaude/web-runtime/server';
-import  { type NextRequest } from 'next/server';
+import { type NextRequest } from 'next/server';
 
 const CORS = getWithAuthCorsHeaders;
 const DEFAULT_ENTITIES = ['content', 'company', 'job', 'user'] as const;
 const VALID_ENTITIES = new Set(DEFAULT_ENTITIES);
 const VALID_SORTS = ['relevance', 'popularity', 'newest', 'alphabetical'] as const;
-const CONTENT_CATEGORY_VALUES =
-  Constants.public.Enums.content_category as readonly DatabaseGenerated['public']['Enums']['content_category'][];
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums
+  .content_category as readonly DatabaseGenerated['public']['Enums']['content_category'][];
 const JOB_CATEGORY_VALUES = Constants.public.Enums.job_category as readonly JobCategory[];
 const JOB_EMPLOYMENT_VALUES = Constants.public.Enums.job_type as readonly JobEmployment[];
 const JOB_EXPERIENCE_VALUES = Constants.public.Enums.experience_level as readonly JobExperience[];
@@ -106,7 +115,8 @@ export async function GET(request: NextRequest) {
   const jobEmploymentParam = url.searchParams.get('job_employment') ?? undefined;
   const jobExperienceParam = url.searchParams.get('job_experience') ?? undefined;
   const jobRemoteParam = url.searchParams.get('job_remote');
-  const jobRemote = jobRemoteParam === 'true' ? true : (jobRemoteParam === 'false' ? false : undefined);
+  const jobRemote =
+    jobRemoteParam === 'true' ? true : jobRemoteParam === 'false' ? false : undefined;
 
   const jobCategory = validateEnumValue<JobCategory>(jobCategoryParam, JOB_CATEGORY_VALUES);
   const jobEmployment = validateEnumValue<JobEmployment>(jobEmploymentParam, JOB_EMPLOYMENT_VALUES);
@@ -131,7 +141,9 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (entities?.some((entity) => !VALID_ENTITIES.has(entity as (typeof DEFAULT_ENTITIES)[number]))) {
+  if (
+    entities?.some((entity) => !VALID_ENTITIES.has(entity as (typeof DEFAULT_ENTITIES)[number]))
+  ) {
     return badRequestResponse(
       `Invalid entities parameter. Must be one of: ${[...VALID_ENTITIES].join(', ')}`,
       CORS
@@ -150,7 +162,10 @@ export async function GET(request: NextRequest) {
   }
 
   const hasJobFilters = Boolean(
-    jobCategory !== undefined || jobEmployment !== undefined || jobExperience !== undefined || jobRemote !== undefined
+    jobCategory !== undefined ||
+    jobEmployment !== undefined ||
+    jobExperience !== undefined ||
+    jobRemote !== undefined
   );
 
   const searchType = determineSearchType(entities, hasJobFilters);
@@ -278,7 +293,10 @@ function parseCsvParam(value: null | string): string[] | undefined {
   return parts.length > 0 ? parts : undefined;
 }
 
-function validateEnumValue<T extends string>(value: string | undefined, validValues: readonly T[]): T | undefined {
+function validateEnumValue<T extends string>(
+  value: string | undefined,
+  validValues: readonly T[]
+): T | undefined {
   if (!value) return undefined;
   return validValues.includes(value as T) ? (value as T) : undefined;
 }
@@ -341,8 +359,7 @@ async function executeSearch(params: {
     const result = await searchService.filterJobs(jobArgs);
 
     const jobs = result.jobs ?? [];
-    const totalCount =
-      typeof result.total_count === 'number' ? result.total_count : jobs.length;
+    const totalCount = typeof result.total_count === 'number' ? result.total_count : jobs.length;
     return {
       results: jobs as SearchResultRow[],
       totalCount,
@@ -374,8 +391,7 @@ async function executeSearch(params: {
   };
 
   if (categories?.length) {
-    args.p_categories =
-      categories as DatabaseGenerated['public']['Enums']['content_category'][];
+    args.p_categories = categories as DatabaseGenerated['public']['Enums']['content_category'][];
   }
   if (tags?.length) {
     args.p_tags = tags;
@@ -410,7 +426,7 @@ function highlightResults(results: SearchResultRow[], query: string): Highlighte
     const description = typeof descriptionValue === 'string' ? descriptionValue : undefined;
     const author = typeof authorValue === 'string' ? authorValue : undefined;
     const tags = Array.isArray(tagsValue)
-      ? (tagsValue.filter((tag: unknown): tag is string => typeof tag === 'string'))
+      ? tagsValue.filter((tag: unknown): tag is string => typeof tag === 'string')
       : undefined;
 
     if (title) {
@@ -424,11 +440,15 @@ function highlightResults(results: SearchResultRow[], query: string): Highlighte
     }
 
     if (author) {
-      highlighted.author_highlighted = highlightSearchTerms(author, query, { wholeWordsOnly: false });
+      highlighted.author_highlighted = highlightSearchTerms(author, query, {
+        wholeWordsOnly: false,
+      });
     }
 
     if (tags && tags.length > 0) {
-      highlighted.tags_highlighted = highlightSearchTermsArray(tags, query, { wholeWordsOnly: false });
+      highlighted.tags_highlighted = highlightSearchTermsArray(tags, query, {
+        wholeWordsOnly: false,
+      });
     }
 
     return highlighted;

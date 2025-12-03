@@ -4,11 +4,19 @@ import {
   getUserBookmarksForCollections,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { iconSize, cluster, spaceY, muted, marginBottom, weight , size } from '@heyclaude/web-runtime/design-system';
+import {
+  iconSize,
+  cluster,
+  spaceY,
+  muted,
+  marginBottom,
+  weight,
+  size,
+} from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
-import { Button, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -28,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function NewCollectionPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,

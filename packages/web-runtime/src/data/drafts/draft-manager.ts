@@ -23,7 +23,7 @@ import { Constants } from '@heyclaude/database-types';
 
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
-import  { type SubmissionContentType } from '../../types/component.types.ts';
+import { type SubmissionContentType } from '../../types/component.types.ts';
 
 /**
  * Form data structure for drafts

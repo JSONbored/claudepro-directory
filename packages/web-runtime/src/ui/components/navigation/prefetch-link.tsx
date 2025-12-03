@@ -31,10 +31,10 @@
 
 import { usePrefetchOnHover } from '../../../hooks/use-prefetch-on-hover.ts';
 import Link from 'next/link';
-import type { ComponentProps } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 import type { UrlObject } from 'url';
 
-export interface PrefetchLinkProps extends ComponentProps<typeof Link> {
+export interface PrefetchLinkProps extends Omit<ComponentPropsWithoutRef<typeof Link>, 'prefetchDelay' | 'disablePrefetch'> {
   /**
    * Hover delay before prefetch (ms)
    * @default 300

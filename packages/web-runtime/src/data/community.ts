@@ -4,12 +4,7 @@ import { CommunityService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
-import {
-  logger,
-  normalizeError,
-  pulseUserSearch,
-  searchUsersUnified,
-} from '../index.ts';
+import { logger, normalizeError, pulseUserSearch, searchUsersUnified } from '../index.ts';
 import { generateRequestId } from '../utils/request-id.ts';
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
@@ -31,7 +26,7 @@ export async function getCommunityDirectory(options: {
 
   if (searchQuery?.trim()) {
     const { trackPerformance } = await import('../utils/performance-metrics');
-    
+
     try {
       const { result: unifiedResults } = await trackPerformance(
         async () => {
@@ -48,15 +43,15 @@ export async function getCommunityDirectory(options: {
 
       const allUsers: Database['public']['CompositeTypes']['community_directory_user'][] =
         unifiedResults.map((result) => ({
-            id: result.id,
-            slug: result.slug,
-            name: result.title || result.slug || '',
-            image: null,
-            bio: result.description || null,
-            work: null,
-            tier: 'free',
-            created_at: result.created_at,
-          }));
+          id: result.id,
+          slug: result.slug,
+          name: result.title || result.slug || '',
+          image: null,
+          bio: result.description || null,
+          work: null,
+          tier: 'free',
+          created_at: result.created_at,
+        }));
 
       // Fire-and-forget: Generate explicit requestId for traceability in async callback
       const callbackRequestId = generateRequestId();
@@ -82,7 +77,10 @@ export async function getCommunityDirectory(options: {
       };
     } catch (error) {
       // trackPerformance already logs the error, but we log again with context about fallback behavior
-      const normalized = normalizeError(error, 'Community directory search failed, falling back to RPC');
+      const normalized = normalizeError(
+        error,
+        'Community directory search failed, falling back to RPC'
+      );
       reqLogger.warn('Community directory search failed, using RPC fallback', {
         err: normalized,
         searchQuery: searchQuery.trim(),
@@ -120,7 +118,7 @@ export async function getCommunityDirectory(options: {
 
 /**
  * Get a public user profile by slug.
- * 
+ *
  * IMPORTANT: This is a PUBLIC endpoint - uses anonymous Supabase client.
  * - When viewerId is provided, is_following status is included in the response
  * - The RPC function handles privacy checks internally
@@ -140,10 +138,11 @@ export async function getPublicUserProfile(input: {
 
   try {
     return await fetchCached(
-      (client) => new CommunityService(client).getUserProfile({
-        p_user_slug: slug,
-        ...(viewerId ? { p_viewer_id: viewerId } : {})
-      }),
+      (client) =>
+        new CommunityService(client).getUserProfile({
+          p_user_slug: slug,
+          ...(viewerId ? { p_viewer_id: viewerId } : {}),
+        }),
       {
         keyParts: viewerId ? ['user-profile', slug, 'viewer', viewerId] : ['user-profile', slug],
         tags: ['users', `user-${slug}`],
@@ -167,7 +166,7 @@ export async function getPublicUserProfile(input: {
 
 /**
  * Get a public collection's details by user slug and collection slug.
- * 
+ *
  * IMPORTANT: This is a PUBLIC endpoint - uses anonymous Supabase client.
  * - Public collections are viewable by anyone
  * - The RPC function handles privacy checks internally
@@ -187,11 +186,12 @@ export async function getPublicCollectionDetail(input: {
 
   try {
     const data = await fetchCached(
-      (client) => new CommunityService(client).getUserCollectionDetail({
-        p_user_slug: userSlug,
-        p_collection_slug: collectionSlug,
-        ...(viewerId ? { p_viewer_id: viewerId } : {})
-      }),
+      (client) =>
+        new CommunityService(client).getUserCollectionDetail({
+          p_user_slug: userSlug,
+          p_collection_slug: collectionSlug,
+          ...(viewerId ? { p_viewer_id: viewerId } : {}),
+        }),
       {
         keyParts: viewerId
           ? ['collection-detail', userSlug, collectionSlug, 'viewer', viewerId]

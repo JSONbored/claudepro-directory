@@ -5,7 +5,6 @@
 
 import { serializeJsonLd } from '@heyclaude/shared-runtime';
 import { getSEOMetadataWithSchemas } from '@heyclaude/web-runtime/data';
-import Script from 'next/script';
 
 interface StructuredDataProps {
   route: string;
@@ -49,15 +48,14 @@ export async function StructuredData({ route }: StructuredDataProps) {
         const uniqueKey = `${schemaType}-${schemaId}`;
 
         return (
-          <Script
+          <script
             key={uniqueKey}
             id={`structured-data-${uniqueKey}`}
             type="application/ld+json"
-            // eslint-disable-next-line jsx-a11y/no-danger -- JSON-LD structured data is serialized with XSS protection via serializeJsonLd
+            // eslint-disable-next-line react/no-danger -- JSON-LD structured data is serialized with XSS protection via serializeJsonLd
             dangerouslySetInnerHTML={{
               __html: serialized,
             }}
-            strategy="afterInteractive"
           />
         );
       })}

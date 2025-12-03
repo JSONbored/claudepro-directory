@@ -4,10 +4,28 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import  { type JobsFilterResult } from '@heyclaude/web-runtime/core';
+import { type JobsFilterResult } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getFilteredJobs } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, grid, muted, absolute, animate, spaceY, marginBottom, iconLeading, iconSize, weight, radius ,size , padding , gap , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  cluster,
+  grid,
+  muted,
+  absolute,
+  animate,
+  spaceY,
+  marginBottom,
+  iconLeading,
+  iconSize,
+  weight,
+  radius,
+  size,
+  padding,
+  gap,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Clock,
@@ -18,14 +36,20 @@ import {
   SlidersHorizontal,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import  { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
-import { UnifiedBadge, Button , Card, CardContent, Input ,
+import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
+import {
+  UnifiedBadge,
+  Button,
+  Card,
+  CardContent,
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  SelectValue,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -51,9 +75,11 @@ export const dynamic = 'force-dynamic';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
     loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
@@ -153,13 +179,13 @@ async function JobsListSection({
     route: '/jobs',
     module: 'apps/web/src/app/jobs',
   });
-   
+
   const hasFilters = Boolean(
     (typeof searchQuery === 'string' && searchQuery !== '') ||
-      (category ?? '') !== 'all' ||
-      (employment ?? '') !== 'any' ||
-      (experience ?? '') !== 'any' ||
-      remote !== undefined
+    (category ?? '') !== 'all' ||
+    (employment ?? '') !== 'any' ||
+    (experience ?? '') !== 'any' ||
+    remote !== undefined
   );
 
   // Use noCache for filtered queries (uncached SSR per Phase 3)
@@ -201,11 +227,17 @@ async function JobsListSection({
     return (
       <Card>
         <CardContent className={`flex flex-col items-center justify-center ${padding.yXl}`}>
-          <div className={`${marginBottom.comfortable} rounded-full bg-accent/10 ${padding.default}`}>
+          <div
+            className={`${marginBottom.comfortable} bg-accent/10 rounded-full ${padding.default}`}
+          >
             <Briefcase className={`h-12 w-12 ${muted.default}`} />
           </div>
-          <h3 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>No Jobs Available Yet</h3>
-          <p className={`${marginBottom.relaxed} ${maxWidth.md} text-center ${muted.default} leading-relaxed`}>
+          <h3 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>
+            No Jobs Available Yet
+          </h3>
+          <p
+            className={`${marginBottom.relaxed} ${maxWidth.md} text-center ${muted.default} leading-relaxed`}
+          >
             We're building our jobs board! Soon you'll find amazing opportunities with companies
             working on the future of AI. Be the first to know when new positions are posted.
           </p>
@@ -281,7 +313,7 @@ async function JobsListSection({
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -360,16 +392,20 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
   return (
     <div className={`${minHeight.screen} bg-background`}>
-      <section className="relative overflow-hidden border-b border-border">
+      <section className="border-border relative overflow-hidden border-b">
         <div className={`container mx-auto ${padding.xDefault} py-20`}>
           <div className={`mx-auto ${maxWidth['3xl']}`}>
             <div className={`${marginBottom.comfortable} flex justify-center`}>
-              <div className={`rounded-full bg-accent/10 ${padding.compact}`}>
-                <Briefcase className="h-8 w-8 text-primary" />
+              <div className={`bg-accent/10 rounded-full ${padding.compact}`}>
+                <Briefcase className="text-primary h-8 w-8" />
               </div>
             </div>
 
-            <h1 className={`${marginBottom.default} ${weight.bold} ${size['4xl']} tracking-tight sm:text-5xl`}>AI Jobs Board</h1>
+            <h1
+              className={`${marginBottom.default} ${weight.bold} ${size['4xl']} tracking-tight sm:text-5xl`}
+            >
+              AI Jobs Board
+            </h1>
 
             <p className={`mx-auto mt-4 ${maxWidth.xl} ${muted.lg}`}>
               Discover opportunities with companies building the future of artificial intelligence.
@@ -381,7 +417,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 fallback={
                   <UnifiedBadge variant="base" style="secondary">
                     <Briefcase className={iconLeading.xs} />
-                    <span className={`inline-block h-4 w-16 ${animate.pulse} rounded bg-muted/40`} />
+                    <span
+                      className={`inline-block h-4 w-16 ${animate.pulse} bg-muted/40 rounded`}
+                    />
                   </UnifiedBadge>
                 }
               >
@@ -411,201 +449,213 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
           <Card className="card-gradient glow-effect">
             <CardContent className={`${spaceY.comfortable} ${padding.comfortable}`}>
               <form method="GET" action="/jobs" className={grid.responsive4}>
-                  <div className="relative">
-                    <Search
-                      className={`${absolute.topHalfLeft} -translate-y-1/2 h-4 w-4 transform ${muted.default}`}
-                    />
-                    <Input
-                      id={searchInputId}
-                      name="search"
-                      placeholder="Search jobs, companies, or skills..."
-                      defaultValue={searchQuery ?? ''}
-                      className="pl-10"
-                    />
-                  </div>
+                <div className="relative">
+                  <Search
+                    className={`${absolute.topHalfLeft} h-4 w-4 -translate-y-1/2 transform ${muted.default}`}
+                  />
+                  <Input
+                    id={searchInputId}
+                    name="search"
+                    placeholder="Search jobs, companies, or skills..."
+                    defaultValue={searchQuery ?? ''}
+                    className="pl-10"
+                  />
+                </div>
 
-                  <Select name="category" defaultValue={category ?? 'all'}>
-                    <SelectTrigger id={categoryFilterId} aria-label="Filter jobs by category">
-                      <Filter className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      <SelectItem value="engineering">Engineering</SelectItem>
-                      <SelectItem value="design">Design</SelectItem>
-                      <SelectItem value="product">Product</SelectItem>
-                      <SelectItem value="marketing">Marketing</SelectItem>
-                      <SelectItem value="sales">Sales</SelectItem>
-                      <SelectItem value="support">Support</SelectItem>
-                      <SelectItem value="research">Research</SelectItem>
-                      <SelectItem value="data">Data</SelectItem>
-                      <SelectItem value="operations">Operations</SelectItem>
-                      <SelectItem value="leadership">Leadership</SelectItem>
-                      <SelectItem value="consulting">Consulting</SelectItem>
-                      <SelectItem value="education">Education</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <Select name="category" defaultValue={category ?? 'all'}>
+                  <SelectTrigger id={categoryFilterId} aria-label="Filter jobs by category">
+                    <Filter className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="engineering">Engineering</SelectItem>
+                    <SelectItem value="design">Design</SelectItem>
+                    <SelectItem value="product">Product</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="sales">Sales</SelectItem>
+                    <SelectItem value="support">Support</SelectItem>
+                    <SelectItem value="research">Research</SelectItem>
+                    <SelectItem value="data">Data</SelectItem>
+                    <SelectItem value="operations">Operations</SelectItem>
+                    <SelectItem value="leadership">Leadership</SelectItem>
+                    <SelectItem value="consulting">Consulting</SelectItem>
+                    <SelectItem value="education">Education</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
 
-                  <Select name="employment" defaultValue={employment ?? 'any'}>
-                    <SelectTrigger
-                      id={employmentFilterId}
-                      aria-label="Filter jobs by employment type"
+                <Select name="employment" defaultValue={employment ?? 'any'}>
+                  <SelectTrigger
+                    id={employmentFilterId}
+                    aria-label="Filter jobs by employment type"
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Employment Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">All Types</SelectItem>
+                    <SelectItem value={Constants.public.Enums.job_type[0]}>Full Time</SelectItem>
+                    <SelectItem value={Constants.public.Enums.job_type[1]}>Part Time</SelectItem>
+                    <SelectItem value={Constants.public.Enums.job_type[2]}>Contract</SelectItem>
+                    <SelectItem value={Constants.public.Enums.job_type[3]}>Freelance</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <div className={cluster.compact}>
+                  <Button
+                    type="button"
+                    variant={remote ? 'default' : 'outline'}
+                    className="flex-1"
+                    asChild
+                  >
+                    <Link
+                      href={buildFilterUrl({
+                        remote: remote ? undefined : 'true',
+                      })}
                     >
-                      <Clock className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Employment Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="any">All Types</SelectItem>
-                      <SelectItem value={Constants.public.Enums.job_type[0]}>Full Time</SelectItem>
-                      <SelectItem value={Constants.public.Enums.job_type[1]}>Part Time</SelectItem>
-                      <SelectItem value={Constants.public.Enums.job_type[2]}>Contract</SelectItem>
-                      <SelectItem value={Constants.public.Enums.job_type[3]}>Freelance</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Remote
+                    </Link>
+                  </Button>
+                  <Button type="submit" size="sm">
+                    Filter
+                  </Button>
+                </div>
 
-                  <div className={cluster.compact}>
-                    <Button
-                      type="button"
-                      variant={remote ? 'default' : 'outline'}
-                      className="flex-1"
-                      asChild
-                    >
+                <Select name="experience" defaultValue={experience ?? 'any'}>
+                  <SelectTrigger
+                    id={experienceFilterId}
+                    aria-label="Filter jobs by experience level"
+                  >
+                    <SlidersHorizontal className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Experience Level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">All Levels</SelectItem>
+                    <SelectItem value={Constants.public.Enums.experience_level[0]}>
+                      Entry level
+                    </SelectItem>
+                    <SelectItem value={Constants.public.Enums.experience_level[1]}>
+                      Mid level
+                    </SelectItem>
+                    <SelectItem value={Constants.public.Enums.experience_level[2]}>
+                      Senior level
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select name="sort" defaultValue={sort}>
+                  <SelectTrigger id={sortFilterId} aria-label="Sort jobs">
+                    <SelectValue placeholder="Sort" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest first</SelectItem>
+                    <SelectItem value="oldest">Oldest first</SelectItem>
+                    <SelectItem value="salary">Highest salary</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <input type="hidden" name="page" value="1" />
+              </form>
+
+              {}
+              {(searchQuery ?? '') !== '' ||
+              (category ?? '') !== 'all' ||
+              (employment ?? '') !== 'any' ||
+              (experience ?? '') !== 'any' ||
+              sort !== 'newest' ||
+              remote ? (
+                <div className={`flex flex-wrap ${gap.compact} border-border mt-4 border-t pt-4`}>
+                  <span className={`${muted.sm}`}>Active filters:</span>
+                  {searchQuery ? (
+                    <UnifiedBadge variant="base" style="secondary">
+                      Search: {searchQuery}
                       <Link
-                        href={buildFilterUrl({
-                          remote: remote ? undefined : 'true',
-                        })}
+                        href={buildFilterUrl({ search: undefined })}
+                        className="hover:text-destructive ml-1"
+                        aria-label="Remove search filter"
                       >
-                        <MapPin className="mr-2 h-4 w-4" />
-                        Remote
+                        ×
                       </Link>
-                    </Button>
-                    <Button type="submit" size="sm">
-                      Filter
-                    </Button>
-                  </div>
-
-                  <Select name="experience" defaultValue={experience ?? 'any'}>
-                    <SelectTrigger
-                      id={experienceFilterId}
-                      aria-label="Filter jobs by experience level"
-                    >
-                      <SlidersHorizontal className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Experience Level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="any">All Levels</SelectItem>
-                      <SelectItem value={Constants.public.Enums.experience_level[0]}>
-                        Entry level
-                      </SelectItem>
-                      <SelectItem value={Constants.public.Enums.experience_level[1]}>
-                        Mid level
-                      </SelectItem>
-                      <SelectItem value={Constants.public.Enums.experience_level[2]}>
-                        Senior level
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select name="sort" defaultValue={sort}>
-                    <SelectTrigger id={sortFilterId} aria-label="Sort jobs">
-                      <SelectValue placeholder="Sort" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="newest">Newest first</SelectItem>
-                      <SelectItem value="oldest">Oldest first</SelectItem>
-                      <SelectItem value="salary">Highest salary</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <input type="hidden" name="page" value="1" />
-                </form>
-
-                { }
-                {((searchQuery ?? '') !== '' ||
-                  (category ?? '') !== 'all' ||
-                  (employment ?? '') !== 'any' ||
-                  (experience ?? '') !== 'any' ||
-                  sort !== 'newest' ||
-                  remote) ? <div className={`flex flex-wrap ${gap.compact} mt-4 border-border border-t pt-4`}>
-                    <span className={`${muted.sm}`}>Active filters:</span>
-                    {searchQuery ? <UnifiedBadge variant="base" style="secondary">
-                        Search: {searchQuery}
-                        <Link
-                          href={buildFilterUrl({ search: undefined })}
-                          className="ml-1 hover:text-destructive"
-                          aria-label="Remove search filter"
-                        >
-                          ×
-                        </Link>
-                      </UnifiedBadge> : null}
-                    {category && category !== 'all' ? <UnifiedBadge variant="base" style="secondary">
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                        <Link
-                          href={buildFilterUrl({ category: undefined })}
-                          className="ml-1 hover:text-destructive"
-                          aria-label="Remove category filter"
-                        >
-                          ×
-                        </Link>
-                      </UnifiedBadge> : null}
-                    {employment && employment !== 'any' ? <UnifiedBadge variant="base" style="secondary">
-                        {employment.charAt(0).toUpperCase() +
-                          employment.slice(1).replace('time', ' Time')}
-                        <Link
-                          href={buildFilterUrl({ employment: undefined })}
-                          className="ml-1 hover:text-destructive"
-                          aria-label="Remove employment type filter"
-                        >
-                          ×
-                        </Link>
-                      </UnifiedBadge> : null}
-                    {experience && experience !== 'any' ? <UnifiedBadge variant="base" style="secondary">
-                        {experience === Constants.public.Enums.experience_level[0]
-                          ? 'Entry level'
-                          : (experience === Constants.public.Enums.experience_level[1]
-                            ? 'Mid level'
-                            : 'Senior level')}
-                        <Link
-                          href={buildFilterUrl({ experience: undefined })}
-                          className="ml-1 hover:text-destructive"
-                          aria-label="Remove experience filter"
-                        >
-                          ×
-                        </Link>
-                      </UnifiedBadge> : null}
-                    {remote ? <UnifiedBadge variant="base" style="secondary">
-                        Remote
-                        <Link
-                          href={buildFilterUrl({ remote: undefined })}
-                          className="ml-1 hover:text-destructive"
-                          aria-label="Remove remote filter"
-                        >
-                          ×
-                        </Link>
-                      </UnifiedBadge> : null}
-                    {sort !== 'newest' && (
-                      <UnifiedBadge variant="base" style="secondary">
-                        Sort: {sort === 'oldest' ? 'Oldest' : 'Highest Salary'}
-                        <Link
-                          href={buildFilterUrl({ sort: undefined })}
-                          className="ml-1 hover:text-destructive"
-                          aria-label="Reset sort"
-                        >
-                          ×
-                        </Link>
-                      </UnifiedBadge>
-                    )}
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={ROUTES.JOBS} className="text-xs">
-                        Clear All
+                    </UnifiedBadge>
+                  ) : null}
+                  {category && category !== 'all' ? (
+                    <UnifiedBadge variant="base" style="secondary">
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                      <Link
+                        href={buildFilterUrl({ category: undefined })}
+                        className="hover:text-destructive ml-1"
+                        aria-label="Remove category filter"
+                      >
+                        ×
                       </Link>
-                    </Button>
-                  </div> : null}
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+                    </UnifiedBadge>
+                  ) : null}
+                  {employment && employment !== 'any' ? (
+                    <UnifiedBadge variant="base" style="secondary">
+                      {employment.charAt(0).toUpperCase() +
+                        employment.slice(1).replace('time', ' Time')}
+                      <Link
+                        href={buildFilterUrl({ employment: undefined })}
+                        className="hover:text-destructive ml-1"
+                        aria-label="Remove employment type filter"
+                      >
+                        ×
+                      </Link>
+                    </UnifiedBadge>
+                  ) : null}
+                  {experience && experience !== 'any' ? (
+                    <UnifiedBadge variant="base" style="secondary">
+                      {experience === Constants.public.Enums.experience_level[0]
+                        ? 'Entry level'
+                        : experience === Constants.public.Enums.experience_level[1]
+                          ? 'Mid level'
+                          : 'Senior level'}
+                      <Link
+                        href={buildFilterUrl({ experience: undefined })}
+                        className="hover:text-destructive ml-1"
+                        aria-label="Remove experience filter"
+                      >
+                        ×
+                      </Link>
+                    </UnifiedBadge>
+                  ) : null}
+                  {remote ? (
+                    <UnifiedBadge variant="base" style="secondary">
+                      Remote
+                      <Link
+                        href={buildFilterUrl({ remote: undefined })}
+                        className="hover:text-destructive ml-1"
+                        aria-label="Remove remote filter"
+                      >
+                        ×
+                      </Link>
+                    </UnifiedBadge>
+                  ) : null}
+                  {sort !== 'newest' && (
+                    <UnifiedBadge variant="base" style="secondary">
+                      Sort: {sort === 'oldest' ? 'Oldest' : 'Highest Salary'}
+                      <Link
+                        href={buildFilterUrl({ sort: undefined })}
+                        className="hover:text-destructive ml-1"
+                        aria-label="Reset sort"
+                      >
+                        ×
+                      </Link>
+                    </UnifiedBadge>
+                  )}
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={ROUTES.JOBS} className="text-xs">
+                      Clear All
+                    </Link>
+                  </Button>
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
       <section className={`container mx-auto ${padding.xDefault} ${padding.ySection}`}>
         <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-[1fr_320px]`}>
@@ -613,11 +663,17 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             <Suspense
               fallback={
                 <Card>
-                  <CardContent className={`flex flex-col items-center justify-center ${padding.yXl}`}>
-                    <div className={`${marginBottom.comfortable} rounded-full bg-accent/10 ${padding.default}`}>
+                  <CardContent
+                    className={`flex flex-col items-center justify-center ${padding.yXl}`}
+                  >
+                    <div
+                      className={`${marginBottom.comfortable} bg-accent/10 rounded-full ${padding.default}`}
+                    >
                       <Briefcase className={`h-12 w-12 ${muted.default}`} />
                     </div>
-                    <h3 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>Loading Jobs...</h3>
+                    <h3 className={`${marginBottom.default} ${weight.bold} ${size['2xl']}`}>
+                      Loading Jobs...
+                    </h3>
                     <p
                       className={`${marginBottom.relaxed} ${maxWidth.md} text-center ${muted.default} leading-relaxed`}
                     >

@@ -1,7 +1,7 @@
 'use server';
 
 import { QuizService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
 
@@ -29,15 +29,16 @@ export async function getConfigRecommendations(
   } = input;
 
   return fetchCached(
-    (client) => new QuizService(client).getRecommendations({
+    (client) =>
+      new QuizService(client).getRecommendations({
         p_use_case: useCase,
         p_experience_level: experienceLevel,
         p_tool_preferences: toolPreferences,
         p_integrations: integrations,
         p_focus_areas: focusAreas,
         p_limit: limit,
-        ...(viewerId ? { p_viewer_id: viewerId } : {})
-    }),
+        ...(viewerId ? { p_viewer_id: viewerId } : {}),
+      }),
     {
       keyParts: [
         'tool-recommendations',

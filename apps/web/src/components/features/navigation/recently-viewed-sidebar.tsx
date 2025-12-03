@@ -128,7 +128,7 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.15 }}
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
               e.preventDefault();
               e.stopPropagation();
               onRemove(item.category, item.slug);

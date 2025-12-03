@@ -96,7 +96,8 @@
     "validate:build:full": "pnpm type-check && pnpm lint && pnpm validate:build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "format": "pnpm lint:eslint --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\" && pnpm lint:eslint --fix",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "email:dev": "email dev --dir apps/web/src/emails --port 3001",
     "email:upload": "turbo run email:upload:exec",
     "dev:exec": "next dev apps/web --turbopack",
@@ -126,7 +127,7 @@
   },
   "devDependencies": {
     "@anthropic-ai/mcpb": "^2.0.1",
-    "@aws-sdk/client-s3": "^3.940.0",
+    "@aws-sdk/client-s3": "^3.943.0",
     "@eslint/js": "^9.39.1",
     "@heyclaude/generators": "workspace:*",
     "@react-email/components": "^1.0.1",
@@ -138,9 +139,10 @@
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/archiver": "^7.0.0",
     "@types/node": "^24.10.1",
-    "@typescript-eslint/eslint-plugin": "^8.48.0",
-    "@typescript-eslint/parser": "^8.48.0",
+    "@typescript-eslint/eslint-plugin": "^8.48.1",
+    "@typescript-eslint/parser": "^8.48.1",
     "archiver": "^7.0.1",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-better-tailwindcss": "^3.7.11",
     "eslint-plugin-boundaries": "^5.3.0",
@@ -149,26 +151,29 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-n": "^17.23.1",
     "eslint-plugin-perfectionist": "^4.15.1",
+    "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-unicorn": "^62.0.0",
     "eslint-plugin-vitest": "^0.5.4",
     "jsdom": "^27.2.0",
-    "knip": "^5.70.2",
-    "lefthook": "^2.0.4",
+    "knip": "^5.71.0",
+    "lefthook": "^2.0.7",
     "ora": "^9.0.0",
+    "prettier": "^3.7.4",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "react": "^18.3.1",
     "react-dom": "18.3.1",
     "server-only": "^0.0.1",
     "tailwindcss": "^4.1.17",
     "ts-prune": "^0.10.3",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "turbo": "^2.6.1",
     "typescript": "5.9.3",
-    "typescript-eslint": "^8.48.0",
+    "typescript-eslint": "^8.48.1",
     "ultracite": "^6.3.8",
-    "vercel": "^48.12.0",
-    "vitest": "^4.0.14"
+    "vercel": "^48.12.1",
+    "vitest": "^4.0.15"
   },
   "pnpm": {
     "overrides": {
@@ -183,6 +188,9 @@
       "esbuild@<=0.24.2": ">=0.25.0",
       "undici@<5.29.0": ">=5.29.0",
       "browserslist": "4.24.4"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "lefthook"
+    ]
   }
 }

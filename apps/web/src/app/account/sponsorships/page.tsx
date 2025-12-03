@@ -4,18 +4,32 @@ import {
   getUserSponsorships,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, muted, spaceY, marginBottom, marginTop, iconLeading, iconSize, weight ,size , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  cluster,
+  muted,
+  spaceY,
+  marginBottom,
+  marginTop,
+  iconLeading,
+  iconSize,
+  weight,
+  size,
+  gap,
+} from '@heyclaude/web-runtime/design-system';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, Button ,
+import {
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
-
 
 /**
  * Dynamic Rendering Required
@@ -35,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * - Current date is between start_date and end_date (inclusive)
  */
 function isSponsorshipActive(
-  sponsorship: { active: boolean | null; end_date: string; start_date: string; },
+  sponsorship: { active: boolean | null; end_date: string; start_date: string },
   now: Date
 ): boolean {
   return (
@@ -65,7 +79,7 @@ function isSponsorshipActive(
 export default async function SponsorshipsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -179,7 +193,8 @@ export default async function SponsorshipsPage() {
           const clickCount = sponsorship.click_count ?? 0;
 
           const hasHitLimit =
-            sponsorship.impression_limit != undefined && impressionCount >= sponsorship.impression_limit;
+            sponsorship.impression_limit != undefined &&
+            impressionCount >= sponsorship.impression_limit;
 
           const ctr =
             impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
@@ -195,7 +210,10 @@ export default async function SponsorshipsPage() {
                     <div className={cluster.compact}>
                       <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
                       {isActive ? (
-                        <UnifiedBadge variant="base" className="bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400">
+                        <UnifiedBadge
+                          variant="base"
+                          className="bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400"
+                        >
                           Active
                         </UnifiedBadge>
                       ) : (
@@ -203,9 +221,14 @@ export default async function SponsorshipsPage() {
                           Inactive
                         </UnifiedBadge>
                       )}
-                      {hasHitLimit ? <UnifiedBadge variant="base" className="bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400">
+                      {hasHitLimit ? (
+                        <UnifiedBadge
+                          variant="base"
+                          className="bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400"
+                        >
                           Limit Reached
-                        </UnifiedBadge> : null}
+                        </UnifiedBadge>
+                      ) : null}
                     </div>
                     <CardTitle className={marginTop.compact}>
                       {sponsorship.content_type} - ID: {sponsorship.content_id}
@@ -228,32 +251,32 @@ export default async function SponsorshipsPage() {
                 {/* Quick stats */}
                 <div className={`${marginBottom.default} grid grid-cols-3 ${gap.comfortable}`}>
                   <div>
-                    <div
-                      className={`${cluster.tight} mb-1 ${muted.xs}`}
-                    >
+                    <div className={`${cluster.tight} mb-1 ${muted.xs}`}>
                       <Eye className={iconSize.xs} />
                       Impressions
                     </div>
-                    <div className={`${weight.bold} ${size['2xl']}`}>{impressionCount.toLocaleString()}</div>
-                    {sponsorship.impression_limit ? <div className={`${muted.default} ${size.xs}`}>
+                    <div className={`${weight.bold} ${size['2xl']}`}>
+                      {impressionCount.toLocaleString()}
+                    </div>
+                    {sponsorship.impression_limit ? (
+                      <div className={`${muted.default} ${size.xs}`}>
                         of {sponsorship.impression_limit.toLocaleString()}
-                      </div> : null}
+                      </div>
+                    ) : null}
                   </div>
 
                   <div>
-                    <div
-                      className={`${cluster.tight} mb-1 ${muted.xs}`}
-                    >
+                    <div className={`${cluster.tight} mb-1 ${muted.xs}`}>
                       <MousePointer className={iconSize.xs} />
                       Clicks
                     </div>
-                    <div className={`${weight.bold} ${size['2xl']}`}>{clickCount.toLocaleString()}</div>
+                    <div className={`${weight.bold} ${size['2xl']}`}>
+                      {clickCount.toLocaleString()}
+                    </div>
                   </div>
 
                   <div>
-                    <div
-                      className={`${cluster.tight} mb-1 ${muted.xs}`}
-                    >
+                    <div className={`${cluster.tight} mb-1 ${muted.xs}`}>
                       <BarChart className={iconSize.xs} />
                       CTR
                     </div>
@@ -262,8 +285,9 @@ export default async function SponsorshipsPage() {
                 </div>
 
                 {/* Progress bar if has limit */}
-                {sponsorship.impression_limit ? <div
-                    className="h-2 w-full rounded-full bg-muted"
+                {sponsorship.impression_limit ? (
+                  <div
+                    className="bg-muted h-2 w-full rounded-full"
                     role="progressbar"
                     aria-valuenow={impressionCount}
                     aria-valuemin={0}
@@ -271,13 +295,14 @@ export default async function SponsorshipsPage() {
                     aria-label={`Impressions: ${impressionCount} of ${sponsorship.impression_limit}`}
                   >
                     <div
-                      className="h-2 rounded-full bg-primary transition-all"
+                      className="bg-primary h-2 rounded-full transition-all"
                       style={{
                         width: `${Math.min(100, (impressionCount / sponsorship.impression_limit) * 100)}%`,
                       }}
                       aria-hidden="true"
                     />
-                  </div> : null}
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
           );

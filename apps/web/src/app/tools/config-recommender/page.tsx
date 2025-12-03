@@ -18,29 +18,43 @@
  */
 
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { cluster, animate, marginBottom, iconLeading, muted, weight, radius ,size  , gap , padding , row , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
-import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge,
+  cluster,
+  animate,
+  marginBottom,
+  iconLeading,
+  muted,
+  weight,
+  radius,
+  size,
+  gap,
+  padding,
+  row,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
+import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import {
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
 import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
     loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
@@ -107,7 +121,9 @@ export default function ConfigRecommenderPage() {
             </UnifiedBadge>
 
             {/* Title */}
-            <h1 className={`${marginBottom.comfortable} bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text ${weight.bold} ${size['4xl']} text-transparent md:text-5xl lg:text-6xl`}>
+            <h1
+              className={`${marginBottom.comfortable} from-foreground to-foreground/70 bg-gradient-to-r bg-clip-text ${weight.bold} ${size['4xl']} text-transparent md:text-5xl lg:text-6xl`}
+            >
               Find Your Perfect Claude Configuration
             </h1>
 
@@ -144,14 +160,16 @@ export default function ConfigRecommenderPage() {
         {/* Benefits Section */}
         <section className={`container mx-auto ${padding.xDefault} pb-16`}>
           <div className={`mx-auto ${maxWidth['4xl']}`}>
-            <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['2xl']}`}>How It Works</h2>
+            <h2 className={`${marginBottom.relaxed} text-center ${weight.bold} ${size['2xl']}`}>
+              How It Works
+            </h2>
 
             <div className={`grid ${gap.relaxed} md:grid-cols-3`}>
               <Card>
                 <CardHeader>
                   <CardTitle className={`${cluster.compact} ${size.lg}`}>
                     <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full bg-primary ${weight.bold} text-primary-foreground ${size.sm}`}
+                      className={`bg-primary flex h-8 w-8 items-center justify-center rounded-full ${weight.bold} text-primary-foreground ${size.sm}`}
                     >
                       1
                     </span>
@@ -170,7 +188,7 @@ export default function ConfigRecommenderPage() {
                 <CardHeader>
                   <CardTitle className={`${cluster.compact} ${size.lg}`}>
                     <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full bg-primary ${weight.bold} text-primary-foreground ${size.sm}`}
+                      className={`bg-primary flex h-8 w-8 items-center justify-center rounded-full ${weight.bold} text-primary-foreground ${size.sm}`}
                     >
                       2
                     </span>
@@ -189,7 +207,7 @@ export default function ConfigRecommenderPage() {
                 <CardHeader>
                   <CardTitle className={`${cluster.compact} ${size.lg}`}>
                     <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full bg-primary ${weight.bold} text-primary-foreground ${size.sm}`}
+                      className={`bg-primary flex h-8 w-8 items-center justify-center rounded-full ${weight.bold} text-primary-foreground ${size.sm}`}
                     >
                       3
                     </span>
@@ -213,48 +231,36 @@ export default function ConfigRecommenderPage() {
             <Card className="border-accent/20 bg-accent/5">
               <CardHeader>
                 <CardTitle className={cluster.compact}>
-                  <BarChart className="h-5 w-5 text-primary" />
+                  <BarChart className="text-primary h-5 w-5" />
                   What You'll Get
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className={`grid ${gap.default} sm:grid-cols-2`}>
                   <li className={`${row.compact}`}>
-                    <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
-                    />
+                    <Sparkles className="text-primary mt-0.5 h-5 w-5 shrink-0" />
                     <span className="text-sm">
                       Personalized match scores for each configuration
                     </span>
                   </li>
                   <li className={`${row.compact}`}>
-                    <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
-                    />
+                    <Sparkles className="text-primary mt-0.5 h-5 w-5 shrink-0" />
                     <span className="text-sm">Clear explanations of why each was recommended</span>
                   </li>
                   <li className={`${row.compact}`}>
-                    <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
-                    />
+                    <Sparkles className="text-primary mt-0.5 h-5 w-5 shrink-0" />
                     <span className="text-sm">Ranked results from best to good fit</span>
                   </li>
                   <li className={`${row.compact}`}>
-                    <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
-                    />
+                    <Sparkles className="text-primary mt-0.5 h-5 w-5 shrink-0" />
                     <span className="text-sm">Shareable results to discuss with your team</span>
                   </li>
                   <li className={`${row.compact}`}>
-                    <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
-                    />
+                    <Sparkles className="text-primary mt-0.5 h-5 w-5 shrink-0" />
                     <span className="text-sm">Direct links to setup guides and documentation</span>
                   </li>
                   <li className={`${row.compact}`}>
-                    <Sparkles
-                      className="h-5 w-5 text-primary mt-0.5 shrink-0"
-                    />
+                    <Sparkles className="text-primary mt-0.5 h-5 w-5 shrink-0" />
                     <span className="text-sm">Filter results by category and use case</span>
                   </li>
                 </ul>

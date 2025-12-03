@@ -26,7 +26,20 @@ import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
-import { iconSize, spaceY, cluster, marginBottom, marginTop, muted, weight ,size  , gap , padding , row , radius } from '@heyclaude/web-runtime/design-system';
+import {
+  iconSize,
+  spaceY,
+  cluster,
+  marginBottom,
+  marginTop,
+  muted,
+  weight,
+  size,
+  gap,
+  padding,
+  row,
+  radius,
+} from '@heyclaude/web-runtime/design-system';
 import { useFieldHighlight, useFormTracking, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
@@ -39,7 +52,7 @@ import {
   X,
 } from '@heyclaude/web-runtime/icons';
 import { useClientLogger } from '@heyclaude/web-runtime/logging/client';
-import  { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import {
   Badge,
   Button,
@@ -62,7 +75,7 @@ import {
   type ValidationState,
 } from '@/src/components/core/forms/wizard/animated-form-field';
 import { InlinePreview } from '@/src/components/core/forms/wizard/inline-preview';
-import  { type WizardStep } from '@/src/components/core/forms/wizard/progress-indicator';
+import { type WizardStep } from '@/src/components/core/forms/wizard/progress-indicator';
 import {
   SocialProofBar,
   StepSocialProof,
@@ -329,9 +342,9 @@ export default function WizardSubmissionPage() {
         const bytes = new Uint8Array(buffer);
         const isValidImage =
           // JPEG: FF D8 FF
-          (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) ||
+          (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) ||
           // PNG: 89 50 4E 47
-          (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) ||
+          (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) ||
           // WebP: 52 49 46 46 ... 57 45 42 50
           (bytes[0] === 0x52 &&
             bytes[1] === 0x49 &&
@@ -903,7 +916,9 @@ function StepTypeSelection({
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>Choose Your Submission Type</h2>
+        <h2 className={`${weight.bold} ${size['3xl']} text-foreground`}>
+          Choose Your Submission Type
+        </h2>
         <p className={`${marginTop.compact} ${muted.lg}`}>
           What would you like to share with the community?
         </p>
@@ -1086,7 +1101,7 @@ function StepBasicInfo({
                 <div className={cluster.comfortable}>
                   <label
                     htmlFor="thumbnail-upload"
-                    className={`flex cursor-pointer items-center ${gap.compact} ${radius.lg} border border-dashed ${padding.xDefault} ${padding.yCompact} transition-colors hover:bg-accent/50`}
+                    className={`flex cursor-pointer items-center ${gap.compact} ${radius.lg} border border-dashed ${padding.xDefault} ${padding.yCompact} hover:bg-accent/50 transition-colors`}
                     style={{
                       borderColor: TOKENS.colors.border.light,
                       ...(isUploadingThumbnail && { opacity: 0.6, pointerEvents: 'none' }),
@@ -1141,7 +1156,7 @@ function StepBasicInfo({
                         onClick={onRemoveThumbnail}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        className="-right-2 -top-2 absolute flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm"
+                        className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm"
                         disabled={isUploadingThumbnail}
                       >
                         <X className={iconSize.sm} />
@@ -1497,9 +1512,7 @@ function StepExamplesTags({
             </CardTitle>
           </CardHeader>
           <CardContent className={spaceY.comfortable}>
-            <p className={muted.sm}>
-              Add examples to show how your configuration is used
-            </p>
+            <p className={muted.sm}>Add examples to show how your configuration is used</p>
 
             {/* Add Example Input */}
             <div className={`flex ${gap.compact}`}>
@@ -1541,7 +1554,7 @@ function StepExamplesTags({
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.9 }}
                         transition={TOKENS.animations.spring.snappy}
-                        className={`group ${row.default} ${radius.lg} border ${padding.compact} transition-all hover:border-accent-primary/50`}
+                        className={`group ${row.default} ${radius.lg} border ${padding.compact} hover:border-accent-primary/50 transition-all`}
                         style={{
                           backgroundColor: TOKENS.colors.background.primary,
                           borderColor: TOKENS.colors.border.default,
@@ -1583,9 +1596,7 @@ function StepExamplesTags({
                   }}
                 >
                   <Code className={`mx-auto mb-3 h-10 w-10 ${muted.default}`} />
-                  <p className={muted.sm}>
-                    No examples yet. Add some to help users understand!
-                  </p>
+                  <p className={muted.sm}>No examples yet. Add some to help users understand!</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1609,15 +1620,11 @@ function StepExamplesTags({
             <CardTitle className={cluster.compact}>
               <Tag className={iconSize.md} />
               Tags
-              <span className={`ml-auto font-normal ${muted.sm}`}>
-                {data.tags.length} tags
-              </span>
+              <span className={`ml-auto font-normal ${muted.sm}`}>{data.tags.length} tags</span>
             </CardTitle>
           </CardHeader>
           <CardContent className={spaceY.comfortable}>
-            <p className={muted.sm}>
-              Add tags to help users discover your submission
-            </p>
+            <p className={muted.sm}>Add tags to help users discover your submission</p>
 
             {/* Add Tag Input */}
             <div className={`flex ${gap.compact}`}>
@@ -1684,7 +1691,7 @@ function StepExamplesTags({
                                 removeTag(tagIndex);
                               }
                             }}
-                            className={`ml-1 rounded-full ${padding.hair} transition-colors hover:bg-accent-primary/20`}
+                            className={`ml-1 rounded-full ${padding.hair} hover:bg-accent-primary/20 transition-colors`}
                           >
                             <X className={iconSize.xs} />
                           </button>
@@ -1703,9 +1710,7 @@ function StepExamplesTags({
                   }}
                 >
                   <Tag className={`mx-auto mb-2 h-8 w-8 ${muted.default}`} />
-                  <p className={muted.sm}>
-                    No tags yet. Add tags to improve discoverability!
-                  </p>
+                  <p className={muted.sm}>No tags yet. Add tags to improve discoverability!</p>
                 </motion.div>
               )}
             </AnimatePresence>

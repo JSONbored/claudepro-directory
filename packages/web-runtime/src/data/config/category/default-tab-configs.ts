@@ -1,6 +1,6 @@
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 
-import  { type TabConfig } from '../../../types/category.ts';
+import { type TabConfig } from '../../../types/category.ts';
 
 /**
  * Standard tabs with Examples tab - for categories WITH examples data (mcp, skills)

@@ -6,7 +6,7 @@
 import 'server-only';
 
 import { TrendingService } from '@heyclaude/data-layer';
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import {
   generateRequestId,
@@ -135,8 +135,7 @@ function mapPopularRows(rows: LoosePopularRow[], fallbackCategory: ContentCatego
 
 function mapRecentRows(rows: LooseRecentRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
-    category:
-      (row.category ?? fallbackCategory ?? DEFAULT_CATEGORY) satisfies ContentCategory,
+    category: (row.category ?? fallbackCategory ?? DEFAULT_CATEGORY) satisfies ContentCategory,
     slug: row.slug,
     title: row.title ?? row.slug,
     description: row.description ?? undefined,
@@ -158,8 +157,9 @@ function mapSidebarTrending(rows: LooseTrendingRow[], fallbackCategory: ContentC
 
 function mapSidebarRecent(rows: LooseRecentRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => {
-    const displayCategory =
-      (row.category ?? fallbackCategory ?? DEFAULT_CATEGORY) satisfies ContentCategory;
+    const displayCategory = (row.category ??
+      fallbackCategory ??
+      DEFAULT_CATEGORY) satisfies ContentCategory;
     const createdAt = row.created_at ?? null;
     return {
       title: row.title ?? row.slug,

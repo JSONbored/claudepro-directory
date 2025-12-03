@@ -1,9 +1,38 @@
-import { emptyCard, marginBottom, marginTop, spaceY, radius , padding , gap , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  emptyCard,
+  marginBottom,
+  marginTop,
+  spaceY,
+  radius,
+  padding,
+  gap,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 
 // Static skeleton IDs to avoid array index keys
-const CONTENT_GRID_SKELETONS = ['cg-1', 'cg-2', 'cg-3', 'cg-4', 'cg-5', 'cg-6', 'cg-7', 'cg-8', 'cg-9'] as const;
-const RELATED_TAG_SKELETONS = ['rt-1', 'rt-2', 'rt-3', 'rt-4', 'rt-5', 'rt-6', 'rt-7', 'rt-8'] as const;
+const CONTENT_GRID_SKELETONS = [
+  'cg-1',
+  'cg-2',
+  'cg-3',
+  'cg-4',
+  'cg-5',
+  'cg-6',
+  'cg-7',
+  'cg-8',
+  'cg-9',
+] as const;
+const RELATED_TAG_SKELETONS = [
+  'rt-1',
+  'rt-2',
+  'rt-3',
+  'rt-4',
+  'rt-5',
+  'rt-6',
+  'rt-7',
+  'rt-8',
+] as const;
 
 export default function TagDetailLoading() {
   return (
@@ -12,7 +41,7 @@ export default function TagDetailLoading() {
       <section className={emptyCard.default}>
         <div className={`container mx-auto ${padding.xDefault} ${padding.yHero}`}>
           <Skeleton className={`${marginBottom.comfortable} h-5 w-24`} />
-          
+
           <div className={`mx-auto ${maxWidth['3xl']}`}>
             <div className={`${marginBottom.comfortable} flex justify-center`}>
               <Skeleton className="h-16 w-16 rounded-full" />

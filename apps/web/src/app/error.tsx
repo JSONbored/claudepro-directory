@@ -1,7 +1,18 @@
 'use client';
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { responsive, muted, marginBottom, marginTop, weight ,size , padding , gap , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  responsive,
+  muted,
+  marginBottom,
+  marginTop,
+  weight,
+  size,
+  padding,
+  gap,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { Button, Card } from '@heyclaude/web-runtime/ui';
@@ -15,7 +26,6 @@ import { useEffect } from 'react';
  */
 // eslint-disable-next-line architectural-rules/require-env-validation-schema -- NODE_ENV is inlined by Next.js at build time, not a runtime lookup
 const isDevelopment = process.env.NODE_ENV === 'development';
-
 
 /**
  * Renders a full-screen error UI shown when an uncaught client-side error occurs and logs the error to the monitoring backend.
@@ -53,24 +63,34 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className={`flex ${minHeight.screen} items-center justify-center bg-background ${padding.xDefault}`}>
+    <div
+      className={`flex ${minHeight.screen} bg-background items-center justify-center ${padding.xDefault}`}
+    >
       <Card className={`w-full ${maxWidth.lg} ${padding.relaxed} text-center`}>
         <div className={marginBottom.comfortable}>
           <div className={`${marginBottom.default} flex justify-center`}>
-            <div className={`rounded-full bg-destructive/10 ${padding.compact}`}>
-              <AlertCircle className="h-12 w-12 text-destructive" aria-hidden="true" />
+            <div className={`bg-destructive/10 rounded-full ${padding.compact}`}>
+              <AlertCircle className="text-destructive h-12 w-12" aria-hidden="true" />
             </div>
           </div>
-          <h1 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`}>Something went wrong</h1>
+          <h1 className={`${marginBottom.tight} ${weight.bold} ${size['2xl']}`}>
+            Something went wrong
+          </h1>
           <p className={muted.default}>
             An unexpected error occurred. We've logged the issue and will investigate it shortly.
           </p>
         </div>
 
-        {isDevelopment && error.message ? <div className={`${marginBottom.comfortable} rounded-md bg-muted ${padding.default} text-left`}>
-            <p className={`font-mono text-destructive ${size.xs}`}>{error.message}</p>
-            {error.digest ? <p className={`${marginTop.compact} font-mono ${muted.xs}`}>Digest: {error.digest}</p> : null}
-          </div> : null}
+        {isDevelopment && error.message ? (
+          <div
+            className={`${marginBottom.comfortable} bg-muted rounded-md ${padding.default} text-left`}
+          >
+            <p className={`text-destructive font-mono ${size.xs}`}>{error.message}</p>
+            {error.digest ? (
+              <p className={`${marginTop.compact} font-mono ${muted.xs}`}>Digest: {error.digest}</p>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className={responsive.smRowGap}>
           <Button onClick={reset} size="lg">

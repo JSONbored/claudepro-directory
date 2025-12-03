@@ -16,7 +16,11 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { routeFluxRequest, handleOptions } from '@heyclaude/web-runtime/flux';
-import { generateRequestId, logger, createErrorResponse  } from '@heyclaude/web-runtime/logging/server';
+import {
+  generateRequestId,
+  logger,
+  createErrorResponse,
+} from '@heyclaude/web-runtime/logging/server';
 import { type NextRequest } from 'next/server';
 
 interface RouteContext {

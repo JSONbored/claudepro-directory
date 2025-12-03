@@ -1,19 +1,17 @@
 import { getUserIdentities } from '@heyclaude/web-runtime';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { spaceY, muted, marginBottom, weight , size } from '@heyclaude/web-runtime/design-system';
+import { spaceY, muted, marginBottom, weight, size } from '@heyclaude/web-runtime/design-system';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { Button,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';

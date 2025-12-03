@@ -74,6 +74,9 @@ export {
   getTotalResourceCount
 } from '../data/config/category/index.ts';
 
+// Tag utilities (client-safe - simple string manipulation)
+export { formatTagForDisplay, formatTagForUrl } from '../data/tags-utils.ts';
+
 // Server Actions (Safe to import in client - they're RPC endpoints)
 // These are treated as RPC calls by Next.js, safe for client import
 export * from '../actions/pulse.ts';

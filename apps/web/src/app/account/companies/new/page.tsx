@@ -3,9 +3,9 @@
  */
 
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
-import { spaceY, muted, marginBottom, weight , size } from '@heyclaude/web-runtime/design-system';
+import { spaceY, muted, marginBottom, weight, size } from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { CompanyForm } from '@/src/components/core/forms/company-form';

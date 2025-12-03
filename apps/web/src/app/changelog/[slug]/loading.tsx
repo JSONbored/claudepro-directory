@@ -5,9 +5,16 @@
  * Shows placeholder content matching the layout of the detail page.
  */
 
-import { spaceY, cluster, marginBottom , padding , gap , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
-import { Skeleton, Separator  } from '@heyclaude/web-runtime/ui';
-
+import {
+  spaceY,
+  cluster,
+  marginBottom,
+  padding,
+  gap,
+  radius,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
+import { Skeleton, Separator } from '@heyclaude/web-runtime/ui';
 
 /**
  * Renders a skeleton UI for a changelog entry detail page.

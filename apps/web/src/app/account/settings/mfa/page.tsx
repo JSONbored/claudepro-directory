@@ -3,7 +3,15 @@
  * Allows users to manage their multi-factor authentication settings
  */
 
-import { iconSize, spaceY, cluster, marginTop, muted, weight , size } from '@heyclaude/web-runtime/design-system';
+import {
+  iconSize,
+  spaceY,
+  cluster,
+  marginTop,
+  muted,
+  weight,
+  size,
+} from '@heyclaude/web-runtime/design-system';
 import { Shield } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
@@ -12,10 +20,10 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
-
 
 import { MFAFactorsListClient } from './mfa-factors-list-client';
 
@@ -44,7 +52,7 @@ export const dynamic = 'force-dynamic';
 export default async function MFASettingsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger
   const reqLogger = logger.child({
     requestId,

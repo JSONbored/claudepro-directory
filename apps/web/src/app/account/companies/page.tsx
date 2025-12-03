@@ -11,7 +11,22 @@ import {
   getUserCompanies,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, cluster, iconSize, spaceY, muted, marginBottom, marginTop, iconLeading, weight ,size  , gap , padding , radius , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  cluster,
+  iconSize,
+  spaceY,
+  muted,
+  marginBottom,
+  marginTop,
+  iconLeading,
+  weight,
+  size,
+  gap,
+  padding,
+  radius,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Briefcase,
   Building2,
@@ -21,21 +36,19 @@ import {
   Eye,
   Plus,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { UnifiedBadge, Button ,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-
 
 /**
  * Dynamic Rendering Required
@@ -213,7 +226,9 @@ export default async function CompaniesPage() {
         <Card>
           <CardContent className={`flex flex-col items-center ${padding.ySection}`}>
             <Building2 className={`${marginBottom.default} h-12 w-12 ${muted.default}`} />
-            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>No companies yet</h3>
+            <h3 className={`${marginBottom.tight} ${weight.semibold} ${size.xl}`}>
+              No companies yet
+            </h3>
             <p className={`${marginBottom.default} ${maxWidth.md} text-center ${muted.default}`}>
               Create a company profile to showcase your organization and post job listings
             </p>
@@ -235,10 +250,7 @@ export default async function CompaniesPage() {
                 id: string;
                 name: string;
                 slug: string;
-              } =>
-                company.id !== null &&
-                company.name !== null &&
-                company.slug !== null
+              } => company.id !== null && company.name !== null && company.slug !== null
             )
             .map((company, index) => {
               return (
@@ -250,7 +262,9 @@ export default async function CompaniesPage() {
                           // Validate logo URL is safe (should be from Supabase storage or trusted domain)
                           if (!company.logo) {
                             return (
-                              <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
+                              <div
+                                className={`flex h-16 w-16 items-center justify-center ${radius.lg} bg-accent border`}
+                              >
                                 <Building2 className={`h-8 w-8 ${muted.default}`} />
                               </div>
                             );
@@ -260,7 +274,9 @@ export default async function CompaniesPage() {
                             // Only allow HTTPS
                             if (parsed.protocol !== 'https:') {
                               return (
-                                <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
+                                <div
+                                  className={`flex h-16 w-16 items-center justify-center ${radius.lg} bg-accent border`}
+                                >
                                   <Building2 className={`h-8 w-8 ${muted.default}`} />
                                 </div>
                               );
@@ -283,7 +299,9 @@ export default async function CompaniesPage() {
                               isAwsS3;
                             if (!isTrustedSource) {
                               return (
-                                <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
+                                <div
+                                  className={`flex h-16 w-16 items-center justify-center ${radius.lg} bg-accent border`}
+                                >
                                   <Building2 className={`h-8 w-8 ${muted.default}`} />
                                 </div>
                               );
@@ -300,7 +318,9 @@ export default async function CompaniesPage() {
                             );
                           } catch {
                             return (
-                              <div className={`flex h-16 w-16 items-center justify-center ${radius.lg} border bg-accent`}>
+                              <div
+                                className={`flex h-16 w-16 items-center justify-center ${radius.lg} bg-accent border`}
+                              >
                                 <Building2 className={`h-8 w-8 ${muted.default}`} />
                               </div>
                             );
@@ -309,9 +329,11 @@ export default async function CompaniesPage() {
                         <div className="flex-1">
                           <div className={cluster.compact}>
                             <CardTitle>{company.name}</CardTitle>
-                            {company.featured ? <UnifiedBadge variant="base" style="default">
+                            {company.featured ? (
+                              <UnifiedBadge variant="base" style="default">
                                 Featured
-                              </UnifiedBadge> : null}
+                              </UnifiedBadge>
+                            ) : null}
                           </div>
                           <CardDescription className={marginTop.tight}>
                             {company.description ?? 'No description provided'}
@@ -373,7 +395,9 @@ export default async function CompaniesPage() {
                   </CardHeader>
 
                   <CardContent>
-                    <div className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}>
+                    <div
+                      className={`${marginBottom.default} flex flex-wrap ${gap.comfortable} ${muted.sm}`}
+                    >
                       <div className={cluster.tight}>
                         <Briefcase className={iconSize.sm} />
                         {company.stats?.active_jobs ?? 0} active job
@@ -383,10 +407,12 @@ export default async function CompaniesPage() {
                         <Eye className={iconSize.sm} />
                         {(company.stats?.total_views ?? 0).toLocaleString()} views
                       </div>
-                      {company.stats?.latest_job_posted_at ? <div className={cluster.tight}>
+                      {company.stats?.latest_job_posted_at ? (
+                        <div className={cluster.tight}>
                           <Calendar className={iconSize.sm} />
                           Last job posted {formatRelativeDate(company.stats.latest_job_posted_at)}
-                        </div> : null}
+                        </div>
+                      ) : null}
                     </div>
 
                     <div className={cluster.compact}>

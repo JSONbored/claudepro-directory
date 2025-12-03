@@ -1,6 +1,20 @@
 import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { cluster, grid, animate, spaceY, muted, marginBottom, weight, radius , size  , gap , padding , minHeight , maxWidth } from '@heyclaude/web-runtime/design-system';
+import {
+  cluster,
+  grid,
+  animate,
+  spaceY,
+  muted,
+  marginBottom,
+  weight,
+  radius,
+  size,
+  gap,
+  padding,
+  minHeight,
+  maxWidth,
+} from '@heyclaude/web-runtime/design-system';
 import {
   Github,
   Layers,
@@ -17,21 +31,29 @@ import {
   getHomepageCategoryIds,
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
-import { UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import {
+  UnifiedBadge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
     loading: () => <div className={`h-32 ${animate.pulse} ${radius.lg} bg-muted/20`} />,
   }
 );
-
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community');
@@ -75,7 +97,7 @@ function formatStatValue(value: null | number | undefined): string {
 export default async function CommunityPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -161,11 +183,13 @@ export default async function CommunityPage() {
               style="outline"
               className={`${marginBottom.comfortable} border-accent/20 bg-accent/5 text-accent`}
             >
-              <Users className="mr-1 h-3 w-3 text-accent" />
+              <Users className="text-accent mr-1 h-3 w-3" />
               Community
             </UnifiedBadge>
 
-            <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:text-6xl`}>Join the Claude Community</h1>
+            <h1 className={`${marginBottom.comfortable} ${weight.bold} ${size['4xl']} md:text-6xl`}>
+              Join the Claude Community
+            </h1>
 
             <p className={`mx-auto mb-8 ${maxWidth['2xl']} ${muted.lg}`}>
               Connect with developers and AI enthusiasts building with Claude. Share your
@@ -173,23 +197,29 @@ export default async function CommunityPage() {
             </p>
 
             <div className={`flex flex-wrap justify-center ${gap.comfortable}`}>
-              {channels.github ? <Button size="lg" asChild>
+              {channels.github ? (
+                <Button size="lg" asChild>
                   <a href={channels.github} target="_blank" rel="noopener noreferrer">
                     <Github className="mr-2 h-5 w-5" />
                     GitHub
                   </a>
-                </Button> : null}
-              {channels.discord ? <Button size="lg" variant="outline" asChild>
+                </Button>
+              ) : null}
+              {channels.discord ? (
+                <Button size="lg" variant="outline" asChild>
                   <a href={channels.discord} target="_blank" rel="noopener noreferrer">
                     <MessageSquare className="mr-2 h-5 w-5" />
                     Discord
                   </a>
-                </Button> : null}
-              {channels.twitter ? <Button size="lg" variant="outline" asChild>
+                </Button>
+              ) : null}
+              {channels.twitter ? (
+                <Button size="lg" variant="outline" asChild>
                   <a href={channels.twitter} target="_blank" rel="noopener noreferrer">
                     <Twitter className="mr-2 h-5 w-5" />X (Twitter)
                   </a>
-                </Button> : null}
+                </Button>
+              ) : null}
             </div>
           </div>
         </div>
@@ -203,7 +233,7 @@ export default async function CommunityPage() {
               <Card key={title}>
                 <CardHeader>
                   <CardTitle className={cluster.compact}>
-                    <Icon className="h-5 w-5 text-primary" />
+                    <Icon className="text-primary h-5 w-5" />
                     {title}
                   </CardTitle>
                 </CardHeader>
@@ -226,20 +256,26 @@ export default async function CommunityPage() {
             </CardHeader>
             <CardContent className={spaceY.comfortable}>
               <div>
-                <h3 className={`${marginBottom.tight} ${weight.semibold}`}>1. Fork the Repository</h3>
+                <h3 className={`${marginBottom.tight} ${weight.semibold}`}>
+                  1. Fork the Repository
+                </h3>
                 <p className={muted.default}>
                   Start by forking our GitHub repository and cloning it to your local machine.
                 </p>
               </div>
               <div>
-                <h3 className={`${marginBottom.tight} ${weight.semibold}`}>2. Add Your Configuration</h3>
+                <h3 className={`${marginBottom.tight} ${weight.semibold}`}>
+                  2. Add Your Configuration
+                </h3>
                 <p className={muted.default}>
                   Create a new JSON file with your Claude configuration in the appropriate content
                   directory.
                 </p>
               </div>
               <div>
-                <h3 className={`${marginBottom.tight} ${weight.semibold}`}>3. Submit a Pull Request</h3>
+                <h3 className={`${marginBottom.tight} ${weight.semibold}`}>
+                  3. Submit a Pull Request
+                </h3>
                 <p className={muted.default}>
                   Submit a pull request with your contribution. Our team will review it promptly.
                 </p>

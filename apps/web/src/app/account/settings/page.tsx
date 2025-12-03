@@ -2,7 +2,7 @@
  * Settings Page - User profile and account management.
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
 import {
   generatePageMetadata,
@@ -10,15 +10,26 @@ import {
   getUserSettings,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { between, spaceY, cluster, muted, marginBottom, weight ,size , gap } from '@heyclaude/web-runtime/design-system';
+import {
+  between,
+  spaceY,
+  cluster,
+  muted,
+  marginBottom,
+  weight,
+  size,
+  gap,
+} from '@heyclaude/web-runtime/design-system';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { Button ,
+import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -60,7 +71,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SettingsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -146,9 +157,11 @@ export default async function SettingsPage() {
     try {
       // Type-safe access to user_metadata (Record<string, unknown> from Supabase)
       const userMetadata = user.user_metadata;
-      const fullName = typeof userMetadata['full_name'] === 'string' ? userMetadata['full_name'] : null;
+      const fullName =
+        typeof userMetadata['full_name'] === 'string' ? userMetadata['full_name'] : null;
       const name = typeof userMetadata['name'] === 'string' ? userMetadata['name'] : null;
-      const avatarUrl = typeof userMetadata['avatar_url'] === 'string' ? userMetadata['avatar_url'] : null;
+      const avatarUrl =
+        typeof userMetadata['avatar_url'] === 'string' ? userMetadata['avatar_url'] : null;
       const picture = typeof userMetadata['picture'] === 'string' ? userMetadata['picture'] : null;
       await ensureUserRecord({
         id: user.id,
@@ -199,11 +212,13 @@ export default async function SettingsPage() {
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>Update your public profile details</CardDescription>
             </div>
-            {userData?.slug ? <Link href={`/u/${userData.slug}`}>
+            {userData?.slug ? (
+              <Link href={`/u/${userData.slug}`}>
                 <Button variant="outline" size="sm">
                   View Profile
                 </Button>
-              </Link> : null}
+              </Link>
+            ) : null}
           </div>
         </CardHeader>
         <CardContent>
@@ -247,7 +262,8 @@ export default async function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className={spaceY.comfortable}>
-          {userData?.image && typeof userData.image === 'string' ? <div className={cluster.comfortable}>
+          {userData?.image && typeof userData.image === 'string' ? (
+            <div className={cluster.comfortable}>
               <Image
                 src={userData.image}
                 alt={`${userData.name ?? 'User'}'s avatar`}
@@ -263,7 +279,8 @@ export default async function SettingsPage() {
                   providerLabel={user.app_metadata.provider === 'github' ? 'GitHub' : 'Google'}
                 />
               </div>
-            </div> : null}
+            </div>
+          ) : null}
         </CardContent>
       </Card>
     </div>

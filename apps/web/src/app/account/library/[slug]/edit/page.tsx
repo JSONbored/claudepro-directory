@@ -3,11 +3,19 @@ import {
   getAuthenticatedUser,
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
-import { spaceY, muted, marginBottom, iconSize, weight , size , cluster } from '@heyclaude/web-runtime/design-system';
+import {
+  spaceY,
+  muted,
+  marginBottom,
+  iconSize,
+  weight,
+  size,
+  cluster,
+} from '@heyclaude/web-runtime/design-system';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { Button, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -24,17 +32,19 @@ interface EditCollectionPageProperties {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: EditCollectionPageProperties): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: EditCollectionPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
 export default async function EditCollectionPage({ params }: EditCollectionPageProperties) {
   const { slug } = await params;
-  
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,

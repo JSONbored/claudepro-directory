@@ -12,7 +12,7 @@
  * - SEO optimized with dynamic metadata
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
 import {
@@ -39,17 +39,18 @@ import {
   maxWidth,
 } from '@heyclaude/web-runtime/design-system';
 import { Tag, ArrowLeft, Filter } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { type DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import  { type DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
-import { UnifiedBadge, Card, CardContent , Button , UnifiedCardGrid  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  UnifiedBadge,
+  Card,
+  CardContent,
+  Button,
+  UnifiedCardGrid,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-
 
 // Dynamic rendering for fresh data
 export const dynamic = 'force-dynamic';
@@ -100,14 +101,7 @@ export async function generateMetadata({
   return {
     title: `${displayTag} - Browse Content - ${APP_CONFIG.name}`,
     description: `Discover ${itemCount} Claude AI tools, MCP servers, agents, and more tagged with "${displayTag}". Find the best resources for ${displayTag.toLowerCase()}.`,
-    keywords: [
-      tag,
-      displayTag,
-      'claude',
-      'ai tools',
-      'mcp servers',
-      ...categoryKeywords,
-    ],
+    keywords: [tag, displayTag, 'claude', 'ai tools', 'mcp servers', ...categoryKeywords],
     openGraph: {
       title: `${displayTag} - Browse Content - ${APP_CONFIG.name}`,
       description: `Discover ${itemCount} Claude AI tools, MCP servers, agents, and more tagged with "${displayTag}". Find the best resources for ${displayTag.toLowerCase()}.`,
@@ -151,7 +145,7 @@ function RelatedTagsSidebar({
               <UnifiedBadge
                 variant="base"
                 style="outline"
-                className="cursor-pointer transition-colors hover:bg-accent"
+                className="hover:bg-accent cursor-pointer transition-colors"
               >
                 {formatTagForDisplay(tag.tag)}
                 <span className={`ml-1 ${muted.default}`}>({tag.count})</span>
@@ -181,10 +175,7 @@ function CategoryFilterTabs({
   return (
     <div className={`${marginBottom.comfortable} flex flex-wrap ${gap.compact}`}>
       <Link href={`/tags/${encodeURIComponent(tag)}`}>
-        <Button
-          variant={activeCategory === null ? 'secondary' : 'outline'}
-          size="sm"
-        >
+        <Button variant={activeCategory === null ? 'secondary' : 'outline'} size="sm">
           All
         </Button>
       </Link>
@@ -193,14 +184,8 @@ function CategoryFilterTabs({
         if (count === 0) return null;
 
         return (
-          <Link
-            key={category}
-            href={`/tags/${encodeURIComponent(tag)}?category=${category}`}
-          >
-            <Button
-              variant={activeCategory === category ? 'secondary' : 'outline'}
-              size="sm"
-            >
+          <Link key={category} href={`/tags/${encodeURIComponent(tag)}?category=${category}`}>
+            <Button variant={activeCategory === category ? 'secondary' : 'outline'} size="sm">
               {CATEGORY_LABELS[category]} ({count})
             </Button>
           </Link>
@@ -330,7 +315,7 @@ export default async function TagDetailPage({
           {/* Back link */}
           <Link
             href="/tags"
-            className={`${cluster.compact} ${marginBottom.comfortable} inline-flex ${muted.default} transition-colors hover:text-foreground`}
+            className={`${cluster.compact} ${marginBottom.comfortable} inline-flex ${muted.default} hover:text-foreground transition-colors`}
           >
             <ArrowLeft className={iconSize.sm} />
             <span>All Tags</span>
@@ -338,8 +323,8 @@ export default async function TagDetailPage({
 
           <div className={`mx-auto ${maxWidth['3xl']}`}>
             <div className={`${marginBottom.comfortable} flex justify-center`}>
-              <div className={`rounded-full bg-primary/10 ${padding.compact}`} aria-hidden="true">
-                <Tag className="h-10 w-10 text-primary" />
+              <div className={`bg-primary/10 rounded-full ${padding.compact}`} aria-hidden="true">
+                <Tag className="text-primary h-10 w-10" />
               </div>
             </div>
 
@@ -351,19 +336,19 @@ export default async function TagDetailPage({
             </h1>
 
             <p className={`mx-auto mt-4 ${maxWidth.xl} ${muted.lg}`}>
-              {contentResult.totalCount}{' '}
-              {contentResult.totalCount === 1 ? 'item' : 'items'} tagged with "
-              {displayTag}"
-              {activeCategory ? ` in ${CATEGORY_LABELS[activeCategory]}` : null}
+              {contentResult.totalCount} {contentResult.totalCount === 1 ? 'item' : 'items'} tagged
+              with "{displayTag}"{activeCategory ? ` in ${CATEGORY_LABELS[activeCategory]}` : null}
             </p>
 
-            {tagMetadata?.categories && tagMetadata.categories.length > 0 ? <div className={`${marginTop.default} flex flex-wrap justify-center ${gap.compact}`}>
+            {tagMetadata?.categories && tagMetadata.categories.length > 0 ? (
+              <div className={`${marginTop.default} flex flex-wrap justify-center ${gap.compact}`}>
                 {tagMetadata.categories.map((category) => (
                   <UnifiedBadge key={category} variant="base" style="outline">
                     {CATEGORY_LABELS[category]}
                   </UnifiedBadge>
                 ))}
-              </div> : null}
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
@@ -374,7 +359,8 @@ export default async function TagDetailPage({
           {/* Main content area */}
           <div className="lg:col-span-3">
             {/* Category Filter Tabs */}
-            {tagMetadata?.categories && tagMetadata.categories.length > 1 ? <div className={`${marginBottom.comfortable} ${cluster.compact}`}>
+            {tagMetadata?.categories && tagMetadata.categories.length > 1 ? (
+              <div className={`${marginBottom.comfortable} ${cluster.compact}`}>
                 <Filter className={`h-4 w-4 ${muted.default}`} />
                 <span className={muted.sm}>Filter:</span>
                 <CategoryFilterTabs
@@ -382,7 +368,8 @@ export default async function TagDetailPage({
                   activeCategory={activeCategory}
                   categoryCounts={categoryCounts}
                 />
-              </div> : null}
+              </div>
+            ) : null}
 
             {/* Content Grid */}
             {displayItems.length === 0 ? (
@@ -392,11 +379,13 @@ export default async function TagDetailPage({
                   No content found for this tag
                   {activeCategory ? ` in ${CATEGORY_LABELS[activeCategory]}` : null}.
                 </p>
-                {activeCategory ? <Link href={`/tags/${encodeURIComponent(tag)}`}>
+                {activeCategory ? (
+                  <Link href={`/tags/${encodeURIComponent(tag)}`}>
                     <Button variant="link" className={marginTop.compact}>
                       View all categories
                     </Button>
-                  </Link> : null}
+                  </Link>
+                ) : null}
               </Card>
             ) : (
               <UnifiedCardGrid
@@ -414,9 +403,7 @@ export default async function TagDetailPage({
             {/* Browse all tags CTA */}
             <Card>
               <CardContent className="p-4 text-center">
-                <p className={`${marginBottom.compact} ${muted.sm}`}>
-                  Explore more topics
-                </p>
+                <p className={`${marginBottom.compact} ${muted.sm}`}>Explore more topics</p>
                 <Link href="/tags">
                   <Button variant="outline" size="sm" className="w-full">
                     <Tag className="mr-2 h-4 w-4" />

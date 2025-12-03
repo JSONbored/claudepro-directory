@@ -8,12 +8,8 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
-import  { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
+import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getCategoryConfig,
@@ -21,7 +17,7 @@ import {
   getContentDetailCore,
   getRelatedContent,
 } from '@heyclaude/web-runtime/server';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
@@ -51,9 +47,8 @@ export async function generateStaticParams() {
   // Dynamic imports only for data modules (category/content)
   const { getHomepageCategoryIds } = await import('@heyclaude/web-runtime/data/config/category');
   const { getContentByCategory } = await import('@heyclaude/web-runtime/data/content');
-  const { logger, generateRequestId, normalizeError } = await import(
-    '@heyclaude/web-runtime/logging/server'
-  );
+  const { logger, generateRequestId, normalizeError } =
+    await import('@heyclaude/web-runtime/logging/server');
 
   const categories = getHomepageCategoryIds;
   const parameters: Array<{ category: string; slug: string }> = [];
@@ -247,9 +242,8 @@ export default async function DetailPage({
     // During build, missing content is expected - only log at debug level
     // During runtime, log at warn level to catch real issues (except in production where it's also expected)
     const suppressMissingContentWarning =
-      env.NEXT_PHASE === 'phase-production-build' ||
-      env.VERCEL_ENV === 'production';
-    
+      env.NEXT_PHASE === 'phase-production-build' || env.VERCEL_ENV === 'production';
+
     if (suppressMissingContentWarning) {
       reqLogger.debug('DetailPage: content not found during build/production (expected)', {
         section: 'core-content-fetch',
@@ -324,21 +318,25 @@ export default async function DetailPage({
       {(() => {
         const recentlyViewedCategory = mapCategoryToRecentlyViewed(category);
         if (!recentlyViewedCategory) return null;
-        
+
         // Extract tags safely before passing to client component
         const itemTags = 'tags' in fullItem ? ensureStringArray(fullItem.tags).slice(0, 3) : [];
         const tagsProp = itemTags.length > 0 ? { tags: itemTags } : {};
-        
+
         // Extract title safely
-        const itemTitle = 
-          ('display_title' in fullItem && typeof fullItem.display_title === 'string' ? fullItem.display_title : undefined) ??
-          ('title' in fullItem && typeof fullItem.title === 'string' ? fullItem.title : undefined) ??
+        const itemTitle =
+          ('display_title' in fullItem && typeof fullItem.display_title === 'string'
+            ? fullItem.display_title
+            : undefined) ??
+          ('title' in fullItem && typeof fullItem.title === 'string'
+            ? fullItem.title
+            : undefined) ??
           slug;
-        
+
         // Extract description safely - ensure it's a string
-        const itemDescription = 
+        const itemDescription =
           typeof fullItem.description === 'string' ? fullItem.description : '';
-        
+
         return (
           <RecentlyViewedTracker
             category={recentlyViewedCategory}
