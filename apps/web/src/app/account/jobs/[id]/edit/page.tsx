@@ -39,6 +39,17 @@ interface EditJobPageMetadataProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Builds page metadata for the Edit Job page using the route parameter `id`.
+ *
+ * Extracts `id` from the provided `params` and delegates to `generatePageMetadata`
+ * to produce metadata for the route `/account/jobs/:id/edit`.
+ *
+ * @param params - Route parameters object (awaitable) containing `id`
+ * @returns The generated Metadata for the edit job page
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({
   params,
 }: EditJobPageMetadataProperties): Promise<Metadata> {

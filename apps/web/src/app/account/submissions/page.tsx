@@ -97,6 +97,18 @@ function formatSubmissionDate(dateString: string): string {
   });
 }
 
+/**
+ * Parse and validate a GitHub pull request URL and return its owner, repository, and PR number.
+ *
+ * @param url - The candidate PR URL to parse; may be `null` or `undefined`.
+ * @returns An object `{ owner, repo, prNumber }` when `url` is a valid, canonical GitHub PR HTTPS URL without credentials, query, or fragment; `null` otherwise.
+ *
+ * @see buildSafePrUrl
+ * @see PR_PATH_REGEX
+ * @see OWNER_REGEX
+ * @see REPO_REGEX
+ * @see PR_NUMBER_REGEX
+ */
 function extractPrComponents(
   url: null | string | undefined
 ): null | { owner: string; prNumber: string; repo: string } {
@@ -170,7 +182,14 @@ const ALLOWED_TYPES = Constants.public.Enums.submission_type;
 // Typed copy for use as submission_type array
 const ALLOWED_TYPES_ARRAY: Database['public']['Enums']['submission_type'][] = [...ALLOWED_TYPES];
 
-// Strict content slug validation - only alphanumeric, hyphens, underscores
+/**
+ * Checks whether a content slug contains only allowed characters.
+ *
+ * @param slug - The content slug to validate.
+ * @returns `true` if `slug` consists exclusively of lowercase letters (a–z), digits (0–9), hyphens (-), or underscores (_); `false` otherwise.
+ *
+ * @see getSafeContentUrl
+ */
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string') return false;
   // No path separators, no dots, no percent-encoding, no special chars
@@ -182,7 +201,15 @@ function isSafeType(type: string): type is Database['public']['Enums']['submissi
   return (ALLOWED_TYPES as readonly string[]).includes(type);
 }
 
-// Safe URL constructor - validates both type and slug before constructing
+/**
+ * Builds a safe relative content URL for a validated submission type and slug.
+ *
+ * @param type - Submission type from the database enum
+ * @param slug - Content slug (alphanumeric characters, hyphen, or underscore)
+ * @returns The relative path `/type/slug` when both inputs are valid, or `null` if validation fails.
+ * @see isSafeType
+ * @see isValidSlug
+ */
 function getSafeContentUrl(
   type: Database['public']['Enums']['submission_type'],
   slug: string
@@ -194,16 +221,16 @@ function getSafeContentUrl(
 }
 
 /**
- * Renders the account "My Submissions" page, fetching the current user's submissions and displaying them with controls for viewing PRs, content links, and creating new submissions.
+ * Render the authenticated user's "My Submissions" page, fetching and displaying their submissions with controls for viewing PRs, content links, and creating new submissions.
  *
- * Fetches the authenticated user and the user's dashboard data (submissions). If the user is not authenticated, renders a sign-in prompt. If dashboard loading fails, renders an error message. Validates submission enums, constructs safe PR and content links, logs data-integrity issues, and renders a list of SubmissionCard components or an empty-state card.
+ * If the user is not authenticated, renders a sign-in prompt; if submissions fail to load, renders an error message.
  *
- * @returns The React element tree for the submissions page.
+ * @returns The React element tree for the My Submissions page.
  *
- * @see getAuthenticatedUser - authentication helper used to resolve the current user
- * @see getUserDashboard - server-side data fetch that returns submissions
- * @see SubmissionCard - presentation component used to render individual submissions
- * @see generateRequestId - request-scoped identifier used for logging
+ * @see getAuthenticatedUser
+ * @see getUserDashboard
+ * @see SubmissionCard
+ * @see generateRequestId
  */
 export default async function SubmissionsPage() {
   // Generate single requestId for this page request
@@ -364,7 +391,15 @@ export default async function SubmissionsPage() {
   }
 
   /**
-   * Get safe content URL or null if invalid
+   * Construct a safe content link object for a submission when the type and slug are valid and the submission is merged.
+   *
+   * @param type - The submission type (one of the database `submission_type` enum)
+   * @param slug - The content slug to validate and include in the URL
+   * @param status - The submission status; a link is returned only when this equals the merged status
+   * @returns `{ href: string }` with a validated content URL (e.g. `/type/slug`) if inputs are valid and `status` is merged, `null` otherwise
+   *
+   * @see getSafeContentUrl
+   * @see isSafeType
    */
   function getContentLinkProperties(
     type: Database['public']['Enums']['submission_type'],

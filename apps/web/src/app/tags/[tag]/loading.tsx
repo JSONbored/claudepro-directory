@@ -34,6 +34,19 @@ const RELATED_TAG_SKELETONS = [
   'rt-8',
 ] as const;
 
+/**
+ * Render a full-page skeleton UI for the tag detail view.
+ *
+ * Displays a hero skeleton (avatar and title placeholders), a main content area with
+ * filter/tab placeholders and a responsive grid of content-card skeletons, and a
+ * right sidebar with related-tag and action placeholders.
+ *
+ * @returns A JSX element containing the loading skeleton for the tag detail page.
+ *
+ * @see Skeleton
+ * @see CONTENT_GRID_SKELETONS
+ * @see RELATED_TAG_SKELETONS
+ */
 export default function TagDetailLoading() {
   return (
     <div className={`${minHeight.screen} bg-background`}>

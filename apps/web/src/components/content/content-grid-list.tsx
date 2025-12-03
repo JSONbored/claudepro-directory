@@ -53,6 +53,14 @@ const ENHANCED_HERO_CATEGORIES: readonly ContentCategory[] = [
   'guides',
 ] as const;
 
+/**
+ * Determines whether a given category string is one of the enhanced hero categories.
+ *
+ * @param category - The category identifier to test.
+ * @returns `true` if `category` is a member of the enhanced hero categories, `false` otherwise.
+ * @see ENHANCED_HERO_CATEGORIES
+ * @see ContentCategory
+ */
 function isEnhancedCategory(category: string): category is ContentCategory {
   return ENHANCED_HERO_CATEGORIES.includes(category as ContentCategory);
 }
@@ -255,6 +263,17 @@ function ContentHeroSection<T extends DisplayableContent>({
   );
 }
 
+/**
+ * Renders a skeleton loading state for the content search area.
+ *
+ * Displays a large placeholder heading and two smaller right-aligned input/action placeholders
+ * to match the layout of the live content search UI while data is loading.
+ *
+ * @returns The skeleton JSX used as a visual placeholder for the content search region.
+ *
+ * @see ContentSearchClient
+ * @see ContentListServer
+ */
 function ContentSearchSkeleton() {
   return (
     <div className={`w-full ${spaceY.comfortable}`}>
@@ -267,6 +286,28 @@ function ContentSearchSkeleton() {
   );
 }
 
+/**
+ * Composes the server-rendered content listing page: hero, searchable list, sidebar, and newsletter CTA.
+ *
+ * Renders a ContentHeroSection immediately on the server, a client-side ContentSearchClient wrapped in Suspense
+ * (with a skeleton fallback), a RecentlyViewedSidebar in Suspense, and a footer NewsletterCTAVariant inside a
+ * LazySection. Forwards category/type to child components and supplies default search placeholder and badges.
+ *
+ * @param title - Page title used in the hero and search placeholder
+ * @param description - Short descriptive text shown under the hero title
+ * @param icon - Icon name displayed in the hero area
+ * @param items - Array of displayable content items to power the search, tag strip, and stats
+ * @param type - Content type identifier (also forwarded as `category` to children)
+ * @param searchPlaceholder - Placeholder text for the search input; defaults to `Search <title>...`
+ * @param badges - Optional list of badges to display in the hero; defaults to an empty array
+ * @param category - Optional explicit category value; when provided it is forwarded to client components
+ * @returns The fully composed content list page JSX including hero, search, sidebar, and newsletter CTA
+ *
+ * @see ContentHeroSection
+ * @see ContentSearchClient
+ * @see RecentlyViewedSidebar
+ * @see NewsletterCTAVariant
+ */
 export function ContentListServer<T extends DisplayableContent>({
   title,
   description,

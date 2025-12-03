@@ -65,6 +65,26 @@ function sanitizeFilename(name: string): string {
   return cleaned;
 }
 
+/**
+ * Fetches full content for a category and slug from Supabase and returns it as a JSON HTTP response.
+ *
+ * Calls the `get_api_content_full` RPC with the provided category and slug; on success returns a 200
+ * JSON response containing the RPC result (stringifying non-string payloads). If the RPC returns
+ * no data a 404 JSON response is returned. If the RPC call fails, a structured error response is
+ * returned and the error is logged.
+ *
+ * @param category - The content category to query (one of the `content_category` enum values)
+ * @param slug - The content item slug to fetch
+ * @param reqLogger - A scoped logger for recording RPC errors and request context
+ * @returns A Promise that resolves to a NextResponse representing either the JSON payload (200),
+ *          a 404 not-found JSON response, or a structured error response produced by
+ *          createErrorResponse when the RPC fails
+ *
+ * @see createSupabaseAnonClient
+ * @see createErrorResponse
+ * @see buildSecurityHeaders
+ * @see buildCacheHeaders
+ */
 async function handleJsonFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
@@ -124,6 +144,24 @@ async function handleJsonFormat(
   });
 }
 
+/**
+ * Generate and return a Markdown export for a content record.
+ *
+ * Reads `includeMetadata` and `includeFooter` from the request URL, invokes the
+ * `generate_markdown_export` database RPC, validates the RPC response, and
+ * returns a NextResponse containing the rendered Markdown or a JSON error
+ * response with an appropriate HTTP status.
+ *
+ * @param category - Content category (must be a valid content_category enum)
+ * @param slug - Content slug identifier
+ * @param url - Parsed request URL (used to read query parameters)
+ * @param reqLogger - Scoped logger for request-scoped logging
+ * @returns A NextResponse containing the exported Markdown on success; a JSON NextResponse with an error message and an appropriate HTTP status on failure
+ *
+ * @see createSupabaseAnonClient
+ * @see DatabaseGenerated.public.Functions.generate_markdown_export
+ * @see sanitizeFilename
+ */
 async function handleMarkdownFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
@@ -216,6 +254,23 @@ async function handleMarkdownFormat(
   });
 }
 
+/**
+ * Generate the LLMs.txt output for a content item and return it as a plain-text HTTP response.
+ *
+ * Queries the `generate_item_llms_txt` Supabase RPC for the given content category and slug.
+ * On RPC error returns a structured error response; if the RPC returns no data returns a 404 JSON response.
+ *
+ * @param category - The content category (from DatabaseGenerated.public.Enums.content_category)
+ * @param slug - The content item's slug identifier
+ * @param reqLogger - A scoped logger instance for request-scoped logging
+ * @returns A NextResponse containing the LLMs.txt content as `text/plain` with appropriate security, CORS, and cache headers,
+ *          or a JSON NextResponse with an error and appropriate status (e.g., 404 or RPC-derived error response).
+ *
+ * @see generate_item_llms_txt RPC
+ * @see createSupabaseAnonClient
+ * @see createErrorResponse
+ * @see buildSecurityHeaders
+ */
 async function handleItemLlmsTxt(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,

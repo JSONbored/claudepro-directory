@@ -35,6 +35,15 @@ type SearchFacetAggregate = Awaited<ReturnType<typeof getSearchFacets>>;
 type SearchFacetSummary = SearchFacetAggregate['facets'][number];
 type ContentCategory = Database['public']['Enums']['content_category'];
 
+/**
+ * Determines whether a candidate sort value is an allowed sort option.
+ *
+ * @param value - The candidate sort key to validate.
+ * @returns `true` if `value` is an accepted sort option, `false` otherwise.
+ *
+ * @see VALID_SORT_OPTIONS
+ * @see SearchFilters
+ */
 function isValidSort(value: string | undefined): value is SearchFilters['sort'] {
   return value !== undefined && VALID_SORT_OPTIONS.has(value as SearchFilters['sort']);
 }
@@ -148,6 +157,19 @@ async function SearchResultsSection({
   );
 }
 
+/**
+ * Server-rendered search page that resolves query params, loads facets and zero-state suggestions, and renders the search results area with a recently viewed sidebar.
+ *
+ * This page fetches search facets and, when no query or user filters are present, homepage-derived suggestions. It computes quick facet lists and deduplicated fallback suggestions, and passes all derived data to the client search UI. Rendering is dynamic and performed per request.
+ *
+ * @param searchParams - Promise resolving to route search parameters (optional `q`, `category`, `tags`, `author`, `sort`)
+ * @returns The page's React element tree containing the search header, results section, and sidebar
+ *
+ * @see SearchResultsSection
+ * @see getSearchFacets
+ * @see getHomepageData
+ * @see searchContent
+ */
 export default async function SearchPage({ searchParams }: SearchPageProperties) {
   const resolvedParameters = await searchParams;
 

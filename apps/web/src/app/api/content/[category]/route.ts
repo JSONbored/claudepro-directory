@@ -26,6 +26,13 @@ import { NextRequest, NextResponse } from 'next/server';
 const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
+/**
+ * Determines whether a string is a valid `content_category` enum value.
+ *
+ * @param value - The string to validate as a content category
+ * @returns `true` if `value` is one of the allowed `content_category` enum values, `false` otherwise.
+ * @see CONTENT_CATEGORY_VALUES
+ */
 function isValidContentCategory(
   value: string
 ): value is DatabaseGenerated['public']['Enums']['content_category'] {
@@ -34,6 +41,21 @@ function isValidContentCategory(
   );
 }
 
+/**
+ * Serve a category-specific LLMs text export for the route /api/content/[category].
+ *
+ * Processes the incoming request's `format` query (defaults to "llms-category") and the route `category`,
+ * validates inputs, retrieves the generated text for the category, and returns it as text/plain.
+ *
+ * @param request - The incoming NextRequest
+ * @param params - An object containing a promise that resolves to route parameters; expects `{ category: string }`
+ * @returns A NextResponse containing the plain-text LLMs export for the category with appropriate headers,
+ *          or an error response (400 for invalid format/category or missing data, or an error response on failure)
+ *
+ * @see buildSecurityHeaders
+ * @see buildCacheHeaders
+ * @see badRequestResponse
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ category: string }> }

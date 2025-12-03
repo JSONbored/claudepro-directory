@@ -133,6 +133,14 @@ function mapPopularRows(rows: LoosePopularRow[], fallbackCategory: ContentCatego
   }));
 }
 
+/**
+ * Map raw recent-content rows into normalized recent content objects.
+ *
+ * @param rows - Array of loose recent content rows returned from the database
+ * @param fallbackCategory - Category to use when a row's `category` is null or undefined; if this is also null, `DEFAULT_CATEGORY` is used
+ * @returns An array of objects with the shape `{ category: ContentCategory, slug: string, title: string, description?: string, author?: string, tags?: string[], created_at?: string }`
+ * @see mapTrendingRows, mapPopularRows
+ */
 function mapRecentRows(rows: LooseRecentRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     category: (row.category ?? fallbackCategory ?? DEFAULT_CATEGORY) satisfies ContentCategory,
@@ -155,6 +163,16 @@ function mapSidebarTrending(rows: LooseTrendingRow[], fallbackCategory: ContentC
   }));
 }
 
+/**
+ * Map recent content rows into sidebar-ready items with title, slug, and formatted date.
+ *
+ * @param rows - Array of recent content rows to map; each row should include at least `slug` and may include `title`, `category`, and `created_at`.
+ * @param fallbackCategory - Category to use when a row's `category` is missing; if also missing, `DEFAULT_CATEGORY` is used.
+ * @returns An array of objects each containing:
+ *  - `title`: the row title or `slug` when title is missing,
+ *  - `slug`: a path string in the form `"/{category}/{slug}"` where `category` is row.category, fallbackCategory, or `DEFAULT_CATEGORY`,
+ *  - `date`: a localized US-formatted date string like "Dec 1, 2025" when `created_at` is present, or an empty string when absent.
+ */
 function mapSidebarRecent(rows: LooseRecentRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => {
     const displayCategory = (row.category ??

@@ -130,6 +130,33 @@ function hasFilterCriteria(filters?: FilterState | null): boolean {
   );
 }
 
+/**
+ * Renders a client-side content search UI with unified search, filtering, quick filters, saved-search presets, and fallback suggestions.
+ *
+ * Provides a searchable grid of content cards derived from `items` and remote search results; manages local filter state, executes searches via the unified search client, exposes quick-filter actions, and integrates saved-search presets.
+ *
+ * @param props.items - Base list of content items to display and use as a fallback when no search is active or when search fails.
+ * @param props.searchPlaceholder - Placeholder text for the search input.
+ * @param props.title - Human-readable content type name used in empty-state labels.
+ * @param props.icon - Optional icon name to display in the empty state.
+ * @param props.category - Optional default category to apply to searches when present.
+ * @param props.availableTags - Optional explicit list of available tag filter options; when omitted, tags are derived from supplied items and results.
+ * @param props.availableAuthors - Optional explicit list of available author filter options; when omitted, authors are derived from supplied items and results.
+ * @param props.availableCategories - Optional explicit list of available category filter options; when omitted, categories are derived from supplied items and results.
+ * @param props.zeroStateSuggestions - Optional list of content suggestions used when no search query or filters are active (used before `fallbackSuggestions`).
+ * @param props.quickTags - Optional prioritized tag suggestions shown in the quick-filters area.
+ * @param props.quickAuthors - Optional prioritized author suggestions shown in the quick-filters area.
+ * @param props.quickCategories - Optional prioritized category suggestions shown in the quick-filters area.
+ * @param props.fallbackSuggestions - Optional explicit pool of fallback suggestion items that take precedence over `zeroStateSuggestions` and top `items`.
+ *
+ * @returns The rendered content search client UI element.
+ *
+ * @see UnifiedSearch
+ * @see UnifiedCardGrid
+ * @see useSavedSearchPresets
+ * @see searchUnifiedClient
+ * @see hasFilterCriteria
+ */
 function ContentSearchClientComponent<T extends DisplayableContent>({
   items,
   searchPlaceholder,

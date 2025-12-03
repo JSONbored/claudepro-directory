@@ -55,6 +55,13 @@ const NewsletterCTAVariant = dynamicImport(
   }
 );
 
+/**
+ * Provide the Next.js page metadata for the Community page.
+ *
+ * @returns The `Metadata` object for the `/community` route.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community');
 }
@@ -69,6 +76,14 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = 1800;
 
+/**
+ * Format a numeric statistic into a compact, human-readable string.
+ *
+ * @param value - The numeric statistic to format; may be `null` or `undefined`
+ * @returns The value formatted in compact notation (for example, `1.2K`). Returns `'0'` for `null`, `undefined`, or `NaN`.
+ *
+ * @see Intl.NumberFormat
+ */
 function formatStatValue(value: null | number | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '0';
   return Intl.NumberFormat('en', {
@@ -78,14 +93,13 @@ function formatStatValue(value: null | number | undefined): string {
 }
 
 /**
- * Renders the Community page, fetching directory and homepage metrics and displaying community stats, contribution guidance, and contact CTA.
+ * Render the Community page with contact links, community statistics, contribution guidance, and an email CTA.
  *
- * This server component:
- * - Loads community directory entries, configuration count, and homepage metrics in parallel and uses safe fallbacks if any fetch fails.
- * - Creates a request-scoped logger and records warnings when expected contact channels (Discord, Twitter/X) are not configured and errors when data fetches fail.
- * - Renders hero actions for configured contact channels, three summary stat cards (Configurations, Contributors, Community Members), contribution instructions, and an email newsletter CTA.
+ * Loads community directory entries, configuration count, and homepage metrics (each with safe fallbacks on failure)
+ * and renders hero actions for configured contact channels, three summary stat cards, contribution instructions,
+ * and a newsletter signup component.
  *
- * @returns The rendered React element for the Community page.
+ * @returns The React element tree for the Community page.
  *
  * @see generateRequestId
  * @see getContactChannels

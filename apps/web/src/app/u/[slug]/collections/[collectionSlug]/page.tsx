@@ -54,12 +54,29 @@ function isValidContentType(type: string): boolean {
   return (ALLOWED_CONTENT_TYPES as readonly string[]).includes(type);
 }
 
-// Slug must be alphanumeric/dash/underscore, no slashes, no protocol
+/**
+ * Determines whether a slug is a valid identifier composed only of ASCII letters, digits, dashes, or underscores.
+ *
+ * @param slug - The candidate slug to validate
+ * @returns `true` if `slug` contains only letters (A–Z, a–z), digits (0–9), dashes (`-`), or underscores (`_`); `false` otherwise.
+ *
+ * @see getSafeContentLink
+ * @see ALLOWED_CONTENT_TYPES
+ */
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string') return false;
   return /^[a-zA-Z0-9-_]+$/.test(slug);
 }
 
+/**
+ * Produce a safe content path for an item when its type and slug are valid.
+ *
+ * @param item - Object containing `content_type` and `content_slug` to validate
+ * @returns The path in the form `/content_type/content_slug` if the content type is allowed and the slug is valid, `null` otherwise.
+ *
+ * @see isValidContentType
+ * @see isValidSlug
+ */
 function getSafeContentLink(item: { content_slug: string; content_type: string }): null | string {
   if (isValidContentType(item.content_type) && isValidSlug(item.content_slug)) {
     return `/${item.content_type}/${item.content_slug}`;
@@ -71,6 +88,19 @@ interface PublicCollectionPageProperties {
   params: Promise<{ collectionSlug: string; slug: string }>;
 }
 
+/**
+ * Produce metadata for the public collection page at /u/:slug/collections/:collectionSlug and attempt to warm the data cache for the subsequent page render.
+ *
+ * Prefetching errors are caught and logged; they do not prevent metadata from being generated.
+ *
+ * @param params - A promise that resolves to route parameters containing `slug` (user slug) and `collectionSlug` (collection slug).
+ * @returns The page metadata for the specified public collection route.
+ *
+ * @see getPublicCollectionDetail
+ * @see generatePageMetadata
+ * @see normalizeError
+ * @see logger
+ */
 export async function generateMetadata({
   params,
 }: PublicCollectionPageProperties): Promise<Metadata> {

@@ -48,15 +48,14 @@ import {
 export const revalidate = 86_400;
 
 /**
- * Server-rendered page for partner advertising and pricing, assembling real-time stats,
- * launch pricing, pricing options, features, FAQ, and contact CTAs.
+ * Render the partner advertising and pricing landing page with real-time stats, pricing options,
+ * features, FAQ, and contact CTAs.
  *
- * Loads pricing configuration, hero statistics, contact channels, and CTAs, and renders
- * the Partner marketing UI. If pricing configuration fails to load, a sensible default
- * pricing object is used to avoid a server error. A request-scoped ID and child logger
- * are generated for the page request to help correlate logs.
- *
- * Note: this page uses incremental static regeneration with a 1-day revalidation window.
+ * The page fetches hero statistics, contact channels, CTAs, and pricing configuration on the
+ * server. If loading the pricing configuration fails, a sensible default pricing object is used
+ * to allow rendering to continue. A request-scoped ID and child logger are created for the
+ * request to support correlated logging. This page is configured for Incremental Static
+ * Regeneration with a 1-day revalidation window.
  *
  * @returns The React element tree for the partner landing page.
  *

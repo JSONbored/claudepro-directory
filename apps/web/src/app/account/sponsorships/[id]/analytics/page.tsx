@@ -44,6 +44,13 @@ interface AnalyticsPageProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Build metadata for the sponsorship analytics page using the route's `id` parameter.
+ *
+ * @param param0 - Object whose `params` promise resolves to route parameters; expects an `id` identifying the sponsorship.
+ * @returns The page `Metadata` (title, description, open graph, etc.) for the `/account/sponsorships/:id/analytics` route.
+ * @see {@link generatePageMetadata}
+ */
 export async function generateMetadata({ params }: AnalyticsPageProperties): Promise<Metadata> {
   const { id } = await params;
   return generatePageMetadata('/account/sponsorships/:id/analytics', { params: { id } });

@@ -136,6 +136,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * Responds to CORS preflight requests with a 204 No Content and the configured CORS headers.
+ *
+ * @returns A NextResponse with HTTP status 204 (No Content) and the `CORS` headers applied
+ * @see CORS
+ */
 export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,

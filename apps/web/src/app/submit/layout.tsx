@@ -2,6 +2,12 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { type Metadata } from 'next';
 import { type ReactNode } from 'react';
 
+/**
+ * Generates the page metadata for the /submit route.
+ *
+ * @returns The Next.js `Metadata` object for the `/submit` route.
+ * @see {@link generatePageMetadata} from @heyclaude/web-runtime/data
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/submit');
 }

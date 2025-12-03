@@ -130,7 +130,15 @@ function mapSubmissionTypeToContentCategory(
   return DEFAULT_CONTENT_CATEGORY;
 }
 
-// Type guard for recent merged submissions
+/**
+ * Validates that a value is a recent merged submission object with the fields required by the submit page.
+ *
+ * @param submission - Value to test for the recent submission shape
+ * @returns `true` if `submission` has `id`, `content_name`, `content_type`, and `merged_at` fields; `false` otherwise.
+ *
+ * @see mapSubmissionTypeToContentCategory
+ * @see Database
+ */
 function isValidRecentSubmission(submission: unknown): submission is {
   content_name: string;
   content_type: Database['public']['Enums']['submission_type'];
@@ -152,6 +160,15 @@ function isValidRecentSubmission(submission: unknown): submission is {
   );
 }
 
+/**
+ * Provide the page metadata used by Next.js for the Submit page.
+ *
+ * This metadata is consumed by Next.js to populate the document head (SEO, titles, and open graph data) for the `/submit` route.
+ *
+ * @returns The metadata object for the Submit page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/submit');
 }
@@ -160,13 +177,18 @@ export async function generateMetadata(): Promise<Metadata> {
  * Edge-cached data: Dashboard data fetched from edge-cached data layer
  */
 /**
- * Render the Submit page for database-first community submissions.
+ * Render the Submit page for community database-first submissions.
  *
- * Fetches submission dashboard data, submission form configuration, and content templates (with defensive fallbacks), composes community stats and recent merged submissions, and renders the submission form alongside a right-hand sidebar with stats, recent activity, promos, and a newsletter CTA.
+ * Fetches submission dashboard data, submission form configuration, and content templates,
+ * composes community stats and recent merged submissions, and renders the submission form
+ * alongside a right-hand sidebar with stats, recent activity, promos, and a newsletter CTA.
  *
- * Data fetching is request-scoped and uses per-request logging; form configuration errors will abort rendering while dashboard and template errors use fallbacks so the page can still render partially. The page respects the file-level ISR revalidation setting (revalidate = 86400).
+ * Form configuration loading is required and will abort rendering on failure; dashboard and
+ * template loading use defensive fallbacks so the page can render partially. Data fetching
+ * is request-scoped and uses a per-request logger. The page uses ISR with revalidation set to
+ * 900 seconds.
  *
- * @returns A React element representing the Submit page layout and UI.
+ * @returns A React element for the Submit page layout and UI.
  *
  * @see SubmitFormClient
  * @see SubmitPageHero

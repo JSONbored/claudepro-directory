@@ -43,10 +43,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Check if a sponsorship is currently active
- * A sponsorship is active if:
- * - The active flag is true (not null or false)
- * - Current date is between start_date and end_date (inclusive)
+ * Determine whether a sponsorship is currently active.
+ *
+ * A sponsorship is considered active when its `active` flag is `true` and the provided
+ * `now` falls within the inclusive range from `start_date` to `end_date`.
+ *
+ * @param sponsorship - Object containing sponsorship status and date range. `start_date` and `end_date` are expected to be parseable date strings (e.g., ISO 8601).
+ * @param now - Reference date used to evaluate the sponsorship's current status.
+ * @returns `true` if `sponsorship.active` is `true` and `now` is between `start_date` and `end_date` (inclusive), `false` otherwise.
  */
 function isSponsorshipActive(
   sponsorship: { active: boolean | null; end_date: string; start_date: string },

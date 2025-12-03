@@ -23,6 +23,19 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 
+/**
+ * Handle GET /api/company requests to return a company's public profile identified by the `slug` query parameter.
+ *
+ * Expects a `slug` query parameter; if missing returns a 400 Bad Request. When provided, invokes the `get_company_profile`
+ * RPC and returns the resulting profile as JSON with cache and diagnostic headers. If the RPC returns an error or an
+ * unexpected exception occurs, returns a constructed error response with logging context.
+ *
+ * @param request - Incoming Next.js request containing the `slug` query parameter
+ * @returns A Next.js response: the company profile JSON with status 200 on success; a 400 response when `slug` is missing; or an error response describing RPC or internal failures
+ * @see createSupabaseAnonClient
+ * @see buildCacheHeaders
+ * @see createErrorResponse
+ */
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({

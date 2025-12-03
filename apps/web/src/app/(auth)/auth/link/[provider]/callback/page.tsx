@@ -72,7 +72,26 @@ export default function OAuthLinkCallbackPage({
     let redirectTimeoutId: null | ReturnType<typeof setTimeout> = null;
 
     // Use shared validation utility to prevent open redirects
-    // Matches server-side validation in route handlers
+    /**
+     * Initiates the client-side OAuth account linking workflow for the current provider.
+     *
+     * Validates the provider parameter, waits for auth state to be ready, ensures the user is signed in,
+     * and starts the Supabase identity-linking flow. On success this will navigate the browser to the
+     * OAuth provider's authorization URL. On failure it updates component state with an error message,
+     * logs the failure, and — if the user is not signed in — schedules a redirect to the login page
+     * that preserves the intended post-login linking flow.
+     *
+     * Side effects:
+     * - May call setStatus, setErrorMessage, and setProvider to update UI state.
+     * - May call router.push to navigate to the login page when the user is not authenticated.
+     * - May set globalThis.location.href to navigate to the OAuth provider.
+     * - Logs client warnings and errors for telemetry.
+     *
+     * @see isValidProvider
+     * @see validateNextParameter
+     * @see supabaseClient.auth.linkIdentity
+     * @see normalizeError
+     */
 
     async function handleLink() {
       // Prevent duplicate OAuth linking attempts (e.g., from Strict Mode re-mounts)

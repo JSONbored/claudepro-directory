@@ -33,6 +33,23 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/library/new');
 }
 
+/**
+ * Renders the "Create Collection" page for an authenticated user.
+ *
+ * If the request is unauthenticated the function redirects the client to /login.
+ * For authenticated requests it fetches the user's bookmarks, logs request and
+ * authentication lifecycle events, and renders the page containing a back
+ * navigation control and a CollectionForm prepopulated with the user's bookmarks
+ * (each bookmark's `notes` is normalized to an empty string when missing).
+ *
+ * @returns The React element for the Create Collection page containing navigation, header, and a CollectionForm.
+ *
+ * @see generateRequestId
+ * @see getAuthenticatedUser
+ * @see getUserBookmarksForCollections
+ * @see CollectionForm
+ * @see ROUTES.ACCOUNT_LIBRARY
+ */
 export default async function NewCollectionPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

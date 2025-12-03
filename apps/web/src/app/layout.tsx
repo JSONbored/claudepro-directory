@@ -166,10 +166,19 @@ const DEFAULT_LAYOUT_DATA: {
 };
 
 /**
- * Static Rendering Enabled
+ * Root HTML layout for the application that is statically renderable and wraps pages with global providers and UI.
  *
- * RootLayout now uses static component config (no server actions or headers()).
- * This allows the layout to be statically generated, improving performance.
+ * Fetches layout data (announcements and navigation) in a non-blocking manner and falls back to DEFAULT_LAYOUT_DATA on failure; failures are logged with a request-scoped logger but do not prevent rendering. Uses static component configuration so the layout can be statically generated (no server actions or headers).
+ *
+ * @param children - The page or application content to render inside the layout.
+ * @returns The root HTML structure including head meta, theme and notification providers, layout content, and client-side support scripts/components.
+ *
+ * @see getLayoutData
+ * @see getComponentCardConfig
+ * @see generateRequestId
+ * @see normalizeError
+ * @see ThemeProvider
+ * @see LayoutContent
  */
 
 export default async function RootLayout({

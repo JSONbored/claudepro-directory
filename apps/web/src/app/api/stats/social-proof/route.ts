@@ -23,6 +23,34 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const revalidate = 300;
 
+/**
+ * Provide social proof metrics (top weekly contributors, recent submission count, monthly success rate, and total user count) for the submission wizard.
+ *
+ * Queries recent submissions (7 days), monthly submissions (30 days), and total content count in parallel, aggregates:
+ * - top 5 weekly contributors (username extracted from email if present),
+ * - recent submissions count,
+ * - monthly success rate (percentage of merged submissions),
+ * - total user count (from content rows),
+ * and returns a cached JSON payload with ETag and Last-Modified headers.
+ *
+ * Response is cached with s-maxage=300 and stale-while-revalidate=600 and includes an ETag based on the response timestamp and a simple stats hash. On unexpected errors the route returns a standardized error response.
+ *
+ * @returns An HTTP JSON response with shape:
+ * {
+ *   success: true,
+ *   stats: {
+ *     contributors: { count: number, names: string[] },
+ *     submissions: number,
+ *     successRate: number | null,
+ *     totalUsers: number | null
+ *   },
+ *   timestamp: string
+ * }
+ *
+ * @see generateRequestId
+ * @see createSupabaseAnonClient
+ * @see createErrorResponse
+ */
 export async function GET() {
   // Generate single requestId for this API request
   const requestId = generateRequestId();

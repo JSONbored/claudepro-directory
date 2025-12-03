@@ -13,6 +13,15 @@ import {
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
+/**
+ * Generate page metadata for the Terms of Service route.
+ *
+ * This function provides the Metadata object Next.js uses for the `/terms` page.
+ *
+ * @returns The metadata object for the `/terms` page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/terms');
 }

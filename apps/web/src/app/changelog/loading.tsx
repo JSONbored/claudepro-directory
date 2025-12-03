@@ -17,13 +17,12 @@ import {
 import { PageHeaderSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
 
 /**
- * Render a loading skeleton for the changelog page.
+ * Renders a skeleton placeholder layout for the changelog page.
  *
- * Renders placeholder UI for the changelog interface: a header skeleton (including a page header and small chips),
- * a responsive category filter row with seven tab placeholders, and six changelog card placeholders each showing
- * title, description, and tag skeletons.
+ * Includes header placeholders, a responsive row of seven category tab placeholders, and six changelog
+ * card placeholders (each showing title, description, and tag skeletons).
  *
- * @returns A JSX element containing skeleton placeholders for the header, category filters, and changelog cards.
+ * @returns A JSX element containing skeleton placeholders for the changelog page: header, category filters, and changelog cards.
  *
  * @see PageHeaderSkeleton
  * @see Skeleton

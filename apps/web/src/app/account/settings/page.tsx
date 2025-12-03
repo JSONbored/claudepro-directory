@@ -45,20 +45,26 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Produce the page metadata for the "/account/settings" route.
+ *
+ * @returns The Metadata object used by Next.js for the Settings page.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/settings');
 }
 
 /**
- * Render the account settings page for the authenticated user, handling data loading,
- * missing-user initialization, and appropriate fallback UIs for unauthenticated or error states.
+ * Render the account settings page for the currently authenticated user, including data loading,
+ * optional initialization of a missing user record, and appropriate fallback UIs.
  *
- * The component performs request-scoped logging, fetches the authenticated user and their
- * settings, attempts to initialize a missing user record, and renders profile editing,
- * account details, and profile-picture controls (or compact fallback cards when required).
+ * This server component performs request-scoped logging, loads the authenticated user and their
+ * settings, attempts to create a user record if one is missing, and renders profile editing,
+ * account details, and profile-picture controls or compact fallback cards when data is unavailable.
  *
- * @returns A React element containing the settings UI or a fallback UI when the user is not
- * authenticated or settings/profile data cannot be loaded.
+ * @returns A React element containing the settings UI or a fallback UI when authentication or
+ * settings/profile data cannot be loaded.
  *
  * @see generateRequestId
  * @see getAuthenticatedUser

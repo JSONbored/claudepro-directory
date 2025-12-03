@@ -88,11 +88,29 @@ function toTitleCase(value: string): string {
     .join(' ');
 }
 
+/**
+ * Convert a status identifier into a human-readable label.
+ *
+ * @param value - Optional status identifier (e.g., "active", "in_review"); may be null or undefined
+ * @returns The human-friendly status label; `Unknown` if `value` is falsy
+ *
+ * @see toTitleCase
+ * @see getStatusColor
+ */
 function humanizeStatus(value?: null | string): string {
   if (!value) return 'Unknown';
   return toTitleCase(value);
 }
 
+/**
+ * Return a human-friendly label for a job plan.
+ *
+ * @param plan - The job plan enum value; if `null` or `undefined`, the one-time plan label is used.
+ * @returns The label corresponding to the provided plan; defaults to "One-Time" when no plan is given.
+ *
+ * @see JOB_PLAN_LABELS
+ * @see resolveTierLabel
+ */
 function resolvePlanLabel(plan?: Database['public']['Enums']['job_plan'] | null): string {
   if (!plan) {
     return JOB_PLAN_LABELS['one-time'];
@@ -101,10 +119,10 @@ function resolvePlanLabel(plan?: Database['public']['Enums']['job_plan'] | null)
 }
 
 /**
- * Return a human-readable label for a job tier.
+ * Resolve a human-friendly label for a job tier.
  *
- * @param tier - The job tier enum value; if `undefined` or `null`, the function uses the default `standard` tier.
- * @returns The friendly label for the provided `tier`; returns `Standard` when `tier` is missing.
+ * @param tier - The job tier enum value; if omitted or null, the `standard` tier is used.
+ * @returns The corresponding label from JOB_TIER_LABELS; `Standard` when `tier` is missing.
  *
  * @see JOB_TIER_LABELS
  */
@@ -116,10 +134,10 @@ function resolveTierLabel(tier?: Database['public']['Enums']['job_tier'] | null)
 }
 
 /**
- * Return the badge color token associated with a job status.
+ * Resolve the design-system badge color token for a given job status.
  *
- * @param status - The job status to resolve
- * @returns The badge color token (design-system token or CSS class) for the provided status
+ * @param status - Job status whose badge color token to retrieve
+ * @returns The badge color token associated with `status`
  *
  * @see jobStatusBadge
  */
@@ -128,11 +146,11 @@ function getStatusColor(status: JobStatus): string {
 }
 
 /**
- * Generate page metadata for the "My Job Listings" account page.
+ * Produce the Next.js page metadata for the account "My Job Listings" route.
  *
- * Uses the shared page metadata helper to produce canonical metadata for the '/account/jobs' route.
+ * Generates canonical title, description, and related metadata used by Next.js for the '/account/jobs' page.
  *
- * @returns Metadata for the '/account/jobs' page
+ * @returns Page metadata for the '/account/jobs' route
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
@@ -144,20 +162,14 @@ interface MyJobsPageProperties {
 }
 
 /**
- * Renders the "My Job Listings" account page for the authenticated user, including job rows, billing summaries, and a payment confirmation banner when applicable.
+ * Server component that renders the "My Job Listings" account page for the authenticated user.
  *
- * This server component:
- * - Ensures the user is authenticated and shows a sign-in prompt if not.
- * - Loads the user's dashboard data and per-job billing summaries, with structured logging on failures.
- * - Validates and normalizes job rows returned from the dashboard RPC.
- * - Shows per-job controls (edit, analytics, view, toggle status, delete) and billing information when present.
- * - Displays a payment success alert when `searchParams.payment === 'success'` and `searchParams.job_id` match a job.
+ * Renders the user's job listings with billing summaries, per-job controls, and an optional payment confirmation banner based on URL query parameters. The component performs server-side authentication and data fetching (user dashboard and per-job billing summaries), validates job rows returned from the backend, and presents appropriate UI for unauthenticated, error, empty, and populated states.
  *
- * Notes:
- * - This page is configured for dynamic server-side rendering and Node.js runtime.
+ * This page is rendered on the server (Node.js runtime) and depends on server-side data fetching for user and billing information.
  *
- * @param searchParams - Optional query parameters from the page URL (may include `payment` and `job_id`) used to show payment state or target a specific job.
- * @returns The rendered JSX for the My Job Listings account page.
+ * @param searchParams - Optional query parameters from the page URL; may include `payment` and `job_id` to show payment state or target a specific job.
+ * @returns The JSX element for the My Job Listings page.
  *
  * @see getAuthenticatedUser
  * @see getUserDashboard

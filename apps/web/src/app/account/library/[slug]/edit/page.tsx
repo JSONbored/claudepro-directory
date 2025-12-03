@@ -32,6 +32,14 @@ interface EditCollectionPageProperties {
   params: Promise<{ slug: string }>;
 }
 
+/**
+ * Create metadata for the collection edit page using the provided route slug.
+ *
+ * @param params - An object whose `params` promise resolves to route parameters; the `slug` parameter is used to populate the metadata for the edit page.
+ * @returns Metadata for the /account/library/:slug/edit page with the `slug` value applied.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({
   params,
 }: EditCollectionPageProperties): Promise<Metadata> {
@@ -39,6 +47,16 @@ export async function generateMetadata({
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
+/**
+ * Renders the "Edit Collection" server page: validates authentication, loads collection details, and renders the edit form for the specified collection slug.
+ *
+ * @param params - Route params containing `slug` of the collection to edit
+ * @returns The React element for the Edit Collection page
+ *
+ * @see getAuthenticatedUser
+ * @see getCollectionDetail
+ * @see CollectionForm
+ */
 export default async function EditCollectionPage({ params }: EditCollectionPageProperties) {
   const { slug } = await params;
 

@@ -14,6 +14,14 @@ import {
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
+/**
+ * Generate the metadata for the Accessibility page.
+ *
+ * @returns The Next.js `Metadata` object for the `/accessibility` route.
+ *
+ * @see generatePageMetadata
+ * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/accessibility');
 }

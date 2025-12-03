@@ -86,10 +86,16 @@ const NewsletterCTAVariant = dynamicImport(
 );
 
 /**
- * Streaming Jobs Count Badge
- * Fetches total job count independently to avoid duplicate RPC calls
- * OPTIMIZATION: This component streams its own data, eliminating the
- * redundant count-only query in the main page component.
+ * Renders a badge showing the total number of jobs by fetching a minimal filtered jobs response.
+ *
+ * Performs an independent count query to avoid duplicating the main page's RPC. If the fetch fails
+ * or no total is returned, the badge displays "0 Jobs Available". This component streams its own
+ * data so the page can avoid an extra count-only query.
+ *
+ * @returns A badge element containing a briefcase icon and the total jobs text (e.g., "X Jobs Available").
+ *
+ * @see getFilteredJobs
+ * @see UnifiedBadge
  */
 async function JobsCountBadge() {
   let totalJobs = 0;
@@ -114,6 +120,13 @@ async function JobsCountBadge() {
   );
 }
 
+/**
+ * Build page metadata for the /jobs route based on current query parameters.
+ *
+ * @param searchParams - Promise resolving to the current URL search parameters; used to read the `category` and `remote` filter values.
+ * @returns Metadata for the /jobs page that reflects the selected `category` and `remote` filters.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({
   searchParams,
 }: PagePropsWithSearchParams): Promise<Metadata> {

@@ -69,19 +69,23 @@ const NewsletterCTAVariant = dynamicImport(
  */
 export const revalidate = 86_400;
 
-// Generate metadata from centralized registry
+/**
+ * Provide route-specific page metadata for the Config Recommender page.
+ *
+ * @returns Page metadata for the '/tools/config-recommender' route.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/tools/config-recommender');
 }
 
 /**
- * Render the Config Recommender landing page.
+ * Renders the Config Recommender landing page and establishes request-scoped logging.
  *
- * Renders a server-side React page that presents a client-side, rule-based quiz and
- * supporting informational sections (hero, benefits, features, and newsletter CTA).
- * Creates a request-scoped logger with a generated requestId, normalizes and logs
- * render errors, and re-throws normalized errors so they are handled by the application's
- * error boundary.
+ * Presents a server-side React page containing a client-side 7-question quiz and supporting
+ * informational sections (hero, benefits, features, and newsletter CTA). Creates a single
+ * requestId and a request-scoped child logger for the render; any render-time errors are
+ * normalized, logged, and re-thrown to be handled by the application's error boundary.
  *
  * @returns The React element tree for the Config Recommender landing page.
  *

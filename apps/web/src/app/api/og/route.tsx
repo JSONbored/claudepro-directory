@@ -4,6 +4,22 @@ import { type NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
+/**
+ * Generate an Open Graph image based on query parameters.
+ *
+ * Reads optional search parameters from the incoming request to customize the image:
+ * - `title`: main heading (falls back to OG_DEFAULTS.title)
+ * - `description`: optional subheading (falls back to OG_DEFAULTS.description)
+ * - `type`: badge label (falls back to OG_DEFAULTS.type)
+ * - `tags`: comma-separated list of tag strings (trimmed, deduplicated; renders up to 5)
+ *
+ * @param request - NextRequest whose URL search params may include `title`, `description`, `type`, and `tags`.
+ * @returns An ImageResponse containing the rendered OG image, sized according to OG_DIMENSIONS.
+ *
+ * @see OG_DEFAULTS
+ * @see OG_DIMENSIONS
+ * @see ImageResponse
+ */
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const title = searchParams.get('title') ?? OG_DEFAULTS.title;

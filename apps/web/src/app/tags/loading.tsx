@@ -38,6 +38,15 @@ const TAG_GRID_SKELETONS = [
   'tg-12',
 ] as const;
 
+/**
+ * Render a full-page skeleton loading state for the Tags page.
+ *
+ * Renders a non-interactive placeholder UI consisting of a hero skeleton, a "Popular Tags" row, and a responsive grid of tag-item skeletons; the root element is marked with accessibility attributes (`aria-busy="true"` and `role="status"`) and the decorative hero section is `aria-hidden`.
+ *
+ * @returns A JSX element containing skeleton placeholders for the Tags page (hero, popular tags, and responsive tag grid).
+ *
+ * @see Skeleton
+ */
 export default function TagsLoading() {
   return (
     <div className={`${minHeight.screen} bg-background`} aria-busy="true" role="status">

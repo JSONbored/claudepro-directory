@@ -159,6 +159,14 @@ export async function generateStaticParams() {
   }
 }
 
+/**
+ * Produces page metadata for a company detail route using the incoming route params.
+ *
+ * @param params - An object with a `slug` promise that resolves to the company slug from the route
+ * @returns Metadata for the /companies/:slug page
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: CompanyPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/companies/:slug', {

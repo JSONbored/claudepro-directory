@@ -79,7 +79,17 @@ const FILTERABLE_CATEGORIES = Constants.public.Enums.content_category.filter(
 );
 
 /**
- * Generate metadata for tag pages
+ * Builds SEO metadata and Open Graph data for a tag detail page.
+ *
+ * Uses the route `tag` param (URL-encoded), resolves tag metadata to derive item counts
+ * and category labels, and composes title, description, keywords, and Open Graph fields.
+ *
+ * @param params - Promise resolving to an object with the URL-encoded `tag` route parameter
+ * @returns Metadata populated with title, description, keywords, and `openGraph` suitable for the tag page
+ *
+ * @see formatTagForDisplay
+ * @see getTagMetadata
+ * @see APP_CONFIG
  */
 export async function generateMetadata({
   params,
@@ -112,7 +122,16 @@ export async function generateMetadata({
 }
 
 /**
- * Related tags sidebar
+ * Sidebar showing tags related to the current tag by shared categories.
+ *
+ * Renders a list of up to 15 tags that share at least one category with `currentTag`.
+ * If no related tags exist, the component returns `null`.
+ *
+ * @param props.currentTag - The active tag to find related tags for (encoded string).
+ * @param props.allTags - Array of tag summaries (each includes `tag`, `categories`, and `count`) used to determine related tags.
+ *
+ * @see {@link TagDetailPage} - Page that uses this sidebar.
+ * @see {@link formatTagForDisplay} - Utility used to format tag labels for display.
  */
 function RelatedTagsSidebar({
   currentTag,
@@ -161,7 +180,16 @@ function RelatedTagsSidebar({
 type FilterableCategory = (typeof FILTERABLE_CATEGORIES)[number];
 
 /**
- * Category filter tabs
+ * Renders category filter tabs for a given tag, showing counts and the active selection.
+ *
+ * @param tag - The tag to filter by (used to build tab links).
+ * @param activeCategory - The currently selected filterable category, or `null` for "All".
+ * @param categoryCounts - Map of content category to item count; categories with a count of zero are not shown.
+ * @returns The tab controls as a JSX element.
+ *
+ * @see FILTERABLE_CATEGORIES
+ * @see CATEGORY_LABELS
+ * @see RelatedTagsSidebar
  */
 function CategoryFilterTabs({
   tag,
@@ -196,8 +224,16 @@ function CategoryFilterTabs({
 }
 
 /**
- * Convert TaggedContentItem to DisplayableContent for ConfigCard
- * This casts the item to the enriched_content_item format expected by the UI
+ * Create a UI-ready DisplayableContent object from a TaggedContentItem.
+ *
+ * Maps fields from the backend TaggedContentItem into the DisplayableContent shape expected by UI card/grid components.
+ *
+ * @param item - The tagged content item to convert
+ * @returns The mapped DisplayableContent used by card and grid components
+ *
+ * @see ConfigCard
+ * @see UnifiedCardGrid
+ * @see DisplayableContent
  */
 function toDisplayableContent(item: TaggedContentItem): DisplayableContent {
   // Cast to enriched_content_item compatible structure
@@ -232,6 +268,21 @@ function toDisplayableContent(item: TaggedContentItem): DisplayableContent {
   } as DisplayableContent;
 }
 
+/**
+ * Renders the tag detail page showing content items filtered by a specific tag, optional category filters, pagination-aware content grid, and a related-tags sidebar.
+ *
+ * Fetches tag metadata, tag-filtered content, and a list of all tags on each request (server component; dynamic rendering forced). If no tag metadata and no content are found, this component triggers a 404 via Next.js `notFound()`.
+ *
+ * @param params - An object containing route parameters; expects `tag` (URL-encoded).
+ * @param searchParams - An object containing query parameters; may include `category` to filter results.
+ *
+ * @returns A React element that renders the tag hero, category filter tabs (when applicable), a content grid or an empty state, and a sidebar with related tags and a CTA.
+ *
+ * @see generateMetadata - Builds SEO and Open Graph metadata for the tag page.
+ * @see RelatedTagsSidebar - Sidebar component that shows related tags.
+ * @see CategoryFilterTabs - Component that renders the category filter controls.
+ * @see toDisplayableContent - Mapper that converts fetched content items into UI displayable items.
+ */
 export default async function TagDetailPage({
   params,
   searchParams,

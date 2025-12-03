@@ -52,6 +52,12 @@ const NewsletterCTAVariant = dynamicImport(
  */
 export const revalidate = 3600;
 
+/**
+ * Provide page metadata for the site's root path.
+ *
+ * @returns Page metadata for the root (`/`) route.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/');
 }
@@ -63,10 +69,17 @@ interface HomePageProperties {
 }
 
 /**
- * Top Contributors Server Component
+ * Renders the Top Contributors section using cached homepage data.
  *
- * NOTE: This calls getHomepageData which is deduplicated via React's cache()
- * The data is already fetched in the main page component, so this is a cache hit.
+ * Fetches homepage data for the homepage category IDs (the call is deduplicated by React's cache),
+ * records RPC failures via analytics when fetching fails, and returns a TopContributors element
+ * populated with normalized contributor objects. If the fetch fails or data is absent, an empty
+ * contributors list is rendered.
+ *
+ * @returns A TopContributors React element populated with contributor objects (empty when data is unavailable).
+ * @see getHomepageData
+ * @see trackRPCFailure
+ * @see TopContributors
  */
 async function TopContributorsServer() {
   const categoryIds = getHomepageCategoryIds;
@@ -108,19 +121,22 @@ async function TopContributorsServer() {
 }
 
 /**
- * Streaming SSR Homepage Architecture
+ * Renders the streaming, cache-optimized homepage composed of hero, content, and lazy sections.
  *
- * Data Flow:
- * 1. Main page fetches homepage data (member count for hero)
- * 2. Hero section renders with member count
- * 3. HomepageContentServer streams (uses React-cached getHomepageData - cache hit)
- * 4. TopContributorsServer lazy loads (uses React-cached getHomepageData - cache hit)
+ * Fetching and caching behavior:
+ * - Fetches homepage data early to populate the hero (member count and "new this week" indicator).
+ * - Uses React cache() for request-scoped deduplication of getHomepageData calls.
+ * - Cross-request caching is provided via unstable_cache in the underlying fetch utilities.
+ * - Failures when fetching homepage data are logged and rendered as graceful fallbacks (do not crash the page).
+ * - ISR revalidation for this page is configured to match the file-level `revalidate` value (3600 seconds).
  *
- * This architecture:
- * - Improves TTFB by ~50% (hero renders immediately)
- * - Uses React cache() for request-level deduplication
- * - Uses unstable_cache for cross-request caching
- * - Errors are NOT cached (fixed in fetch-cached.ts)
+ * @param props.searchParams - Optional query parameters passed to the page (e.g., `q`).
+ * @returns The React element for the homepage, streaming sections as they become available.
+ *
+ * @see getHomepageData
+ * @see HomepageHeroServer
+ * @see HomepageContentServerWrapper
+ * @see TopContributorsServer
  */
 export default async function HomePage({ searchParams }: HomePageProperties) {
   const requestId = generateRequestId();

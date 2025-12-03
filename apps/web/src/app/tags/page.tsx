@@ -62,6 +62,19 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Server-rendered page that displays an interactive tag index with metrics, a featured grid, and an animated tag cloud.
+ *
+ * Fetches tag summaries (minCount: 1, limit: 500), computes aggregate counts, and renders either an empty state
+ * or the UI composed of a hero (summary badges), a "Trending Topics" featured grid, and an "All Topics" animated tag cloud.
+ * If tag fetching fails, the error is logged and the page falls back to an empty tag set to render the empty state.
+ *
+ * @returns The page's React element tree for the tags index.
+ *
+ * @see {@link getAllTagsWithCounts} for the source of tag summaries
+ * @see {@link AnimatedTagCloud} for the interactive tag cloud visualization
+ * @see {@link FeaturedTagsGrid} for the featured/trending tag grid
+ */
 export default async function TagsIndexPage() {
   const requestId = generateRequestId();
   const reqLogger = logger.child({

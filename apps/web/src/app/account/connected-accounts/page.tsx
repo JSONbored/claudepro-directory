@@ -29,6 +29,27 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata(ROUTE);
 }
 
+/**
+ * Renders the Connected Accounts page for the current user, fetching OAuth identities and
+ * returning the appropriate UI for authenticated, unauthenticated, and error states.
+ *
+ * This server component:
+ * - Ensures the requester is authenticated; if not, renders a sign-in prompt.
+ * - Fetches the user's connected identities and renders them via the client component.
+ * - Shows a stable, generic error fallback when identity data cannot be loaded.
+ *
+ * Data fetching and ISR:
+ * - Performs server-side authentication and identity retrieval during render.
+ * - Does not expose internal error details to the client; only a generic error message is shown.
+ *
+ * @returns The rendered page JSX for the connected accounts route.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserIdentities
+ * @see ConnectedAccountsClient
+ * @see generateRequestId
+ * @see ROUTES
+ */
 export default async function ConnectedAccountsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

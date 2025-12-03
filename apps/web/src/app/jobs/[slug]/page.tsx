@@ -115,8 +115,14 @@ function getSafeWebsiteUrl(url: null | string | undefined): null | string {
 }
 
 /**
- * Validate and sanitize email address for safe use in mailto links
- * Returns safe mailto URL or null if email is invalid
+ * Validate and normalize an email address for safe use in a `mailto:` link.
+ *
+ * Performs format validation, rejects dangerous input (null bytes, path traversal, protocol injections),
+ * lowercases and enforces a 254-character maximum, and returns a percent-encoded `mailto:` URL when valid.
+ *
+ * @param email - The email address to validate and normalize; may be `null` or `undefined`.
+ * @returns A `mailto:` URL with the address percent-encoded, or `null` if the input is invalid.
+ * @see getSafeWebsiteUrl
  */
 function getSafeMailtoUrl(email: null | string | undefined): null | string {
   if (!email || typeof email !== 'string') return null;
@@ -153,12 +159,12 @@ function getSafeMailtoUrl(email: null | string | undefined): null | string {
 }
 
 /**
- * Build metadata for a job detail page based on the incoming slug.
+ * Build page metadata for a job detail route using the provided slug.
  *
- * Attempts to load the job by slug and includes the job as the page item when available; otherwise generates default route metadata for /jobs/:slug.
+ * Attempts to load the job by slug and, if found, includes the job as the page `item` (with `tags` defaulted to an empty array) in the generated metadata; otherwise returns route-level metadata for `/jobs/:slug`.
  *
- * @param params - An object (or promise resolving to an object) that provides the `slug` route parameter.
- * @returns The Next.js Metadata for the job page, optionally populated with the job item and its tags.
+ * @param params - An object (or a promise resolving to an object) containing the `slug` route parameter.
+ * @returns The Next.js `Metadata` for the job page, optionally populated with the resolved job item.
  *
  * @see getJobBySlug
  * @see generatePageMetadata
@@ -198,13 +204,11 @@ export async function generateMetadata({
 }
 
 /**
- * Produce the list of slugs to pre-render at build time for the jobs listing.
+ * Produce route parameter objects for Next.js to pre-render a limited set of job pages.
  *
- * Attempts to fetch up to the top 10 jobs and returns an array of { slug } objects for Incremental Static Regeneration (ISR); remaining job pages are rendered on-demand because dynamicParams is enabled.
+ * Attempts to fetch up to 10 top jobs and returns an array of `{ slug }` objects for ISR; when no jobs are available or an error occurs, returns a single placeholder slug so the build does not fail. This supports on-demand rendering for remaining job pages because `dynamicParams` is enabled.
  *
- * This runs at build-time (or during ISR revalidation) and uses a scoped logger and requestId for tracing; on fetch errors or when no jobs are available it returns a single placeholder slug.
- *
- * @returns An array of route parameter objects like `{ slug: string }` to be used by Next.js for static generation.
+ * @returns An array of route parameter objects (`{ slug: string }[]`). If no jobs can be fetched, returns `[{ slug: 'placeholder' }]`.
  *
  * @see getFilteredJobs - server helper used to fetch the top jobs
  * @see dynamicParams - page-level flag enabling on-demand rendering for non-pre-rendered slugs
@@ -244,12 +248,12 @@ export async function generateStaticParams() {
 }
 
 /**
- * Renders the job detail page for a given slug: validates the slug, loads job data server-side, and returns the page UI or a 404 when the slug is invalid or the job does not exist.
+ * Render the job detail page for a job identified by the route `slug`; validates parameters, loads job data server-side, and triggers a 404 when the slug is invalid or the job does not exist.
  *
- * The page uses server-side data fetching and participates in ISR as configured at the module level (revalidation and dynamicParams). A per-request logger is created for scoped diagnostics.
+ * The page participates in ISR as configured at the module level (see `revalidate` and `dynamicParams`) and creates a per-request scoped logger for diagnostics.
  *
  * @param params - Route parameters object containing `slug`
- * @returns The rendered job detail page as JSX.Element
+ * @returns The rendered job detail page content
  *
  * @see getJobBySlug - Loads job data from the database
  * @see getSafeWebsiteUrl - Validates external application links before rendering

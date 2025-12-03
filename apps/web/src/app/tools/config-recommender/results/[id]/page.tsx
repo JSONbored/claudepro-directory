@@ -36,6 +36,23 @@ interface DecodedQuizAnswers {
   useCase: Database['public']['Enums']['use_case_type'];
 }
 
+/**
+ * Decode and validate a base64url-encoded quiz answers payload into a DecodedQuizAnswers object.
+ *
+ * Decodes the provided `encoded` string from base64url, parses it as JSON, and validates required
+ * and optional fields (including enum membership). Returns a normalized object containing
+ * `useCase`, `experienceLevel`, `toolPreferences` and any present optional fields (`p_integrations`,
+ * `p_focus_areas`, `teamSize`, `timestamp`).
+ *
+ * @param encoded - A base64url-encoded JSON string representing quiz answers.
+ * @param resultId - Result identifier used for contextual logging.
+ * @param parentLogger - Optional parent logger; when omitted a child logger is created for this operation.
+ * @returns The decoded and validated quiz answers as a `DecodedQuizAnswers` object.
+ * @throws An error normalized by `normalizeError` when decoding, parsing, or validation fails.
+ *
+ * @see normalizeError
+ * @see Constants.public.Enums
+ */
 function decodeQuizAnswers(
   encoded: string,
   resultId: string,
@@ -158,6 +175,17 @@ function decodeQuizAnswers(
   }
 }
 
+/**
+ * Normalize raw recommendation rows from the database into a consistent array of recommendation items required by the UI.
+ *
+ * @param results - Raw `results` returned by the `get_recommendations` database function; may be undefined or contain incomplete items.
+ * @param resultId - Identifier for the recommendation result set, used for logging context.
+ * @param parentLogger - Optional parent logger; if provided a child logger is used for operation-scoped logging.
+ * @returns An array of recommendation items that include `category`, `slug`, and `title`. Returns an empty array when `results` is falsy.
+ *
+ * @see ResultsDisplay
+ * @see getConfigRecommendations
+ */
 function normalizeRecommendationResults(
   results: Database['public']['Functions']['get_recommendations']['Returns']['results'],
   resultId: string,
@@ -223,6 +251,19 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
   };
 }
 
+/**
+ * Server-rendered page that decodes quiz answers from the URL, fetches and normalizes configuration recommendations, and renders the results UI.
+ *
+ * Processes a Base64URL-encoded `answers` query parameter, validates and decodes it, requests recommendations from the backend, and constructs a shareable results view.
+ *
+ * @param props.params - Route parameters containing the page `id`.
+ * @param props.searchParams - URL search parameters; must include an `answers` value (Base64URL-encoded quiz answers).
+ * @returns A React element that displays the recommendation results and a shareable URL.
+ *
+ * @see ResultsDisplay
+ * @see decodeQuizAnswers
+ * @see getConfigRecommendations
+ */
 export default async function ResultsPage({ params, searchParams }: PageProperties) {
   const resolvedParameters = await params;
   const resolvedSearchParameters = await searchParams;

@@ -12,6 +12,14 @@ import {
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
+/**
+ * Produce the page metadata for the Cookies page used by Next.js routing and SEO.
+ *
+ * @returns The Metadata object for the "/cookies" page.
+ *
+ * @see generatePageMetadata - helper that builds standard page metadata
+ * @see {@link export const revalidate} - this page is statically generated (no revalidation)
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/cookies');
 }
@@ -22,6 +30,21 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = false;
 
+/**
+ * Render the site's Cookie Policy page.
+ *
+ * Displays the Cookie Policy content with an embedded "Last updated" date retrieved on the server.
+ *
+ * The component reads the site's last updated date via `getLastUpdatedDate()` and renders semantic
+ * sections describing cookie types, third-party services, management options, and contact links.
+ *
+ * This page is statically generated at build time and does not revalidate (see `export const revalidate = false`).
+ *
+ * @returns The Cookie Policy page as JSX for server-side rendering.
+ *
+ * @see getLastUpdatedDate - retrieves the "Last updated" date shown on the page.
+ * @see NavLink - used for internal navigation links to contact and privacy pages.
+ */
 export default function CookiesPage() {
   const lastUpdated = getLastUpdatedDate();
 

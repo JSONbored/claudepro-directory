@@ -223,7 +223,15 @@ export default async function AccountDashboard() {
     }
   }
 
-  // Helper to safely extract categoryData
+  /**
+   * Safely retrieves the `categoryData` map from an account dashboard's homepage payload.
+   *
+   * @param homepageData - The `homepage` portion of the account dashboard bundle; may be null, undefined, or malformed.
+   * @returns A record mapping category keys to arrays of `HomepageContentItem`. Returns an empty object if `categoryData` is absent or `homepageData.content` is not a valid object.
+   *
+   * @see getAccountDashboardBundle
+   * @see HomepageContentItem
+   */
   function extractHomepageCategoryData(
     homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage']
   ): Record<string, HomepageContentItem[]> {
@@ -437,6 +445,17 @@ export default async function AccountDashboard() {
   );
 }
 
+/**
+ * Renders a compact quick-action row with a title, supporting description, and a right-aligned "Open" link.
+ *
+ * @param title - Short title for the action
+ * @param description - One-line descriptive text shown beneath the title
+ * @param href - Destination URL for the action link
+ * @returns A React element representing the quick-action row
+ *
+ * @see NavLink
+ * @see RecentlySavedGrid
+ */
 function QuickActionRow({
   title,
   description,
@@ -461,6 +480,17 @@ function QuickActionRow({
   );
 }
 
+/**
+ * Renders an empty-state placeholder shown when the user has no saved configurations.
+ *
+ * Displays a brief explanatory message and an action link that navigates the user to the directory
+ * so they can explore and bookmark configurations.
+ *
+ * @returns A React element representing the empty "recently saved" state UI.
+ *
+ * @see RecentlySavedGrid
+ * @see ROUTES.HOME
+ */
 function EmptyRecentlySavedState() {
   return (
     <div

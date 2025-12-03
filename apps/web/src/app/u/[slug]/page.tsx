@@ -95,8 +95,19 @@ function getSafeCollectionUrl(userSlug: string, collectionSlug: string): null | 
 }
 
 /**
- * Sanitize display text for safe use in text content
- * Removes HTML tags, script content, and dangerous characters
+ * Sanitizes a text value for safe plain-text display.
+ *
+ * Strips angle brackets, removes control characters and dangerous directional marks
+ * while allowing tabs and newlines, trims whitespace, and truncates to 200 characters.
+ * If the input is missing or the sanitized result is empty, the provided `fallback` is returned.
+ *
+ * @param text - The input text to sanitize (may be null or undefined)
+ * @param fallback - Value to return when `text` is not a valid string or sanitization yields an empty result
+ * @returns The sanitized text, or `fallback` if the input is invalid or the sanitized output is empty
+ *
+ * @see isValidSlug
+ * @see getSafeContentUrl
+ * @see getSafeCollectionUrl
  */
 function sanitizeDisplayText(text: null | string | undefined, fallback: string): string {
   if (!text || typeof text !== 'string') return fallback;
@@ -141,6 +152,13 @@ interface UserProfilePageProperties {
  */
 export const revalidate = 1800;
 
+/**
+ * Generate page metadata for a user's public profile route.
+ *
+ * @param params - Promise resolving to an object with `slug`, the route parameter used to build metadata.
+ * @returns Metadata for the /u/:slug user profile page.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: UserProfilePageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/u/:slug', {
@@ -149,14 +167,12 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
 }
 
 /**
- * Render the public user profile page for the given route slug.
+ * Renders the public user profile page for the user identified by the route slug.
  *
- * Fetches the public profile, activity stats, public collections, and contributions for the requested user,
- * determines viewer context to control follow actions, validates slugs and related item URLs, and returns
- * the fully rendered page or triggers a 404 when the slug is invalid or the profile is not found.
+ * Triggers a 404 by calling `notFound()` when the slug is invalid or when no profile is found.
  *
- * @param props - Route parameters object containing `slug`
- * @returns The React element for the user profile page
+ * @param props - Route parameters object containing `slug` used to load the profile
+ * @returns The React element representing the rendered user profile page
  *
  * @see {@link isValidSlug}
  * @see {@link getPublicUserProfile}

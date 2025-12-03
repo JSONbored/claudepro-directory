@@ -57,9 +57,15 @@ export const revalidate = 7200;
 export const dynamicParams = true; // Allow older changelog entries to be rendered on-demand
 
 /**
- * Generate static params for recent changelog entries
- * Pre-renders top 20 entries to optimize build time while maintaining SEO coverage
- * Older entries are rendered on-demand via ISR (revalidate = 7200s)
+ * Provide static route parameters for a subset of recent changelog entries to pre-render at build time.
+ *
+ * Pre-renders the most recent changelog entries (limited to a top subset) so the build only generates a bounded number
+ * of changelog pages; older entries are available on-demand via ISR (revalidate = 7200s).
+ *
+ * @returns An array of parameter objects of the form `{ slug: string }` for entries that should be statically generated.
+ * @throws Throws a normalized error if changelog entries cannot be loaded.
+ * @see getAllChangelogEntries
+ * @see revalidate
  */
 export async function generateStaticParams() {
   // Limit to top 20 changelog entries (most recent) to optimize build time
@@ -92,7 +98,16 @@ export async function generateStaticParams() {
 }
 
 /**
- * Generate metadata for changelog detail page
+ * Create page metadata for a changelog detail page using the provided route parameters.
+ *
+ * Attempts to load the changelog entry identified by `slug` and uses the entry (when available)
+ * to populate the metadata; if the entry cannot be loaded, metadata generation proceeds with a null item.
+ *
+ * @param params - A promise resolving to route parameters containing `slug`
+ * @returns The metadata object for the changelog detail page
+ *
+ * @see getChangelogEntryBySlug
+ * @see generatePageMetadata
  */
 export async function generateMetadata({
   params,
@@ -131,14 +146,13 @@ export async function generateMetadata({
 }
 
 /**
- * Render the changelog detail page for a given entry slug.
+ * Render the changelog detail page for a given entry slug, loading the entry and producing the full entry view.
  *
- * Fetches the changelog entry by slug, initializes a request-scoped logger, and returns the full page UI
- * including read progress, view tracking, structured data, meta (canonical) link, and rendered changelog content.
+ * Loads the changelog entry identified by `slug`, renders metadata, view-tracking, structured data, canonical link, and the changelog content; if the entry is missing a 404 is triggered.
  *
- * @param params - An object containing the route params; must resolve to `{ slug: string }`.
+ * @param params - Promise resolving to an object with the route params; must resolve to `{ slug: string }`.
  * @returns The rendered React element for the changelog entry page.
- * @throws Will throw a normalized error if loading the changelog entry fails.
+ * @throws A normalized error if loading the changelog entry fails.
  * @see getChangelogEntryBySlug
  * @see ReadProgress
  * @see Pulse

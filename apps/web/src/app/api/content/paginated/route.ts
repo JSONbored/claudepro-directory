@@ -37,6 +37,20 @@ function toContentCategory(
     : undefined;
 }
 
+/**
+ * Handle GET requests to return a paginated list of content items optionally filtered by category.
+ *
+ * Parses `offset`, `limit`, and `category` from the request query string, validates them, invokes
+ * the `get_content_paginated_slim` RPC via a Supabase anon client, and returns the retrieved items
+ * or a structured error response.
+ *
+ * @param request - The incoming NextRequest whose query parameters (`offset`, `limit`, `category`) control pagination and filtering.
+ * @returns The HTTP response: on success a 200 response with a JSON array of content items; on invalid query parameters a 400 bad request response; on RPC or internal errors an error response reflecting the failure.
+ *
+ * @see toContentCategory
+ * @see createSupabaseAnonClient
+ * @see get_content_paginated_slim
+ */
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({

@@ -65,10 +65,10 @@ function formatStatus(rawStatus: string): string {
 }
 
 /**
- * Get the design-system color key associated with a job status.
+ * Return the design-system color key that corresponds to a job status.
  *
  * @param status - The job status to map to a badge color
- * @returns The color key string from the `jobStatusBadge` mapping for `status`
+ * @returns The color key for the given `status`
  *
  * @see jobStatusBadge
  * @see JobStatus
@@ -93,14 +93,14 @@ export async function generateMetadata({ params }: JobAnalyticsPageProperties): 
 }
 
 /**
- * Render the authenticated Job Analytics page for the job specified by `params.id`.
+ * Render the Job Analytics page for the authenticated owner of the job specified by `params.id`.
  *
- * Performs server-side authentication, loads the user's job data, computes basic metrics
- * (views, clicks, CTR) and renders a dashboard with listing details, performance metrics,
- * and contextual insights. If the user is unauthenticated the request is redirected to the
- * login route; if the job cannot be loaded or is not owned by the user, a fallback UI is rendered.
+ * Performs server-side authentication and loads the job for the current user; redirects to the login
+ * route if the request is unauthenticated and renders a fallback card when the job cannot be loaded
+ * or is not owned by the user. When a job is available, computes basic metrics (views, clicks, CTR)
+ * and returns the analytics dashboard showing listing details, performance metrics, and contextual insights.
  *
- * @param params - Route parameters object containing the job `id` (i.e., `{ id: string }`).
+ * @param params - Route parameters object containing the job `id` (e.g., `{ id: string }`).
  * @returns A React element containing the job analytics dashboard, or a fallback Card when analytics are unavailable.
  *
  * @see getAuthenticatedUser

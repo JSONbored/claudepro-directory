@@ -2,6 +2,23 @@ import { getContentDescriptionCopy } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { type MetadataRoute } from 'next';
 
+/**
+ * Builds the web app manifest used as Next.js metadata for the site.
+ *
+ * This function fetches the site's descriptive copy and returns a complete
+ * MetadataRoute.Manifest object populated with application name (from
+ * APP_CONFIG), short name, description, start URL, display/orientation settings,
+ * theme/background colors, categories, language/direction, and a set of icon
+ * descriptors (including maskable and Apple touch icons).
+ *
+ * @returns A MetadataRoute.Manifest describing the Progressive Web App (PWA)
+ *          metadata — includes name, short_name, description, start_url, scope,
+ *          display, orientation, background_color, theme_color, categories,
+ *          language/direction, prefer_related_applications, and icons.
+ *
+ * @see getContentDescriptionCopy — provides the manifest description text
+ * @see APP_CONFIG — provides the application name used in the manifest
+ */
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const description = await getContentDescriptionCopy();
 

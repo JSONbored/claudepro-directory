@@ -146,6 +146,22 @@ const DEFAULT_FORM_DATA: FormData = {
   // thumbnail_url is optional, don't include in default
 };
 
+/**
+ * Client-side wizard page that guides a user through a five-step content submission flow with draft auto-save, template application, thumbnail upload/validation, and final submission handling.
+ *
+ * The component manages form state, step navigation, quality scoring, template loading, social-proof fetching, and integrates with DraftManager, analytics tracking, and the submission API.
+ *
+ * @returns The JSX element that renders the multi-step submission wizard.
+ *
+ * @see StepTypeSelection
+ * @see StepBasicInfo
+ * @see StepConfiguration
+ * @see StepExamplesTags
+ * @see StepReviewSubmit
+ * @see DraftManager
+ * @see useTemplateApplication
+ * @see submitContentForReview
+ */
 export default function WizardSubmissionPage() {
   // Onboarding toasts
   useOnboardingToasts({ enabled: true, context: 'wizard' });
@@ -891,7 +907,16 @@ export default function WizardSubmissionPage() {
 }
 
 /**
- * Step 1: Type Selection
+ * Renders the first wizard step UI that lets the user choose a submission content type.
+ *
+ * Presents a heading, explanatory text, social proof for step 1, and a set of selectable type cards.
+ *
+ * @param selected - The currently selected submission content type.
+ * @param onSelect - Callback invoked with the chosen `SubmissionContentType` when a selection is made.
+ * @returns The React element for the "Type Selection" step containing social proof and type selection cards.
+ *
+ * @see StepSocialProof
+ * @see TypeSelectionCards
  */
 function StepTypeSelection({
   selected,
@@ -933,7 +958,19 @@ function StepTypeSelection({
 }
 
 /**
- * Step 2: Basic Information
+ * Render the "Basic Information" step of the wizard that collects the submission's
+ * name, description, author, optional GitHub URL, and an optional thumbnail image.
+ *
+ * @param data - Current form data for the wizard step.
+ * @param onChange - Callback to update parts of the form data; receives a partial update.
+ * @param onImageUpload - Called with a selected File to validate, process, and upload a thumbnail.
+ * @param isUploadingThumbnail - When true, thumbnail inputs and actions are disabled and show an uploading state.
+ * @param thumbnailPreview - Local or remote URL for the thumbnail preview, or `null` if none.
+ * @param onRemoveThumbnail - Removes the current thumbnail selection and preview from the form.
+ *
+ * @see StepTypeSelection
+ * @see AnimatedFormField
+ * @see handleImageUpload
  */
 function StepBasicInfo({
   data,
@@ -1174,7 +1211,24 @@ function StepBasicInfo({
 }
 
 /**
- * Step 3: Configuration (Type-Specific)
+ * Renders the "Configuration" step UI with fields tailored to the selected submission type.
+ *
+ * Displays optional template quick-select (or a loading skeleton), shows type-specific form fields
+ * (Agents, MCP, Rules, Commands), and invokes callbacks when fields change or a template is applied.
+ *
+ * @param submissionType - The currently selected submission content type which determines which fields are shown.
+ * @param data - Current form data for the configuration step; field values are read from and merged into this object.
+ * @param onChange - Called with an updated data object when any configuration field changes.
+ * @param templates - Optional list of templates available for the current submission type presented by the quick-select.
+ * @param templatesLoading - When true, shows a loading skeleton in place of the template quick-select.
+ * @param onApplyTemplate - Optional callback invoked with a template when the user applies one from the quick-select.
+ * @param getHighlightClasses - Optional helper that returns CSS classes for highlighting individual fields after template application.
+ *
+ * @returns A JSX element containing the configuration step UI.
+ *
+ * @see StepSocialProof
+ * @see TemplateQuickSelect
+ * @see AnimatedFormField
  */
 function StepConfiguration({
   submissionType,
@@ -1429,7 +1483,17 @@ function StepConfiguration({
 }
 
 /**
- * Step 4: Examples & Tags
+ * Render the Examples & Tags step UI for adding, listing, and removing usage examples and discovery tags.
+ *
+ * Displays inputs for creating new examples and tags, animated lists of existing entries, and invokes the
+ * provided change handler with partial updates to the form data when examples or tags are added or removed.
+ *
+ * @param data - Current form data containing `examples` and `tags` used to populate the UI
+ * @param onChange - Callback invoked with `Partial<FormData>` updates (e.g., `{ examples: [...] }` or `{ tags: [...] }`)
+ * @returns The rendered JSX element for the Examples & Tags step
+ *
+ * @see FormData
+ * @see StepBasicInfo
  */
 function StepExamplesTags({
   data,

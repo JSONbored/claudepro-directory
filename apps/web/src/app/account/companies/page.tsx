@@ -74,6 +74,16 @@ function isAllowedHttpUrl(url: null | string | undefined): boolean {
   }
 }
 
+/**
+ * Produce page metadata for the "My Companies" account page.
+ *
+ * This metadata is consumed by Next.js to populate the document head (title, description,
+ * Open Graph, etc.) for the /account/companies route.
+ *
+ * @returns Metadata object for the /account/companies page
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies');
 }

@@ -68,6 +68,19 @@ interface FiltersPayload {
 
 type SearchResultRow = Record<string, unknown>;
 
+/**
+ * Handle GET /api/search: validate query parameters, execute the search, and return paginated highlighted results.
+ *
+ * Validates query string, pagination, sort, entity/category/job filters, executes the appropriate search
+ * (content, unified, or jobs), highlights matched terms in results, enqueues analytics, and returns a JSON
+ * response containing results, the original query, applied filters, pagination metadata, and inferred search type.
+ *
+ * @param request - The NextRequest whose URL search parameters provide the query and filter values
+ * @returns A Response with a JSON body { results, query, filters, pagination, searchType } on success; on invalid input or failure returns an error response with an appropriate HTTP status
+ * @see executeSearch
+ * @see highlightResults
+ * @see trackSearchAnalytics
+ */
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -284,6 +297,12 @@ export function OPTIONS() {
   return handleOptionsRequest(CORS);
 }
 
+/**
+ * Parse a comma-separated string into an array of trimmed, non-empty values.
+ *
+ * @param value - A comma-separated string or `null`
+ * @returns An array of trimmed, non-empty strings, or `undefined` if `value` is falsy or yields no values
+ */
 function parseCsvParam(value: null | string): string[] | undefined {
   if (!value) return undefined;
   const parts = value
@@ -293,6 +312,13 @@ function parseCsvParam(value: null | string): string[] | undefined {
   return parts.length > 0 ? parts : undefined;
 }
 
+/**
+ * Validate that a string matches one of the allowed enum values.
+ *
+ * @param value - The input string to validate (may be undefined)
+ * @param validValues - Readonly array of permitted values for the enum
+ * @returns The input cast to `T` if it exists in `validValues`, `undefined` otherwise
+ */
 function validateEnumValue<T extends string>(
   value: string | undefined,
   validValues: readonly T[]
@@ -301,6 +327,32 @@ function validateEnumValue<T extends string>(
   return validValues.includes(value as T) ? (value as T) : undefined;
 }
 
+/**
+ * Execute a search using the provided parameters and return matching rows with a total count.
+ *
+ * Uses `searchType` to dispatch to the appropriate backend query:
+ * - 'jobs' runs the jobs filter and applies job-specific filters
+ * - 'unified' runs a multi-entity unified search
+ * - otherwise runs a content search that can be filtered by categories, tags, and authors
+ *
+ * @param authors - Optional list of author identifiers to filter content results
+ * @param categories - Optional list of content category keys to filter content results
+ * @param entities - Optional list of entity names to restrict unified searches; ignored for content searches
+ * @param jobCategory - Optional job category to filter job searches
+ * @param jobEmployment - Optional job employment type to filter job searches
+ * @param jobExperience - Optional job experience level to filter job searches
+ * @param jobRemote - Optional boolean to restrict job searches to remote-only positions
+ * @param limit - Maximum number of results to return
+ * @param offset - Result offset for pagination
+ * @param query - Search query string; may be empty to perform unfiltered queries
+ * @param searchService - Service instance used to perform the underlying search operations
+ * @param searchType - Determines which search backend to call ('jobs' | 'unified' | 'content')
+ * @param sort - Sort mode to apply for content searches
+ * @param tags - Optional list of tag strings to filter content results
+ * @returns An object with `results`, the array of matching rows, and `totalCount`, the total number of matches
+ *
+ * @see SearchService
+ */
 async function executeSearch(params: {
   authors?: string[] | undefined;
   categories?: string[] | undefined;
@@ -409,6 +461,15 @@ async function executeSearch(params: {
   };
 }
 
+/**
+ * Produce highlighted variants of searchable fields in each result using the provided query.
+ *
+ * @param results - Array of search result rows; may include `title`, `description`, `author`, and `tags` fields.
+ * @param query - The search query used to generate highlights; if empty or whitespace-only, results are returned as shallow copies with no highlight fields added.
+ * @returns An array of results where matching fields have corresponding highlighted properties (`title_highlighted`, `description_highlighted`, `author_highlighted`, `tags_highlighted`) when applicable.
+ * @see highlightSearchTerms
+ * @see highlightSearchTermsArray
+ */
 function highlightResults(results: SearchResultRow[], query: string): HighlightedSearchResult[] {
   if (!query.trim()) {
     return results.map((result) => ({ ...result }));

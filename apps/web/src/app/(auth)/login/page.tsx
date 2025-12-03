@@ -28,12 +28,12 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = 'force-dynamic';
 
 /**
- * Render the login page layout, resolving an optional redirect target from the incoming search parameters.
+ * Render the login page layout and supply an optional redirect target to the client login panel.
  *
- * The component resolves the provided `searchParams` promise to extract a `redirect` value (if present), creates a request-scoped logger for this render, and passes the resolved `redirect` to the client-side login panel when available. Errors while resolving `searchParams` are logged and the page renders without a redirect target.
+ * Resolves the incoming `searchParams` to extract an optional `redirect` value; if resolution fails or no redirect is provided, the page renders without a redirect target.
  *
- * @param props.searchParams - A promise that resolves to an object that may contain a `redirect` string.
- * @returns The React element for the login page layout.
+ * @param props.searchParams - A promise that resolves to an object which may include a `redirect` string used after successful login
+ * @returns The React element for the login page layout
  *
  * @see {@link LoginPanelClient}
  * @see {@link SplitAuthLayout}

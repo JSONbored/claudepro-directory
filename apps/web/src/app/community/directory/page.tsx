@@ -25,6 +25,23 @@ export const revalidate = false;
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
+/**
+ * Render the Community Directory UI and populate it with users from the backend.
+ *
+ * Fetches directory data using the provided `searchQuery` (limited by DEFAULT_DIRECTORY_LIMIT),
+ * transforms and filters the results into typed user lists, and renders the main profile search
+ * and a contributors sidebar.
+ *
+ * @param searchQuery - Query string used to filter directory results; may be empty to return all users.
+ * @returns The rendered directory content as a JSX element.
+ *
+ * @see getCommunityDirectory
+ * @see ProfileSearchClient
+ * @see ContributorsSidebar
+ * @see DEFAULT_DIRECTORY_LIMIT
+ * @see generateRequestId
+ * @see logger
+ */
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   // Generate single requestId for this component
   const requestId = generateRequestId();

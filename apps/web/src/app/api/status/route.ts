@@ -24,7 +24,20 @@ import { NextRequest, NextResponse } from 'next/server';
 const CORS = getOnlyCorsHeaders;
 
 /**
- * Normalize a raw `get_api_health` RPC result (snake_case) into a camelCase health-report object.
+ * Convert a snake_case RPC result from `get_api_health` into a camelCase health report.
+ *
+ * @param result - Raw RPC return object from `get_api_health`
+ * @returns The normalized health report with shape:
+ *   {
+ *     apiVersion: string,
+ *     checks: {
+ *       database: { latency: number; status: string; error?: string },
+ *       contentTable: { count: number; status: string; error?: string },
+ *       categoryConfigs: { count: number; status: string; error?: string }
+ *     },
+ *     status: string,
+ *     timestamp: string
+ *   }
  */
 function transformHealthResult(
   result: DatabaseGenerated['public']['Functions']['get_api_health']['Returns']
@@ -149,6 +162,21 @@ function transformHealthResult(
   return response;
 }
 
+/**
+ * Handle GET requests to the status/health endpoint and return a normalized health report.
+ *
+ * Calls the backend RPC `get_api_health`, transforms the RPC result into a camelCase health
+ * object, and responds with a JSON payload. The HTTP status code is 200 when the reported
+ * status is `healthy` or `degraded`, and 503 otherwise. On RPC or unexpected errors, returns
+ * a standardized error response.
+ *
+ * @param _request - The incoming NextRequest (unused by this handler).
+ * @returns A NextResponse containing the transformed health report on success, or an error response when the RPC call or handler fails.
+ *
+ * @see transformHealthResult
+ * @see createSupabaseAnonClient
+ * @see createErrorResponse
+ */
 export async function GET(_request: NextRequest) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({

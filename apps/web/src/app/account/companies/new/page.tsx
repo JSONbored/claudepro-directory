@@ -21,6 +21,21 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies/new');
 }
 
+/**
+ * Server-side page component that renders the "Create Company" form for authenticated users.
+ *
+ * Fetches the current user, creates a request-scoped logger for the request, and performs a server-side
+ * redirect to `/login` when no authenticated user is found. When authenticated, returns the page UI
+ * containing the page header and the CompanyForm in create mode.
+ *
+ * @returns A React element representing the new company creation page.
+ *
+ * @see getAuthenticatedUser
+ * @see CompanyForm
+ * @see generateRequestId
+ * @see logger
+ * @see redirect
+ */
 export default async function NewCompanyPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
