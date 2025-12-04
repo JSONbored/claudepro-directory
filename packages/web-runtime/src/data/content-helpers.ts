@@ -1,6 +1,6 @@
 import 'server-only';
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 
 export function generateContentTags(
   category?: Database['public']['Enums']['content_category'] | null,

@@ -4,7 +4,7 @@
 
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { CompanyForm } from '@/src/components/core/forms/company-form';
@@ -42,7 +42,7 @@ export default async function NewCompanyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Create Company</h1>
+        <h1 className="mb-2 text-3xl font-bold">Create Company</h1>
         <p className="text-muted-foreground">
           Add a new company profile to post jobs and showcase your organization
         </p>

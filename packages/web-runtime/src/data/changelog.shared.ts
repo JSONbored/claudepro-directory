@@ -1,4 +1,4 @@
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { z } from 'zod';
 
@@ -32,10 +32,7 @@ const changesSchema = z
 
 export type ChangelogChanges = z.infer<typeof changesSchema>;
 
-export function parseChangelogChanges(
-  changes: unknown,
-  requestId?: string
-): ChangelogChanges {
+export function parseChangelogChanges(changes: unknown, requestId?: string): ChangelogChanges {
   try {
     return changesSchema.parse(changes);
   } catch (error) {

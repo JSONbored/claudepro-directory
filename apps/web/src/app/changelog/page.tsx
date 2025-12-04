@@ -23,13 +23,13 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { UI_CLASSES, NavLink } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
 import { StructuredData } from '@/src/components/core/infra/structured-data';
@@ -37,11 +37,13 @@ import { ChangelogListClient } from '@/src/components/features/changelog/changel
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
 
@@ -63,7 +65,7 @@ export const revalidate = 3600;
 export async function generateMetadata(): Promise<Metadata> {
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const metadataLogger = logger.child({
     requestId: metadataRequestId,
@@ -113,7 +115,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ChangelogPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -182,15 +184,15 @@ export default async function ChangelogPage() {
           <div className="space-y-4">
             <NavLink
               href="/"
-              className="inline-flex items-center gap-2 text-muted-foreground text-sm"
+              className="text-muted-foreground inline-flex items-center gap-2 text-sm"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Home</span>
             </NavLink>
 
             <div className="space-y-2">
-              <h1 className="font-bold text-4xl tracking-tight">Changelog</h1>
-              <p className="text-lg text-muted-foreground">
+              <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
+              <p className="text-muted-foreground text-lg">
                 Track all updates, new features, bug fixes, and improvements to Claude Pro
                 Directory.
               </p>
@@ -199,25 +201,26 @@ export default async function ChangelogPage() {
             {/* Stats */}
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-muted-foreground text-sm`}>
               <div>
-                <span className="font-semibold text-foreground">
+                <span className="text-foreground font-semibold">
                   {overview.metadata?.total_entries ?? publishedEntries.length}
                 </span>{' '}
                 total updates
               </div>
-              {publishedEntries.length > 0 &&
-                publishedEntries[0]?.release_date ? <div>
-                    Latest:{' '}
-                    <time
-                      dateTime={publishedEntries[0].release_date}
-                      className="font-medium text-foreground"
-                    >
-                      {new Date(publishedEntries[0].release_date).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </time>
-                  </div> : null}
+              {publishedEntries.length > 0 && publishedEntries[0]?.release_date ? (
+                <div>
+                  Latest:{' '}
+                  <time
+                    dateTime={publishedEntries[0].release_date}
+                    className="text-foreground font-medium"
+                  >
+                    {new Date(publishedEntries[0].release_date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </time>
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -245,7 +248,7 @@ export default async function ChangelogPage() {
     return (
       <div className="container max-w-6xl py-8">
         <div className="space-y-4">
-          <h1 className="font-bold text-4xl tracking-tight">Changelog</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
           <p className="text-muted-foreground">
             Unable to load changelog entries. Please try again later.
           </p>

@@ -16,21 +16,30 @@ import {
   getHomepageCategoryIds,
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES, UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import {
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
-
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community');
@@ -56,7 +65,7 @@ function formatStatValue(value: null | number | undefined): string {
 export default async function CommunityPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -132,7 +141,7 @@ export default async function CommunityPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden px-4 py-24">
         <div className="container mx-auto text-center">
@@ -140,13 +149,13 @@ export default async function CommunityPage() {
             <UnifiedBadge
               variant="base"
               style="outline"
-              className="mb-6 border-accent/20 bg-accent/5 text-accent"
+              className="border-accent/20 bg-accent/5 text-accent mb-6"
             >
-              <Users className="mr-1 h-3 w-3 text-accent" />
+              <Users className="text-accent mr-1 h-3 w-3" />
               Community
             </UnifiedBadge>
 
-            <h1 className="mb-6 font-bold text-4xl md:text-6xl">Join the Claude Community</h1>
+            <h1 className="mb-6 text-4xl font-bold md:text-6xl">Join the Claude Community</h1>
 
             <p className={UI_CLASSES.TEXT_HEADING_LARGE}>
               Connect with developers and AI enthusiasts building with Claude. Share your
@@ -154,23 +163,29 @@ export default async function CommunityPage() {
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
-              {channels.github ? <Button size="lg" asChild>
+              {channels.github ? (
+                <Button size="lg" asChild>
                   <a href={channels.github} target="_blank" rel="noopener noreferrer">
                     <Github className="mr-2 h-5 w-5" />
                     GitHub
                   </a>
-                </Button> : null}
-              {channels.discord ? <Button size="lg" variant="outline" asChild>
+                </Button>
+              ) : null}
+              {channels.discord ? (
+                <Button size="lg" variant="outline" asChild>
                   <a href={channels.discord} target="_blank" rel="noopener noreferrer">
                     <MessageSquare className="mr-2 h-5 w-5" />
                     Discord
                   </a>
-                </Button> : null}
-              {channels.twitter ? <Button size="lg" variant="outline" asChild>
+                </Button>
+              ) : null}
+              {channels.twitter ? (
+                <Button size="lg" variant="outline" asChild>
                   <a href={channels.twitter} target="_blank" rel="noopener noreferrer">
                     <Twitter className="mr-2 h-5 w-5" />X (Twitter)
                   </a>
-                </Button> : null}
+                </Button>
+              ) : null}
             </div>
           </div>
         </div>
@@ -184,12 +199,12 @@ export default async function CommunityPage() {
               <Card key={title}>
                 <CardHeader>
                   <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                    <Icon className="h-5 w-5 text-primary" />
+                    <Icon className="text-primary h-5 w-5" />
                     {title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="font-bold text-3xl">{value}</div>
+                  <div className="text-3xl font-bold">{value}</div>
                   <p className="text-muted-foreground">{description}</p>
                 </CardContent>
               </Card>

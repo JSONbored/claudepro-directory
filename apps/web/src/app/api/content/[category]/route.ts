@@ -6,7 +6,7 @@
 import 'server-only';
 
 import { ContentService } from '@heyclaude/data-layer';
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
@@ -15,14 +15,23 @@ import {
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient, badRequestResponse, getOnlyCorsHeaders, buildCacheHeaders  } from '@heyclaude/web-runtime/server';
+import {
+  createSupabaseAnonClient,
+  badRequestResponse,
+  getOnlyCorsHeaders,
+  buildCacheHeaders,
+} from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
-function isValidContentCategory(value: string): value is DatabaseGenerated['public']['Enums']['content_category'] {
-  return CONTENT_CATEGORY_VALUES.includes(value as DatabaseGenerated['public']['Enums']['content_category']);
+function isValidContentCategory(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['content_category'] {
+  return CONTENT_CATEGORY_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['content_category']
+  );
 }
 
 export async function GET(

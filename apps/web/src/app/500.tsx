@@ -1,6 +1,6 @@
 /**
  * 500 Error Page - Server Error
- * 
+ *
  * This page is shown when a server error occurs (500 status code).
  * Next.js will automatically use this page for server errors.
  */
@@ -9,10 +9,7 @@
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle, Home, RefreshCw } from '@heyclaude/web-runtime/icons';
-import {
-  generateRequestId,
-  logClientError,
-} from '@heyclaude/web-runtime/logging/client';
+import { generateRequestId, logClientError } from '@heyclaude/web-runtime/logging/client';
 import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -49,17 +46,18 @@ export default function ServerError() {
   }, []);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="bg-background flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-lg p-8 text-center">
         <div className="mb-6">
           <div className="mb-4 flex justify-center">
-            <div className="rounded-full bg-destructive/10 p-3">
-              <AlertCircle className="h-12 w-12 text-destructive" aria-hidden="true" />
+            <div className="bg-destructive/10 rounded-full p-3">
+              <AlertCircle className="text-destructive h-12 w-12" aria-hidden="true" />
             </div>
           </div>
-          <h1 className="mb-2 font-bold text-2xl">Server Error</h1>
+          <h1 className="mb-2 text-2xl font-bold">Server Error</h1>
           <p className="text-muted-foreground">
-            We encountered an error while processing your request. Our team has been notified and is working on a fix.
+            We encountered an error while processing your request. Our team has been notified and is
+            working on a fix.
           </p>
         </div>
 

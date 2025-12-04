@@ -2,18 +2,17 @@ import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime'
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, Button ,
+  UI_CLASSES,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
@@ -155,12 +154,13 @@ export default async function ActivityPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Activity</h1>
+        <h1 className="mb-2 text-3xl font-bold">Activity</h1>
         <p className="text-muted-foreground">Your contribution history and community activity</p>
       </div>
 
       {/* Stats Overview - only render if summary is available */}
-      {hasSummary ? <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {hasSummary ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Submissions</CardTitle>
@@ -168,14 +168,15 @@ export default async function ActivityPage() {
             <CardContent>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <GitPullRequest className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO}`} />
-                <span className="font-bold text-2xl">
+                <span className="text-2xl font-bold">
                   {summary.merged_submissions}/{summary.total_submissions}
                 </span>
               </div>
-              <p className="mt-1 text-muted-foreground text-xs">Merged</p>
+              <p className="text-muted-foreground mt-1 text-xs">Merged</p>
             </CardContent>
           </Card>
-        </div> : null}
+        </div>
+      ) : null}
 
       {/* Timeline - only render if timeline is available */}
       {hasTimeline ? (

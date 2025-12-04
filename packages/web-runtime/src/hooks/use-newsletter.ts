@@ -2,7 +2,7 @@
  * Newsletter Subscription Hook
  *
  * Client-side state management for newsletter subscription forms.
- * Calls Supabase Edge Function directly with retry logic and analytics tracking.
+ * Uses Inngest via server action for reliable, durable processing.
  *
  * @example
  * ```tsx
@@ -28,20 +28,10 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { fetchWithRetry, type FetchRetryConfig } from '../client.ts';
-import { getNewsletterConfig } from '../config/static-configs.ts';
 import { logClientError, logClientWarn } from '../utils/client-logger.ts';
 import { usePulse } from './use-pulse.ts';
 import { toasts } from '../client/toast.ts';
-import { useCallback, useMemo, useState, useTransition } from 'react';
-
-const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
-
-// Default retry configuration
-const DEFAULT_MAX_RETRIES = 3;
-const DEFAULT_INITIAL_RETRY_DELAY_MS = 1000;
-const DEFAULT_RETRY_BACKOFF_MULTIPLIER = 2;
+import { useCallback, useState, useTransition } from 'react';
 
 /** Options for useNewsletter hook */
 export interface UseNewsletterOptions {
@@ -106,25 +96,6 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
   const [isPending, startTransition] = useTransition();
   const pulse = usePulse();
 
-  // Load retry config from static defaults
-  const retryConfig: FetchRetryConfig = useMemo(() => {
-    try {
-      const config = getNewsletterConfig();
-      return {
-        maxRetries: config['newsletter.max_retries'] ?? DEFAULT_MAX_RETRIES,
-        initialDelayMs: config['newsletter.initial_retry_delay_ms'] ?? DEFAULT_INITIAL_RETRY_DELAY_MS,
-        backoffMultiplier: config['newsletter.retry_backoff_multiplier'] ?? DEFAULT_RETRY_BACKOFF_MULTIPLIER,
-      };
-    } catch (configError: unknown) {
-      logClientWarn('useNewsletter: failed to load retry config', configError, 'useNewsletter.loadConfig');
-      return {
-        maxRetries: DEFAULT_MAX_RETRIES,
-        initialDelayMs: DEFAULT_INITIAL_RETRY_DELAY_MS,
-        backoffMultiplier: DEFAULT_RETRY_BACKOFF_MULTIPLIER,
-      };
-    }
-  }, []);
-
   const reset = useCallback(() => {
     setEmail('');
     setError(null);
@@ -144,34 +115,21 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
     startTransition(async () => {
       try {
         const referrer = typeof window !== 'undefined' ? window.location.href : undefined;
-
-        if (!SUPABASE_URL) {
-          throw new Error('Supabase URL not configured');
-        }
-
         const normalizedEmail = email.toLowerCase().trim();
 
-        const response = await fetchWithRetry(
-          `${SUPABASE_URL}/functions/v1/email-handler`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Email-Action': 'subscribe',
-            },
-            body: JSON.stringify({
-              email: normalizedEmail,
-              source,
-              ...(referrer && { referrer }),
-              ...(metadata && metadata),
-            }),
+        // Import and call the server action
+        const { subscribeNewsletterAction } = await import('../actions/newsletter.ts');
+        
+        const result = await subscribeNewsletterAction({
+          email: normalizedEmail,
+          source,
+          metadata: {
+            ...(referrer && { referrer }),
+            ...(metadata && metadata),
           },
-          retryConfig
-        );
+        });
 
-        const result = await response.json();
-
-        if (response.ok && result.success) {
+        if (result?.data?.success) {
           if (showToasts) {
             toasts.raw.success('Welcome!', {
               description: successMessage,
@@ -184,7 +142,6 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
               event: 'subscribe',
               metadata: {
                 source,
-                subscription_id: result.subscription_id,
                 ...(referrer && { referrer }),
                 ...(metadata && metadata),
               },
@@ -200,14 +157,13 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             logClientWarn('useNewsletter: signup success tracking failed', trackingError, 'useNewsletter.trackSuccess', {
               source,
               email: normalizedEmail,
-              subscriptionId: result.subscription_id,
             });
           });
 
           reset();
           onSuccess?.();
         } else {
-          const errorMessage = result.message || result.error || 'Please try again later.';
+          const errorMessage = result?.serverError || 'Please try again later.';
 
           setError(errorMessage);
 
@@ -237,7 +193,6 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             component: 'useNewsletter',
             source,
             email: `${email.substring(0, 3)}***`,
-            status: response.status,
             ...logContext,
           });
         }
@@ -288,7 +243,6 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
     metadata,
     logContext,
     pulse,
-    retryConfig,
   ]);
 
   return {

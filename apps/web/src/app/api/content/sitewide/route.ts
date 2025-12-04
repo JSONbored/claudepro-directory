@@ -13,11 +13,13 @@ import {
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient,
+import {
+  createSupabaseAnonClient,
   badRequestResponse,
   getOnlyCorsHeaders,
-  buildCacheHeaders } from '@heyclaude/web-runtime/server';
-import  { type NextRequest } from 'next/server';
+  buildCacheHeaders,
+} from '@heyclaude/web-runtime/server';
+import { type NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;

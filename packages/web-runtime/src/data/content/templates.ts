@@ -1,18 +1,19 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
 
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
-type MergedTemplateItem = ContentTemplateItem & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+type MergedTemplateItem = ContentTemplateItem &
+  (ContentTemplateItem['template_data'] extends Record<string, unknown>
     ? ContentTemplateItem['template_data']
     : Record<string, unknown>) & {
-  templateData: ContentTemplateItem['template_data'];
-};
+    templateData: ContentTemplateItem['template_data'];
+  };
 
 export async function getContentTemplates(
   category: Database['public']['Enums']['content_category']
@@ -32,8 +33,7 @@ export async function getContentTemplates(
     return [];
   }
 
-  const templates =
-    result.templates?.filter(Boolean) ?? [];
+  const templates = result.templates?.filter(Boolean) ?? [];
 
   return templates.map((template) => {
     const templateData = template.template_data;

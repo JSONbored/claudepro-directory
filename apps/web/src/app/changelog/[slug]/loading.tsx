@@ -5,8 +5,7 @@
  * Shows placeholder content matching the layout of the detail page.
  */
 
-import { Skeleton, UI_CLASSES, Separator  } from '@heyclaude/web-runtime/ui';
-
+import { Skeleton, UI_CLASSES, Separator } from '@heyclaude/web-runtime/ui';
 
 export default function ChangelogEntryLoading() {
   return (

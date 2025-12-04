@@ -6,21 +6,23 @@
 
 import 'server-only';
 
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { APP_CONFIG, buildSecurityHeaders  } from '@heyclaude/shared-runtime';
+import { APP_CONFIG, buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
   generateRequestId,
   logger,
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient,
+import {
+  createSupabaseAnonClient,
   badRequestResponse,
   getOnlyCorsHeaders,
   getWithAcceptCorsHeaders,
   buildCacheHeaders,
-  proxyStorageFile } from '@heyclaude/web-runtime/server';
+  proxyStorageFile,
+} from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS_JSON = getOnlyCorsHeaders;
@@ -74,7 +76,7 @@ async function handleJsonFormat(
     p_slug: slug,
     p_base_url: SITE_URL,
   } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
-  
+
   const { data, error } = await supabase.rpc('get_api_content_full', rpcArgs);
 
   if (error) {
@@ -138,7 +140,7 @@ async function handleMarkdownFormat(
     p_include_metadata: includeMetadata,
     p_include_footer: includeFooter,
   } satisfies DatabaseGenerated['public']['Functions']['generate_markdown_export']['Args'];
-  
+
   const { data, error } = await supabase.rpc('generate_markdown_export', rpcArgs);
 
   if (error) {
@@ -224,7 +226,7 @@ async function handleItemLlmsTxt(
     p_category: category,
     p_slug: slug,
   } satisfies DatabaseGenerated['public']['Functions']['generate_item_llms_txt']['Args'];
-  
+
   const { data, error } = await supabase.rpc('generate_item_llms_txt', rpcArgs);
 
   if (error) {
@@ -261,7 +263,7 @@ async function handleItemLlmsTxt(
 
   const dataString = typeof data === 'string' ? data : String(data);
   const formatted: string = dataString.replaceAll(String.raw`\n`, '\n');
-  
+
   return new NextResponse(formatted, {
     status: 200,
     headers: {

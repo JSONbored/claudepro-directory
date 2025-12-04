@@ -1,6 +1,6 @@
 'use server';
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { cache } from 'react';
 
 import { logger, normalizeError } from '../index.ts';
@@ -12,7 +12,15 @@ type JobBillingSummaryRow = Database['public']['Views']['job_billing_summary']['
 
 type PaymentPlanCatalogRowSubset = Pick<
   PaymentPlanRow,
-  'benefits' | 'billing_cycle_days' | 'description' | 'is_subscription' | 'job_expiry_days' | 'plan' | 'price_cents' | 'product_type' | 'tier'
+  | 'benefits'
+  | 'billing_cycle_days'
+  | 'description'
+  | 'is_subscription'
+  | 'job_expiry_days'
+  | 'plan'
+  | 'price_cents'
+  | 'product_type'
+  | 'tier'
 >;
 
 export type PaymentPlanCatalogEntry = Omit<PaymentPlanCatalogRowSubset, 'benefits'> & {
@@ -130,9 +138,7 @@ export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogE
   }
 });
 
-export async function getJobBillingSummaries(
-  jobIds: string[]
-): Promise<JobBillingSummaryEntry[]> {
+export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBillingSummaryEntry[]> {
   if (jobIds.length === 0) {
     return [];
   }
@@ -199,12 +205,7 @@ export async function getJobBillingSummaries(
     // Type guard: Validate each entry has required fields
     const entries: JobBillingSummaryEntry[] = [];
     for (const entry of data) {
-      if (
-        typeof entry === 'object' &&
-        'job_id' in entry &&
-        'plan' in entry &&
-        'tier' in entry
-      ) {
+      if (typeof entry === 'object' && 'job_id' in entry && 'plan' in entry && 'tier' in entry) {
         entries.push(entry as JobBillingSummaryEntry);
       }
     }

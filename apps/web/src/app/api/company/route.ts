@@ -5,7 +5,7 @@
 
 import 'server-only';
 
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
   generateRequestId,
   logger,
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     const rpcArgs = {
       p_slug: slug,
     } satisfies DatabaseGenerated['public']['Functions']['get_company_profile']['Args'];
-    
+
     const { data: profile, error } = await supabase.rpc('get_company_profile', rpcArgs);
 
     if (error) {

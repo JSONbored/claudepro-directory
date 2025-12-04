@@ -4,7 +4,7 @@
  * Leverages get_company_profile() RPC + company_job_stats materialized view
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -16,13 +16,16 @@ import {
   Users,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge,
+import {
+  UI_CLASSES,
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -107,7 +110,7 @@ export async function generateStaticParams() {
 
   // Generate requestId for static params generation (build-time)
   const staticParamsRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId: staticParamsRequestId,
@@ -146,7 +149,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -172,9 +175,9 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
     <>
       <StructuredData route={`/companies/${slug}`} />
 
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         {/* Company Header */}
-        <section className="relative border-border border-b">
+        <section className="border-border relative border-b">
           <div className="container mx-auto px-4 py-12">
             <div className="flex items-start gap-6">
               {company.logo ? (
@@ -183,24 +186,28 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   alt={`${company.name} logo`}
                   width={96}
                   height={96}
-                  className="h-24 w-24 rounded-lg border-4 border-background object-cover"
+                  className="border-background h-24 w-24 rounded-lg border-4 object-cover"
                   priority
                 />
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-lg border-4 border-background bg-accent font-bold text-2xl">
+                <div className="border-background bg-accent flex h-24 w-24 items-center justify-center rounded-lg border-4 text-2xl font-bold">
                   <Building className="h-12 w-12" />
                 </div>
               )}
 
               <div className="flex-1">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
-                  <h1 className="font-bold text-3xl">{company.name}</h1>
-                  {company.featured ? <UnifiedBadge variant="base" style="default">
+                  <h1 className="text-3xl font-bold">{company.name}</h1>
+                  {company.featured ? (
+                    <UnifiedBadge variant="base" style="default">
                       Featured
-                    </UnifiedBadge> : null}
+                    </UnifiedBadge>
+                  ) : null}
                 </div>
 
-                {company.description ? <p className="mt-2 max-w-3xl text-muted-foreground">{company.description}</p> : null}
+                {company.description ? (
+                  <p className="text-muted-foreground mt-2 max-w-3xl">{company.description}</p>
+                ) : null}
 
                 <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
                   <SafeWebsiteLink
@@ -211,25 +218,31 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                     Website
                   </SafeWebsiteLink>
 
-                  {company.industry ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.industry ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <TrendingUp className="h-4 w-4" />
                       {company.industry}
-                    </div> : null}
+                    </div>
+                  ) : null}
 
                   {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
-                  {company.size ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.size ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Users className="h-4 w-4" />
                       {company.size}
-                    </div> : null}
+                    </div>
+                  ) : null}
 
-                  {company.using_cursor_since ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.using_cursor_since ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Calendar className="h-4 w-4" />
                       Using Claude since{' '}
                       {new Date(company.using_cursor_since).toLocaleDateString('en-US', {
                         month: 'short',
                         year: 'numeric',
                       })}
-                    </div> : null}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -242,7 +255,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
             {/* Main content - Active jobs */}
             <div className="space-y-6">
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                <h2 className="font-bold text-2xl">
+                <h2 className="text-2xl font-bold">
                   Active Positions ({active_jobs?.length ?? 0})
                 </h2>
               </div>
@@ -250,9 +263,9 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
               {!active_jobs || active_jobs.length === 0 ? (
                 <Card>
                   <CardContent className="flex flex-col items-center py-16">
-                    <Briefcase className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <h3 className="mb-2 font-semibold text-xl">No Active Positions</h3>
-                    <p className="mb-6 max-w-md text-center text-muted-foreground">
+                    <Briefcase className="text-muted-foreground mb-4 h-12 w-12" />
+                    <h3 className="mb-2 text-xl font-semibold">No Active Positions</h3>
+                    <p className="text-muted-foreground mb-6 max-w-md text-center">
                       This company doesn't have any job openings at the moment. Check back later!
                     </p>
                     <Link href={ROUTES.JOBS}>
@@ -265,21 +278,24 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
               ) : (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   {active_jobs
-                    .filter((job): job is typeof job & {
-                      click_count: number;
-                      company: string;
-                      experience: Database['public']['Enums']['experience_level'];
-                      expires_at: string;
-                      id: string;
-                      plan: Database['public']['Enums']['job_plan'];
-                      posted_at: string;
-                      slug: string;
-                      title: string;
-                      view_count: number;
-                      workplace: Database['public']['Enums']['workplace_type'];
-                    } => {
-                      return Boolean(
-                        job.id &&
+                    .filter(
+                      (
+                        job
+                      ): job is typeof job & {
+                        click_count: number;
+                        company: string;
+                        experience: Database['public']['Enums']['experience_level'];
+                        expires_at: string;
+                        id: string;
+                        plan: Database['public']['Enums']['job_plan'];
+                        posted_at: string;
+                        slug: string;
+                        title: string;
+                        view_count: number;
+                        workplace: Database['public']['Enums']['workplace_type'];
+                      } => {
+                        return Boolean(
+                          job.id &&
                           job.slug &&
                           job.title &&
                           job.company &&
@@ -290,8 +306,9 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                           job.expires_at &&
                           job.view_count !== null &&
                           job.click_count !== null
-                      );
-                    })
+                        );
+                      }
+                    )
                     .map((job) => {
                       return (
                         <JobCard
@@ -344,17 +361,21 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                     <span className="font-semibold text-green-600">{stats?.active_jobs ?? 0}</span>
                   </div>
 
-                  {stats && (stats.remote_jobs ?? 0) > 0 ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  {stats && (stats.remote_jobs ?? 0) > 0 ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Remote Positions</span>
                       <span className="font-semibold">{stats.remote_jobs ?? 0}</span>
-                    </div> : null}
+                    </div>
+                  ) : null}
 
-                  {stats?.avg_salary_min ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  {stats?.avg_salary_min ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
                       <span className="font-semibold">
                         ${(stats.avg_salary_min / 1000).toFixed(0)}k+
                       </span>
-                    </div> : null}
+                    </div>
+                  ) : null}
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Views</span>
@@ -363,16 +384,18 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                     </span>
                   </div>
 
-                  {stats?.latest_job_posted_at ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  {stats?.latest_job_posted_at ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
-                      <span className="font-semibold text-sm">
+                      <span className="text-sm font-semibold">
                         {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',
                         })}
                       </span>
-                    </div> : null}
+                    </div>
+                  ) : null}
                 </CardContent>
               </Card>
 

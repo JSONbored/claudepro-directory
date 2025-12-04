@@ -1,10 +1,10 @@
-import  { type Database } from '@heyclaude/database-types';
-import  { type CreateJobInput } from '@heyclaude/web-runtime';
+import { type Database } from '@heyclaude/database-types';
+import { type CreateJobInput } from '@heyclaude/web-runtime';
 import { createJob } from '@heyclaude/web-runtime/actions';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function NewJobPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -55,7 +55,7 @@ export default async function NewJobPage() {
 
     // Generate requestId for server action (separate from page render)
     const actionRequestId = generateRequestId();
-    
+
     // Create request-scoped child logger for server action
     const actionLogger = logger.child({
       requestId: actionRequestId,
@@ -90,9 +90,10 @@ export default async function NewJobPage() {
     }
 
     // Type the result data using generated database types
-    type CreateJobResult = Database['public']['CompositeTypes']['create_job_with_payment_result'] & {
-      checkoutUrl?: null | string;
-    };
+    type CreateJobResult =
+      Database['public']['CompositeTypes']['create_job_with_payment_result'] & {
+        checkoutUrl?: null | string;
+      };
     const jobResult = result.data as CreateJobResult;
 
     if (jobResult.success) {
@@ -131,7 +132,7 @@ export default async function NewJobPage() {
       new Error('Job creation failed'),
       'NewJobPage: createJob returned success=false'
     );
-      actionLogger.error('NewJobPage: createJob returned success=false', normalized, {
+    actionLogger.error('NewJobPage: createJob returned success=false', normalized, {
       jobId: jobResult.job_id ?? 'unknown',
       companyId: jobResult.company_id ?? 'unknown',
       requiresPayment: jobResult.requires_payment ?? false,
@@ -140,7 +141,7 @@ export default async function NewJobPage() {
       success: false,
       message: 'Job creation failed. Please try again or contact support.',
     };
-  };
+  }
 
   return (
     <div className="space-y-6">

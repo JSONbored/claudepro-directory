@@ -1,5 +1,4 @@
-import { getSkeletonKeys, Skeleton  } from '@heyclaude/web-runtime/ui';
-
+import { getSkeletonKeys, Skeleton } from '@heyclaude/web-runtime/ui';
 
 const CODE_LINE_KEYS = getSkeletonKeys(8);
 
@@ -17,9 +16,9 @@ const CODE_LINE_KEYS = getSkeletonKeys(8);
  */
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       {/* Header */}
-      <div className="border-border/50 border-b bg-card/30">
+      <div className="border-border/50 bg-card/30 border-b">
         <div className="container mx-auto px-4 py-8">
           {/* Back button */}
           <Skeleton size="sm" width="sm" className="mb-6" />

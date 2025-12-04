@@ -15,7 +15,6 @@ import { normalizeRpcResult } from './content-helpers.ts';
 
 const JOBS_CATEGORY = Constants.public.Enums.content_category[9] as string; // 'jobs'
 
-
 const COMPANY_DETAIL_TTL_KEY = 'cache.company_detail.ttl_seconds';
 
 type GetCompanyAdminProfileReturn =
@@ -109,7 +108,8 @@ export async function getCompaniesList(
 
   try {
     return await fetchCached(
-      (client) => new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
+      (client) =>
+        new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
       {
         keyParts: ['companies-list', limit, offset],
         tags: ['companies', JOBS_CATEGORY],
@@ -147,7 +147,7 @@ async function fetchCompanySearchResults(
   });
 
   const { trackPerformance } = await import('../utils/performance-metrics');
-  
+
   try {
     const { result } = await trackPerformance(
       async () => {
@@ -167,7 +167,7 @@ async function fetchCompanySearchResults(
         logLevel: 'info', // Log all operations for observability
       }
     );
-    
+
     return result;
   } catch (error) {
     // trackPerformance already logs the error, but we log again with context about fallback behavior

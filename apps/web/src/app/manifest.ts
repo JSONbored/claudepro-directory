@@ -1,6 +1,6 @@
 import { getContentDescriptionCopy } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import  { type MetadataRoute } from 'next';
+import { type MetadataRoute } from 'next';
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const description = await getContentDescriptionCopy();

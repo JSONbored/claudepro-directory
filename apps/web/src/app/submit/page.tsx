@@ -11,13 +11,16 @@ import {
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { cn, UI_CLASSES, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  cn,
+  UI_CLASSES,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
@@ -27,11 +30,13 @@ import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
 
@@ -139,7 +144,6 @@ function isValidRecentSubmission(submission: unknown): submission is {
     submission.merged_at !== null
   );
 }
-
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/submit');
@@ -306,7 +310,7 @@ export default async function SubmitPage() {
           {/* Stats Card - 3-column grid */}
           <Card>
             <CardHeader>
-              <CardTitle className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'font-medium text-sm')}>
+              <CardTitle className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'text-sm font-medium')}>
                 <TrendingUp className={UI_CLASSES.ICON_SM} />
                 Community Stats
               </CardTitle>
@@ -314,19 +318,19 @@ export default async function SubmitPage() {
             <CardContent className={UI_CLASSES.GRID_COLS_3_GAP_2}>
               {/* Total */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-blue-500/10')}>
-                <div className="font-bold text-2xl text-blue-400">{stats.total}</div>
+                <div className="text-2xl font-bold text-blue-400">{stats.total}</div>
                 <div className={UI_CLASSES.TEXT_XS_MUTED}>Total</div>
               </div>
 
               {/* Pending */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-yellow-500/10')}>
-                <div className="font-bold text-2xl text-yellow-400">{stats.pending}</div>
+                <div className="text-2xl font-bold text-yellow-400">{stats.pending}</div>
                 <div className={UI_CLASSES.TEXT_XS_MUTED}>Pending</div>
               </div>
 
               {/* This Week */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-green-500/10')}>
-                <div className="font-bold text-2xl text-green-400">{stats.merged_this_week}</div>
+                <div className="text-2xl font-bold text-green-400">{stats.merged_this_week}</div>
                 <div className={UI_CLASSES.TEXT_XS_MUTED}>This Week</div>
               </div>
             </CardContent>

@@ -2,8 +2,7 @@ import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/c
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { NavLink } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
-
+import { type Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/accessibility');
@@ -39,11 +38,11 @@ export default function AccessibilityPage() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
       <div className="prose prose-invert max-w-none">
-        <h1 className="mb-6 font-bold text-3xl sm:text-4xl">Accessibility Statement</h1>
-        <p className="mb-8 text-muted-foreground">Page generated: {lastUpdated}</p>
+        <h1 className="mb-6 text-3xl font-bold sm:text-4xl">Accessibility Statement</h1>
+        <p className="text-muted-foreground mb-8">Page generated: {lastUpdated}</p>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">Our Commitment</h2>
+          <h2 className="mb-4 text-2xl font-semibold">Our Commitment</h2>
           <p className="mb-4">
             {APP_CONFIG.name} is committed to ensuring digital accessibility for people with
             disabilities. We are continually improving the user experience for everyone and applying
@@ -52,7 +51,7 @@ export default function AccessibilityPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">Conformance Status</h2>
+          <h2 className="mb-4 text-2xl font-semibold">Conformance Status</h2>
           <p className="mb-4">
             We aim to conform to the{' '}
             <NavLink
@@ -69,11 +68,11 @@ export default function AccessibilityPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">Accessibility Features</h2>
+          <h2 className="mb-4 text-2xl font-semibold">Accessibility Features</h2>
           <p className="mb-4">Our website includes the following accessibility features:</p>
 
           <div className="mb-6">
-            <h3 className="mb-3 font-semibold text-xl">Keyboard Navigation</h3>
+            <h3 className="mb-3 text-xl font-semibold">Keyboard Navigation</h3>
             <ul className="list-disc space-y-2 pl-6">
               <li>All interactive elements are keyboard accessible</li>
               <li>Skip to main content link for screen reader users</li>
@@ -83,7 +82,7 @@ export default function AccessibilityPage() {
           </div>
 
           <div className="mb-6">
-            <h3 className="mb-3 font-semibold text-xl">Visual Design</h3>
+            <h3 className="mb-3 text-xl font-semibold">Visual Design</h3>
             <ul className="list-disc space-y-2 pl-6">
               <li>High contrast color ratios (WCAG AA compliant)</li>
               <li>Dark mode support for reduced eye strain</li>
@@ -94,7 +93,7 @@ export default function AccessibilityPage() {
           </div>
 
           <div className="mb-6">
-            <h3 className="mb-3 font-semibold text-xl">Screen Reader Support</h3>
+            <h3 className="mb-3 text-xl font-semibold">Screen Reader Support</h3>
             <ul className="list-disc space-y-2 pl-6">
               <li>Semantic HTML structure</li>
               <li>ARIA labels and descriptions where appropriate</li>
@@ -105,7 +104,7 @@ export default function AccessibilityPage() {
           </div>
 
           <div className="mb-6">
-            <h3 className="mb-3 font-semibold text-xl">Content</h3>
+            <h3 className="mb-3 text-xl font-semibold">Content</h3>
             <ul className="list-disc space-y-2 pl-6">
               <li>Clear and simple language</li>
               <li>Descriptive link text</li>
@@ -116,7 +115,7 @@ export default function AccessibilityPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">Known Limitations</h2>
+          <h2 className="mb-4 text-2xl font-semibold">Known Limitations</h2>
           <p className="mb-4">
             Despite our efforts, some areas may not be fully accessible. We are actively working to
             address these:
@@ -129,7 +128,7 @@ export default function AccessibilityPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">Testing and Validation</h2>
+          <h2 className="mb-4 text-2xl font-semibold">Testing and Validation</h2>
           <p className="mb-4">We regularly test our website using:</p>
           <ul className="list-disc space-y-2 pl-6">
             <li>Automated accessibility testing tools</li>
@@ -141,7 +140,7 @@ export default function AccessibilityPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">Compatible Technologies</h2>
+          <h2 className="mb-4 text-2xl font-semibold">Compatible Technologies</h2>
           <p className="mb-4">Our website is designed to be compatible with:</p>
           <ul className="list-disc space-y-2 pl-6">
             <li>Modern web browsers (Chrome, Firefox, Safari, Edge)</li>
@@ -152,7 +151,7 @@ export default function AccessibilityPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">Feedback and Support</h2>
+          <h2 className="mb-4 text-2xl font-semibold">Feedback and Support</h2>
           <p className="mb-4">
             We welcome feedback on the accessibility of {APP_CONFIG.name}. If you encounter any
             accessibility barriers or have suggestions for improvement, please let us know:
@@ -181,7 +180,7 @@ export default function AccessibilityPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">Formal Complaints</h2>
+          <h2 className="mb-4 text-2xl font-semibold">Formal Complaints</h2>
           <p className="mb-4">
             If you are not satisfied with our response to your accessibility concern, please contact
             us directly through the channels listed above.
@@ -189,7 +188,7 @@ export default function AccessibilityPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">Ongoing Improvements</h2>
+          <h2 className="mb-4 text-2xl font-semibold">Ongoing Improvements</h2>
           <p className="mb-4">Accessibility is an ongoing effort. We regularly:</p>
           <ul className="list-disc space-y-2 pl-6">
             <li>Review and update our accessibility practices</li>
@@ -201,7 +200,7 @@ export default function AccessibilityPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">Assessment Approach</h2>
+          <h2 className="mb-4 text-2xl font-semibold">Assessment Approach</h2>
           <p className="mb-4">
             This accessibility statement was created using automated and manual testing methods,
             including:

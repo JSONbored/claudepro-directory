@@ -1,7 +1,7 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
 
@@ -20,14 +20,15 @@ export async function getReviewsWithStatsData(
   const { contentType, contentSlug, sortBy, limit, offset, userId } = parameters;
 
   return fetchCached(
-    (client) => new ContentService(client).getReviewsWithStats({
+    (client) =>
+      new ContentService(client).getReviewsWithStats({
         p_content_type: contentType,
         p_content_slug: contentSlug,
         ...(sortBy ? { p_sort_by: sortBy } : {}),
         ...(limit ? { p_limit: limit } : {}),
         ...(offset ? { p_offset: offset } : {}),
-        ...(userId ? { p_user_id: userId } : {})
-    }),
+        ...(userId ? { p_user_id: userId } : {}),
+      }),
     {
       // Next.js automatically handles serialization of keyParts array
       keyParts: [

@@ -11,7 +11,12 @@
  * ISR: 5 minutes (300s) - Social proof updates frequently
  */
 import { Constants } from '@heyclaude/database-types';
-import { generateRequestId, logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+  createErrorResponse,
+} from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseAnonClient } from '@heyclaude/web-runtime/server';
 import { NextResponse } from 'next/server';
 
@@ -21,7 +26,7 @@ export const revalidate = 300;
 export async function GET() {
   // Generate single requestId for this API request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,

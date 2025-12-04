@@ -1,5 +1,5 @@
 import { MiscService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { revalidateTag } from 'next/cache';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
@@ -7,7 +7,8 @@ import { getCacheInvalidateTags } from '../cache-config.ts';
 import { logger, normalizeError } from '../index.ts';
 import { generateRequestId } from '../utils/request-id.ts';
 
-export type ActiveNotificationRecord = Database['public']['Functions']['get_active_notifications']['Returns'][number];
+export type ActiveNotificationRecord =
+  Database['public']['Functions']['get_active_notifications']['Returns'][number];
 
 const DEFAULT_NOTIFICATION_TAG = 'notifications' as const;
 const TTL_KEY = 'cache.notifications.ttl_seconds' as const;

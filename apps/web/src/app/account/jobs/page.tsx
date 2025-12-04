@@ -19,12 +19,20 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
+import {
+  BADGE_COLORS,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle, Alert, AlertDescription, AlertTitle   } from '@heyclaude/web-runtime/ui';
+  CardTitle,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
 
@@ -70,18 +78,14 @@ function humanizeStatus(value?: null | string): string {
   return toTitleCase(value);
 }
 
-function resolvePlanLabel(
-  plan?: Database['public']['Enums']['job_plan'] | null
-): string {
+function resolvePlanLabel(plan?: Database['public']['Enums']['job_plan'] | null): string {
   if (!plan) {
     return JOB_PLAN_LABELS['one-time'];
   }
   return JOB_PLAN_LABELS[plan];
 }
 
-function resolveTierLabel(
-  tier?: Database['public']['Enums']['job_tier'] | null
-): string {
+function resolveTierLabel(tier?: Database['public']['Enums']['job_tier'] | null): string {
   if (!tier) {
     return JOB_TIER_LABELS.standard;
   }
@@ -97,7 +101,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface MyJobsPageProperties {
-  searchParams?: Promise<{ job_id?: string; payment?: string; }>;
+  searchParams?: Promise<{ job_id?: string; payment?: string }>;
 }
 
 export default async function MyJobsPage({ searchParams }: MyJobsPageProperties) {
@@ -107,7 +111,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -321,7 +325,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                 ? `${paymentJob.title} is now live.`
                 : 'Your job listing is now live.'}
             </p>
-            <p className="text-emerald-900/80 text-xs sm:text-sm dark:text-emerald-100/80">
+            <p className="text-xs text-emerald-900/80 sm:text-sm dark:text-emerald-100/80">
               {paymentAlertPlanLabel} • {paymentAlertTierLabel}
               {paymentAlertPrice ? ` • ${paymentAlertPrice}` : ''}
               {paymentAlertRenewal ? ` • ${paymentAlertRenewal}` : ''}
@@ -331,7 +335,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
       )}
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <h1 className="mb-2 font-bold text-3xl">My Job Listings</h1>
+          <h1 className="mb-2 text-3xl font-bold">My Job Listings</h1>
           <p className="text-muted-foreground">
             {jobs.length} {jobs.length === 1 ? 'listing' : 'listings'}
           </p>
@@ -347,9 +351,9 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
       {jobs.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center py-12">
-            <Briefcase className="mb-4 h-12 w-12 text-muted-foreground" />
-            <h3 className="mb-2 font-semibold text-xl">No job listings yet</h3>
-            <p className="mb-4 max-w-md text-center text-muted-foreground">
+            <Briefcase className="text-muted-foreground mb-4 h-12 w-12" />
+            <h3 className="mb-2 text-xl font-semibold">No job listings yet</h3>
+            <p className="text-muted-foreground mb-4 max-w-md text-center">
               Post your first job listing to reach talented developers in the Claude community
             </p>
             <Button asChild>
@@ -381,17 +385,17 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                 ]
                   .filter(Boolean)
                   .join(' • ')
-              : (job.expires_at
+              : job.expires_at
                 ? `Active until ${formatRelativeDate(job.expires_at)}`
-                : null);
+                : null;
             const paymentCopy =
               summary?.last_payment_at && summary.last_payment_amount !== null
                 ? `${formatPriceLabel(summary.last_payment_amount, false)} • Received ${formatRelativeDate(
                     summary.last_payment_at
                   )}`
-                : (summary?.last_payment_at
+                : summary?.last_payment_at
                   ? `Last payment ${formatRelativeDate(summary.last_payment_at)}`
-                  : null);
+                  : null;
             const showBillingCard =
               Boolean(planPriceLabel ?? renewalCopy ?? paymentCopy) || Boolean(summary);
 
@@ -419,27 +423,31 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                 </CardHeader>
 
                 <CardContent>
-                  <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
+                  <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Eye className="h-4 w-4" />
                       {job.view_count ?? 0} views
                     </div>
                     {job.posted_at ? <div>Posted {formatRelativeDate(job.posted_at)}</div> : null}
-                    {job.expires_at ? <div>Expires {formatRelativeDate(job.expires_at)}</div> : null}
+                    {job.expires_at ? (
+                      <div>Expires {formatRelativeDate(job.expires_at)}</div>
+                    ) : null}
                   </div>
-                  {showBillingCard ? <div className="mb-4 rounded-lg border border-muted border-dashed bg-muted/20 p-3 text-xs sm:text-sm">
+                  {showBillingCard ? (
+                    <div className="border-muted bg-muted/20 mb-4 rounded-lg border border-dashed p-3 text-xs sm:text-sm">
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                        <span className="font-semibold text-foreground">Billing</span>
+                        <span className="text-foreground font-semibold">Billing</span>
                         <UnifiedBadge variant="base" style="outline" className="capitalize">
                           {planLabel} • {tierLabel}
                         </UnifiedBadge>
                       </div>
-                      <div className="mt-2 space-y-1 text-muted-foreground">
+                      <div className="text-muted-foreground mt-2 space-y-1">
                         {planPriceLabel ? <p>Price: {planPriceLabel}</p> : null}
                         {renewalCopy ? <p>{renewalCopy}</p> : null}
                         {paymentCopy ? <p>{paymentCopy}</p> : null}
                       </div>
-                    </div> : null}
+                    </div>
+                  ) : null}
 
                   <div className={UI_CLASSES.FLEX_GAP_2}>
                     <Button variant="outline" size="sm" asChild>
@@ -456,12 +464,14 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
                       </Link>
                     </Button>
 
-                    {job.slug ? <Button variant="ghost" size="sm" asChild>
+                    {job.slug ? (
+                      <Button variant="ghost" size="sm" asChild>
                         <Link href={`/jobs/${job.slug}`}>
                           <ExternalLink className="mr-1 h-3 w-3" />
                           View
                         </Link>
-                      </Button> : null}
+                      </Button>
+                    ) : null}
 
                     {(() => {
                       const status = job.status;

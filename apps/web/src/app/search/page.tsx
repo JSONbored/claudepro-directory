@@ -8,7 +8,8 @@ import {
   generatePageMetadata,
   getHomepageData,
   getSearchFacets,
-  searchContent, getHomepageCategoryIds 
+  searchContent,
+  getHomepageCategoryIds,
 } from '@heyclaude/web-runtime/data';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
@@ -36,7 +37,6 @@ type ContentCategory = Database['public']['Enums']['content_category'];
 function isValidSort(value: string | undefined): value is SearchFilters['sort'] {
   return value !== undefined && VALID_SORT_OPTIONS.has(value as SearchFilters['sort']);
 }
-
 
 /**
  * Dynamic Rendering Required
@@ -149,10 +149,10 @@ async function SearchResultsSection({
 
 export default async function SearchPage({ searchParams }: SearchPageProperties) {
   const resolvedParameters = await searchParams;
-  
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -178,12 +178,8 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
   if (author) filters.p_authors = [author];
   filters.p_limit = 50;
 
-   
   const hasUserFilters =
-    !!validatedSort ||
-    (categories?.length ?? 0) > 0 ||
-    (tags?.length ?? 0) > 0 ||
-    !!author;
+    !!validatedSort || (categories?.length ?? 0) > 0 || (tags?.length ?? 0) > 0 || !!author;
 
   // Gate zero-state data behind !query && !hasFilters (Phase 3 requirement)
   const hasQueryOrFilters = query.length > 0 || hasUserFilters;
@@ -273,7 +269,7 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 font-bold text-4xl">
+      <h1 className="mb-8 text-4xl font-bold">
         {query ? `Search: "${query}"` : 'Search Claude Code Directory'}
       </h1>
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">

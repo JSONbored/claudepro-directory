@@ -1,10 +1,6 @@
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import  { type Metadata } from 'next';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { AuthBrandPanel } from '@/src/components/core/auth/auth-brand-panel';
@@ -81,9 +77,7 @@ export default async function LoginPage({
       <SplitAuthLayout
         brandPanel={<AuthBrandPanel />}
         mobileHeader={<AuthMobileHeader />}
-        authPanel={
-          <LoginPanelClient {...(redirectTo ? { redirectTo } : {})} />
-        }
+        authPanel={<LoginPanelClient {...(redirectTo ? { redirectTo } : {})} />}
       />
     </Suspense>
   );

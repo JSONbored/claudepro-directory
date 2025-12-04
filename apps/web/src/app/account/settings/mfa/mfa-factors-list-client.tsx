@@ -1,7 +1,7 @@
 'use client';
 
 import { Shield } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES, Button  } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 
 import { EnrollMFADialog } from '@/src/components/features/account/mfa/enroll-mfa-dialog';

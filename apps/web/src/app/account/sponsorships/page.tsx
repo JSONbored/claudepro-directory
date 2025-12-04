@@ -6,15 +6,18 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge, Button ,
+import {
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
-
 
 /**
  * Dynamic Rendering Required
@@ -34,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * - Current date is between start_date and end_date (inclusive)
  */
 function isSponsorshipActive(
-  sponsorship: { active: boolean | null; end_date: string; start_date: string; },
+  sponsorship: { active: boolean | null; end_date: string; start_date: string },
   now: Date
 ): boolean {
   return (
@@ -47,7 +50,7 @@ function isSponsorshipActive(
 export default async function SponsorshipsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -109,7 +112,7 @@ export default async function SponsorshipsPage() {
       <div className="space-y-6">
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
           <div>
-            <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
+            <h1 className="mb-2 text-3xl font-bold">Sponsorships</h1>
             <p className="text-muted-foreground">No active campaigns yet</p>
           </div>
           <Button variant="outline" asChild>
@@ -120,7 +123,7 @@ export default async function SponsorshipsPage() {
           </Button>
         </div>
         <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
+          <CardContent className="text-muted-foreground py-12 text-center">
             You haven't launched any sponsorship campaigns yet.
           </CardContent>
         </Card>
@@ -140,7 +143,7 @@ export default async function SponsorshipsPage() {
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
+          <h1 className="mb-2 text-3xl font-bold">Sponsorships</h1>
           <p className="text-muted-foreground">
             {activeCount} active {activeCount === 1 ? 'campaign' : 'campaigns'}
           </p>
@@ -161,7 +164,8 @@ export default async function SponsorshipsPage() {
           const clickCount = sponsorship.click_count ?? 0;
 
           const hasHitLimit =
-            sponsorship.impression_limit != undefined && impressionCount >= sponsorship.impression_limit;
+            sponsorship.impression_limit != undefined &&
+            impressionCount >= sponsorship.impression_limit;
 
           const ctr =
             impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
@@ -185,9 +189,11 @@ export default async function SponsorshipsPage() {
                           Inactive
                         </UnifiedBadge>
                       )}
-                      {hasHitLimit ? <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_WARNING}>
+                      {hasHitLimit ? (
+                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_WARNING}>
                           Limit Reached
-                        </UnifiedBadge> : null}
+                        </UnifiedBadge>
+                      ) : null}
                     </div>
                     <CardTitle className="mt-2">
                       {sponsorship.content_type} - ID: {sponsorship.content_id}
@@ -211,41 +217,44 @@ export default async function SponsorshipsPage() {
                 <div className="mb-4 grid grid-cols-3 gap-4">
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-muted-foreground mb-1 text-xs`}
                     >
                       <Eye className="h-3 w-3" />
                       Impressions
                     </div>
-                    <div className="font-bold text-2xl">{impressionCount.toLocaleString()}</div>
-                    {sponsorship.impression_limit ? <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                    <div className="text-2xl font-bold">{impressionCount.toLocaleString()}</div>
+                    {sponsorship.impression_limit ? (
+                      <div className={UI_CLASSES.TEXT_XS_MUTED}>
                         of {sponsorship.impression_limit.toLocaleString()}
-                      </div> : null}
+                      </div>
+                    ) : null}
                   </div>
 
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-muted-foreground mb-1 text-xs`}
                     >
                       <MousePointer className="h-3 w-3" />
                       Clicks
                     </div>
-                    <div className="font-bold text-2xl">{clickCount.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">{clickCount.toLocaleString()}</div>
                   </div>
 
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-muted-foreground mb-1 text-xs`}
                     >
                       <BarChart className="h-3 w-3" />
                       CTR
                     </div>
-                    <div className="font-bold text-2xl">{ctr}%</div>
+                    <div className="text-2xl font-bold">{ctr}%</div>
                   </div>
                 </div>
 
                 {/* Progress bar if has limit */}
-                {sponsorship.impression_limit ? <div
-                    className="h-2 w-full rounded-full bg-muted"
+                {sponsorship.impression_limit ? (
+                  <div
+                    className="bg-muted h-2 w-full rounded-full"
                     role="progressbar"
                     aria-valuenow={impressionCount}
                     aria-valuemin={0}
@@ -253,13 +262,14 @@ export default async function SponsorshipsPage() {
                     aria-label={`Impressions: ${impressionCount} of ${sponsorship.impression_limit}`}
                   >
                     <div
-                      className="h-2 rounded-full bg-primary transition-all"
+                      className="bg-primary h-2 rounded-full transition-all"
                       style={{
                         width: `${Math.min(100, (impressionCount / sponsorship.impression_limit) * 100)}%`,
                       }}
                       aria-hidden="true"
                     />
-                  </div> : null}
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
           );

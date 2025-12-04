@@ -1,15 +1,21 @@
 import 'server-only';
 
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError, validateLimit, validateQueryString } from '@heyclaude/shared-runtime';
-import { generateRequestId, logger, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient,
+import {
+  generateRequestId,
+  logger,
+  createErrorResponse,
+} from '@heyclaude/web-runtime/logging/server';
+import {
+  createSupabaseAnonClient,
   badRequestResponse,
   jsonResponse,
   getWithAuthCorsHeaders,
   buildCacheHeaders,
-  handleOptionsRequest } from '@heyclaude/web-runtime/server';
-import  { type NextRequest } from 'next/server';
+  handleOptionsRequest,
+} from '@heyclaude/web-runtime/server';
+import { type NextRequest } from 'next/server';
 
 const CORS = getWithAuthCorsHeaders;
 
@@ -42,10 +48,11 @@ export async function GET(request: NextRequest) {
   reqLogger.info('Autocomplete request received', { query });
 
   const supabase = createSupabaseAnonClient();
-  const rpcArgs: DatabaseGenerated['public']['Functions']['get_search_suggestions_from_history']['Args'] = {
-    p_query: query,
-    p_limit: limit,
-  };
+  const rpcArgs: DatabaseGenerated['public']['Functions']['get_search_suggestions_from_history']['Args'] =
+    {
+      p_query: query,
+      p_limit: limit,
+    };
 
   try {
     const { data, error } = await supabase.rpc('get_search_suggestions_from_history', rpcArgs);

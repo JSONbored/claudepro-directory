@@ -1,6 +1,6 @@
 /** Homepage consuming homepageConfigs for runtime-tunable categories */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { trackRPCFailure } from '@heyclaude/web-runtime/core';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -8,9 +8,9 @@ import {
   getHomepageCategoryIds,
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
-import  { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
 import { HomePageLoading } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 
@@ -23,11 +23,13 @@ import { RecentlyViewedRail } from '@/src/components/features/home/recently-view
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
 
@@ -104,7 +106,7 @@ async function TopContributorsServer() {
 export default async function HomePage({ searchParams }: HomePageProperties) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger
   const reqLogger = logger.child({
     requestId,
@@ -137,7 +139,7 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
   const searchFiltersPromise = HomepageSearchFacetsServer();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <div className="relative overflow-hidden">
         {/* Hero section - streams immediately (no data fetching) */}
         <HomepageHeroServer memberCount={memberCount} />

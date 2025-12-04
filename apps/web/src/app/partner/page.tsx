@@ -11,18 +11,19 @@ import {
   MousePointer,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { RESPONSIVE_PATTERNS, UI_CLASSES, UnifiedBadge, HoverCard , Button ,
+  RESPONSIVE_PATTERNS,
+  UI_CLASSES,
+  UnifiedBadge,
+  HoverCard,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 
 /**
  * Dynamic Rendering Required
@@ -128,19 +129,15 @@ export default async function PartnerPage() {
       </div>
 
       {/* Launch Pricing Banner */}
-      <Card
-        className="mx-auto mb-12 max-w-4xl border-primary/20 bg-linear-to-r from-primary/10 to-primary/5"
-      >
+      <Card className="border-primary/20 from-primary/10 to-primary/5 mx-auto mb-12 max-w-4xl bg-linear-to-r">
         <CardContent className="pt-6 pb-6">
-          <div
-            className="flex flex-col items-center gap-3 text-center md:flex-row md:justify-between md:text-left"
-          >
+          <div className="flex flex-col items-center gap-3 text-center md:flex-row md:justify-between md:text-left">
             <div className="flex items-start gap-3">
-              <div className="rounded-full bg-primary/10 p-2">
-                <Sparkles className="h-5 w-5 text-primary" />
+              <div className="bg-primary/10 rounded-full p-2">
+                <Sparkles className="text-primary h-5 w-5" />
               </div>
               <div>
-                <p className="font-semibold text-lg">
+                <p className="text-lg font-semibold">
                   Launch Pricing: {pricing.launch.discountPercent}% Off Everything
                 </p>
                 <p className="text-muted-foreground text-sm">
@@ -158,7 +155,7 @@ export default async function PartnerPage() {
 
       {/* Pricing Options */}
       <div className="mx-auto mb-16 max-w-5xl">
-        <h2 className="mb-8 text-center font-bold text-3xl">Simple, Transparent Pricing</h2>
+        <h2 className="mb-8 text-center text-3xl font-bold">Simple, Transparent Pricing</h2>
         <div className="grid gap-8 md:grid-cols-2">
           {/* Job Listings */}
           <HoverCard variant="strong">
@@ -183,12 +180,12 @@ export default async function PartnerPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Pricing */}
-                <div className="rounded-lg border bg-muted/30 p-4">
+                <div className="bg-muted/30 rounded-lg border p-4">
                   <div className="mb-2 flex items-baseline gap-2">
-                    <span className="font-bold text-muted-foreground text-xl line-through">
+                    <span className="text-muted-foreground text-xl font-bold line-through">
                       ${pricing.jobs.regular}
                     </span>
-                    <span className="font-bold text-3xl text-primary">
+                    <span className="text-primary text-3xl font-bold">
                       ${pricing.jobs.discounted}
                     </span>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
@@ -256,12 +253,12 @@ export default async function PartnerPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Pricing */}
-                <div className="rounded-lg border bg-muted/30 p-4">
+                <div className="bg-muted/30 rounded-lg border p-4">
                   <div className="mb-2 flex items-baseline gap-2">
-                    <span className="font-bold text-muted-foreground text-xl line-through">
+                    <span className="text-muted-foreground text-xl font-bold line-through">
                       ${pricing.sponsored.regular}
                     </span>
-                    <span className="font-bold text-3xl text-primary">
+                    <span className="text-primary text-3xl font-bold">
                       ${pricing.sponsored.discounted}
                     </span>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
@@ -308,11 +305,11 @@ export default async function PartnerPage() {
 
       {/* Why Advertise Here */}
       <div className="mx-auto mb-16 max-w-4xl">
-        <h2 className="mb-8 text-center font-bold text-2xl">Why Claude Pro Directory?</h2>
+        <h2 className="mb-8 text-center text-2xl font-bold">Why Claude Pro Directory?</h2>
         <div className="grid gap-6 md:grid-cols-3">
           <Card>
             <CardContent className="pt-6">
-              <Eye className="mb-3 h-8 w-8 text-primary" />
+              <Eye className="text-primary mb-3 h-8 w-8" />
               <p className="mb-2 font-semibold">Highly Engaged Audience</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
                 5.3 pages/visit average • Engineers actively building with Claude AI
@@ -321,7 +318,7 @@ export default async function PartnerPage() {
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <MousePointer className="mb-3 h-8 w-8 text-primary" />
+              <MousePointer className="text-primary mb-3 h-8 w-8" />
               <p className="mb-2 font-semibold">Quality Over Quantity</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
                 Focused community of AI engineers, not random traffic
@@ -330,7 +327,7 @@ export default async function PartnerPage() {
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <BarChart className="mb-3 h-8 w-8 text-primary" />
+              <BarChart className="text-primary mb-3 h-8 w-8" />
               <p className="mb-2 font-semibold">Transparent Analytics</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
                 Real-time dashboard with views, clicks, and engagement metrics
@@ -342,7 +339,7 @@ export default async function PartnerPage() {
 
       {/* FAQ / Common Questions */}
       <div className="mx-auto mb-16 max-w-3xl">
-        <h2 className="mb-8 text-center font-bold text-2xl">Frequently Asked Questions</h2>
+        <h2 className="mb-8 text-center text-2xl font-bold">Frequently Asked Questions</h2>
         <div className="space-y-4">
           <Card>
             <CardContent className="pt-6">
@@ -376,12 +373,12 @@ export default async function PartnerPage() {
 
       {/* Final CTA */}
       <div className="mx-auto max-w-2xl text-center">
-        <Card className="border-primary/20 bg-linear-to-r from-primary/10 to-primary/5">
+        <Card className="border-primary/20 from-primary/10 to-primary/5 bg-linear-to-r">
           <CardContent className="pt-8 pb-8">
-            <h2 className="mb-4 font-bold text-2xl">
+            <h2 className="mb-4 text-2xl font-bold">
               Ready to Reach {heroStats.monthlyVisitors.toLocaleString()}+ AI Engineers?
             </h2>
-            <p className="mb-6 text-muted-foreground">
+            <p className="text-muted-foreground mb-6">
               Get started with launch pricing ({pricing.launch.discountPercent}% off) before{' '}
               {pricing.launch.endDate}
             </p>

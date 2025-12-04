@@ -6,8 +6,8 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
-import { Button, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function NewCollectionPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -78,7 +78,7 @@ export default async function NewCollectionPage() {
             Back to Library
           </Button>
         </Link>
-        <h1 className="mb-2 font-bold text-3xl">Create Collection</h1>
+        <h1 className="mb-2 text-3xl font-bold">Create Collection</h1>
         <p className="text-muted-foreground">Organize your bookmarks into a custom collection</p>
       </div>
 

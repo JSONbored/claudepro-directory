@@ -2,25 +2,23 @@
  * Edit Company Page - Update existing company via edge function
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserCompanyById,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { Button,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -137,7 +135,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Edit Company</h1>
+        <h1 className="mb-2 text-3xl font-bold">Edit Company</h1>
         <p className="text-muted-foreground">Update your company profile information</p>
       </div>
 

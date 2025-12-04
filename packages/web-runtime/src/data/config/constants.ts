@@ -6,27 +6,16 @@
  * for type safety and runtime validation.
  */
 
-
-
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { z } from 'zod';
 
 import { SOCIAL_LINKS } from '../../config/social-links.ts';
-import  { type SocialLinkKey } from '../../config/social-links.ts';
-import {
-  
-  PAGINATION_CONFIG,
-  UI_ANIMATION,
-} from '../../config/unified-config.ts';
+import { type SocialLinkKey } from '../../config/social-links.ts';
+import { PAGINATION_CONFIG, UI_ANIMATION } from '../../config/unified-config.ts';
 
 /**
  * Application Information
  */
-
-
-
-
-
 
 /**
  * Claude Configuration Schema
@@ -127,7 +116,6 @@ export const UI_CONFIG = {
  * From unified-config.ts (single source of truth)
  */
 
-
 /**
  * Analytics Configuration
  */
@@ -154,7 +142,6 @@ export const DEV_CONFIG = {
  * Security Configuration
  * Used for trusted hostname validation, security headers, and allowed origins
  */
-
 
 /**
  * Polling Intervals Configuration
@@ -209,10 +196,10 @@ export const ANIMATION_DURATIONS = {
 
 /**
  * Query Limit Constants
- * 
+ *
  * Default limits for database queries to prevent excessive data fetching.
  * These limits balance performance with functionality needs.
- * 
+ *
  * For admin/export use cases, use MAX_* constants or pass explicit limits.
  */
 export const QUERY_LIMITS = {
@@ -233,8 +220,14 @@ export const QUERY_LIMITS = {
   },
 } as const;
 
-export {APP_CONFIG, EXTERNAL_SERVICES, ROUTES, SECURITY_CONFIG, TIME_CONSTANTS} from '@heyclaude/shared-runtime';
-export {SOCIAL_LINKS} from '../../config/social-links.ts';
+export {
+  APP_CONFIG,
+  EXTERNAL_SERVICES,
+  ROUTES,
+  SECURITY_CONFIG,
+  TIME_CONSTANTS,
+} from '@heyclaude/shared-runtime';
+export { SOCIAL_LINKS } from '../../config/social-links.ts';
 
 /**
  * Get a social link by key
@@ -243,4 +236,4 @@ export {SOCIAL_LINKS} from '../../config/social-links.ts';
 export function getSocialLink(key: SocialLinkKey): string | undefined {
   return SOCIAL_LINKS[key];
 }
-export {DATE_CONFIG} from '../../config/unified-config.ts';
+export { DATE_CONFIG } from '../../config/unified-config.ts';

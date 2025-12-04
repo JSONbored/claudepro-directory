@@ -3,7 +3,7 @@
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
-import { UI_CLASSES, Button , Card  } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
 
@@ -14,7 +14,6 @@ import { useEffect } from 'react';
  */
 // eslint-disable-next-line architectural-rules/require-env-validation-schema -- NODE_ENV is inlined by Next.js at build time, not a runtime lookup
 const isDevelopment = process.env.NODE_ENV === 'development';
-
 
 /**
  * Renders a full-screen error UI shown when an uncaught client-side error occurs and logs the error to the monitoring backend.
@@ -52,24 +51,28 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="bg-background flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-lg p-8 text-center">
         <div className="mb-6">
           <div className="mb-4 flex justify-center">
-            <div className="rounded-full bg-destructive/10 p-3">
-              <AlertCircle className="h-12 w-12 text-destructive" aria-hidden="true" />
+            <div className="bg-destructive/10 rounded-full p-3">
+              <AlertCircle className="text-destructive h-12 w-12" aria-hidden="true" />
             </div>
           </div>
-          <h1 className="mb-2 font-bold text-2xl">Something went wrong</h1>
+          <h1 className="mb-2 text-2xl font-bold">Something went wrong</h1>
           <p className="text-muted-foreground">
             An unexpected error occurred. We've logged the issue and will investigate it shortly.
           </p>
         </div>
 
-        {isDevelopment && error.message ? <div className="mb-6 rounded-md bg-muted p-4 text-left">
-            <p className="font-mono text-destructive text-xs">{error.message}</p>
-            {error.digest ? <p className="mt-2 font-mono text-muted-foreground text-xs">Digest: {error.digest}</p> : null}
-          </div> : null}
+        {isDevelopment && error.message ? (
+          <div className="bg-muted mb-6 rounded-md p-4 text-left">
+            <p className="text-destructive font-mono text-xs">{error.message}</p>
+            {error.digest ? (
+              <p className="text-muted-foreground mt-2 font-mono text-xs">Digest: {error.digest}</p>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
           <Button onClick={reset} size="lg">
@@ -84,7 +87,7 @@ export default function ErrorBoundary({
           </Link>
         </div>
 
-        <div className="mt-8 text-muted-foreground text-sm">
+        <div className="text-muted-foreground mt-8 text-sm">
           <p className="mb-2">Or explore:</p>
           <div className={`flex ${UI_CLASSES.FLEX_WRAP_GAP_2} justify-center`}>
             <Link href={ROUTES.AGENTS} className="hover:text-primary">

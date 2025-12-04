@@ -1,53 +1,39 @@
-import { logger } from '../../logger';
-import { getEnvVar } from '@heyclaude/shared-runtime';
+import { logger } from '../../logging/server.ts';
 import { normalizeError } from '../../errors.ts';
 
+/**
+ * Post-submission hook for contact form
+ * Sends event to Inngest for reliable email delivery
+ */
 export async function onContactSubmission(
   result: { submission_id: string },
   _ctx: { userId?: string },
-  input: any
+  input: { name: string; email: string; category: string; message: string }
 ) {
-  const supabaseUrl = getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
+  try {
+    // Send event to Inngest for durable email processing
+    const { inngest } = await import('../../inngest/client.ts');
+    
+    await inngest.send({
+      name: 'email/contact',
+      data: {
+        submissionId: result.submission_id,
+        name: input.name,
+        email: input.email,
+        category: input.category,
+        message: input.message,
+      },
+    });
 
-  if (!supabaseUrl) {
-    logger.error(
-      'submitContactForm missing NEXT_PUBLIC_SUPABASE_URL env',
-      new Error('Missing NEXT_PUBLIC_SUPABASE_URL'),
-      {
-        action: 'submitContactForm',
-        envVar: 'NEXT_PUBLIC_SUPABASE_URL',
-        phase: 'validation',
-      }
-    );
-    return null;
-  }
-
-  // Trigger emails via edge function
-  const response = await fetch(`${supabaseUrl}/functions/v1/email-handler`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Email-Action': 'contact-submission',
-    },
-    body: JSON.stringify({
+    logger.info('Contact form email event sent to Inngest', {
       submissionId: result.submission_id,
-      name: input.name,
-      email: input.email,
       category: input.category,
-      message: input.message,
-    }),
-    cache: 'no-store',
-    next: { revalidate: 0 },
-  });
-
-  const emailResult = (await response.json()) as { success?: boolean; error?: string };
-
-  if (!(response.ok && emailResult?.success)) {
-    const errorMessage = emailResult?.error || response.statusText || 'Email sending failed';
-    const normalized = normalizeError(new Error(errorMessage), 'submitContactForm email failed');
-    logger.warn('submitContactForm email failed (submission saved)', {
+    });
+  } catch (error) {
+    // Log but don't throw - submission was already saved to database
+    const normalized = normalizeError(error, 'Contact form email event failed');
+    logger.warn('Contact form email event failed (submission saved)', {
       err: normalized,
-      status: response.status,
       submissionId: result.submission_id,
     });
   }

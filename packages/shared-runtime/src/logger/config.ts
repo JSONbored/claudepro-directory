@@ -81,6 +81,17 @@ export const SENSITIVE_PATTERNS = [
   'user.userId',
   'user.user_id',
   
+  // Email fields (PII) - added to catch root-level email logging
+  'email',
+  'emailAddress',
+  'email_address',
+  'userEmail',
+  'user_email',
+  'recipientEmail',
+  'recipient_email',
+  'senderEmail',
+  'sender_email',
+  
   // IP Address fields (PII under GDPR)
   'ip',
   'ipAddress',
@@ -155,30 +166,51 @@ const USER_ID_PATHS = [
 ] as const;
 
 /**
+ * Email paths that should be hashed (not just redacted)
+ * Maintains traceability while protecting PII
+ */
+const EMAIL_PATHS = [
+  'email',
+  'emailAddress',
+  'email_address',
+  'userEmail',
+  'user_email',
+  'recipientEmail',
+  'recipient_email',
+  'senderEmail',
+  'sender_email',
+  'user.email',
+] as const;
+
+/**
  * Custom censor function for Pino redaction
- * Hashes user IDs (maintains traceability) while redacting other sensitive data
- * This maintains traceability for user IDs while protecting PII (GDPR/CCPA compliant)
+ * Hashes user IDs and emails (maintains traceability) while redacting other sensitive data
+ * This maintains traceability for user IDs/emails while protecting PII (GDPR/CCPA compliant)
  * 
  * @param value - The value to censor
  * @param path - The path to the key being redacted (e.g., ['user', 'id'] or ['userId'])
- * @returns Hashed user ID for user ID paths, '[REDACTED]' for other sensitive data
+ * @returns Hashed value for user ID/email paths, '[REDACTED]' for other sensitive data
  * 
  * @see {@link https://getpino.io/#/docs/redaction | Pino Redaction with Custom Censor}
  */
 function hashUserIdCensor(value: unknown, path: string[]): string {
-  // Check if this is a user ID path that should be hashed
-  const isUserIdPath = USER_ID_PATHS.some(userIdPath => {
-    // Match exact path or nested path (e.g., 'userId' matches ['userId'], 'user.id' matches ['user', 'id'])
-    const userIdPathParts = userIdPath.split('.');
-    if (path.length === userIdPathParts.length) {
-      return path.every((part, i) => part === userIdPathParts[i]);
+  // Helper to match paths
+  const matchesPath = (paths: readonly string[]) => paths.some(targetPath => {
+    const pathParts = targetPath.split('.');
+    if (path.length === pathParts.length) {
+      return path.every((part, i) => part === pathParts[i]);
     }
     return false;
   });
   
   // Hash user IDs (maintains traceability for correlation across logs)
-  if (isUserIdPath && typeof value === 'string' && value.length > 0) {
+  if (matchesPath(USER_ID_PATHS) && typeof value === 'string' && value.length > 0) {
     return hashUserId(value);
+  }
+  
+  // Hash emails (maintains traceability while protecting PII)
+  if (matchesPath(EMAIL_PATHS) && typeof value === 'string' && value.includes('@')) {
+    return hashEmail(value, false); // Maximum privacy - redact domain like userSerializer
   }
   
   // Standard redaction for other sensitive data (passwords, tokens, etc.)

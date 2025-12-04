@@ -1,18 +1,16 @@
 import { getUserIdentities } from '@heyclaude/web-runtime';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { Button,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
@@ -101,7 +99,7 @@ export default async function ConnectedAccountsPage() {
 
   const pageHeader = (
     <div>
-      <h1 className="mb-2 font-bold text-3xl">Connected Accounts</h1>
+      <h1 className="mb-2 text-3xl font-bold">Connected Accounts</h1>
       <p className="text-muted-foreground">Manage your OAuth provider connections</p>
     </div>
   );

@@ -51,7 +51,7 @@ function decodeQuizAnswers(
         module: 'apps/web/src/app/tools/config-recommender/results/[id]',
         operation: 'decodeQuizAnswers',
       });
-  
+
   try {
     const json = Buffer.from(encoded, 'base64url').toString('utf8');
     const parsed = JSON.parse(json) as unknown;
@@ -130,14 +130,22 @@ function decodeQuizAnswers(
       useCase: data['useCase'] as Database['public']['Enums']['use_case_type'],
       experienceLevel: data['experienceLevel'] as Database['public']['Enums']['experience_level'],
       toolPreferences: data['toolPreferences'] as string[],
-      ...(Array.isArray(data['p_integrations']) && data['p_integrations'].length > 0 && {
-        p_integrations: data['p_integrations'] as Database['public']['Enums']['integration_type'][],
-      }),
-      ...(Array.isArray(data['p_focus_areas']) && data['p_focus_areas'].length > 0 && {
-        p_focus_areas: data['p_focus_areas'] as Database['public']['Enums']['focus_area_type'][],
-      }),
-      ...(typeof data['teamSize'] === 'string' && data['teamSize'] !== '' ? { teamSize: data['teamSize'] } : {}),
-      ...(typeof data['timestamp'] === 'string' && data['timestamp'] !== '' ? { timestamp: data['timestamp'] } : {}),
+      ...(Array.isArray(data['p_integrations']) &&
+        data['p_integrations'].length > 0 && {
+          p_integrations: data[
+            'p_integrations'
+          ] as Database['public']['Enums']['integration_type'][],
+        }),
+      ...(Array.isArray(data['p_focus_areas']) &&
+        data['p_focus_areas'].length > 0 && {
+          p_focus_areas: data['p_focus_areas'] as Database['public']['Enums']['focus_area_type'][],
+        }),
+      ...(typeof data['teamSize'] === 'string' && data['teamSize'] !== ''
+        ? { teamSize: data['teamSize'] }
+        : {}),
+      ...(typeof data['timestamp'] === 'string' && data['timestamp'] !== ''
+        ? { timestamp: data['timestamp'] }
+        : {}),
     } as DecodedQuizAnswers;
   } catch (error) {
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
@@ -171,7 +179,7 @@ function normalizeRecommendationResults(
         module: 'apps/web/src/app/tools/config-recommender/results/[id]',
         operation: 'normalizeRecommendationResults',
       });
-  
+
   if (!results) return [];
   const normalized = results.filter(
     (
@@ -220,7 +228,7 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -287,7 +295,11 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
 
   const recommendations: RecommendationResponse = {
     ...enrichedResult,
-    results: normalizeRecommendationResults(enrichedResult.results, resolvedParameters.id, reqLogger),
+    results: normalizeRecommendationResults(
+      enrichedResult.results,
+      resolvedParameters.id,
+      reqLogger
+    ),
     answers,
     id: resolvedParameters.id,
     generatedAt: new Date().toISOString(),
@@ -303,7 +315,7 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <section className="container mx-auto px-4 py-12">
         <ResultsDisplay recommendations={recommendations} shareUrl={shareUrl} />
       </section>

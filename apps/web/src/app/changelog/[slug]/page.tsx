@@ -33,9 +33,9 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink, Separator   } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, NavLink, Separator } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { ReadProgress } from '@/src/components/content/read-progress';
@@ -57,7 +57,7 @@ export async function generateStaticParams() {
 
   // Generate requestId for static params generation (build-time)
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -93,7 +93,7 @@ export async function generateMetadata({
 
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const metadataLogger = logger.child({
     requestId: metadataRequestId,
@@ -132,7 +132,7 @@ export default async function ChangelogEntryPage({
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -176,7 +176,7 @@ export default async function ChangelogEntryPage({
         {/* Navigation */}
         <NavLink
           href={ROUTES.CHANGELOG}
-          className="inline-flex items-center gap-2 text-muted-foreground text-sm"
+          className="text-muted-foreground inline-flex items-center gap-2 text-sm"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Changelog</span>
@@ -186,19 +186,17 @@ export default async function ChangelogEntryPage({
         <header className="space-y-4 pb-6">
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-muted-foreground text-sm`}>
             <Calendar className="h-4 w-4" />
-            <time dateTime={entry.release_date}>
-              {formatChangelogDate(entry.release_date)}
-            </time>
+            <time dateTime={entry.release_date}>{formatChangelogDate(entry.release_date)}</time>
           </div>
 
-          <h1 className="font-bold text-4xl tracking-tight">{entry.title}</h1>
+          <h1 className="text-4xl font-bold tracking-tight">{entry.title}</h1>
 
           {/* Canonical URL */}
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
             <span className="text-muted-foreground">Permanent link:</span>
             <a
               href={canonicalUrl}
-              className="truncate text-primary transition-colors hover:text-primary/80"
+              className="text-primary hover:text-primary/80 truncate transition-colors"
             >
               {canonicalUrl}
             </a>

@@ -1,8 +1,8 @@
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
@@ -19,7 +19,7 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   // Generate single requestId for this component
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -126,8 +126,8 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mx-auto mb-12 max-w-3xl text-center">
-        <h1 className="mb-4 font-bold text-4xl">Community Directory</h1>
-        <p className="text-lg text-muted-foreground">
+        <h1 className="mb-4 text-4xl font-bold">Community Directory</h1>
+        <p className="text-muted-foreground text-lg">
           Connect with Claude Code contributors, power users, and community experts
         </p>
       </div>
