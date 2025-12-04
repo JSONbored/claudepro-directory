@@ -14,11 +14,13 @@ import { formatChangelogDateShort } from '@heyclaude/web-runtime/utils/changelog
 
 interface TimelineMarkerProps {
   entry: Database['public']['Tables']['changelog']['Row'];
-  index: number;
   isActive: boolean;
   targetPath: string;
   onClick?: (() => void) | undefined;
 }
+
+// Sticky offset accounts for fixed header (64px) + padding (32px)
+const TIMELINE_MARKER_STICKY_OFFSET = '96px';
 
 /**
  * TimelineMarker Component
@@ -29,7 +31,7 @@ export function TimelineMarker({ entry, isActive, targetPath, onClick }: Timelin
   return (
     <div
       className={`relative ${isActive ? 'z-20' : 'z-10'}`}
-      style={{ position: 'sticky', top: '96px' }}
+      style={{ position: 'sticky', top: TIMELINE_MARKER_STICKY_OFFSET }}
     >
       {/* Horizontal connector line from marker dot to timeline - Minimal */}
       <div className="absolute -left-5 top-[18px] h-px w-5 bg-border/40" aria-hidden="true" />

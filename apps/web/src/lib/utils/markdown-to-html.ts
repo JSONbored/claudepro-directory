@@ -15,6 +15,8 @@
  */
 
 import { marked } from 'marked';
+import DOMPurify from 'isomorphic-dompurify';
+import { normalizeError, logger } from '@heyclaude/web-runtime';
 
 // Configure marked for GitHub Flavored Markdown (GFM) support
 marked.use({
@@ -46,12 +48,17 @@ export function markdownToHtml(markdown: string | null | undefined): string {
       async: false, // Synchronous parsing for server-side
     }) as string;
 
-    // Return HTML (will be sanitized by TrustedHTML component on client)
-    // Note: We could add server-side DOMPurify here, but TrustedHTML already handles it
-    return html;
+    // Sanitize HTML server-side for defense-in-depth
+    return DOMPurify.sanitize(html);
   } catch (error) {
     // Log error but return empty string to prevent crashes
-    console.error('[markdownToHtml] Failed to parse markdown:', error);
+    // Use universal logger (works in both server and client contexts)
+    const normalized = normalizeError(error, 'Failed to parse markdown');
+    logger.error('[markdownToHtml] Failed to parse markdown', normalized, {
+      operation: 'markdownToHtml',
+      module: 'lib/utils/markdown-to-html',
+      markdownLength: markdown.length,
+    });
     return '';
   }
 }

@@ -118,6 +118,68 @@ function CategorySection({
 }
 
 /**
+ * Render additional content (JSON sections or HTML) after structured changes
+ * 
+ * @param entry - Changelog entry with content
+ * @param metadataSections - Optional JSON sections from generated content
+ * @param hasStructuredChanges - Whether structured changes are displayed
+ * @returns JSX for additional content sections
+ */
+function renderAdditionalContent(
+  entry: ChangelogEntry,
+  metadataSections: GuideSection[] | undefined,
+  hasStructuredChanges: boolean
+) {
+  let rawContent = entry.content || '';
+
+  // Remove accordion sections from content to avoid duplication
+  rawContent = removeAccordionSectionsFromContent(rawContent);
+
+  // If we have structured changes, also remove category sections (## Added, ## Changed, etc.)
+  // to avoid displaying the same content twice
+  if (hasStructuredChanges) {
+    rawContent = removeCategorySectionsFromContent(rawContent);
+  }
+
+  // Convert markdown to HTML (content is stored as markdown in database)
+  const displayContent = rawContent.trim() ? markdownToHtml(rawContent) : '';
+
+  // Only show additional content if there's something meaningful left after removing duplicates
+  const hasAdditionalContent = displayContent.trim().length > 0;
+
+  return (
+    <>
+      {hasStructuredChanges && (metadataSections || hasAdditionalContent) && (
+        <div className={`${UI_CLASSES.MARGIN_TOP_RELAXED} ${UI_CLASSES.PADDING_Y_RELAXED} border-t border-border/50`}>
+          {metadataSections && metadataSections.length > 0 ? (
+            <div className="prose prose-slate dark:prose-invert max-w-none">
+              <JSONSectionRenderer sections={metadataSections} />
+            </div>
+          ) : hasAdditionalContent ? (
+            <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic">
+              <TrustedHTML html={displayContent} />
+            </div>
+          ) : null}
+        </div>
+      )}
+      {!hasStructuredChanges && metadataSections && metadataSections.length > 0 && (
+        <div className="prose prose-slate dark:prose-invert max-w-none">
+          <JSONSectionRenderer sections={metadataSections} />
+        </div>
+      )}
+      {!hasStructuredChanges && !metadataSections && hasAdditionalContent && (
+        <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic">
+          <TrustedHTML html={displayContent} />
+        </div>
+      )}
+
+      {/* Accordion Sections - Technical Details and Deployment (Client Component) */}
+      {entry.content && <ChangelogAccordionSections content={entry.content} />}
+    </>
+  );
+}
+
+/**
  * Props for ChangelogContent component
  */
 export interface ChangelogContentProps {
@@ -148,19 +210,11 @@ export const ChangelogContent = memo(({ entry, sections, hideHeader = false }: C
       : undefined);
 
   // Get non-empty categories for badge display
-  const nonEmptyCategories: Database['public']['Enums']['changelog_category'][] = [];
-  if (changes.Added && changes.Added.length > 0)
-    nonEmptyCategories.push('Added' as Database['public']['Enums']['changelog_category']);
-  if (changes.Changed && changes.Changed.length > 0)
-    nonEmptyCategories.push('Changed' as Database['public']['Enums']['changelog_category']);
-  if (changes.Deprecated && changes.Deprecated.length > 0)
-    nonEmptyCategories.push('Deprecated' as Database['public']['Enums']['changelog_category']);
-  if (changes.Removed && changes.Removed.length > 0)
-    nonEmptyCategories.push('Removed' as Database['public']['Enums']['changelog_category']);
-  if (changes.Fixed && changes.Fixed.length > 0)
-    nonEmptyCategories.push('Fixed' as Database['public']['Enums']['changelog_category']);
-  if (changes.Security && changes.Security.length > 0)
-    nonEmptyCategories.push('Security' as Database['public']['Enums']['changelog_category']);
+  const nonEmptyCategories = (['Added', 'Changed', 'Deprecated', 'Removed', 'Fixed', 'Security'] as const)
+    .filter((category): category is Database['public']['Enums']['changelog_category'] => {
+      const items = changes[category];
+      return items !== undefined && Array.isArray(items) && items.length > 0;
+    });
 
   // Check if we have structured changes to display
   const hasStructuredChanges = Object.values(changes).some(
@@ -207,101 +261,23 @@ export const ChangelogContent = memo(({ entry, sections, hideHeader = false }: C
       {/* Structured Changes Display - Beautiful categorized sections */}
       {hasStructuredChanges && (
         <div className={`${UI_CLASSES.MARGIN_COMFORTABLE}`}>
-          {changes.Added && changes.Added.length > 0 && (
-            <CategorySection
-              category="Added"
-              items={changes.Added}
-              icon={CATEGORY_ICONS.Added}
-            />
-          )}
-          {changes.Changed && changes.Changed.length > 0 && (
-            <CategorySection
-              category="Changed"
-              items={changes.Changed}
-              icon={CATEGORY_ICONS.Changed}
-            />
-          )}
-          {changes.Fixed && changes.Fixed.length > 0 && (
-            <CategorySection
-              category="Fixed"
-              items={changes.Fixed}
-              icon={CATEGORY_ICONS.Fixed}
-            />
-          )}
-          {changes.Security && changes.Security.length > 0 && (
-            <CategorySection
-              category="Security"
-              items={changes.Security}
-              icon={CATEGORY_ICONS.Security}
-            />
-          )}
-          {changes.Deprecated && changes.Deprecated.length > 0 && (
-            <CategorySection
-              category="Deprecated"
-              items={changes.Deprecated}
-              icon={CATEGORY_ICONS.Deprecated}
-            />
-          )}
-          {changes.Removed && changes.Removed.length > 0 && (
-            <CategorySection
-              category="Removed"
-              items={changes.Removed}
-              icon={CATEGORY_ICONS.Removed}
-            />
-          )}
+          {(['Added', 'Changed', 'Fixed', 'Security', 'Deprecated', 'Removed'] as const).map(category => {
+            const items = changes[category];
+            if (!items || items.length === 0) return null;
+            return (
+              <CategorySection
+                key={category}
+                category={category}
+                items={items}
+                icon={CATEGORY_ICONS[category]}
+              />
+            );
+          })}
         </div>
       )}
 
       {/* Additional Content - Rendered as JSON Sections or HTML */}
-      {(() => {
-        let rawContent = entry.content || '';
-
-        // Remove accordion sections from content to avoid duplication
-        rawContent = removeAccordionSectionsFromContent(rawContent);
-
-        // If we have structured changes, also remove category sections (## Added, ## Changed, etc.)
-        // to avoid displaying the same content twice
-        if (hasStructuredChanges) {
-          rawContent = removeCategorySectionsFromContent(rawContent);
-        }
-
-        // Convert markdown to HTML (content is stored as markdown in database)
-        const displayContent = rawContent.trim() ? markdownToHtml(rawContent) : '';
-
-        // Only show additional content if there's something meaningful left after removing duplicates
-        const hasAdditionalContent = displayContent.trim().length > 0;
-
-        return (
-          <>
-            {hasStructuredChanges && (metadataSections || hasAdditionalContent) && (
-              <div className={`${UI_CLASSES.MARGIN_TOP_RELAXED} ${UI_CLASSES.PADDING_Y_RELAXED} border-t border-border/50`}>
-                {metadataSections && metadataSections.length > 0 ? (
-                  <div className="prose prose-slate dark:prose-invert max-w-none">
-                    <JSONSectionRenderer sections={metadataSections} />
-                  </div>
-                ) : hasAdditionalContent ? (
-                  <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic">
-                    <TrustedHTML html={displayContent} />
-                  </div>
-                ) : null}
-              </div>
-            )}
-            {!hasStructuredChanges && metadataSections && metadataSections.length > 0 && (
-              <div className="prose prose-slate dark:prose-invert max-w-none">
-                <JSONSectionRenderer sections={metadataSections} />
-              </div>
-            )}
-            {!hasStructuredChanges && !metadataSections && hasAdditionalContent && (
-              <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic">
-                <TrustedHTML html={displayContent} />
-              </div>
-            )}
-
-            {/* Accordion Sections - Technical Details and Deployment (Client Component) */}
-            {entry.content && <ChangelogAccordionSections content={entry.content} />}
-          </>
-        );
-      })()}
+      {renderAdditionalContent(entry, metadataSections, hasStructuredChanges)}
     </article>
   );
 });

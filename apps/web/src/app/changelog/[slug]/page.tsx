@@ -33,7 +33,13 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink, Separator, ANIMATION_CONSTANTS } from '@heyclaude/web-runtime/ui';
+import {
+  UI_CLASSES,
+  NavLink,
+  Separator,
+  ANIMATION_CONSTANTS,
+  Breadcrumbs,
+} from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -176,6 +182,9 @@ export default async function ChangelogEntryPage({
       <article
         className={`container max-w-6xl ${UI_CLASSES.FORM_SECTION_SPACING} ${UI_CLASSES.PADDING_Y_RELAXED}`}
       >
+        {/* Breadcrumbs */}
+        <Breadcrumbs categoryLabel="Changelog" currentTitle={entry.title} />
+
         {/* Navigation */}
         <NavLink
           href={ROUTES.CHANGELOG}

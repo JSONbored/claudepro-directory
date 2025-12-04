@@ -286,6 +286,8 @@ export type Database = {
           release_date: string
           robots_follow: boolean | null
           robots_index: boolean | null
+          seo_description: string | null
+          seo_title: string | null
           slug: string
           source: Database["public"]["Enums"]["changelog_source"] | null
           title: string
@@ -314,6 +316,8 @@ export type Database = {
           release_date: string
           robots_follow?: boolean | null
           robots_index?: boolean | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug: string
           source?: Database["public"]["Enums"]["changelog_source"] | null
           title: string
@@ -342,6 +346,8 @@ export type Database = {
           release_date?: string
           robots_follow?: boolean | null
           robots_index?: boolean | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug?: string
           source?: Database["public"]["Enums"]["changelog_source"] | null
           title?: string
@@ -620,6 +626,7 @@ export type Database = {
           twitter_card: string | null
           updated_at: string
           use_cases: string[] | null
+          use_count: number
           view_count: number
         }
         Insert: {
@@ -666,6 +673,7 @@ export type Database = {
           twitter_card?: string | null
           updated_at?: string
           use_cases?: string[] | null
+          use_count?: number
           view_count?: number
         }
         Update: {
@@ -712,6 +720,7 @@ export type Database = {
           twitter_card?: string | null
           updated_at?: string
           use_cases?: string[] | null
+          use_count?: number
           view_count?: number
         }
         Relationships: []
@@ -975,6 +984,41 @@ export type Database = {
           usage_count?: number
         }
         Relationships: []
+      }
+      content_votes: {
+        Row: {
+          content_slug: string
+          content_type: Database["public"]["Enums"]["content_category"]
+          created_at: string
+          id: string
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content_slug: string
+          content_type: Database["public"]["Enums"]["content_category"]
+          created_at?: string
+          id?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content_slug?: string
+          content_type?: Database["public"]["Enums"]["content_category"]
+          created_at?: string
+          id?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_content_votes_content"
+            columns: ["content_slug", "content_type"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["slug", "category"]
+          },
+        ]
       }
       email_blocklist: {
         Row: {
@@ -3381,6 +3425,14 @@ export type Database = {
         }
       }
       audit_job_subscription_state: { Args: never; Returns: number }
+      backfill_changelog_seo_fields: {
+        Args: never
+        Returns: {
+          errors: string[]
+          skipped_count: number
+          updated_count: number
+        }[]
+      }
       batch_add_bookmarks: {
         Args: {
           p_items: Database["public"]["CompositeTypes"]["bookmark_item_input"][]
@@ -3905,6 +3957,16 @@ export type Database = {
           category: Database["public"]["Enums"]["content_category"]
         }[]
       }
+      get_all_tags_with_counts: {
+        Args: { p_limit?: number; p_min_count?: number }
+        Returns: Database["public"]["CompositeTypes"]["tag_with_counts"][]
+        SetofOptions: {
+          from: "*"
+          to: "tag_with_counts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_analytics_summary: {
         Args: { p_category?: Database["public"]["Enums"]["content_category"] }
         Returns: {
@@ -4110,6 +4172,34 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      get_content_by_tag: {
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+          p_offset?: number
+          p_tag: string
+        }
+        Returns: {
+          author: string
+          author_profile_url: string
+          avg_rating: number
+          bookmark_count: number
+          category: Database["public"]["Enums"]["content_category"]
+          copy_count: number
+          date_added: string
+          description: string
+          id: string
+          review_count: number
+          slug: string
+          source: Database["public"]["Enums"]["content_source"]
+          tags: string[]
+          title: string
+          total_count: number
+          updated_at: string
+          use_count: number
+          view_count: number
+        }[]
       }
       get_content_detail_complete: {
         Args: {
@@ -4552,6 +4642,7 @@ export type Database = {
           twitter_card: string | null
           updated_at: string
           use_cases: string[] | null
+          use_count: number
           view_count: number
         }[]
         SetofOptions: {
@@ -4685,6 +4776,15 @@ export type Database = {
           object_path: string
         }[]
       }
+      get_social_proof_stats: {
+        Args: { p_month_ago: string; p_week_ago: string }
+        Returns: {
+          content_count: number
+          month_submissions: Json
+          recent_submissions: Json
+          top_contributors: string[]
+        }[]
+      }
       get_sponsorship_analytics: {
         Args: { p_sponsorship_id: string; p_user_id: string }
         Returns: Database["public"]["CompositeTypes"]["sponsorship_analytics_result"]
@@ -4764,6 +4864,7 @@ export type Database = {
           twitter_card: string | null
           updated_at: string
           use_cases: string[] | null
+          use_count: number
           view_count: number
         }[]
         SetofOptions: {
@@ -4871,6 +4972,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      get_user_content_vote: {
+        Args: {
+          p_content_slug: string
+          p_content_type: Database["public"]["Enums"]["content_category"]
+          p_session_id?: string
+          p_user_id?: string
+        }
+        Returns: boolean
       }
       get_user_dashboard: {
         Args: { p_user_id: string }
@@ -5062,6 +5172,10 @@ export type Database = {
       }
       invoke_edge_function: {
         Args: { action_header: string; function_name: string; payload?: Json }
+        Returns: number
+      }
+      invoke_edge_function_endpoint: {
+        Args: { endpoint: string }
         Returns: number
       }
       is_admin: { Args: { p_user_id: string }; Returns: boolean }
@@ -5596,6 +5710,21 @@ export type Database = {
           slug: string
           title: string
         }[]
+      }
+      toggle_content_vote: {
+        Args: {
+          p_content_slug: string
+          p_content_type: Database["public"]["Enums"]["content_category"]
+          p_session_id?: string
+          p_user_id?: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["toggle_content_vote_result"]
+        SetofOptions: {
+          from: "*"
+          to: "toggle_content_vote_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       toggle_follow: {
         Args: {
@@ -6278,6 +6407,8 @@ export type Database = {
         changes: Json | null
         created_at: string | null
         updated_at: string | null
+        seo_title: string | null
+        seo_description: string | null
       }
       changelog_overview_result: {
         entries:
@@ -7369,6 +7500,11 @@ export type Database = {
         email: string | null
         error: string | null
       }
+      tag_with_counts: {
+        tag: string | null
+        usage_count: number | null
+        categories: string[] | null
+      }
       tech_article_schema: {
         context: string | null
         type: string | null
@@ -7380,6 +7516,13 @@ export type Database = {
         author: Json | null
         in_language: string | null
         article_section: string | null
+      }
+      toggle_content_vote_result: {
+        success: boolean | null
+        voted: boolean | null
+        new_count: number | null
+        content_slug: string | null
+        content_type: Database["public"]["Enums"]["content_category"] | null
       }
       toggle_follow_result: {
         success: boolean | null

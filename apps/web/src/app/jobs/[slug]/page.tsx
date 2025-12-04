@@ -183,7 +183,7 @@ export async function generateStaticParams() {
     return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
-    reqLogger.error('JobPage: getJobs threw in generateStaticParams', normalized);
+    reqLogger.error('JobPage: getFilteredJobs threw in generateStaticParams', normalized);
     return [];
   }
 }

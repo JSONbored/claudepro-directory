@@ -52,19 +52,23 @@ interface ChangelogTimelineViewProps {
  * for active entry detection
  */
 export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const contentRefs = useRef<Map<number, HTMLElement>>(new Map());
-  const observerRefs = useRef<Map<number, IntersectionObserver>>(new Map());
+  const [activeSlug, setActiveSlug] = useState<string | null>(entries[0]?.slug ?? null);
+  const contentRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const observerRefs = useRef<Map<string, IntersectionObserver>>(new Map());
 
   // Set up Intersection Observer for each content section
   useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') {
+      return;
+    }
+
     // Clean up existing observers
     observerRefs.current.forEach((observer) => observer.disconnect());
     observerRefs.current.clear();
 
     // Create observers for each entry
-    entries.forEach((_entryItem, index) => {
-      const element = contentRefs.current.get(index);
+    entries.forEach((entry) => {
+      const element = contentRefs.current.get(entry.slug);
       if (!element) return;
 
       const observer = new IntersectionObserver(
@@ -80,7 +84,7 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
 
             // Only update if this section is significantly visible (at least 20% from top)
             if (visibilityRatio > 0.2) {
-              setActiveIndex(index);
+              setActiveSlug(entry.slug);
             }
           }
         },
@@ -91,7 +95,7 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
       );
 
       observer.observe(element);
-      observerRefs.current.set(index, observer);
+      observerRefs.current.set(entry.slug, observer);
     });
 
     // Cleanup on unmount
@@ -102,19 +106,19 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
   }, [entries]);
 
   // Scroll to content handler
-  const scrollToContent = (index: number) => {
-    const element = contentRefs.current.get(index);
+  const scrollToContent = (slug: string) => {
+    const element = contentRefs.current.get(slug);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
   // Set ref for content section
-  const setContentRef = (index: number) => (element: HTMLElement | null) => {
+  const setContentRef = (slug: string) => (element: HTMLElement | null) => {
     if (element) {
-      contentRefs.current.set(index, element);
+      contentRefs.current.set(slug, element);
     } else {
-      contentRefs.current.delete(index);
+      contentRefs.current.delete(slug);
     }
   };
 
@@ -127,7 +131,7 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
 
         {/* Timeline markers */}
         <div className="relative pl-8">
-          {entries.map((entry, index) => {
+          {entries.map((entry) => {
             const targetPath = getSafeChangelogPath(entry.slug);
             if (!targetPath) return null;
 
@@ -135,10 +139,9 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
               <TimelineMarker
                 key={entry.slug}
                 entry={entry}
-                index={index}
-                isActive={activeIndex === index}
+                isActive={activeSlug === entry.slug}
                 targetPath={targetPath}
-                onClick={() => scrollToContent(index)}
+                onClick={() => scrollToContent(entry.slug)}
               />
             );
           })}
@@ -147,11 +150,11 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
 
       {/* Content Column (Right) - Aligned with timeline markers */}
       <div className="space-y-0">
-        {entries.map((entry, index) => (
+        {entries.map((entry) => (
           <section
             key={entry.slug}
-            id={`changelog-entry-${index}`}
-            ref={setContentRef(index)}
+            id={`changelog-entry-${entry.slug}`}
+            ref={setContentRef(entry.slug)}
             className="scroll-mt-24 pt-6 md:pt-8 pb-12 md:pb-20 border-b border-border/20 last:border-b-0 last:pb-0"
           >
             <ChangelogContent entry={entry} hideHeader={true} />

@@ -17,7 +17,7 @@ import {
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient } from '@heyclaude/web-runtime/server';
+import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -36,7 +36,9 @@ export async function GET() {
   });
 
   try {
-    const supabase = createSupabaseAnonClient();
+    // Use admin client to bypass RLS for public stats API
+    // The RLS policy on content_submissions checks auth.users table which anon client cannot access
+    const supabase = createSupabaseAdminClient();
 
     // Calculate date ranges
     const weekAgo = new Date();

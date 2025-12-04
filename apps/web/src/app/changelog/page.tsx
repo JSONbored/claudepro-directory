@@ -28,7 +28,7 @@ import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runti
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, NavLink, Breadcrumbs } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
@@ -180,6 +180,9 @@ export default async function ChangelogPage() {
         <StructuredData route="/changelog" />
 
         <div className="mx-auto max-w-[1400px] space-y-8 px-4 py-8 md:px-8 lg:px-12">
+          {/* Breadcrumbs */}
+          <Breadcrumbs categoryLabel="Changelog" />
+
           {/* Header */}
           <div className="space-y-4">
             <NavLink

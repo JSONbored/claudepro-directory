@@ -12,6 +12,7 @@ import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, pgmqSend, type PgmqMessage } from '../../../supabase/pgmq-client';
 import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { generateOGImageUrl } from '../../../seo/og';
 
 const CHANGELOG_QUEUE = 'changelog_process';
 const BATCH_SIZE = 5;
@@ -132,6 +133,193 @@ function generateTldr(commits: GitHubCommit[]): string {
   if (parts.length === 0) parts.push(`${commits.length} update${commits.length > 1 ? 's' : ''}`);
 
   return `This release includes ${parts.join(' and ')}.`;
+}
+
+/**
+ * Generate SEO-optimized title (53-60 chars) from changelog title and sections
+ * Ensures title is within optimal SEO length range
+ */
+function generateOptimizedTitle(originalTitle: string, sections: ChangelogSection[]): string {
+  // If title is already in optimal range (53-60 chars), use it
+  if (originalTitle.length >= 53 && originalTitle.length <= 60) {
+    return originalTitle;
+  }
+
+  // If title is too long, truncate intelligently
+  if (originalTitle.length > 60) {
+    // Try to truncate at word boundary
+    const truncated = originalTitle.slice(0, 57);
+    const lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > 45) {
+      return truncated.slice(0, lastSpace) + '...';
+    }
+    return truncated + '...';
+  }
+
+  // If title is too short, enhance with category info
+  if (originalTitle.length < 53) {
+    const categoryMap: Record<string, string> = {
+      feat: 'Features',
+      fix: 'Bug Fixes',
+      perf: 'Performance',
+      refactor: 'Refactoring',
+    };
+
+    // Find primary category
+    const primaryCategory = sections[0]?.type;
+    const categoryLabel = primaryCategory ? categoryMap[primaryCategory] : null;
+
+    if (categoryLabel) {
+      const enhanced = `${originalTitle} - ${categoryLabel}`;
+      if (enhanced.length <= 60) {
+        return enhanced;
+      }
+    }
+
+    // Fallback: add "Update" suffix if still too short
+    if (originalTitle.length < 45) {
+      const withUpdate = `${originalTitle} Update`;
+      if (withUpdate.length <= 60) {
+        return withUpdate;
+      }
+    }
+  }
+
+  return originalTitle;
+}
+
+/**
+ * Generate optimized SEO description (150-160 chars) from changelog sections
+ * Format: "Added X features, Changed Y systems, Fixed Z bugs. Released [date]."
+ */
+function generateOptimizedDescription(sections: ChangelogSection[], releaseDate: string): string {
+  // Map commit types to changelog categories
+  const categoryMap: Record<string, string> = {
+    feat: 'Added',
+    fix: 'Fixed',
+    perf: 'Changed',
+    refactor: 'Changed',
+    docs: 'Changed',
+    style: 'Changed',
+    test: 'Changed',
+    chore: 'Changed',
+  };
+
+  // Count commits by category
+  const categoryCounts: Record<string, number> = {};
+  for (const section of sections) {
+    const category = categoryMap[section.type] || 'Changed';
+    categoryCounts[category] = (categoryCounts[category] || 0) + section.commits.length;
+  }
+
+  // Build description parts
+  const parts: string[] = [];
+  if (categoryCounts['Added']) {
+    parts.push(`Added ${categoryCounts['Added']} feature${categoryCounts['Added'] > 1 ? 's' : ''}`);
+  }
+  if (categoryCounts['Changed']) {
+    parts.push(`Changed ${categoryCounts['Changed']} system${categoryCounts['Changed'] > 1 ? 's' : ''}`);
+  }
+  if (categoryCounts['Fixed']) {
+    parts.push(`Fixed ${categoryCounts['Fixed']} bug${categoryCounts['Fixed'] > 1 ? 's' : ''}`);
+  }
+
+  // Fallback if no categorized changes
+  if (parts.length === 0) {
+    const totalCommits = sections.reduce((sum, s) => sum + s.commits.length, 0);
+    parts.push(`${totalCommits} update${totalCommits > 1 ? 's' : ''}`);
+  }
+
+  // Format date
+  const date = new Date(releaseDate);
+  const formattedDate = date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  // Build description (target: 150-160 chars)
+  let description = `${parts.join(', ')}. Released ${formattedDate}.`;
+
+  // Trim or pad to optimal length (150-160 chars)
+  if (description.length > 160) {
+    // Truncate intelligently
+    description = description.slice(0, 157) + '...';
+  } else if (description.length < 150) {
+    // Add context if too short (but don't exceed 160)
+    const remaining = Math.min(160 - description.length, 10);
+    if (remaining > 5) {
+      description = `Claude Pro Directory update: ${description}`;
+      if (description.length > 160) {
+        description = description.slice(0, 157) + '...';
+      }
+    }
+  }
+
+  return description;
+}
+
+/**
+ * Extract SEO keywords from changelog sections and commits
+ * Returns array of relevant keywords for SEO
+ */
+function extractKeywords(sections: ChangelogSection[], commits: GitHubCommit[]): string[] {
+  const keywords = new Set<string>();
+
+  // Add base keywords
+  keywords.add('changelog');
+  keywords.add('release notes');
+  keywords.add('updates');
+
+  // Add category keywords from sections
+  const categoryMap: Record<string, string> = {
+    feat: 'features',
+    fix: 'bug fixes',
+    perf: 'performance',
+    refactor: 'refactoring',
+    docs: 'documentation',
+    style: 'styling',
+    test: 'testing',
+    chore: 'maintenance',
+  };
+
+  for (const section of sections) {
+    const categoryKeyword = categoryMap[section.type];
+    if (categoryKeyword) {
+      keywords.add(categoryKeyword);
+    }
+  }
+
+  // Extract keywords from commit descriptions (common terms)
+  const commonTerms = new Set<string>();
+  for (const commit of commits) {
+    const parsed = parseConventionalCommit(commit.commit.message);
+    if (parsed) {
+      const words = parsed.description.toLowerCase().split(/\s+/);
+      for (const word of words) {
+        // Extract meaningful words (3+ chars, not common stop words)
+        if (
+          word.length >= 3 &&
+          !['the', 'and', 'for', 'with', 'this', 'that', 'from', 'into'].includes(word)
+        ) {
+          // Clean word (remove punctuation)
+          const cleanWord = word.replace(/[^\w]/g, '');
+          if (cleanWord.length >= 3) {
+            commonTerms.add(cleanWord);
+          }
+        }
+      }
+    }
+  }
+
+  // Add top 5 most common terms as keywords (limit to avoid spam)
+  const sortedTerms = Array.from(commonTerms).slice(0, 5);
+  for (const term of sortedTerms) {
+    keywords.add(term);
+  }
+
+  // Limit total keywords to 10 (SEO best practice)
+  return Array.from(keywords).slice(0, 10);
 }
 
 /**
@@ -282,13 +470,28 @@ export const processChangelogQueue = inngest.createFunction(
           const deploymentId = deployment?.['id'] as string || '';
           const slug = `${dateStr}-${deploymentId.slice(-6)}`;
           const siteUrl = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
+          const changelogPath = `/changelog/${slug}`;
+          const canonicalUrl = `${siteUrl}${changelogPath}`;
 
-          // Insert changelog entry
+          // Generate SEO-optimized description (150-160 chars)
+          const optimizedDescription = generateOptimizedDescription(sections, dateStr);
+
+          // Generate SEO-optimized title (53-60 chars) - separate from display title
+          // Title should be concise and keyword-rich for SEO
+          const seoTitle = generateOptimizedTitle(title, sections);
+
+          // Extract keywords from sections and commits
+          const keywords = extractKeywords(sections, conventionalCommits);
+
+          // Generate OG image URL (dynamic OG image endpoint)
+          const ogImageUrl = generateOGImageUrl(changelogPath);
+
+          // Insert changelog entry with SEO fields
           const changelogEntry: DatabaseGenerated['public']['Tables']['changelog']['Insert'] = {
             title,
             slug,
             tldr,
-            description: tldr,
+            description: optimizedDescription, // Use optimized description instead of tldr
             content: markdownContent,
             raw_content: markdownContent,
             release_date: dateStr as string,
@@ -298,7 +501,16 @@ export const processChangelogQueue = inngest.createFunction(
             commit_count: conventionalCommits.length,
             contributors: [...new Set(conventionalCommits.map((c) => c.commit.author.name))],
             git_commit_sha: headCommit,
-            canonical_url: `${siteUrl}/changelog/${slug}`,
+            canonical_url: canonicalUrl,
+            // SEO fields
+            seo_title: seoTitle, // SEO-optimized title (53-60 chars)
+            seo_description: optimizedDescription, // SEO-optimized description (150-160 chars)
+            keywords: keywords.length > 0 ? keywords : null,
+            og_image: ogImageUrl,
+            og_type: 'article', // Changelog entries are articles
+            twitter_card: 'summary_large_image',
+            robots_index: true,
+            robots_follow: true,
           };
 
           const { data: changelogData, error: insertError } = await supabase
