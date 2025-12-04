@@ -131,13 +131,14 @@
     "analyze:all": "npm run analyze:unused && npm run analyze:circular"
   },
   "devDependencies": {
-    "@anthropic-ai/mcpb": "^2.0.1",
+    "@anthropic-ai/mcpb": "^2.1.2",
     "@aws-sdk/client-s3": "^3.943.0",
     "@eslint/js": "^9.39.1",
     "@heyclaude/generators": "workspace:*",
+    "@playwright/test": "^1.57.0",
     "@react-email/components": "^1.0.1",
     "@react-email/render": "^2.0.0",
-    "@supabase/supabase-js": "^2.86.0",
+    "@supabase/supabase-js": "^2.86.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -173,13 +174,11 @@
     "tailwindcss": "^4.1.17",
     "ts-prune": "^0.10.3",
     "tsx": "^4.21.0",
-    "turbo": "^2.6.1",
+    "turbo": "^2.6.2",
     "typescript": "5.9.3",
     "typescript-eslint": "^8.48.1",
-    "ultracite": "^6.3.8",
     "vercel": "^48.12.1",
-    "vitest": "^4.0.15",
-    "@playwright/test": "^1.48.0"
+    "vitest": "^4.0.15"
   },
   "pnpm": {
     "overrides": {
