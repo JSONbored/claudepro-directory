@@ -27,6 +27,12 @@ export const runtime = 'nodejs';
 
 const ROUTE = '/account/connected-accounts';
 
+/**
+ * Builds the Next.js metadata for the Connected Accounts page.
+ *
+ * @returns The page metadata object for the Connected Accounts route.
+ * @see ROUTE
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata(ROUTE);
 }

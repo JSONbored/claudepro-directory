@@ -78,15 +78,13 @@ async function handleFluxRequest(
 }
 
 /**
- * Handles GET requests for the Flux catch-all API route and forwards them to the Flux router.
+ * Handle GET requests for the Flux catch-all API route by delegating to the Flux router.
  *
- * Resolves dynamic path segments from `context`, creates a request-scoped log context, and delegates
- * processing to the Flux routing implementation.
- *
- * @param request - NextRequest: The incoming Next.js request object for the GET operation.
- * @param context - RouteContext: Route context containing resolved dynamic route parameters; `context.params.path` is the path segments array.
- * @returns Response: The Response object produced by the Flux router for this GET request.
+ * @param request - NextRequest: Incoming Next.js request object for the GET operation.
+ * @param context - RouteContext: Route context whose `params.path` promise resolves to the array of dynamic path segments for this request.
+ * @returns Response: The HTTP Response produced by the Flux router for this GET request.
  * @see routeFluxRequest
+ * @see handleFluxRequest
  * @see generateRequestId
  * @see logger
  */

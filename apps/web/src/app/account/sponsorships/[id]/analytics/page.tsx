@@ -36,6 +36,15 @@ interface AnalyticsPageProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Generate metadata for the sponsorship analytics page identified by the route `id`.
+ *
+ * @param params - A promise resolving to route parameters; must provide `id` for the sponsorship
+ * @returns Metadata for the sponsorship analytics page for the provided `id`
+ *
+ * @see generatePageMetadata
+ * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata
+ */
 export async function generateMetadata({ params }: AnalyticsPageProperties): Promise<Metadata> {
   const { id } = await params;
   return generatePageMetadata('/account/sponsorships/:id/analytics', { params: { id } });

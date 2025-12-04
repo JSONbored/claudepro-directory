@@ -24,10 +24,10 @@ interface EditCollectionPageProperties {
 }
 
 /**
- * Generate metadata for the Edit Collection page using the route slug.
+ * Generate page metadata for the Edit Collection route using the route slug.
  *
- * @param params - A promise resolving to route parameters; must contain `slug` identifying the collection.
- * @returns The Next.js page `Metadata` for the `/account/library/:slug/edit` route populated with the provided `slug`.
+ * @param params - Promise resolving to route parameters containing `slug`
+ * @returns The Next.js `Metadata` for the `/account/library/:slug/edit` route with the provided `slug`
  *
  * @see generatePageMetadata
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata

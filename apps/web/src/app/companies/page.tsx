@@ -48,12 +48,16 @@ const NewsletterCTAVariant = dynamicImport(
 export const revalidate = 86_400;
 
 /**
- * Validate and sanitize external website URL for safe use in href attributes.
- * Only allows HTTPS URLs (or HTTP for localhost in development).
- * Returns canonicalized URL or null if invalid.
+ * Validate and canonicalize an external website URL for safe use in anchor hrefs.
+ *
+ * Allows `https:` URLs universally and `http:` only for localhost addresses.
+ * Rejects URLs containing username or password components, trims and lowercases the hostname,
+ * removes trailing dots and default ports (80 for HTTP, 443 for HTTPS).
  *
  * @param url - The input URL to validate; may be `null` or `undefined`.
- * @returns A canonicalized, safe href string when the input is an allowed URL, `null` otherwise.
+ * @returns The canonicalized, safe href string when the input is an allowed URL, `null` otherwise.
+ *
+ * @see /companies page where this is used to render external company links
  */
 function getSafeWebsiteUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
@@ -89,6 +93,15 @@ function getSafeWebsiteUrl(url: null | string | undefined): null | string {
   }
 }
 
+/**
+ * Provide metadata for the /companies page.
+ *
+ * Used by Next.js to supply route metadata such as title, description, and Open Graph data.
+ *
+ * @returns The Metadata object for the /companies route.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/companies');
 }

@@ -937,21 +937,19 @@ function StepTypeSelection({
 }
 
 /**
- * Render the "Basic Information" step of the submission wizard and manage inputs for
- * name, description, author, GitHub URL, and optional thumbnail upload/preview.
+ * Render the "Basic Information" step of the submission wizard, providing inputs for name,
+ * description, author, GitHub URL, and an optional thumbnail upload with preview and removal.
  *
- * Handles real-time validation state for the name and description fields and exposes
- * callbacks for updating form data, uploading an image file to generate a thumbnail,
- * and removing the current thumbnail.
+ * Provides live validation state for the name and description fields and invokes callbacks
+ * when form values change, an image is selected for thumbnail generation, or the thumbnail is removed.
  *
- * @param props.data - Current form data for the wizard step.
- * @param props.onChange - Callback invoked with partial form updates when any field changes.
- * @param props.onImageUpload - Async callback to handle a selected image file and generate/upload a thumbnail.
- * @param props.isUploadingThumbnail - Indicates whether a thumbnail is currently being generated/uploaded.
- * @param props.thumbnailPreview - Local or remote URL used to render the thumbnail preview, or null if none.
+ * @param props.data - Current form values for the step.
+ * @param props.onChange - Called with partial updates to form data when any field changes.
+ * @param props.onImageUpload - Handler invoked with a selected image file to generate/upload a thumbnail.
+ * @param props.isUploadingThumbnail - Whether a thumbnail is currently being generated/uploaded.
+ * @param props.thumbnailPreview - Local or remote URL to render the thumbnail preview, or `null` if none.
  * @param props.onRemoveThumbnail - Callback to remove the current thumbnail and clear its preview.
- *
- * @returns The rendered JSX for step 2 (basic information) of the wizard.
+ * @returns The JSX for step 2 (basic information) of the wizard.
  *
  * @see WizardSubmissionPage
  * @see AnimatedFormField
@@ -1195,18 +1193,16 @@ function StepBasicInfo({
 }
 
 /**
- * Renders the "Configuration" step of the submission wizard, showing type-specific form fields,
- * an optional template quick-select, and social proof for step 3.
+ * Render the configuration step of the submission wizard for the selected content type.
  *
- * @param props.submissionType - The selected content type which controls which fields are shown.
- * @param props.data - Current type-specific form data values.
- * @param props.onChange - Callback invoked with updated type-specific data when any field changes.
- * @param props.templates - Optional array of templates available for the current content type.
- * @param props.templatesLoading - When true, shows a loading skeleton for the template selector.
- * @param props.onApplyTemplate - Optional callback invoked when a template is applied.
- * @param props.getHighlightClasses - Optional helper that returns CSS classes to highlight a given field path.
- *
- * @returns The JSX for the configuration step.
+ * @param submissionType - The selected content type which controls which type-specific fields are shown.
+ * @param data - Current type-specific form values (e.g., systemPrompt, temperature, npmPackage).
+ * @param onChange - Callback invoked with updated type-specific data when any field changes.
+ * @param templates - Optional templates available for the current content type shown in the quick-select.
+ * @param templatesLoading - When true, show a loading skeleton for the template selector.
+ * @param onApplyTemplate - Optional callback invoked when a template is applied from the quick-select.
+ * @param getHighlightClasses - Optional helper that returns CSS classes to highlight a given field path (e.g., "type_specific.systemPrompt").
+ * @returns The rendered React element for the configuration step.
  *
  * @see StepSocialProof
  * @see TemplateQuickSelect

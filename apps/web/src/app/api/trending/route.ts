@@ -118,6 +118,21 @@ function mapTrendingRows(rows: LooseTrendingRow[], fallbackCategory: ContentCate
   }));
 }
 
+/**
+ * Map database "popular" rows into frontend-friendly popular item objects.
+ *
+ * Transforms each LoosePopularRow into an object with these properties:
+ * `category` (uses row.category, or `fallbackCategory`, or `DEFAULT_CATEGORY`),
+ * `slug`, `title` (falls back to `slug` when missing), `description`, `author`,
+ * `tags` (only included when the source value is an array),
+ * `viewCount`, `copyCount`, and `popularity`.
+ *
+ * @param rows - Array of database rows representing popular content
+ * @param fallbackCategory - Category to use when a row's category is null/undefined
+ * @returns An array of mapped popular item objects with keys:
+ * `category`, `slug`, `title`, `description?`, `author?`, `tags?`, `viewCount?`, `copyCount?`, `popularity?`
+ * @see DEFAULT_CATEGORY
+ */
 function mapPopularRows(rows: LoosePopularRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     category:
@@ -134,11 +149,11 @@ function mapPopularRows(rows: LoosePopularRow[], fallbackCategory: ContentCatego
 }
 
 /**
- * Map database recent-content rows into a normalized frontend-ready shape, applying a fallback category when missing.
+ * Normalize recent-content database rows into frontend-ready items, applying a fallback category when missing.
  *
- * @param rows - Array of recent-content rows (may contain partial/optional fields)
- * @param fallbackCategory - Category to use when a row's category is null; if null, DEFAULT_CATEGORY is used
- * @returns An array of mapped items with fields: `category` (ContentCategory), `slug`, `title`, optional `description`, optional `author`, optional `tags`, and optional `created_at`
+ * @param rows - LooseRecentRow[] - Array of recent-content rows; individual rows may contain partial or optional fields
+ * @param fallbackCategory - ContentCategory | null - Category to use when a row's `category` is null; if `null`, `DEFAULT_CATEGORY` is applied
+ * @returns An array of mapped items with the shape: `{ category: ContentCategory, slug: string, title: string, description?: string, author?: string, tags?: string[], created_at?: string }`
  * @see mapPopularRows
  * @see mapTrendingRows
  */
@@ -154,6 +169,15 @@ function mapRecentRows(rows: LooseRecentRow[], fallbackCategory: ContentCategory
   }));
 }
 
+/**
+ * Produce sidebar-ready items from trending rows.
+ *
+ * Maps each input row to an object with a display title, a category-prefixed slug path, and a localized views string.
+ *
+ * @param rows - Array of trending rows to transform
+ * @param fallbackCategory - Category to use when a row has no category; if `null`, the module `DEFAULT_CATEGORY` is used
+ * @returns An array of sidebar items with properties `{ title: string; slug: string; views: string }` where `slug` is `/<category>/<slug>` and `views` is formatted like `"1,234 views"`
+ */
 function mapSidebarTrending(rows: LooseTrendingRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     title: row.title ?? row.slug,
@@ -165,11 +189,11 @@ function mapSidebarTrending(rows: LooseTrendingRow[], fallbackCategory: ContentC
 }
 
 /**
- * Map recent content rows into sidebar items containing a display title, a category-prefixed slug path, and a localized date string.
+ * Create sidebar items from recent content rows with a category-prefixed slug and a localized date.
  *
- * @param {LooseRecentRow[]} rows - Array of recent-content rows from the database; fields may be missing.
- * @param {ContentCategory | null} fallbackCategory - Category to use when a row's category is absent; if null the module-level DEFAULT_CATEGORY is used.
- * @returns {{ title: string; slug: string; date: string; }[]} An array of sidebar items where `title` is the row title or slug fallback, `slug` is the path prefixed with `/category/`, and `date` is a localized "Mon DD, YYYY" string or an empty string when the creation date is unavailable.
+ * @param {LooseRecentRow[]} rows - Array of recent-content rows from the database; individual fields may be missing.
+ * @param {ContentCategory | null} fallbackCategory - Category to use when a row's category is absent; if `null`, `DEFAULT_CATEGORY` is used.
+ * @returns {{ title: string; slug: string; date: string; }[]} An array of sidebar items where `title` is `row.title` or the row's `slug` fallback, `slug` is prefixed with `/<category>/`, and `date` is a localized "Mon DD, YYYY" string or an empty string if the creation date is unavailable.
  * @see mapSidebarTrending
  * @see DEFAULT_CATEGORY
  */

@@ -50,8 +50,20 @@ interface HomePageProperties {
 }
 
 /**
- * Top Contributors Server Component
- * Fetches top contributors data for the homepage
+ * Server component that fetches, sanitizes, and renders the homepage top contributors.
+ *
+ * Fetches homepage data using category IDs, tracks RPC failures scoped to the
+ * "top-contributors" section on error, filters out invalid contributor entries,
+ * normalizes each contributor (ensuring `id`, `slug`, `name`, defaulting `tier`
+ * to `"free"`, and adding a `created_at` timestamp), and renders the
+ * TopContributors component with the processed list.
+ *
+ * @returns A React element rendering the TopContributors component populated with processed contributor objects.
+ *
+ * @see getHomepageData
+ * @see getHomepageCategoryIds
+ * @see trackRPCFailure
+ * @see TopContributors
  */
 async function TopContributorsServer() {
   const categoryIds = getHomepageCategoryIds;

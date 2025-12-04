@@ -42,10 +42,12 @@ const NewsletterCTAVariant = dynamicImport(
 );
 
 /**
- * Provide metadata for the "/community" page used by Next.js.
+ * Create the Next.js page metadata for the /community route.
  *
- * @returns The page Metadata object for the community route.
- * @see {@link generatePageMetadata} - helper that constructs page metadata from a route
+ * Used by Next.js to supply route-specific metadata (title, description, open graph, etc.).
+ *
+ * @returns The metadata object for the community page.
+ * @see {@link generatePageMetadata}
  */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community');
@@ -60,6 +62,15 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = 86_400;
 
+/**
+ * Format a numeric statistic for display using compact English notation.
+ *
+ * Accepts a number, `null`, or `undefined` and returns a human-readable compact string
+ * (e.g., "1.2K"). If the input is `null`, `undefined`, or `NaN`, returns "0".
+ *
+ * @param value - The numeric value to format; `null`/`undefined`/`NaN` are treated as zero
+ * @returns The formatted numeric string in compact `en` notation with up to one decimal place, or `"0"` for missing/invalid values
+ */
 function formatStatValue(value: null | number | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '0';
   return Intl.NumberFormat('en', {

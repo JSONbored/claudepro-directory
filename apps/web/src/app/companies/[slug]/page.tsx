@@ -36,8 +36,14 @@ import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
 /**
- * Reusable component for rendering safe website links
- * Returns null if URL is invalid, otherwise renders an external link
+ * Render an external anchor for a validated website URL, or return `null` when the URL is not safe.
+ *
+ * @param url - The website URL to validate; may be `null` or `undefined`. If not a safe URL, nothing is rendered.
+ * @param children - Content to display inside the anchor element.
+ * @param className - Optional CSS class names applied to the anchor.
+ * @returns An anchor element pointing to the validated URL, or `null` if validation fails.
+ *
+ * @see {@link @heyclaude/web-runtime/core#getSafeWebsiteUrl}
  */
 function SafeWebsiteLink({
   url,
@@ -110,6 +116,17 @@ export async function generateStaticParams() {
   }
 }
 
+/**
+ * Produces page metadata for the company route using the provided slug.
+ *
+ * Resolves the `slug` from the incoming route params and delegates metadata creation
+ * to `generatePageMetadata` for the /companies/:slug route.
+ *
+ * @param params - Object containing route parameters; expects a `slug` promise that resolves to the company slug.
+ * @returns The page `Metadata` for the company detail route.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: CompanyPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/companies/:slug', {

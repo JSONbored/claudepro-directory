@@ -36,6 +36,14 @@ export const dynamic = 'force-dynamic';
 // Whitelisted content types for outgoing links - use Constants from database types
 const ALLOWED_CONTENT_TYPES = Constants.public.Enums.content_category;
 
+/**
+ * Checks whether a content category string is allowed for public collections.
+ *
+ * @param type - The content category identifier to validate (e.g., "article", "image")
+ * @returns `true` if `type` is listed in the module's allowed content types, `false` otherwise.
+ *
+ * @see ALLOWED_CONTENT_TYPES
+ */
 function isValidContentType(type: string): boolean {
   return (ALLOWED_CONTENT_TYPES as readonly string[]).includes(type);
 }
@@ -74,13 +82,15 @@ interface PublicCollectionPageProperties {
 }
 
 /**
- * Generates metadata for a public collection detail page and warms the related data cache.
+ * Generate page metadata for a public collection detail and warm the data cache for the subsequent render.
  *
- * Fetches collection detail data before the page renders to pre-populate the cache. Errors
- * during the fetch are logged but do not interrupt metadata generation.
+ * Attempts a non-blocking fetch of the collection detail to pre-populate caches; fetch errors are logged but do not prevent metadata from being produced.
  *
- * @param params - Route parameters containing the user slug and collection slug
- * @returns Page metadata for the public collection detail page
+ * @param params - Route parameters containing `slug` (user slug) and `collectionSlug`
+ * @returns Page metadata for the route `/u/:slug/collections/:collectionSlug`
+ *
+ * @see getPublicCollectionDetail
+ * @see generatePageMetadata
  */
 export async function generateMetadata({
   params,

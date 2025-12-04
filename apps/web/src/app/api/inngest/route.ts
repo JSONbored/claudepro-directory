@@ -47,12 +47,14 @@ export async function GET(request: NextRequest, context: unknown) {
 }
 
 /**
- * Handle POST requests to /api/inngest by adding per-request logging and delegating to the Inngest POST handler.
+ * Handle POST requests to /api/inngest by delegating to the Inngest POST handler with per-request tracing.
  *
- * @param request - The incoming NextRequest for the API route.
- * @param context - The Next.js route handler context (framework-provided).
- * @returns The HTTP response produced by the Inngest POST handler.
+ * Creates a per-request logger and forwards the incoming `request` and `context` to `inngestPOST`; on failure the original error is normalized and logged before being re-thrown.
  *
+ * @param request - NextRequest - The incoming request for the API route.
+ * @param context - unknown - The Next.js route handler context provided to the API route.
+ * @returns Promise<Response> - The HTTP response produced by the Inngest POST handler.
+ * @throws Any error thrown by the underlying `inngestPOST` handler is re-thrown after being normalized and logged.
  * @see {@link inngestPOST}
  * @see {@link generateRequestId}
  * @see {@link logger}
@@ -76,11 +78,11 @@ export async function POST(request: NextRequest, context: unknown) {
 }
 
 /**
- * Handle PUT requests to /api/inngest by creating a request-scoped logger and delegating to the Inngest sync handler.
+ * Handle PUT requests to /api/inngest by forwarding the request to the Inngest sync handler while scoping logs and normalizing errors.
  *
- * @param request - The Next.js request object for the incoming HTTP request.
- * @param context - The route context passed through to the Inngest handler.
- * @returns The Response produced by the underlying Inngest PUT handler.
+ * @param request - The Next.js request object for the incoming HTTP request
+ * @param context - The route context forwarded to the Inngest handler
+ * @returns The Response produced by the Inngest PUT handler
  * @see {@link @heyclaude/web-runtime/inngest#PUT}
  * @see {@link @heyclaude/web-runtime/logging/server.generateRequestId}
  * @see {@link @heyclaude/web-runtime/logging/server.logger}

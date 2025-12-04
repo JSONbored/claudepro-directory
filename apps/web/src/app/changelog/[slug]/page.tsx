@@ -97,15 +97,10 @@ export async function generateStaticParams() {
 }
 
 /**
- * Build page metadata for a changelog entry identified by slug.
+ * Generate metadata for the changelog detail route identified by `slug`.
  *
- * Attempts to load the changelog entry by slug and returns metadata for the
- * route template `/changelog/:slug`. If the entry cannot be loaded, a
- * metadata object is still returned with the item set to `null` and the error
- * recorded to the request-scoped logger.
- *
- * @param params - A promise that resolves to an object containing the `slug` of the changelog entry
- * @returns Metadata configured for the changelog detail route, using the loaded entry when available
+ * @param params - A promise that resolves to an object with the `slug` of the changelog entry to load
+ * @returns Metadata for the `/changelog/:slug` route; if the entry cannot be loaded, the returned metadata will use `item: null`
  *
  * @see getChangelogEntryBySlug
  * @see generatePageMetadata
@@ -147,14 +142,14 @@ export async function generateMetadata({
 }
 
 /**
- * Render the changelog detail page for a given entry slug.
+ * Renders the changelog detail page for a given entry slug.
  *
- * Loads the changelog entry by slug, renders metadata, structured data, view tracking, and the entry content;
- * triggers a 404 when the entry is not found.
+ * Fetches the changelog entry by slug, returns a 404 when the entry is not found,
+ * and renders the entry content together with structured data and view-tracking.
  *
- * @param params - A promise that resolves to an object with the `slug` of the changelog entry to render.
+ * @param params - A promise that resolves to an object containing the `slug` of the changelog entry to render.
  * @returns The server-rendered React element for the changelog entry page.
- * @throws An error normalized via `normalizeError` if loading the changelog entry fails.
+ * @throws A normalized error when loading the changelog entry fails.
  *
  * @see getChangelogEntryBySlug
  * @see getChangelogUrl

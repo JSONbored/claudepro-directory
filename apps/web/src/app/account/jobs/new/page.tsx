@@ -16,6 +16,13 @@ import { JobForm } from '@/src/components/core/forms/job-form';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Produce metadata for the "/account/jobs/new" page.
+ *
+ * @returns The Next.js `Metadata` object for the new job creation page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/jobs/new');
 }
@@ -61,6 +68,22 @@ export default async function NewJobPage() {
     // planCatalog remains [] - JobForm will use legacy fallback
   }
 
+  /**
+   * Handle submission of the new-job form: create the job, start checkout if payment is required, or redirect to the jobs list.
+   *
+   * @param data - The job creation payload submitted from the JobForm
+   * @returns An object describing the outcome:
+   * - `{ success: true, requiresPayment: true, checkoutUrl, message }` when creation succeeded and a checkout URL is provided,
+   * - `{ success: false, requiresPayment: true, message }` when creation indicates payment is required but no checkout URL could be started,
+   * - `{ success: false, message }` when job creation failed.
+   * The function will perform a redirect to `/account/jobs` when creation succeeds and no payment is required.
+   * @throws Normalized errors when the createJob call throws, when `result.serverError` is present, or when the action returns malformed/missing data.
+   *
+   * @see createJob
+   * @see normalizeError
+   * @see redirect
+   * @see JobForm
+   */
   async function handleSubmit(data: CreateJobInput) {
     'use server';
 

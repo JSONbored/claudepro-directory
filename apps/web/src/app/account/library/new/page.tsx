@@ -20,6 +20,12 @@ import { CollectionForm } from '@/src/components/core/forms/collection-form';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Produce the page metadata for the account library "create collection" route.
+ *
+ * @returns Page metadata for the '/account/library/new' route.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/library/new');
 }

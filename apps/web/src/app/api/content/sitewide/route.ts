@@ -25,20 +25,16 @@ import { NextResponse } from 'next/server';
 const CORS = getOnlyCorsHeaders;
 
 /**
- * Serve sitewide content in one of several export formats based on the request query.
+ * Serve sitewide content in multiple export formats based on the request's `format` query parameter.
  *
- * Handles GET requests to /api/content/sitewide. Supported formats:
- * - "llms" and "llms-txt": returns sitewide LLMs export as plain text (default).
- * - "readme": returns raw JSON data from `generate_readme_data` RPC (for CLI script to format).
+ * Supported formats:
+ * - `llms` / `llms-txt` (default): returns the sitewide LLMs export as plain text (`text/plain; charset=utf-8`).
+ * - `readme`: returns raw JSON data from the readme RPC (`application/json; charset=utf-8`) intended for CLI formatting.
  *
- * For "readme" the response is `application/json; charset=utf-8` containing raw data from the RPC.
- * The CLI script (`generate-readme.ts`) formats this data into markdown. For LLMs exports the
- * response is `text/plain; charset=utf-8`. Responses include standard security, CORS, and content
- * cache headers. Invalid formats produce a 400 Bad Request JSON response; failures while generating
- * LLMs export produce a 500 JSON error.
+ * Successful responses include security, CORS, and content cache headers. An invalid `format` yields a 400 JSON error; failures generating the LLMs export yield a 500 JSON error.
  *
- * @param request - The incoming NextRequest containing query parameters (optional `format`).
- * @returns A NextResponse containing the exported content or a JSON error payload.
+ * @param request - The incoming NextRequest; may include a `format` query parameter (`llms`, `llms-txt`, or `readme`).
+ * @returns A NextResponse containing the exported content (plain text or JSON) or a JSON error payload.
  *
  * @see ContentService
  * @see createSupabaseAnonClient

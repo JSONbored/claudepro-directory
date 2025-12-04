@@ -66,6 +66,16 @@ function formatPriceLabel(cents: number, isSubscription?: boolean | null): strin
   return isSubscription ? `${base}/month` : base;
 }
 
+/**
+ * Converts a string into title case by capitalizing the first letter of each word.
+ *
+ * Splits the input on spaces, underscores, or hyphens and joins the segments with single spaces.
+ *
+ * @param value - The input string to convert
+ * @returns The input with each word capitalized and joined by single spaces
+ *
+ * @see humanizeStatus
+ */
 function toTitleCase(value: string): string {
   return value
     .split(/[\s_-]+/)
@@ -87,10 +97,10 @@ function humanizeStatus(value?: null | string): string {
 }
 
 /**
- * Resolve a human-readable label for a job plan.
+ * Resolves the human-readable label for a job plan.
  *
- * @param plan - The job plan enum value; may be undefined or null
- * @returns The label corresponding to `plan`. If `plan` is missing, returns the label for the one-time plan.
+ * @param plan - The job plan enum value; may be `undefined` or `null`
+ * @returns The label for the provided `plan`. If `plan` is missing, returns the label for the one-time plan.
  *
  * @see JOB_PLAN_LABELS
  */
@@ -116,6 +126,14 @@ function resolveTierLabel(tier?: Database['public']['Enums']['job_tier'] | null)
   return JOB_TIER_LABELS[tier];
 }
 
+/**
+ * Maps a job status to its badge color token.
+ *
+ * @param status - The job status to map
+ * @returns The color token string associated with the provided `status`
+ *
+ * @see BADGE_COLORS.jobStatus
+ */
 function getStatusColor(status: JobStatus): string {
   return BADGE_COLORS.jobStatus[status];
 }

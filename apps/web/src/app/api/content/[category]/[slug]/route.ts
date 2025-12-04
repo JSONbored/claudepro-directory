@@ -54,6 +54,12 @@ function sanitizeHeaderValue(val: string): string {
   return val.replaceAll(/[\r\n\t\b\f\v]/g, '').trim();
 }
 
+/**
+ * Cleans a filename by removing control characters, quotes, backslashes, and surrounding whitespace.
+ *
+ * @param name - The input filename to sanitize
+ * @returns A safe filename string; if the sanitized result is empty, returns `export.md`
+ */
 function sanitizeFilename(name: string): string {
   let cleaned = name
     .replaceAll(/[\r\n\t\b\f\v]/g, '')
@@ -140,20 +146,17 @@ async function handleJsonFormat(
 }
 
 /**
- * Generate a Markdown export for a content record and return an HTTP response with the result.
+ * Produce a Markdown export for a content record and return an HTTP response containing the result.
  *
- * Parses `includeMetadata` and `includeFooter` query parameters from `url`, invokes the
- * `generate_markdown_export` Supabase RPC for the given `category` and `slug`, and returns
- * a NextResponse containing the generated Markdown with appropriate headers (content-type,
- * content-disposition, security, CORS, cache, and provenance). On RPC or validation failures,
- * returns a JSON error response with status 400 and appropriate headers.
+ * Parses `includeMetadata` and `includeFooter` from the provided `url`, invokes the
+ * `generate_markdown_export` RPC with the given `category` and `slug`, and returns either the
+ * generated Markdown payload with appropriate headers or a JSON error response on failure.
  *
- * @param category - Content category (one of the values in the content_category enum)
- * @param slug - Content record slug
- * @param url - The request URL; query params `includeMetadata` (defaults to true) and
- *   `includeFooter` (defaults to false unless explicitly "true") control export options
- * @param reqLogger - A scoped logger for request-scoped logging
- * @returns A NextResponse containing either the Markdown payload (status 200) or a JSON error payload (status 400)
+ * @param category - DatabaseGenerated['public']['Enums']['content_category']: content category to export
+ * @param slug - string: content record slug to export
+ * @param url - URL: request URL used to read query params `includeMetadata` and `includeFooter`
+ * @param reqLogger - ReturnType<typeof logger.child>: request-scoped logger for error/context logging
+ * @returns A NextResponse containing the Markdown payload (status 200) or a JSON error payload (status 400)
  *
  * @see generate_markdown_export RPC
  * @see sanitizeFilename

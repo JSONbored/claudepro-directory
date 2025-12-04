@@ -66,8 +66,10 @@ const PR_NUMBER_REGEX = /^\d+$/;
 const PR_PATH_REGEX = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)$/;
 
 /**
- * Format date consistently using en-US locale
- * Returns safe fallback for invalid or missing dates
+ * Formats a parseable date string to the en-US "MMM d, yyyy" style or returns "-" for missing/invalid input.
+ *
+ * @param dateString - The date string to format.
+ * @returns The formatted date (e.g., "Jan 2, 2024"), or "-" if `dateString` is missing or invalid.
  */
 function formatSubmissionDate(dateString: string): string {
   if (!dateString || typeof dateString !== 'string') {
@@ -85,10 +87,10 @@ function formatSubmissionDate(dateString: string): string {
 }
 
 /**
- * Parse and validate a GitHub pull request URL and return its owner, repository, and PR number.
+ * Parse a GitHub pull request URL and return its owner, repository, and PR number when the URL is a safe, well-formed GitHub PR link.
  *
  * @param url - Candidate URL string to validate and parse.
- * @returns `{ owner, repo, prNumber }` when `url` is a well-formed, safe `https://github.com/:owner/:repo/pull/:number` URL; `null` for any invalid, unsafe, or non-PR input.
+ * @returns An object `{ owner, repo, prNumber }` when `url` is a valid `https://github.com/:owner/:repo/pull/:number` URL; `null` otherwise.
  *
  * @see buildSafePrUrl
  * @see PR_PATH_REGEX
@@ -186,7 +188,19 @@ function isSafeType(type: string): type is Database['public']['Enums']['submissi
   return (ALLOWED_TYPES as readonly string[]).includes(type);
 }
 
-// Safe URL constructor - validates both type and slug before constructing
+/**
+ * Constructs a safe internal content URL for a validated submission type and slug.
+ *
+ * Validates that `type` is an allowed submission_type and `slug` matches the expected
+ * pattern before constructing the path.
+ *
+ * @param type - The submission type to use in the URL (must be an allowed `submission_type`)
+ * @param slug - The content slug (must match `^[a-z0-9-_]+$`)
+ * @returns The internal URL path in the form `/type/slug` if both inputs are valid, `null` otherwise.
+ *
+ * @see isSafeType
+ * @see isValidSlug
+ */
 function getSafeContentUrl(
   type: Database['public']['Enums']['submission_type'],
   slug: string
@@ -375,7 +389,15 @@ export default async function SubmissionsPage() {
   }
 
   /**
-   * Get safe content URL or null if invalid
+   * Return a safe internal content link when the submission is merged and inputs are valid.
+   *
+   * @param type - The submission's type (one of Database.public.Enums.submission_type)
+   * @param slug - The content slug to link to; must match the internal slug pattern
+   * @param status - The submission's status (one of Database.public.Enums.submission_status)
+   * @returns `{ href: string }` containing a safe `/type/slug` URL when `status` equals the merged status and `type`/`slug` validate; otherwise `null`
+   *
+   * @see getSafeContentUrl
+   * @see Constants.public.Enums.submission_status
    */
   function getContentLinkProperties(
     type: Database['public']['Enums']['submission_type'],

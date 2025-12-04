@@ -95,9 +95,16 @@ function isValidContentCategory(
 }
 
 /**
- * Map submission_type to content_category with runtime validation
- * Uses only generated types from @heyclaude/database-types
- * Validates that the submission_type value is a valid content_category at runtime
+ * Map a submission_type value to a valid content_category, returning a safe default when the input is null or invalid.
+ *
+ * If `submissionType` is `null` or not a recognized `content_category`, this function returns `DEFAULT_CONTENT_CATEGORY`
+ * and logs a warning.
+ *
+ * @param submissionType - A `submission_type` enum value or `null`
+ * @returns A `content_category` value corresponding to `submissionType`, or `DEFAULT_CONTENT_CATEGORY` as a fallback
+ *
+ * @see isValidContentCategory
+ * @see DEFAULT_CONTENT_CATEGORY
  */
 function mapSubmissionTypeToContentCategory(
   submissionType: Database['public']['Enums']['submission_type'] | null

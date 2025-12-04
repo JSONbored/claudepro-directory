@@ -33,12 +33,10 @@ function isValidChangelogSlug(slug: string): boolean {
 }
 
 /**
- * Determine whether a string is a safe internal URL path suitable for in-app navigation.
+ * Validate that a string is a safe internal path for in-app navigation (starts with a single `/` and contains only common path, query, or fragment characters).
  *
- * Accepts paths that start with a single leading slash and contain only common URL path/query/fragment characters.
- *
- * @param path - The candidate internal path to validate (e.g., `/changelog/my-entry`).
- * @returns `true` if the path is a well-formed internal path starting with `/`, `false` otherwise.
+ * @param path - Candidate internal path (for example, `/changelog/my-entry`)
+ * @returns `true` if `path` is a well-formed internal path starting with `/`, `false` otherwise.
  *
  * @see getSafeChangelogPath
  * @see isValidChangelogSlug

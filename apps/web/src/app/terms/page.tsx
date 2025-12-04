@@ -23,12 +23,12 @@ export async function generateMetadata(): Promise<Metadata> {
 export const revalidate = false;
 
 /**
- * Renders the Terms of Service page with dynamic last-updated date and contact links.
+ * Renders the Terms of Service page showing the current "Last updated" date and contact links.
  *
- * Fetches the last updated timestamp and contact channels at render time to display the "Last updated"
- * line and the contact email. The page is statically generated; revalidation is disabled (see `revalidate`).
+ * Fetches the last-updated timestamp and contact channels at render time; the page is statically
+ * generated and does not revalidate (see `revalidate`).
  *
- * @returns A React element containing the Terms of Service content, sectioned into standard articles and including links to the Privacy Policy and contact methods.
+ * @returns The React element for the Terms of Service page.
  *
  * @see getLastUpdatedDate
  * @see getContactChannels

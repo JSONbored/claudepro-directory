@@ -25,6 +25,16 @@ import { NextRequest, NextResponse } from 'next/server';
 const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
+/**
+ * Normalize and validate a content category string against the allowed enum values.
+ *
+ * The input is normalized (trimmed and lowercased) and returned if it matches one of
+ * the known content category values; otherwise `undefined` is returned.
+ *
+ * @param value - `string | undefined` — the raw category value to normalize and validate
+ * @returns `DatabaseGenerated['public']['Enums']['content_category'] | undefined` — the normalized category when valid, or `undefined` when missing or invalid
+ * @see CONTENT_CATEGORY_VALUES
+ */
 function toContentCategory(
   value: string | undefined
 ): DatabaseGenerated['public']['Enums']['content_category'] | undefined {

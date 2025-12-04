@@ -66,8 +66,13 @@ function getSafeContentUrl(type: string, slug: string): null | string {
 }
 
 /**
- * Get safe collection URL from user slug and collection slug
- * Returns null if either is invalid
+ * Constructs a safe collection URL for a user if both slugs are valid after sanitization.
+ *
+ * @param userSlug - The user-facing slug for the profile (sanitized before validation)
+ * @param collectionSlug - The collection's slug (sanitized before validation)
+ * @returns The path `/u/{sanitizedUserSlug}/collections/{sanitizedCollectionSlug}` or `null` if either slug is invalid
+ * @see sanitizeSlug
+ * @see isValidSlug
  */
 function getSafeCollectionUrl(userSlug: string, collectionSlug: string): null | string {
   // Sanitize slugs first, then validate the sanitized results
@@ -81,12 +86,13 @@ function getSafeCollectionUrl(userSlug: string, collectionSlug: string): null | 
 /**
  * Produce a plain-text-safe display string from arbitrary input.
  *
- * Removes angle brackets, control and dangerous Unicode characters, trims the result,
- * and limits it to 200 characters; if the result is empty or input is invalid, returns `fallback`.
+ * Sanitizes the input by stripping dangerous/control characters, trimming whitespace,
+ * and truncating to 200 characters; if the input is missing or yields no content after
+ * sanitization, the provided `fallback` is returned.
  *
  * @param text - The input text to sanitize.
- * @param fallback - Value to return when `text` is missing or yields an empty sanitized string.
- * @returns The sanitized display string, or `fallback` if sanitization produces no content.
+ * @param fallback - Value to return when `text` is missing or sanitization produces no content.
+ * @returns The sanitized display string, or `fallback` if no safe content remains.
  *
  * @see sanitizeSlug
  * @see getSafeContentUrl
@@ -134,6 +140,14 @@ interface UserProfilePageProperties {
  */
 export const revalidate = false;
 
+/**
+ * Produce page metadata for a user profile route using the provided slug.
+ *
+ * @param params - A promise resolving to an object with `slug`, the user identifier used to populate the route parameter.
+ * @returns The Next.js `Metadata` for the /u/:slug user profile page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: UserProfilePageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/u/:slug', {

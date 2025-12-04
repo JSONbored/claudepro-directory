@@ -37,6 +37,17 @@ function toContentCategory(value: null | string): ContentCategory | null {
     : null;
 }
 
+/**
+ * Execute a Supabase RPC call with request-scoped logging and unified error handling.
+ *
+ * Logs the RPC failure when an error is present, rethrows the original Error if the RPC returned an Error,
+ * and otherwise throws a new Error when the RPC returned an error-like value or null data.
+ *
+ * @param rpcName - Human-readable RPC identifier used in logs and error messages
+ * @param rpcCall - Function that executes the RPC and resolves to an object with `data` (T or null) and `error` (any)
+ * @param reqLogger - Request-scoped logger (result of `logger.child(...)`) used to record RPC failures
+ * @returns The RPC `data` when the call succeeds
+ */
 async function executeRpcWithLogging<T>(
   rpcName: string,
   rpcCall: () => PromiseLike<{ data: null | T; error: unknown }>,

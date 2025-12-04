@@ -32,14 +32,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Renders an authentication error page when an authorization code flow fails.
+ * Display an authentication error page when an authorization-code sign-in attempt fails.
  *
- * This server component executes per request (dynamic = 'force-dynamic'), reads `searchParams`
- * for `code`, `provider`, and `message`, emits a redacted informational log entry, and returns
- * a centered card UI offering actions to retry sign-in or return home.
+ * Reads `searchParams` for optional `code`, `provider`, and `message`, emits a redacted informational log entry, and renders a centered card offering actions to retry sign-in or return home.
  *
  * @param properties - Next.js page props containing `searchParams` with optional `code`, `provider`, and `message` query values
- * @returns The page's JSX element displaying the authentication error and action buttons
+ * @returns The JSX element rendering the authentication error card with "Try Again" and "Return Home" actions
  *
  * @see ROUTES
  * @see generateRequestId

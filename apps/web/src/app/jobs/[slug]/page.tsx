@@ -131,10 +131,11 @@ export async function generateStaticParams() {
 }
 
 /**
- * Renders the job detail page for a given route slug: validates the slug, loads the job record,
- * and returns the server-rendered UI for the job (header, description, requirements, benefits,
- * apply actions, and job details). If the slug is invalid or the job is not found, the route
- * resolves to a 404 via next/navigation.notFound().
+ * Render the job detail page for a given route slug.
+ *
+ * Validates the incoming `slug`, loads the corresponding job record, and returns the server-rendered UI
+ * containing header, metadata, description, requirements, benefits, apply actions, and job details.
+ * If slug validation fails or the job cannot be found, the route resolves to a 404 via next/navigation.notFound().
  *
  * @param props.params - Route parameters containing the `slug` for the job to display.
  * @returns The server-rendered React element for the job detail page.

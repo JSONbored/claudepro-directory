@@ -31,12 +31,11 @@ export const revalidate = 7200;
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
- * Produce static route parameters for a subset of popular content to pre-render at build time.
+ * Generate a list of static route parameters ({ category, slug }) for a subset of popular content to pre-render at build time.
  *
- * Generates up to 10 { category, slug } entries per homepage category for partial pre-rendering;
- * pages not included are served on-demand via Next.js dynamic params and ISR (revalidation handled elsewhere).
+ * Limits the number of entries per homepage category (controlled by MAX_ITEMS_PER_CATEGORY) and relies on Next.js dynamic params and ISR to serve pages not included in this list on-demand.
  *
- * @returns An array of objects each containing `category` and `slug` to be used as static params for pre-rendering
+ * @returns An array of objects with `category` and `slug` to be used as static params for pre-rendering
  *
  * @see getHomepageCategoryIds
  * @see getContentByCategory
@@ -176,10 +175,10 @@ export async function generateMetadata({
 /**
  * Render the content detail page for a given category and slug.
  *
- * Fetches core content required for the page (blocking for LCP), defers analytics and related-item data for Suspense, validates category and configuration (returns a 404 when invalid or missing), and conditionally includes recently-viewed tracking and a collection-specific section when applicable.
+ * Validates the category and category configuration, fetches core content synchronously (blocking for LCP), and initiates analytics and related-item fetches asynchronously for Suspense. Conditionally includes recently-viewed tracking for supported categories and a collection-specific section when the item is a collection. Triggers a 404 (via notFound()) when the category, category config, or core content is missing.
  *
- * @param params - Route parameters object containing `category` and `slug`
- * @returns A React element for the requested content detail page
+ * @param params - Promise resolving to an object with `category` and `slug` route parameters
+ * @returns A React element representing the requested content detail page
  *
  * @see getContentDetailCore
  * @see getContentAnalytics
