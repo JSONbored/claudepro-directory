@@ -249,11 +249,11 @@ export default async function SponsorshipsPage() {
                       Impressions
                     </div>
                     <div className="text-2xl font-bold">{impressionCount.toLocaleString()}</div>
-                    {sponsorship.impression_limit ? (
+                    {sponsorship.impression_limit == null ? null : (
                       <div className={UI_CLASSES.TEXT_XS_MUTED}>
                         of {sponsorship.impression_limit.toLocaleString()}
                       </div>
-                    ) : null}
+                    )}
                   </div>
 
                   <div>
@@ -278,7 +278,7 @@ export default async function SponsorshipsPage() {
                 </div>
 
                 {/* Progress bar if has limit */}
-                {sponsorship.impression_limit ? (
+                {sponsorship.impression_limit == null ? null : (
                   <div
                     className="bg-muted h-2 w-full rounded-full"
                     role="progressbar"
@@ -295,7 +295,7 @@ export default async function SponsorshipsPage() {
                       aria-hidden="true"
                     />
                   </div>
-                ) : null}
+                )}
               </CardContent>
             </Card>
           );

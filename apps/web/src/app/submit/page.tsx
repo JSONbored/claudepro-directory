@@ -385,7 +385,7 @@ export default async function SubmitPage() {
       </div>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className="container mx-auto px-4 py-12">
+      <section className="px-4 py-12">
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

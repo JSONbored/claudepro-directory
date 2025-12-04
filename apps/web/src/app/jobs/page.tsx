@@ -535,7 +535,6 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 <input type="hidden" name="page" value="1" />
               </form>
 
-              {}
               {(searchQuery ?? '') !== '' ||
               (category !== undefined && category !== 'all') ||
               (employment !== undefined && employment !== 'any') ||

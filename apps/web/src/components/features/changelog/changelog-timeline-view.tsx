@@ -35,11 +35,10 @@ function isValidChangelogSlug(slug: string): boolean {
 /**
  * Determine whether a string is a safe internal URL path suitable for in-app navigation.
  *
- * Accepts paths that start with a single leading slash, do not begin with dangerous protocols
- * (e.g., `javascript:`, `data:`), and contain only common URL path/query/fragment characters.
+ * Accepts paths that start with a single leading slash and contain only common URL path/query/fragment characters.
  *
  * @param path - The candidate internal path to validate (e.g., `/changelog/my-entry`).
- * @returns `true` if the path is a well-formed internal path starting with `/` and not using dangerous protocols, `false` otherwise.
+ * @returns `true` if the path is a well-formed internal path starting with `/`, `false` otherwise.
  *
  * @see getSafeChangelogPath
  * @see isValidChangelogSlug
@@ -48,7 +47,7 @@ function isValidInternalPath(path: string): boolean {
   if (typeof path !== 'string' || path.length === 0) return false;
   if (!path.startsWith('/')) return false;
   if (path.startsWith('//')) return false;
-  if (/^(javascript|data|vbscript|file):/i.test(path)) return false;
+  // Protocol check removed as redundant: paths starting with / cannot match protocol patterns (javascript:, data:, etc.)
   return /^\/[a-zA-Z0-9/?#\-_.~!*'();:@&=+$,%[\]]*$/.test(path);
 }
 

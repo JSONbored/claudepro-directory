@@ -3,6 +3,7 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
+import { getSafeWebsiteUrl, getSafeMailtoUrl } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   ArrowLeft,
@@ -35,98 +36,10 @@ import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
 /**
- * Validate and sanitize external website URL for safe use in href attributes
- * Only allows HTTPS URLs (or HTTP for localhost in development)
- * Returns canonicalized URL or null if invalid
- */
-/**
  * ISR: 2 hours (7200s) - Job postings are relatively stable
  */
 export const revalidate = 7200;
-export const dynamicParams = true; /**
- * Validate and sanitize an external website URL for safe use as an href.
- *
- * @param url - The input URL to validate; may be `null` or `undefined`.
- * @returns A canonicalized, safe href string when the input is an allowed URL, `null` otherwise. Allowed URLs use `https:` universally; `http:` is allowed only for localhost addresses. URLs containing credentials or failing parsing are rejected.
- *
- * @see getSafeMailtoUrl
- * @see /apps/web/src/app/jobs/[slug]/page.tsx - usage for external apply links
- */
-
-function getSafeWebsiteUrl(url: null | string | undefined): null | string {
-  if (!url || typeof url !== 'string') return null;
-
-  try {
-    const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol (or HTTP for localhost/development)
-    const isLocalhost =
-      parsed.hostname === 'localhost' ||
-      parsed.hostname === '127.0.0.1' ||
-      parsed.hostname === '::1';
-    if (parsed.protocol === 'https:') {
-      // HTTPS always allowed
-    } else if (parsed.protocol === 'http:' && isLocalhost) {
-      // HTTP allowed only for local development
-    } else {
-      return null;
-    }
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // Sanitize: remove credentials
-    parsed.username = '';
-    parsed.password = '';
-    // Normalize hostname
-    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-    // Remove default ports
-    if (parsed.port === '80' || parsed.port === '443') {
-      parsed.port = '';
-    }
-
-    // Return canonicalized href (guaranteed to be normalized and safe)
-    return parsed.href;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Validate and sanitize email address for safe use in mailto links
- * Returns safe mailto URL or null if email is invalid
- */
-function getSafeMailtoUrl(email: null | string | undefined): null | string {
-  if (!email || typeof email !== 'string') return null;
-
-  // Trim and normalize
-  const trimmed = email.trim();
-  if (trimmed.length === 0) return null;
-
-  // Basic email format validation (RFC 5322 simplified)
-  // Prevents injection attacks while allowing valid emails
-  const emailRegex =
-    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-
-  // Validate format
-  if (!emailRegex.test(trimmed)) return null;
-
-  // Security checks: reject dangerous patterns
-  // Prevent null bytes
-  if (trimmed.includes('\0')) return null;
-  // Prevent path traversal attempts
-  if (trimmed.includes('..') || trimmed.includes('//')) return null;
-  // Prevent protocol injection (javascript:, data:, etc.)
-  if (/^(javascript|data|vbscript|file):/i.test(trimmed)) return null;
-
-  // Normalize to lowercase
-  const normalized = trimmed.toLowerCase();
-
-  // Limit length (RFC 5321: max 254 characters)
-  if (normalized.length > 254) return null;
-
-  // Encode email in mailto URL to prevent injection
-  // encodeURIComponent handles special characters safely
-  return `mailto:${encodeURIComponent(normalized)}`;
-}
+export const dynamicParams = true; // Allow jobs not pre-rendered to be rendered on-demand
 
 /**
  * Builds page metadata for a job detail page from the provided route params and the job record.

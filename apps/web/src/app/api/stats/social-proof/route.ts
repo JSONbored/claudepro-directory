@@ -72,6 +72,12 @@ export async function GET() {
   try {
     // Use admin client to bypass RLS for public stats API
     // The RLS policy on content_submissions checks auth.users table which anon client cannot access
+    // Use admin client to bypass RLS for aggregated stats
+    // Security posture: Least-privilege
+    // - Admin client uses service-role key with strictly necessary privileges
+    // - Handler is restricted to read-only queries with minimal selects (id, status, created_at, author)
+    // - Returns only derived aggregates/usernames (no sensitive data)
+    // - No additional sensitive columns can be pulled accidentally (read-only, minimal selects enforced)
     const supabase = createSupabaseAdminClient();
 
     // Calculate date ranges

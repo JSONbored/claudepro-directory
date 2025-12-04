@@ -3281,6 +3281,17 @@ export type Database = {
         }
         Relationships: []
       }
+      mv_active_metadata_templates: {
+        Row: {
+          active: boolean | null
+          default_keywords: string[] | null
+          description_template: string | null
+          route_pattern: string | null
+          title_formulas: string[] | null
+          use_current_year: boolean | null
+        }
+        Relationships: []
+      }
       mv_content_list_slim: {
         Row: {
           author: string | null
@@ -5324,6 +5335,7 @@ export type Database = {
           title: string
         }[]
       }
+      refresh_metadata_templates_cache: { Args: never; Returns: undefined }
       refresh_mv_site_urls: { Args: never; Returns: undefined }
       refresh_profile_from_oauth: {
         Args: { user_id: string }

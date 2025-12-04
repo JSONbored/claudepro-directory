@@ -164,7 +164,8 @@ export default async function PartnerPage() {
                   Launch Pricing: {pricing.launch.discountPercent}% Off Everything
                 </p>
                 <p className="text-muted-foreground text-sm">
-                  Ends {pricing.launch.endDate} • Simple monthly billing, cancel anytime
+                  {pricing.launch.endDate ? `Ends ${pricing.launch.endDate} • ` : null}
+                  Simple monthly billing, cancel anytime
                 </p>
               </div>
             </div>
@@ -402,8 +403,8 @@ export default async function PartnerPage() {
               Ready to Reach {heroStats.monthlyVisitors.toLocaleString()}+ AI Engineers?
             </h2>
             <p className="text-muted-foreground mb-6">
-              Get started with launch pricing ({pricing.launch.discountPercent}% off) before{' '}
-              {pricing.launch.endDate}
+              Get started with launch pricing ({pricing.launch.discountPercent}% off)
+              {pricing.launch.endDate ? ` before ${pricing.launch.endDate}` : null}
             </p>
             <Button size="lg" asChild>
               <a href={partnerCtas.partnershipInquiry.href}>

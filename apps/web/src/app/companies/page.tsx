@@ -1,3 +1,4 @@
+import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -24,6 +25,11 @@ import dynamicImport from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 
+/**
+ * ISR: 24 hours (86400s) - Companies list updates infrequently
+ * Uses ISR instead of force-dynamic for better performance and SEO
+ */
+
 const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
@@ -41,48 +47,6 @@ const NewsletterCTAVariant = dynamicImport(
  * Uses ISR instead of force-dynamic for better performance and SEO
  */
 export const revalidate = 86_400;
-
-/**
- * Validate and sanitize external website URL for safe use in href attributes
- * Only allows HTTPS URLs (or HTTP for localhost in development)
- * Returns canonicalized URL or null if invalid
- */
-function getSafeWebsiteUrl(url: null | string | undefined): null | string {
-  if (!url || typeof url !== 'string') return null;
-
-  try {
-    const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol (or HTTP for localhost/development)
-    const isLocalhost =
-      parsed.hostname === 'localhost' ||
-      parsed.hostname === '127.0.0.1' ||
-      parsed.hostname === '::1';
-    if (parsed.protocol === 'https:') {
-      // HTTPS always allowed
-    } else if (parsed.protocol === 'http:' && isLocalhost) {
-      // HTTP allowed only for local development
-    } else {
-      return null;
-    }
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // Sanitize: remove credentials
-    parsed.username = '';
-    parsed.password = '';
-    // Normalize hostname
-    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-    // Remove default ports
-    if (parsed.port === '80' || parsed.port === '443') {
-      parsed.port = '';
-    }
-
-    // Return canonicalized href (guaranteed to be normalized and safe)
-    return parsed.href;
-  } catch {
-    return null;
-  }
-}
 
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/companies');

@@ -66,6 +66,10 @@
       "types": "./src/utils/changelog.ts",
       "default": "./src/utils/changelog.ts"
     },
+    "./utils/url-safety": {
+      "types": "./src/utils/url-safety.ts",
+      "default": "./src/utils/url-safety.ts"
+    },
     "./config/actions": {
       "types": "./src/config/actions.config.ts",
       "default": "./src/config/actions.config.ts"

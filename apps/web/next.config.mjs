@@ -139,7 +139,10 @@ const nextConfig = {
     turbopackFileSystemCacheForDev: true,
     // Note: turbopackFileSystemCacheForBuild is only available in Next.js canary
     // TODO: Enable when Next.js stable supports it for major production build improvements
-    staticGenerationMaxConcurrency: 32,
+    // Reduced from 32 to 12 to reduce database load during build
+    // 32 pages × 4-5 queries = 128-160 concurrent queries (overwhelming database)
+    // 12 pages × 4-5 queries = 48-60 concurrent queries (more manageable)
+    staticGenerationMaxConcurrency: 12,
     staleTimes: {
       dynamic: 30,
       static: 300,

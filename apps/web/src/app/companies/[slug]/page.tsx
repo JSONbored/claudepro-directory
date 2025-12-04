@@ -5,6 +5,7 @@
  */
 
 import { type Database } from '@heyclaude/database-types';
+import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -55,41 +56,6 @@ function SafeWebsiteLink({
       {children}
     </a>
   );
-}
-
-/**
- * Validate and sanitize external website URL for safe use in href attributes
- * Only allows HTTPS URLs (or HTTP for localhost in development)
- * Returns canonicalized URL or null if invalid
- */
-function getSafeWebsiteUrl(url: null | string | undefined): null | string {
-  if (!url || typeof url !== 'string') return null;
-
-  try {
-    const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol (or HTTP for localhost/development)
-    const isLocalhost =
-      parsed.hostname === 'localhost' ||
-      parsed.hostname === '127.0.0.1' ||
-      parsed.hostname === '::1';
-    const isValidProtocol =
-      parsed.protocol === 'https:' || (parsed.protocol === 'http:' && isLocalhost);
-    if (!isValidProtocol) return null;
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // Normalize hostname
-    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-    // Remove default ports
-    if (parsed.port === '80' || parsed.port === '443') {
-      parsed.port = '';
-    }
-
-    // Return canonicalized href (guaranteed to be normalized and safe)
-    return parsed.href;
-  } catch {
-    return null;
-  }
 }
 
 interface CompanyPageProperties {

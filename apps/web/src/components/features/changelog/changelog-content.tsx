@@ -22,7 +22,14 @@ import type { Database } from '@heyclaude/database-types';
 import { parseChangelogChanges } from '@heyclaude/web-runtime/data';
 import { memo } from 'react';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
-import { UnifiedBadge, UI_CLASSES, BADGE_COLORS, STATE_PATTERNS, ANIMATION_CONSTANTS } from '@heyclaude/web-runtime/ui';
+import {
+  UnifiedBadge,
+  UI_CLASSES,
+  BADGE_COLORS,
+  STATE_PATTERNS,
+  ANIMATION_CONSTANTS,
+  CHANGELOG_CATEGORIES,
+} from '@heyclaude/web-runtime/ui';
 import { Plus, GitCompare, CheckCircle, XCircle, AlertTriangle, Shield } from '@heyclaude/web-runtime/icons';
 
 type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
@@ -58,8 +65,12 @@ function TrustedHTML({ html, className, id }: { html: string; className?: string
 
 /**
  * Category Icon Map - Icons for each changelog category
+ * Keys must match CHANGELOG_CATEGORIES to ensure type safety
  */
-const CATEGORY_ICONS = {
+const CATEGORY_ICONS: Record<
+  (typeof CHANGELOG_CATEGORIES)[number],
+  React.ComponentType<{ className?: string }>
+> = {
   Added: Plus,
   Changed: GitCompare,
   Fixed: CheckCircle,
@@ -174,12 +185,13 @@ function renderAdditionalContent(
 
   // Only show additional content if there's something meaningful left after removing duplicates
   const hasAdditionalContent = displayContent.trim().length > 0;
+  const hasMetadataSections = Array.isArray(metadataSections) && metadataSections.length > 0;
 
   return (
     <>
-      {hasStructuredChanges && (metadataSections || hasAdditionalContent) && (
+      {hasStructuredChanges && (hasMetadataSections || hasAdditionalContent) && (
         <div className={`${UI_CLASSES.MARGIN_TOP_RELAXED} ${UI_CLASSES.PADDING_Y_RELAXED} border-t border-border/50`}>
-          {metadataSections && metadataSections.length > 0 ? (
+          {hasMetadataSections ? (
             <div className="prose prose-slate dark:prose-invert max-w-none">
               <JSONSectionRenderer sections={metadataSections} />
             </div>
@@ -190,12 +202,12 @@ function renderAdditionalContent(
           ) : null}
         </div>
       )}
-      {!hasStructuredChanges && metadataSections && metadataSections.length > 0 && (
+      {!hasStructuredChanges && hasMetadataSections && (
         <div className="prose prose-slate dark:prose-invert max-w-none">
           <JSONSectionRenderer sections={metadataSections} />
         </div>
       )}
-      {!hasStructuredChanges && !metadataSections && hasAdditionalContent && (
+      {!hasStructuredChanges && !hasMetadataSections && hasAdditionalContent && (
         <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic">
           <TrustedHTML html={displayContent} />
         </div>
@@ -238,11 +250,12 @@ export const ChangelogContent = memo(({ entry, sections, hideHeader = false }: C
       : undefined);
 
   // Get non-empty categories for badge display
-  const nonEmptyCategories = (['Added', 'Changed', 'Deprecated', 'Removed', 'Fixed', 'Security'] as const)
-    .filter((category): category is Database['public']['Enums']['changelog_category'] => {
+  const nonEmptyCategories = CHANGELOG_CATEGORIES.filter(
+    (category): category is Database['public']['Enums']['changelog_category'] => {
       const items = changes[category];
       return items !== undefined && Array.isArray(items) && items.length > 0;
-    });
+    }
+  );
 
   // Check if we have structured changes to display
   const hasStructuredChanges = Object.values(changes).some(
@@ -289,7 +302,7 @@ export const ChangelogContent = memo(({ entry, sections, hideHeader = false }: C
       {/* Structured Changes Display - Beautiful categorized sections */}
       {hasStructuredChanges && (
         <div className={`${UI_CLASSES.MARGIN_COMFORTABLE}`}>
-          {(['Added', 'Changed', 'Fixed', 'Security', 'Deprecated', 'Removed'] as const).map(category => {
+          {CHANGELOG_CATEGORIES.map((category) => {
             const items = changes[category];
             if (!items || items.length === 0) return null;
             return (
