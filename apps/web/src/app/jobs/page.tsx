@@ -143,9 +143,9 @@ async function JobsListSection({
 
   const hasFilters = Boolean(
     (typeof searchQuery === 'string' && searchQuery !== '') ||
-    (category ?? '') !== 'all' ||
-    (employment ?? '') !== 'any' ||
-    (experience ?? '') !== 'any' ||
+    (category !== undefined && category !== 'all') ||
+    (employment !== undefined && employment !== 'any') ||
+    (experience !== undefined && experience !== 'any') ||
     remote !== undefined
   );
 
@@ -671,7 +671,12 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
 
 function extractSalaryValue(raw: null | string | undefined) {
   if (!raw) return 0;
-  const match = raw.replaceAll(',', '').match(/(\d{2,6})(?:\s?-\s?(\d{2,6}))?/);
+  // Normalize "k" suffix to thousands (e.g., "40k" -> "40000")
+  const normalized = raw
+    .replaceAll(',', '')
+    .replaceAll(/(\d+)k/gi, (_, n) => String(Number(n) * 1000));
+  // Match any number of digits (removed 2-6 digit restriction to handle 7+ digit values)
+  const match = normalized.match(/(\d+)(?:\s*-\s*(\d+))?/);
   if (!match) return 0;
   const first = Number(match[1]) || 0;
   const second = match[2] ? Number(match[2]) : first;

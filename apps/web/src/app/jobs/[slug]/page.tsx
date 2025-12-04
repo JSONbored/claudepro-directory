@@ -180,7 +180,7 @@ export async function generateStaticParams() {
       return [{ slug: 'placeholder' }];
     }
 
-    return jobs.slice(0, MAX_STATIC_JOBS).map((job) => ({ slug: job.slug }));
+    return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
     reqLogger.error('JobPage: getJobs threw in generateStaticParams', normalized);

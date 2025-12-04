@@ -220,6 +220,25 @@ export const QUERY_LIMITS = {
   },
 } as const;
 
+/**
+ * Static Generation Limits
+ *
+ * Limits for pre-rendering static pages at build time.
+ * These values balance build performance with SEO coverage.
+ */
+export const STATIC_GENERATION_LIMITS = {
+  /**
+   * Maximum changelog entries to pre-render at build time
+   * Most recent entries are pre-rendered; older entries use ISR (revalidate = 7200s)
+   */
+  changelog: 20,
+  /**
+   * Maximum jobs to pre-render at build time
+   * Most recent jobs are pre-rendered; older jobs use ISR
+   */
+  jobs: 10,
+} as const;
+
 export {
   APP_CONFIG,
   EXTERNAL_SERVICES,

@@ -1,5 +1,9 @@
-import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime';
-import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
+import {
+  generatePageMetadata,
+  getAuthenticatedUser,
+  getUserActivitySummary,
+  getUserActivityTimeline,
+} from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -71,8 +75,9 @@ export default async function ActivityPage() {
 
   // Create new child logger with user context
   // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  // Using userId directly - redaction will automatically hash it
   const userLogger = reqLogger.child({
-    userId: user.id, // Redaction will automatically hash this
+    userId: user.id, // Redaction automatically hashes this via hashUserIdCensor
   });
 
   userLogger.info('ActivityPage: authentication successful', {
@@ -81,21 +86,15 @@ export default async function ActivityPage() {
 
   // Section: Activity Data Fetch
   // Fetch activity data - use Promise.allSettled for partial success handling
+  // CRITICAL: Call data functions directly instead of actions to avoid cookies() in unstable_cache() error
   const [summaryResult, timelineResult] = await Promise.allSettled([
-    getActivitySummary(),
-    getActivityTimeline({ limit: 50, offset: 0 }),
+    getUserActivitySummary(user.id),
+    getUserActivityTimeline({ userId: user.id, limit: 50, offset: 0 }),
   ]);
 
-  function handleActionResult<T>(
-    name: string,
-    result: PromiseSettledResult<null | { data?: null | T; serverError?: unknown }>
-  ): null | T {
+  function handleDataResult<T>(name: string, result: PromiseSettledResult<null | T>): null | T {
     if (result.status === 'fulfilled') {
-      const value = result.value;
-      if (value && typeof value === 'object' && 'data' in value) {
-        return (value.data as null | T | undefined) ?? null;
-      }
-      return null;
+      return result.value;
     }
     // result.status === 'rejected' at this point
     const reason = result.reason as unknown;
@@ -108,8 +107,8 @@ export default async function ActivityPage() {
     return null;
   }
 
-  const summary = handleActionResult('activity summary', summaryResult);
-  const timeline = handleActionResult('activity timeline', timelineResult);
+  const summary = handleDataResult('activity summary', summaryResult);
+  const timeline = handleDataResult('activity timeline', timelineResult);
 
   const hasSummary = !!summary;
   const hasTimeline = !!timeline;

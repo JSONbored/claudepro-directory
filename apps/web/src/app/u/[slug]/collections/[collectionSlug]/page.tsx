@@ -54,13 +54,13 @@ function getSafeContentLink(item: { content_slug: string; content_type: string }
 }
 
 interface PublicCollectionPageProperties {
-  params: Promise<{ collectionSlug: string; slug: string }>;
+  params: { collectionSlug: string; slug: string };
 }
 
 export async function generateMetadata({
   params,
 }: PublicCollectionPageProperties): Promise<Metadata> {
-  const { slug, collectionSlug } = await params;
+  const { slug, collectionSlug } = params;
 
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
@@ -95,7 +95,7 @@ export async function generateMetadata({
 }
 
 export default async function PublicCollectionPage({ params }: PublicCollectionPageProperties) {
-  const { slug, collectionSlug } = await params;
+  const { slug, collectionSlug } = params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();

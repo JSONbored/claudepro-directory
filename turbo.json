@@ -45,6 +45,7 @@
         "apps/web/package.json",
         "packages/**/src/**/*.{ts,tsx}",
         "packages/**/package.json",
+        "packages/**/tsconfig.json",
         "!packages/generators/**",
         "!packages/edge-runtime/**",
         "!**/*.test.{ts,tsx}",
@@ -106,7 +107,7 @@
       "cache": true
     },
     "generators:build": {
-      "outputs": ["packages/generators/dist/**", "packages/generators/tsconfig.tsbuildinfo"],
+      "outputs": ["packages/generators/dist/**", "packages/generators/.tsbuildinfo"],
       "inputs": [
         "packages/generators/src/**/*",
         "packages/generators/tsconfig.json",
@@ -121,7 +122,7 @@
       ]
     },
     "@heyclaude/web-runtime#build": {
-      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "outputs": ["dist/**", ".tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true,
       "dependsOn": [
@@ -131,7 +132,7 @@
       ]
     },
     "@heyclaude/data-layer#build": {
-      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "outputs": ["dist/**", ".tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true,
       "dependsOn": [
@@ -140,13 +141,13 @@
       ]
     },
     "@heyclaude/shared-runtime#build": {
-      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "outputs": ["dist/**", ".tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true,
       "dependsOn": ["@heyclaude/database-types#build"]
     },
     "@heyclaude/database-types#build": {
-      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "outputs": ["dist/**", ".tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true
     },
@@ -239,6 +240,7 @@
   "globalDependencies": ["package.json", "pnpm-lock.yaml"],
   "globalEnv": [
     "NODE_ENV",
+    "VERCEL_ENV",
     "NEXT_PUBLIC_SUPABASE_URL",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY"
   ],
@@ -289,6 +291,8 @@
     "STATSIG_SERVER_API_KEY",
     "EXPERIMENTATION_CONFIG",
     "AUTONOMA_CLIENT_ID",
-    "AUTONOMA_SECRET_ID"
+    "AUTONOMA_SECRET_ID",
+    "INNGEST_EVENT_KEY",
+    "INNGEST_SIGNING_KEY"
   ]
 }

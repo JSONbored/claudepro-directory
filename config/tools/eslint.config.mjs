@@ -128,6 +128,21 @@ export default tseslint.config(
       // Better Tailwind CSS settings for Tailwind v4 (CSS-based config)
       'better-tailwindcss': {
         entryPoint: 'apps/web/src/app/globals.css',
+        // Safelist for classes that are valid but not detected by the plugin
+        // prose classes are from @tailwindcss/typography plugin (used for markdown content)
+        // Custom component classes defined in globals.css @layer components
+        safelist: [
+          'prose',
+          'prose-invert',
+          'prose-slate',
+          'prose-neutral',
+          'prose-sm',
+          'dark:prose-invert',
+          'not-prose',
+          'transition-colors-smooth',
+          'card-gradient',
+          'glow-effect',
+        ],
       },
     },
     rules: {

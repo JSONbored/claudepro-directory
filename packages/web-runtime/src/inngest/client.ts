@@ -248,15 +248,67 @@ export interface ResendEmailEventData {
  * Configuration:
  * - id: Unique identifier for this app in Inngest dashboard
  * - schemas: Type-safe event schemas
+ * - env: Environment identifier for branch environments (preview branches)
  *
  * Environment variables (auto-injected by Vercel Marketplace integration):
  * - INNGEST_EVENT_KEY: For sending events
  * - INNGEST_SIGNING_KEY: For verifying webhook signatures
+ *
+ * Branch Environments:
+ * - Production: Uses default environment (env: undefined)
+ * - Preview: Uses branch-specific environment based on PR ID or commit SHA
+ * - Development: Uses default environment (local dev with Inngest Dev Server)
+ *
+ * @see https://www.inngest.com/docs/platform/environments#branch-environments
  */
-export const inngest = new Inngest({
-  id: 'heyclaude',
-  schemas: new EventSchemas().fromRecord<Events>(),
-});
+
+// Determine the Inngest environment for branch environments
+function getInngestEnv(): string | undefined {
+  // Only set env for preview deployments (not production or local dev)
+  if (typeof process === 'undefined' || !process.env) {
+    return undefined;
+  }
+
+  const vercelEnv = process.env['VERCEL_ENV'];
+  const prId = process.env['VERCEL_GIT_PULL_REQUEST_ID'];
+  const commitSha = process.env['VERCEL_GIT_COMMIT_SHA'];
+
+  // Preview environment: Use PR ID if available, otherwise use commit SHA
+  // This creates isolated branch environments for each preview deployment
+  if (vercelEnv === 'preview') {
+    if (prId) {
+      // PR-based preview: Use PR ID for consistent environment across PR deployments
+      return `preview-${prId}`;
+    }
+    if (commitSha) {
+      // Commit-based preview: Use short commit SHA
+      return `preview-${commitSha.slice(0, 7)}`;
+    }
+    // Fallback: Use generic preview identifier
+    return 'preview';
+  }
+
+  // Production and development: Use default environment (undefined)
+  // Production uses the default production environment
+  // Local development uses Inngest Dev Server (via INNGEST_DEV env var)
+  return undefined;
+}
+
+// Build client options conditionally to satisfy exactOptionalPropertyTypes
+const inngestEnv = getInngestEnv();
+const schemas = new EventSchemas().fromRecord<Events>();
+
+// Create client with conditional env property
+export const inngest = inngestEnv !== undefined
+  ? new Inngest({
+      id: 'heyclaude',
+      schemas,
+      env: inngestEnv,
+    })
+  : new Inngest({
+      id: 'heyclaude',
+      schemas,
+    });
 
 // Re-export for convenience
 export type { Events as InngestEvents };

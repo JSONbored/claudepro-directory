@@ -96,7 +96,12 @@
     "validate:build:full": "pnpm type-check:build && pnpm lint:build && pnpm validate:build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\" && pnpm lint:eslint --fix",
+    "test:visual": "playwright test --config config/tests/playwright.config.ts",
+    "test:visual:ui": "playwright test --config config/tests/playwright.config.ts --ui",
+    "test:visual:update": "playwright test --config config/tests/playwright.config.ts --update-snapshots",
+    "test:visual:debug": "playwright test --config config/tests/playwright.config.ts --debug",
+    "test:visual:report": "playwright show-report",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\" && pnpm lint:fix",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "email:dev": "email dev --dir apps/web/src/emails --port 3001",
     "email:upload": "turbo run email:upload:exec",
@@ -173,7 +178,8 @@
     "typescript-eslint": "^8.48.1",
     "ultracite": "^6.3.8",
     "vercel": "^48.12.1",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.15",
+    "@playwright/test": "^1.48.0"
   },
   "pnpm": {
     "overrides": {

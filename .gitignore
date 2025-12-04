@@ -105,6 +105,13 @@ supabase/migrations/*
 # Turborepo
 .turbo
 
+# Playwright test artifacts
+test-results/
+playwright-report/
+*.spec.ts-snapshots/
+*.spec.tsx-snapshots/
+.playwright/
+
 apps/edge/functions/deno.lock
 
 packages/edge-runtime/src/utils/email/templates/template-map.json

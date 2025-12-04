@@ -1540,7 +1540,7 @@ function StepExamplesTags({
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.9 }}
                         transition={TOKENS.animations.spring.snappy}
-                        className="group hover:border-accent-primary/50 flex items-start gap-3 rounded-lg border p-3 transition-all"
+                        className="group hover:border-accent/50 flex items-start gap-3 rounded-lg border p-3 transition-all"
                         style={{
                           backgroundColor: TOKENS.colors.background.primary,
                           borderColor: TOKENS.colors.border.default,
@@ -1683,7 +1683,7 @@ function StepExamplesTags({
                                 removeTag(tagIndex);
                               }
                             }}
-                            className="hover:bg-accent-primary/20 ml-1 rounded-full p-0.5 transition-colors"
+                            className="hover:bg-accent/20 ml-1 rounded-full p-0.5 transition-colors"
                           >
                             <X className="h-3 w-3" />
                           </button>

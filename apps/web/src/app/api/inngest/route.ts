@@ -12,7 +12,7 @@ import {
   POST as inngestPOST,
   PUT as inngestPUT,
 } from '@heyclaude/web-runtime/inngest';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type NextRequest } from 'next/server';
 
 /**
@@ -37,7 +37,13 @@ export async function GET(request: NextRequest, context: unknown) {
     method: 'GET',
   });
   reqLogger.debug('Inngest GET request (introspection)');
-  return inngestGET(request, context);
+  try {
+    return await inngestGET(request, context);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Inngest GET handler failed');
+    reqLogger.error('Inngest GET handler failed', normalized);
+    throw error;
+  }
 }
 
 /**
@@ -60,7 +66,13 @@ export async function POST(request: NextRequest, context: unknown) {
     method: 'POST',
   });
   reqLogger.debug('Inngest POST request (function invocation)');
-  return inngestPOST(request, context);
+  try {
+    return await inngestPOST(request, context);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Inngest POST handler failed');
+    reqLogger.error('Inngest POST handler failed', normalized);
+    throw error;
+  }
 }
 
 /**
@@ -82,5 +94,11 @@ export async function PUT(request: NextRequest, context: unknown) {
     method: 'PUT',
   });
   reqLogger.debug('Inngest PUT request (sync)');
-  return inngestPUT(request, context);
+  try {
+    return await inngestPUT(request, context);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Inngest PUT handler failed');
+    reqLogger.error('Inngest PUT handler failed', normalized);
+    throw error;
+  }
 }

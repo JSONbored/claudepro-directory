@@ -52,8 +52,8 @@ export const dynamicParams = true; // Allow older changelog entries to be render
  * Older entries are rendered on-demand via ISR (revalidate = 7200s)
  */
 export async function generateStaticParams() {
-  // Limit to top 20 changelog entries (most recent) to optimize build time
-  const MAX_STATIC_ENTRIES = 20;
+  // Import shared constant for consistency across changelog pages
+  const { STATIC_GENERATION_LIMITS } = await import('@heyclaude/web-runtime/data/config/constants');
 
   // Generate requestId for static params generation (build-time)
   const requestId = generateRequestId();
@@ -70,7 +70,7 @@ export async function generateStaticParams() {
     const entries = await getAllChangelogEntries();
 
     // Only pre-render the most recent entries to optimize build time
-    return entries.slice(0, MAX_STATIC_ENTRIES).map((entry) => ({
+    return entries.slice(0, STATIC_GENERATION_LIMITS.changelog).map((entry) => ({
       slug: entry.slug,
     }));
   } catch (error) {

@@ -71,12 +71,14 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
     Database['public']['Enums']['oauth_provider'] | null
   >(null);
 
+  // Normalize provider values to lowercase for consistent comparison
+  // Database returns provider as text, enum values are lowercase strings
   const connectedProviders = new Set(
     identities
       .filter(
         (i): i is NonNullable<typeof i> & { provider: string } => i !== null && i.provider !== null
       )
-      .map((i) => i.provider)
+      .map((i) => i.provider.toLowerCase().trim())
   );
   const availableProviders = Object.entries(PROVIDER_CONFIG) as [
     Database['public']['Enums']['oauth_provider'],
@@ -124,11 +126,13 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
   return (
     <div className="space-y-4">
       {availableProviders.map(([provider, config]) => {
+        // Normalize provider for comparison (database returns text, enum is lowercase)
+        const normalizedProvider = provider.toLowerCase();
         const identity = identities.find(
           (i): i is NonNullable<typeof i> & { provider: string } =>
-            i !== null && i.provider === provider
+            i !== null && i.provider !== null && i.provider.toLowerCase().trim() === normalizedProvider
         );
-        const isConnected = connectedProviders.has(provider);
+        const isConnected = connectedProviders.has(normalizedProvider);
         const IconComponent = config.icon;
 
         return (

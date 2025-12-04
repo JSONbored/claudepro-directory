@@ -1,5 +1,8 @@
-import { getUserIdentities } from '@heyclaude/web-runtime';
-import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
+import {
+  generatePageMetadata,
+  getAuthenticatedUser,
+  getUserIdentitiesData,
+} from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -73,8 +76,9 @@ export default async function ConnectedAccountsPage() {
 
   // Create new child logger with user context
   // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  // Using userId directly - redaction will automatically hash it via hashUserIdCensor
   const userLogger = reqLogger.child({
-    userId: user.id, // Redaction will automatically hash this
+    userId: user.id, // Redaction automatically hashes this via hashUserIdCensor
   });
 
   userLogger.info('ConnectedAccountsPage: authentication successful', {
@@ -82,19 +86,21 @@ export default async function ConnectedAccountsPage() {
   });
 
   // Section: Identities Data Fetch
-  let result: Awaited<ReturnType<typeof getUserIdentities>> | { data: null; serverError: string };
+  // CRITICAL: Call data function directly instead of action to avoid cookies() in unstable_cache() error
+  let identitiesData: Awaited<ReturnType<typeof getUserIdentitiesData>>;
   try {
-    result = await getUserIdentities();
+    identitiesData = await getUserIdentitiesData(user.id);
     userLogger.info('ConnectedAccountsPage: identities data loaded', {
       section: 'identities-data-fetch',
-      hasData: !!result.data,
+      hasData: Boolean(identitiesData),
     });
   } catch (error) {
-    const normalized = normalizeError(error, 'getUserIdentities invocation failed');
-    userLogger.error('ConnectedAccountsPage: getUserIdentities threw', normalized, {
+    const normalized = normalizeError(error, 'getUserIdentitiesData invocation failed');
+    userLogger.error('ConnectedAccountsPage: getUserIdentitiesData threw', normalized, {
       section: 'identities-data-fetch',
     });
-    result = { data: null, serverError: normalized.message };
+    // getUserIdentitiesData returns { identities: [] } on error, not null
+    identitiesData = { identities: [] };
   }
 
   const pageHeader = (
@@ -104,42 +110,14 @@ export default async function ConnectedAccountsPage() {
     </div>
   );
 
-  if (!result.data || result.serverError) {
-    if (result.serverError) {
-      const normalized = normalizeError(result.serverError, 'Connected accounts server error');
-      userLogger.error('ConnectedAccountsPage: getUserIdentities returned serverError', normalized);
-    } else {
-      userLogger.warn('ConnectedAccountsPage: getUserIdentities returned no data');
-    }
-
-    // Use generic error message for user-facing display to prevent leaking
-    // internal implementation details. Detailed errors are logged server-side.
-    const errorMessage = 'Failed to load connected accounts. Please try again later.';
-
-    userLogger.info('ConnectedAccountsPage: page render completed (error)', {
-      section: 'page-render',
-      outcome: result.serverError ? 'server-error' : 'no-data',
+  // Check if identities array is empty (not null check - identitiesData is always an object)
+  if (!identitiesData?.identities || identitiesData.identities.length === 0) {
+    userLogger.info('ConnectedAccountsPage: no OAuth identities found', {
+      section: 'identities-data-fetch',
     });
-
-    return (
-      <div className="space-y-6">
-        {pageHeader}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Connected accounts unavailable</CardTitle>
-            <CardDescription>{errorMessage}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline">
-              <Link href={ROUTES.ACCOUNT_SETTINGS}>Go to settings</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
   }
 
-  const identities = result.data.identities ?? [];
+  const identities = identitiesData?.identities ?? [];
   if (identities.length === 0) {
     userLogger.info('ConnectedAccountsPage: no OAuth identities found', {
       section: 'identities-data-fetch',

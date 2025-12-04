@@ -226,6 +226,10 @@ const nextConfig = {
       process.env.NODE_ENV === 'production' ? { properties: ['^data-test'] } : false,
   },
 
+  // Webpack config: Fallback for non-Turbopack builds or edge cases
+  // Note: With --turbopack flag, this config is typically not executed.
+  // Turbopack handles most of these concerns via turbopack.resolveAlias and serverExternalPackages.
+  // This remains as a compatibility fallback for environments where Turbopack might not be available.
   webpack: (config, { dev, webpack, isServer }) => {
     if (!dev) {
       config.plugins.push(
@@ -250,7 +254,7 @@ const nextConfig = {
 
     // Ensure .ts and .tsx extensions are resolved for Deno-compatible imports
     // This allows shared-runtime to use .ts extensions (required by Deno) while
-    // still working with Next.js webpack bundler
+    // still working with Next.js webpack bundler (fallback mode)
     const existingExtensions = config.resolve.extensions || [];
     const tsExtensions = ['.ts', '.tsx'];
     const otherExtensions = existingExtensions.filter(

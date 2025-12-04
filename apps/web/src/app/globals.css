@@ -757,6 +757,10 @@
     transition: var(--transition-normal);
   }
 
+  .transition-colors-smooth {
+    transition: color var(--duration-200) var(--ease-in-out);
+  }
+
   .transition-fast {
     transition: var(--transition-fast);
   }
@@ -812,6 +816,43 @@
 
 /* Component Classes */
 @layer components {
+  /* Typography/Prose Styles - Basic prose utility classes for markdown content */
+  .prose {
+    color: var(--color-text-primary);
+    max-width: 65ch;
+  }
+
+  .prose-invert {
+    color: var(--color-text-primary);
+  }
+
+  .prose-slate {
+    color: var(--color-text-primary);
+  }
+
+  .prose-neutral {
+    color: var(--color-text-primary);
+  }
+
+  .prose-sm {
+    font-size: var(--font-size-sm);
+  }
+
+  .not-prose {
+    /* Reset prose styles */
+  }
+
+  /* Dark mode prose invert variant */
+  @media (prefers-color-scheme: dark) {
+    .dark\:prose-invert {
+      color: var(--color-text-primary);
+    }
+  }
+
+  [data-theme="dark"] .dark\:prose-invert {
+    color: var(--color-text-primary);
+  }
+
   /* Hero Section with Claude Orange Gradient */
   .hero-gradient {
     background: var(--gradient-hero);
@@ -1451,6 +1492,50 @@
   @media (min-width: 1400px) {
     max-width: 1400px;
   }
+}
+
+/* Transition utilities */
+@utility transition-colors-smooth {
+  transition: color var(--duration-200) var(--ease-in-out);
+}
+
+/* Prose typography utilities */
+@utility prose {
+  color: var(--color-text-primary);
+  max-width: 65ch;
+}
+
+@utility prose-invert {
+  color: var(--color-text-primary);
+}
+
+@utility prose-slate {
+  color: var(--color-text-primary);
+}
+
+@utility prose-neutral {
+  color: var(--color-text-primary);
+}
+
+@utility prose-sm {
+  font-size: var(--font-size-sm);
+}
+
+@utility not-prose {
+  /* Reset prose styles */
+  max-width: none;
+}
+
+/* Component utility classes - also defined in @layer components for hover states */
+@utility card-gradient {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  transition: var(--transition-normal);
+}
+
+@utility glow-effect {
+  box-shadow: var(--shadow-glow);
 }
 
 /* ========================================

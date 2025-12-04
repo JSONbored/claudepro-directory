@@ -63,7 +63,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       route,
       operation: 'FluxAPI:GET',
       method: 'GET',
-      logContext: { requestId },
+      logContext: { requestId, path: params.path.join('/') },
     });
   }
 }
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       route,
       operation: 'FluxAPI:POST',
       method: 'POST',
-      logContext: { requestId },
+      logContext: { requestId, path: params.path.join('/') },
     });
   }
 }

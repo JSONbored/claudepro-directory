@@ -80,7 +80,8 @@ export default async function NewJobPage() {
       throw normalized;
     }
 
-    if (result.data === null || result.data === undefined) {
+    // After checking serverError, result.data is guaranteed to be defined
+    if (!result.data) {
       const normalized = normalizeError(
         'createJob returned no data',
         'NewJobPage: createJob returned no data'
