@@ -4,6 +4,14 @@ import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { UI_CLASSES, NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
+/**
+ * Produce page metadata for the Terms page.
+ *
+ * @returns Page metadata for the "/terms" route.
+ *
+ * @see generatePageMetadata
+ * @see {@link import('next').Metadata}
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/terms');
 }
@@ -14,6 +22,19 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = false;
 
+/**
+ * Renders the Terms of Service page with dynamic last-updated date and contact links.
+ *
+ * Fetches the last updated timestamp and contact channels at render time to display the "Last updated"
+ * line and the contact email. The page is statically generated; revalidation is disabled (see `revalidate`).
+ *
+ * @returns A React element containing the Terms of Service content, sectioned into standard articles and including links to the Privacy Policy and contact methods.
+ *
+ * @see getLastUpdatedDate
+ * @see getContactChannels
+ * @see NavLink
+ * @see APP_CONFIG
+ */
 export default function TermsPage() {
   const lastUpdated = getLastUpdatedDate();
   const channels = getContactChannels();

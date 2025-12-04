@@ -35,8 +35,16 @@ import { removeAccordionSectionsFromContent, removeCategorySectionsFromContent }
 import { markdownToHtml } from '@/src/lib/utils/markdown-to-html';
 
 /**
- * TrustedHTML - Safe wrapper for HTML content with sanitization
- * Uses SanitizedHTML client component for XSS protection
+ * Render sanitized HTML content while optionally forwarding `className` and `id`.
+ *
+ * Renders the provided HTML string using a sanitizing wrapper to prevent unsafe markup.
+ *
+ * @param props.html - The HTML string to render (already converted from Markdown or other sources).
+ * @param props.className - Optional CSS class to apply to the rendered container.
+ * @param props.id - Optional id to apply to the rendered container.
+ * @returns A React element containing the sanitized HTML.
+ *
+ * @see SanitizedHTML
  */
 function TrustedHTML({ html, className, id }: { html: string; className?: string; id?: string }) {
   return (
@@ -61,7 +69,17 @@ const CATEGORY_ICONS = {
 } as const;
 
 /**
- * Category Section Component - Displays a category of changes
+ * Render a titled changelog section for a specific category with its items and a count badge.
+ *
+ * Renders nothing when `items` is empty or undefined.
+ *
+ * @param props.category - The changelog category label to display as the section heading.
+ * @param props.items - Array of change items; each item's `content` is rendered as sanitized HTML.
+ * @param props.icon - Icon component used for the section heading and item bullets.
+ *
+ * @see CATEGORY_ICONS - Maps changelog categories to icon components used by this section.
+ * @see TrustedHTML - Component used to safely render converted markdown HTML.
+ * @see markdownToHtml - Converts markdown in each item's `content` to HTML before rendering.
  */
 function CategorySection({
   category,
@@ -118,12 +136,22 @@ function CategorySection({
 }
 
 /**
- * Render additional content (JSON sections or HTML) after structured changes
- * 
- * @param entry - Changelog entry with content
- * @param metadataSections - Optional JSON sections from generated content
- * @param hasStructuredChanges - Whether structured changes are displayed
- * @returns JSX for additional content sections
+ * Render supplemental changelog content (JSON sections or HTML) and the accordion sections after structured changes.
+ *
+ * When structured changes are present this component will render metadata sections or remaining markdown-derived HTML;
+ * when structured changes are absent it will render metadata sections or the full markdown content.
+ *
+ * @param entry - Changelog entry object; `entry.content` is used as the source markdown for additional HTML and for accordion sections
+ * @param metadataSections - Optional JSON-derived guide sections to render via JSONSectionRenderer
+ * @param hasStructuredChanges - Whether the changelog's structured/category changes are being displayed; affects which content is shown to avoid duplication
+ * @returns A JSX fragment containing the additional content (metadata or HTML) and the ChangelogAccordionSections component when applicable
+ *
+ * @see JSONSectionRenderer
+ * @see TrustedHTML
+ * @see ChangelogAccordionSections
+ * @see removeAccordionSectionsFromContent
+ * @see removeCategorySectionsFromContent
+ * @see markdownToHtml
  */
 function renderAdditionalContent(
   entry: ChangelogEntry,

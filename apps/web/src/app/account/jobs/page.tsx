@@ -73,11 +73,27 @@ function toTitleCase(value: string): string {
     .join(' ');
 }
 
+/**
+ * Converts a job status string into a human-readable title-cased label.
+ *
+ * @param value - The raw status value (e.g., "active", "pending", or `null`/`undefined`).
+ * @returns The title-cased status (e.g., "Active") or `"Unknown"` when `value` is falsy.
+ *
+ * @see toTitleCase
+ */
 function humanizeStatus(value?: null | string): string {
   if (!value) return 'Unknown';
   return toTitleCase(value);
 }
 
+/**
+ * Resolve a human-readable label for a job plan.
+ *
+ * @param plan - The job plan enum value; may be undefined or null
+ * @returns The label corresponding to `plan`. If `plan` is missing, returns the label for the one-time plan.
+ *
+ * @see JOB_PLAN_LABELS
+ */
 function resolvePlanLabel(plan?: Database['public']['Enums']['job_plan'] | null): string {
   if (!plan) {
     return JOB_PLAN_LABELS['one-time'];
@@ -85,6 +101,14 @@ function resolvePlanLabel(plan?: Database['public']['Enums']['job_plan'] | null)
   return JOB_PLAN_LABELS[plan];
 }
 
+/**
+ * Resolve a human-readable label for a job tier.
+ *
+ * @param tier - The job tier enum value; when `undefined` or `null`, the standard tier label is used
+ * @returns The label corresponding to `tier`, or the Standard tier label when no tier is provided
+ *
+ * @see JOB_TIER_LABELS
+ */
 function resolveTierLabel(tier?: Database['public']['Enums']['job_tier'] | null): string {
   if (!tier) {
     return JOB_TIER_LABELS.standard;
@@ -96,6 +120,13 @@ function getStatusColor(status: JobStatus): string {
   return BADGE_COLORS.jobStatus[status];
 }
 
+/**
+ * Produce metadata for the My Jobs account page.
+ *
+ * @returns Page metadata for the "/account/jobs" route.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/jobs');
 }
@@ -104,6 +135,26 @@ interface MyJobsPageProperties {
   searchParams?: Promise<{ job_id?: string; payment?: string }>;
 }
 
+/**
+ * Renders the "My Job Listings" account page and loads server-side data required to display
+ * the user's jobs, billing summaries, and payment confirmation alert.
+ *
+ * This server component authenticates the current user, fetches the user's dashboard and
+ * per-job billing summaries, and renders appropriate UI states for unauthenticated users,
+ * data-fetch failures, empty job lists, and populated job listings (including billing info
+ * and action controls).
+ *
+ * @param props.searchParams - Optional query parameters from the request. Recognized keys:
+ *   - `payment`: payment status indicator (e.g., "success")
+ *   - `job_id`: job identifier associated with a payment
+ *
+ * @returns The page React element for the user's job listings.
+ *
+ * @see getUserDashboard
+ * @see getJobBillingSummaries
+ * @see resolvePlanLabel
+ * @see resolveTierLabel
+ */
 export default async function MyJobsPage({ searchParams }: MyJobsPageProperties) {
   const resolvedSearchParameters = searchParams ? await searchParams : {};
   const paymentStatus = resolvedSearchParameters.payment;

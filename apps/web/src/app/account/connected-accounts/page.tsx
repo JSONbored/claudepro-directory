@@ -31,6 +31,16 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata(ROUTE);
 }
 
+/**
+ * Renders the Connected Accounts page for the current user, showing linked OAuth identities or a sign-in prompt when unauthenticated.
+ *
+ * @returns The page's React element containing the header and an OAuth providers card populated with the user's identities, or a sign-in prompt if no user is authenticated.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserIdentitiesData
+ * @see ConnectedAccountsClient
+ * @see ROUTES.LOGIN
+ */
 export default async function ConnectedAccountsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

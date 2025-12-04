@@ -27,6 +27,18 @@ export const metadata: Metadata = {
 // Force dynamic rendering for auth-protected pages
 export const dynamic = 'force-dynamic';
 
+/**
+ * Render the MFA Settings page that lets an authenticated user view and manage multi-factor authentication.
+ *
+ * If no authenticated user is found, the function redirects to `/login`. A request-scoped identifier and logger are created for the page request.
+ *
+ * @returns The JSX for the MFA Settings page, including an enrolled factors list and explanatory "How it works" content.
+ *
+ * @see getAuthenticatedUser
+ * @see MFAFactorsListClient
+ * @see generateRequestId
+ * @see redirect
+ */
 export default async function MFASettingsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

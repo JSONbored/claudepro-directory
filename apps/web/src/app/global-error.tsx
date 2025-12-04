@@ -5,13 +5,13 @@ import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect } from 'react';
 
 /**
- * Global error boundary for the entire application.
+ * Top-level error boundary component that logs unhandled errors and renders a critical fallback UI.
  *
- * This is the top-level error boundary that catches errors not handled
- * by other error boundaries. Logs errors using client-side logging utilities
- * and displays a critical error fallback UI.
+ * @param error - The caught Error object; may include an optional `digest` string used for observability.
+ * @param reset - Callback to reset the error boundary and attempt to recover the application.
+ * @returns The fallback React element displayed when a global unhandled error occurs.
  *
- * @see {@link logClientErrorBoundary} - Client-side error logging utility
+ * @see {@link logClientErrorBoundary}
  */
 export default function GlobalError({
   error,

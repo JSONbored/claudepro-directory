@@ -41,6 +41,17 @@ import { ThemeToggle } from '@heyclaude/web-runtime/ui';
  */
 const CONTACT_CHANNELS = getContactChannels();
 
+/**
+ * Site footer component that renders branding, navigation columns (Browse, Resources, Support, Legal), social links, and a theme-aware status badge.
+ *
+ * The component adapts its RSS resource entry to the current pathname, delays rendering of the external status badge until client mount to avoid hydration mismatches, and exposes contact and routing links via runtime configuration.
+ *
+ * @returns The footer element containing branding, navigation links, social icons, and a theme-aware system status badge.
+ *
+ * @see APP_CONFIG
+ * @see ROUTES
+ * @see CONTACT_CHANNELS
+ */
 function FooterComponent() {
   const currentYear = new Date().getFullYear();
   const { resolvedTheme } = useTheme();

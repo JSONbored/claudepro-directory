@@ -23,6 +23,28 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 
+/**
+ * Serve a changelog entry as an LLMs-compliant plain-text file for the given slug.
+ *
+ * Validates the `format` query parameter (must be `llms-entry`), retrieves the
+ * prepared LLMs text for the requested changelog entry via the content service,
+ * normalizes literal `\n` sequences into real newlines, and returns the result
+ * as a `text/plain; charset=utf-8` response with security, CORS, and cache headers.
+ *
+ * Edge cases:
+ * - Returns a 400 response when `format` is not `llms-entry` or when the entry
+ *   is not found or invalid.
+ * - On unexpected errors, returns a standardized error response including route,
+ *   operation, and method context.
+ *
+ * @param request - The incoming Next.js request object.
+ * @param params - An object containing a Promise that resolves to route params; must include `slug`.
+ * @returns A NextResponse containing the plaintext LLMs-formatted changelog entry on success, or an error response (400 or standardized error) on failure.
+ *
+ * @see ContentService#getChangelogEntryLlmsTxt
+ * @see createSupabaseAnonClient
+ * @see buildSecurityHeaders
+ */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({

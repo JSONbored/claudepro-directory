@@ -4,6 +4,22 @@ import { type NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
+/**
+ * Generate an Open Graph image SVG/JSX using values from the request URL's search parameters.
+ *
+ * The function reads these optional search parameters from `request.url`:
+ * - `title` — title text to render (falls back to OG_DEFAULTS.title)
+ * - `description` — descriptive subtitle (falls back to OG_DEFAULTS.description)
+ * - `type` — badge text rendered at the top (falls back to OG_DEFAULTS.type)
+ * - `tags` — comma-separated list of tags; parsed, trimmed, uniqued, and up to 5 tags rendered
+ *
+ * @param request - NextRequest whose URL search params supply `title`, `description`, `type`, and `tags`
+ * @returns An ImageResponse containing the rendered Open Graph image using OG_DIMENSIONS for width and height
+ *
+ * @see OG_DEFAULTS
+ * @see OG_DIMENSIONS
+ * @see ImageResponse
+ */
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const title = searchParams.get('title') ?? OG_DEFAULTS.title;

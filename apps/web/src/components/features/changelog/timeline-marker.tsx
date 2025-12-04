@@ -23,9 +23,16 @@ interface TimelineMarkerProps {
 const TIMELINE_MARKER_STICKY_OFFSET = '96px';
 
 /**
- * TimelineMarker Component
- * 
- * Sticky timeline entry that highlights when its content section is active
+ * Render a sticky timeline entry with a marker, connector, and link to a changelog item.
+ *
+ * @param entry - A changelog row from the public database schema used to render title and release date
+ * @param isActive - Controls visual emphasis (z-index, text styles, and marker color) when the related content section is active
+ * @param targetPath - Destination URL the marker links to
+ * @param onClick - Optional click handler invoked when the link is activated
+ * @returns A JSX element representing the timeline marker for the provided changelog entry
+ *
+ * @see formatChangelogDateShort
+ * @see TIMELINE_MARKER_STICKY_OFFSET
  */
 export function TimelineMarker({ entry, isActive, targetPath, onClick }: TimelineMarkerProps) {
   return (

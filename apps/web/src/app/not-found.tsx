@@ -13,6 +13,13 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = false;
 
+/**
+ * Renders the site's 404 Not Found page using the NotFoundEmpty presentation.
+ *
+ * @returns The React element for the 404 page.
+ *
+ * @see {@link "@/src/components/primitives/feedback/empty-state".NotFoundEmpty}
+ */
 export default function NotFound() {
   return (
     <div className="bg-background flex min-h-screen items-center justify-center px-4">

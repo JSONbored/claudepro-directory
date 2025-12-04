@@ -64,6 +64,21 @@ const PROVIDER_CONFIG: Record<
   },
 };
 
+/**
+ * Renders UI for viewing, linking, and unlinking the user's connected OAuth providers.
+ *
+ * Displays each configured provider (GitHub, Google, Discord), shows connection status and identity info,
+ * allows starting the OAuth linking flow, and provides a confirmation dialog to unlink a provider.
+ * The component prevents unlinking when only one provider remains connected.
+ *
+ * @param identities - Array of identity records returned by `get_user_identities()`. Entries may be `null`
+ *   and identity objects may have a `provider` or `email` that is `null`. Provider comparisons are performed
+ *   after normalizing provider values to lowercase and trimming whitespace.
+ * @returns The React element that manages connected OAuth providers for the current user.
+ *
+ * @see PROVIDER_CONFIG
+ * @see unlinkOAuthProvider
+ */
 export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientProps) {
   const [isPending, startTransition] = useTransition();
   const [unlinkDialogOpen, setUnlinkDialogOpen] = useState(false);

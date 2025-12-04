@@ -88,6 +88,19 @@ export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/companies');
 }
 
+/**
+ * Renders the Companies directory page and its list of company cards.
+ *
+ * Fetches up to 50 companies, logs request-scoped diagnostics, and renders a hero, a responsive grid of company cards (with optional logo, industry, description, stats, featured badge, and validated external website links), and a newsletter CTA.
+ *
+ * @throws When loading the companies list fails — the underlying error is normalized and rethrown.
+ * @returns The page's React element tree for the /companies route.
+ *
+ * @see getCompaniesList
+ * @see getSafeWebsiteUrl
+ * @see generatePageMetadata
+ * @see revalidate (page uses Incremental Static Regeneration configured elsewhere)
+ */
 export default async function CompaniesPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

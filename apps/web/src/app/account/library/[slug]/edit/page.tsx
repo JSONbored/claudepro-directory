@@ -23,6 +23,15 @@ interface EditCollectionPageProperties {
   params: Promise<{ slug: string }>;
 }
 
+/**
+ * Generate metadata for the Edit Collection page using the route slug.
+ *
+ * @param params - A promise resolving to route parameters; must contain `slug` identifying the collection.
+ * @returns The Next.js page `Metadata` for the `/account/library/:slug/edit` route populated with the provided `slug`.
+ *
+ * @see generatePageMetadata
+ * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata
+ */
 export async function generateMetadata({
   params,
 }: EditCollectionPageProperties): Promise<Metadata> {
@@ -30,6 +39,20 @@ export async function generateMetadata({
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
+/**
+ * Render the edit-collection page for the specified collection slug.
+ *
+ * Fetches the authenticated user and collection details, then renders the edit form
+ * populated with collection and bookmark data. May redirect to the login page,
+ * trigger a 404 via `notFound()`, or rethrow a normalized error when data fetching fails.
+ *
+ * @param params - An object whose `slug` identifies the collection to edit.
+ * @returns The page element containing navigation, collection details header, and the edit `CollectionForm`.
+ *
+ * @see CollectionForm
+ * @see getCollectionDetail
+ * @see getAuthenticatedUser
+ */
 export default async function EditCollectionPage({ params }: EditCollectionPageProperties) {
   const { slug } = await params;
 

@@ -16,6 +16,17 @@ export const revalidate = false;
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
+/**
+ * Renders the Community Directory page content: fetches directory data filtered by `searchQuery`
+ * and renders the main profile search grid with a contributors sidebar.
+ *
+ * @param searchQuery - Text used to filter directory results; empty string returns unfiltered results
+ * @returns The React element tree for the community directory section
+ * @throws If fetching the community directory fails, the error is normalized and rethrown
+ * @see getCommunityDirectory
+ * @see ProfileSearchClient
+ * @see ContributorsSidebar
+ */
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   // Generate single requestId for this component
   const requestId = generateRequestId();

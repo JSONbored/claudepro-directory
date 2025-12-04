@@ -34,6 +34,29 @@ import {
  */
 export const revalidate = 86_400;
 
+/**
+ * Renders the Partner marketing page that presents pricing, benefits, and CTAs for advertising.
+ *
+ * Fetches partner pricing, hero statistics, contact channels, and CTA links on the server,
+ * and renders a multi-section page with a hero banner, real-time stats, launch pricing banner,
+ * pricing options (job and sponsored listings), benefits, FAQ, and a final CTA.
+ *
+ * If loading the pricing configuration fails, the component falls back to built-in default pricing
+ * values to avoid a page error. A request-scoped logger and single requestId are created for the
+ * page request to scope telemetry and error reporting.
+ *
+ * This is a server component that uses server-side data and participates in ISR; the module
+ * exports the revalidation interval.
+ *
+ * @returns The rendered React element for the partner page.
+ *
+ * @see getPartnerPricing
+ * @see getPartnerHeroStats
+ * @see getPartnerContactChannels
+ * @see getPartnerCtas
+ * @see generateRequestId
+ * @see logger
+ */
 export default async function PartnerPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

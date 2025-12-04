@@ -37,6 +37,25 @@ function toContentCategory(
     : undefined;
 }
 
+/**
+ * Handle GET requests to retrieve paginated content with optional category filtering.
+ *
+ * Parses `offset`, `limit`, and `category` from the request URL, validates parameters,
+ * invokes the `get_content_paginated_slim` stored procedure, and returns the resulting
+ * items as a JSON array with appropriate CORS and caching headers. On validation failure
+ * or RPC errors, returns a structured error response with an appropriate HTTP status.
+ *
+ * @param request - The incoming NextRequest for the GET operation
+ * @returns A Next.js Response containing a JSON array of content items on success (HTTP 200),
+ *          a 400 Bad Request for invalid query parameters, or a structured error response
+ *          for RPC/internal errors (e.g., HTTP 500). Responses include CORS headers,
+ *          an `X-Generated-By` header when data is returned, and cache headers for
+ *          the paginated content.
+ *
+ * @see toContentCategory
+ * @see createSupabaseAnonClient
+ * @see buildCacheHeaders
+ */
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({

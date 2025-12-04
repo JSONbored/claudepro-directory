@@ -57,6 +57,21 @@ async function executeRpcWithLogging<T>(
   return data;
 }
 
+/**
+ * Generate an XML feed payload and accompanying metadata for the requested feed type and category.
+ *
+ * Selects the appropriate Supabase RPCs to produce either a changelog feed or a content feed in
+ * RSS or Atom format, and returns the XML body together with the correct Content-Type and a
+ * human-readable source label.
+ *
+ * @param type - Feed format to generate: 'rss' or 'atom'
+ * @param category - Content category name, `'changelog'` for changelog feeds, `null` for all content
+ * @param supabase - Supabase anonymous client used to call database RPCs
+ * @param reqLogger - Request-scoped logger used for RPC call logging and error context
+ * @returns An object containing `xml` (the feed XML string), `contentType` (HTTP Content-Type header value), and `source` (a short label describing the feed origin)
+ * @see executeRpcWithLogging
+ * @see toContentCategory
+ */
 async function generateFeedPayload(
   type: FeedType,
   category: null | string,

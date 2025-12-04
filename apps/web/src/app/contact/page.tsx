@@ -22,6 +22,22 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = 86_400;
 
+/**
+ * Renders the Contact page with available contact channels and supplemental information.
+ *
+ * Renders a page showing an interactive terminal (feature-flagged), traditional contact options
+ * (GitHub Discussions, GitHub Issues, Discord, and Email when configured), and additional FAQ,
+ * response time, and contributing sections.
+ *
+ * This server-rendered component generates a request-scoped ID and logger and emits warnings
+ * when expected contact channels (email, github, discord) are not configured.
+ *
+ * @returns The React element for the Contact page.
+ *
+ * @see getContactChannels
+ * @see ContactTerminal
+ * @see ContactTerminalErrorBoundary
+ */
 export default function ContactPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

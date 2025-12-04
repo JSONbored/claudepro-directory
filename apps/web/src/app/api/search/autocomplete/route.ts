@@ -19,6 +19,21 @@ import { type NextRequest } from 'next/server';
 
 const CORS = getWithAuthCorsHeaders;
 
+/**
+ * Handle GET requests for search autocomplete and return matching suggestions based on the user's query.
+ *
+ * Validates query string and `limit` parameters, queries the database via a Supabase RPC for historical
+ * search suggestions, and responds with a JSON payload containing `suggestions` and the original `query`.
+ * Validation failures produce a 400 response; RPC or unexpected failures produce a structured error response.
+ *
+ * @param request - The incoming NextRequest for the autocomplete endpoint
+ * @returns A Response containing JSON `{ suggestions, query }` with HTTP 200 on success, or an error response on failure
+ *
+ * @see validateQueryString
+ * @see validateLimit
+ * @see createSupabaseAnonClient
+ * @see createErrorResponse
+ */
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({

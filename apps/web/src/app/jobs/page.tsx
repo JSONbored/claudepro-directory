@@ -112,7 +112,24 @@ export async function generateMetadata({
   });
 }
 
-// Deferred Jobs List Section Component for PPR
+/**
+ * Renders the jobs list section: fetches filtered jobs, applies client-side sorting, and displays empty or results states.
+ *
+ * This server component requests jobs via the RPC helper `getFilteredJobs`. When any filter is active (searchQuery, category, employment, experience, or remote) the fetch is performed without caching (uncached SSR) to ensure up-to-date results; otherwise ISR is allowed per page-level revalidation. Results are sorted client-side using `applyJobSorting`, and the component renders a full list, a "no jobs found" message when filters return zero results, or a "no jobs available yet" message when the total count is zero.
+ *
+ * @param props.searchQuery - Full-text search string to filter job titles and descriptions.
+ * @param props.category - Category filter (omit or `undefined` to ignore).
+ * @param props.employment - Employment type filter (e.g., "full-time", "part-time"; omit or `undefined` to ignore).
+ * @param props.experience - Experience level filter (e.g., "junior", "senior"; omit or `undefined` to ignore).
+ * @param props.remote - Remote-only filter; when `true` restricts results to remote roles, when `false` restricts to non-remote, omit (`undefined`) to ignore.
+ * @param props.sort - Sort option to apply after fetching (`'newest' | 'oldest' | 'salary'`).
+ * @param props.limit - Maximum number of jobs to request for this page.
+ * @param props.offset - Offset for pagination.
+ *
+ * @see getFilteredJobs
+ * @see applyJobSorting
+ * @see extractSalaryValue
+ */
 async function JobsListSection({
   searchQuery,
   category,
@@ -249,6 +266,31 @@ async function JobsListSection({
   );
 }
 
+/**
+ * Renders the Jobs page: a server-rendered, filterable jobs listing with a streaming total-count badge,
+ * persistent filter form, active-filter chips, and a two-column layout containing the job list and sidebar cards.
+ *
+ * The page parses and normalizes query parameters (search, category, employment, experience, remote, sort, page, limit),
+ * enforces bounds for pagination and limit, and builds navigation URLs that preserve or remove filters.
+ * The total job count is provided via the streaming JobsCountBadge component; the main job list is rendered by JobsListSection.
+ *
+ * @param props.searchParams - Query parameters accepted:
+ *   - q, query, or search: full-text search string
+ *   - category: job category (e.g., "engineering") or "all"
+ *   - employment: employment type (e.g., "full time") or "any"
+ *   - experience: experience level (e.g., "entry") or "any"
+ *   - remote: "true" to filter remote-only
+ *   - sort: "newest" | "oldest" | "salary" (defaults to "newest")
+ *   - page: 1-based page number (clamped to [1, 10000])
+ *   - limit: items per page (defaults to 20, max 100)
+ *
+ * @returns The page JSX containing header/hero, filter form with active filters and Clear All, a streaming jobs count badge,
+ *          the JobsListSection (with server-side data fetching and client-side sorting), and sidebar components.
+ *
+ * @see JobsCountBadge
+ * @see JobsListSection
+ * @see applyJobSorting
+ */
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
@@ -670,6 +712,15 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
   });
 }
 
+/**
+ * Convert a salary string into a numeric value suitable for comparison and sorting.
+ *
+ * Accepts values with commas, optional "k" suffix (e.g., "40k", "40.5k"), optional decimals, and optional ranges (e.g., "40k-60k"); when a range is provided the higher endpoint is returned.
+ *
+ * @param raw - Salary text to parse; may be `null` or `undefined`.
+ * @returns The parsed numeric salary (largest endpoint of a range), or `0` if parsing fails.
+ * @see applyJobSorting
+ */
 function extractSalaryValue(raw: null | string | undefined) {
   if (!raw) return 0;
   // Normalize "k" suffix to thousands (e.g., "40k" -> "40000", "40.5k" -> "40500")

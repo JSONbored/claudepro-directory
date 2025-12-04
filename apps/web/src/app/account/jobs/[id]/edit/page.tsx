@@ -32,6 +32,15 @@ interface EditJobPageMetadataProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Produce page metadata for the Edit Job page at /account/jobs/:id/edit using the route `id`.
+ *
+ * @param props - An object with a `params` property that resolves to route parameters; expects `params.id` to identify the job.
+ * @returns Metadata for the page, populated for the path `/account/jobs/:id/edit`.
+ *
+ * @see generatePageMetadata
+ * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata
+ */
 export async function generateMetadata({
   params,
 }: EditJobPageMetadataProperties): Promise<Metadata> {
@@ -43,6 +52,20 @@ interface EditJobPageProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Page component that renders the "Edit Job Listing" UI, loads the authenticated user's job and plan catalog, and handles updates.
+ *
+ * Renders a pre-filled JobForm for the specified job id, shows a warning when job enum fields are invalid, redirects unauthenticated users to /login, and calls the server action to update the job (redirecting to /account/jobs on successful update). If the job is not found or not owned by the user, it triggers Next.js notFound().
+ *
+ * @param params - Route params promise containing `{ id: string }` for the job to edit
+ * @returns The page's React element tree for editing a job listing
+ *
+ * @see getAuthenticatedUser
+ * @see getUserJobById
+ * @see getPaymentPlanCatalog
+ * @see updateJob
+ * @see JobForm
+ */
 export default async function EditJobPage({ params }: EditJobPageProperties) {
   const { id } = await params;
 

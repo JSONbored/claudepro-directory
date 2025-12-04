@@ -107,6 +107,20 @@ const commonQuestions = [
   },
 ];
 
+/**
+ * Render the Help Center page with topics, common questions, quick actions, and contact options.
+ *
+ * Renders a static help UI that lists help topics and links, frequently asked questions with optional links,
+ * three quick-action cards (Search, Guides, Contact Support), and a "Still need help?" callout with contact actions.
+ *
+ * @returns A React element containing the full Help Center page.
+ *
+ * @see APP_CONFIG
+ * @see NavLink
+ * @see HoverCard
+ * @see Card
+ * @see revalidate - page is statically generated (revalidation controlled by this module)
+ */
 export default function HelpPage() {
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">

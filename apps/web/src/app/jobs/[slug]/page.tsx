@@ -43,7 +43,15 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
  * ISR: 2 hours (7200s) - Job postings are relatively stable
  */
 export const revalidate = 7200;
-export const dynamicParams = true; // Allow jobs not pre-rendered to be rendered on-demand
+export const dynamicParams = true; /**
+ * Validate and sanitize an external website URL for safe use as an href.
+ *
+ * @param url - The input URL to validate; may be `null` or `undefined`.
+ * @returns A canonicalized, safe href string when the input is an allowed URL, `null` otherwise. Allowed URLs use `https:` universally; `http:` is allowed only for localhost addresses. URLs containing credentials or failing parsing are rejected.
+ *
+ * @see getSafeMailtoUrl
+ * @see /apps/web/src/app/jobs/[slug]/page.tsx - usage for external apply links
+ */
 
 function getSafeWebsiteUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
@@ -120,6 +128,16 @@ function getSafeMailtoUrl(email: null | string | undefined): null | string {
   return `mailto:${encodeURIComponent(normalized)}`;
 }
 
+/**
+ * Builds page metadata for a job detail page from the provided route params and the job record.
+ *
+ * If the job cannot be loaded, returns metadata without the job `item` and logs the failure.
+ *
+ * @param params - Promise resolving to route params; must include `slug`.
+ * @returns The page Metadata populated with the job data when available, otherwise metadata without `item`.
+ * @see getJobBySlug
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -154,6 +172,17 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Produce static route parameters (slugs) for pre-rendering a subset of job pages at build time.
+ *
+ * Generates an array of parameter objects used by Next.js to statically pre-render job pages.
+ * Only a limited number of jobs are returned to bound build-time work; remaining jobs are handled on demand.
+ *
+ * @returns An array of parameter objects `{ slug: string }` for up to 10 jobs; returns an empty array if no jobs are available or if an error occurs.
+ *
+ * @see getFilteredJobs - source of job listings used to derive slugs
+ * @see export const dynamicParams - remaining job pages are rendered on-demand when not pre-rendered
+ */
 export async function generateStaticParams() {
   // Limit to top 10 jobs to optimize build time
   // ISR with dynamicParams=true handles remaining jobs on-demand
@@ -188,6 +217,19 @@ export async function generateStaticParams() {
   }
 }
 
+/**
+ * Renders the job detail page for a given route slug: validates the slug, loads the job record,
+ * and returns the server-rendered UI for the job (header, description, requirements, benefits,
+ * apply actions, and job details). If the slug is invalid or the job is not found, the route
+ * resolves to a 404 via next/navigation.notFound().
+ *
+ * @param props.params - Route parameters containing the `slug` for the job to display.
+ * @returns The server-rendered React element for the job detail page.
+ *
+ * @see getJobBySlug
+ * @see getSafeWebsiteUrl
+ * @see getSafeMailtoUrl
+ */
 export default async function JobPage({ params }: PageProps) {
   if (!params) {
     notFound();

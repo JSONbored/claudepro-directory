@@ -100,9 +100,16 @@ export const revalidate = 1800; // 30min ISR (fallback if edge function cache mi
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
- * Generate static params for company pages
- * Pre-renders top 10 companies at build time to optimize build performance
- * ISR with dynamicParams=true handles remaining companies on-demand
+ * Produce route params for pre-rendering company pages at build time.
+ *
+ * Generates up to 10 { slug } objects for static pre-rendering; remaining company pages are rendered on demand via dynamicParams with ISR. On failure, logs the error and returns an empty array.
+ *
+ * @returns An array of objects each containing a `slug` string for a company page; empty if fetching fails or no slugs are available.
+ *
+ * @see {@link /apps/web/src/app/companies/[slug]/page.tsx | CompanyPage}
+ * @see {@link getCompaniesList} from @heyclaude/web-runtime/data
+ * @see {@link generateRequestId}
+ * @see {@link normalizeError}
  */
 export async function generateStaticParams() {
   // Limit to top 10 companies to optimize build time
@@ -144,6 +151,27 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
   });
 }
 
+/**
+ * Render the company profile page for a given slug, including the company header,
+ * active job listings, and a sidebar with hiring statistics and site CTA.
+ *
+ * This server component fetches the company profile by slug and returns a 404
+ * when the company is not found. The rendered page includes:
+ * - StructuredData for the route
+ * - Company header (logo or placeholder, name, featured badge, description, metadata, website)
+ * - Main content with active positions or a "No Active Positions" callout
+ * - Sidebar with company stats and a website CTA
+ *
+ * Data fetching uses the app's RPC materialized view and participates in the
+ * file-level ISR configuration (revalidation settings applied at the route level).
+ *
+ * @param params - Route params object containing the `slug` of the company
+ * @returns The company profile page element containing header, listings, and stats
+ *
+ * @see getCompanyProfile
+ * @see SafeWebsiteLink
+ * @see generateStaticParams
+ */
 export default async function CompanyPage({ params }: CompanyPageProperties) {
   const { slug } = await params;
 
