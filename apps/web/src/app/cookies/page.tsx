@@ -32,7 +32,7 @@ export const revalidate = false;
  * @see getLastUpdatedDate
  * @see NavLink
  * @see generatePageMetadata
- * @see export const revalidate
+ * @see revalidate
  */
 export default function CookiesPage() {
   const lastUpdated = getLastUpdatedDate();

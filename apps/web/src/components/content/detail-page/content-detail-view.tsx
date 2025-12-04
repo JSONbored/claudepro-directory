@@ -238,10 +238,11 @@ export async function UnifiedDetailPage({
     return ensureStringArray(reqs);
   })();
 
-  const securityItems =
-    'security' in contentItem && contentItem['security']
-      ? ensureStringArray(contentItem['security'])
-      : [];
+  const securityItems = (() => {
+    const sec =
+      ('security' in contentItem && contentItem['security']) || metadata['security'];
+    return ensureStringArray(sec);
+  })();
 
   const quickActionsPackageName =
     typeof metadata['package'] === 'string' ? (metadata['package'] as string) : null;
@@ -893,6 +894,7 @@ export async function UnifiedDetailPage({
       features,
       useCases,
       requirements,
+      securityItems,
       troubleshooting,
       guideSections,
       collectionSections,

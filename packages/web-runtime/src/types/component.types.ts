@@ -769,6 +769,7 @@ export interface ProcessedSectionData {
   features?: string[];
   useCases?: string[];
   requirements?: string[];
+  securityItems?: string[];
   troubleshooting?: Array<string | { issue: string; solution: string }>;
 
   // Special content types

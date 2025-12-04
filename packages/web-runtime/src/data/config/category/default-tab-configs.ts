@@ -67,7 +67,7 @@ const STANDARD_NO_EXAMPLES_TABS: ReadonlyArray<TabConfig> = [
 ] as const;
 
 /**
- * Simple tabs WITHOUT Examples - for rules and commands
+ * Simple tabs WITHOUT Examples - for rules
  * These have minimal structure with content + troubleshooting
  */
 const SIMPLE_TABS: ReadonlyArray<TabConfig> = [
@@ -92,6 +92,42 @@ const SIMPLE_TABS: ReadonlyArray<TabConfig> = [
     sections: ['reviews', 'related'],
     lazy: true,
     order: 3,
+  },
+] as const;
+
+/**
+ * Commands tabs WITH Examples - for commands
+ * Includes examples tab for command invocation examples
+ */
+const COMMANDS_TABS: ReadonlyArray<TabConfig> = [
+  {
+    id: 'overview',
+    label: 'Overview',
+    mobileLabel: 'Overview',
+    sections: ['content', 'description', 'features', 'use_cases', 'requirements'],
+    order: 1,
+  },
+  {
+    id: 'examples',
+    label: 'Examples',
+    mobileLabel: 'Examples',
+    sections: ['examples'],
+    order: 2,
+  },
+  {
+    id: 'usage',
+    label: 'Usage Tips',
+    mobileLabel: 'Usage',
+    sections: ['troubleshooting'],
+    order: 3,
+  },
+  {
+    id: 'discussion',
+    label: 'Discussion',
+    mobileLabel: 'Discuss',
+    sections: ['reviews', 'related'],
+    lazy: true,
+    order: 4,
   },
 ] as const;
 
@@ -153,7 +189,8 @@ export const DEFAULT_TAB_CONFIGS: Readonly<
   statuslines: STANDARD_NO_EXAMPLES_TABS,
   // Simple content categories → minimal tabs
   rules: SIMPLE_TABS,
-  commands: SIMPLE_TABS,
+  // Commands with Examples tab
+  commands: COMMANDS_TABS,
   // Special layouts
   guides: GUIDE_TABS,
   collections: COLLECTION_TABS,

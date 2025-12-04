@@ -1,4 +1,3 @@
-import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -48,6 +47,48 @@ const NewsletterCTAVariant = dynamicImport(
  */
 export const revalidate = 86_400;
 
+/**
+ * Validate and sanitize external website URL for safe use in href attributes.
+ * Only allows HTTPS URLs (or HTTP for localhost in development).
+ * Returns canonicalized URL or null if invalid.
+ *
+ * @param url - The input URL to validate; may be `null` or `undefined`.
+ * @returns A canonicalized, safe href string when the input is an allowed URL, `null` otherwise.
+ */
+function getSafeWebsiteUrl(url: null | string | undefined): null | string {
+  if (!url || typeof url !== 'string') return null;
+
+  try {
+    const parsed = new URL(url.trim());
+    // Only allow HTTPS protocol (or HTTP for localhost/development)
+    const isLocalhost =
+      parsed.hostname === 'localhost' ||
+      parsed.hostname === '127.0.0.1' ||
+      parsed.hostname === '::1';
+    if (parsed.protocol === 'https:') {
+      // HTTPS always allowed
+    } else if (parsed.protocol === 'http:' && isLocalhost) {
+      // HTTP allowed only for local development
+    } else {
+      return null;
+    }
+    // Reject dangerous components
+    if (parsed.username || parsed.password) return null;
+
+    // Normalize hostname
+    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
+    // Remove default ports
+    if (parsed.port === '80' || parsed.port === '443') {
+      parsed.port = '';
+    }
+
+    // Return canonicalized href (guaranteed to be normalized and safe)
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/companies');
 }
@@ -63,7 +104,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see getCompaniesList
  * @see getSafeWebsiteUrl
  * @see generatePageMetadata
- * @see revalidate (page uses Incremental Static Regeneration configured elsewhere)
+ * @see revalidate (defined on line 49 in this file)
  */
 export default async function CompaniesPage() {
   // Generate single requestId for this page request

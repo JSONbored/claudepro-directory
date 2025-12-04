@@ -201,11 +201,9 @@ export default async function SettingsPage() {
               <CardDescription>Update your public profile details</CardDescription>
             </div>
             {userData?.slug ? (
-              <Link href={`/u/${userData.slug}`}>
-                <Button variant="outline" size="sm">
-                  View Profile
-                </Button>
-              </Link>
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/u/${userData.slug}`}>View Profile</Link>
+              </Button>
             ) : null}
           </div>
         </CardHeader>

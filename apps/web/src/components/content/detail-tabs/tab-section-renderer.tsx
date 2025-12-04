@@ -4,7 +4,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
 import type {
   ContentItem,
   ProcessedSectionData,
@@ -201,18 +201,15 @@ export function TabSectionRenderer({
       );
 
     case 'security': {
-      // Cast item to ContentItem for property access (content is Json type from RPC)
-      const contentItem = item as ContentItem;
-      if (!(config.sections.security && 'security' in contentItem)) return null;
-      const securityItems = ensureStringArray(contentItem['security']);
-      if (securityItems.length === 0) return null;
+      if (!(config.sections.security && sectionData.securityItems)) return null;
+      if (sectionData.securityItems.length === 0) return null;
       const validCategory = isValidCategory(item.category) ? item.category : 'agents';
       return (
         <UnifiedSection
           variant="list"
           title="Security Best Practices"
           description="Important security considerations"
-          items={securityItems}
+          items={sectionData.securityItems}
           category={validCategory}
           dotColor="bg-orange-500"
         />

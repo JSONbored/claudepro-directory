@@ -182,7 +182,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: false,
       troubleshooting: true,
       examples: true,
-      requirements: false,
+      requirements: true,
     },
     metadata: {
       showGitHubLink: true,

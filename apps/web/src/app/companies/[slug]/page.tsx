@@ -248,93 +248,101 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
             {/* Main content - Active jobs */}
             <div className="space-y-6">
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                <h2 className="text-2xl font-bold">
-                  Active Positions ({active_jobs?.length ?? 0})
-                </h2>
-              </div>
-
-              {!active_jobs || active_jobs.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center py-16">
-                    <Briefcase className="text-muted-foreground mb-4 h-12 w-12" />
-                    <h3 className="mb-2 text-xl font-semibold">No Active Positions</h3>
-                    <p className="text-muted-foreground mb-6 max-w-md text-center">
-                      This company doesn't have any job openings at the moment. Check back later!
-                    </p>
-                    <Link href={ROUTES.JOBS}>
-                      <UnifiedBadge variant="base" style="default">
-                        Browse All Jobs
-                      </UnifiedBadge>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {active_jobs
-                    .filter(
-                      (
-                        job
-                      ): job is typeof job & {
-                        click_count: number;
-                        company: string;
-                        experience: Database['public']['Enums']['experience_level'];
-                        expires_at: string;
-                        id: string;
-                        plan: Database['public']['Enums']['job_plan'];
-                        posted_at: string;
-                        slug: string;
-                        title: string;
-                        view_count: number;
-                        workplace: Database['public']['Enums']['workplace_type'];
-                      } => {
-                        return Boolean(
-                          job.id &&
-                          job.slug &&
-                          job.title &&
-                          job.company &&
-                          job.workplace &&
-                          job.experience &&
-                          job.plan &&
-                          job.posted_at &&
-                          job.expires_at &&
-                          job.view_count !== null &&
-                          job.click_count !== null
-                        );
-                      }
-                    )
-                    .map((job) => {
-                      return (
-                        <JobCard
-                          key={job.id}
-                          job={{
-                            id: job.id,
-                            slug: job.slug,
-                            title: job.title,
-                            company: job.company,
-                            company_logo: job.company_logo,
-                            location: job.location,
-                            description: job.description,
-                            salary: job.salary,
-                            remote: job.remote ?? false,
-                            type: job.type,
-                            workplace: job.workplace,
-                            experience: job.experience,
-                            category: job.category,
-                            tags: job.tags ?? [],
-                            plan: job.plan,
-                            tier: job.tier,
-                            posted_at: job.posted_at,
-                            expires_at: job.expires_at,
-                            view_count: job.view_count,
-                            click_count: job.click_count,
-                            link: job.link,
-                          }}
-                        />
+              {(() => {
+                const filteredActiveJobs =
+                  active_jobs?.filter(
+                    (
+                      job
+                    ): job is typeof job & {
+                      click_count: number;
+                      company: string;
+                      experience: Database['public']['Enums']['experience_level'];
+                      expires_at: string;
+                      id: string;
+                      plan: Database['public']['Enums']['job_plan'];
+                      posted_at: string;
+                      slug: string;
+                      title: string;
+                      view_count: number;
+                      workplace: Database['public']['Enums']['workplace_type'];
+                    } => {
+                      return Boolean(
+                        job.id &&
+                        job.slug &&
+                        job.title &&
+                        job.company &&
+                        job.workplace &&
+                        job.experience &&
+                        job.plan &&
+                        job.posted_at &&
+                        job.expires_at &&
+                        typeof job.view_count === 'number' &&
+                        typeof job.click_count === 'number'
                       );
-                    })}
-                </div>
-              )}
+                    }
+                  ) ?? [];
+
+                return (
+                  <>
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                      <h2 className="text-2xl font-bold">
+                        Active Positions ({filteredActiveJobs.length})
+                      </h2>
+                    </div>
+
+                    {filteredActiveJobs.length === 0 ? (
+                      <Card>
+                        <CardContent className="flex flex-col items-center py-16">
+                          <Briefcase className="text-muted-foreground mb-4 h-12 w-12" />
+                          <h3 className="mb-2 text-xl font-semibold">No Active Positions</h3>
+                          <p className="text-muted-foreground mb-6 max-w-md text-center">
+                            This company doesn't have any job openings at the moment. Check back
+                            later!
+                          </p>
+                          <Link href={ROUTES.JOBS}>
+                            <UnifiedBadge variant="base" style="default">
+                              Browse All Jobs
+                            </UnifiedBadge>
+                          </Link>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        {filteredActiveJobs.map((job) => {
+                          return (
+                            <JobCard
+                              key={job.id}
+                              job={{
+                                id: job.id,
+                                slug: job.slug,
+                                title: job.title,
+                                company: job.company,
+                                company_logo: job.company_logo,
+                                location: job.location,
+                                description: job.description,
+                                salary: job.salary,
+                                remote: job.remote ?? false,
+                                type: job.type,
+                                workplace: job.workplace,
+                                experience: job.experience,
+                                category: job.category,
+                                tags: job.tags ?? [],
+                                plan: job.plan,
+                                tier: job.tier,
+                                posted_at: job.posted_at,
+                                expires_at: job.expires_at,
+                                view_count: job.view_count,
+                                click_count: job.click_count,
+                                link: job.link,
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
 
             {/* Sidebar - Company stats */}
