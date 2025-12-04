@@ -50,16 +50,16 @@ const DEFAULT_FLAGS: LayoutFlags = {
   fabSubmitAction: true, // ✅ Show "Submit Content" action
   fabSearchAction: true, // ✅ Show "Search (⌘K)" action
   fabScrollToTop: true, // ✅ Show "Scroll to top" action
-  fabNotifications: true, // ✅ Show notifications (mobile)
-  notificationsProvider: true,
-  notificationsSheet: true,
-  notificationsToasts: true,
+  fabNotifications: false, // ❌ Disabled: Show notifications (mobile)
+  notificationsProvider: false, // ❌ Disabled: Notification provider
+  notificationsSheet: false, // ❌ Disabled: Notification sheet
+  notificationsToasts: false, // ❌ Disabled: Notification toasts
   footerDelayVariant: '30s' as const,
   ctaVariant: 'value_focused' as const,
-  notificationsEnabled: true,
-  notificationsSheetEnabled: true,
-  notificationsToastsEnabled: true,
-  fabNotificationsEnabled: true, // ✅ Enable FAB notifications
+  notificationsEnabled: false, // ❌ Disabled: All notifications
+  notificationsSheetEnabled: false, // ❌ Disabled: Notification sheet
+  notificationsToastsEnabled: false, // ❌ Disabled: Notification toasts
+  fabNotificationsEnabled: false, // ❌ Disabled: FAB notifications
 };
 
 /**

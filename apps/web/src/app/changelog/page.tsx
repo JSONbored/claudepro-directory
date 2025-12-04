@@ -179,7 +179,7 @@ export default async function ChangelogPage() {
       <>
         <StructuredData route="/changelog" />
 
-        <div className="container max-w-6xl space-y-8 py-8">
+        <div className="mx-auto max-w-[1400px] space-y-8 px-4 py-8 md:px-8 lg:px-12">
           {/* Header */}
           <div className="space-y-4">
             <NavLink
@@ -246,7 +246,7 @@ export default async function ChangelogPage() {
 
     // Fallback UI on error
     return (
-      <div className="container max-w-6xl py-8">
+      <div className="container max-w-7xl py-8">
         <div className="space-y-4">
           <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
           <p className="text-muted-foreground">

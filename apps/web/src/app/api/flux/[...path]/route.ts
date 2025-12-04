@@ -29,6 +29,40 @@ interface RouteContext {
   }>;
 }
 
+type HttpMethod = 'GET' | 'POST';
+
+async function handleFluxRequest(
+  method: HttpMethod,
+  request: NextRequest,
+  context: RouteContext
+): Promise<Response> {
+  const requestId = generateRequestId();
+  const params = await context.params;
+  const route = `/api/flux/${params.path.join('/')}`;
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'FluxAPI',
+    route,
+    method,
+  });
+
+  try {
+    reqLogger.debug(`Flux ${method} request`, { path: params.path });
+    return await routeFluxRequest(method, params.path, request);
+  } catch (error) {
+    const normalized = normalizeError(error, `Flux ${method} request failed`);
+    reqLogger.error(`Flux ${method} request failed`, normalized, {
+      path: params.path.join('/'),
+    });
+    return createErrorResponse(error, {
+      route,
+      operation: `FluxAPI:${method}`,
+      method,
+      logContext: { requestId, path: params.path.join('/') },
+    });
+  }
+}
+
 /**
  * Handle GET requests for the Flux catch-all API route and forward them to the Flux router.
  *
@@ -43,29 +77,7 @@ interface RouteContext {
  * @see logger
  */
 export async function GET(request: NextRequest, context: RouteContext) {
-  const requestId = generateRequestId();
-  const params = await context.params;
-  const route = `/api/flux/${params.path.join('/')}`;
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'FluxAPI',
-    route,
-    method: 'GET',
-  });
-
-  try {
-    reqLogger.debug('Flux GET request', { path: params.path });
-    return await routeFluxRequest('GET', params.path, request);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Flux GET request failed');
-    reqLogger.error('Flux GET request failed', normalized);
-    return createErrorResponse(error, {
-      route,
-      operation: 'FluxAPI:GET',
-      method: 'GET',
-      logContext: { requestId, path: params.path.join('/') },
-    });
-  }
+  return handleFluxRequest('GET', request, context);
 }
 
 /**
@@ -80,29 +92,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
  * @see logger
  */
 export async function POST(request: NextRequest, context: RouteContext) {
-  const requestId = generateRequestId();
-  const params = await context.params;
-  const route = `/api/flux/${params.path.join('/')}`;
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'FluxAPI',
-    route,
-    method: 'POST',
-  });
-
-  try {
-    reqLogger.debug('Flux POST request', { path: params.path });
-    return await routeFluxRequest('POST', params.path, request);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Flux POST request failed');
-    reqLogger.error('Flux POST request failed', normalized);
-    return createErrorResponse(error, {
-      route,
-      operation: 'FluxAPI:POST',
-      method: 'POST',
-      logContext: { requestId, path: params.path.join('/') },
-    });
-  }
+  return handleFluxRequest('POST', request, context);
 }
 
 /**

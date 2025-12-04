@@ -110,13 +110,6 @@ export default async function ConnectedAccountsPage() {
     </div>
   );
 
-  // Check if identities array is empty (not null check - identitiesData is always an object)
-  if (!identitiesData?.identities || identitiesData.identities.length === 0) {
-    userLogger.info('ConnectedAccountsPage: no OAuth identities found', {
-      section: 'identities-data-fetch',
-    });
-  }
-
   const identities = identitiesData?.identities ?? [];
   if (identities.length === 0) {
     userLogger.info('ConnectedAccountsPage: no OAuth identities found', {

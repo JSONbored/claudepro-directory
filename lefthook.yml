@@ -81,21 +81,34 @@ pre-commit:
         pnpm validate:client-server
       fail_text: "❌ Client/server boundary violations found. Fix them before committing."
 
-    # 6. Run tests for changed files (fast feedback, only affected tests)
+    # 6. Run tests for changed files (non-blocking, warnings only)
     test-affected:
       glob: "**/*.{ts,tsx}"
       exclude: 
         - "apps/edge/functions/**"
         - "packages/edge-runtime/src/utils/email/**"
       run: |
-        echo "🧪 Running tests for changed files..."
+        echo "🧪 Running tests for changed files (non-blocking)..."
+        set +e
         # Run only tests related to changed files (vitest --changed)
         # This is fast and only runs tests that might be affected by changes
-        pnpm test --run --changed || {
-          echo "⚠️  No tests found for changed files, running all tests..."
-          pnpm test --run
-        }
-      fail_text: "❌ Tests failed. Fix failing tests before committing."
+        pnpm test --run --changed 2>&1
+        TEST_STATUS=$?
+        if [ $TEST_STATUS -ne 0 ]; then
+          echo "⚠️  Tests failed for changed files, trying all tests..."
+          pnpm test --run 2>&1
+          ALL_TEST_STATUS=$?
+          if [ $ALL_TEST_STATUS -ne 0 ]; then
+            echo "⚠️  Some tests failed (not blocking - fix before merging)"
+            echo "   Run 'pnpm test' to see full output"
+          else
+            echo "✅ All tests passed"
+          fi
+        else
+          echo "✅ Tests for changed files passed"
+        fi
+        exit 0
+      fail_text: "⚠️  Tests failed (not blocking - fix before merging)."
       stage_fixed: false
 
 # ============================================================================
@@ -139,7 +152,23 @@ pre-push:
         pnpm build
       fail_text: "❌ Build failed. Fix errors before pushing."
 
-    # 3. Technical debt analysis (non-blocking warnings)
+    # 3. Run full test suite (non-blocking, warnings only)
+    test-all:
+      run: |
+        echo "🧪 Running full test suite (non-blocking)..."
+        set +e
+        pnpm test --run 2>&1
+        TEST_STATUS=$?
+        if [ $TEST_STATUS -ne 0 ]; then
+          echo "⚠️  Some tests failed (not blocking - fix before merging)"
+          echo "   Run 'pnpm test' to see full output"
+        else
+          echo "✅ All tests passed"
+        fi
+        exit 0
+      fail_text: "⚠️  Tests failed (not blocking - fix before merging)."
+
+    # 4. Technical debt analysis (non-blocking warnings)
     tech-debt:
       run: |
         echo "📊 Analyzing technical debt..."

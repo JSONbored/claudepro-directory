@@ -5,15 +5,15 @@
  * Follows existing [category]/[slug]/page.tsx pattern with ISR.
  *
  * Architecture:
- * - Server component with ISR (10-minute revalidation)
- * - Static generation for all entries at build time
+ * - Server component with ISR (2-hour revalidation)
+ * - Static generation for recent entries, older ones via on-demand ISR
  * - SEO-optimized with metadata and structured data
  * - View tracking integration
  *
  * Performance:
- * - ISR: 600s (10 minutes) for fresh content
+ * - ISR: 7200s (2 hours) for stable changelog content
  * - Database-cached entry loading
- * - Static params generation
+ * - Static params generation for recent entries only
  *
  * Production Standards:
  * - Type-safe with Next.js 15.5.4
@@ -33,7 +33,7 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink, Separator } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, NavLink, Separator, ANIMATION_CONSTANTS } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -48,7 +48,7 @@ export const dynamicParams = true; // Allow older changelog entries to be render
 
 /**
  * Generate static params for recent changelog entries
- * Pre-renders top 20 entries to optimize build time while maintaining SEO coverage
+ * Pre-renders a limited set of recent entries (STATIC_GENERATION_LIMITS.changelog)
  * Older entries are rendered on-demand via ISR (revalidate = 7200s)
  */
 export async function generateStaticParams() {
@@ -70,7 +70,8 @@ export async function generateStaticParams() {
     const entries = await getAllChangelogEntries();
 
     // Only pre-render the most recent entries to optimize build time
-    return entries.slice(0, STATIC_GENERATION_LIMITS.changelog).map((entry) => ({
+    const limit = Math.max(0, STATIC_GENERATION_LIMITS.changelog);
+    return entries.slice(0, limit).map((entry) => ({
       slug: entry.slug,
     }));
   } catch (error) {
@@ -172,38 +173,42 @@ export default async function ChangelogEntryPage({
       {/* Structured Data - Pre-generated schemas from database */}
       <StructuredData route={`/changelog/${entry.slug}`} />
 
-      <article className="container max-w-4xl space-y-8 py-8">
+      <article
+        className={`container max-w-6xl ${UI_CLASSES.FORM_SECTION_SPACING} ${UI_CLASSES.PADDING_Y_RELAXED}`}
+      >
         {/* Navigation */}
         <NavLink
           href={ROUTES.CHANGELOG}
-          className="text-muted-foreground inline-flex items-center gap-2 text-sm"
+          className={`${UI_CLASSES.TEXT_HELPER} ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_BODY_SM}`}
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className={UI_CLASSES.ICON_SM} />
           <span>Back to Changelog</span>
         </NavLink>
 
         {/* Header */}
-        <header className="space-y-4 pb-6">
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-muted-foreground text-sm`}>
-            <Calendar className="h-4 w-4" />
+        <header className={`${UI_CLASSES.FORM_GROUP_SPACING} ${UI_CLASSES.MARGIN_COMFORTABLE}`}>
+          <div
+            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.TEXT_HELPER} ${UI_CLASSES.TEXT_BODY_SM}`}
+          >
+            <Calendar className={UI_CLASSES.ICON_SM} />
             <time dateTime={entry.release_date}>{formatChangelogDate(entry.release_date)}</time>
           </div>
 
-          <h1 className="text-4xl font-bold tracking-tight">{entry.title}</h1>
+          <h1 className={UI_CLASSES.HEADING_H1}>{entry.title}</h1>
 
           {/* Canonical URL */}
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
-            <span className="text-muted-foreground">Permanent link:</span>
+          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_BODY_SM}`}>
+            <span className={UI_CLASSES.TEXT_HELPER}>Permanent link:</span>
             <a
               href={canonicalUrl}
-              className="text-primary hover:text-primary/80 truncate transition-colors"
+              className={`text-primary hover:text-primary/80 truncate ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
             >
               {canonicalUrl}
             </a>
           </div>
         </header>
 
-        <Separator className="my-6" />
+        <Separator className={UI_CLASSES.MARGIN_Y_RELAXED} />
 
         {/* Content */}
         <ChangelogContent entry={entry} />

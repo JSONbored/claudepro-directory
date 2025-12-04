@@ -80,7 +80,7 @@ export default async function NewJobPage() {
       throw normalized;
     }
 
-    // After checking serverError, result.data is guaranteed to be defined
+    // result.data should be present per types, but check kept to handle unexpected runtime/malformed responses
     if (!result.data) {
       const normalized = normalizeError(
         'createJob returned no data',

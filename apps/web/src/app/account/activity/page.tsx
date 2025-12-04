@@ -158,7 +158,7 @@ export default async function ActivityPage() {
       </div>
 
       {/* Stats Overview - only render if summary is available */}
-      {hasSummary ? (
+      {summary == null ? null : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card>
             <CardHeader className="pb-3">
@@ -175,7 +175,7 @@ export default async function ActivityPage() {
             </CardContent>
           </Card>
         </div>
-      ) : null}
+      )}
 
       {/* Timeline - only render if timeline is available */}
       {hasTimeline ? (
@@ -184,7 +184,7 @@ export default async function ActivityPage() {
             <CardTitle>Activity Timeline</CardTitle>
             <CardDescription>
               Your recent contributions and interactions
-              {hasSummary ? ` (${summary.total_activity} total)` : ''}
+              {summary == null ? '' : ` (${summary.total_activity} total)`}
             </CardDescription>
           </CardHeader>
           <CardContent>

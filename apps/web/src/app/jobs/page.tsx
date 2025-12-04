@@ -279,7 +279,8 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   const pageParameter = rawParameters['page'];
   const limitParameter = rawParameters['limit'];
   const page = Math.max(1, Math.min(Number(pageParameter) || 1, 10_000));
-  const limit = Math.min(Number(limitParameter) || 20, 100);
+  const parsedLimit = Number(limitParameter);
+  const limit = Math.min(parsedLimit > 0 ? parsedLimit : 20, 100);
   const offset = (page - 1) * limit;
 
   reqLogger.info('Jobs page accessed', {
@@ -494,11 +495,11 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
               {}
               {(searchQuery ?? '') !== '' ||
-              (category ?? '') !== 'all' ||
-              (employment ?? '') !== 'any' ||
-              (experience ?? '') !== 'any' ||
+              (category !== undefined && category !== 'all') ||
+              (employment !== undefined && employment !== 'any') ||
+              (experience !== undefined && experience !== 'any') ||
               sort !== 'newest' ||
-              remote ? (
+              remote !== undefined ? (
                 <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} border-border mt-4 border-t pt-4`}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Active filters:</span>
                   {searchQuery ? (
@@ -671,12 +672,12 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
 
 function extractSalaryValue(raw: null | string | undefined) {
   if (!raw) return 0;
-  // Normalize "k" suffix to thousands (e.g., "40k" -> "40000")
+  // Normalize "k" suffix to thousands (e.g., "40k" -> "40000", "40.5k" -> "40500")
   const normalized = raw
     .replaceAll(',', '')
-    .replaceAll(/(\d+)k/gi, (_, n) => String(Number(n) * 1000));
-  // Match any number of digits (removed 2-6 digit restriction to handle 7+ digit values)
-  const match = normalized.match(/(\d+)(?:\s*-\s*(\d+))?/);
+    .replaceAll(/(\d+(?:\.\d+)?)k/gi, (_, n) => String(Number(n) * 1000));
+  // Allow optional decimals in both parts while still supporting 7+ digit values
+  const match = normalized.match(/(\d+(?:\.\d+)?)(?:\s*-\s*(\d+(?:\.\d+)?))?/);
   if (!match) return 0;
   const first = Number(match[1]) || 0;
   const second = match[2] ? Number(match[2]) : first;

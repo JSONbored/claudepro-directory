@@ -127,7 +127,8 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
     <div className="space-y-4">
       {availableProviders.map(([provider, config]) => {
         // Normalize provider for comparison (database returns text, enum is lowercase)
-        const normalizedProvider = provider.toLowerCase();
+        // Use same normalization as connectedProviders (toLowerCase().trim())
+        const normalizedProvider = provider.toLowerCase().trim();
         const identity = identities.find(
           (i): i is NonNullable<typeof i> & { provider: string } =>
             i !== null && i.provider !== null && i.provider.toLowerCase().trim() === normalizedProvider

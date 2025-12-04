@@ -176,15 +176,15 @@ export async function generateStaticParams() {
     const jobs = jobsResult?.jobs ?? [];
 
     if (jobs.length === 0) {
-      reqLogger.warn('generateStaticParams: no jobs available, returning placeholder');
-      return [{ slug: 'placeholder' }];
+      reqLogger.warn('generateStaticParams: no jobs available, returning no static params');
+      return [];
     }
 
     return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
     reqLogger.error('JobPage: getJobs threw in generateStaticParams', normalized);
-    return [{ slug: 'placeholder' }];
+    return [];
   }
 }
 
