@@ -84,6 +84,16 @@ function formatSubmissionDate(dateString: string): string {
   });
 }
 
+/**
+ * Parse and validate a GitHub pull request URL and return its owner, repository, and PR number.
+ *
+ * @param url - Candidate URL string to validate and parse.
+ * @returns `{ owner, repo, prNumber }` when `url` is a well-formed, safe `https://github.com/:owner/:repo/pull/:number` URL; `null` for any invalid, unsafe, or non-PR input.
+ *
+ * @see buildSafePrUrl
+ * @see PR_PATH_REGEX
+ * @see dangerousCharsSet
+ */
 function extractPrComponents(
   url: null | string | undefined
 ): null | { owner: string; prNumber: string; repo: string } {
@@ -157,7 +167,14 @@ const ALLOWED_TYPES = Constants.public.Enums.submission_type;
 // Typed copy for use as submission_type array
 const ALLOWED_TYPES_ARRAY: Database['public']['Enums']['submission_type'][] = [...ALLOWED_TYPES];
 
-// Strict content slug validation - only alphanumeric, hyphens, underscores
+/**
+ * Validates that a content slug contains only lowercase letters, digits, hyphens, or underscores.
+ *
+ * @param slug - Candidate slug to validate (no dots, slashes, spaces, percent-encoding, or uppercase letters).
+ * @returns `true` if `slug` matches `/^[a-z0-9-_]+$/`, `false` otherwise.
+ *
+ * @see getSafeContentUrl
+ */
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string') return false;
   // No path separators, no dots, no percent-encoding, no special chars
@@ -180,6 +197,25 @@ function getSafeContentUrl(
   return `/${type}/${slug}`;
 }
 
+/**
+ * Render the "My Submissions" account page, fetching the current user's submissions and displaying them.
+ *
+ * Fetches the authenticated user and the user's dashboard submissions, validates and formats submission
+ * data, and returns the server-rendered UI for listing submissions, creating a new submission, and
+ * showing informational guidance.
+ *
+ * Data fetching is performed on the server for the current request; errors during dashboard fetching
+ * render a simple error message. Links to GitHub PRs and internal content pages are validated before
+ * being exposed.
+ *
+ * @returns The rendered submissions page as a React Server Component subtree.
+ *
+ * @see SubmissionCard
+ * @see getUserDashboard
+ * @see getAuthenticatedUser
+ * @see getSafeContentUrl
+ * @see extractPrComponents
+ */
 export default async function SubmissionsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

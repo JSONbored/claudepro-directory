@@ -40,12 +40,28 @@ function isValidContentType(type: string): boolean {
   return (ALLOWED_CONTENT_TYPES as readonly string[]).includes(type);
 }
 
-// Slug must be alphanumeric/dash/underscore, no slashes, no protocol
+/**
+ * Checks whether a slug contains only letters, digits, hyphens, or underscores.
+ *
+ * @param slug - The candidate slug to validate (no slashes, no protocol).
+ * @returns `true` if `slug` is a non-empty string composed only of ASCII letters, digits, `-`, or `_`; `false` otherwise.
+ *
+ * @see getSafeContentLink
+ */
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string') return false;
   return /^[a-zA-Z0-9-_]+$/.test(slug);
 }
 
+/**
+ * Produce a safe internal path to a content item when its type and slug are valid.
+ *
+ * @param item - Object containing `content_type` and `content_slug` for the content item
+ * @returns The path string `/[content_type]/[content_slug]` when both values are valid, or `null` when not
+ *
+ * @see isValidContentType
+ * @see isValidSlug
+ */
 function getSafeContentLink(item: { content_slug: string; content_type: string }): null | string {
   if (isValidContentType(item.content_type) && isValidSlug(item.content_slug)) {
     return `/${item.content_type}/${item.content_slug}`;
@@ -57,6 +73,15 @@ interface PublicCollectionPageProperties {
   params: { collectionSlug: string; slug: string };
 }
 
+/**
+ * Generates metadata for a public collection detail page and warms the related data cache.
+ *
+ * Fetches collection detail data before the page renders to pre-populate the cache. Errors
+ * during the fetch are logged but do not interrupt metadata generation.
+ *
+ * @param params - Route parameters containing the user slug and collection slug
+ * @returns Page metadata for the public collection detail page
+ */
 export async function generateMetadata({
   params,
 }: PublicCollectionPageProperties): Promise<Metadata> {
@@ -94,6 +119,22 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Renders the public collection detail page for a user's collection, including header, items list, and stats.
+ *
+ * Fetches the collection data for the given user and collection slugs, triggers a 404 when the collection is missing,
+ * and conditionally shows owner controls and safe item links. Also emits a non-blocking view tracking pulse.
+ *
+ * @param params - Route parameters for the page.
+ * @param params.slug - The user slug (profile owner) from the route.
+ * @param params.collectionSlug - The collection slug from the route.
+ * @returns The React element tree for the public collection page.
+ *
+ * @see getPublicCollectionDetail
+ * @see getAuthenticatedUser
+ * @see getSafeContentLink
+ * @see generateRequestId
+ */
 export default async function PublicCollectionPage({ params }: PublicCollectionPageProperties) {
   const { slug, collectionSlug } = params;
 

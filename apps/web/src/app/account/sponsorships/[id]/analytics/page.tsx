@@ -41,6 +41,22 @@ export async function generateMetadata({ params }: AnalyticsPageProperties): Pro
   return generatePageMetadata('/account/sponsorships/:id/analytics', { params: { id } });
 }
 
+/**
+ * Render the sponsorship analytics page for a given sponsorship id.
+ *
+ * Renders campaign overview metrics, campaign details, a 30-day daily performance chart,
+ * and optimization tips. Enforces authentication (prompts sign-in if unauthenticated)
+ * and fetches analytics data for the current user; if analytics are missing or invalid,
+ * the page resolves to a not-found response.
+ *
+ * @param params - Route parameters object containing the `id` of the sponsorship to display.
+ * @returns A React element displaying campaign metrics, daily performance visualization, and tips.
+ *
+ * @see getSponsorshipAnalytics
+ * @see getAuthenticatedUser
+ * @see generateRequestId
+ * @see notFound
+ */
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProperties) {
   const { id } = await params;
 

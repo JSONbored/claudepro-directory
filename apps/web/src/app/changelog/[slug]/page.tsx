@@ -53,9 +53,17 @@ export const revalidate = 7200;
 export const dynamicParams = true; // Allow older changelog entries to be rendered on-demand
 
 /**
- * Generate static params for recent changelog entries
- * Pre-renders a limited set of recent entries (STATIC_GENERATION_LIMITS.changelog)
- * Older entries are rendered on-demand via ISR (revalidate = 7200s)
+ * Build the list of static route params for the most recent changelog entries.
+ *
+ * Pre-renders up to STATIC_GENERATION_LIMITS.changelog of the latest entries to reduce build time;
+ * older entries are rendered on-demand via ISR (revalidate = 7200 seconds).
+ *
+ * @returns An array of param objects of the form `{ slug: string }` for Next.js static generation
+ *
+ * @throws {Error} When loading changelog entries fails — the error is normalized and re-thrown.
+ *
+ * @see getAllChangelogEntries
+ * @see STATIC_GENERATION_LIMITS
  */
 export async function generateStaticParams() {
   // Import shared constant for consistency across changelog pages
@@ -89,7 +97,18 @@ export async function generateStaticParams() {
 }
 
 /**
- * Generate metadata for changelog detail page
+ * Build page metadata for a changelog entry identified by slug.
+ *
+ * Attempts to load the changelog entry by slug and returns metadata for the
+ * route template `/changelog/:slug`. If the entry cannot be loaded, a
+ * metadata object is still returned with the item set to `null` and the error
+ * recorded to the request-scoped logger.
+ *
+ * @param params - A promise that resolves to an object containing the `slug` of the changelog entry
+ * @returns Metadata configured for the changelog detail route, using the loaded entry when available
+ *
+ * @see getChangelogEntryBySlug
+ * @see generatePageMetadata
  */
 export async function generateMetadata({
   params,
@@ -128,7 +147,19 @@ export async function generateMetadata({
 }
 
 /**
- * Changelog Detail Page Component
+ * Render the changelog detail page for a given entry slug.
+ *
+ * Loads the changelog entry by slug, renders metadata, structured data, view tracking, and the entry content;
+ * triggers a 404 when the entry is not found.
+ *
+ * @param params - A promise that resolves to an object with the `slug` of the changelog entry to render.
+ * @returns The server-rendered React element for the changelog entry page.
+ * @throws An error normalized via `normalizeError` if loading the changelog entry fails.
+ *
+ * @see getChangelogEntryBySlug
+ * @see getChangelogUrl
+ * @see ChangelogContent
+ * @see StructuredData
  */
 export default async function ChangelogEntryPage({
   params,

@@ -1,14 +1,11 @@
 /**
- * Auth Route Group Layout
+ * Minimal layout wrapper for authentication pages that provides a full-viewport container.
  *
- * Minimal layout wrapper for authentication pages.
- * The split-screen layout and viewport handling is now managed
- * by the SplitAuthLayout component within each auth page.
+ * Renders a passthrough container that applies background and overflow handling; navigation and footer are intentionally omitted.
  *
- * Features:
- * - No navigation or footer (clean auth UI)
- * - Passthrough container for split-screen auth pages
- * - Overflow handling for full-viewport experience
+ * @param children - Child nodes to render inside the auth layout
+ * @returns The layout element that wraps the provided `children`
+ * @see SplitAuthLayout - component responsible for split-screen layout and viewport handling within auth pages
  */
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {

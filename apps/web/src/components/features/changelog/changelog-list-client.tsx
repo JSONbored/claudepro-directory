@@ -11,10 +11,13 @@ export interface ChangelogListClientProps {
 }
 
 /**
- * ChangelogListClient Component
- * 
- * Timeline view without filter tabs - matches Supabase/Cursor.sh design
- * All entries are displayed in a clean timeline layout
+ * Render a timeline of changelog entries without filter tabs.
+ *
+ * Renders the full timeline using ChangelogTimelineView when entries are present; when `entries` is empty, displays a centered "No changelog entries found." message.
+ *
+ * @param entries - Array of changelog entries to display in the timeline
+ *
+ * @see ChangelogTimelineView
  */
 export function ChangelogListClient({ entries }: ChangelogListClientProps) {
   return (

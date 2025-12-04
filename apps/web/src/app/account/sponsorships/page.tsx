@@ -31,10 +31,19 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Check if a sponsorship is currently active
- * A sponsorship is active if:
- * - The active flag is true (not null or false)
- * - Current date is between start_date and end_date (inclusive)
+ * Determine whether a sponsorship is active at a given time.
+ *
+ * A sponsorship is considered active when its `active` flag is `true` and the
+ * provided time falls between `start_date` and `end_date` (inclusive).
+ *
+ * @param sponsorship - Object containing sponsorship state and date range:
+ *   - `active`: boolean or null indicating whether the sponsorship is enabled
+ *   - `start_date`: ISO date string for the start of the sponsorship period
+ *   - `end_date`: ISO date string for the end of the sponsorship period
+ * @param now - Reference Date used to evaluate whether the sponsorship is within its active range
+ * @returns `true` if the sponsorship's `active` flag is `true` and `now` is between `start_date` and `end_date` (inclusive), `false` otherwise.
+ *
+ * @see SponsorshipsPage
  */
 function isSponsorshipActive(
   sponsorship: { active: boolean | null; end_date: string; start_date: string },
@@ -47,6 +56,23 @@ function isSponsorshipActive(
   );
 }
 
+/**
+ * Render the account Sponsorships page: authenticate the user, load and display their sponsorship campaigns with stats and controls.
+ *
+ * Attempts to authenticate the current request, loads the user's sponsorships, and renders one of:
+ * - a sign-in prompt when unauthenticated,
+ * - an error message when sponsorships cannot be loaded,
+ * - an empty-state CTA when the user has no sponsorships,
+ * - or a list of sponsorship cards sorted newest-first showing status badges, impressions/clicks/CTR, and an impressions progress bar when applicable.
+ *
+ * This is a server component that performs per-request data fetching and logging; it relies on request-scoped logging, getAuthenticatedUser for authentication, getUserSponsorships for data, and isSponsorshipActive to determine campaign activity. The page is rendered dynamically on the server.
+ *
+ * @returns The rendered JSX for the Sponsorships page (heading, CTAs, and a grid of sponsorship cards or appropriate fallback UIs).
+ *
+ * @see getAuthenticatedUser
+ * @see getUserSponsorships
+ * @see isSponsorshipActive
+ */
 export default async function SponsorshipsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

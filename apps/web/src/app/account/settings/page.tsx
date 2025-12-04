@@ -40,6 +40,22 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/settings');
 }
 
+/**
+ * Server-rendered settings page that displays and manages the authenticated user's profile and account settings.
+ *
+ * Renders the full settings UI when user data and profile are available; otherwise renders appropriate fallback
+ * interfaces for unauthenticated access or when settings/profile cannot be loaded. This page performs request-scoped
+ * data fetching and initialization on each request and runs with dynamic server rendering.
+ *
+ * @returns The page JSX: the main settings UI when data is present; an authentication prompt if the request is unauthenticated;
+ * or an error/fallback card when user settings or profile cannot be loaded.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserSettings
+ * @see ensureUserRecord
+ * @see ProfileEditForm
+ * @see RefreshProfileButton
+ */
 export default async function SettingsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

@@ -92,16 +92,23 @@ async function TopContributorsServer() {
 }
 
 /**
- * OPTIMIZATION: Streaming SSR Homepage
+ * Server component that renders the homepage using streaming Suspense boundaries to reduce time-to-first-byte.
  *
- * The homepage is now split into streaming Suspense boundaries:
- * 1. Hero section - streams immediately (no data fetching)
- * 2. Search facets - streams in parallel (non-blocking)
- * 3. Homepage content - streams when ready (non-blocking)
- * 4. Top contributors - lazy loaded below fold
+ * Renders the page as a set of streaming sections so the hero can appear immediately while other data loads:
+ * - Hero: renders immediately and receives a best-effort member count fetched from `getHomepageData` (falls back to 0 on failure).
+ * - Search facets: fetched in parallel and streamed independently.
+ * - Homepage content: rendered within a Suspense boundary and streamed when its data is ready.
+ * - Top contributors and newsletter CTA: lazy-loaded below the fold.
  *
- * This improves TTFB by ~50% (200-300ms → 100-150ms) by allowing
- * the hero section to render immediately while other data loads.
+ * @param searchParams - A promise resolving to the page's query parameters (awaited so search params are available before render).
+ * @returns The homepage React element composed of streaming Suspense boundaries and lazy sections.
+ *
+ * @see HomepageHeroServer
+ * @see HomepageContentServerWrapper
+ * @see TopContributorsServer
+ * @see getHomepageData
+ * @see trackRPCFailure
+ * @see revalidate
  */
 export default async function HomePage({ searchParams }: HomePageProperties) {
   // Generate single requestId for this page request

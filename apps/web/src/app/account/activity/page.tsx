@@ -32,6 +32,27 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/activity');
 }
 
+/**
+ * Renders the Account Activity page: enforces authentication, loads the user's activity summary and timeline in parallel (allowing partial failures), and displays a summary card and an activity timeline or appropriate fallbacks.
+ *
+ * If the user is unauthenticated this returns a sign-in prompt. If both activity summary and timeline fail to load, this returns a global "Activity unavailable" fallback. Partial failures are tolerated: available data is shown while failed pieces are logged and hidden.
+ *
+ * Data fetched:
+ * - User authentication via getAuthenticatedUser
+ * - Activity summary via getUserActivitySummary
+ * - Activity timeline via getUserActivityTimeline
+ *
+ * Logging:
+ * - Creates a request-scoped logger and a user-scoped logger (user identifiers are redacted per logger configuration).
+ *
+ * @returns The React element tree for the Activity page.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserActivitySummary
+ * @see getUserActivityTimeline
+ * @see ActivityTimeline
+ * @see logger
+ */
 export default async function ActivityPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

@@ -170,12 +170,27 @@ export interface DetailHeaderActionsProps {
 }
 
 /**
- * DetailHeaderActions Component (Client Component)
+ * Render interactive header actions for a content detail view.
  *
- * Interactive action buttons for the detail header
- * - Back button with router navigation
- * - Copy button with state and toast notifications
- * - Primary and secondary action buttons with click handlers
+ * Renders back navigation, primary/secondary actions, pin/share controls, copy and download flows,
+ * and a sticky actions sidebar when appropriate. Copy and download behaviours may be overridden
+ * via props or rely on utilities like `getContentForCopy` and `sanitizePathSegment`.
+ *
+ * @param item - The content detail object (typically a ContentItem) used to derive title, slug, description, content, and download URLs
+ * @param typeName - Human-readable content type label (shown as a badge)
+ * @param category - Content category (used for routing, downloads, and analytics)
+ * @param hasContent - Whether the item exposes copyable content; toggles content-specific action UI
+ * @param displayTitle - Title to display in the header (falls back to item.title or item.slug when absent)
+ * @param primaryAction - Primary CTA shown in the actions sidebar; its `type` determines special handling (e.g., `download`)
+ * @param secondaryActions - Optional list of additional serializable actions rendered as secondary buttons
+ * @param onCopyContent - Optional override callback invoked when the Copy Content button is pressed; if provided, the component will delegate copy handling to this function
+ *
+ * @returns The React element that composes the detail header actions UI.
+ *
+ * @see sanitizePathSegment
+ * @see getContentForCopy
+ * @see useCopyWithEmailCapture
+ * @see ShareMenu
  */
 export function DetailHeaderActions({
   item,

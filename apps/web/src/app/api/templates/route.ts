@@ -19,6 +19,24 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
+/**
+ * Handle GET requests to fetch content templates for a specified category.
+ *
+ * Validates the `category` query parameter, returns a 400 JSON error when the
+ * category is missing or invalid, and on success returns a JSON payload with
+ * templates and metadata while setting cache control headers suitable for
+ * CDN/edge caching.
+ *
+ * @param request - The incoming NextRequest containing URL search parameters.
+ * @returns A NextResponse containing either:
+ *  - On success (status 200): `{ success: true, templates: Array, category: string, count: number }`
+ *  - On invalid category (status 400): `{ error: 'Invalid category', message: string }`
+ *  - On internal error: a standardized error response produced by `createErrorResponse`.
+ *
+ * @see VALID_CATEGORIES
+ * @see getContentTemplates
+ * @see createErrorResponse
+ */
 export async function GET(request: NextRequest) {
   // Generate single requestId for this API request
   const requestId = generateRequestId();

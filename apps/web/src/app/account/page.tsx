@@ -39,6 +39,24 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Render the account dashboard page for the authenticated user.
+ *
+ * This server component verifies authentication, loads the user's dashboard bundle
+ * (dashboard, library, homepage), computes metrics and recent bookmarks, resolves
+ * content details for recent bookmarks, and builds personalized recommendations
+ * before returning the dashboard UI.
+ *
+ * The component returns a complete JSX page that includes stats, quick actions,
+ * a recently saved grid, and recommended items. If the user is not authenticated
+ * or required dashboard data cannot be loaded, it renders an appropriate fallback UI.
+ *
+ * @returns A JSX element representing the account dashboard page.
+ *
+ * @see getAuthenticatedUser
+ * @see getAccountDashboardBundle
+ * @see RecentlySavedGrid
+ */
 export default async function AccountDashboard() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
@@ -408,6 +426,17 @@ export default async function AccountDashboard() {
   );
 }
 
+/**
+ * Renders a compact action row with a title, description, and a right-aligned "Open" link.
+ *
+ * @param title - Short label for the action
+ * @param description - One-line explanation of what the action does
+ * @param href - Destination URL for the "Open" link
+ * @returns A JSX element representing the quick action row
+ *
+ * @see NavLink
+ * @see RecentlySavedGrid
+ */
 function QuickActionRow({
   title,
   description,
@@ -430,6 +459,17 @@ function QuickActionRow({
   );
 }
 
+/**
+ * Displays an empty state shown when the user has no saved configs.
+ *
+ * Renders a brief message and a link to the directory so users can explore and bookmark configurations.
+ *
+ * @returns A React element containing the empty-state message and a directory link.
+ *
+ * @see RecentlySavedGrid
+ * @see NavLink
+ * @see ROUTES.HOME
+ */
 function EmptyRecentlySavedState() {
   return (
     <div className="border-border/70 rounded-2xl border border-dashed p-6 text-center">

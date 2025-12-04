@@ -33,10 +33,10 @@ export const dynamicParams = true; // Allow unknown slugs to be rendered on dema
 /**
  * Produce static route parameters for a subset of popular content to pre-render at build time.
  *
- * Returns an array of { category, slug } entries containing up to 30 top items per homepage category.
- * Invalid or missing slugs are excluded; other pages remain available for on-demand rendering via dynamicParams.
+ * Generates up to 10 { category, slug } entries per homepage category for partial pre-rendering;
+ * pages not included are served on-demand via Next.js dynamic params and ISR (revalidation handled elsewhere).
  *
- * @returns An array of objects with `category` and `slug` to be used as static params for pre-rendering
+ * @returns An array of objects each containing `category` and `slug` to be used as static params for pre-rendering
  *
  * @see getHomepageCategoryIds
  * @see getContentByCategory
@@ -176,7 +176,7 @@ export async function generateMetadata({
 /**
  * Render the content detail page for a given category and slug.
  *
- * Fetches core content required for the page (blocking for LCP) and composes the UI while deferring analytics and related-item data for Suspense. Validates the category and its configuration and returns a 404 when invalid or when the core content is missing. Conditionally includes recently-viewed tracking for supported categories and a collection-specific section when the item is a collection.
+ * Fetches core content required for the page (blocking for LCP), defers analytics and related-item data for Suspense, validates category and configuration (returns a 404 when invalid or missing), and conditionally includes recently-viewed tracking and a collection-specific section when applicable.
  *
  * @param params - Route parameters object containing `category` and `slug`
  * @returns A React element for the requested content detail page

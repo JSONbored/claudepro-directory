@@ -41,6 +41,12 @@ const NewsletterCTAVariant = dynamicImport(
   }
 );
 
+/**
+ * Provide metadata for the "/community" page used by Next.js.
+ *
+ * @returns The page Metadata object for the community route.
+ * @see {@link generatePageMetadata} - helper that constructs page metadata from a route
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community');
 }
@@ -62,6 +68,19 @@ function formatStatValue(value: null | number | undefined): string {
   }).format(value);
 }
 
+/**
+ * Renders the Community page including hero content, aggregated community statistics, contribution guidance, and an email CTA.
+ *
+ * Fetches directory and homepage metrics, logs configuration gaps and data-fetch errors, and supplies safe defaults when data is unavailable.
+ *
+ * @returns The page's React element tree (JSX) for server rendering.
+ *
+ * @see getCommunityDirectory
+ * @see getConfigurationCount
+ * @see getHomepageData
+ * @see NewsletterCTAVariant
+ * @see generateRequestId
+ */
 export default async function CommunityPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

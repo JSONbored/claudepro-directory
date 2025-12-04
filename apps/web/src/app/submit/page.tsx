@@ -123,7 +123,16 @@ function mapSubmissionTypeToContentCategory(
   return DEFAULT_CONTENT_CATEGORY;
 }
 
-// Type guard for recent merged submissions
+/**
+ * Type guard that verifies an unknown value has the shape of a recent merged submission.
+ *
+ * @param submission - Value to check for the required recent-submission fields
+ * @returns `true` if `submission` has non-null `id`, `content_name`, `content_type`, and `merged_at` properties (and therefore can be treated as a recent merged submission), `false` otherwise.
+ *
+ * @see mapSubmissionTypeToContentCategory
+ * @see formatTimeAgo
+ * @see SidebarActivityCard
+ */
 function isValidRecentSubmission(submission: unknown): submission is {
   content_name: string;
   content_type: Database['public']['Enums']['submission_type'];
@@ -145,6 +154,16 @@ function isValidRecentSubmission(submission: unknown): submission is {
   );
 }
 
+/**
+ * Produce the page metadata for the Submit page.
+ *
+ * Generates the Metadata object used by Next.js for the /submit route, applying the site's standard metadata defaults for content pages.
+ *
+ * @returns The Metadata object for the Submit page
+ *
+ * @see generatePageMetadata
+ * @see import('next').Metadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/submit');
 }
@@ -152,7 +171,20 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Edge-cached data: Dashboard data fetched from edge-cached data layer
  */
-// revalidate is set at the top of the file
+/**
+ * Render the community submission page including the submission form, metrics dashboard, content templates, and a sidebar with recent activity and tips.
+ *
+ * This server component fetches data per-request: submission dashboard stats & recent submissions, submission form configuration, and content templates for supported categories. It performs runtime validation on category mappings and logs failures; template fetch failures for individual categories fall back to empty arrays so the page can still render. The page is edge-cached and uses the file-level `revalidate` for ISR.
+ *
+ * @returns The page's JSX element containing the hero, submission form, community stats, recent activity, and newsletter CTA.
+ *
+ * @see getSubmissionDashboard
+ * @see getSubmissionFormFields
+ * @see getContentTemplates
+ * @see SubmitFormClient
+ * @see SubmitPageHero
+ * @see SidebarActivityCard
+ */
 
 export default async function SubmitPage() {
   // Generate single requestId for this page request

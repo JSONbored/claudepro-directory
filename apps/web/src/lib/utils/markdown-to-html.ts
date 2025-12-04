@@ -26,16 +26,19 @@ marked.use({
 });
 
 /**
- * Convert markdown string to sanitized HTML
+ * Convert a Markdown string to sanitized HTML suitable for server-side rendering.
  *
- * @param markdown - Raw markdown string from database
- * @returns Sanitized HTML string safe for rendering
+ * @param {string | null | undefined} markdown - Raw Markdown string (may be null/undefined).
+ * @returns {string} Sanitized HTML string; returns an empty string for invalid, empty input or on error.
  *
  * @example
  * ```ts
  * const html = markdownToHtml('## Heading\n\n**Bold text**');
  * // Returns: '<h2>Heading</h2><p><strong>Bold text</strong></p>'
  * ```
+ *
+ * @see {@link https://github.com/markedjs/marked|marked} for Markdown parsing
+ * @see {@link https://github.com/cure53/DOMPurify|DOMPurify} for HTML sanitization
  */
 export function markdownToHtml(markdown: string | null | undefined): string {
   if (!markdown || typeof markdown !== 'string' || markdown.trim().length === 0) {

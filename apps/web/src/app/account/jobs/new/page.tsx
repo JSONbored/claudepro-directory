@@ -20,6 +20,17 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/jobs/new');
 }
 
+/**
+ * Render the "Post a Job" page with a job creation form and plan catalog.
+ *
+ * Fetches the payment plan catalog for use in the form and provides a server action that creates jobs, handles payment-required flows (returns a checkout URL when needed), and redirects to the jobs list when creation succeeds without payment.
+ *
+ * @returns The React element for the New Job page containing the header and a JobForm wired to the server action that creates jobs and manages payment/redirect behavior.
+ *
+ * @see JobForm
+ * @see getPaymentPlanCatalog
+ * @see createJob
+ */
 export default async function NewJobPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

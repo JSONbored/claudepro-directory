@@ -31,6 +31,20 @@ interface RouteContext {
 
 type HttpMethod = 'GET' | 'POST';
 
+/**
+ * Route a Flux API request to the runtime, building per-request logging and returning a HTTP response.
+ *
+ * @param method - HTTP method for the Flux operation ('GET' or 'POST')
+ * @param request - The incoming Next.js request object
+ * @param context - Route context containing resolved route params (expects `params.path` as string[])
+ * @returns A Response produced by the Flux runtime for the given route and method, or an error Response if processing failed
+ *
+ * @see routeFluxRequest
+ * @see normalizeError
+ * @see createErrorResponse
+ * @see generateRequestId
+ * @see logger
+ */
 async function handleFluxRequest(
   method: HttpMethod,
   request: NextRequest,
@@ -64,14 +78,14 @@ async function handleFluxRequest(
 }
 
 /**
- * Handle GET requests for the Flux catch-all API route and forward them to the Flux router.
+ * Handles GET requests for the Flux catch-all API route and forwards them to the Flux router.
  *
- * Resolves the dynamic path segments from `context`, creates a request-scoped log context, and delegates
+ * Resolves dynamic path segments from `context`, creates a request-scoped log context, and delegates
  * processing to the Flux routing implementation.
  *
- * @param request - The incoming Next.js request object for the GET operation.
- * @param context - Route context containing resolved dynamic route parameters; `context.params.path` is the path segments array.
- * @returns A Response object representing the Flux API response for the routed GET request.
+ * @param request - NextRequest: The incoming Next.js request object for the GET operation.
+ * @param context - RouteContext: Route context containing resolved dynamic route parameters; `context.params.path` is the path segments array.
+ * @returns Response: The Response object produced by the Flux router for this GET request.
  * @see routeFluxRequest
  * @see generateRequestId
  * @see logger
@@ -81,11 +95,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 /**
- * Handle POST requests for the Flux catch-all API route and forward them to the Flux router.
+ * Handle POST requests to the Flux catch-all API route by delegating processing to the Flux router.
  *
- * @param {NextRequest} request - The incoming Next.js request for the POST operation.
- * @param {RouteContext} context - Route context containing a promise-resolved `params.path` array of path segments.
- * @returns {Promise<Response>} A Response produced by the Flux router for the given path and request.
+ * @param request - The incoming Next.js request for the POST operation.
+ * @param context - Route context containing a promise-resolved `params.path` array of path segments.
+ * @returns The Response produced by the Flux router for the given path and request.
  *
  * @see routeFluxRequest
  * @see generateRequestId

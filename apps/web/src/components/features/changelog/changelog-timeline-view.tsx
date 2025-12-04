@@ -18,11 +18,32 @@ import { TimelineMarker } from './timeline-marker';
 
 type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 
+/**
+ * Validates a changelog slug according to the project's allowed format.
+ *
+ * @param slug - The slug to validate; must be 3–100 characters long and use only lowercase letters (`a–z`), digits (`0–9`), or hyphens (`-`).
+ * @returns `true` if `slug` meets the length and character constraints, `false` otherwise.
+ *
+ * @see getSafeChangelogPath
+ * @see isValidInternalPath
+ */
 function isValidChangelogSlug(slug: string): boolean {
   if (typeof slug !== 'string' || slug.length < 3 || slug.length > 100) return false;
   return /^[a-z0-9-]+$/.test(slug);
 }
 
+/**
+ * Determine whether a string is a safe internal URL path suitable for in-app navigation.
+ *
+ * Accepts paths that start with a single leading slash, do not begin with dangerous protocols
+ * (e.g., `javascript:`, `data:`), and contain only common URL path/query/fragment characters.
+ *
+ * @param path - The candidate internal path to validate (e.g., `/changelog/my-entry`).
+ * @returns `true` if the path is a well-formed internal path starting with `/` and not using dangerous protocols, `false` otherwise.
+ *
+ * @see getSafeChangelogPath
+ * @see isValidChangelogSlug
+ */
 function isValidInternalPath(path: string): boolean {
   if (typeof path !== 'string' || path.length === 0) return false;
   if (!path.startsWith('/')) return false;
@@ -31,6 +52,16 @@ function isValidInternalPath(path: string): boolean {
   return /^\/[a-zA-Z0-9/?#\-_.~!*'();:@&=+$,%[\]]*$/.test(path);
 }
 
+/**
+ * Produce a safe internal changelog path for a given slug.
+ *
+ * @param slug - The candidate changelog slug (may be null or undefined).
+ * @returns The internal path `/changelog/{sanitized-slug}` if the slug is valid and safe, `null` otherwise.
+ *
+ * @see isValidChangelogSlug
+ * @see isValidInternalPath
+ * @see sanitizeSlug
+ */
 function getSafeChangelogPath(slug: string | null | undefined): string | null {
   if (!slug || typeof slug !== 'string') return null;
   if (!isValidChangelogSlug(slug)) return null;
@@ -46,10 +77,17 @@ interface ChangelogTimelineViewProps {
 }
 
 /**
- * ChangelogTimelineView Component
- * 
- * Implements sticky scroll timeline with Intersection Observer
- * for active entry detection
+ * Render a two-column changelog timeline with sticky left-side markers and scroll-linked content sections.
+ *
+ * The component displays timeline markers (hidden on small screens) and corresponding changelog content sections;
+ * it tracks which section is currently prominent using IntersectionObserver and highlights the matching marker.
+ * Clicking a marker smoothly scrolls the associated content section into view.
+ *
+ * @param entries - Ordered array of changelog entries used to render timeline markers and their corresponding content sections.
+ *
+ * @see ChangelogContent
+ * @see TimelineMarker
+ * @see getSafeChangelogPath
  */
 export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
   const [activeSlug, setActiveSlug] = useState<string | null>(entries[0]?.slug ?? null);

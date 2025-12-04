@@ -35,6 +35,18 @@ interface DecodedQuizAnswers {
   useCase: Database['public']['Enums']['use_case_type'];
 }
 
+/**
+ * Decode and validate a base64url-encoded JSON string of quiz answers into a typed DecodedQuizAnswers object.
+ *
+ * @param encoded - The base64url-encoded JSON payload containing quiz answers.
+ * @param resultId - Identifier used to annotate logs when decoding fails.
+ * @returns The decoded answers containing required fields `useCase`, `experienceLevel`, and `toolPreferences`, and optionally `p_integrations`, `p_focus_areas`, `teamSize`, and `timestamp`.
+ * @throws An error normalized by `normalizeError` when the input cannot be decoded or fails validation.
+ *
+ * @see Constants
+ * @see normalizeError
+ * @see logger
+ */
 function decodeQuizAnswers(
   encoded: string,
   resultId: string,
@@ -157,6 +169,17 @@ function decodeQuizAnswers(
   }
 }
 
+/**
+ * Filters and validates recommendation items, returning only those that include `category`, `slug`, and `title`.
+ *
+ * @param results - Raw recommendation items returned by the RPC; may be `null` or `undefined`.
+ * @param resultId - Identifier included in logs when items are filtered.
+ * @param parentLogger - Optional parent logger used to create an operation-scoped logger for warnings.
+ * @returns An array of recommendation items guaranteed to have `category`, `slug`, and `title`.
+ *
+ * @see getConfigRecommendations
+ * @see ResultsDisplay
+ */
 function normalizeRecommendationResults(
   results: Database['public']['Functions']['get_recommendations']['Returns']['results'],
   resultId: string,
@@ -222,6 +245,24 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
   };
 }
 
+/**
+ * Render the Configuration Recommender results page for a given result ID.
+ *
+ * Decodes and validates an encoded `answers` query parameter, fetches personalized
+ * configuration recommendations from the backend, normalizes the returned items,
+ * constructs a shareable URL, and renders the results UI. If `answers` is missing,
+ * decoding fails, or the recommendations response is empty, the page triggers a 404.
+ *
+ * @param props.params - Route parameters containing the `id` of the results set
+ * @param props.searchParams - Query parameters; must include `answers` (base64url-encoded JSON)
+ *
+ * @returns The React element that displays the recommendations and a shareable URL
+ *
+ * @see decodeQuizAnswers
+ * @see getConfigRecommendations
+ * @see normalizeRecommendationResults
+ * @see ResultsDisplay
+ */
 export default async function ResultsPage({ params, searchParams }: PageProperties) {
   const resolvedParameters = await params;
   const resolvedSearchParameters = await searchParams;

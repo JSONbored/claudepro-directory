@@ -79,8 +79,18 @@ function getSafeCollectionUrl(userSlug: string, collectionSlug: string): null | 
 }
 
 /**
- * Sanitize display text for safe use in text content
- * Removes HTML tags, script content, and dangerous characters
+ * Produce a plain-text-safe display string from arbitrary input.
+ *
+ * Removes angle brackets, control and dangerous Unicode characters, trims the result,
+ * and limits it to 200 characters; if the result is empty or input is invalid, returns `fallback`.
+ *
+ * @param text - The input text to sanitize.
+ * @param fallback - Value to return when `text` is missing or yields an empty sanitized string.
+ * @returns The sanitized display string, or `fallback` if sanitization produces no content.
+ *
+ * @see sanitizeSlug
+ * @see getSafeContentUrl
+ * @see getSafeCollectionUrl
  */
 function sanitizeDisplayText(text: null | string | undefined, fallback: string): string {
   if (!text || typeof text !== 'string') return fallback;
@@ -131,6 +141,21 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
   });
 }
 
+/**
+ * Render the user profile page for the provided route parameters.
+ *
+ * Loads the public user profile and renders the hero header, activity stats,
+ * public collections, and contributions. If the slug is invalid or the profile
+ * is not found, the page will trigger Next.js not-found handling.
+ *
+ * @param params - Route parameters containing the `slug` of the user to display.
+ * @returns The React element for the user's profile page.
+ *
+ * @see getPublicUserProfile
+ * @see getSafeCollectionUrl
+ * @see getSafeContentUrl
+ * @see sanitizeDisplayText
+ */
 export default async function UserProfilePage({ params }: UserProfilePageProperties) {
   const { slug } = await params;
 

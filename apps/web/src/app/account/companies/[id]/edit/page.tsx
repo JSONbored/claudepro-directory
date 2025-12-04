@@ -39,6 +39,23 @@ interface EditCompanyPageProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Renders the Edit Company page for the company identified by the route `id`.
+ *
+ * Fetches the authenticated user, loads the company for that user, and renders a pre-populated
+ * company edit form when access is allowed. If the user is unauthenticated this page
+ * redirects to the login route. If the company cannot be loaded this page returns an
+ * error card; if the company does not exist or access is denied this page triggers a 404.
+ *
+ * @param props.params - Route parameters containing the `id` of the company to edit.
+ * @returns The page element that displays the edit form pre-populated with the company data,
+ *          or an error card / redirect / 404 response when appropriate.
+ *
+ * @see CompanyForm
+ * @see getUserCompanyById
+ * @see getAuthenticatedUser
+ * @see ROUTES.ACCOUNT_COMPANIES
+ */
 export default async function EditCompanyPage({ params }: EditCompanyPageProperties) {
   const { id } = await params;
 

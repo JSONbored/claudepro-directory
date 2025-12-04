@@ -53,6 +53,18 @@ export async function generateMetadata({ params }: JobAnalyticsPageProperties): 
   return generatePageMetadata('/account/jobs/:id/analytics', { params: { id } });
 }
 
+/**
+ * Render the Job Analytics page for a specific job, fetching the authenticated user and the job's analytics data, and displaying listing details, performance metrics, and actionable insights.
+ *
+ * The component redirects to the login route when no authenticated user is present and renders a "Job analytics unavailable" card when the job cannot be loaded or is not owned by the user.
+ *
+ * @param params - Route params; expects an object with `id` set to the job identifier to display analytics for.
+ * @returns The analytics page React element showing listing details, metrics, trends, and contextual insights.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserJobById
+ * @see MetricsDisplay
+ */
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProperties) {
   const { id } = await params;
 

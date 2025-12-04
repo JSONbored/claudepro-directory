@@ -133,6 +133,15 @@ function mapPopularRows(rows: LoosePopularRow[], fallbackCategory: ContentCatego
   }));
 }
 
+/**
+ * Map database recent-content rows into a normalized frontend-ready shape, applying a fallback category when missing.
+ *
+ * @param rows - Array of recent-content rows (may contain partial/optional fields)
+ * @param fallbackCategory - Category to use when a row's category is null; if null, DEFAULT_CATEGORY is used
+ * @returns An array of mapped items with fields: `category` (ContentCategory), `slug`, `title`, optional `description`, optional `author`, optional `tags`, and optional `created_at`
+ * @see mapPopularRows
+ * @see mapTrendingRows
+ */
 function mapRecentRows(rows: LooseRecentRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     category: (row.category ?? fallbackCategory ?? DEFAULT_CATEGORY) satisfies ContentCategory,
@@ -155,6 +164,15 @@ function mapSidebarTrending(rows: LooseTrendingRow[], fallbackCategory: ContentC
   }));
 }
 
+/**
+ * Map recent content rows into sidebar items containing a display title, a category-prefixed slug path, and a localized date string.
+ *
+ * @param {LooseRecentRow[]} rows - Array of recent-content rows from the database; fields may be missing.
+ * @param {ContentCategory | null} fallbackCategory - Category to use when a row's category is absent; if null the module-level DEFAULT_CATEGORY is used.
+ * @returns {{ title: string; slug: string; date: string; }[]} An array of sidebar items where `title` is the row title or slug fallback, `slug` is the path prefixed with `/category/`, and `date` is a localized "Mon DD, YYYY" string or an empty string when the creation date is unavailable.
+ * @see mapSidebarTrending
+ * @see DEFAULT_CATEGORY
+ */
 function mapSidebarRecent(rows: LooseRecentRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => {
     const displayCategory = (row.category ??

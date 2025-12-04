@@ -39,6 +39,21 @@ export async function generateMetadata({ params }: CollectionPageProperties): Pr
   return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
 
+/**
+ * Renders the collection detail page for a given collection slug, including header, share/edit controls, item manager, and stats.
+ *
+ * This server component authenticates the user, loads the collection data for the authenticated user, and renders user-facing fallbacks:
+ * - Redirects to `/login` if the request is unauthenticated.
+ * - Calls `notFound()` when the specified collection is not accessible or missing.
+ * - Displays an error Card if fetching collection data fails.
+ *
+ * @param params - An object whose `slug` property identifies the collection to display.
+ * @returns The page JSX that shows collection metadata, controls (share/edit), a collection item manager, and summary statistics.
+ *
+ * @see getAuthenticatedUser
+ * @see getCollectionDetail
+ * @see generatePageMetadata
+ */
 export default async function CollectionDetailPage({ params }: CollectionPageProperties) {
   const { slug } = await params;
 

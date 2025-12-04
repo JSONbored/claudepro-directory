@@ -60,6 +60,20 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/tools/config-recommender');
 }
 
+/**
+ * Render the Config Recommender page containing the hero, 7-question quiz, benefits,
+ * features, and newsletter call-to-action.
+ *
+ * Renders a full-page React tree for the rule-based configuration recommender UI.
+ * The page generates a per-request identifier and creates a request-scoped logger for
+ * render-time telemetry, normalizes and rethrows render errors so they are handled by
+ * the application's error boundary.
+ *
+ * @returns The page's React element tree for the Config Recommender UI.
+ *
+ * @see QuizForm
+ * @see NewsletterCTAVariant
+ */
 export default function ConfigRecommenderPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();

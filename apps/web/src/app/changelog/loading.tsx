@@ -7,6 +7,14 @@
 
 import { UI_CLASSES, PageHeaderSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Renders a skeleton UI that mirrors the changelog page layout while content loads.
+ *
+ * @returns The React element containing header, category filter, and multiple changelog card skeletons.
+ * @see PageHeaderSkeleton
+ * @see Skeleton
+ * @see UI_CLASSES
+ */
 export default function ChangelogLoading() {
   return (
     <div className="container max-w-6xl space-y-8 py-8">

@@ -54,13 +54,16 @@ const NewsletterCTAVariant = dynamicImport(
 export const revalidate = 3600;
 
 /**
- * Build metadata for the changelog page and include RSS and Atom feed alternates.
+ * Builds metadata for the /changelog route and includes RSS and Atom feed alternates.
  *
- * If metadata generation fails, returns a fallback metadata object with a default title,
- * description, and the same RSS/Atom alternates.
+ * If metadata generation fails, returns a sensible fallback metadata object with a default
+ * title, description, and the same feed alternates.
  *
- * @returns Page metadata for the `/changelog` route. The metadata includes feed discovery
- *          URLs under `alternates.types` for `application/rss+xml` and `application/atom+xml`.
+ * @returns Page metadata for the /changelog route. Includes `alternates.types` entries for
+ *          `application/rss+xml` and `application/atom+xml` pointing to the site's feed URLs.
+ *
+ * @see generatePageMetadata
+ * @see APP_CONFIG
  */
 export async function generateMetadata(): Promise<Metadata> {
   // Generate requestId for metadata generation (separate from page render)

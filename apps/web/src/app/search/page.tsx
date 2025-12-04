@@ -34,6 +34,15 @@ type SearchFacetAggregate = Awaited<ReturnType<typeof getSearchFacets>>;
 type SearchFacetSummary = SearchFacetAggregate['facets'][number];
 type ContentCategory = Database['public']['Enums']['content_category'];
 
+/**
+ * Type guard that checks whether a string corresponds to one of the allowed sort options.
+ *
+ * @param value - The candidate sort value to validate.
+ * @returns `true` if `value` is one of the entries in `VALID_SORT_OPTIONS`, `false` otherwise.
+ *
+ * @see VALID_SORT_OPTIONS
+ * @see SearchFilters
+ */
 function isValidSort(value: string | undefined): value is SearchFilters['sort'] {
   return value !== undefined && VALID_SORT_OPTIONS.has(value as SearchFilters['sort']);
 }
@@ -147,6 +156,18 @@ async function SearchResultsSection({
   );
 }
 
+/**
+ * Render the search page: resolves query and filters from route parameters, loads search facets and zero-state suggestions, and renders the search UI with results and a recently viewed sidebar.
+ *
+ * @param searchParams - A promise that resolves to route query parameters (may include `q`, `category`, `tags`, `author`, `sort`); used to derive the search query and filters for the page.
+ * @returns The rendered search page element containing the search input, results section, facet controls, zero-state/fallback suggestions, and the recently viewed sidebar.
+ *
+ * @see getSearchFacets
+ * @see getHomepageData
+ * @see ContentSearchClient
+ * @see SearchResultsSection
+ * @see RecentlyViewedSidebar
+ */
 export default async function SearchPage({ searchParams }: SearchPageProperties) {
   const resolvedParameters = await searchParams;
 

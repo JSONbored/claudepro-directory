@@ -30,18 +30,12 @@ import { use, useEffect, useRef, useState } from 'react';
 export const dynamic = 'force-dynamic';
 
 /**
- * Initiates the client-side OAuth account linking flow for the given provider, handling validation,
- * authentication checks, and redirects to the OAuth provider or login as needed.
+ * Client-side React page that initiates an OAuth account linking flow for a specified provider.
  *
- * This component:
- * - Validates the `provider` parameter.
- * - If the user is not signed in, shows an error message and redirects to the login page (preserving a validated `next`).
- * - If the user is signed in, constructs a callback URL with `next` and `link=true`, calls `supabaseClient.auth.linkIdentity`,
- *   and navigates to the returned provider URL.
- * - Renders a loading UI while the flow is in progress and an error UI on failure.
+ * Validates the provider and the `next` return URL, requires an authenticated user (otherwise redirects to login while preserving a validated `next`), constructs a callback URL with `link=true`, calls the Supabase linking API to begin the OAuth flow, and renders a loading state while redirecting or an error UI on failure.
  *
- * @param params - A promise that resolves to an object containing the OAuth provider slug (e.g., `{ provider: 'github' }`).
- * @returns The component's rendered JSX for the linking UI or error state.
+ * @param params - A promise resolving to an object with the OAuth provider slug (e.g., `{ provider: 'github' }`)
+ * @returns The component's rendered JSX for the linking UI or error state
  *
  * @see isValidProvider
  * @see validateNextParameter
@@ -72,7 +66,22 @@ export default function OAuthLinkCallbackPage({
     let redirectTimeoutId: null | ReturnType<typeof setTimeout> = null;
 
     // Use shared validation utility to prevent open redirects
-    // Matches server-side validation in route handlers
+    /**
+     * Initiates the client-side OAuth account linking flow for the configured provider.
+     *
+     * Validates the provider and current authentication state, constructs a linking callback
+     * URL (with `next` and `link=true`), and calls Supabase to start the OAuth flow. If the
+     * user is not signed in, schedules a redirect to the login page that preserves the
+     * intended `next` target. On success, navigates the browser to the OAuth provider URL.
+     * On failure or unexpected responses, updates component state to show an error.
+     *
+     * This function guards against duplicate attempts and will no-op while auth is loading
+     * or if the hosting component has unmounted.
+     *
+     * @see validateNextParameter
+     * @see isValidProvider
+     * @see supabaseClient.auth.linkIdentity
+     */
 
     async function handleLink() {
       // Prevent duplicate OAuth linking attempts (e.g., from Strict Mode re-mounts)

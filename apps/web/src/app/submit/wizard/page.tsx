@@ -132,6 +132,18 @@ const DEFAULT_FORM_DATA: FormData = {
   // thumbnail_url is optional, don't include in default
 };
 
+/**
+ * Renders and orchestrates a multi-step client-side submission wizard for creating and submitting content.
+ *
+ * The component manages wizard state, form data, draft persistence, template loading and application,
+ * thumbnail validation/upload, social-proof fetching, quality scoring, and the final submission flow.
+ *
+ * @returns The wizard UI as a React element, including step content, navigation controls, inline preview, and social proof.
+ *
+ * @see WizardLayout
+ * @see DraftManager
+ * @see useTemplateApplication
+ */
 export default function WizardSubmissionPage() {
   // Onboarding toasts
   useOnboardingToasts({ enabled: true, context: 'wizard' });
@@ -877,7 +889,15 @@ export default function WizardSubmissionPage() {
 }
 
 /**
- * Step 1: Type Selection
+ * Renders the "Choose Your Submission Type" step UI for the submission wizard.
+ *
+ * Displays a header with decorative icon and social proof, and renders the type selection cards.
+ *
+ * @param props.selected - Currently selected submission content type.
+ * @param props.onSelect - Callback invoked when a submission type is chosen.
+ * @returns The JSX element for the type selection step.
+ *
+ * @see WizardSubmissionPage
  */
 function StepTypeSelection({
   selected,
@@ -917,7 +937,24 @@ function StepTypeSelection({
 }
 
 /**
- * Step 2: Basic Information
+ * Render the "Basic Information" step of the submission wizard and manage inputs for
+ * name, description, author, GitHub URL, and optional thumbnail upload/preview.
+ *
+ * Handles real-time validation state for the name and description fields and exposes
+ * callbacks for updating form data, uploading an image file to generate a thumbnail,
+ * and removing the current thumbnail.
+ *
+ * @param props.data - Current form data for the wizard step.
+ * @param props.onChange - Callback invoked with partial form updates when any field changes.
+ * @param props.onImageUpload - Async callback to handle a selected image file and generate/upload a thumbnail.
+ * @param props.isUploadingThumbnail - Indicates whether a thumbnail is currently being generated/uploaded.
+ * @param props.thumbnailPreview - Local or remote URL used to render the thumbnail preview, or null if none.
+ * @param props.onRemoveThumbnail - Callback to remove the current thumbnail and clear its preview.
+ *
+ * @returns The rendered JSX for step 2 (basic information) of the wizard.
+ *
+ * @see WizardSubmissionPage
+ * @see AnimatedFormField
  */
 function StepBasicInfo({
   data,
@@ -1158,7 +1195,22 @@ function StepBasicInfo({
 }
 
 /**
- * Step 3: Configuration (Type-Specific)
+ * Renders the "Configuration" step of the submission wizard, showing type-specific form fields,
+ * an optional template quick-select, and social proof for step 3.
+ *
+ * @param props.submissionType - The selected content type which controls which fields are shown.
+ * @param props.data - Current type-specific form data values.
+ * @param props.onChange - Callback invoked with updated type-specific data when any field changes.
+ * @param props.templates - Optional array of templates available for the current content type.
+ * @param props.templatesLoading - When true, shows a loading skeleton for the template selector.
+ * @param props.onApplyTemplate - Optional callback invoked when a template is applied.
+ * @param props.getHighlightClasses - Optional helper that returns CSS classes to highlight a given field path.
+ *
+ * @returns The JSX for the configuration step.
+ *
+ * @see StepSocialProof
+ * @see TemplateQuickSelect
+ * @see AnimatedFormField
  */
 function StepConfiguration({
   submissionType,
@@ -1413,7 +1465,12 @@ function StepConfiguration({
 }
 
 /**
- * Step 4: Examples & Tags
+ * Renders the "Examples & Tags" wizard step allowing users to add, remove, and review usage examples and discovery tags.
+ *
+ * @param data - Current form data containing `examples` and `tags`.
+ * @param onChange - Callback invoked with partial `FormData` updates when examples or tags change.
+ * @see WizardSubmissionPage
+ * @see StepSocialProof
  */
 function StepExamplesTags({
   data,
