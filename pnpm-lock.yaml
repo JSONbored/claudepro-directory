@@ -386,7 +386,7 @@ importers:
         specifier: workspace:*
         version: link:../shared-runtime
       '@supabase/supabase-js':
-        specifier: ^2.84.0
+        specifier: ^2.86.0
         version: 2.86.0
       pino:
         specifier: ^10.1.0
@@ -428,7 +428,7 @@ importers:
         specifier: ^2.2.5
         version: 2.2.5
       '@supabase/supabase-js':
-        specifier: ^2.84.0
+        specifier: ^2.86.0
         version: 2.86.0
       archiver:
         specifier: ^7.0.1
@@ -593,7 +593,7 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0(@supabase/supabase-js@2.86.0)
       '@supabase/supabase-js':
-        specifier: ^2.84.0
+        specifier: ^2.86.0
         version: 2.86.0
       canvas-confetti:
         specifier: ^1.9.4

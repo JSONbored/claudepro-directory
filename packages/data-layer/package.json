@@ -15,7 +15,7 @@
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",
     "@heyclaude/shared-runtime": "workspace:*",
-    "@supabase/supabase-js": "^2.84.0",
+    "@supabase/supabase-js": "^2.86.0",
     "pino": "^10.1.0"
   },
   "devDependencies": {
