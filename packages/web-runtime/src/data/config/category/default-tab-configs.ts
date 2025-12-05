@@ -67,35 +67,6 @@ const STANDARD_NO_EXAMPLES_TABS: ReadonlyArray<TabConfig> = [
 ] as const;
 
 /**
- * Simple tabs WITHOUT Examples - for rules (legacy, kept for backward compatibility)
- * These have minimal structure with content + troubleshooting
- */
-const SIMPLE_TABS: ReadonlyArray<TabConfig> = [
-  {
-    id: 'overview',
-    label: 'Overview',
-    mobileLabel: 'Overview',
-    sections: ['content', 'description', 'features', 'use_cases', 'requirements'],
-    order: 1,
-  },
-  {
-    id: 'usage',
-    label: 'Usage Tips',
-    mobileLabel: 'Usage',
-    sections: ['troubleshooting'],
-    order: 2,
-  },
-  {
-    id: 'discussion',
-    label: 'Discussion',
-    mobileLabel: 'Discuss',
-    sections: ['reviews', 'related'],
-    lazy: true,
-    order: 3,
-  },
-] as const;
-
-/**
  * Rules tabs WITH Examples - for CLAUDE.md files
  * Includes examples tab for rule usage examples
  */
