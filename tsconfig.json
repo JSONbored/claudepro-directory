@@ -21,7 +21,7 @@
     },
     "noEmit": true,
     "incremental": true,
-    "tsBuildInfoFile": "apps/web/.next/cache/.tsbuildinfo",
+    "tsBuildInfoFile": ".tsbuildinfo",
     "skipLibCheck": true,
     "typeRoots": [
       "./node_modules/@types",

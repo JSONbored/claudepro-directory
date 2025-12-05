@@ -1,4 +1,4 @@
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { ensureStringArray } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -9,14 +9,19 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import  { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
+import { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
+import {
+  UI_CLASSES,
+  NavLink,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
@@ -34,6 +39,24 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Render the account dashboard page for the authenticated user.
+ *
+ * This server component verifies authentication, loads the user's dashboard bundle
+ * (dashboard, library, homepage), computes metrics and recent bookmarks, resolves
+ * content details for recent bookmarks, and builds personalized recommendations
+ * before returning the dashboard UI.
+ *
+ * The component returns a complete JSX page that includes stats, quick actions,
+ * a recently saved grid, and recommended items. If the user is not authenticated
+ * or required dashboard data cannot be loaded, it renders an appropriate fallback UI.
+ *
+ * @returns A JSX element representing the account dashboard page.
+ *
+ * @see getAuthenticatedUser
+ * @see getAccountDashboardBundle
+ * @see RecentlySavedGrid
+ */
 export default async function AccountDashboard() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
@@ -187,13 +210,20 @@ export default async function AccountDashboard() {
     }
   }
 
-  // Helper to safely extract categoryData
+  /**
+   * Safely extracts the `categoryData` map from account dashboard homepage data, returning an empty object if the structure is missing or invalid.
+   *
+   * @param homepageData - The `homepage` field from the account dashboard bundle (may be null, undefined, or malformed)
+   * @returns A record mapping category keys to arrays of `HomepageContentItem`; an empty object if no valid `categoryData` is present
+   *
+   * @see getAccountDashboardBundle
+   */
   function extractHomepageCategoryData(
     homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage']
   ): Record<string, HomepageContentItem[]> {
     if (
-      homepageData?.content === null || 
-      homepageData?.content === undefined || 
+      homepageData?.content === null ||
+      homepageData?.content === undefined ||
       typeof homepageData.content !== 'object'
     ) {
       return {};
@@ -220,11 +250,11 @@ export default async function AccountDashboard() {
   // Section: Recommendations
   const recommendations = candidateRecommendations
     .filter(
-      (item) => 
-        typeof item.slug === 'string' && 
-        item.slug !== '' && 
-        !bookmarkedSlugs.has(`${item.category}/${item.slug}`) && 
-        typeof item.title === 'string' && 
+      (item) =>
+        typeof item.slug === 'string' &&
+        item.slug !== '' &&
+        !bookmarkedSlugs.has(`${item.category}/${item.slug}`) &&
+        typeof item.title === 'string' &&
         item.title !== ''
     )
     .slice(0, 3);
@@ -252,7 +282,7 @@ export default async function AccountDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Dashboard</h1>
+        <h1 className="mb-2 text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back, {profile?.name ?? 'User'}!</p>
       </div>
 
@@ -264,10 +294,10 @@ export default async function AccountDashboard() {
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Bookmark className="h-5 w-5 text-primary" />
-              <span className="font-bold text-3xl">{bookmarkCount ?? 0}</span>
+              <Bookmark className="text-primary h-5 w-5" />
+              <span className="text-3xl font-bold">{bookmarkCount ?? 0}</span>
             </div>
-            <p className="mt-2 text-muted-foreground text-xs">Saved items</p>
+            <p className="text-muted-foreground mt-2 text-xs">Saved items</p>
           </CardContent>
         </Card>
 
@@ -285,7 +315,7 @@ export default async function AccountDashboard() {
                 ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
                 : 'Free'}
             </UnifiedBadge>
-            <p className="mt-2 text-muted-foreground text-xs">Membership level</p>
+            <p className="text-muted-foreground mt-2 text-xs">Membership level</p>
           </CardContent>
         </Card>
 
@@ -295,10 +325,10 @@ export default async function AccountDashboard() {
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Calendar className="h-5 w-5 text-primary" />
-              <span className="font-bold text-3xl">{accountAge}</span>
+              <Calendar className="text-primary h-5 w-5" />
+              <span className="text-3xl font-bold">{accountAge}</span>
             </div>
-            <p className="mt-2 text-muted-foreground text-xs">Days active</p>
+            <p className="text-muted-foreground mt-2 text-xs">Days active</p>
           </CardContent>
         </Card>
       </div>
@@ -310,11 +340,13 @@ export default async function AccountDashboard() {
           <CardDescription>Common tasks and features</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {resumeBookmarkHref ? <QuickActionRow
+          {resumeBookmarkHref ? (
+            <QuickActionRow
               title="Resume latest bookmark"
               description="Continue where you left off"
               href={resumeBookmarkHref}
-            /> : null}
+            />
+          ) : null}
           <QuickActionRow
             title="View all bookmarks"
             description={`You have ${bookmarkCount ?? 0} saved configurations`}
@@ -360,25 +392,29 @@ export default async function AccountDashboard() {
                   return (
                     <li
                       key={`${item.category}-${item.slug}`}
-                      className="rounded-xl border border-border/60 bg-muted/20 p-3"
+                      className="border-border/60 bg-muted/20 rounded-xl border p-3"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="font-semibold">{item.title}</p>
-                          {item.description ? <p className="line-clamp-2 text-muted-foreground text-sm">
+                          {item.description ? (
+                            <p className="text-muted-foreground line-clamp-2 text-sm">
                               {item.description}
-                            </p> : null}
+                            </p>
+                          ) : null}
                         </div>
                         <div className="flex flex-col items-end gap-2">
-                          <NavLink href={itemHref} className="font-medium text-sm">
+                          <NavLink href={itemHref} className="text-sm font-medium">
                             Explore →
                           </NavLink>
-                          {similarHref ? <NavLink
+                          {similarHref ? (
+                            <NavLink
                               href={similarHref}
-                              className="text-muted-foreground text-xs hover:text-foreground"
+                              className="text-muted-foreground hover:text-foreground text-xs"
                             >
                               Explore similar →
-                            </NavLink> : null}
+                            </NavLink>
+                          ) : null}
                         </div>
                       </div>
                     </li>
@@ -397,6 +433,17 @@ export default async function AccountDashboard() {
   );
 }
 
+/**
+ * Renders a compact action row with a title, description, and a right-aligned "Open" link.
+ *
+ * @param title - Short label for the action
+ * @param description - One-line explanation of what the action does
+ * @param href - Destination URL for the "Open" link
+ * @returns A JSX element representing the quick action row
+ *
+ * @see NavLink
+ * @see RecentlySavedGrid
+ */
 function QuickActionRow({
   title,
   description,
@@ -407,21 +454,32 @@ function QuickActionRow({
   title: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-border/50 p-3">
+    <div className="border-border/50 flex items-center justify-between gap-4 rounded-xl border p-3">
       <div>
         <p className="font-medium">{title}</p>
         <p className="text-muted-foreground text-sm">{description}</p>
       </div>
-      <NavLink href={href} className="font-semibold text-sm">
+      <NavLink href={href} className="text-sm font-semibold">
         Open →
       </NavLink>
     </div>
   );
 }
 
+/**
+ * Displays an empty state shown when the user has no saved configs.
+ *
+ * Renders a brief message and a link to the directory so users can explore and bookmark configurations.
+ *
+ * @returns A React element containing the empty-state message and a directory link.
+ *
+ * @see RecentlySavedGrid
+ * @see NavLink
+ * @see ROUTES.HOME
+ */
 function EmptyRecentlySavedState() {
   return (
-    <div className="rounded-2xl border border-border/70 border-dashed p-6 text-center">
+    <div className="border-border/70 rounded-2xl border border-dashed p-6 text-center">
       <p className="font-medium">No saved configs yet</p>
       <p className="text-muted-foreground text-sm">
         Browse the directory and bookmark your favorite configurations to see them here.

@@ -35,4 +35,26 @@ export const ROUTES: RouteConfig[] = [
     methods: ['POST', 'OPTIONS'],
     handler: { import: './routes/content-generate/index.ts', function: 'handleGeneratePackage' },
   },
+  // Queue processing routes (migrated from flux-station)
+  {
+    name: 'embedding-process',
+    path: '/embedding/process',
+    methods: ['POST', 'OPTIONS'],
+    handler: { import: './routes/embedding/index.ts', function: 'handleEmbeddingGenerationQueue' },
+    rateLimit: 'heavy',
+  },
+  {
+    name: 'embedding-webhook',
+    path: '/embedding/webhook',
+    methods: ['POST', 'OPTIONS'],
+    handler: { import: './routes/embedding/index.ts', function: 'handleEmbeddingWebhook' },
+    rateLimit: 'public',
+  },
+  {
+    name: 'image-generation-process',
+    path: '/image-generation/process',
+    methods: ['POST', 'OPTIONS'],
+    handler: { import: './routes/image-generation/index.ts', function: 'handleImageGenerationQueue' },
+    rateLimit: 'heavy',
+  },
 ];

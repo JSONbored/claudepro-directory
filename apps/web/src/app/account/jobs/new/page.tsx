@@ -1,10 +1,10 @@
-import  { type Database } from '@heyclaude/database-types';
-import  { type CreateJobInput } from '@heyclaude/web-runtime';
+import { type Database } from '@heyclaude/database-types';
+import { type CreateJobInput } from '@heyclaude/web-runtime';
 import { createJob } from '@heyclaude/web-runtime/actions';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
@@ -16,14 +16,32 @@ import { JobForm } from '@/src/components/core/forms/job-form';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Generate metadata for the /account/jobs/new page.
+ *
+ * @returns Metadata for the new job creation page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/jobs/new');
 }
 
+/**
+ * Render the "Post a Job" page with a job creation form and plan catalog.
+ *
+ * Fetches the payment plan catalog for use in the form and provides a server action that creates jobs, handles payment-required flows (returns a checkout URL when needed), and redirects to the jobs list when creation succeeds without payment.
+ *
+ * @returns The React element for the New Job page containing the header and a JobForm wired to the server action that creates jobs and manages payment/redirect behavior.
+ *
+ * @see JobForm
+ * @see getPaymentPlanCatalog
+ * @see createJob
+ */
 export default async function NewJobPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -50,12 +68,28 @@ export default async function NewJobPage() {
     // planCatalog remains [] - JobForm will use legacy fallback
   }
 
+  /**
+   * Create a job from submitted form data, initiating checkout if payment is required or redirecting to the jobs list when no payment is needed.
+   *
+   * @param data - The payload from JobForm used to create the job
+   * @returns An object describing the outcome:
+   * - `{ success: true, requiresPayment: true, checkoutUrl: string, message: string }` when creation succeeded and a checkout URL is provided,
+   * - `{ success: false, requiresPayment: true, message: string }` when creation indicates payment is required but no checkout URL could be started,
+   * - `{ success: false, message: string }` when job creation failed.
+   * Note: when creation succeeds and `requiresPayment` is `false`, the function performs a redirect to `/account/jobs` instead of returning.
+   * @throws Normalized errors when the `createJob` call throws, when `result.serverError` is present, or when the action returns malformed/missing data
+   *
+   * @see createJob
+   * @see normalizeError
+   * @see redirect
+   * @see JobForm
+   */
   async function handleSubmit(data: CreateJobInput) {
     'use server';
 
     // Generate requestId for server action (separate from page render)
     const actionRequestId = generateRequestId();
-    
+
     // Create request-scoped child logger for server action
     const actionLogger = logger.child({
       requestId: actionRequestId,
@@ -80,7 +114,8 @@ export default async function NewJobPage() {
       throw normalized;
     }
 
-    if (result.data === null || result.data === undefined) {
+    // result.data should be present per types, but check kept to handle unexpected runtime/malformed responses
+    if (!result.data) {
       const normalized = normalizeError(
         'createJob returned no data',
         'NewJobPage: createJob returned no data'
@@ -90,9 +125,10 @@ export default async function NewJobPage() {
     }
 
     // Type the result data using generated database types
-    type CreateJobResult = Database['public']['CompositeTypes']['create_job_with_payment_result'] & {
-      checkoutUrl?: null | string;
-    };
+    type CreateJobResult =
+      Database['public']['CompositeTypes']['create_job_with_payment_result'] & {
+        checkoutUrl?: null | string;
+      };
     const jobResult = result.data as CreateJobResult;
 
     if (jobResult.success) {
@@ -131,7 +167,7 @@ export default async function NewJobPage() {
       new Error('Job creation failed'),
       'NewJobPage: createJob returned success=false'
     );
-      actionLogger.error('NewJobPage: createJob returned success=false', normalized, {
+    actionLogger.error('NewJobPage: createJob returned success=false', normalized, {
       jobId: jobResult.job_id ?? 'unknown',
       companyId: jobResult.company_id ?? 'unknown',
       requiresPayment: jobResult.requires_payment ?? false,
@@ -140,7 +176,7 @@ export default async function NewJobPage() {
       success: false,
       message: 'Job creation failed. Please try again or contact support.',
     };
-  };
+  }
 
   return (
     <div className="space-y-6">

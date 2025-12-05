@@ -6,21 +6,23 @@
 
 import 'server-only';
 
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { APP_CONFIG, buildSecurityHeaders  } from '@heyclaude/shared-runtime';
+import { APP_CONFIG, buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
   generateRequestId,
   logger,
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient,
+import {
+  createSupabaseAnonClient,
   badRequestResponse,
   getOnlyCorsHeaders,
   getWithAcceptCorsHeaders,
   buildCacheHeaders,
-  proxyStorageFile } from '@heyclaude/web-runtime/server';
+  proxyStorageFile,
+} from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS_JSON = getOnlyCorsHeaders;
@@ -48,10 +50,22 @@ function getProperty(obj: unknown, key: string): unknown {
   return desc?.value;
 }
 
+/**
+ * Removes control characters (CR, LF, tab, backspace, form feed, vertical tab) and trims surrounding whitespace from a header value.
+ *
+ * @param val - The header value to sanitize (string)
+ * @returns The sanitized header value (string) with control characters removed and trimmed
+ */
 function sanitizeHeaderValue(val: string): string {
   return val.replaceAll(/[\r\n\t\b\f\v]/g, '').trim();
 }
 
+/**
+ * Sanitizes a filename by removing control characters, double quotes, backslashes, and trimming surrounding whitespace.
+ *
+ * @param {string} name - The input filename to sanitize.
+ * @returns {string} A safe filename; returns `export.md` if the sanitized result is empty.
+ */
 function sanitizeFilename(name: string): string {
   let cleaned = name
     .replaceAll(/[\r\n\t\b\f\v]/g, '')
@@ -63,6 +77,21 @@ function sanitizeFilename(name: string): string {
   return cleaned;
 }
 
+/**
+ * Fetches a full content record for the given category and slug and returns it as an HTTP JSON response.
+ *
+ * Calls the `get_api_content_full` Supabase RPC and:
+ * - returns a 200 response with the JSON content when the RPC succeeds and data is present,
+ * - returns a 404 JSON response when no content is found,
+ * - returns an error response produced by `createErrorResponse` when the RPC returns an error.
+ *
+ * @param category - Content category enum value used to scope the lookup
+ * @param slug - Content slug to identify the record
+ * @param reqLogger - Scoped request logger used to record RPC errors and context
+ * @returns A NextResponse containing the exported JSON content on success, a 404 JSON response if not found, or an error response created from RPC errors
+ * @see {@link createErrorResponse}
+ * @see {@link get_api_content_full}
+ */
 async function handleJsonFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
@@ -74,7 +103,7 @@ async function handleJsonFormat(
     p_slug: slug,
     p_base_url: SITE_URL,
   } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
-  
+
   const { data, error } = await supabase.rpc('get_api_content_full', rpcArgs);
 
   if (error) {
@@ -122,6 +151,23 @@ async function handleJsonFormat(
   });
 }
 
+/**
+ * Produce a Markdown export for a content record.
+ *
+ * Parses `includeMetadata` and `includeFooter` from the provided `url`, invokes the
+ * `generate_markdown_export` RPC for the given `category` and `slug`, and returns a
+ * NextResponse containing the generated Markdown or a structured JSON error.
+ *
+ * @param category - DatabaseGenerated['public']['Enums']['content_category']: content category to export
+ * @param slug - string: content record slug to export
+ * @param url - URL: request URL used to read query params `includeMetadata` and `includeFooter`
+ * @param reqLogger - ReturnType<typeof logger.child>: request-scoped logger for error and context logging
+ * @returns A NextResponse containing the Markdown payload on success (status 200) or a JSON error payload on failure (status 400)
+ *
+ * @see generate_markdown_export RPC
+ * @see sanitizeFilename
+ * @see sanitizeHeaderValue
+ */
 async function handleMarkdownFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
@@ -138,7 +184,7 @@ async function handleMarkdownFormat(
     p_include_metadata: includeMetadata,
     p_include_footer: includeFooter,
   } satisfies DatabaseGenerated['public']['Functions']['generate_markdown_export']['Args'];
-  
+
   const { data, error } = await supabase.rpc('generate_markdown_export', rpcArgs);
 
   if (error) {
@@ -214,6 +260,21 @@ async function handleMarkdownFormat(
   });
 }
 
+/**
+ * Generate an LLMs.txt representation for a content item and return it as a plain text HTTP response.
+ *
+ * Calls the `generate_item_llms_txt` Supabase RPC with the provided category and slug and responds with
+ * the RPC-produced text when found; returns a JSON error response when the item is not found or the RPC fails.
+ *
+ * @param category - Database content category enum identifying the type of content to export
+ * @param slug - Content slug identifying the specific item to export
+ * @param reqLogger - Scoped logger used for request-scoped logging and RPC error reporting
+ * @returns A NextResponse containing the LLMs.txt content as `text/plain; charset=utf-8` with appropriate security and cache headers on success, or a JSON error response (status 4xx/5xx) on RPC errors or when content is not found
+ *
+ * @see generate_item_llms_txt (Supabase RPC)
+ * @see createErrorResponse
+ * @see buildSecurityHeaders
+ */
 async function handleItemLlmsTxt(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
@@ -224,7 +285,7 @@ async function handleItemLlmsTxt(
     p_category: category,
     p_slug: slug,
   } satisfies DatabaseGenerated['public']['Functions']['generate_item_llms_txt']['Args'];
-  
+
   const { data, error } = await supabase.rpc('generate_item_llms_txt', rpcArgs);
 
   if (error) {
@@ -261,7 +322,7 @@ async function handleItemLlmsTxt(
 
   const dataString = typeof data === 'string' ? data : String(data);
   const formatted: string = dataString.replaceAll(String.raw`\n`, '\n');
-  
+
   return new NextResponse(formatted, {
     status: 200,
     headers: {
@@ -447,6 +508,12 @@ export async function GET(
   }
 }
 
+/**
+ * Handle CORS preflight requests by returning a 204 No Content response with CORS headers.
+ *
+ * @returns {NextResponse} A 204 No Content response configured with the `getOnlyCorsHeaders` CORS headers.
+ * @see getOnlyCorsHeaders
+ */
 export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,

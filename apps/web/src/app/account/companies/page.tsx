@@ -20,21 +20,20 @@ import {
   Eye,
   Plus,
 } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge, Button ,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-
 
 /**
  * Dynamic Rendering Required
@@ -44,9 +43,10 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Validate company website URL is safe for use in href
- * Only allows absolute URLs with http:// or https:// protocol
- * Strictly validates to prevent XSS and protocol-relative URLs
+ * Determine whether a string is a safe absolute HTTP(S) URL suitable for use in an href.
+ *
+ * @param url - The candidate URL to validate; may be null or undefined.
+ * @returns `true` if `url` is a non-empty string that parses as an absolute URL with `http:` or `https:` protocol, `false` otherwise.
  */
 function isAllowedHttpUrl(url: null | string | undefined): boolean {
   if (!url || typeof url !== 'string') return false;
@@ -60,10 +60,31 @@ function isAllowedHttpUrl(url: null | string | undefined): boolean {
   }
 }
 
+/**
+ * Provide metadata for the account "Companies" page.
+ *
+ * @returns Metadata for the /account/companies page consumed by Next.js
+ * @see generatePageMetadata
+ * @see /account/companies
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies');
 }
 
+/**
+ * Render the "My Companies" account page allowing an authenticated user to view and manage their companies.
+ *
+ * Renders a sign-in prompt when no user is authenticated, an error card if companies cannot be loaded,
+ * an empty-state prompt when the user has no companies, or a responsive list of company cards with logo, metadata, stats, and actions.
+ *
+ * @returns The React element for the companies management page (sign-in prompt, error state, empty state, or companies list).
+ *
+ * @see getAuthenticatedUser
+ * @see getUserCompanies
+ * @see isAllowedHttpUrl
+ * @see generateRequestId
+ * @see logger
+ */
 export default async function CompaniesPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
@@ -177,7 +198,7 @@ export default async function CompaniesPage() {
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <h1 className="mb-2 font-bold text-3xl">My Companies</h1>
+          <h1 className="mb-2 text-3xl font-bold">My Companies</h1>
           <p className="text-muted-foreground">
             {companies.length} {companies.length === 1 ? 'company' : 'companies'}
           </p>
@@ -193,9 +214,9 @@ export default async function CompaniesPage() {
       {companies.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center py-12">
-            <Building2 className="mb-4 h-12 w-12 text-muted-foreground" />
-            <h3 className="mb-2 font-semibold text-xl">No companies yet</h3>
-            <p className="mb-4 max-w-md text-center text-muted-foreground">
+            <Building2 className="text-muted-foreground mb-4 h-12 w-12" />
+            <h3 className="mb-2 text-xl font-semibold">No companies yet</h3>
+            <p className="text-muted-foreground mb-4 max-w-md text-center">
               Create a company profile to showcase your organization and post job listings
             </p>
             <Button asChild>
@@ -216,10 +237,7 @@ export default async function CompaniesPage() {
                 id: string;
                 name: string;
                 slug: string;
-              } =>
-                company.id !== null &&
-                company.name !== null &&
-                company.slug !== null
+              } => company.id !== null && company.name !== null && company.slug !== null
             )
             .map((company, index) => {
               return (
@@ -229,19 +247,29 @@ export default async function CompaniesPage() {
                       <div className="flex flex-1 items-start gap-4">
                         {(() => {
                           // Validate logo URL is safe (should be from Supabase storage or trusted domain)
-                          if (!company.logo) return null;
+                          if (!company.logo) {
+                            return (
+                              <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                                <Building2 className="text-muted-foreground h-8 w-8" />
+                              </div>
+                            );
+                          }
                           try {
                             const parsed = new URL(company.logo);
                             // Only allow HTTPS
-                            if (parsed.protocol !== 'https:') return null;
+                            if (parsed.protocol !== 'https:') {
+                              return (
+                                <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                                  <Building2 className="text-muted-foreground h-8 w-8" />
+                                </div>
+                              );
+                            }
                             // Allow Supabase storage (public bucket path) or common CDN domains
                             // Restrict to specific CDN patterns to prevent subdomain abuse
                             const isSupabaseHost =
                               parsed.hostname.endsWith('.supabase.co') ||
                               parsed.hostname.endsWith('.supabase.in');
-                            const isCloudinary =
-                              parsed.hostname === 'res.cloudinary.com' ||
-                              /^[a-z0-9-]+\.cloudinary\.com$/.test(parsed.hostname);
+                            const isCloudinary = parsed.hostname === 'res.cloudinary.com';
                             const isAwsS3 =
                               /^[a-z0-9-]+\.s3\.amazonaws\.com$/.test(parsed.hostname) ||
                               /^s3\.[a-z0-9-]+\.amazonaws\.com$/.test(parsed.hostname);
@@ -250,7 +278,13 @@ export default async function CompaniesPage() {
                                 parsed.pathname.startsWith('/storage/v1/object/public/')) ||
                               isCloudinary ||
                               isAwsS3;
-                            if (!isTrustedSource) return null;
+                            if (!isTrustedSource) {
+                              return (
+                                <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                                  <Building2 className="text-muted-foreground h-8 w-8" />
+                                </div>
+                              );
+                            }
                             return (
                               <Image
                                 src={company.logo}
@@ -262,20 +296,21 @@ export default async function CompaniesPage() {
                               />
                             );
                           } catch {
-                            return null;
+                            return (
+                              <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                                <Building2 className="text-muted-foreground h-8 w-8" />
+                              </div>
+                            );
                           }
                         })()}
-                        {!company.logo && (
-                          <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
-                            <Building2 className="h-8 w-8 text-muted-foreground" />
-                          </div>
-                        )}
                         <div className="flex-1">
                           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                             <CardTitle>{company.name}</CardTitle>
-                            {company.featured ? <UnifiedBadge variant="base" style="default">
+                            {company.featured ? (
+                              <UnifiedBadge variant="base" style="default">
                                 Featured
-                              </UnifiedBadge> : null}
+                              </UnifiedBadge>
+                            ) : null}
                           </div>
                           <CardDescription className="mt-1">
                             {company.description ?? 'No description provided'}
@@ -337,7 +372,7 @@ export default async function CompaniesPage() {
                   </CardHeader>
 
                   <CardContent>
-                    <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
+                    <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                         <Briefcase className="h-4 w-4" />
                         {company.stats?.active_jobs ?? 0} active job
@@ -347,10 +382,12 @@ export default async function CompaniesPage() {
                         <Eye className="h-4 w-4" />
                         {(company.stats?.total_views ?? 0).toLocaleString()} views
                       </div>
-                      {company.stats?.latest_job_posted_at ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                      {company.stats?.latest_job_posted_at ? (
+                        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                           <Calendar className="h-4 w-4" />
                           Last job posted {formatRelativeDate(company.stats.latest_job_posted_at)}
-                        </div> : null}
+                        </div>
+                      ) : null}
                     </div>
 
                     <div className={UI_CLASSES.FLEX_GAP_2}>

@@ -308,7 +308,7 @@ export const RETRY_CONFIG = {
 /** Cache TTL settings (in seconds) */
 export const CACHE_TTL = {
   'homepage': 3600, // 1 hour
-  'content_detail': 7200, // 2 hours
+  'content_detail': 14400, // 4 hours (increased from 2 hours to reduce slow query warnings)
   'content_list': 1800, // 30 minutes
   'content_trending': 1800, // 30 minutes
   'content_paginated': 86400, // 1 day

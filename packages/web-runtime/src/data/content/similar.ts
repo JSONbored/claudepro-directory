@@ -1,7 +1,7 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
 
@@ -13,11 +13,12 @@ export async function getSimilarContent(input: {
   const { contentType, contentSlug, limit = 6 } = input;
 
   return fetchCached(
-    (client) => new ContentService(client).getSimilarContent({
+    (client) =>
+      new ContentService(client).getSimilarContent({
         p_content_type: contentType,
         p_content_slug: contentSlug,
-        p_limit: limit
-    }),
+        p_limit: limit,
+      }),
     {
       keyParts: ['similar-content', contentType, contentSlug, limit],
       tags: ['content', 'similar', `content-${contentSlug}`],

@@ -1,10 +1,17 @@
 import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { UI_CLASSES, NavLink  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { UI_CLASSES, NavLink } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 
-
+/**
+ * Produce page metadata for the Terms page.
+ *
+ * @returns Page metadata for the "/terms" route.
+ *
+ * @see generatePageMetadata
+ * @see {@link import('next').Metadata}
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/terms');
 }
@@ -15,6 +22,19 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = false;
 
+/**
+ * Renders the Terms of Service page showing the current "Last updated" date and contact links.
+ *
+ * Fetches the last-updated timestamp and contact channels at render time; the page is statically
+ * generated and does not revalidate (see `revalidate`).
+ *
+ * @returns The React element for the Terms of Service page.
+ *
+ * @see getLastUpdatedDate
+ * @see getContactChannels
+ * @see NavLink
+ * @see APP_CONFIG
+ */
 export default function TermsPage() {
   const lastUpdated = getLastUpdatedDate();
   const channels = getContactChannels();
@@ -22,7 +42,7 @@ export default function TermsPage() {
   return (
     <div className={`container mx-auto max-w-4xl ${UI_CLASSES.PADDING_X_DEFAULT} py-8 sm:py-12`}>
       <div className="prose prose-invert max-w-none">
-        <h1 className={`${UI_CLASSES.MARGIN_COMFORTABLE} font-bold text-3xl sm:text-4xl`}>
+        <h1 className={`${UI_CLASSES.MARGIN_COMFORTABLE} text-3xl font-bold sm:text-4xl`}>
           Terms of Service
         </h1>
         <p className={`${UI_CLASSES.MARGIN_RELAXED} text-muted-foreground`}>
@@ -30,7 +50,7 @@ export default function TermsPage() {
         </p>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>
-          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>
+          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>
             1. Acceptance of Terms
           </h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
@@ -41,7 +61,7 @@ export default function TermsPage() {
         </section>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>
-          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>
+          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>
             2. Use of Service
           </h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
@@ -61,7 +81,7 @@ export default function TermsPage() {
         </section>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>
-          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>3. User Content</h2>
+          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>3. User Content</h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
             You retain ownership of content you submit to {APP_CONFIG.name}. By submitting content,
             you grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, modify,
@@ -76,7 +96,7 @@ export default function TermsPage() {
         </section>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>
-          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>
+          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>
             4. Intellectual Property
           </h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
@@ -87,7 +107,7 @@ export default function TermsPage() {
         </section>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>
-          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>
+          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>
             5. Account Termination
           </h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
@@ -98,7 +118,7 @@ export default function TermsPage() {
         </section>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>
-          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>6. Disclaimers</h2>
+          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>6. Disclaimers</h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
             The service is provided "AS IS" and "AS AVAILABLE" without warranties of any kind,
             either express or implied, including but not limited to implied warranties of
@@ -111,7 +131,7 @@ export default function TermsPage() {
         </section>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>
-          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>
+          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>
             7. Limitation of Liability
           </h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
@@ -122,7 +142,7 @@ export default function TermsPage() {
         </section>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>
-          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>
+          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>
             8. Indemnification
           </h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
@@ -133,7 +153,7 @@ export default function TermsPage() {
         </section>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>
-          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>
+          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>
             9. Changes to Terms
           </h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
@@ -145,7 +165,7 @@ export default function TermsPage() {
         </section>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>
-          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>
+          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>
             10. Governing Law
           </h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
@@ -155,7 +175,7 @@ export default function TermsPage() {
         </section>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>
-          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>11. Contact Us</h2>
+          <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>11. Contact Us</h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
             If you have questions about these Terms of Service, please{' '}
             <NavLink href={`mailto:${channels.email}`} external>

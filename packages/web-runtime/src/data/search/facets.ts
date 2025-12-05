@@ -1,13 +1,12 @@
 'use server';
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { logger, normalizeError } from '../../index.ts';
 import { generateRequestId } from '../../utils/request-id.ts';
 
-type SearchFacetsRow =
-  Database['public']['Functions']['get_search_facets']['Returns'][number];
+type SearchFacetsRow = Database['public']['Functions']['get_search_facets']['Returns'][number];
 
 export interface SearchFacetSummary {
   authors: string[];
@@ -27,8 +26,12 @@ function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {
   return {
     category: row.category,
     contentCount: row.content_count,
-    tags: Array.isArray(row.all_tags) ? row.all_tags.filter((tag): tag is string => typeof tag === 'string') : [],
-    authors: Array.isArray(row.authors) ? row.authors.filter((author): author is string => typeof author === 'string') : [],
+    tags: Array.isArray(row.all_tags)
+      ? row.all_tags.filter((tag): tag is string => typeof tag === 'string')
+      : [],
+    authors: Array.isArray(row.authors)
+      ? row.authors.filter((author): author is string => typeof author === 'string')
+      : [],
   };
 }
 
@@ -84,10 +87,11 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
   } catch (error) {
     // Log and rethrow - note: RPC errors logged above may also propagate here
     // Skip re-logging if this is already an RPC error (detected by error message pattern)
-    const isRpcError = error instanceof Error && 
-      (error.message.includes('RPC get_search_facets failed') || 
-       error.message.includes('get_search_facets'));
-    
+    const isRpcError =
+      error instanceof Error &&
+      (error.message.includes('RPC get_search_facets failed') ||
+        error.message.includes('get_search_facets'));
+
     if (!isRpcError) {
       // Only log if this is a cache error, not an RPC error
       const normalized = normalizeError(error, 'getSearchFacets failed');

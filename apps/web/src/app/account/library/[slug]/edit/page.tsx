@@ -5,8 +5,8 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { Button, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -23,17 +23,42 @@ interface EditCollectionPageProperties {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: EditCollectionPageProperties): Promise<Metadata> {
+/**
+ * Generate page metadata for the Edit Collection route using the route slug.
+ *
+ * @param params - Promise resolving to route parameters containing `slug`
+ * @returns The Next.js `Metadata` for the `/account/library/:slug/edit` route with the provided `slug`
+ *
+ * @see generatePageMetadata
+ * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata
+ */
+export async function generateMetadata({
+  params,
+}: EditCollectionPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
+/**
+ * Render the edit-collection page for the specified collection slug.
+ *
+ * Fetches the authenticated user and collection details, then renders the edit form
+ * populated with collection and bookmark data. May redirect to the login page,
+ * trigger a 404 via `notFound()`, or rethrow a normalized error when data fetching fails.
+ *
+ * @param params - An object whose `slug` identifies the collection to edit.
+ * @returns The page element containing navigation, collection details header, and the edit `CollectionForm`.
+ *
+ * @see CollectionForm
+ * @see getCollectionDetail
+ * @see getAuthenticatedUser
+ */
 export default async function EditCollectionPage({ params }: EditCollectionPageProperties) {
   const { slug } = await params;
-  
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -109,7 +134,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
             Back to Collection
           </Button>
         </Link>
-        <h1 className="mb-2 font-bold text-3xl">Edit Collection</h1>
+        <h1 className="mb-2 text-3xl font-bold">Edit Collection</h1>
         <p className="text-muted-foreground">Update your collection details and settings</p>
       </div>
 

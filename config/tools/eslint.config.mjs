@@ -16,17 +16,21 @@
  * - eslint-plugin-n: Node.js-specific rules
  * - eslint-plugin-better-tailwindcss: Tailwind CSS linting
  * - eslint-plugin-perfectionist: Sorting and consistency
+ * - eslint-plugin-prettier: Prettier integration
+ * - eslint-config-prettier: Disables conflicting ESLint formatting rules
  * - architectural-rules: Custom rules for logging, security, architecture
  *
  * Located in config/tools/ to match codebase organization pattern
  */
 
 import eslint from '@eslint/js';
+import eslintConfigPrettier from 'eslint-config-prettier';
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import eslintPluginBoundaries from 'eslint-plugin-boundaries';
 import eslintPluginJSDoc from 'eslint-plugin-jsdoc';
 import eslintPluginN from 'eslint-plugin-n';
 import eslintPluginPerfectionist from 'eslint-plugin-perfectionist';
+import eslintPluginPrettier from 'eslint-plugin-prettier';
 import eslintPluginReact from 'eslint-plugin-react';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import eslintPluginVitest from 'eslint-plugin-vitest';
@@ -48,6 +52,8 @@ export default tseslint.config(
   ...tseslint.configs.stylistic,
   // Phase 2: Unicorn plugin for modern JavaScript/TypeScript patterns
   eslintPluginUnicorn.configs.recommended,
+  // Prettier config - must be last to override conflicting formatting rules
+  eslintConfigPrettier,
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
@@ -73,6 +79,7 @@ export default tseslint.config(
       n: eslintPluginN,
       'better-tailwindcss': eslintPluginBetterTailwindcss,
       perfectionist: eslintPluginPerfectionist,
+      prettier: eslintPluginPrettier,
       // Note: unicorn plugin is already included via eslintPluginUnicorn.configs.recommended
     },
     settings: {
@@ -121,6 +128,21 @@ export default tseslint.config(
       // Better Tailwind CSS settings for Tailwind v4 (CSS-based config)
       'better-tailwindcss': {
         entryPoint: 'apps/web/src/app/globals.css',
+        // Safelist for classes that are valid but not detected by the plugin
+        // prose classes are from @tailwindcss/typography plugin (used for markdown content)
+        // Custom component classes defined in globals.css @layer components
+        safelist: [
+          'prose',
+          'prose-invert',
+          'prose-slate',
+          'prose-neutral',
+          'prose-sm',
+          'dark:prose-invert',
+          'not-prose',
+          'transition-colors-smooth',
+          'card-gradient',
+          'glow-effect',
+        ],
       },
     },
     rules: {
@@ -193,12 +215,17 @@ export default tseslint.config(
       'n/no-extraneous-import': 'off', // Monorepo handles this
 
       // ============================================
-      // Better Tailwind CSS Rules (NEW)
+      // Better Tailwind CSS Rules
       // ============================================
       'better-tailwindcss/no-duplicate-classes': 'warn',
       'better-tailwindcss/no-unnecessary-whitespace': 'warn',
-      'better-tailwindcss/enforce-consistent-class-order': 'off', // Can be noisy
-      'better-tailwindcss/no-unregistered-classes': 'off', // Too strict for custom utilities
+      'better-tailwindcss/enforce-consistent-class-order': 'off', // Disabled: Prettier with prettier-plugin-tailwindcss handles sorting
+      'better-tailwindcss/no-unregistered-classes': 'warn', // Enabled to catch typos and invalid classes
+
+      // ============================================
+      // Prettier Rules
+      // ============================================
+      'prettier/prettier': 'warn', // Run Prettier as an ESLint rule
 
       // ============================================
       // Perfectionist Rules (NEW - Sorting)
@@ -274,6 +301,9 @@ export default tseslint.config(
       'unicorn/prefer-object-from-entries': 'warn',
       'unicorn/no-negated-condition': 'warn',
       'unicorn/throw-new-error': 'error',
+      // Disabled: Auto-fix conflicts with Prettier (Prettier removes parentheses that this rule wants to add)
+      // Developers should manually refactor nested ternaries to if/else statements for better readability
+      'unicorn/no-nested-ternary': 'off',
 
       // ============================================
       // Boundaries Plugin Rules

@@ -135,8 +135,14 @@ const nextConfig = {
   },
 
   experimental: {
+    // Turbopack filesystem caching for development (30-50% faster rebuilds)
     turbopackFileSystemCacheForDev: true,
-    staticGenerationMaxConcurrency: 32,
+    // Note: turbopackFileSystemCacheForBuild is only available in Next.js canary
+    // TODO: Enable when Next.js stable supports it for major production build improvements
+    // Reduced from 32 to 12 to reduce database load during build
+    // 32 pages × 4-5 queries = 128-160 concurrent queries (overwhelming database)
+    // 12 pages × 4-5 queries = 48-60 concurrent queries (more manageable)
+    staticGenerationMaxConcurrency: 12,
     staleTimes: {
       dynamic: 30,
       static: 300,
@@ -223,6 +229,10 @@ const nextConfig = {
       process.env.NODE_ENV === 'production' ? { properties: ['^data-test'] } : false,
   },
 
+  // Webpack config: Fallback for non-Turbopack builds or edge cases
+  // Note: With --turbopack flag, this config is typically not executed.
+  // Turbopack handles most of these concerns via turbopack.resolveAlias and serverExternalPackages.
+  // This remains as a compatibility fallback for environments where Turbopack might not be available.
   webpack: (config, { dev, webpack, isServer }) => {
     if (!dev) {
       config.plugins.push(
@@ -247,7 +257,7 @@ const nextConfig = {
 
     // Ensure .ts and .tsx extensions are resolved for Deno-compatible imports
     // This allows shared-runtime to use .ts extensions (required by Deno) while
-    // still working with Next.js webpack bundler
+    // still working with Next.js webpack bundler (fallback mode)
     const existingExtensions = config.resolve.extensions || [];
     const tsExtensions = ['.ts', '.tsx'];
     const otherExtensions = existingExtensions.filter(
@@ -416,9 +426,19 @@ const nextConfig = {
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
       {
-        source: '/(agents|mcp|rules|commands|hooks|guides)/:path*',
+        // Content detail pages - all categories
+        // Matches ISR revalidate time (7200s/2hr) with 24hr stale-while-revalidate
+        source: '/(agents|mcp|rules|commands|hooks|guides|skills|statuslines|collections)/:slug',
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' },
+          { key: 'Cache-Control', value: 'public, s-maxage=7200, stale-while-revalidate=86400' },
+          { key: 'Vary', value: 'Accept-Encoding' },
+        ],
+      },
+      {
+        // Content category listing pages
+        source: '/(agents|mcp|rules|commands|hooks|guides|skills|statuslines|collections)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=3600, stale-while-revalidate=86400' },
           { key: 'Vary', value: 'Accept-Encoding' },
         ],
       },

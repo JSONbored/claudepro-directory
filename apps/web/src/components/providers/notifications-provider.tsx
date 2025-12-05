@@ -1,6 +1,9 @@
 /**
  * NotificationsProvider
  * Centralizes notification fetch, realtime updates, dismissed state, and feature flags.
+ *
+ * IMPORTANT: Only fetches notifications for authenticated users to avoid auth errors.
+ * Uses useAuthenticatedUser hook to check auth state before calling server actions.
  */
 'use client';
 
@@ -11,7 +14,7 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
-import { useSafeAction } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser, useSafeAction } from '@heyclaude/web-runtime/hooks';
 import {
   createContext,
   useCallback,
@@ -48,15 +51,13 @@ const NotificationsContext = createContext<NotificationsContextValue | null>(nul
 const DISMISSED_STORAGE_KEY = 'notification-storage';
 
 /**
- * Provides notification state, controls, and feature-flagged fetching/dismissal to descendant components.
+ * Provides notification state, controls, and feature-flagged fetching and dismissal to descendant components.
  *
- * Exposes a NotificationsContext value that includes the current notifications, unread count, methods to
- * dismiss single or all notifications, sheet open/close/toggle controls, a manual refresh function, and
- * derived feature flags. Dismissed notification IDs are persisted to localStorage and synced to the server;
- * notifications are refreshed on mount and periodically while enabled.
+ * Exposes a NotificationsContext value containing current notifications, unread count, dismiss/dismissAll actions,
+ * sheet open/close/toggle controls, feature flags, and a manual refresh function. Dismissed IDs are persisted to
+ * localStorage and synced to the server; notifications are refreshed on mount and periodically while enabled.
  *
  * @param children - React children that will receive the notifications context
- *
  * @see NotificationsContext
  * @see useNotificationsContext
  */
@@ -73,6 +74,12 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     }),
     [layoutFlags]
   );
+
+  // Check authentication state - only fetch notifications for authenticated users
+  // This prevents auth errors for unauthenticated visitors browsing the site
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuthenticatedUser({
+    context: 'NotificationsProvider',
+  });
 
   const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
@@ -103,7 +110,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   }, [dismissedIds]);
 
   const refresh = useCallback(async () => {
-    if (!flags.enableNotifications) return;
+    // Only fetch notifications for authenticated users with notifications enabled
+    // This prevents auth errors for unauthenticated visitors
+    if (!flags.enableNotifications || !isAuthenticated) return;
     try {
       const latest = await fetchNotifications({ dismissedIds: dismissedIdsRef.current });
 
@@ -140,7 +149,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         }
       );
     }
-  }, [fetchNotifications, flags.enableNotifications]);
+  }, [fetchNotifications, flags.enableNotifications, isAuthenticated]);
 
   useEffect(() => {
     try {
@@ -159,7 +168,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   }, []);
 
   useEffect(() => {
-    if (!(isInitialized && flags.enableNotifications)) return;
+    // Wait for both initialization and auth state resolution before fetching
+    // This prevents auth errors for unauthenticated users
+    if (!(isInitialized && flags.enableNotifications && !isAuthLoading && isAuthenticated)) return;
     refresh().catch((error) => {
       logClientError(
         '[NotificationsProvider] Failed to refresh notifications on mount',
@@ -167,10 +178,11 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         'NotificationsProvider.mount'
       );
     });
-  }, [flags.enableNotifications, isInitialized, refresh]);
+  }, [flags.enableNotifications, isInitialized, isAuthLoading, isAuthenticated, refresh]);
 
   useEffect(() => {
-    if (!(flags.enableNotifications && isInitialized)) {
+    // Only set up periodic refresh for authenticated users
+    if (!(flags.enableNotifications && isInitialized && !isAuthLoading && isAuthenticated)) {
       return undefined;
     }
     const id = window.setInterval(() => {
@@ -179,10 +191,13 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       );
     }, 60000);
     return () => window.clearInterval(id);
-  }, [flags.enableNotifications, isInitialized, refresh]);
+  }, [flags.enableNotifications, isInitialized, isAuthLoading, isAuthenticated, refresh]);
 
   const dismiss = useCallback(
     (id: string) => {
+      // Silently ignore dismiss attempts from unauthenticated users
+      if (!isAuthenticated) return;
+
       setDismissedIds((prev) => {
         if (prev.includes(id)) return prev;
         return [...prev, id];
@@ -196,11 +211,13 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           });
         });
     },
-    [performDismiss, refresh]
+    [isAuthenticated, performDismiss, refresh]
   );
 
   const dismissAll = useCallback(() => {
-    if (notifications.length === 0) return;
+    // Silently ignore dismiss attempts from unauthenticated users
+    if (!isAuthenticated || notifications.length === 0) return;
+
     const ids = notifications.map((notification) => notification.id);
     setDismissedIds((prev) => Array.from(new Set([...prev, ...ids])));
     setNotifications([]);
@@ -212,7 +229,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           count: ids.length,
         });
       });
-  }, [notifications, performDismiss, refresh]);
+  }, [isAuthenticated, notifications, performDismiss, refresh]);
 
   const contextValue = useMemo<NotificationsContextValue>(
     () => ({

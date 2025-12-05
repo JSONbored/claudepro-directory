@@ -1,19 +1,22 @@
-import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime';
-import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
+import {
+  generatePageMetadata,
+  getAuthenticatedUser,
+  getUserActivitySummary,
+  getUserActivityTimeline,
+} from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, Button ,
+  UI_CLASSES,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
@@ -25,10 +28,30 @@ import { ActivityTimeline } from '@/src/components/features/user-activity/activi
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Generates page metadata for the account Activity page.
+ *
+ * @returns The Next.js `Metadata` object for the "/account/activity" route.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/activity');
 }
 
+/**
+ * Render the Account Activity page for the authenticated user.
+ *
+ * Requires authentication and displays the user's activity summary and timeline.
+ * If one data source fails the page shows available data and a localized fallback for the failed section;
+ * if both sources fail, a global "Activity unavailable" fallback is rendered.
+ *
+ * @returns The React element tree for the Account Activity page.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserActivitySummary
+ * @see getUserActivityTimeline
+ * @see ActivityTimeline
+ */
 export default async function ActivityPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
@@ -72,8 +95,9 @@ export default async function ActivityPage() {
 
   // Create new child logger with user context
   // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  // Using userId directly - redaction will automatically hash it
   const userLogger = reqLogger.child({
-    userId: user.id, // Redaction will automatically hash this
+    userId: user.id, // Redaction automatically hashes this via hashUserIdCensor
   });
 
   userLogger.info('ActivityPage: authentication successful', {
@@ -82,21 +106,25 @@ export default async function ActivityPage() {
 
   // Section: Activity Data Fetch
   // Fetch activity data - use Promise.allSettled for partial success handling
+  // CRITICAL: Call data functions directly instead of actions to avoid cookies() in unstable_cache() error
   const [summaryResult, timelineResult] = await Promise.allSettled([
-    getActivitySummary(),
-    getActivityTimeline({ limit: 50, offset: 0 }),
+    getUserActivitySummary(user.id),
+    getUserActivityTimeline({ userId: user.id, limit: 50, offset: 0 }),
   ]);
 
-  function handleActionResult<T>(
-    name: string,
-    result: PromiseSettledResult<null | { data?: null | T; serverError?: unknown }>
-  ): null | T {
+  /**
+   * Normalize a settled activity-data result, log any rejection, and return the fulfilled value or `null`.
+   *
+   * @param name - Human-readable name of the data being loaded (used in error messages and logs)
+   * @param result - The settled promise result to inspect
+   * @returns The fulfilled value of type `T` if present, `null` if the promise was rejected
+   *
+   * @see normalizeError
+   * @see ActivityPage
+   */
+  function handleDataResult<T>(name: string, result: PromiseSettledResult<null | T>): null | T {
     if (result.status === 'fulfilled') {
-      const value = result.value;
-      if (value && typeof value === 'object' && 'data' in value) {
-        return (value.data as null | T | undefined) ?? null;
-      }
-      return null;
+      return result.value;
     }
     // result.status === 'rejected' at this point
     const reason = result.reason as unknown;
@@ -109,8 +137,8 @@ export default async function ActivityPage() {
     return null;
   }
 
-  const summary = handleActionResult('activity summary', summaryResult);
-  const timeline = handleActionResult('activity timeline', timelineResult);
+  const summary = handleDataResult('activity summary', summaryResult);
+  const timeline = handleDataResult('activity timeline', timelineResult);
 
   const hasSummary = !!summary;
   const hasTimeline = !!timeline;
@@ -155,12 +183,13 @@ export default async function ActivityPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Activity</h1>
+        <h1 className="mb-2 text-3xl font-bold">Activity</h1>
         <p className="text-muted-foreground">Your contribution history and community activity</p>
       </div>
 
       {/* Stats Overview - only render if summary is available */}
-      {hasSummary ? <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {summary == null ? null : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Submissions</CardTitle>
@@ -168,14 +197,15 @@ export default async function ActivityPage() {
             <CardContent>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <GitPullRequest className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO}`} />
-                <span className="font-bold text-2xl">
+                <span className="text-2xl font-bold">
                   {summary.merged_submissions}/{summary.total_submissions}
                 </span>
               </div>
-              <p className="mt-1 text-muted-foreground text-xs">Merged</p>
+              <p className="text-muted-foreground mt-1 text-xs">Merged</p>
             </CardContent>
           </Card>
-        </div> : null}
+        </div>
+      )}
 
       {/* Timeline - only render if timeline is available */}
       {hasTimeline ? (
@@ -184,7 +214,7 @@ export default async function ActivityPage() {
             <CardTitle>Activity Timeline</CardTitle>
             <CardDescription>
               Your recent contributions and interactions
-              {hasSummary ? ` (${summary.total_activity} total)` : ''}
+              {summary == null ? '' : ` (${summary.total_activity} total)`}
             </CardDescription>
           </CardHeader>
           <CardContent>

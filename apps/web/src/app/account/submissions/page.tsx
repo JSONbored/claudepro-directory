@@ -7,13 +7,18 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
+import {
+  BADGE_COLORS,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
@@ -37,13 +42,13 @@ export async function generateMetadata(): Promise<Metadata> {
 // Dangerous Unicode characters that could be used for attacks
 // Using Set for O(1) lookup performance instead of O(n) array includes
 const dangerousCharsSet = new Set([
-  0x20_2E,
-  0x20_2D,
-  0x20_2C,
-  0x20_2B,
-  0x20_2A, // RTL override marks
-  0x20_0E,
-  0x20_0F, // Left-to-right/right-to-left marks
+  0x20_2e,
+  0x20_2d,
+  0x20_2c,
+  0x20_2b,
+  0x20_2a, // RTL override marks
+  0x20_0e,
+  0x20_0f, // Left-to-right/right-to-left marks
   0x20_66,
   0x20_67,
   0x20_68,
@@ -61,8 +66,10 @@ const PR_NUMBER_REGEX = /^\d+$/;
 const PR_PATH_REGEX = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)$/;
 
 /**
- * Format date consistently using en-US locale
- * Returns safe fallback for invalid or missing dates
+ * Formats a parseable date string to the en-US "MMM d, yyyy" style or returns "-" for missing/invalid input.
+ *
+ * @param dateString - The date string to format.
+ * @returns The formatted date (e.g., "Jan 2, 2024"), or "-" if `dateString` is missing or invalid.
  */
 function formatSubmissionDate(dateString: string): string {
   if (!dateString || typeof dateString !== 'string') {
@@ -79,9 +86,19 @@ function formatSubmissionDate(dateString: string): string {
   });
 }
 
+/**
+ * Parse a GitHub pull request URL and return its owner, repository, and PR number when the URL is a safe, well-formed GitHub PR link.
+ *
+ * @param url - Candidate URL string to validate and parse.
+ * @returns An object `{ owner, repo, prNumber }` when `url` is a valid `https://github.com/:owner/:repo/pull/:number` URL; `null` otherwise.
+ *
+ * @see buildSafePrUrl
+ * @see PR_PATH_REGEX
+ * @see dangerousCharsSet
+ */
 function extractPrComponents(
   url: null | string | undefined
-): null | { owner: string; prNumber: string; repo: string; } {
+): null | { owner: string; prNumber: string; repo: string } {
   if (!url || typeof url !== 'string') return null;
 
   // Disallow control characters, invisible chars, and dangerous unicode
@@ -89,8 +106,8 @@ function extractPrComponents(
     const code = url.codePointAt(index);
     if (
       code === undefined ||
-      (code >= 0x0 && code <= 0x1F) ||
-      (code >= 0x7F && code <= 0x9F) ||
+      (code >= 0x0 && code <= 0x1f) ||
+      (code >= 0x7f && code <= 0x9f) ||
       dangerousCharsSet.has(code)
     ) {
       return null;
@@ -150,23 +167,47 @@ function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
 const ALLOWED_TYPES = Constants.public.Enums.submission_type;
 
 // Typed copy for use as submission_type array
-const ALLOWED_TYPES_ARRAY: Database['public']['Enums']['submission_type'][] = [
-  ...ALLOWED_TYPES,
-];
+const ALLOWED_TYPES_ARRAY: Database['public']['Enums']['submission_type'][] = [...ALLOWED_TYPES];
 
-// Strict content slug validation - only alphanumeric, hyphens, underscores
+/**
+ * Validates that a content slug contains only lowercase letters, digits, hyphens, or underscores.
+ *
+ * @param slug - Candidate slug to validate (no dots, slashes, spaces, percent-encoding, or uppercase letters).
+ * @returns `true` if `slug` matches `/^[a-z0-9-_]+$/`, `false` otherwise.
+ *
+ * @see getSafeContentUrl
+ */
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string') return false;
   // No path separators, no dots, no percent-encoding, no special chars
   return /^[a-z0-9-_]+$/.test(slug);
 }
 
-// Strict type validation - must be in allowlist
+/**
+ * Checks whether a string is one of the allowed submission_type values.
+ *
+ * @param type - Candidate submission type string to validate
+ * @returns `true` if `type` is one of the allowed submission_type values, `false` otherwise.
+ *
+ * @see ALLOWED_TYPES
+ */
 function isSafeType(type: string): type is Database['public']['Enums']['submission_type'] {
   return (ALLOWED_TYPES as readonly string[]).includes(type);
 }
 
-// Safe URL constructor - validates both type and slug before constructing
+/**
+ * Constructs a safe internal content URL for a validated submission type and slug.
+ *
+ * Validates that `type` is an allowed submission_type and `slug` matches the expected
+ * pattern before constructing the path.
+ *
+ * @param type - The submission type to use in the URL (must be an allowed `submission_type`)
+ * @param slug - The content slug (must match `^[a-z0-9-_]+$`)
+ * @returns The internal URL path in the form `/type/slug` if both inputs are valid, `null` otherwise.
+ *
+ * @see isSafeType
+ * @see isValidSlug
+ */
 function getSafeContentUrl(
   type: Database['public']['Enums']['submission_type'],
   slug: string
@@ -177,10 +218,25 @@ function getSafeContentUrl(
   return `/${type}/${slug}`;
 }
 
+/**
+ * Render the authenticated user's submissions page.
+ *
+ * Fetches the current request's authenticated user and their dashboard submissions, validates
+ * external PR and internal content links, and renders the appropriate UI (submissions list,
+ * sign-in prompt, or error message) for this server-rendered page.
+ *
+ * @returns A React Server Component subtree representing the submissions page.
+ *
+ * @see SubmissionCard
+ * @see getUserDashboard
+ * @see getAuthenticatedUser
+ * @see getSafeContentUrl
+ * @see extractPrComponents
+ */
 export default async function SubmissionsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -318,8 +374,15 @@ export default async function SubmissionsPage() {
   };
 
   /**
-   * Get safe PR link props or null if PR URL is invalid
-   * Extracts and validates PR components, then constructs a safe URL
+   * Produce safe GitHub PR link properties for a submission when its PR reference is valid.
+   *
+   * Validates and normalizes a submission's PR reference and returns an object suitable for link props.
+   *
+   * @param submission - A submission record (one element from `submissions`) that may contain `pr_url` and/or `pr_number`.
+   * @returns `{ href: string }` with a canonical, validated GitHub PR URL if a safe PR link can be constructed, `null` otherwise.
+   *
+   * @see extractPrComponents
+   * @see buildSafePrUrl
    */
   function getPrLinkProperties(submission: (typeof submissions)[number]) {
     const components = submission.pr_url ? extractPrComponents(submission.pr_url) : null;
@@ -336,7 +399,15 @@ export default async function SubmissionsPage() {
   }
 
   /**
-   * Get safe content URL or null if invalid
+   * Return a safe internal content link when the submission is merged and inputs are valid.
+   *
+   * @param type - The submission's type (one of Database.public.Enums.submission_type)
+   * @param slug - The content slug to link to; must match the internal slug pattern
+   * @param status - The submission's status (one of Database.public.Enums.submission_status)
+   * @returns `{ href: string }` containing a safe `/type/slug` URL when `status` equals the merged status and `type`/`slug` validate; otherwise `null`
+   *
+   * @see getSafeContentUrl
+   * @see Constants.public.Enums.submission_status
    */
   function getContentLinkProperties(
     type: Database['public']['Enums']['submission_type'],
@@ -344,7 +415,9 @@ export default async function SubmissionsPage() {
     status: Database['public']['Enums']['submission_status']
   ): null | { href: string } {
     const safeUrl = getSafeContentUrl(type, slug);
-    return safeUrl && status === Constants.public.Enums.submission_status[4] ? { href: safeUrl } : null; // 'merged'
+    return safeUrl && status === Constants.public.Enums.submission_status[4]
+      ? { href: safeUrl }
+      : null; // 'merged'
   }
 
   // Log any submissions with missing IDs for data integrity monitoring
@@ -360,7 +433,7 @@ export default async function SubmissionsPage() {
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <h1 className="mb-2 font-bold text-3xl">My Submissions</h1>
+          <h1 className="mb-2 text-3xl font-bold">My Submissions</h1>
           <p className="text-muted-foreground">
             {submissions.length} {submissions.length === 1 ? 'submission' : 'submissions'}
           </p>
@@ -377,8 +450,8 @@ export default async function SubmissionsPage() {
         <Card>
           <CardContent className="flex flex-col items-center py-12">
             <Send className={`mb-4 h-12 w-12 ${UI_CLASSES.ICON_NEUTRAL}`} />
-            <h3 className="mb-2 font-semibold text-xl">No submissions yet</h3>
-            <p className="mb-4 max-w-md text-center text-muted-foreground">
+            <h3 className="mb-2 text-xl font-semibold">No submissions yet</h3>
+            <p className="text-muted-foreground mb-4 max-w-md text-center">
               Share your Claude configurations with the community! Your contributions help everyone
               build better AI workflows.
             </p>
@@ -421,8 +494,8 @@ export default async function SubmissionsPage() {
               className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO} ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
             />
             <div className="flex-1">
-              <p className="font-medium text-blue-400 text-sm">How it works</p>
-              <p className="mt-1 text-muted-foreground text-sm">
+              <p className="text-sm font-medium text-blue-400">How it works</p>
+              <p className="text-muted-foreground mt-1 text-sm">
                 When you submit a configuration, we automatically create a Pull Request on GitHub.
                 Our team reviews it for quality, security, and accuracy. Once approved and merged,
                 your contribution goes live for everyone to use!

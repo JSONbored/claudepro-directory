@@ -1,3 +1,4 @@
+import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -9,25 +10,35 @@ import {
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge, Button ,
+import {
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 
+/**
+ * ISR: 24 hours (86400s) - Companies list updates infrequently
+ * Uses ISR instead of force-dynamic for better performance and SEO
+ */
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
 
@@ -38,55 +49,32 @@ const NewsletterCTAVariant = dynamicImport(
 export const revalidate = 86_400;
 
 /**
- * Validate and sanitize external website URL for safe use in href attributes
- * Only allows HTTPS URLs (or HTTP for localhost in development)
- * Returns canonicalized URL or null if invalid
+ * Produce page metadata for the Companies page.
+ *
+ * @returns The metadata object for the `/companies` route.
+ * @see generatePageMetadata
  */
-function getSafeWebsiteUrl(url: null | string | undefined): null | string {
-  if (!url || typeof url !== 'string') return null;
-
-  try {
-    const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol (or HTTP for localhost/development)
-    const isLocalhost =
-      parsed.hostname === 'localhost' ||
-      parsed.hostname === '127.0.0.1' ||
-      parsed.hostname === '::1';
-    if (parsed.protocol === 'https:') {
-      // HTTPS always allowed
-    } else if (parsed.protocol === 'http:' && isLocalhost) {
-      // HTTP allowed only for local development
-    } else {
-      return null;
-    }
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // Sanitize: remove credentials
-    parsed.username = '';
-    parsed.password = '';
-    // Normalize hostname
-    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-    // Remove default ports
-    if (parsed.port === '80' || parsed.port === '443') {
-      parsed.port = '';
-    }
-
-    // Return canonicalized href (guaranteed to be normalized and safe)
-    return parsed.href;
-  } catch {
-    return null;
-  }
-}
-
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/companies');
 }
 
+/**
+ * Render the Companies directory page including a hero, a responsive grid of company cards, and a newsletter CTA.
+ *
+ * Fetches the companies list (requesting up to 50 entries) and renders each company's card with optional logo, industry, description, stats, featured badge, and a validated external website link. The page uses incremental static regeneration with revalidate = 86400 (24 hours).
+ *
+ * @throws A normalized error when loading the companies list fails.
+ * @returns The React element tree for the /companies route.
+ *
+ * @see getCompaniesList
+ * @see getSafeWebsiteUrl from @heyclaude/web-runtime/core
+ * @see generatePageMetadata
+ * @see revalidate (defined on line 49 in this file)
+ */
 export default async function CompaniesPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -126,14 +114,14 @@ export default async function CompaniesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       {/* Hero */}
       <section className={`${UI_CLASSES.CONTAINER_OVERFLOW_BORDER}`}>
         <div className="container mx-auto px-4 py-20">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 flex justify-center">
-              <div className="rounded-full bg-accent/10 p-3">
-                <Building className="h-8 w-8 text-primary" />
+              <div className="bg-accent/10 rounded-full p-3">
+                <Building className="text-primary h-8 w-8" />
               </div>
             </div>
 
@@ -168,9 +156,9 @@ export default async function CompaniesPage() {
         {companies.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center py-12">
-              <Building className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 font-semibold text-xl">No companies yet</h3>
-              <p className="mb-4 max-w-md text-center text-muted-foreground">
+              <Building className="text-muted-foreground mb-4 h-12 w-12" />
+              <h3 className="mb-2 text-xl font-semibold">No companies yet</h3>
+              <p className="text-muted-foreground mb-4 max-w-md text-center">
                 Be the first company to join the directory!
               </p>
               <Button asChild>
@@ -185,23 +173,27 @@ export default async function CompaniesPage() {
           <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
             {companies.map((company, index) => (
               <Card key={company.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
-                {company.featured ? <div className="-top-2 -right-2 absolute z-10">
+                {company.featured ? (
+                  <div className="absolute -top-2 -right-2 z-10">
                     <UnifiedBadge variant="base" className="bg-accent text-accent-foreground">
                       <Star className="mr-1 h-3 w-3" />
                       Featured
                     </UnifiedBadge>
-                  </div> : null}
+                  </div>
+                ) : null}
 
                 <CardHeader>
                   <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                    {company.logo ? <Image
+                    {company.logo ? (
+                      <Image
                         src={company.logo}
                         alt={`${company.name} logo`}
                         width={48}
                         height={48}
                         className="h-12 w-12 rounded-lg object-cover"
                         priority={index < 6}
-                      /> : null}
+                      />
+                    ) : null}
                     <div className="flex-1">
                       <CardTitle>
                         <Link
@@ -211,18 +203,23 @@ export default async function CompaniesPage() {
                           {company.name}
                         </Link>
                       </CardTitle>
-                      {company.industry ? <CardDescription>{company.industry}</CardDescription> : null}
+                      {company.industry ? (
+                        <CardDescription>{company.industry}</CardDescription>
+                      ) : null}
                     </div>
                   </div>
                 </CardHeader>
 
                 <CardContent>
-                  {company.description ? <p className="mb-4 line-clamp-2 text-muted-foreground text-sm">
+                  {company.description ? (
+                    <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
                       {company.description}
-                    </p> : null}
+                    </p>
+                  ) : null}
 
                   {/* Job Statistics from RPC/data layer (getCompanyProfile RPC) */}
-                  {company.stats && (company.stats.active_jobs ?? 0) > 0 ? <div className="mb-4 flex flex-wrap gap-2">
+                  {company.stats && (company.stats.active_jobs ?? 0) > 0 ? (
+                    <div className="mb-4 flex flex-wrap gap-2">
                       <UnifiedBadge variant="base" style="secondary" className="text-xs">
                         <Briefcase className="mr-1 h-3 w-3" />
                         {company.stats.active_jobs ?? 0} Active{' '}
@@ -241,13 +238,16 @@ export default async function CompaniesPage() {
                           {company.stats.remote_jobs ?? 0} Remote
                         </UnifiedBadge>
                       )}
-                    </div> : null}
+                    </div>
+                  ) : null}
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
-                    {company.size ? <UnifiedBadge variant="base" style="outline" className="text-xs">
+                    {company.size ? (
+                      <UnifiedBadge variant="base" style="outline" className="text-xs">
                         {company.size} employees
-                      </UnifiedBadge> : null}
+                      </UnifiedBadge>
+                    ) : null}
 
                     {(() => {
                       const safeWebsiteUrl = getSafeWebsiteUrl(company.website);

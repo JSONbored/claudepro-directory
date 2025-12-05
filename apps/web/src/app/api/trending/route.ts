@@ -6,7 +6,7 @@
 import 'server-only';
 
 import { TrendingService } from '@heyclaude/data-layer';
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import {
   generateRequestId,
@@ -99,6 +99,26 @@ function clampLimit(rawLimit: number): number {
   return Math.min(Math.max(rawLimit, 1), 100);
 }
 
+/**
+ * Convert database trending rows into frontend-ready trending item objects.
+ *
+ * Maps each LooseTrendingRow to an object with normalized fields (category, slug, title,
+ * description, author, tags, source) and numeric metrics (viewCount, copyCount, bookmarkCount,
+ * popularity, engagementScore, freshnessScore). If a row field is missing it will be omitted
+ * (set to `undefined`) and `fallbackCategory` or `DEFAULT_CATEGORY` is used when the row's
+ * category is absent.
+ *
+ * @param rows - Array of database rows containing trending metrics (LooseTrendingRow[])
+ * @param fallbackCategory - Category to use when a row's category is null/undefined; when this is
+ *   also null, `DEFAULT_CATEGORY` is applied
+ * @returns An array of normalized trending items suitable for frontend consumption, with fields:
+ *   `category`, `slug`, `title`, `description`, `author`, `tags`, `source`, `viewCount`,
+ *   `copyCount`, `bookmarkCount`, `popularity`, `engagementScore`, and `freshnessScore`
+ *
+ * @see mapPopularRows
+ * @see mapRecentRows
+ * @see DEFAULT_CATEGORY
+ */
 function mapTrendingRows(rows: LooseTrendingRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     category:
@@ -118,6 +138,14 @@ function mapTrendingRows(rows: LooseTrendingRow[], fallbackCategory: ContentCate
   }));
 }
 
+/**
+ * Convert database popular rows into frontend-friendly popular item objects.
+ *
+ * @param rows - Array of database rows representing popular content (`LoosePopularRow[]`)
+ * @param fallbackCategory - Category to use when a row's category is null or undefined (`ContentCategory | null`)
+ * @returns An array of mapped popular items where each object contains `category`, `slug`, `title`, and optionally `description`, `author`, `tags`, `viewCount`, `copyCount`, and `popularity`
+ * @see DEFAULT_CATEGORY
+ */
 function mapPopularRows(rows: LoosePopularRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     category:
@@ -133,10 +161,18 @@ function mapPopularRows(rows: LoosePopularRow[], fallbackCategory: ContentCatego
   }));
 }
 
+/**
+ * Convert recent-content database rows into frontend-ready items, filling missing categories with the provided fallback or the default.
+ *
+ * @param rows - LooseRecentRow[]: Array of recent-content rows; individual rows may contain partial or optional fields
+ * @param fallbackCategory - ContentCategory | null: Category to use when a row's `category` is null; if `null`, `DEFAULT_CATEGORY` is applied
+ * @returns An array of mapped items: `{ category: ContentCategory, slug: string, title: string, description?: string, author?: string, tags?: string[], created_at?: string }`
+ * @see mapPopularRows
+ * @see mapTrendingRows
+ */
 function mapRecentRows(rows: LooseRecentRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
-    category:
-      (row.category ?? fallbackCategory ?? DEFAULT_CATEGORY) satisfies ContentCategory,
+    category: (row.category ?? fallbackCategory ?? DEFAULT_CATEGORY) satisfies ContentCategory,
     slug: row.slug,
     title: row.title ?? row.slug,
     description: row.description ?? undefined,
@@ -146,6 +182,15 @@ function mapRecentRows(rows: LooseRecentRow[], fallbackCategory: ContentCategory
   }));
 }
 
+/**
+ * Create sidebar-ready items from trending rows.
+ *
+ * @param rows - (LooseTrendingRow[]) Array of trending rows to transform
+ * @param fallbackCategory - (ContentCategory | null) Category to use when a row has no category; if `null`, `DEFAULT_CATEGORY` is used
+ * @returns {Array<{ title: string; slug: string; views: string }>} Array of sidebar items where `slug` is `/<category>/<slug>` and `views` is formatted like `"1,234 views"`
+ * @see mapSidebarRecent
+ * @see DEFAULT_CATEGORY
+ */
 function mapSidebarTrending(rows: LooseTrendingRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     title: row.title ?? row.slug,
@@ -156,10 +201,20 @@ function mapSidebarTrending(rows: LooseTrendingRow[], fallbackCategory: ContentC
   }));
 }
 
+/**
+ * Create sidebar items from recent content rows with a category-prefixed slug and a localized date.
+ *
+ * @param {LooseRecentRow[]} rows - Array of recent-content rows from the database; individual fields may be missing.
+ * @param {ContentCategory | null} fallbackCategory - Category to use when a row's category is absent; if `null`, `DEFAULT_CATEGORY` is used.
+ * @returns {{ title: string; slug: string; date: string; }[]} An array of sidebar items where `title` is `row.title` or the row's `slug` fallback, `slug` is prefixed with `/<category>/`, and `date` is a localized "Mon DD, YYYY" string or an empty string if the creation date is unavailable.
+ * @see mapSidebarTrending
+ * @see DEFAULT_CATEGORY
+ */
 function mapSidebarRecent(rows: LooseRecentRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => {
-    const displayCategory =
-      (row.category ?? fallbackCategory ?? DEFAULT_CATEGORY) satisfies ContentCategory;
+    const displayCategory = (row.category ??
+      fallbackCategory ??
+      DEFAULT_CATEGORY) satisfies ContentCategory;
     const createdAt = row.created_at ?? null;
     return {
       title: row.title ?? row.slug,
@@ -323,6 +378,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * Responds to HTTP OPTIONS requests with no content and CORS headers.
+ *
+ * @returns A NextResponse with status 204 (No Content) and the allowed CORS headers applied.
+ * @see getOnlyCorsHeaders - the set of CORS headers included in the response
+ * @see NextResponse - Next.js response helper used to build the response
+ */
 export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,

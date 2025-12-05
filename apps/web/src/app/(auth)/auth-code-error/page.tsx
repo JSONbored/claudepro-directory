@@ -1,18 +1,18 @@
-import  { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
+import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-} from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, Button ,
+  UI_CLASSES,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 
 const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
@@ -20,9 +20,9 @@ const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
 export const dynamic = 'force-dynamic';
 
 /**
- * Produce the page metadata for the authentication code error route.
+ * Generate page metadata for the authentication code error route.
  *
- * @returns Metadata for the auth code error page
+ * @returns The metadata object for the authentication code error page.
  * @see generatePageMetadata
  * @see AUTH_CODE_ERROR_PATH
  * @see {@link https://nextjs.org/docs/app/building-your-application/metadata Metadata (Next.js)}
@@ -32,14 +32,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Renders an authentication error page when an authorization code flow fails.
+ * Display an authentication error page when an authorization-code sign-in attempt fails.
  *
- * This server component executes per request (dynamic = 'force-dynamic'), reads `searchParams`
- * for `code`, `provider`, and `message`, emits a redacted informational log entry, and returns
- * a centered card UI offering actions to retry sign-in or return home.
+ * Reads `searchParams` for optional `code`, `provider`, and `message`, emits a redacted informational log entry, and renders a centered card offering actions to retry sign-in or return home.
  *
  * @param properties - Next.js page props containing `searchParams` with optional `code`, `provider`, and `message` query values
- * @returns The page's JSX element displaying the authentication error and action buttons
+ * @returns The JSX element rendering the authentication error card with "Try Again" and "Return Home" actions
  *
  * @see ROUTES
  * @see generateRequestId
@@ -83,10 +81,8 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <div
-          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
-        >
-          <AlertCircle className="h-6 w-6 text-destructive" />
+        <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+          <AlertCircle className="text-destructive h-6 w-6" />
         </div>
         <CardTitle className="text-2xl">Authentication Error</CardTitle>
         <CardDescription>

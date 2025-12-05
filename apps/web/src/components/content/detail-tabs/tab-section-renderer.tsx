@@ -4,7 +4,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
 import type {
   ContentItem,
   ProcessedSectionData,
@@ -40,8 +40,17 @@ export interface TabSectionRendererProps {
 }
 
 /**
- * Renders a single section based on section ID
- * Returns null if section should not be displayed
+ * Render the content subsection identified by `sectionId` for the given item using preprocessed section data and feature flags.
+ *
+ * @param sectionId - Section identifier (e.g., 'content', 'features', 'installation', 'security', 'guide_sections')
+ * @param item - The content item being rendered; provides metadata such as `category` and `slug`
+ * @param sectionData - Preprocessed data required by sections (e.g., configData, installationData, examplesData, features, useCases, requirements, troubleshooting, guideSections, collectionSections, securityItems)
+ * @param config - Feature flags and type information that enable or configure specific sections (including `sections` and `typeName`)
+ * @returns A React element for the requested section, or `null` when the section is disabled or has no data to display
+ *
+ * @see UnifiedSection
+ * @see JSONSectionRenderer
+ * @see ReviewListSection
  */
 export function TabSectionRenderer({
   sectionId,
@@ -201,18 +210,15 @@ export function TabSectionRenderer({
       );
 
     case 'security': {
-      // Cast item to ContentItem for property access (content is Json type from RPC)
-      const contentItem = item as ContentItem;
-      if (!(config.sections.security && 'security' in contentItem)) return null;
-      const securityItems = ensureStringArray(contentItem['security']);
-      if (securityItems.length === 0) return null;
+      if (!(config.sections.security && sectionData.securityItems)) return null;
+      if (sectionData.securityItems.length === 0) return null;
       const validCategory = isValidCategory(item.category) ? item.category : 'agents';
       return (
         <UnifiedSection
           variant="list"
           title="Security Best Practices"
           description="Important security considerations"
-          items={securityItems}
+          items={sectionData.securityItems}
           category={validCategory}
           dotColor="bg-orange-500"
         />

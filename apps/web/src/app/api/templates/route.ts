@@ -6,18 +6,41 @@
  *
  * Runtime: Node.js (required for Supabase client with service role)
  */
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
-import { generateRequestId, logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+  createErrorResponse,
+} from '@heyclaude/web-runtime/logging/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
+/**
+ * Handle GET requests to fetch content templates for a specified category.
+ *
+ * Validates the `category` query parameter and returns either a success payload
+ * with templates and metadata, a 400 JSON error when the category is missing or
+ * invalid, or a standardized error response for internal failures. Successful
+ * responses include Cache-Control headers suitable for CDN/edge caching.
+ *
+ * @param request - The incoming NextRequest whose URL search parameters may include `category`
+ * @returns A NextResponse containing:
+ *  - On success (status 200): an object `{ success: true, templates: Array, category: string, count: number }`
+ *  - On invalid category (status 400): an object `{ error: 'Invalid category', message: string }`
+ *  - On internal error: a standardized error response produced by `createErrorResponse`
+ *
+ * @see VALID_CATEGORIES
+ * @see getContentTemplates
+ * @see createErrorResponse
+ */
 export async function GET(request: NextRequest) {
   // Generate single requestId for this API request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,

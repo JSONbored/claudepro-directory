@@ -3,6 +3,7 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
+import { getSafeWebsiteUrl, getSafeMailtoUrl } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   ArrowLeft,
@@ -16,10 +17,18 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/server';
-import  { type PageProps } from '@heyclaude/web-runtime/types/app.schema';
+import { type PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
-import { UI_CLASSES, UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import {
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -27,90 +36,21 @@ import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
 /**
- * Validate and sanitize external website URL for safe use in href attributes
- * Only allows HTTPS URLs (or HTTP for localhost in development)
- * Returns canonicalized URL or null if invalid
- */
-/**
  * ISR: 2 hours (7200s) - Job postings are relatively stable
  */
 export const revalidate = 7200;
-
-function getSafeWebsiteUrl(url: null | string | undefined): null | string {
-  if (!url || typeof url !== 'string') return null;
-
-  try {
-    const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol (or HTTP for localhost/development)
-    const isLocalhost =
-      parsed.hostname === 'localhost' ||
-      parsed.hostname === '127.0.0.1' ||
-      parsed.hostname === '::1';
-    if (parsed.protocol === 'https:') {
-      // HTTPS always allowed
-    } else if (parsed.protocol === 'http:' && isLocalhost) {
-      // HTTP allowed only for local development
-    } else {
-      return null;
-    }
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // Sanitize: remove credentials
-    parsed.username = '';
-    parsed.password = '';
-    // Normalize hostname
-    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-    // Remove default ports
-    if (parsed.port === '80' || parsed.port === '443') {
-      parsed.port = '';
-    }
-
-    // Return canonicalized href (guaranteed to be normalized and safe)
-    return parsed.href;
-  } catch {
-    return null;
-  }
-}
+export const dynamicParams = true; // Allow jobs not pre-rendered to be rendered on-demand
 
 /**
- * Validate and sanitize email address for safe use in mailto links
- * Returns safe mailto URL or null if email is invalid
+ * Builds page metadata for a job detail page from the provided route params and the job record.
+ *
+ * If the job cannot be loaded, returns metadata without the job `item` and logs the failure.
+ *
+ * @param params - Promise resolving to route params; must include `slug`.
+ * @returns The page Metadata populated with the job data when available, otherwise metadata without `item`.
+ * @see getJobBySlug
+ * @see generatePageMetadata
  */
-function getSafeMailtoUrl(email: null | string | undefined): null | string {
-  if (!email || typeof email !== 'string') return null;
-
-  // Trim and normalize
-  const trimmed = email.trim();
-  if (trimmed.length === 0) return null;
-
-  // Basic email format validation (RFC 5322 simplified)
-  // Prevents injection attacks while allowing valid emails
-  const emailRegex =
-    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-
-  // Validate format
-  if (!emailRegex.test(trimmed)) return null;
-
-  // Security checks: reject dangerous patterns
-  // Prevent null bytes
-  if (trimmed.includes('\0')) return null;
-  // Prevent path traversal attempts
-  if (trimmed.includes('..') || trimmed.includes('//')) return null;
-  // Prevent protocol injection (javascript:, data:, etc.)
-  if (/^(javascript|data|vbscript|file):/i.test(trimmed)) return null;
-
-  // Normalize to lowercase
-  const normalized = trimmed.toLowerCase();
-
-  // Limit length (RFC 5321: max 254 characters)
-  if (normalized.length > 254) return null;
-
-  // Encode email in mailto URL to prevent injection
-  // encodeURIComponent handles special characters safely
-  return `mailto:${encodeURIComponent(normalized)}`;
-}
-
 export async function generateMetadata({
   params,
 }: {
@@ -119,7 +59,7 @@ export async function generateMetadata({
   const { slug } = await params;
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const metadataLogger = logger.child({
     requestId: metadataRequestId,
@@ -145,10 +85,25 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Produce static route parameters (slugs) for pre-rendering a subset of job pages at build time.
+ *
+ * Generates an array of parameter objects used by Next.js to statically pre-render job pages.
+ * Only a limited number of jobs are returned to bound build-time work; remaining jobs are handled on demand.
+ *
+ * @returns An array of parameter objects `{ slug: string }` for up to 10 jobs; returns an empty array if no jobs are available or if an error occurs.
+ *
+ * @see getFilteredJobs - source of job listings used to derive slugs
+ * @see export const dynamicParams - remaining job pages are rendered on-demand when not pre-rendered
+ */
 export async function generateStaticParams() {
+  // Limit to top 10 jobs to optimize build time
+  // ISR with dynamicParams=true handles remaining jobs on-demand
+  const MAX_STATIC_JOBS = 10;
+
   // Generate requestId for static params generation (build-time)
   const staticParametersRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId: staticParametersRequestId,
@@ -159,22 +114,36 @@ export async function generateStaticParams() {
 
   const { getFilteredJobs } = await import('@heyclaude/web-runtime/server');
   try {
-    const jobsResult = await getFilteredJobs({});
+    const jobsResult = await getFilteredJobs({ limit: MAX_STATIC_JOBS });
     const jobs = jobsResult?.jobs ?? [];
 
     if (jobs.length === 0) {
-      reqLogger.warn('generateStaticParams: no jobs available, returning placeholder');
-      return [{ slug: 'placeholder' }];
+      reqLogger.warn('generateStaticParams: no jobs available, returning no static params');
+      return [];
     }
 
     return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
-    reqLogger.error('JobPage: getJobs threw in generateStaticParams', normalized);
-    return [{ slug: 'placeholder' }];
+    reqLogger.error('JobPage: getFilteredJobs threw in generateStaticParams', normalized);
+    return [];
   }
 }
 
+/**
+ * Render the job detail page for a given route slug.
+ *
+ * Validates the incoming `slug`, loads the corresponding job record, and returns the server-rendered UI
+ * containing header, metadata, description, requirements, benefits, apply actions, and job details.
+ * Triggers next/navigation.notFound() when slug validation fails or the job cannot be found.
+ *
+ * @param props.params - Route parameters containing the `slug` for the job to display.
+ * @returns The React element representing the server-rendered job detail page.
+ *
+ * @see getJobBySlug
+ * @see getSafeWebsiteUrl
+ * @see getSafeMailtoUrl
+ */
 export default async function JobPage({ params }: PageProps) {
   if (!params) {
     notFound();
@@ -185,8 +154,10 @@ export default async function JobPage({ params }: PageProps) {
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const slug = validationResult.success ? validationResult.data.slug : String(rawParameters['slug']);
-  
+  const slug = validationResult.success
+    ? validationResult.data.slug
+    : String(rawParameters['slug']);
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -242,8 +213,8 @@ export default async function JobPage({ params }: PageProps) {
       />
       <StructuredData route={`/jobs/${slug}`} />
 
-      <div className="min-h-screen bg-background">
-        <div className="border-border/50 border-b bg-card/30">
+      <div className="bg-background min-h-screen">
+        <div className="border-border/50 bg-card/30 border-b">
           <div className="container mx-auto px-4 py-8">
             <Button variant="ghost" asChild className="mb-6">
               <Link href={ROUTES.JOBS}>
@@ -254,16 +225,16 @@ export default async function JobPage({ params }: PageProps) {
 
             <div className="max-w-4xl">
               <div className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} mb-6 gap-4`}>
-                <div className="rounded-lg bg-accent/10 p-3">
-                  <Building2 className="h-6 w-6 text-primary" />
+                <div className="bg-accent/10 rounded-lg p-3">
+                  <Building2 className="text-primary h-6 w-6" />
                 </div>
                 <div className="flex-1">
-                  <h1 className="mb-2 font-bold text-3xl">{job.title}</h1>
+                  <h1 className="mb-2 text-3xl font-bold">{job.title}</h1>
                   <p className="text-muted-foreground text-xl">{job.company}</p>
                 </div>
               </div>
 
-              <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
+              <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                   <MapPin className="h-4 w-4" />
                   <span>{job.location}</span>
@@ -317,7 +288,7 @@ export default async function JobPage({ params }: PageProps) {
                   <ul className="space-y-2">
                     {requirements.map((request: string) => (
                       <li key={request} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                        <span className="mt-1 text-accent">•</span>
+                        <span className="text-accent mt-1">•</span>
                         <span>{request}</span>
                       </li>
                     ))}
@@ -390,18 +361,18 @@ export default async function JobPage({ params }: PageProps) {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
-                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <Clock className="text-muted-foreground h-4 w-4" />
                     <span>
                       {(job.type ?? 'Unknown').charAt(0).toUpperCase() +
                         (job.type ?? 'Unknown').slice(1)}
                     </span>
                   </div>
                   <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <MapPin className="text-muted-foreground h-4 w-4" />
                     <span>{job.remote ? 'Remote Available' : 'On-site'}</span>
                   </div>
                   <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
-                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <Users className="text-muted-foreground h-4 w-4" />
                     <span>
                       {(job.category ?? 'General').charAt(0).toUpperCase() +
                         (job.category ?? 'General').slice(1)}

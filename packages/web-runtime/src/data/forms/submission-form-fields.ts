@@ -1,7 +1,7 @@
 'use server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
@@ -9,7 +9,7 @@ import { cache } from 'react';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
-import  {
+import {
   type SubmissionContentType,
   type SubmissionFormConfig,
   type SubmissionFormSection,
@@ -18,11 +18,12 @@ import  {
   type TextareaFieldDefinition,
   type NumberFieldDefinition,
   type SelectFieldDefinition,
-  type SelectOption
+  type SelectOption,
 } from '../../types/component.types.ts';
 import { generateRequestId } from '../../utils/request-id.ts';
 
-const SUBMISSION_CONTENT_TYPES = Constants.public.Enums.submission_type as readonly SubmissionContentType[];
+const SUBMISSION_CONTENT_TYPES = Constants.public.Enums
+  .submission_type as readonly SubmissionContentType[];
 const FORM_FIELDS_CACHE_TAG = 'submission-form-fields';
 const FORM_FIELDS_CACHE_SECONDS = 60 * 60 * 6;
 
@@ -73,9 +74,7 @@ function mapField(item: FormFieldConfigItem): FieldDefinition | null {
         max: item.max_value ?? undefined,
         step: item.step_value ?? undefined,
         defaultValue:
-          typeof item.default_value === 'number'
-            ? (item.default_value as number)
-            : undefined,
+          typeof item.default_value === 'number' ? (item.default_value as number) : undefined,
       } as NumberFieldDefinition;
     }
 

@@ -1,7 +1,7 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
@@ -21,7 +21,8 @@ function isValidContentCategory(
   );
 }
 
-export type ContentDetailData = Database['public']['Functions']['get_content_detail_complete']['Returns'];
+export type ContentDetailData =
+  Database['public']['Functions']['get_content_detail_complete']['Returns'];
 
 export async function getContentDetailComplete(input: {
   category: string;
@@ -36,7 +37,10 @@ export async function getContentDetailComplete(input: {
   });
 
   if (!isValidContentCategory(category)) {
-    const normalized = normalizeError('Invalid category', 'Invalid category in getContentDetailComplete');
+    const normalized = normalizeError(
+      'Invalid category',
+      'Invalid category in getContentDetailComplete'
+    );
     reqLogger.error('Invalid category in getContentDetailComplete', normalized, {
       category,
       slug,
@@ -46,7 +50,8 @@ export async function getContentDetailComplete(input: {
 
   try {
     return await fetchCached(
-      (client) => new ContentService(client).getContentDetailComplete({ p_category: category, p_slug: slug }),
+      (client) =>
+        new ContentService(client).getContentDetailComplete({ p_category: category, p_slug: slug }),
       {
         keyParts: ['content', category, slug, 'complete'],
         tags: generateContentTags(category, slug),
@@ -78,7 +83,10 @@ export async function getContentDetailCore(input: {
   });
 
   if (!isValidContentCategory(category)) {
-    const normalized = normalizeError('Invalid category', 'Invalid category in getContentDetailCore');
+    const normalized = normalizeError(
+      'Invalid category',
+      'Invalid category in getContentDetailCore'
+    );
     reqLogger.error('Invalid category in getContentDetailCore', normalized, {
       category,
       slug,
@@ -88,7 +96,8 @@ export async function getContentDetailCore(input: {
 
   try {
     return await fetchCached(
-      (client) => new ContentService(client).getContentDetailCore({ p_category: category, p_slug: slug }),
+      (client) =>
+        new ContentService(client).getContentDetailCore({ p_category: category, p_slug: slug }),
       {
         keyParts: ['content', category, slug, 'core'],
         tags: generateContentTags(category, slug),
@@ -120,7 +129,10 @@ export async function getContentAnalytics(input: {
   });
 
   if (!isValidContentCategory(category)) {
-    const normalized = normalizeError('Invalid category', 'Invalid category in getContentAnalytics');
+    const normalized = normalizeError(
+      'Invalid category',
+      'Invalid category in getContentAnalytics'
+    );
     reqLogger.error('Invalid category in getContentAnalytics', normalized, {
       category,
       slug,
@@ -130,7 +142,8 @@ export async function getContentAnalytics(input: {
 
   try {
     return await fetchCached(
-      (client) => new ContentService(client).getContentAnalytics({ p_category: category, p_slug: slug }),
+      (client) =>
+        new ContentService(client).getContentAnalytics({ p_category: category, p_slug: slug }),
       {
         keyParts: ['content', category, slug, 'analytics'],
         tags: generateContentTags(category, slug),

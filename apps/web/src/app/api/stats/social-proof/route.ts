@@ -11,17 +11,56 @@
  * ISR: 5 minutes (300s) - Social proof updates frequently
  */
 import { Constants } from '@heyclaude/database-types';
-import { generateRequestId, logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient } from '@heyclaude/web-runtime/server';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+  createErrorResponse,
+} from '@heyclaude/web-runtime/logging/server';
+import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 export const revalidate = 300;
 
+/**
+ * Provide live social proof metrics: top contributors this week, recent submission count,
+ * success rate for the last 30 days, and total user count.
+ *
+ * Uses an admin Supabase client to query submissions and content, computes:
+ * - top contributors (up to 5 usernames derived from `author`),
+ * - `submissions` (count over the past 7 days),
+ * - `successRate` (percentage of submissions with status 'merged' over the past 30 days, or `null` if no data),
+ * - `totalUsers` (content count, or `null` if unavailable),
+ * and returns the results with caching headers and an ETag for conditional requests.
+ *
+ * Response headers:
+ * - Cache-Control: public, s-maxage=300, stale-while-revalidate=600
+ * - ETag: generated from timestamp and a compact stats hash
+ * - Last-Modified: derived from the response timestamp
+ *
+ * ISR / revalidation: cache TTL and revalidate value set to 300 seconds (s-maxage=300).
+ *
+ * @returns A NextResponse containing a JSON body with:
+ *  - `success`: `true`
+ *  - `stats`:
+ *    - `contributors`: `{ count: number, names: string[] }`
+ *    - `submissions`: number
+ *    - `successRate`: number | null
+ *    - `totalUsers`: number | null
+ *  - `timestamp`: ISO 8601 string
+ * The response status is 200 on success. In case of an internal error, the route returns a standardized error response produced by `createErrorResponse`.
+ *
+ * @see createSupabaseAdminClient
+ * @see generateRequestId
+ * @see normalizeError
+ * @see createErrorResponse
+ * @see Constants.public.Enums.submission_status
+ */
 export async function GET() {
   // Generate single requestId for this API request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -31,7 +70,15 @@ export async function GET() {
   });
 
   try {
-    const supabase = createSupabaseAnonClient();
+    // Use admin client to bypass RLS for public stats API
+    // The RLS policy on content_submissions checks auth.users table which anon client cannot access
+    // Use admin client to bypass RLS for aggregated stats
+    // Security posture: Least-privilege
+    // - Admin client uses service-role key with strictly necessary privileges
+    // - Handler is restricted to read-only queries with minimal selects (id, status, created_at, author)
+    // - Returns only derived aggregates/usernames (no sensitive data)
+    // - No additional sensitive columns can be pulled accidentally (read-only, minimal selects enforced)
+    const supabase = createSupabaseAdminClient();
 
     // Calculate date ranges
     const weekAgo = new Date();

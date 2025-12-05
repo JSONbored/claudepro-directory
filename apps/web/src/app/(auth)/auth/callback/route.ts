@@ -3,14 +3,10 @@
  */
 
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { refreshProfileFromOAuthServer, validateNextParameter  } from '@heyclaude/web-runtime';
+import { refreshProfileFromOAuthServer, validateNextParameter } from '@heyclaude/web-runtime';
 import { subscribeViaOAuthAction } from '@heyclaude/web-runtime/actions';
 import { SECURITY_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient } from '@heyclaude/web-runtime/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -156,9 +152,9 @@ export async function GET(request: NextRequest) {
 
       const redirectUrl = isLocalEnvironment
         ? `${origin}${next}`
-        : (forwardedHost && isValidHost
+        : forwardedHost && isValidHost
           ? `https://${forwardedHost}${next}`
-          : `${origin}${next}`);
+          : `${origin}${next}`;
 
       const response = NextResponse.redirect(redirectUrl);
       if (shouldSetNewsletterCookie) {
@@ -181,7 +177,9 @@ export async function GET(request: NextRequest) {
     const normalized = normalizeError(error, 'Auth callback exchange failed');
     reqLogger.error('Auth callback exchange failed', normalized, {
       hasCode: true,
-      ...(error && typeof error === 'object' && 'code' in error && { errorCode: String(error.code) }),
+      ...(error &&
+        typeof error === 'object' &&
+        'code' in error && { errorCode: String(error.code) }),
     });
   } else {
     const normalized = normalizeError(

@@ -166,10 +166,14 @@ export function highlightSearchTerms(
 }
 
 /**
- * Escape HTML characters to prevent XSS
+ * Escape HTML characters to prevent XSS/HTML injection
+ * 
+ * @param text - Text to escape (handles null/undefined)
+ * @returns Escaped text safe for HTML insertion
  */
-function escapeHtml(text: string): string {
-  return text
+export function escapeHtml(text: string | null | undefined): string {
+  if (text == null) return '';
+  return String(text)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')

@@ -134,6 +134,17 @@ async function ViewCountMetadata({
   return <DetailMetadata item={item} viewCount={viewCount} copyCount={resolvedCopyCount} />;
 }
 
+/**
+ * Render a DetailSidebar for a content item after resolving its related items.
+ *
+ * @param item - The content row or expanded content detail to display in the sidebar.
+ * @param relatedItemsPromise - Promise that resolves to the list of related content items.
+ * @param config - Sidebar configuration including `typeName` and optional display metadata:
+ *                 `categoryLabel`, `showGitHubLink`, and `githubPathPrefix`.
+ * @returns The DetailSidebar React node populated with the resolved related items.
+ *
+ * @see DetailSidebar
+ */
 async function SidebarWithRelated({
   item,
   relatedItemsPromise,
@@ -163,24 +174,20 @@ async function SidebarWithRelated({
 }
 
 /**
- * Renders the unified detail page for a content item, including header, metadata, content/code sections,
- * configuration, installation, examples, sidebars, and optional tabbed layout.
+ * Render the detail page for a content item, composing the header, metadata, main content sections, and sidebars.
  *
- * This server-rendered component performs server-side preprocessing (syntax highlighting, language detection,
- * filename generation, markdown heading extraction, and config formatting) in parallel before streaming the UI.
- * It also suspends to stream view-count and related-items data when promises are provided.
+ * Renders configuration, installation, examples, content/code sections, and optional tabbed layouts; supports streaming of view and copy counts via promise props and accepts pre-fetched or eagerly provided related items for the sidebar.
  *
- * @param props.item - The content item row or expanded content detail used to build the page.
- * @param props.relatedItems - Eagerly provided related items for the sidebar (optional).
- * @param props.viewCount - Pre-fetched view count to render immediately (optional).
- * @param props.copyCount - Pre-fetched copy count to render immediately (optional).
- * @param props.relatedItemsPromise - Promise that resolves to related items; used to stream sidebar content (optional).
- * @param props.viewCountPromise - Promise that resolves to the view count; used to stream metadata (optional).
- * @param props.copyCountPromise - Promise that resolves to the copy count; used to stream metadata (optional).
- * @param props.collectionSections - React node containing collection-specific sections to include in the main content (optional).
- * @param props.tabsEnabled - When true and the category config defines tabs, the page renders a tabbed layout instead of the default single-column layout.
- *
- * @returns The fully rendered detail page JSX for the provided content item.
+ * @param props.item - Content row or expanded content detail used to build the page.
+ * @param props.relatedItems - Eagerly provided related items for the sidebar.
+ * @param props.viewCount - Pre-fetched view count to render immediately.
+ * @param props.copyCount - Pre-fetched copy count to render immediately.
+ * @param props.relatedItemsPromise - Promise that resolves to related items for streaming into the sidebar.
+ * @param props.viewCountPromise - Promise that resolves to the view count for streaming into metadata.
+ * @param props.copyCountPromise - Promise that resolves to the copy count for streaming into metadata.
+ * @param props.collectionSections - React node with collection-specific sections to include in the main content.
+ * @param props.tabsEnabled - When true and the category configuration defines tabs, render the tabbed layout.
+ * @returns The JSX element for the rendered detail page for the provided content item.
  *
  * @see getCategoryConfig
  * @see highlightCode
@@ -238,10 +245,11 @@ export async function UnifiedDetailPage({
     return ensureStringArray(reqs);
   })();
 
-  const securityItems =
-    'security' in contentItem && contentItem['security']
-      ? ensureStringArray(contentItem['security'])
-      : [];
+  const securityItems = (() => {
+    const sec =
+      ('security' in contentItem && contentItem['security']) || metadata['security'];
+    return ensureStringArray(sec);
+  })();
 
   const quickActionsPackageName =
     typeof metadata['package'] === 'string' ? (metadata['package'] as string) : null;
@@ -893,6 +901,7 @@ export async function UnifiedDetailPage({
       features,
       useCases,
       requirements,
+      securityItems,
       troubleshooting,
       guideSections,
       collectionSections,
@@ -1259,7 +1268,13 @@ export async function UnifiedDetailPage({
                 variant="enhanced-list"
                 title="Troubleshooting"
                 description="Common issues and solutions"
-                items={troubleshooting as Array<string | { issue: string; solution: string }>}
+                items={
+                  troubleshooting as Array<
+                    | string
+                    | { issue: string; solution: string }
+                    | { question: string; answer: string }
+                  >
+                }
                 dotColor="bg-red-500"
               />
             )}

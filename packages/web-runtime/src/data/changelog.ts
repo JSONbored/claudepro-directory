@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { ChangelogService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
@@ -52,15 +52,18 @@ export async function getChangelogOverview(
   const { category, publishedOnly = true, featuredOnly = false, limit = 50, offset = 0 } = options;
 
   const result = await fetchCached(
-    (client) => new ChangelogService(client).getChangelogOverview({
+    (client) =>
+      new ChangelogService(client).getChangelogOverview({
         ...(category ? { p_category: category } : {}),
         p_published_only: publishedOnly,
         p_featured_only: featuredOnly,
         p_limit: limit,
-        p_offset: offset
-    }),
+        p_offset: offset,
+      }),
     {
-      keyParts: category ? [CACHE_KEY_PREFIX, category, limit, offset] : [CACHE_KEY_PREFIX, 'overview', limit, offset],
+      keyParts: category
+        ? [CACHE_KEY_PREFIX, category, limit, offset]
+        : [CACHE_KEY_PREFIX, 'overview', limit, offset],
       tags: [CHANGELOG_TAG, ...(category ? [`changelog-category-${category}`] : [])],
       ttlKey: CHANGELOG_TTL_KEY,
       fallback: createEmptyOverview(limit, offset),
@@ -269,9 +272,7 @@ export async function getChangelogMetadata() {
     };
   }
   const categoryCounts =
-    metadata.category_counts == null
-      ? {}
-      : (metadata.category_counts as Record<string, number>);
+    metadata.category_counts == null ? {} : (metadata.category_counts as Record<string, number>);
 
   return {
     totalEntries: metadata.total_entries ?? 0,

@@ -5,6 +5,8 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
     "rootDir": "src",
     "outDir": "dist",
     "module": "NodeNext",
