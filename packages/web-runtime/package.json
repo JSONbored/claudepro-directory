@@ -232,7 +232,7 @@
     "html2canvas-pro": "^1.5.13",
     "inngest": "^3.46.0",
     "lucide-react": "^0.460.0",
-    "motion": "^12.23.24",
+    "motion": "^12.23.25",
     "next-safe-action": "^8.0.11",
     "pino": "^10.1.0",
     "react-error-boundary": "^6.0.0",
