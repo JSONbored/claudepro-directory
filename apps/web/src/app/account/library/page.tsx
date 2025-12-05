@@ -18,15 +18,23 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
+import {
+  UI_CLASSES,
+  NavLink,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle, Tabs, TabsContent, TabsList, TabsTrigger    } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
-
 
 /**
  * Dynamic Rendering Required
@@ -35,14 +43,33 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Produce page metadata for the account Library route.
+ *
+ * @returns The Next.js `Metadata` object configured for the "/account/library" page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/library');
 }
 
+/**
+ * Renders the authenticated user's Library page with bookmarks and collections, using server-side data fetching and request-scoped logging.
+ *
+ * If the request is unauthenticated, renders a sign-in prompt. If library data cannot be loaded, renders an error card; otherwise renders tabs for bookmarks and collections with counts and item cards.
+ *
+ * @returns The page's React element representing the user's library view.
+ *
+ * @see getAuthenticatedUser - obtains the current user for this request
+ * @see getUserLibrary - fetches bookmarks, collections, and stats for the user
+ * @see generateRequestId - creates the request-scoped identifier used for logging
+ * @see normalizeError - used to normalize fetch errors for logging
+ */
 export default async function LibraryPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -154,7 +181,7 @@ export default async function LibraryPage() {
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <h1 className="mb-2 font-bold text-3xl">My Library</h1>
+          <h1 className="mb-2 text-3xl font-bold">My Library</h1>
           <p className="text-muted-foreground">
             {bookmarkCount} bookmarks • {collectionCount} collections
           </p>
@@ -186,9 +213,9 @@ export default async function LibraryPage() {
           {bookmarks.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center py-12">
-                <BookmarkIcon className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 font-semibold text-xl">No bookmarks yet</h3>
-                <p className="max-w-md text-center text-muted-foreground">
+                <BookmarkIcon className="text-muted-foreground mb-4 h-12 w-12" />
+                <h3 className="mb-2 text-xl font-semibold">No bookmarks yet</h3>
+                <p className="text-muted-foreground max-w-md text-center">
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
@@ -210,7 +237,9 @@ export default async function LibraryPage() {
                           </UnifiedBadge>
                           <CardTitle className="text-lg">{bookmark.content_slug}</CardTitle>
                         </div>
-                        {bookmark.notes ? <CardDescription className="mt-2">{bookmark.notes}</CardDescription> : null}
+                        {bookmark.notes ? (
+                          <CardDescription className="mt-2">{bookmark.notes}</CardDescription>
+                        ) : null}
                       </div>
                       <NavLink
                         href={`/${bookmark.content_type}/${bookmark.content_slug}`}
@@ -241,9 +270,9 @@ export default async function LibraryPage() {
           {collections.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center py-12">
-                <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 font-semibold text-xl">No collections yet</h3>
-                <p className="mb-4 max-w-md text-center text-muted-foreground">
+                <FolderOpen className="text-muted-foreground mb-4 h-12 w-12" />
+                <h3 className="mb-2 text-xl font-semibold">No collections yet</h3>
+                <p className="text-muted-foreground mb-4 max-w-md text-center">
                   Organize your bookmarks into custom collections! Group related configurations
                   together and share them with others.
                 </p>
@@ -264,15 +293,19 @@ export default async function LibraryPage() {
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                         <div className="flex-1">
                           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
-                            <Layers className="h-4 w-4 text-primary" />
-                            {collection.is_public ? <UnifiedBadge variant="base" style="outline" className="text-xs">
+                            <Layers className="text-primary h-4 w-4" />
+                            {collection.is_public ? (
+                              <UnifiedBadge variant="base" style="outline" className="text-xs">
                                 Public
-                              </UnifiedBadge> : null}
+                              </UnifiedBadge>
+                            ) : null}
                           </div>
                           <CardTitle className="text-lg">{collection.name}</CardTitle>
-                          {collection.description ? <CardDescription className="mt-2 line-clamp-2">
+                          {collection.description ? (
+                            <CardDescription className="mt-2 line-clamp-2">
                               {collection.description}
-                            </CardDescription> : null}
+                            </CardDescription>
+                          ) : null}
                         </div>
                       </div>
                     </CardHeader>

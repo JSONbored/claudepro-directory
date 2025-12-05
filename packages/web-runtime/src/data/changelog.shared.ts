@@ -1,4 +1,4 @@
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { z } from 'zod';
 
@@ -6,18 +6,24 @@ import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
 import { generateRequestId } from '../utils/request-id.ts';
 
-const changeItemSchema = z.object({
-  content: z.string(),
-});
+// Support both formats:
+// 1. Array of objects: [{ content: "..." }]
+// 2. Array of strings: ["...", "..."]
+const changeItemSchema = z.union([z.object({ content: z.string() }), z.string()]);
+
+// Transform strings to objects for consistency
+const changeItemSchemaTransformed = changeItemSchema.transform((item) =>
+  typeof item === 'string' ? { content: item } : item
+);
 
 const changesSchema = z
   .object({
-    Added: z.array(changeItemSchema).optional(),
-    Changed: z.array(changeItemSchema).optional(),
-    Fixed: z.array(changeItemSchema).optional(),
-    Removed: z.array(changeItemSchema).optional(),
-    Deprecated: z.array(changeItemSchema).optional(),
-    Security: z.array(changeItemSchema).optional(),
+    Added: z.array(changeItemSchemaTransformed).optional(),
+    Changed: z.array(changeItemSchemaTransformed).optional(),
+    Fixed: z.array(changeItemSchemaTransformed).optional(),
+    Removed: z.array(changeItemSchemaTransformed).optional(),
+    Deprecated: z.array(changeItemSchemaTransformed).optional(),
+    Security: z.array(changeItemSchemaTransformed).optional(),
   })
   .refine(
     (data) => {
@@ -32,10 +38,7 @@ const changesSchema = z
 
 export type ChangelogChanges = z.infer<typeof changesSchema>;
 
-export function parseChangelogChanges(
-  changes: unknown,
-  requestId?: string
-): ChangelogChanges {
+export function parseChangelogChanges(changes: unknown, requestId?: string): ChangelogChanges {
   try {
     return changesSchema.parse(changes);
   } catch (error) {

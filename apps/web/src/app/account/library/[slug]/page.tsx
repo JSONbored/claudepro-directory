@@ -6,14 +6,18 @@ import {
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge, SimpleCopyButton,
+import {
+  UI_CLASSES,
+  UnifiedBadge,
+  SimpleCopyButton,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -30,17 +34,41 @@ interface CollectionPageProperties {
   params: Promise<{ slug: string }>;
 }
 
+/**
+ * Generate metadata for the collection page at the '/account/library/:slug' route.
+ *
+ * @param params - Object providing route parameters; the resolved value includes `slug`
+ * @returns Metadata for the collection page
+ *
+ * @see generatePageMetadata
+ * @see {@link https://nextjs.org/docs/app/api-reference/functions/generate-metadata | Next.js generateMetadata}
+ */
 export async function generateMetadata({ params }: CollectionPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
 
+/**
+ * Renders the collection detail page for a given collection slug, including header, share/edit controls, item manager, and stats.
+ *
+ * This server component authenticates the user, loads the collection data for the authenticated user, and renders user-facing fallbacks:
+ * - Redirects to `/login` if the request is unauthenticated.
+ * - Calls `notFound()` when the specified collection is not accessible or missing.
+ * - Displays an error Card if fetching collection data fails.
+ *
+ * @param params - An object whose `slug` property identifies the collection to display.
+ * @returns The page JSX that shows collection metadata, controls (share/edit), a collection item manager, and summary statistics.
+ *
+ * @see getAuthenticatedUser
+ * @see getCollectionDetail
+ * @see generatePageMetadata
+ */
 export default async function CollectionDetailPage({ params }: CollectionPageProperties) {
   const { slug } = await params;
-  
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -143,20 +171,25 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
         <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
           <div className="flex-1">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
-              <h1 className="font-bold text-3xl">{collection.name}</h1>
-              {collection.is_public ? <UnifiedBadge variant="base" style="outline" className="text-xs">
+              <h1 className="text-3xl font-bold">{collection.name}</h1>
+              {collection.is_public ? (
+                <UnifiedBadge variant="base" style="outline" className="text-xs">
                   Public
-                </UnifiedBadge> : null}
+                </UnifiedBadge>
+              ) : null}
             </div>
-            {collection.description ? <p className="text-muted-foreground">{collection.description}</p> : null}
-            <div className="mt-2 text-muted-foreground text-sm">
+            {collection.description ? (
+              <p className="text-muted-foreground">{collection.description}</p>
+            ) : null}
+            <div className="text-muted-foreground mt-2 text-sm">
               {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
               {collection.view_count} views
             </div>
           </div>
 
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            {shareUrl ? <SimpleCopyButton
+            {shareUrl ? (
+              <SimpleCopyButton
                 content={shareUrl}
                 label="Share"
                 successMessage="Link copied to clipboard!"
@@ -164,7 +197,8 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
                 size="sm"
                 className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
                 iconClassName="h-4 w-4"
-              /> : null}
+              />
+            ) : null}
             <Link href={`/account/library/${slug}/edit`}>
               <Button variant="outline" size="sm" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Edit className="h-4 w-4" />
@@ -196,26 +230,26 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="font-medium text-sm">Total Items</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">{collection.item_count}</div>
+            <div className="text-2xl font-bold">{collection.item_count}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="font-medium text-sm">Views</CardTitle>
+            <CardTitle className="text-sm font-medium">Views</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">{collection.view_count}</div>
+            <div className="text-2xl font-bold">{collection.view_count}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="font-medium text-sm">Visibility</CardTitle>
+            <CardTitle className="text-sm font-medium">Visibility</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">{collection.is_public ? 'Public' : 'Private'}</div>
+            <div className="text-2xl font-bold">{collection.is_public ? 'Public' : 'Private'}</div>
           </CardContent>
         </Card>
       </div>

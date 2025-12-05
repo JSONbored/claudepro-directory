@@ -3,7 +3,7 @@
  * Single RPC call to get_user_profile() replaces 6+ separate queries
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import {
@@ -13,13 +13,17 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink, UnifiedBadge,
+import {
+  UI_CLASSES,
+  NavLink,
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle   } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
@@ -47,9 +51,18 @@ function isValidSlug(slug: string): boolean {
 }
 
 /**
- * Get safe content URL from type and slug
- * Returns null if either is invalid
- * Uses centralized CONTENT_CATEGORY_VALUES to ensure consistency
+ * Build a validated, sanitized URL path for a content item.
+ *
+ * Validates that `type` is a recognized content category and that `slug`
+ * can be sanitized into a valid path segment; returns `null` if validation fails.
+ *
+ * @param type - Content category (must be a valid content category string)
+ * @param slug - Candidate slug to sanitize and validate for use in the path
+ * @returns The path in the form `/{type}/{sanitizedSlug}` when valid, `null` otherwise
+ *
+ * @see sanitizeSlug
+ * @see isValidSlug
+ * @see isContentCategory
  */
 function getSafeContentUrl(type: string, slug: string): null | string {
   // Validate content type using centralized constant
@@ -62,8 +75,13 @@ function getSafeContentUrl(type: string, slug: string): null | string {
 }
 
 /**
- * Get safe collection URL from user slug and collection slug
- * Returns null if either is invalid
+ * Constructs a safe collection URL for a user if both slugs are valid after sanitization.
+ *
+ * @param userSlug - The user-facing slug for the profile (sanitized before validation)
+ * @param collectionSlug - The collection's slug (sanitized before validation)
+ * @returns The path `/u/{sanitizedUserSlug}/collections/{sanitizedCollectionSlug}` or `null` if either slug is invalid
+ * @see sanitizeSlug
+ * @see isValidSlug
  */
 function getSafeCollectionUrl(userSlug: string, collectionSlug: string): null | string {
   // Sanitize slugs first, then validate the sanitized results
@@ -75,8 +93,19 @@ function getSafeCollectionUrl(userSlug: string, collectionSlug: string): null | 
 }
 
 /**
- * Sanitize display text for safe use in text content
- * Removes HTML tags, script content, and dangerous characters
+ * Produce a plain-text-safe display string from arbitrary input.
+ *
+ * Sanitizes the input by stripping dangerous/control characters, trimming whitespace,
+ * and truncating to 200 characters; if the input is missing or yields no content after
+ * sanitization, the provided `fallback` is returned.
+ *
+ * @param text - The input text to sanitize.
+ * @param fallback - Value to return when `text` is missing or sanitization produces no content.
+ * @returns The sanitized display string, or `fallback` if no safe content remains.
+ *
+ * @see sanitizeSlug
+ * @see getSafeContentUrl
+ * @see getSafeCollectionUrl
  */
 function sanitizeDisplayText(text: null | string | undefined, fallback: string): string {
   if (!text || typeof text !== 'string') return fallback;
@@ -85,13 +114,13 @@ function sanitizeDisplayText(text: null | string | undefined, fallback: string):
   let sanitized = text.replaceAll(/[<>]/g, '');
   // Remove control characters and dangerous Unicode by filtering character codes
   const dangerousChars = new Set([
-    0x20_2E,
-    0x20_2D,
-    0x20_2C,
-    0x20_2B,
-    0x20_2A, // RTL override marks
-    0x20_0E,
-    0x20_0F, // Left-to-right/right-to-left marks
+    0x20_2e,
+    0x20_2d,
+    0x20_2c,
+    0x20_2b,
+    0x20_2a, // RTL override marks
+    0x20_0e,
+    0x20_0f, // Left-to-right/right-to-left marks
     0x20_66,
     0x20_67,
     0x20_68,
@@ -101,8 +130,8 @@ function sanitizeDisplayText(text: null | string | undefined, fallback: string):
     .filter((char) => {
       const code = char.codePointAt(0) ?? 0;
       // Allow tab (0x09), newline (0x0a), and printable characters outside control ranges
-      const isControl = code < 0x20 || (code >= 0x7F && code <= 0x9F);
-      const isPrintable = code === 0x09 || code === 0x0A || !isControl;
+      const isControl = code < 0x20 || (code >= 0x7f && code <= 0x9f);
+      const isPrintable = code === 0x09 || code === 0x0a || !isControl;
       return isPrintable && !dangerousChars.has(code);
     })
     .join('');
@@ -120,6 +149,14 @@ interface UserProfilePageProperties {
  */
 export const revalidate = false;
 
+/**
+ * Produce page metadata for a user profile route using the provided slug.
+ *
+ * @param params - A promise resolving to an object with `slug`, the user identifier used to populate the route parameter.
+ * @returns The Next.js `Metadata` for the /u/:slug user profile page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: UserProfilePageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/u/:slug', {
@@ -127,12 +164,27 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
   });
 }
 
+/**
+ * Render the user profile page for the provided route parameters.
+ *
+ * Loads the public user profile and renders the hero header, activity stats,
+ * public collections, and contributions. If the slug is invalid or the profile
+ * is not found, the page will trigger Next.js not-found handling.
+ *
+ * @param params - Route parameters containing the `slug` of the user to display.
+ * @returns The React element for the user's profile page.
+ *
+ * @see getPublicUserProfile
+ * @see getSafeCollectionUrl
+ * @see getSafeContentUrl
+ * @see sanitizeDisplayText
+ */
 export default async function UserProfilePage({ params }: UserProfilePageProperties) {
   const { slug } = await params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -155,9 +207,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
   });
 
   // Create child logger with viewer context if available
-  const viewerLogger = currentUser?.id 
-    ? reqLogger.child({ viewerId: currentUser.id })
-    : reqLogger;
+  const viewerLogger = currentUser?.id ? reqLogger.child({ viewerId: currentUser.id }) : reqLogger;
 
   // Section: User Profile Fetch
   let profileData: Database['public']['Functions']['get_user_profile']['Returns'] | null = null;
@@ -191,7 +241,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
   const { follower_count, following_count } = stats ?? {};
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       {/* Hero/Profile Header */}
       <section className="relative">
         <div className="container mx-auto px-4">
@@ -203,17 +253,17 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                   alt={`${sanitizeDisplayText(profile.name ?? slug, slug)}'s profile picture`}
                   width={96}
                   height={96}
-                  className="h-24 w-24 rounded-full border-4 border-background object-cover"
+                  className="border-background h-24 w-24 rounded-full border-4 object-cover"
                   priority
                 />
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-background bg-accent font-bold text-2xl">
+                <div className="border-background bg-accent flex h-24 w-24 items-center justify-center rounded-full border-4 text-2xl font-bold">
                   {(profile?.name ?? slug).charAt(0).toUpperCase()}
                 </div>
               )}
 
               <div className="mt-4">
-                <h1 className="font-bold text-3xl">
+                <h1 className="text-3xl font-bold">
                   {sanitizeDisplayText(profile?.name ?? slug, slug)}
                 </h1>
                 {(() => {
@@ -231,7 +281,8 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                   <span>•</span>
                   <div>{following_count ?? 0} following</div>
 
-                  {profile?.website ? <>
+                  {profile?.website ? (
+                    <>
                       <span>•</span>
                       <NavLink
                         href={profile.website}
@@ -241,16 +292,23 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                         <Globe className="h-4 w-4" />
                         Website
                       </NavLink>
-                    </> : null}
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>
 
-            {currentUser && profile && currentUser.id !== profile.id && profile.id && profile.slug ? <FollowButton
+            {currentUser &&
+            profile &&
+            currentUser.id !== profile.id &&
+            profile.id &&
+            profile.slug ? (
+              <FollowButton
                 userId={profile.id}
                 userSlug={profile.slug}
                 initialIsFollowing={is_following ?? false}
-              /> : null}
+              />
+            ) : null}
           </div>
         </div>
       </section>
@@ -297,12 +355,12 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
           <div className="space-y-6 md:col-span-2">
             {/* Public Collections */}
             <div>
-              <h2 className="mb-4 font-bold text-2xl">Public Collections</h2>
+              <h2 className="mb-4 text-2xl font-bold">Public Collections</h2>
 
               {!collections || collections.length === 0 ? (
                 <Card>
                   <CardContent className="flex flex-col items-center py-12">
-                    <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
+                    <FolderOpen className="text-muted-foreground mb-4 h-12 w-12" />
                     <p className="text-muted-foreground">No public collections yet</p>
                   </CardContent>
                 </Card>
@@ -324,11 +382,14 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                     .map((collection) => {
                       const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
                       if (!safeCollectionUrl) {
-                        viewerLogger.warn('UserProfilePage: skipping collection with invalid slug', {
-                          collectionId: collection.id,
-                          collectionName: collection.name ?? 'Unknown',
-                          collectionSlug: collection.slug,
-                        });
+                        viewerLogger.warn(
+                          'UserProfilePage: skipping collection with invalid slug',
+                          {
+                            collectionId: collection.id,
+                            collectionName: collection.name ?? 'Unknown',
+                            collectionSlug: collection.slug,
+                          }
+                        );
                         return null;
                       }
                       return (
@@ -336,9 +397,11 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                           <NavLink href={safeCollectionUrl}>
                             <CardHeader>
                               <CardTitle className="text-lg">{collection.name}</CardTitle>
-                              {collection.description ? <CardDescription className="line-clamp-2">
+                              {collection.description ? (
+                                <CardDescription className="line-clamp-2">
                                   {collection.description}
-                                </CardDescription> : null}
+                                </CardDescription>
+                              ) : null}
                             </CardHeader>
                             <CardContent>
                               <div
@@ -362,8 +425,9 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
             </div>
 
             {/* Content Contributions */}
-            {contributions && contributions.length > 0 ? <div>
-                <h2 className="mb-4 font-bold text-2xl">Contributions</h2>
+            {contributions && contributions.length > 0 ? (
+              <div>
+                <h2 className="mb-4 text-2xl font-bold">Contributions</h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {contributions
                     .filter(
@@ -383,11 +447,14 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                     .map((item) => {
                       const safeContentUrl = getSafeContentUrl(item.content_type, item.slug);
                       if (!safeContentUrl) {
-                        viewerLogger.warn('UserProfilePage: skipping contribution with invalid type or slug', {
-                          contentId: item.id,
-                          contentType: item.content_type,
-                          contentSlug: item.slug,
-                        });
+                        viewerLogger.warn(
+                          'UserProfilePage: skipping contribution with invalid type or slug',
+                          {
+                            contentId: item.id,
+                            contentType: item.content_type,
+                            contentSlug: item.slug,
+                          }
+                        );
                         return null;
                       }
                       return (
@@ -398,9 +465,11 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                                 <UnifiedBadge variant="base" style="secondary" className="text-xs">
                                   {item.content_type}
                                 </UnifiedBadge>
-                                {item.featured ? <UnifiedBadge variant="base" style="default" className="text-xs">
+                                {item.featured ? (
+                                  <UnifiedBadge variant="base" style="default" className="text-xs">
                                     Featured
-                                  </UnifiedBadge> : null}
+                                  </UnifiedBadge>
+                                ) : null}
                               </div>
                               <CardTitle className="text-base">{item.name}</CardTitle>
                               <CardDescription className="line-clamp-2 text-xs">
@@ -408,9 +477,7 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                               </CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div
-                                className="flex items-center gap-2 text-muted-foreground text-xs"
-                              >
+                              <div className="text-muted-foreground flex items-center gap-2 text-xs">
                                 <span>{item.view_count ?? 0} views</span>
                                 <span>•</span>
                                 <span>{item.download_count ?? 0} downloads</span>
@@ -421,7 +488,8 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                       );
                     })}
                 </div>
-              </div> : null}
+              </div>
+            ) : null}
           </div>
         </div>
       </section>

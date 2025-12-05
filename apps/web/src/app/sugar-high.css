@@ -1,31 +1,31 @@
 /**
  * Sugar High Syntax Highlighting Styles - Polar.sh Inspired Design
- * Clean, minimal, professional code blocks
+ * Clean, minimal, professional code blocks with tight line spacing
  * @see https://github.com/huozhi/sugar-high
  */
 
 /* Sugar High CSS Variables - Dark Mode
-   Polar.sh-inspired muted color palette (4-5 colors only) */
+   Polar.sh-inspired muted color palette - professional and readable */
 :root {
-  /* Core Sugar High variables - Polar-style muted palette */
-  --sh-class: #93c5fd;     /* Soft blue - classes/constructors */
-  --sh-identifier: #e2e8f0; /* Off-white - variables/identifiers */
-  --sh-sign: #94a3b8;       /* Slate - punctuation (subtle, not highlighted) */
-  --sh-string: #86efac;     /* Soft green - strings */
-  --sh-keyword: #7dd3fc;    /* Light blue - keywords/booleans */
-  --sh-comment: #64748b;    /* Slate gray - comments */
-  --sh-jsxliterals: #93c5fd; /* Soft blue - JSX */
-  --sh-property: #e2e8f0;   /* Off-white - object properties */
-  --sh-entity: #fcd34d;     /* Soft yellow - entities */
+  /* Core Sugar High variables - Polar.sh-style muted palette */
+  --sh-class: #a5d6ff;      /* Soft blue - classes/constructors */
+  --sh-identifier: #c9d1d9; /* GitHub-style light gray - variables/identifiers */
+  --sh-sign: #8b949e;       /* Very subtle gray - punctuation */
+  --sh-string: #a5d6a7;     /* Soft muted green - strings */
+  --sh-keyword: #79c0ff;    /* Soft blue - keywords/booleans */
+  --sh-comment: #6e7681;    /* Muted gray - comments */
+  --sh-jsxliterals: #a5d6ff; /* Soft blue - JSX */
+  --sh-property: #c9d1d9;   /* Same as identifier - object properties */
+  --sh-entity: #f9c859;     /* Warmer yellow - entities */
 
-  /* Code block structure colors - Polar-style dark mode */
-  --code-bg: #1e1e1e;
-  --code-border: #2e2e2e;
+  /* Code block structure colors - Polar.sh dark mode */
+  --code-bg: #161b22;       /* Darker background like GitHub/Polar */
+  --code-border: #30363d;   /* Subtle border */
   --code-header-bg: rgba(255, 255, 255, 0.02);
-  --code-line-number: #4b5563;
+  --code-line-number: #484f58; /* More subtle line numbers */
 
   /* UI colors - Dark mode */
-  --code-badge-color: #64748b;
+  --code-badge-color: #6e7681;
   --code-line-highlight-bg: rgba(99, 102, 241, 0.08);
   --code-line-highlight-border: #6366f1;
 }
@@ -57,22 +57,22 @@
   }
 }
 
-/* Forced Dark Mode - Polar-style */
+/* Forced Dark Mode - Polar.sh-style */
 [data-theme="dark"] {
-  --sh-class: #93c5fd;
-  --sh-identifier: #e2e8f0;
-  --sh-sign: #94a3b8;
-  --sh-string: #86efac;
-  --sh-keyword: #7dd3fc;
-  --sh-comment: #64748b;
-  --sh-jsxliterals: #93c5fd;
-  --sh-property: #e2e8f0;
-  --sh-entity: #fcd34d;
-  --code-bg: #1e1e1e;
-  --code-border: #2e2e2e;
+  --sh-class: #a5d6ff;
+  --sh-identifier: #c9d1d9;
+  --sh-sign: #8b949e;
+  --sh-string: #a5d6a7;
+  --sh-keyword: #79c0ff;
+  --sh-comment: #6e7681;
+  --sh-jsxliterals: #a5d6ff;
+  --sh-property: #c9d1d9;
+  --sh-entity: #f9c859;
+  --code-bg: #161b22;
+  --code-border: #30363d;
   --code-header-bg: rgba(255, 255, 255, 0.02);
-  --code-line-number: #4b5563;
-  --code-badge-color: #64748b;
+  --code-line-number: #484f58;
+  --code-badge-color: #6e7681;
   --code-line-highlight-bg: rgba(99, 102, 241, 0.08);
   --code-line-highlight-border: #6366f1;
 }
@@ -204,15 +204,15 @@
   color: #10b981;
 }
 
-/* Code Block Pre/Code - Polar-style Typography */
+/* Code Block Pre/Code - Polar.sh-style Typography with tight line spacing */
 .code-block-pre {
   margin: 0;
-  padding: 1rem 0;
+  padding: 0.75rem 0;
   overflow-x: auto;
   background: var(--code-bg);
   font-family: "GeistMono", var(--font-geist-mono), ui-monospace, "SF Mono", Consolas, monospace;
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.45; /* Tighter line spacing like Polar.sh */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -288,37 +288,44 @@
   color: #1e293b;
 }
 
-/* Token-Specific Enhancements */
+/* Token-Specific Enhancements - Polar.sh style */
 .sh__token--keyword {
-  font-weight: 500;
+  font-weight: 450; /* Slightly heavier for emphasis */
 }
 
 .sh__token--comment {
   font-style: italic;
+  opacity: 0.7; /* More subtle comments */
 }
 
 .sh__token--class {
-  font-weight: 500;
+  font-weight: 450;
 }
 
-/* Line Numbers - Polar-style with proper spacing */
+.sh__token--function {
+  font-weight: 450;
+}
+
+/* Line Numbers - Polar.sh-style compact spacing */
 .sugar-high > .sh__line,
 code.sugar-high > .sh__line {
   display: block;
-  padding: 0 1.25rem;
+  padding: 0 1rem;
+  min-height: 1.45em; /* Match line-height for consistent spacing */
   position: relative;
 }
 
 .sh__line::before {
   content: attr(data-line);
   display: inline-block;
-  width: 2.5rem;
-  margin-right: 1.25rem;
-  padding-right: 0.75rem;
+  width: 2rem;
+  margin-right: 0.875rem;
+  padding-right: 0.5rem;
   text-align: right;
   color: var(--code-line-number);
   user-select: none;
-  font-size: inherit;
+  font-size: 12px; /* Slightly smaller for de-emphasis */
+  opacity: 0.6;    /* More subtle like Polar.sh */
   font-variant-numeric: tabular-nums;
 }
 
@@ -349,18 +356,21 @@ code.sugar-high > .sh__line {
 @media (max-width: 640px) {
   .code-block-pre {
     font-size: 12px;
-    padding: 0.75rem 0;
+    padding: 0.5rem 0;
+    line-height: 1.45;
   }
 
   .sh__line::before {
-    width: 2rem;
-    margin-right: 1rem;
-    padding-right: 0.5rem;
+    width: 1.75rem;
+    margin-right: 0.625rem;
+    padding-right: 0.375rem;
+    font-size: 11px;
   }
 
   .sugar-high > .sh__line,
   code.sugar-high > .sh__line {
-    padding: 0 1rem;
+    padding: 0 0.75rem;
+    min-height: 1.45em;
   }
 
   .code-block-header {

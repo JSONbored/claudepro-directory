@@ -5,7 +5,7 @@
 
 import 'server-only';
 
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import {
   generateRequestId,
@@ -13,16 +13,28 @@ import {
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient,
+import {
+  createSupabaseAnonClient,
   badRequestResponse,
   jsonResponse,
   getOnlyCorsHeaders,
-  buildCacheHeaders } from '@heyclaude/web-runtime/server';
+  buildCacheHeaders,
+} from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
+/**
+ * Normalize and validate a content category string against the allowed enum values.
+ *
+ * The input is normalized (trimmed and lowercased) and returned if it matches one of
+ * the known content category values; otherwise `undefined` is returned.
+ *
+ * @param value - `string | undefined` — the raw category value to normalize and validate
+ * @returns `DatabaseGenerated['public']['Enums']['content_category'] | undefined` — the normalized category when valid, or `undefined` when missing or invalid
+ * @see CONTENT_CATEGORY_VALUES
+ */
 function toContentCategory(
   value: string | undefined
 ): DatabaseGenerated['public']['Enums']['content_category'] | undefined {
@@ -35,6 +47,25 @@ function toContentCategory(
     : undefined;
 }
 
+/**
+ * Handle GET requests to retrieve paginated content with optional category filtering.
+ *
+ * Parses `offset`, `limit`, and `category` from the request URL, validates parameters,
+ * invokes the `get_content_paginated_slim` stored procedure, and returns the resulting
+ * items as a JSON array with appropriate CORS and caching headers. On validation failure
+ * or RPC errors, returns a structured error response with an appropriate HTTP status.
+ *
+ * @param request - The incoming NextRequest for the GET operation
+ * @returns A Next.js Response containing a JSON array of content items on success (HTTP 200),
+ *          a 400 Bad Request for invalid query parameters, or a structured error response
+ *          for RPC/internal errors (e.g., HTTP 500). Responses include CORS headers,
+ *          an `X-Generated-By` header when data is returned, and cache headers for
+ *          the paginated content.
+ *
+ * @see toContentCategory
+ * @see createSupabaseAnonClient
+ * @see buildCacheHeaders
+ */
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -60,6 +91,13 @@ export async function GET(request: NextRequest) {
 
     const category = categoryParam === 'all' ? undefined : toContentCategory(categoryParam);
 
+    if (categoryParam !== 'all' && category === undefined) {
+      return badRequestResponse(
+        `Invalid category '${categoryParam}'. Valid categories: all, ${CONTENT_CATEGORY_VALUES.join(', ')}`,
+        CORS
+      );
+    }
+
     reqLogger.info('Paginated content request received', {
       offset: offsetParam,
       limit: limitParam,
@@ -67,12 +105,13 @@ export async function GET(request: NextRequest) {
     });
 
     const supabase = createSupabaseAnonClient();
-    const rpcArgs: DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'] = {
-      ...(category === undefined ? {} : { p_category: category }),
-      p_limit: limitParam,
-      p_offset: offsetParam,
-    };
-    
+    const rpcArgs: DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'] =
+      {
+        ...(category === undefined ? {} : { p_category: category }),
+        p_limit: limitParam,
+        p_offset: offsetParam,
+      };
+
     const { data, error } = await supabase.rpc('get_content_paginated_slim', rpcArgs);
 
     if (error) {
@@ -126,6 +165,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * Handle CORS preflight requests by responding with 204 No Content and only the allowed CORS headers.
+ *
+ * @returns A NextResponse with HTTP status 204 (No Content) and CORS headers from `getOnlyCorsHeaders`.
+ * @see getOnlyCorsHeaders
+ * @see NextResponse
+ */
 export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,

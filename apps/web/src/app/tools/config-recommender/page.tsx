@@ -19,29 +19,30 @@
 
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge,
+  UI_CLASSES,
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
 import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
 
@@ -54,11 +55,32 @@ const NewsletterCTAVariant = dynamicImport(
  */
 export const revalidate = 86_400;
 
-// Generate metadata from centralized registry
+/**
+ * Generate the page metadata for the Config Recommender route.
+ *
+ * Produces the Metadata object consumed by Next.js for the `/tools/config-recommender` page.
+ *
+ * @returns The metadata for the `/tools/config-recommender` page.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/tools/config-recommender');
 }
 
+/**
+ * Render the Config Recommender page containing the hero, 7-question quiz, benefits,
+ * features, and newsletter call-to-action.
+ *
+ * Renders a full-page React tree for the rule-based configuration recommender UI.
+ * The page generates a per-request identifier and creates a request-scoped logger for
+ * render-time telemetry, normalizes and rethrows render errors so they are handled by
+ * the application's error boundary.
+ *
+ * @returns The page's React element tree for the Config Recommender UI.
+ *
+ * @see QuizForm
+ * @see NewsletterCTAVariant
+ */
 export default function ConfigRecommenderPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
@@ -73,7 +95,7 @@ export default function ConfigRecommenderPage() {
 
   try {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         {/* Hero Section */}
         <section className="relative overflow-hidden px-4 py-16">
           <div className="container mx-auto max-w-4xl text-center">
@@ -81,19 +103,19 @@ export default function ConfigRecommenderPage() {
             <UnifiedBadge
               variant="base"
               style="outline"
-              className="mb-6 border-primary/20 bg-accent/5 text-primary"
+              className="border-primary/20 bg-accent/5 text-primary mb-6"
             >
               <Sparkles className="mr-1 h-3 w-3" aria-hidden="true" />
               AI-Powered Recommendations
             </UnifiedBadge>
 
             {/* Title */}
-            <h1 className="mb-6 bg-linear-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-4xl text-transparent md:text-5xl lg:text-6xl">
+            <h1 className="from-foreground to-foreground/70 mb-6 bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent md:text-5xl lg:text-6xl">
               Find Your Perfect Claude Configuration
             </h1>
 
             {/* Description */}
-            <p className="mx-auto mb-8 max-w-3xl text-lg text-muted-foreground md:text-xl">
+            <p className="text-muted-foreground mx-auto mb-8 max-w-3xl text-lg md:text-xl">
               Answer 7 quick questions and get personalized recommendations from our catalog of 147+
               configurations. Instant results, zero cost, tailored to your needs.
             </p>
@@ -125,15 +147,13 @@ export default function ConfigRecommenderPage() {
         {/* Benefits Section */}
         <section className="container mx-auto px-4 pb-16">
           <div className="mx-auto max-w-4xl">
-            <h2 className="mb-8 text-center font-bold text-2xl">How It Works</h2>
+            <h2 className="mb-8 text-center text-2xl font-bold">How It Works</h2>
 
             <div className="grid gap-6 md:grid-cols-3">
               <Card>
                 <CardHeader>
                   <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
-                    <span
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm"
-                    >
+                    <span className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
                       1
                     </span>
                     Answer Questions
@@ -150,9 +170,7 @@ export default function ConfigRecommenderPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
-                    <span
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm"
-                    >
+                    <span className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
                       2
                     </span>
                     Instant Analysis
@@ -169,9 +187,7 @@ export default function ConfigRecommenderPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
-                    <span
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm"
-                    >
+                    <span className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
                       3
                     </span>
                     Get Results
@@ -194,7 +210,7 @@ export default function ConfigRecommenderPage() {
             <Card className="border-accent/20 bg-accent/5">
               <CardHeader>
                 <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <BarChart className="h-5 w-5 text-primary" />
+                  <BarChart className="text-primary h-5 w-5" />
                   What You'll Get
                 </CardTitle>
               </CardHeader>
@@ -202,7 +218,7 @@ export default function ConfigRecommenderPage() {
                 <ul className="grid gap-3 sm:grid-cols-2">
                   <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                     />
                     <span className="text-sm">
                       Personalized match scores for each configuration
@@ -210,31 +226,31 @@ export default function ConfigRecommenderPage() {
                   </li>
                   <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                     />
                     <span className="text-sm">Clear explanations of why each was recommended</span>
                   </li>
                   <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                     />
                     <span className="text-sm">Ranked results from best to good fit</span>
                   </li>
                   <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                     />
                     <span className="text-sm">Shareable results to discuss with your team</span>
                   </li>
                   <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                     />
                     <span className="text-sm">Direct links to setup guides and documentation</span>
                   </li>
                   <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
                     <Sparkles
-                      className={`h-5 w-5 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                      className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                     />
                     <span className="text-sm">Filter results by category and use case</span>
                   </li>

@@ -11,13 +11,16 @@ import {
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { cn, UI_CLASSES, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  cn,
+  UI_CLASSES,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
@@ -27,11 +30,13 @@ import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
 
@@ -78,8 +83,12 @@ function formatTimeAgo(dateString: string): string {
 }
 
 /**
- * Type guard: Check if a value is a valid content_category
- * Uses only generated types from @heyclaude/database-types
+ * Determines whether a string is a valid `content_category` enum value.
+ *
+ * @param value - The string to validate as a content category
+ * @returns `true` if `value` is a member of the `content_category` enum, `false` otherwise
+ *
+ * @see Constants.public.Enums.content_category
  */
 function isValidContentCategory(
   value: string
@@ -90,9 +99,16 @@ function isValidContentCategory(
 }
 
 /**
- * Map submission_type to content_category with runtime validation
- * Uses only generated types from @heyclaude/database-types
- * Validates that the submission_type value is a valid content_category at runtime
+ * Map a submission_type value to a valid content_category, returning a safe default when the input is null or invalid.
+ *
+ * If `submissionType` is `null` or not a recognized `content_category`, this function returns `DEFAULT_CONTENT_CATEGORY`
+ * and logs a warning.
+ *
+ * @param submissionType - A `submission_type` enum value or `null`
+ * @returns A `content_category` value corresponding to `submissionType`, or `DEFAULT_CONTENT_CATEGORY` as a fallback
+ *
+ * @see isValidContentCategory
+ * @see DEFAULT_CONTENT_CATEGORY
  */
 function mapSubmissionTypeToContentCategory(
   submissionType: Database['public']['Enums']['submission_type'] | null
@@ -118,7 +134,16 @@ function mapSubmissionTypeToContentCategory(
   return DEFAULT_CONTENT_CATEGORY;
 }
 
-// Type guard for recent merged submissions
+/**
+ * Type guard that verifies an unknown value has the shape of a recent merged submission.
+ *
+ * @param submission - Value to check for the required recent-submission fields
+ * @returns `true` if `submission` has non-null `id`, `content_name`, `content_type`, and `merged_at` properties (and therefore can be treated as a recent merged submission), `false` otherwise.
+ *
+ * @see mapSubmissionTypeToContentCategory
+ * @see formatTimeAgo
+ * @see SidebarActivityCard
+ */
 function isValidRecentSubmission(submission: unknown): submission is {
   content_name: string;
   content_type: Database['public']['Enums']['submission_type'];
@@ -140,7 +165,16 @@ function isValidRecentSubmission(submission: unknown): submission is {
   );
 }
 
-
+/**
+ * Produce the page metadata for the Submit page.
+ *
+ * Generates the Metadata object used by Next.js for the /submit route, applying the site's standard metadata defaults for content pages.
+ *
+ * @returns The Metadata object for the Submit page
+ *
+ * @see generatePageMetadata
+ * @see import('next').Metadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/submit');
 }
@@ -148,7 +182,20 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Edge-cached data: Dashboard data fetched from edge-cached data layer
  */
-// revalidate is set at the top of the file
+/**
+ * Render the community submission page including the submission form, metrics dashboard, content templates, and a sidebar with recent activity and tips.
+ *
+ * This server component fetches data per-request: submission dashboard stats & recent submissions, submission form configuration, and content templates for supported categories. It performs runtime validation on category mappings and logs failures; template fetch failures for individual categories fall back to empty arrays so the page can still render. The page is edge-cached and uses the file-level `revalidate` for ISR.
+ *
+ * @returns The page's JSX element containing the hero, submission form, community stats, recent activity, and newsletter CTA.
+ *
+ * @see getSubmissionDashboard
+ * @see getSubmissionFormFields
+ * @see getContentTemplates
+ * @see SubmitFormClient
+ * @see SubmitPageHero
+ * @see SidebarActivityCard
+ */
 
 export default async function SubmitPage() {
   // Generate single requestId for this page request
@@ -306,7 +353,7 @@ export default async function SubmitPage() {
           {/* Stats Card - 3-column grid */}
           <Card>
             <CardHeader>
-              <CardTitle className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'font-medium text-sm')}>
+              <CardTitle className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'text-sm font-medium')}>
                 <TrendingUp className={UI_CLASSES.ICON_SM} />
                 Community Stats
               </CardTitle>
@@ -314,19 +361,19 @@ export default async function SubmitPage() {
             <CardContent className={UI_CLASSES.GRID_COLS_3_GAP_2}>
               {/* Total */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-blue-500/10')}>
-                <div className="font-bold text-2xl text-blue-400">{stats.total}</div>
+                <div className="text-2xl font-bold text-blue-400">{stats.total}</div>
                 <div className={UI_CLASSES.TEXT_XS_MUTED}>Total</div>
               </div>
 
               {/* Pending */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-yellow-500/10')}>
-                <div className="font-bold text-2xl text-yellow-400">{stats.pending}</div>
+                <div className="text-2xl font-bold text-yellow-400">{stats.pending}</div>
                 <div className={UI_CLASSES.TEXT_XS_MUTED}>Pending</div>
               </div>
 
               {/* This Week */}
               <div className={cn('rounded-lg p-3 text-center', 'bg-green-500/10')}>
-                <div className="font-bold text-2xl text-green-400">{stats.merged_this_week}</div>
+                <div className="text-2xl font-bold text-green-400">{stats.merged_this_week}</div>
                 <div className={UI_CLASSES.TEXT_XS_MUTED}>This Week</div>
               </div>
             </CardContent>
@@ -349,7 +396,7 @@ export default async function SubmitPage() {
       </div>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className="container mx-auto px-4 py-12">
+      <section className="px-4 py-12">
         <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>

@@ -1,7 +1,7 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
@@ -43,13 +43,14 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
   }
 
   const data = await fetchCached(
-    (client) => new ContentService(client).getRelatedContent({
+    (client) =>
+      new ContentService(client).getRelatedContent({
         p_category: category,
         p_slug: currentSlug,
         p_tags: input.currentTags ?? [],
         p_limit: input.limit ?? 3,
-        p_exclude_slugs: input.exclude ?? []
-    }),
+        p_exclude_slugs: input.exclude ?? [],
+      }),
     {
       keyParts: ['related-content', category, currentSlug, input.limit ?? 3],
       tags: generateContentTags(category, null, ['related-content']),

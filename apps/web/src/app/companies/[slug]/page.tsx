@@ -4,7 +4,8 @@
  * Leverages get_company_profile() RPC + company_job_stats materialized view
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
+import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -16,13 +17,16 @@ import {
   Users,
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, UnifiedBadge,
+import {
+  UI_CLASSES,
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -32,8 +36,14 @@ import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
 /**
- * Reusable component for rendering safe website links
- * Returns null if URL is invalid, otherwise renders an external link
+ * Render an external anchor for a validated website URL or nothing when the URL is not safe.
+ *
+ * @param url - The website URL to validate; may be `null` or `undefined`. If not a safe URL, nothing is rendered.
+ * @param children - Content to display inside the anchor element.
+ * @param className - Optional CSS class names applied to the anchor.
+ * @returns An anchor element for the validated URL, or `null` if the URL is not safe.
+ *
+ * @see {@link @heyclaude/web-runtime/core#getSafeWebsiteUrl}
  */
 function SafeWebsiteLink({
   url,
@@ -54,41 +64,6 @@ function SafeWebsiteLink({
   );
 }
 
-/**
- * Validate and sanitize external website URL for safe use in href attributes
- * Only allows HTTPS URLs (or HTTP for localhost in development)
- * Returns canonicalized URL or null if invalid
- */
-function getSafeWebsiteUrl(url: null | string | undefined): null | string {
-  if (!url || typeof url !== 'string') return null;
-
-  try {
-    const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol (or HTTP for localhost/development)
-    const isLocalhost =
-      parsed.hostname === 'localhost' ||
-      parsed.hostname === '127.0.0.1' ||
-      parsed.hostname === '::1';
-    const isValidProtocol =
-      parsed.protocol === 'https:' || (parsed.protocol === 'http:' && isLocalhost);
-    if (!isValidProtocol) return null;
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // Normalize hostname
-    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-    // Remove default ports
-    if (parsed.port === '80' || parsed.port === '443') {
-      parsed.port = '';
-    }
-
-    // Return canonicalized href (guaranteed to be normalized and safe)
-    return parsed.href;
-  } catch {
-    return null;
-  }
-}
-
 interface CompanyPageProperties {
   params: Promise<{ slug: string }>;
 }
@@ -97,13 +72,28 @@ export const revalidate = 1800; // 30min ISR (fallback if edge function cache mi
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
- * Generate static params for company pages
- * Pre-renders top 50 companies at build time for optimal SEO and performance
+ * Limit to top 10 companies to optimize build time for static pre-rendering.
+ * Remaining company pages are rendered on demand via dynamicParams with ISR.
+ */
+const MAX_STATIC_COMPANIES = 10;
+
+/**
+ * Produce route params for build-time pre-rendering of a subset of company pages.
+ *
+ * Generates up to MAX_STATIC_COMPANIES `{ slug }` objects for static pre-rendering; remaining company pages are rendered on demand via dynamic routing with ISR. If fetching companies fails or no slugs are available, returns an empty array.
+ *
+ * @returns An array of objects each containing a `slug` string for a company page; empty if no slugs are available or fetching fails.
+ *
+ * @see {@link /apps/web/src/app/companies/[slug]/page.tsx | CompanyPage}
+ * @see {@link getCompaniesList} from @heyclaude/web-runtime/data
+ * @see {@link generateRequestId}
+ * @see {@link normalizeError}
+ * @see {@link MAX_STATIC_COMPANIES}
  */
 export async function generateStaticParams() {
   // Generate requestId for static params generation (build-time)
   const staticParamsRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId: staticParamsRequestId,
@@ -115,7 +105,7 @@ export async function generateStaticParams() {
   const { getCompaniesList } = await import('@heyclaude/web-runtime/data');
 
   try {
-    const result = await getCompaniesList(50, 0);
+    const result = await getCompaniesList(MAX_STATIC_COMPANIES, 0);
     const companies = result.companies ?? [];
 
     return companies
@@ -130,6 +120,14 @@ export async function generateStaticParams() {
   }
 }
 
+/**
+ * Create metadata for the company detail page using the route slug.
+ *
+ * @param params - Route parameters containing the `slug` of the company
+ * @returns The `Metadata` object for the /companies/:slug page
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: CompanyPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/companies/:slug', {
@@ -137,12 +135,25 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
   });
 }
 
+/**
+ * Render the company profile page for a given company slug, including the header, active job listings, and sidebar stats.
+ *
+ * The component fetches the company profile by `slug` and triggers a 404 when the company is not found.
+ * Data is fetched server-side and participates in the file-level ISR configuration (revalidation applied at the route level).
+ *
+ * @param params - Route params object containing the `slug` of the company
+ * @returns The React element tree for the company profile page (header, listings, and stats)
+ *
+ * @see getCompanyProfile
+ * @see SafeWebsiteLink
+ * @see generateStaticParams
+ */
 export default async function CompanyPage({ params }: CompanyPageProperties) {
   const { slug } = await params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -168,9 +179,9 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
     <>
       <StructuredData route={`/companies/${slug}`} />
 
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         {/* Company Header */}
-        <section className="relative border-border border-b">
+        <section className="border-border relative border-b">
           <div className="container mx-auto px-4 py-12">
             <div className="flex items-start gap-6">
               {company.logo ? (
@@ -179,24 +190,28 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   alt={`${company.name} logo`}
                   width={96}
                   height={96}
-                  className="h-24 w-24 rounded-lg border-4 border-background object-cover"
+                  className="border-background h-24 w-24 rounded-lg border-4 object-cover"
                   priority
                 />
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-lg border-4 border-background bg-accent font-bold text-2xl">
+                <div className="border-background bg-accent flex h-24 w-24 items-center justify-center rounded-lg border-4 text-2xl font-bold">
                   <Building className="h-12 w-12" />
                 </div>
               )}
 
               <div className="flex-1">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
-                  <h1 className="font-bold text-3xl">{company.name}</h1>
-                  {company.featured ? <UnifiedBadge variant="base" style="default">
+                  <h1 className="text-3xl font-bold">{company.name}</h1>
+                  {company.featured ? (
+                    <UnifiedBadge variant="base" style="default">
                       Featured
-                    </UnifiedBadge> : null}
+                    </UnifiedBadge>
+                  ) : null}
                 </div>
 
-                {company.description ? <p className="mt-2 max-w-3xl text-muted-foreground">{company.description}</p> : null}
+                {company.description ? (
+                  <p className="text-muted-foreground mt-2 max-w-3xl">{company.description}</p>
+                ) : null}
 
                 <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
                   <SafeWebsiteLink
@@ -207,25 +222,31 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                     Website
                   </SafeWebsiteLink>
 
-                  {company.industry ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.industry ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <TrendingUp className="h-4 w-4" />
                       {company.industry}
-                    </div> : null}
+                    </div>
+                  ) : null}
 
                   {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
-                  {company.size ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.size ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Users className="h-4 w-4" />
                       {company.size}
-                    </div> : null}
+                    </div>
+                  ) : null}
 
-                  {company.using_cursor_since ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  {company.using_cursor_since ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Calendar className="h-4 w-4" />
                       Using Claude since{' '}
                       {new Date(company.using_cursor_since).toLocaleDateString('en-US', {
                         month: 'short',
                         year: 'numeric',
                       })}
-                    </div> : null}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -237,31 +258,12 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
             {/* Main content - Active jobs */}
             <div className="space-y-6">
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                <h2 className="font-bold text-2xl">
-                  Active Positions ({active_jobs?.length ?? 0})
-                </h2>
-              </div>
-
-              {!active_jobs || active_jobs.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center py-16">
-                    <Briefcase className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <h3 className="mb-2 font-semibold text-xl">No Active Positions</h3>
-                    <p className="mb-6 max-w-md text-center text-muted-foreground">
-                      This company doesn't have any job openings at the moment. Check back later!
-                    </p>
-                    <Link href={ROUTES.JOBS}>
-                      <UnifiedBadge variant="base" style="default">
-                        Browse All Jobs
-                      </UnifiedBadge>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {active_jobs
-                    .filter((job): job is typeof job & {
+              {(() => {
+                const filteredActiveJobs =
+                  active_jobs?.filter(
+                    (
+                      job
+                    ): job is typeof job & {
                       click_count: number;
                       company: string;
                       experience: Database['public']['Enums']['experience_level'];
@@ -276,50 +278,81 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                     } => {
                       return Boolean(
                         job.id &&
-                          job.slug &&
-                          job.title &&
-                          job.company &&
-                          job.workplace &&
-                          job.experience &&
-                          job.plan &&
-                          job.posted_at &&
-                          job.expires_at &&
-                          job.view_count !== null &&
-                          job.click_count !== null
+                        job.slug &&
+                        job.title &&
+                        job.company &&
+                        job.workplace &&
+                        job.experience &&
+                        job.plan &&
+                        job.posted_at &&
+                        job.expires_at &&
+                        typeof job.view_count === 'number' &&
+                        typeof job.click_count === 'number'
                       );
-                    })
-                    .map((job) => {
-                      return (
-                        <JobCard
-                          key={job.id}
-                          job={{
-                            id: job.id,
-                            slug: job.slug,
-                            title: job.title,
-                            company: job.company,
-                            company_logo: job.company_logo,
-                            location: job.location,
-                            description: job.description,
-                            salary: job.salary,
-                            remote: job.remote ?? false,
-                            type: job.type,
-                            workplace: job.workplace,
-                            experience: job.experience,
-                            category: job.category,
-                            tags: job.tags ?? [],
-                            plan: job.plan,
-                            tier: job.tier,
-                            posted_at: job.posted_at,
-                            expires_at: job.expires_at,
-                            view_count: job.view_count,
-                            click_count: job.click_count,
-                            link: job.link,
-                          }}
-                        />
-                      );
-                    })}
-                </div>
-              )}
+                    }
+                  ) ?? [];
+
+                return (
+                  <>
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                      <h2 className="text-2xl font-bold">
+                        Active Positions ({filteredActiveJobs.length})
+                      </h2>
+                    </div>
+
+                    {filteredActiveJobs.length === 0 ? (
+                      <Card>
+                        <CardContent className="flex flex-col items-center py-16">
+                          <Briefcase className="text-muted-foreground mb-4 h-12 w-12" />
+                          <h3 className="mb-2 text-xl font-semibold">No Active Positions</h3>
+                          <p className="text-muted-foreground mb-6 max-w-md text-center">
+                            This company doesn't have any job openings at the moment. Check back
+                            later!
+                          </p>
+                          <Link href={ROUTES.JOBS}>
+                            <UnifiedBadge variant="base" style="default">
+                              Browse All Jobs
+                            </UnifiedBadge>
+                          </Link>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        {filteredActiveJobs.map((job) => {
+                          return (
+                            <JobCard
+                              key={job.id}
+                              job={{
+                                id: job.id,
+                                slug: job.slug,
+                                title: job.title,
+                                company: job.company,
+                                company_logo: job.company_logo,
+                                location: job.location,
+                                description: job.description,
+                                salary: job.salary,
+                                remote: job.remote ?? false,
+                                type: job.type,
+                                workplace: job.workplace,
+                                experience: job.experience,
+                                category: job.category,
+                                tags: job.tags ?? [],
+                                plan: job.plan,
+                                tier: job.tier,
+                                posted_at: job.posted_at,
+                                expires_at: job.expires_at,
+                                view_count: job.view_count,
+                                click_count: job.click_count,
+                                link: job.link,
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
 
             {/* Sidebar - Company stats */}
@@ -340,17 +373,21 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                     <span className="font-semibold text-green-600">{stats?.active_jobs ?? 0}</span>
                   </div>
 
-                  {stats && (stats.remote_jobs ?? 0) > 0 ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  {stats && (stats.remote_jobs ?? 0) > 0 ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Remote Positions</span>
                       <span className="font-semibold">{stats.remote_jobs ?? 0}</span>
-                    </div> : null}
+                    </div>
+                  ) : null}
 
-                  {stats?.avg_salary_min ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  {stats?.avg_salary_min ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
                       <span className="font-semibold">
                         ${(stats.avg_salary_min / 1000).toFixed(0)}k+
                       </span>
-                    </div> : null}
+                    </div>
+                  ) : null}
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Views</span>
@@ -359,16 +396,18 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                     </span>
                   </div>
 
-                  {stats?.latest_job_posted_at ? <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  {stats?.latest_job_posted_at ? (
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
-                      <span className="font-semibold text-sm">
+                      <span className="text-sm font-semibold">
                         {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',
                         })}
                       </span>
-                    </div> : null}
+                    </div>
+                  ) : null}
                 </CardContent>
               </Card>
 
@@ -378,14 +417,25 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   <CardTitle className="text-lg">Interested in joining?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
-                    {company.website
-                      ? 'Visit their website to learn more about the company and culture.'
-                      : 'Check back regularly for new opportunities!'}
-                  </p>
-                  <SafeWebsiteLink url={company.website} className={UI_CLASSES.LINK_ACCENT}>
-                    Visit Website
-                  </SafeWebsiteLink>
+                  {(() => {
+                    const safeWebsiteUrl = getSafeWebsiteUrl(company.website);
+                    const hasWebsite = Boolean(safeWebsiteUrl);
+
+                    return (
+                      <>
+                        <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
+                          {hasWebsite
+                            ? 'Visit their website to learn more about the company and culture.'
+                            : 'Check back regularly for new opportunities!'}
+                        </p>
+                        {hasWebsite ? (
+                          <SafeWebsiteLink url={safeWebsiteUrl} className={UI_CLASSES.LINK_ACCENT}>
+                            Visit Website
+                          </SafeWebsiteLink>
+                        ) : null}
+                      </>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </aside>

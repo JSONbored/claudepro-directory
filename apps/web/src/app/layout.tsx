@@ -3,14 +3,14 @@ import './view-transitions.css';
 import './micro-interactions.css';
 import './sugar-high.css';
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
 import dynamicImport from 'next/dynamic';
 import localFont from 'next/font/local';
@@ -27,9 +27,11 @@ import { NotificationsProvider } from '@/src/components/providers/notifications-
 
 const NotificationToastHandler = dynamicImport(
   () =>
-    import('@/src/components/features/notifications/notification-toast-handler').then((module_) => ({
-      default: module_.NotificationToastHandler,
-    })),
+    import('@/src/components/features/notifications/notification-toast-handler').then(
+      (module_) => ({
+        default: module_.NotificationToastHandler,
+      })
+    ),
   {
     loading: () => null,
   }
@@ -164,10 +166,16 @@ const DEFAULT_LAYOUT_DATA: {
 };
 
 /**
- * Static Rendering Enabled
+ * Application root layout that renders the global HTML scaffold and top-level providers.
  *
- * RootLayout now uses static component config (no server actions or headers()).
- * This allows the layout to be statically generated, improving performance.
+ * Renders HTML/head/body with global meta, font variables, theme and notification providers, and layout content. Layout data (announcements and navigation) is fetched non-blockingly; on failure the component falls back to DEFAULT_LAYOUT_DATA and logs the error. The layout is statically rendered (no server actions or headers) and uses static component configuration.
+ *
+ * @param children - Page content to be rendered inside the layout
+ * @returns The root HTML element for the application layout
+ *
+ * @see getLayoutData
+ * @see DEFAULT_LAYOUT_DATA
+ * @see generateRequestId
  */
 
 export default async function RootLayout({
@@ -177,7 +185,7 @@ export default async function RootLayout({
 }>) {
   // Generate single requestId for this layout request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,

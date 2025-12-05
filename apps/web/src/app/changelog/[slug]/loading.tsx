@@ -5,9 +5,21 @@
  * Shows placeholder content matching the layout of the detail page.
  */
 
-import { Skeleton, UI_CLASSES, Separator  } from '@heyclaude/web-runtime/ui';
+import { Skeleton, UI_CLASSES, Separator } from '@heyclaude/web-runtime/ui';
 
-
+/**
+ * Render a skeleton UI for the changelog entry detail page.
+ *
+ * Displays placeholder skeletons that mirror the final changelog detail layout:
+ * back navigation, header (date, title, canonical URL), a TL;DR box, category badges,
+ * content paragraphs, and repeated section headers to indicate loading state.
+ *
+ * @returns A React element containing the skeleton layout for the changelog entry detail.
+ *
+ * @see Skeleton
+ * @see Separator
+ * @see UI_CLASSES
+ */
 export default function ChangelogEntryLoading() {
   return (
     <article className="container max-w-4xl space-y-8 py-8">

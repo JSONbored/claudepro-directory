@@ -40,6 +40,7 @@ dist/
 # If cached without dist/, TypeScript thinks builds are complete but outputs don't exist
 *.tsbuildinfo
 tsconfig.tsbuildinfo
+.tsbuildinfo
 
 # Package manager files (Vercel auto-detects via lock files)
 # DO NOT exclude pnpm-lock.yaml - required for pnpm detection

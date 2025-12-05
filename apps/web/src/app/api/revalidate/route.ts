@@ -15,7 +15,12 @@
  * Runtime: Node.js (required for revalidatePath/revalidateTag)
  */
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { generateRequestId, logger, normalizeError, handleApiError } from '@heyclaude/web-runtime/logging/server';
+import {
+  generateRequestId,
+  logger,
+  normalizeError,
+  handleApiError,
+} from '@heyclaude/web-runtime/logging/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -30,10 +35,26 @@ const RevalidateRequestSchema = z.object({
   tags: z.array(z.string()).optional(),
 });
 
+/**
+ * Trigger on-demand ISR revalidation and cache tag invalidation for specified targets.
+ *
+ * Validates the JSON payload, verifies the secret, revalidates Next.js paths derived from
+ * `category`/`slug`, invalidates the provided cache `tags`, logs the outcome, and returns a
+ * JSON summary of the revalidation actions.
+ *
+ * Expected request body: { secret: string, category?: string, slug?: string, tags?: string[] }.
+ *
+ * @param request - Incoming Next.js request containing the JSON payload for revalidation
+ * @returns A NextResponse JSON object with `revalidated: true`, optional `paths` and `tags` arrays, and a `timestamp`, or an error payload with an appropriate HTTP status
+ * @see RevalidateRequestSchema
+ * @see revalidatePath
+ * @see revalidateTag
+ * @see env.REVALIDATE_SECRET
+ */
 export async function POST(request: NextRequest) {
   // Generate single requestId for this API request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -45,15 +66,15 @@ export async function POST(request: NextRequest) {
   try {
     // Validate request body immediately with Zod (no intermediate unsafe variable)
     const parseResult = RevalidateRequestSchema.safeParse(await request.json());
-    
+
     if (!parseResult.success) {
       // Serialize Zod errors for logging (convert to JSON-serializable format)
-      const zodErrors = parseResult.error.issues.map(issue => ({
+      const zodErrors = parseResult.error.issues.map((issue) => ({
         code: issue.code,
         path: issue.path.join('.'),
         message: issue.message,
       }));
-      
+
       reqLogger.warn('Revalidate webhook invalid payload', {
         zodErrors,
       });
@@ -62,7 +83,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     const { secret, category, slug, tags } = parseResult.data;
 
     // Verify secret from body (PostgreSQL trigger sends in payload)

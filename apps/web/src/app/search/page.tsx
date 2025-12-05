@@ -8,7 +8,8 @@ import {
   generatePageMetadata,
   getHomepageData,
   getSearchFacets,
-  searchContent, getHomepageCategoryIds 
+  searchContent,
+  getHomepageCategoryIds,
 } from '@heyclaude/web-runtime/data';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
@@ -33,10 +34,18 @@ type SearchFacetAggregate = Awaited<ReturnType<typeof getSearchFacets>>;
 type SearchFacetSummary = SearchFacetAggregate['facets'][number];
 type ContentCategory = Database['public']['Enums']['content_category'];
 
+/**
+ * Type guard that checks whether a string corresponds to one of the allowed sort options.
+ *
+ * @param value - The candidate sort value to validate.
+ * @returns `true` if `value` is one of the entries in `VALID_SORT_OPTIONS`, `false` otherwise.
+ *
+ * @see VALID_SORT_OPTIONS
+ * @see SearchFilters
+ */
 function isValidSort(value: string | undefined): value is SearchFilters['sort'] {
   return value !== undefined && VALID_SORT_OPTIONS.has(value as SearchFilters['sort']);
 }
-
 
 /**
  * Dynamic Rendering Required
@@ -57,6 +66,14 @@ interface SearchPageProperties {
   }>;
 }
 
+/**
+ * Build metadata for the search page, using the resolved search query when available.
+ *
+ * @param searchParams - A promise resolving to an object containing optional search parameters (e.g., `q`) used to tailor the metadata.
+ * @returns The `Metadata` for the search page with a title and description that include the query when present.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ searchParams }: SearchPageProperties): Promise<Metadata> {
   const resolvedParameters = await searchParams;
   const query = resolvedParameters.q ?? '';
@@ -70,7 +87,31 @@ export async function generateMetadata({ searchParams }: SearchPageProperties): 
   });
 }
 
-// Deferred Results Section Component for PPR
+/**
+ * Render the search results section and present matching content for the current query and filters.
+ *
+ * Fetches search results server-side; when `query` is non-empty or `hasUserFilters` is true, the fetch is performed without caching to prefer fresh results.
+ *
+ * @param query - The user-entered search query string (trimmed and truncated upstream).
+ * @param filters - SearchFilters that constrain the search (sort, categories, tags, authors, limit).
+ * @param hasUserFilters - True when any non-empty filter or a valid sort is applied by the user.
+ * @param facetOptions.authors - Available author facet values for the UI.
+ * @param facetOptions.categories - Available category facet values for the UI.
+ * @param facetOptions.tags - Available tag facet values for the UI.
+ * @param fallbackSuggestions - Fallback/zero-state suggestions to display when results are absent.
+ * @param quickTags - Precomputed quick tag suggestions for the UI.
+ * @param quickAuthors - Precomputed quick author suggestions for the UI.
+ * @param quickCategories - Precomputed quick category suggestions for the UI.
+ * @param requestId - Correlation identifier used for request-scoped logging.
+ *
+ * @returns A React element (ContentSearchClient) configured with fetched results, facets, quick values, and suggestions.
+ *
+ * @throws A normalized error when the backend search fetch fails.
+ *
+ * @see ContentSearchClient
+ * @see searchContent
+ * @see normalizeError
+ */
 async function SearchResultsSection({
   query,
   filters,
@@ -147,12 +188,26 @@ async function SearchResultsSection({
   );
 }
 
+/**
+ * Renders the search page by resolving route parameters into a query and filters, loading search facets and optional zero-state suggestions, and composing the results UI with facet controls and a recently viewed sidebar.
+ *
+ * If there is no query and no user filters, homepage data is queried to provide zero-state suggestions.
+ *
+ * @param searchParams - Promise resolving to route query parameters (may include `q`, `category`, `tags`, `author`, `sort`) used to derive the search query and filters.
+ * @returns The rendered React element for the search page containing the search input, results section, facet controls, zero-state/fallback suggestions, and the recently viewed sidebar.
+ *
+ * @see getSearchFacets
+ * @see getHomepageData
+ * @see ContentSearchClient
+ * @see SearchResultsSection
+ * @see RecentlyViewedSidebar
+ */
 export default async function SearchPage({ searchParams }: SearchPageProperties) {
   const resolvedParameters = await searchParams;
-  
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -178,12 +233,8 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
   if (author) filters.p_authors = [author];
   filters.p_limit = 50;
 
-   
   const hasUserFilters =
-    !!validatedSort ||
-    (categories?.length ?? 0) > 0 ||
-    (tags?.length ?? 0) > 0 ||
-    !!author;
+    !!validatedSort || (categories?.length ?? 0) > 0 || (tags?.length ?? 0) > 0 || !!author;
 
   // Gate zero-state data behind !query && !hasFilters (Phase 3 requirement)
   const hasQueryOrFilters = query.length > 0 || hasUserFilters;
@@ -273,7 +324,7 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 font-bold text-4xl">
+      <h1 className="mb-8 text-4xl font-bold">
         {query ? `Search: "${query}"` : 'Search Claude Code Directory'}
       </h1>
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
@@ -364,6 +415,18 @@ function deriveQuickCategories(
     .slice(0, limit);
 }
 
+/**
+ * Produce an ordered list of suggestions with duplicate `slug` values removed and capped to a maximum length.
+ *
+ * If `items` is not an array or is empty, an empty array is returned.
+ *
+ * @param items - Array of suggestion-like objects; each item may include an optional `slug` string used to detect duplicates. The first occurrence of a given `slug` is kept and later duplicates are dropped.
+ * @param limit - Maximum number of items to include in the returned array.
+ * @returns An array containing up to `limit` items with duplicate `slug` values removed, preserving the original input order.
+ *
+ * @see rankFacetValues
+ * @see deriveQuickCategories
+ */
 function dedupeSuggestions<T extends { slug?: null | string }>(items: T[], limit: number): T[] {
   if (!Array.isArray(items) || items.length === 0) {
     return [];

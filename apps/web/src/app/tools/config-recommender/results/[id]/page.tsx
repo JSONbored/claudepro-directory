@@ -35,6 +35,18 @@ interface DecodedQuizAnswers {
   useCase: Database['public']['Enums']['use_case_type'];
 }
 
+/**
+ * Decode and validate a base64url-encoded JSON string of quiz answers into a typed DecodedQuizAnswers object.
+ *
+ * @param encoded - The base64url-encoded JSON payload containing quiz answers.
+ * @param resultId - Identifier used to annotate logs when decoding fails.
+ * @returns The decoded answers containing required fields `useCase`, `experienceLevel`, and `toolPreferences`, and optionally `p_integrations`, `p_focus_areas`, `teamSize`, and `timestamp`.
+ * @throws An error normalized by `normalizeError` when the input cannot be decoded or fails validation.
+ *
+ * @see Constants
+ * @see normalizeError
+ * @see logger
+ */
 function decodeQuizAnswers(
   encoded: string,
   resultId: string,
@@ -51,7 +63,7 @@ function decodeQuizAnswers(
         module: 'apps/web/src/app/tools/config-recommender/results/[id]',
         operation: 'decodeQuizAnswers',
       });
-  
+
   try {
     const json = Buffer.from(encoded, 'base64url').toString('utf8');
     const parsed = JSON.parse(json) as unknown;
@@ -130,14 +142,22 @@ function decodeQuizAnswers(
       useCase: data['useCase'] as Database['public']['Enums']['use_case_type'],
       experienceLevel: data['experienceLevel'] as Database['public']['Enums']['experience_level'],
       toolPreferences: data['toolPreferences'] as string[],
-      ...(Array.isArray(data['p_integrations']) && data['p_integrations'].length > 0 && {
-        p_integrations: data['p_integrations'] as Database['public']['Enums']['integration_type'][],
-      }),
-      ...(Array.isArray(data['p_focus_areas']) && data['p_focus_areas'].length > 0 && {
-        p_focus_areas: data['p_focus_areas'] as Database['public']['Enums']['focus_area_type'][],
-      }),
-      ...(typeof data['teamSize'] === 'string' && data['teamSize'] !== '' ? { teamSize: data['teamSize'] } : {}),
-      ...(typeof data['timestamp'] === 'string' && data['timestamp'] !== '' ? { timestamp: data['timestamp'] } : {}),
+      ...(Array.isArray(data['p_integrations']) &&
+        data['p_integrations'].length > 0 && {
+          p_integrations: data[
+            'p_integrations'
+          ] as Database['public']['Enums']['integration_type'][],
+        }),
+      ...(Array.isArray(data['p_focus_areas']) &&
+        data['p_focus_areas'].length > 0 && {
+          p_focus_areas: data['p_focus_areas'] as Database['public']['Enums']['focus_area_type'][],
+        }),
+      ...(typeof data['teamSize'] === 'string' && data['teamSize'] !== ''
+        ? { teamSize: data['teamSize'] }
+        : {}),
+      ...(typeof data['timestamp'] === 'string' && data['timestamp'] !== ''
+        ? { timestamp: data['timestamp'] }
+        : {}),
     } as DecodedQuizAnswers;
   } catch (error) {
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
@@ -149,6 +169,17 @@ function decodeQuizAnswers(
   }
 }
 
+/**
+ * Filters and validates recommendation items, returning only those that include `category`, `slug`, and `title`.
+ *
+ * @param results - Raw recommendation items returned by the RPC; may be `null` or `undefined`.
+ * @param resultId - Identifier included in logs when items are filtered.
+ * @param parentLogger - Optional parent logger used to create an operation-scoped logger for warnings.
+ * @returns An array of recommendation items guaranteed to have `category`, `slug`, and `title`.
+ *
+ * @see getConfigRecommendations
+ * @see ResultsDisplay
+ */
 function normalizeRecommendationResults(
   results: Database['public']['Functions']['get_recommendations']['Returns']['results'],
   resultId: string,
@@ -171,7 +202,7 @@ function normalizeRecommendationResults(
         module: 'apps/web/src/app/tools/config-recommender/results/[id]',
         operation: 'normalizeRecommendationResults',
       });
-  
+
   if (!results) return [];
   const normalized = results.filter(
     (
@@ -199,6 +230,17 @@ interface PageProperties {
   searchParams: Promise<{ answers?: string }>;
 }
 
+/**
+ * Generate metadata for the results page using the route `id`.
+ *
+ * Builds base metadata via `generatePageMetadata` for the `/tools/config-recommender/results/:id` route and adds robots directives to prevent indexing while allowing link following.
+ *
+ * @param props - Page properties containing route parameters.
+ * @param props.params - An object (possibly a promise) with an `id` route parameter identifying the result.
+ * @returns The Next.js Metadata object for the results page, including `robots: { index: false, follow: true }`.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: PageProperties): Promise<Metadata> {
   const { id } = await params;
   const baseMetadata = await generatePageMetadata('/tools/config-recommender/results/:id', {
@@ -214,13 +256,31 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
   };
 }
 
+/**
+ * Render the Configuration Recommender results page for a given result ID.
+ *
+ * Decodes and validates the base64url-encoded `answers` query parameter, fetches
+ * personalized configuration recommendations, normalizes returned items, and
+ * renders the results UI with a shareable URL. If `answers` is missing,
+ * fails validation/decoding, or backend recommendations are absent, the page
+ * responds with a 404.
+ *
+ * @param props.params - Route parameters containing the `id` of the results set
+ * @param props.searchParams - Query parameters; must include `answers` (base64url-encoded JSON)
+ * @returns The React element that displays the recommendations and a shareable URL
+ *
+ * @see decodeQuizAnswers
+ * @see getConfigRecommendations
+ * @see normalizeRecommendationResults
+ * @see ResultsDisplay
+ */
 export default async function ResultsPage({ params, searchParams }: PageProperties) {
   const resolvedParameters = await params;
   const resolvedSearchParameters = await searchParams;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -287,7 +347,11 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
 
   const recommendations: RecommendationResponse = {
     ...enrichedResult,
-    results: normalizeRecommendationResults(enrichedResult.results, resolvedParameters.id, reqLogger),
+    results: normalizeRecommendationResults(
+      enrichedResult.results,
+      resolvedParameters.id,
+      reqLogger
+    ),
     answers,
     id: resolvedParameters.id,
     generatedAt: new Date().toISOString(),
@@ -303,7 +367,7 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <section className="container mx-auto px-4 py-12">
         <ResultsDisplay recommendations={recommendations} shareUrl={shareUrl} />
       </section>

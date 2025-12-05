@@ -817,6 +817,25 @@ export type DifficultyLevel = keyof typeof BADGE_COLORS.difficulty;
 export type CollectionType = keyof typeof BADGE_COLORS.collectionType;
 
 export type ChangelogCategory = Database['public']['Enums']['changelog_category'];
+
+/**
+ * Ordered list of changelog categories matching the database enum.
+ * Used to ensure consistency across CATEGORY_ICONS, BADGE_COLORS.changelogCategory, and rendering logic.
+ * Display order: Added, Changed, Fixed, Security, Deprecated, Removed (prioritizes positive changes)
+ *
+ * @see Database['public']['Enums']['changelog_category']
+ * @see CATEGORY_ICONS
+ * @see BADGE_COLORS.changelogCategory
+ */
+export const CHANGELOG_CATEGORIES = [
+  'Added',
+  'Changed',
+  'Fixed',
+  'Security',
+  'Deprecated',
+  'Removed',
+] as const satisfies readonly ChangelogCategory[];
+
 export type JobStatus = Database['public']['Enums']['job_status'];
 export type StatusType = keyof typeof BADGE_COLORS.status;
 export type CategoryType = keyof typeof BADGE_COLORS.category;

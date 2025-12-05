@@ -66,6 +66,10 @@
       "types": "./src/utils/changelog.ts",
       "default": "./src/utils/changelog.ts"
     },
+    "./utils/url-safety": {
+      "types": "./src/utils/url-safety.ts",
+      "default": "./src/utils/url-safety.ts"
+    },
     "./config/actions": {
       "types": "./src/config/actions.config.ts",
       "default": "./src/config/actions.config.ts"
@@ -85,6 +89,14 @@
     "./utils/error-handler": {
       "types": "./src/utils/error-handler.ts",
       "default": "./src/utils/error-handler.ts"
+    },
+    "./utils/heading-normalization": {
+      "types": "./src/utils/heading-normalization.ts",
+      "default": "./src/utils/heading-normalization.ts"
+    },
+    "./utils/content-stats": {
+      "types": "./src/utils/content-stats.ts",
+      "default": "./src/utils/content-stats.ts"
     },
     "./utils/request-context": {
       "types": "./src/utils/request-context.ts",
@@ -137,9 +149,60 @@
     "./config/unified-config": {
       "types": "./src/config/unified-config.ts",
       "default": "./src/config/unified-config.ts"
+    },
+    "./inngest": {
+      "types": "./src/inngest/index.ts",
+      "default": "./src/inngest/index.ts"
+    },
+    "./inngest/client": {
+      "types": "./src/inngest/client.ts",
+      "default": "./src/inngest/client.ts"
+    },
+    "./email": {
+      "types": "./src/email/index.ts",
+      "default": "./src/email/index.ts"
+    },
+    "./email/components": {
+      "types": "./src/email/components/index.ts",
+      "default": "./src/email/components/index.ts"
+    },
+    "./email/config": {
+      "types": "./src/email/config/index.ts",
+      "default": "./src/email/config/index.ts"
+    },
+    "./integrations": {
+      "types": "./src/integrations/index.ts",
+      "default": "./src/integrations/index.ts"
+    },
+    "./integrations/resend": {
+      "types": "./src/integrations/resend.ts",
+      "default": "./src/integrations/resend.ts"
+    },
+    "./integrations/http-client": {
+      "types": "./src/integrations/http-client.ts",
+      "default": "./src/integrations/http-client.ts"
+    },
+    "./design-system": {
+      "types": "./src/design-system/index.ts",
+      "default": "./src/design-system/index.ts"
+    },
+    "./design-system/tokens": {
+      "types": "./src/design-system/tokens.ts",
+      "default": "./src/design-system/tokens.ts"
+    },
+    "./design-system/styles": {
+      "types": "./src/design-system/styles/index.ts",
+      "default": "./src/design-system/styles/index.ts"
+    },
+    "./flux": {
+      "types": "./src/flux/index.ts",
+      "default": "./src/flux/index.ts"
     }
   },
   "dependencies": {
+    "@heyclaude/data-layer": "workspace:*",
+    "@heyclaude/database-types": "workspace:*",
+    "@heyclaude/shared-runtime": "workspace:*",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-collapsible": "^1.1.12",
@@ -151,28 +214,29 @@
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slider": "^1.2.1",
+    "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-switch": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/react-use-controllable-state": "^1.1.1",
     "@radix-ui/react-visually-hidden": "^1.2.4",
-    "cmdk": "^1.1.1",
-    "dompurify": "^3.3.0",
-    "@heyclaude/data-layer": "workspace:*",
-    "@heyclaude/database-types": "workspace:*",
-    "@radix-ui/react-slot": "^1.2.4",
+    "@react-email/components": "^1.0.1",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.84.0",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "devalue": "^5.5.0",
+    "dompurify": "^3.3.0",
     "html2canvas-pro": "^1.5.13",
+    "inngest": "^3.46.0",
     "lucide-react": "^0.460.0",
     "motion": "^12.23.24",
     "next-safe-action": "^8.0.11",
     "pino": "^10.1.0",
     "react-error-boundary": "^6.0.0",
+    "resend": "^6.5.2",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.1.12",
@@ -187,8 +251,8 @@
     "@types/canvas-confetti": "^1.6.4",
     "@types/dompurify": "^3.0.5",
     "@types/react": "19.2.5",
-    "next": "16.0.4",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "next": "16.0.7",
+    "react": "19.2.1",
+    "react-dom": "19.2.1"
   }
 }

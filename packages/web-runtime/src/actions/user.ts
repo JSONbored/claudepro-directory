@@ -474,27 +474,9 @@ export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .inputSchema(z.void())
   .action(async ({ ctx }) => {
-    const { fetchCached } = await import('../cache/fetch-cached.ts');
-    const data = await fetchCached(
-      (client: SupabaseClient<Database>) =>
-        new AccountService(client).getUserActivitySummary({ p_user_id: ctx.userId }),
-      {
-        keyParts: ['user-activity-summary', ctx.userId],
-        tags: ['user-activity', `user-${ctx.userId}`],
-        ttlKey: 'cache.user_activity.ttl_seconds',
-        useAuth: true,
-        fallback: {
-          total_posts: 0,
-          total_comments: 0,
-          total_votes: 0,
-          total_submissions: 0,
-          merged_submissions: 0,
-          total_activity: 0,
-        },
-        logMeta: { namespace: 'user-actions' },
-      }
-    );
-
+    // Use data function instead of fetchCached to avoid cookies() in unstable_cache() error
+    const { getUserActivitySummary } = await import('../data/account.ts');
+    const data = await getUserActivitySummary(ctx.userId);
     return data;
   });
 
@@ -502,29 +484,14 @@ export const getActivityTimeline = authedAction
   .metadata({ actionName: 'getActivityTimeline', category: 'user' })
   .inputSchema(activityFilterSchema)
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
-    const { fetchCached } = await import('../cache/fetch-cached.ts');
-    const data = await fetchCached(
-      (client: SupabaseClient<Database>) =>
-        new AccountService(client).getUserActivityTimeline({
-          p_user_id: ctx.userId,
-          ...(type && { p_type: type }),
-          p_limit: limit,
-          p_offset: offset,
-        }),
-      {
-        keyParts: ['user-activity-timeline', ctx.userId, type ?? 'all', limit, offset],
-        tags: ['user-activity', `user-${ctx.userId}`],
-        ttlKey: 'cache.user_activity.ttl_seconds',
-        useAuth: true,
-        fallback: {
-          activities: [],
-          has_more: false,
-          total: 0,
-        },
-        logMeta: { namespace: 'user-actions' },
-      }
-    );
-
+    // Use data function instead of fetchCached to avoid cookies() in unstable_cache() error
+    const { getUserActivityTimeline } = await import('../data/account.ts');
+    const data = await getUserActivityTimeline({
+      userId: ctx.userId,
+      type: type ?? undefined,
+      limit,
+      offset,
+    });
     return data;
   });
 
@@ -532,20 +499,9 @@ export const getUserIdentities = authedAction
   .metadata({ actionName: 'getUserIdentities', category: 'user' })
   .inputSchema(z.void())
   .action(async ({ ctx }) => {
-    const { fetchCached } = await import('../cache/fetch-cached.ts');
-    const data = await fetchCached(
-      (client: SupabaseClient<Database>) =>
-        new AccountService(client).getUserIdentities({ p_user_id: ctx.userId }),
-      {
-        keyParts: ['user-identities', ctx.userId],
-        tags: ['users', `user-${ctx.userId}`],
-        ttlKey: 'cache.user_stats.ttl_seconds',
-        useAuth: true,
-        fallback: { identities: [] },
-        logMeta: { namespace: 'user-actions' },
-      }
-    );
-
+    // Use data function instead of fetchCached to avoid cookies() in unstable_cache() error
+    const { getUserIdentitiesData } = await import('../data/account.ts');
+    const data = await getUserIdentitiesData(ctx.userId);
     return data;
   });
 

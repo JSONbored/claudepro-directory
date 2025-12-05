@@ -3,7 +3,7 @@
  *
  * Returns static default flag values.
  * All flags are version-controlled in code.
- * 
+ *
  * This file is safe to use in both server and client components since it only returns static values.
  */
 
@@ -35,10 +35,9 @@ export interface LayoutFlags {
   useFloatingActionBar: boolean;
 }
 
-
 /**
  * Default flag values (primary source of truth - no external service dependency)
- * 
+ *
  * FAB Actions:
  * - Submit: Navigate to /submit page
  * - Search: Focus the search input (⌘K)
@@ -47,20 +46,20 @@ export interface LayoutFlags {
  * - Notifications: Show notification badge (mobile only)
  */
 const DEFAULT_FLAGS: LayoutFlags = {
-  useFloatingActionBar: true,   // ✅ Enable the FAB
-  fabSubmitAction: true,        // ✅ Show "Submit Content" action
-  fabSearchAction: true,        // ✅ Show "Search (⌘K)" action
-  fabScrollToTop: true,         // ✅ Show "Scroll to top" action
-  fabNotifications: true,       // ✅ Show notifications (mobile)
-  notificationsProvider: true,
-  notificationsSheet: true,
-  notificationsToasts: true,
+  useFloatingActionBar: true, // ✅ Enable the FAB
+  fabSubmitAction: true, // ✅ Show "Submit Content" action
+  fabSearchAction: true, // ✅ Show "Search (⌘K)" action
+  fabScrollToTop: true, // ✅ Show "Scroll to top" action
+  fabNotifications: false, // ❌ Disabled: Show notifications (mobile)
+  notificationsProvider: false, // ❌ Disabled: Notification provider
+  notificationsSheet: false, // ❌ Disabled: Notification sheet
+  notificationsToasts: false, // ❌ Disabled: Notification toasts
   footerDelayVariant: '30s' as const,
   ctaVariant: 'value_focused' as const,
-  notificationsEnabled: true,
-  notificationsSheetEnabled: true,
-  notificationsToastsEnabled: true,
-  fabNotificationsEnabled: true, // ✅ Enable FAB notifications
+  notificationsEnabled: false, // ❌ Disabled: All notifications
+  notificationsSheetEnabled: false, // ❌ Disabled: Notification sheet
+  notificationsToastsEnabled: false, // ❌ Disabled: Notification toasts
+  fabNotificationsEnabled: false, // ❌ Disabled: FAB notifications
 };
 
 /**

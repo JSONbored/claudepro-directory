@@ -74,6 +74,7 @@ export { getLayoutFlags, type LayoutFlags } from '../data/layout/flags.ts';
 // REMOVED: export * from '../data/config/categories.ts'; - Has module-level feature-flags import, but re-export specific functions
 export { getHomepageFeaturedCategories, getHomepageTabCategories } from '../data/config/categories.ts';
 export * from '../data/config/category/index.ts';
+export { STATIC_GENERATION_LIMITS } from '../data/config/constants.ts';
 
 // Actions
 export * from '../actions/pulse.ts';

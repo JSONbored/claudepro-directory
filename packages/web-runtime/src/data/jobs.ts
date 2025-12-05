@@ -1,9 +1,9 @@
 import 'server-only';
 
 import { JobsService, SearchService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { logError } from '@heyclaude/shared-runtime';
-import  { type SupabaseClient } from '@supabase/supabase-js';
+import { type SupabaseClient } from '@supabase/supabase-js';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { normalizeError } from '../errors.ts';
@@ -35,9 +35,7 @@ export interface JobsFilterOptions {
  * @param options - Filtering options (may include `searchQuery`, `category`, `employment`, `experience`, `remote`, `limit`, `offset`, `sort`)
  * @returns The filtered jobs result, or `null` if an error occurs
  */
-async function getFilteredJobsDirect(
-  options: JobsFilterOptions
-): Promise<JobsFilterResult | null> {
+async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFilterResult | null> {
   // Create request-scoped child logger to avoid race conditions
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -49,7 +47,7 @@ async function getFilteredJobsDirect(
   const { trackPerformance } = await import('../utils/performance-metrics');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
   const { searchQuery, category, employment, experience, remote, limit, offset, sort } = options;
-  
+
   const filtersLog: Record<string, boolean | null | number | string> = {
     searchQuery: searchQuery ?? null,
     category: category ?? null,
@@ -58,18 +56,18 @@ async function getFilteredJobsDirect(
     remote: remote ?? null,
     limit: limit ?? null,
     offset: offset ?? null,
-    sort: sort ?? null
+    sort: sort ?? null,
   };
-  
+
   try {
     const { result } = await trackPerformance(
       async () => {
         const client = createSupabaseAnonClient();
-        
+
         // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
         // Build RPC args with proper type narrowing
         const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
-        
+
         if (searchQuery) {
           rpcArguments.p_search_query = searchQuery;
         }
@@ -94,7 +92,7 @@ async function getFilteredJobsDirect(
         if (offset !== undefined) {
           rpcArguments.p_offset = offset;
         }
-        
+
         // Type compatibility: SupabaseAnonClient is compatible with SupabaseClient<Database>
         // Both are created from the same underlying Supabase client factory with Database type
         // This is safe because createSupabaseAnonClient returns ReturnType<typeof createSupabaseClient<Database>>
@@ -109,7 +107,7 @@ async function getFilteredJobsDirect(
         logLevel: 'info',
       }
     );
-    
+
     return result;
   } catch (error) {
     // trackPerformance already logs the error, but we log again with context about fallback behavior
@@ -159,24 +157,25 @@ export async function getFilteredJobs(
     remote: remote ?? null,
     limit: limit ?? null,
     offset: offset ?? null,
-    sort: sort ?? null
+    sort: sort ?? null,
   };
 
   // If no filters, use standard list (cached)
   if (!hasFilters) {
     try {
       return await fetchCached(
-      (client: SupabaseClient<Database>) => new SearchService(client).filterJobs({
-        ...(limit === undefined ? {} : { p_limit: limit }),
-        ...(offset === undefined ? {} : { p_offset: offset })
-      }),
-      {
-        keyParts: ['jobs-all', limit ?? 0, offset ?? 0],
-        tags: ['jobs-list'],
-        ttlKey: 'cache.jobs.ttl_seconds',
-        fallback: null,
-        logMeta: filtersLog
-      }
+        (client: SupabaseClient<Database>) =>
+          new SearchService(client).filterJobs({
+            ...(limit === undefined ? {} : { p_limit: limit }),
+            ...(offset === undefined ? {} : { p_offset: offset }),
+          }),
+        {
+          keyParts: ['jobs-all', limit ?? 0, offset ?? 0],
+          tags: ['jobs-list'],
+          ttlKey: 'cache.jobs.ttl_seconds',
+          fallback: null,
+          logMeta: filtersLog,
+        }
       );
     } catch (error) {
       // Log error if fetchCached fails unexpectedly (e.g., cache system error)
@@ -197,12 +196,16 @@ export async function getFilteredJobs(
         // While parent bindings are available at runtime, explicit context ensures
         // proper correlation and traceability for fire-and-forget operations
         const callbackRequestId = generateRequestId();
-        await logError('Failed to pulse job search', {
-          requestId: callbackRequestId,
-          operation: 'pulseJobSearch',
-          module: 'data/jobs',
-          searchQuery,
-        }, error);
+        await logError(
+          'Failed to pulse job search',
+          {
+            requestId: callbackRequestId,
+            operation: 'pulseJobSearch',
+            module: 'data/jobs',
+            searchQuery,
+          },
+          error
+        );
       });
     }
     return getFilteredJobsDirect(options);
@@ -217,19 +220,23 @@ export async function getFilteredJobs(
         // While parent bindings are available at runtime, explicit context ensures
         // proper correlation and traceability for fire-and-forget operations
         const callbackRequestId = generateRequestId();
-        await logError('Failed to pulse job search', {
-          requestId: callbackRequestId,
-          operation: 'pulseJobSearch',
-          module: 'data/jobs',
-          searchQuery,
-        }, error);
+        await logError(
+          'Failed to pulse job search',
+          {
+            requestId: callbackRequestId,
+            operation: 'pulseJobSearch',
+            module: 'data/jobs',
+            searchQuery,
+          },
+          error
+        );
       });
     }
 
     // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
     // Build RPC args with proper type narrowing
     const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
-    
+
     if (searchQuery) {
       rpcArguments.p_search_query = searchQuery;
     }
@@ -254,7 +261,7 @@ export async function getFilteredJobs(
     if (offset !== undefined) {
       rpcArguments.p_offset = offset;
     }
-    
+
     return fetchCached(
       (client: SupabaseClient<Database>) => new SearchService(client).filterJobs(rpcArguments),
       {
@@ -273,7 +280,7 @@ export async function getFilteredJobs(
         tags: ['jobs-search'],
         ttlKey: 'cache.jobs.ttl_seconds',
         fallback: null,
-        logMeta: filtersLog
+        logMeta: filtersLog,
       }
     );
   } catch (error) {

@@ -6,13 +6,18 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { POSITION_PATTERNS, UI_CLASSES, UnifiedBadge, Button ,
+import {
+  POSITION_PATTERNS,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -31,17 +36,42 @@ interface AnalyticsPageProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Generates metadata for the sponsorship analytics page for the given route `id`.
+ *
+ * @param params - A promise resolving to route parameters; must resolve to an object containing `id`
+ * @returns Metadata for the sponsorship analytics page corresponding to `id`
+ *
+ * @see generatePageMetadata
+ * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata
+ */
 export async function generateMetadata({ params }: AnalyticsPageProperties): Promise<Metadata> {
   const { id } = await params;
   return generatePageMetadata('/account/sponsorships/:id/analytics', { params: { id } });
 }
 
+/**
+ * Render the sponsorship analytics page for a given sponsorship id.
+ *
+ * Renders campaign overview metrics, campaign details, a 30-day daily performance chart,
+ * and optimization tips. Enforces authentication (prompts sign-in if unauthenticated)
+ * and fetches analytics data for the current user; if analytics are missing or invalid,
+ * the page resolves to a not-found response.
+ *
+ * @param params - Route parameters object containing the `id` of the sponsorship to display.
+ * @returns A React element displaying campaign metrics, daily performance visualization, and tips.
+ *
+ * @see getSponsorshipAnalytics
+ * @see getAuthenticatedUser
+ * @see generateRequestId
+ * @see notFound
+ */
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProperties) {
   const { id } = await params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -163,7 +193,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
       <div>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
-          <h1 className="font-bold text-3xl">Sponsorship Analytics</h1>
+          <h1 className="text-3xl font-bold">Sponsorship Analytics</h1>
         </div>
         <p className="text-muted-foreground">
           Detailed performance metrics for your sponsored content
@@ -194,9 +224,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             value: `${ctr}%`,
             change: 'Clicks / Impressions',
             trend:
-              Number.parseFloat(ctr) > 2
-                ? 'up'
-                : (Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down'),
+              Number.parseFloat(ctr) > 2 ? 'up' : Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down',
           },
           {
             label: 'Avg. Daily Views',
@@ -216,31 +244,31 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="font-medium text-sm">Content Type</p>
+              <p className="text-sm font-medium">Content Type</p>
               <p className="text-muted-foreground">{sponsorship.content_type}</p>
             </div>
 
             <div>
-              <p className="font-medium text-sm">Content ID</p>
-              <p className="font-mono text-muted-foreground text-xs">{sponsorship.content_id}</p>
+              <p className="text-sm font-medium">Content ID</p>
+              <p className="text-muted-foreground font-mono text-xs">{sponsorship.content_id}</p>
             </div>
 
             <div>
-              <p className="font-medium text-sm">Start Date</p>
+              <p className="text-sm font-medium">Start Date</p>
               <p className="text-muted-foreground">
                 {new Date(sponsorship.start_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className="font-medium text-sm">End Date</p>
+              <p className="text-sm font-medium">End Date</p>
               <p className="text-muted-foreground">
                 {new Date(sponsorship.end_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className="font-medium text-sm">Status</p>
+              <p className="text-sm font-medium">Status</p>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <UnifiedBadge variant="base" style={sponsorship.active ? 'default' : 'outline'}>
                   {sponsorship.active ? 'Active' : 'Inactive'}
@@ -249,7 +277,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             </div>
 
             <div>
-              <p className="font-medium text-sm">Tier</p>
+              <p className="text-sm font-medium">Tier</p>
               <div>
                 <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
               </div>
@@ -276,14 +304,14 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
               return (
                 <div key={dayKey} className="grid grid-cols-12 items-center gap-2">
-                  <div className="col-span-2 text-muted-foreground text-xs">
+                  <div className="text-muted-foreground col-span-2 text-xs">
                     {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                   <div className="col-span-10 grid grid-cols-2 gap-1">
                     {/* Impressions bar */}
-                    <div className="relative h-8 overflow-hidden rounded bg-muted">
+                    <div className="bg-muted relative h-8 overflow-hidden rounded">
                       <div
-                        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-primary/30 transition-all`}
+                        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} bg-primary/30 h-full transition-all`}
                         style={{ width: `${(impressions / maxImpressions) * 100}%` }}
                       />
                       <div
@@ -293,9 +321,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                       </div>
                     </div>
                     {/* Clicks bar */}
-                    <div className="relative h-8 overflow-hidden rounded bg-muted">
+                    <div className="bg-muted relative h-8 overflow-hidden rounded">
                       <div
-                        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-accent/50 transition-all`}
+                        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} bg-accent/50 h-full transition-all`}
                         style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
                       />
                       <div

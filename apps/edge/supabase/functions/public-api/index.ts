@@ -15,6 +15,8 @@ import { createDataApiContext } from '@heyclaude/shared-runtime/logging.ts';
 import { handleGeneratePackage } from './routes/content-generate/index.ts';
 import { handlePackageGenerationQueue } from './routes/content-generate/queue-worker.ts';
 import { handleUploadPackage } from './routes/content-generate/upload.ts';
+import { handleEmbeddingGenerationQueue, handleEmbeddingWebhook } from './routes/embedding/index.ts';
+import { handleImageGenerationQueue } from './routes/image-generation/index.ts';
 import { handleOGImageRequest } from './routes/og/index.ts';
 import { handleTransformImageRoute } from './routes/transform/index.ts';
 
@@ -119,6 +121,10 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
       return handleGeneratePackage(ctx.request, logContext);
     });
   },
+  // Queue processing routes (migrated from flux-station)
+  'embedding-process': (ctx) => handleEmbeddingGenerationQueue(ctx.request),
+  'embedding-webhook': (ctx) => handleEmbeddingWebhook(ctx.request),
+  'image-generation-process': (ctx) => handleImageGenerationQueue(ctx.request),
 };
 
 /**

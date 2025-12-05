@@ -6,15 +6,16 @@
 import { Shield } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES,
+import {
+  UI_CLASSES,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
-
 
 import { MFAFactorsListClient } from './mfa-factors-list-client';
 
@@ -26,10 +27,22 @@ export const metadata: Metadata = {
 // Force dynamic rendering for auth-protected pages
 export const dynamic = 'force-dynamic';
 
+/**
+ * Render the MFA Settings page that lets an authenticated user view and manage multi-factor authentication.
+ *
+ * If no authenticated user is found, the function redirects to `/login`. A request-scoped identifier and logger are created for the page request.
+ *
+ * @returns The JSX for the MFA Settings page, including an enrolled factors list and explanatory "How it works" content.
+ *
+ * @see getAuthenticatedUser
+ * @see MFAFactorsListClient
+ * @see generateRequestId
+ * @see redirect
+ */
 export default async function MFASettingsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger
   const reqLogger = logger.child({
     requestId,
@@ -55,8 +68,8 @@ export default async function MFASettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-bold text-3xl">Two-Factor Authentication</h1>
-        <p className="mt-2 text-muted-foreground">
+        <h1 className="text-3xl font-bold">Two-Factor Authentication</h1>
+        <p className="text-muted-foreground mt-2">
           Add an extra layer of security to your account with two-factor authentication.
         </p>
       </div>
@@ -81,7 +94,7 @@ export default async function MFASettingsPage() {
           <CardTitle>How it works</CardTitle>
           <CardDescription>Learn about two-factor authentication</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2 text-muted-foreground text-sm">
+        <CardContent className="text-muted-foreground space-y-2 text-sm">
           <p>
             • Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password,
             etc.)

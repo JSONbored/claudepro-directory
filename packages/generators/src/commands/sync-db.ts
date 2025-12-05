@@ -557,7 +557,9 @@ export async function runSyncDb() {
   // Determine which operations to run
   const runDump = onlyDump || !(onlyTypes || skipDump);
   const runTypes = onlyTypes || !(onlyDump || skipTypes);
-  const runPackageBuildsStep = runTypes && !skipPackageBuilds;
+  // Package builds should be opt-in, not opt-out, to avoid circular dependency:
+  // You need to regenerate types FIRST, then fix type errors, then optionally build
+  const runPackageBuildsStep = runTypes && !skipPackageBuilds && args.includes('--build-packages');
 
   // Ensure env vars are loaded
   await ensureEnvVars(['SUPABASE_PROJECT_ID', 'POSTGRES_URL_NON_POOLING']);

@@ -23,13 +23,13 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { UI_CLASSES, NavLink, Breadcrumbs } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
 import { StructuredData } from '@/src/components/core/infra/structured-data';
@@ -37,11 +37,13 @@ import { ChangelogListClient } from '@/src/components/features/changelog/changel
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
 
@@ -52,18 +54,21 @@ const NewsletterCTAVariant = dynamicImport(
 export const revalidate = 3600;
 
 /**
- * Build metadata for the changelog page and include RSS and Atom feed alternates.
+ * Generate page metadata for the /changelog route, including RSS and Atom feed alternates.
  *
- * If metadata generation fails, returns a fallback metadata object with a default title,
- * description, and the same RSS/Atom alternates.
+ * If metadata generation fails, returns a sensible fallback metadata object with a default
+ * title and description while preserving the feed alternates.
  *
- * @returns Page metadata for the `/changelog` route. The metadata includes feed discovery
- *          URLs under `alternates.types` for `application/rss+xml` and `application/atom+xml`.
+ * @returns Page metadata for the changelog route. `alternates.types` contains
+ *          `application/rss+xml` and `application/atom+xml` entries pointing to the site's feed URLs.
+ *
+ * @see generatePageMetadata
+ * @see APP_CONFIG
  */
 export async function generateMetadata(): Promise<Metadata> {
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const metadataLogger = logger.child({
     requestId: metadataRequestId,
@@ -104,16 +109,25 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the Changelog page with server-loaded entries, client-side filtering, structured data, and a newsletter CTA.
+ * Render the Changelog page using server-side loaded entries, client-side filtering, structured data, and a newsletter CTA.
  *
- * Loads published changelog entries, displays totals and latest release information, and delegates interactive filtering to the client-side list component. If loading fails, a minimal fallback UI is returned.
+ * Loads published changelog entries (with normalized keywords and contributors), computes category counts from the overview metadata, and renders a stats header plus the client-side ChangelogListClient for interactive filtering. If data loading fails, returns a minimal fallback UI instead of throwing.
  *
- * @returns The React element for the changelog page, or a minimal fallback UI when data loading fails.
+ * Server-side behavior:
+ * - Fetches changelog overview via getChangelogOverview with publishedOnly=true.
+ * - Uses server-side data to populate the client list and category counts.
+ * - Page is intended to be served with ISR (revalidation configured at the file level).
+ *
+ * @returns A React element representing the changelog page; returns a minimal fallback UI when data loading fails.
+ *
+ * @see getChangelogOverview
+ * @see ChangelogListClient
+ * @see StructuredData
  */
 export default async function ChangelogPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -177,20 +191,23 @@ export default async function ChangelogPage() {
       <>
         <StructuredData route="/changelog" />
 
-        <div className="container max-w-6xl space-y-8 py-8">
+        <div className="mx-auto max-w-[1400px] space-y-8 px-4 py-8 md:px-8 lg:px-12">
+          {/* Breadcrumbs */}
+          <Breadcrumbs categoryLabel="Changelog" />
+
           {/* Header */}
           <div className="space-y-4">
             <NavLink
               href="/"
-              className="inline-flex items-center gap-2 text-muted-foreground text-sm"
+              className="text-muted-foreground inline-flex items-center gap-2 text-sm"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Home</span>
             </NavLink>
 
             <div className="space-y-2">
-              <h1 className="font-bold text-4xl tracking-tight">Changelog</h1>
-              <p className="text-lg text-muted-foreground">
+              <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
+              <p className="text-muted-foreground text-lg">
                 Track all updates, new features, bug fixes, and improvements to Claude Pro
                 Directory.
               </p>
@@ -199,25 +216,26 @@ export default async function ChangelogPage() {
             {/* Stats */}
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-muted-foreground text-sm`}>
               <div>
-                <span className="font-semibold text-foreground">
+                <span className="text-foreground font-semibold">
                   {overview.metadata?.total_entries ?? publishedEntries.length}
                 </span>{' '}
                 total updates
               </div>
-              {publishedEntries.length > 0 &&
-                publishedEntries[0]?.release_date ? <div>
-                    Latest:{' '}
-                    <time
-                      dateTime={publishedEntries[0].release_date}
-                      className="font-medium text-foreground"
-                    >
-                      {new Date(publishedEntries[0].release_date).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </time>
-                  </div> : null}
+              {publishedEntries.length > 0 && publishedEntries[0]?.release_date ? (
+                <div>
+                  Latest:{' '}
+                  <time
+                    dateTime={publishedEntries[0].release_date}
+                    className="text-foreground font-medium"
+                  >
+                    {new Date(publishedEntries[0].release_date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </time>
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -243,9 +261,9 @@ export default async function ChangelogPage() {
 
     // Fallback UI on error
     return (
-      <div className="container max-w-6xl py-8">
+      <div className="container max-w-7xl py-8">
         <div className="space-y-4">
-          <h1 className="font-bold text-4xl tracking-tight">Changelog</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
           <p className="text-muted-foreground">
             Unable to load changelog entries. Please try again later.
           </p>

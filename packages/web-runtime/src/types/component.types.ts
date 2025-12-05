@@ -769,7 +769,12 @@ export interface ProcessedSectionData {
   features?: string[];
   useCases?: string[];
   requirements?: string[];
-  troubleshooting?: Array<string | { issue: string; solution: string }>;
+  securityItems?: string[];
+  troubleshooting?: Array<
+    | string
+    | { issue: string; solution: string }
+    | { question: string; answer: string }
+  >;
 
   // Special content types
   guideSections?: Array<Record<string, unknown> & { html?: string }> | null;
@@ -815,7 +820,11 @@ export type EnhancedListProps = BaseProps & {
   variant: 'enhanced-list';
   title: string;
   description?: string;
-  items: Array<string | { issue: string; solution: string }>;
+  items: Array<
+    | string
+    | { issue: string; solution: string }
+    | { question: string; answer: string }
+  >;
   icon?: LucideIcon;
   dotColor?: string;
 };
