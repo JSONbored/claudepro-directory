@@ -3,8 +3,8 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
-import { NavLink, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { NavLink, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
@@ -22,10 +22,26 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = 86_400;
 
+/**
+ * Renders the Contact page with available contact channels and supplemental information.
+ *
+ * Renders a page showing an interactive terminal (feature-flagged), traditional contact options
+ * (GitHub Discussions, GitHub Issues, Discord, and Email when configured), and additional FAQ,
+ * response time, and contributing sections.
+ *
+ * This server-rendered component generates a request-scoped ID and logger and emits warnings
+ * when expected contact channels (email, github, discord) are not configured.
+ *
+ * @returns The React element for the Contact page.
+ *
+ * @see getContactChannels
+ * @see ContactTerminal
+ * @see ContactTerminalErrorBoundary
+ */
 export default function ContactPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -56,14 +72,14 @@ export default function ContactPage() {
 
   // Feature flags are now static defaults - no server/middleware dependency
   // Terminal feature should be evaluated in middleware, not in page components
-   
+
   const terminalEnabled = false; // Default for static generation
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">
       <div className="mb-8 text-center">
-        <h1 className="mb-4 font-bold text-3xl sm:text-4xl">Contact Us</h1>
-        <p className="text-lg text-muted-foreground">
+        <h1 className="mb-4 text-3xl font-bold sm:text-4xl">Contact Us</h1>
+        <p className="text-muted-foreground text-lg">
           {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
           {terminalEnabled
             ? 'Use our interactive terminal to get in touch, or choose an option below.'
@@ -86,19 +102,20 @@ export default function ContactPage() {
       {/* Traditional Contact Options */}
       {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
       <div className={terminalEnabled ? 'mt-12' : ''}>
-        <h2 className="mb-6 text-center font-semibold text-2xl">
+        <h2 className="mb-6 text-center text-2xl font-semibold">
           {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
           {terminalEnabled ? 'Or reach us directly:' : 'Get in Touch'}
         </h2>
 
         <div className="grid gap-6 md:grid-cols-2">
           {!(channels.github || channels.discord || channels.email) && (
-            <div className="col-span-2 py-8 text-center text-muted-foreground">
+            <div className="text-muted-foreground col-span-2 py-8 text-center">
               <p>Contact channels are currently being configured. Please check back soon.</p>
             </div>
           )}
           {/* GitHub Discussions */}
-          {channels.github ? <Card>
+          {channels.github ? (
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Github className="h-5 w-5" />
@@ -106,7 +123,7 @@ export default function ContactPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="mb-4 text-muted-foreground">
+                <p className="text-muted-foreground mb-4">
                   Join the conversation, ask questions, and share ideas with the community.
                 </p>
                 <NavLink
@@ -117,10 +134,12 @@ export default function ContactPage() {
                   Visit Discussions →
                 </NavLink>
               </CardContent>
-            </Card> : null}
+            </Card>
+          ) : null}
 
           {/* Discord Community */}
-          {channels.discord ? <Card>
+          {channels.discord ? (
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DiscordIcon className="h-5 w-5" />
@@ -128,7 +147,7 @@ export default function ContactPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="mb-4 text-muted-foreground">
+                <p className="text-muted-foreground mb-4">
                   Chat with other users, get help, and stay updated on the latest developments.
                 </p>
                 <NavLink
@@ -139,10 +158,12 @@ export default function ContactPage() {
                   Join Discord →
                 </NavLink>
               </CardContent>
-            </Card> : null}
+            </Card>
+          ) : null}
 
           {/* GitHub Issues */}
-          {channels.github ? <Card>
+          {channels.github ? (
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MessageSquare className="h-5 w-5" />
@@ -150,7 +171,7 @@ export default function ContactPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="mb-4 text-muted-foreground">
+                <p className="text-muted-foreground mb-4">
                   Found a bug or have a feature request? Open an issue on GitHub.
                 </p>
                 <NavLink
@@ -161,10 +182,12 @@ export default function ContactPage() {
                   Create Issue →
                 </NavLink>
               </CardContent>
-            </Card> : null}
+            </Card>
+          ) : null}
 
           {/* Email */}
-          {channels.email ? <Card>
+          {channels.email ? (
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Mail className="h-5 w-5" />
@@ -172,7 +195,7 @@ export default function ContactPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="mb-4 text-muted-foreground">
+                <p className="text-muted-foreground mb-4">
                   For private inquiries, partnerships, or other matters, reach us via email.
                 </p>
                 <NavLink
@@ -183,25 +206,26 @@ export default function ContactPage() {
                   {channels.email} →
                 </NavLink>
               </CardContent>
-            </Card> : null}
+            </Card>
+          ) : null}
         </div>
       </div>
 
       {/* Additional Information */}
       <div className="prose prose-invert mx-auto mt-12 max-w-none">
-        <h2 className="mb-4 font-semibold text-2xl">Frequently Asked Questions</h2>
+        <h2 className="mb-4 text-2xl font-semibold">Frequently Asked Questions</h2>
         <p className="mb-4">
           Before reaching out, you might find answers in our{' '}
           <NavLink href="/help">Help Center</NavLink>.
         </p>
 
-        <h2 className="mt-8 mb-4 font-semibold text-2xl">Response Time</h2>
+        <h2 className="mt-8 mb-4 text-2xl font-semibold">Response Time</h2>
         <p className="mb-4">
           We typically respond to inquiries within 24-48 hours during business days. For urgent
           matters, please use GitHub Issues or Discord for faster community support.
         </p>
 
-        <h2 className="mt-8 mb-4 font-semibold text-2xl">Contributing</h2>
+        <h2 className="mt-8 mb-4 text-2xl font-semibold">Contributing</h2>
         <p className="mb-4">
           Interested in contributing to {APP_CONFIG.name}? Check out our{' '}
           <NavLink href="/submit">submission guidelines</NavLink> or{' '}

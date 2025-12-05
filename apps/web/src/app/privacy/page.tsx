@@ -2,9 +2,15 @@ import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { NavLink } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 
-
+/**
+ * Provide page metadata used by Next.js for the site's Privacy page.
+ *
+ * @returns The Next.js Metadata object for the "/privacy" page.
+ * @see generatePageMetadata
+ * @see {@link Metadata}
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/privacy');
 }
@@ -15,17 +21,31 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export const revalidate = false;
 
+/**
+ * Render the Privacy Policy page displaying the site's last-updated date and policy sections.
+ *
+ * The component obtains the site's last-updated date, displays it, and presents policy sections
+ * covering information collection, use, sharing, cookies, security, user rights, children's
+ * privacy, changes, and contact information. Internal navigation links point to the Cookies and
+ * Contact pages.
+ *
+ * @returns The Privacy Policy page as a JSX element.
+ *
+ * @see getLastUpdatedDate
+ * @see APP_CONFIG
+ * @see NavLink
+ */
 export default function PrivacyPage() {
   const lastUpdated = getLastUpdatedDate();
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
       <div className="prose prose-invert max-w-none">
-        <h1 className="mb-6 font-bold text-3xl sm:text-4xl">Privacy Policy</h1>
-        <p className="mb-8 text-muted-foreground">Last updated: {lastUpdated}</p>
+        <h1 className="mb-6 text-3xl font-bold sm:text-4xl">Privacy Policy</h1>
+        <p className="text-muted-foreground mb-8">Last updated: {lastUpdated}</p>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">1. Information We Collect</h2>
+          <h2 className="mb-4 text-2xl font-semibold">1. Information We Collect</h2>
           <p className="mb-4">
             We collect information that you provide directly to us when using {APP_CONFIG.name}:
           </p>
@@ -38,7 +58,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">2. How We Use Your Information</h2>
+          <h2 className="mb-4 text-2xl font-semibold">2. How We Use Your Information</h2>
           <p className="mb-4">We use the information we collect to:</p>
           <ul className="list-disc space-y-2 pl-6">
             <li>Provide, maintain, and improve our services</li>
@@ -50,7 +70,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">3. Information Sharing</h2>
+          <h2 className="mb-4 text-2xl font-semibold">3. Information Sharing</h2>
           <p className="mb-4">
             We do not sell your personal information. We may share your information only in the
             following circumstances:
@@ -64,7 +84,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">4. Cookies and Tracking</h2>
+          <h2 className="mb-4 text-2xl font-semibold">4. Cookies and Tracking</h2>
           <p className="mb-4">
             We use cookies and similar tracking technologies to collect and track information about
             your activity on our service. You can control cookies through your browser settings.
@@ -75,7 +95,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">5. Data Security</h2>
+          <h2 className="mb-4 text-2xl font-semibold">5. Data Security</h2>
           <p className="mb-4">
             We implement appropriate technical and organizational measures to protect your personal
             information. However, no method of transmission over the internet is 100% secure.
@@ -83,7 +103,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">6. Your Rights</h2>
+          <h2 className="mb-4 text-2xl font-semibold">6. Your Rights</h2>
           <p className="mb-4">You have the right to:</p>
           <ul className="list-disc space-y-2 pl-6">
             <li>Access and receive a copy of your personal data</li>
@@ -95,7 +115,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">7. Children's Privacy</h2>
+          <h2 className="mb-4 text-2xl font-semibold">7. Children's Privacy</h2>
           <p className="mb-4">
             Our service is not directed to children under 13 years of age. We do not knowingly
             collect personal information from children under 13.
@@ -103,7 +123,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">8. Changes to This Policy</h2>
+          <h2 className="mb-4 text-2xl font-semibold">8. Changes to This Policy</h2>
           <p className="mb-4">
             We may update this Privacy Policy from time to time. We will notify you of any changes
             by posting the new Privacy Policy on this page and updating the "Last updated" date.
@@ -111,7 +131,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 font-semibold text-2xl">9. Contact Us</h2>
+          <h2 className="mb-4 text-2xl font-semibold">9. Contact Us</h2>
           <p className="mb-4">
             If you have questions about this Privacy Policy, please{' '}
             <NavLink href="/contact">contact us</NavLink>.

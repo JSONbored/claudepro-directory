@@ -8,12 +8,8 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
-import  { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
+import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getCategoryConfig,
@@ -21,7 +17,7 @@ import {
   getContentDetailCore,
   getRelatedContent,
 } from '@heyclaude/web-runtime/server';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
@@ -35,30 +31,30 @@ export const revalidate = 7200;
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
- * Produce static route parameters for a subset of popular content to pre-render at build time.
+ * Produce a list of static route params ({ category, slug }) for a subset of popular content to pre-render at build time.
  *
- * Returns an array of { category, slug } entries containing up to 30 top items per homepage category.
- * Invalid or missing slugs are excluded; other pages remain available for on-demand rendering via dynamicParams.
+ * This selects up to MAX_ITEMS_PER_CATEGORY items per homepage category and returns their { category, slug } pairs. Pages not included in the returned list are served on-demand via Next.js dynamic params and ISR (revalidate = 7200).
  *
- * @returns An array of objects with `category` and `slug` to be used as static params for pre-rendering
+ * @returns An array of objects each containing `category` and `slug` for use as static params
  *
  * @see getHomepageCategoryIds
  * @see getContentByCategory
  * @see dynamicParams
+ * @see revalidate
  */
 export async function generateStaticParams() {
   // Dynamic imports only for data modules (category/content)
   const { getHomepageCategoryIds } = await import('@heyclaude/web-runtime/data/config/category');
   const { getContentByCategory } = await import('@heyclaude/web-runtime/data/content');
-  const { logger, generateRequestId, normalizeError } = await import(
-    '@heyclaude/web-runtime/logging/server'
-  );
+  const { logger, generateRequestId, normalizeError } =
+    await import('@heyclaude/web-runtime/logging/server');
 
   const categories = getHomepageCategoryIds;
   const parameters: Array<{ category: string; slug: string }> = [];
 
-  // Limit to top 30 items per category to balance build time vs. performance
-  // Reduced from 50 to optimize build performance while maintaining good SEO coverage
+  // Limit to top 20 items per category to optimize build time
+  // Increased from 10 to 20 after database query optimizations (80% faster queries)
+  // ISR with dynamicParams=true handles remaining pages on-demand with 2hr revalidation
   const MAX_ITEMS_PER_CATEGORY = 30;
 
   // Process all categories in parallel
@@ -180,10 +176,10 @@ export async function generateMetadata({
 /**
  * Render the content detail page for a given category and slug.
  *
- * Fetches core content required for the page (blocking for LCP) and composes the UI while deferring analytics and related-item data for Suspense. Validates the category and its configuration and returns a 404 when invalid or when the core content is missing. Conditionally includes recently-viewed tracking for supported categories and a collection-specific section when the item is a collection.
+ * Validates the category and category configuration, fetches the core content (blocking for LCP), initiates analytics and related-item fetches for Suspense, and conditionally includes recently-viewed tracking and a collection-specific section. Triggers a 404 via `notFound()` when the category, category config, or core content is missing.
  *
- * @param params - Route parameters object containing `category` and `slug`
- * @returns A React element for the requested content detail page
+ * @param params - A promise that resolves to an object with `category` and `slug` route parameters
+ * @returns A React element representing the content detail page for the requested category and slug
  *
  * @see getContentDetailCore
  * @see getContentAnalytics
@@ -245,9 +241,8 @@ export default async function DetailPage({
     // During build, missing content is expected - only log at debug level
     // During runtime, log at warn level to catch real issues (except in production where it's also expected)
     const suppressMissingContentWarning =
-      env.NEXT_PHASE === 'phase-production-build' ||
-      env.VERCEL_ENV === 'production';
-    
+      env.NEXT_PHASE === 'phase-production-build' || env.VERCEL_ENV === 'production';
+
     if (suppressMissingContentWarning) {
       reqLogger.debug('DetailPage: content not found during build/production (expected)', {
         section: 'core-content-fetch',
@@ -322,21 +317,25 @@ export default async function DetailPage({
       {(() => {
         const recentlyViewedCategory = mapCategoryToRecentlyViewed(category);
         if (!recentlyViewedCategory) return null;
-        
+
         // Extract tags safely before passing to client component
         const itemTags = 'tags' in fullItem ? ensureStringArray(fullItem.tags).slice(0, 3) : [];
         const tagsProp = itemTags.length > 0 ? { tags: itemTags } : {};
-        
+
         // Extract title safely
-        const itemTitle = 
-          ('display_title' in fullItem && typeof fullItem.display_title === 'string' ? fullItem.display_title : undefined) ??
-          ('title' in fullItem && typeof fullItem.title === 'string' ? fullItem.title : undefined) ??
+        const itemTitle =
+          ('display_title' in fullItem && typeof fullItem.display_title === 'string'
+            ? fullItem.display_title
+            : undefined) ??
+          ('title' in fullItem && typeof fullItem.title === 'string'
+            ? fullItem.title
+            : undefined) ??
           slug;
-        
+
         // Extract description safely - ensure it's a string
-        const itemDescription = 
+        const itemDescription =
           typeof fullItem.description === 'string' ? fullItem.description : '';
-        
+
         return (
           <RecentlyViewedTracker
             category={recentlyViewedCategory}

@@ -1,9 +1,8 @@
-
 /**
  * Settings Page - User profile and account management.
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
 import {
   generatePageMetadata,
@@ -12,13 +11,16 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, Button ,
+import {
+  UI_CLASSES,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -34,14 +36,36 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Generates metadata for the account settings page.
+ *
+ * @returns The Next.js page metadata for '/account/settings'.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/settings');
 }
 
+/**
+ * Server-rendered settings page that displays and manages the authenticated user's profile and account settings.
+ *
+ * Renders the full settings UI when user data and profile are available; otherwise renders appropriate fallback
+ * interfaces for unauthenticated access or when settings/profile cannot be loaded. This page performs request-scoped
+ * data fetching and initialization on each request and runs with dynamic server rendering.
+ *
+ * @returns The page JSX: the main settings UI when data is present; an authentication prompt if the request is unauthenticated;
+ * or an error/fallback card when user settings or profile cannot be loaded.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserSettings
+ * @see ensureUserRecord
+ * @see ProfileEditForm
+ * @see RefreshProfileButton
+ */
 export default async function SettingsPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -127,9 +151,11 @@ export default async function SettingsPage() {
     try {
       // Type-safe access to user_metadata (Record<string, unknown> from Supabase)
       const userMetadata = user.user_metadata;
-      const fullName = typeof userMetadata['full_name'] === 'string' ? userMetadata['full_name'] : null;
+      const fullName =
+        typeof userMetadata['full_name'] === 'string' ? userMetadata['full_name'] : null;
       const name = typeof userMetadata['name'] === 'string' ? userMetadata['name'] : null;
-      const avatarUrl = typeof userMetadata['avatar_url'] === 'string' ? userMetadata['avatar_url'] : null;
+      const avatarUrl =
+        typeof userMetadata['avatar_url'] === 'string' ? userMetadata['avatar_url'] : null;
       const picture = typeof userMetadata['picture'] === 'string' ? userMetadata['picture'] : null;
       await ensureUserRecord({
         id: user.id,
@@ -159,7 +185,7 @@ export default async function SettingsPage() {
     );
     return (
       <div className="space-y-6">
-        <h1 className="font-bold text-3xl">Settings</h1>
+        <h1 className="text-3xl font-bold">Settings</h1>
         <p className="text-destructive">Unable to load profile. Please try again later.</p>
       </div>
     );
@@ -168,7 +194,7 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Settings</h1>
+        <h1 className="mb-2 text-3xl font-bold">Settings</h1>
         <p className="text-muted-foreground">Manage your account settings and preferences</p>
       </div>
 
@@ -180,11 +206,11 @@ export default async function SettingsPage() {
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>Update your public profile details</CardDescription>
             </div>
-            {userData?.slug ? <Link href={`/u/${userData.slug}`}>
-                <Button variant="outline" size="sm">
-                  View Profile
-                </Button>
-              </Link> : null}
+            {userData?.slug ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/u/${userData.slug}`}>View Profile</Link>
+              </Button>
+            ) : null}
           </div>
         </CardHeader>
         <CardContent>
@@ -201,11 +227,11 @@ export default async function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <p className="font-medium text-sm">Email</p>
+              <p className="text-sm font-medium">Email</p>
               <p className="text-muted-foreground">{user.email}</p>
             </div>
             <div>
-              <p className="font-medium text-sm">Member Since</p>
+              <p className="text-sm font-medium">Member Since</p>
               <p className="text-muted-foreground">
                 {profile.created_at
                   ? new Date(profile.created_at).toLocaleDateString('en-US', {
@@ -228,7 +254,8 @@ export default async function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {userData?.image && typeof userData.image === 'string' ? <div className="flex items-center gap-4">
+          {userData?.image && typeof userData.image === 'string' ? (
+            <div className="flex items-center gap-4">
               <Image
                 src={userData.image}
                 alt={`${userData.name ?? 'User'}'s avatar`}
@@ -244,7 +271,8 @@ export default async function SettingsPage() {
                   providerLabel={user.app_metadata.provider === 'github' ? 'GitHub' : 'Google'}
                 />
               </div>
-            </div> : null}
+            </div>
+          ) : null}
         </CardContent>
       </Card>
     </div>

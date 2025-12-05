@@ -64,6 +64,21 @@ const PROVIDER_CONFIG: Record<
   },
 };
 
+/**
+ * Renders UI for viewing, linking, and unlinking the user's connected OAuth providers.
+ *
+ * Displays each configured provider (GitHub, Google, Discord), shows connection status and identity info,
+ * allows starting the OAuth linking flow, and provides a confirmation dialog to unlink a provider.
+ * The component prevents unlinking when only one provider remains connected.
+ *
+ * @param identities - Array of identity records returned by `get_user_identities()`. Entries may be `null`
+ *   and identity objects may have a `provider` or `email` that is `null`. Provider comparisons are performed
+ *   after normalizing provider values to lowercase and trimming whitespace.
+ * @returns The React element that manages connected OAuth providers for the current user.
+ *
+ * @see PROVIDER_CONFIG
+ * @see unlinkOAuthProvider
+ */
 export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientProps) {
   const [isPending, startTransition] = useTransition();
   const [unlinkDialogOpen, setUnlinkDialogOpen] = useState(false);
@@ -71,12 +86,14 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
     Database['public']['Enums']['oauth_provider'] | null
   >(null);
 
+  // Normalize provider values to lowercase for consistent comparison
+  // Database returns provider as text, enum values are lowercase strings
   const connectedProviders = new Set(
     identities
       .filter(
         (i): i is NonNullable<typeof i> & { provider: string } => i !== null && i.provider !== null
       )
-      .map((i) => i.provider)
+      .map((i) => i.provider.toLowerCase().trim())
   );
   const availableProviders = Object.entries(PROVIDER_CONFIG) as [
     Database['public']['Enums']['oauth_provider'],
@@ -124,11 +141,14 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
   return (
     <div className="space-y-4">
       {availableProviders.map(([provider, config]) => {
+        // Normalize provider for comparison (database returns text, enum is lowercase)
+        // Use same normalization as connectedProviders (toLowerCase().trim())
+        const normalizedProvider = provider.toLowerCase().trim();
         const identity = identities.find(
           (i): i is NonNullable<typeof i> & { provider: string } =>
-            i !== null && i.provider === provider
+            i !== null && i.provider !== null && i.provider.toLowerCase().trim() === normalizedProvider
         );
-        const isConnected = connectedProviders.has(provider);
+        const isConnected = connectedProviders.has(normalizedProvider);
         const IconComponent = config.icon;
 
         return (

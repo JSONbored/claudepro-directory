@@ -169,6 +169,14 @@ function CodeGroupTabs({
   );
 }
 
+/**
+ * Render a vertical list of strings with a leading colored dot for each item.
+ *
+ * @param items - Strings to render as list rows; each string becomes one list item.
+ * @param color - CSS class(es) applied to the dot indicator (typically Tailwind color classes).
+ *
+ * @see UI_CLASSES
+ */
 function List({ items, color }: { items: string[]; color: string }) {
   return (
     <ul className="space-y-2">
@@ -182,34 +190,61 @@ function List({ items, color }: { items: string[]; color: string }) {
   );
 }
 
-type EnhancedListItem = string | { issue: string; solution: string };
+type EnhancedListItem =
+  | string
+  | { issue: string; solution: string }
+  | { question: string; answer: string };
 
-const getEnhancedListKey = (item: EnhancedListItem, index: number) =>
-  typeof item === 'string'
-    ? `enhanced-string-${item.slice(0, 50)}-${index}`
-    : `enhanced-object-${item.issue}-${item.solution.slice(0, 50)}-${index}`;
+const getEnhancedListKey = (item: EnhancedListItem, index: number) => {
+  if (typeof item === 'string') {
+    return `enhanced-string-${item.slice(0, 50)}-${index}`;
+  }
+  // Support both old format (issue/solution) and new format (question/answer)
+  const title = 'question' in item ? item.question : item.issue;
+  const content = 'answer' in item ? item.answer : item.solution;
+  return `enhanced-object-${title}-${content.slice(0, 50)}-${index}`;
+};
 
+/**
+ * Renders a vertical list of items where each entry is either a simple string or a structured Q&A / issue-solution pair.
+ *
+ * For string items the component renders a single-line row with a colored dot and text. For object items it renders a titled row (question or issue) with supporting content (answer or solution) and the same colored dot.
+ *
+ * @param items - Array of items to render. Each item may be a `string`, `{ issue: string; solution: string }`, or `{ question: string; answer: string }`.
+ * @param color - CSS class (typically a Tailwind color class) applied to the leading dot for each list item.
+ * @returns A React element representing the rendered list.
+ *
+ * @see getEnhancedListKey
+ */
 function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: string }) {
   return (
     <ul className="space-y-4">
-      {items.map((item, index) =>
-        typeof item === 'string' ? (
-          <li key={getEnhancedListKey(item, index)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-            <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
-            <span className="text-sm leading-relaxed">{item}</span>
-          </li>
-        ) : (
+      {items.map((item, index) => {
+        if (typeof item === 'string') {
+          return (
+            <li key={getEnhancedListKey(item, index)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+              <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
+              <span className="text-sm leading-relaxed">{item}</span>
+            </li>
+          );
+        }
+
+        // Support both old format (issue/solution) and new Schema.org format (question/answer)
+        const title = 'question' in item ? item.question : item.issue;
+        const content = 'answer' in item ? item.answer : item.solution;
+
+        return (
           <li key={getEnhancedListKey(item, index)} className="space-y-2">
             <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
               <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
               <div className="space-y-1">
-                <p className="font-medium text-foreground text-sm">{item.issue}</p>
-                <p className="text-muted-foreground text-sm leading-relaxed">{item.solution}</p>
+                <p className="font-medium text-foreground text-sm">{title}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">{content}</p>
               </div>
             </div>
           </li>
-        )
-      )}
+        );
+      })}
     </ul>
   );
 }

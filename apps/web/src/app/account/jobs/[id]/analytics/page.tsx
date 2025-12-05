@@ -2,7 +2,7 @@
  * Job Analytics Page - Display view/click metrics for job postings.
  */
 
-import  { type JobStatus } from '@heyclaude/web-runtime';
+import { type JobStatus } from '@heyclaude/web-runtime';
 import { formatRelativeDate } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -12,13 +12,18 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
+import {
+  BADGE_COLORS,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -39,21 +44,50 @@ function formatStatus(rawStatus: string): string {
   return rawStatus.replaceAll('_', ' ').replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/**
+ * Map a job status to its configured badge color.
+ *
+ * @param status - The job status to map
+ * @returns The CSS/color token associated with `status`
+ *
+ * @see BADGE_COLORS.jobStatus
+ */
 function getStatusColor(status: JobStatus): string {
   return BADGE_COLORS.jobStatus[status];
 }
 
+/**
+ * Produce page metadata for the job analytics route using the provided route parameters.
+ *
+ * @param params - An object (as a promise) containing route params; `id` is the job identifier used to build the metadata.
+ * @returns A `Metadata` object for the "/account/jobs/:id/analytics" page scoped to the given job id.
+ *
+ * @see generatePageMetadata
+ * @see JobAnalyticsPage
+ */
 export async function generateMetadata({ params }: JobAnalyticsPageProperties): Promise<Metadata> {
   const { id } = await params;
   return generatePageMetadata('/account/jobs/:id/analytics', { params: { id } });
 }
 
+/**
+ * Render the Job Analytics page for a specific job, fetching the authenticated user and the job's analytics data, and displaying listing details, performance metrics, and actionable insights.
+ *
+ * The component redirects to the login route when no authenticated user is present and renders a "Job analytics unavailable" card when the job cannot be loaded or is not owned by the user.
+ *
+ * @param params - Route params; expects an object with `id` set to the job identifier to display analytics for.
+ * @returns The analytics page React element showing listing details, metrics, trends, and contextual insights.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserJobById
+ * @see MetricsDisplay
+ */
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProperties) {
   const { id } = await params;
-  
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -77,7 +111,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
   const userLogger = reqLogger.child({
     userId: user.id, // Redaction will automatically hash this
   });
-  
+
   userLogger.info('JobAnalyticsPage: authentication successful', {
     section: 'authentication',
   });
@@ -144,15 +178,17 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
         </Button>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
           <div>
-            <h1 className="mb-2 font-bold text-3xl">Job Analytics</h1>
+            <h1 className="mb-2 text-3xl font-bold">Job Analytics</h1>
             <p className="text-muted-foreground">{job.title}</p>
           </div>
-          {job.slug ? <Button variant="outline" asChild>
+          {job.slug ? (
+            <Button variant="outline" asChild>
               <Link href={`${ROUTES.JOBS}/${job.slug}`}>
                 <ExternalLink className="mr-2 h-4 w-4" />
                 View Listing
               </Link>
-            </Button> : null}
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -183,14 +219,18 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
               <p className="text-muted-foreground">Type</p>
               <p className="font-medium capitalize">{job.type}</p>
             </div>
-            {job.posted_at ? <div>
+            {job.posted_at ? (
+              <div>
                 <p className="text-muted-foreground">Posted</p>
                 <p className="font-medium">{formatRelativeDate(job.posted_at)}</p>
-              </div> : null}
-            {job.expires_at ? <div>
+              </div>
+            ) : null}
+            {job.expires_at ? (
+              <div>
                 <p className="text-muted-foreground">Expires</p>
                 <p className="font-medium">{formatRelativeDate(job.expires_at)}</p>
-              </div> : null}
+              </div>
+            ) : null}
           </div>
         </CardContent>
       </Card>
@@ -233,7 +273,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
         <CardContent>
           <div className="space-y-4">
             {viewCount === 0 && (
-              <div className="rounded-lg bg-muted/50 p-4">
+              <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-sm">
                   Your job listing hasn't received any views yet. Try sharing it on social media or
                   updating the description to make it more discoverable.
@@ -256,7 +296,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
 
             {Number.parseFloat(ctr) > 5 && (
               <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-4">
-                <p className="text-green-400 text-sm">
+                <p className="text-sm text-green-400">
                   Great performance! Your CTR of {ctr}% is above average. Keep it up!
                 </p>
               </div>

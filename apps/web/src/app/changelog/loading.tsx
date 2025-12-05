@@ -5,9 +5,16 @@
  * Shows placeholder cards matching the layout of ChangelogCard components.
  */
 
-import { UI_CLASSES, PageHeaderSkeleton, Skeleton  } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, PageHeaderSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
 
-
+/**
+ * Renders a skeleton UI that mirrors the changelog page layout while content loads.
+ *
+ * @returns The React element containing header, category filter, and multiple changelog card skeletons.
+ * @see PageHeaderSkeleton
+ * @see Skeleton
+ * @see UI_CLASSES
+ */
 export default function ChangelogLoading() {
   return (
     <div className="container max-w-6xl space-y-8 py-8">
@@ -31,7 +38,7 @@ export default function ChangelogLoading() {
       {/* Changelog Cards Skeleton */}
       <div className="space-y-6">
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={`changelog-skeleton-${index + 1}`} className="rounded-lg border bg-card p-6">
+          <div key={`changelog-skeleton-${index + 1}`} className="bg-card rounded-lg border p-6">
             <div className="mb-3 flex items-center gap-2">
               <Skeleton size="sm" width="xs" />
               <Skeleton size="sm" width="sm" />

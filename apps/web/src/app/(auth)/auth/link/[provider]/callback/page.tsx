@@ -6,7 +6,7 @@
  */
 
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
+import { isValidProvider, validateNextParameter } from '@heyclaude/web-runtime';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
 import {
@@ -14,12 +14,15 @@ import {
   logClientError,
   logClientWarn,
 } from '@heyclaude/web-runtime/logging/client';
-import { UI_CLASSES, Button ,
+import {
+  UI_CLASSES,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 
@@ -27,18 +30,10 @@ import { use, useEffect, useRef, useState } from 'react';
 export const dynamic = 'force-dynamic';
 
 /**
- * Initiates the client-side OAuth account linking flow for the given provider, handling validation,
- * authentication checks, and redirects to the OAuth provider or login as needed.
+ * Initiates an OAuth account linking flow for a given provider and renders either a loading UI while redirecting or an error UI on failure.
  *
- * This component:
- * - Validates the `provider` parameter.
- * - If the user is not signed in, shows an error message and redirects to the login page (preserving a validated `next`).
- * - If the user is signed in, constructs a callback URL with `next` and `link=true`, calls `supabaseClient.auth.linkIdentity`,
- *   and navigates to the returned provider URL.
- * - Renders a loading UI while the flow is in progress and an error UI on failure.
- *
- * @param params - A promise that resolves to an object containing the OAuth provider slug (e.g., `{ provider: 'github' }`).
- * @returns The component's rendered JSX for the linking UI or error state.
+ * @param params - A promise resolving to an object with the OAuth provider slug (for example, `{ provider: 'github' }`)
+ * @returns The page's React element showing a loading state while redirecting to the provider or an error state if linking fails
  *
  * @see isValidProvider
  * @see validateNextParameter
@@ -69,7 +64,22 @@ export default function OAuthLinkCallbackPage({
     let redirectTimeoutId: null | ReturnType<typeof setTimeout> = null;
 
     // Use shared validation utility to prevent open redirects
-    // Matches server-side validation in route handlers
+    /**
+     * Initiates the client-side OAuth account linking flow for the configured provider.
+     *
+     * Validates the provider and current authentication state, constructs a linking callback
+     * URL (with `next` and `link=true`), and calls Supabase to start the OAuth flow. If the
+     * user is not signed in, schedules a redirect to the login page that preserves the
+     * intended `next` target. On success, navigates the browser to the OAuth provider URL.
+     * On failure or unexpected responses, updates component state to show an error.
+     *
+     * This function guards against duplicate attempts and will no-op while auth is loading
+     * or if the hosting component has unmounted.
+     *
+     * @see validateNextParameter
+     * @see isValidProvider
+     * @see supabaseClient.auth.linkIdentity
+     */
 
     async function handleLink() {
       // Prevent duplicate OAuth linking attempts (e.g., from Strict Mode re-mounts)
@@ -119,7 +129,10 @@ export default function OAuthLinkCallbackPage({
           // Guard redirect with mounted check and store timeout ID for cleanup
           redirectTimeoutId = setTimeout(() => {
             if (!mounted) return; // Don't redirect if component unmounted
-            const next = validateNextParameter(searchParameters.get('next'), '/account/connected-accounts');
+            const next = validateNextParameter(
+              searchParameters.get('next'),
+              '/account/connected-accounts'
+            );
             router.push(
               `/login?redirect=${encodeURIComponent(`/auth/link/${rawProvider}?next=${encodeURIComponent(next)}`)}`
             );
@@ -129,7 +142,10 @@ export default function OAuthLinkCallbackPage({
 
         // Get the next redirect URL with validation
         // Validate 'next' parameter to prevent open redirects (matches server-side validation)
-        const next = validateNextParameter(searchParameters.get('next'), '/account/connected-accounts');
+        const next = validateNextParameter(
+          searchParameters.get('next'),
+          '/account/connected-accounts'
+        );
         const callbackUrl = new URL(`${globalThis.location.origin}/auth/callback`);
         callbackUrl.searchParams.set('next', next);
         callbackUrl.searchParams.set('link', 'true'); // Flag to indicate this is a linking flow
@@ -151,7 +167,9 @@ export default function OAuthLinkCallbackPage({
             provider: rawProvider,
           });
           setStatus('error');
-          setErrorMessage(normalizeError(error, 'Failed to link account. Please try again.').message);
+          setErrorMessage(
+            normalizeError(error, 'Failed to link account. Please try again.').message
+          );
           return;
         }
 
@@ -211,7 +229,7 @@ export default function OAuthLinkCallbackPage({
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center py-8">
-            <Loader2 className={`${UI_CLASSES.ICON_XL} animate-spin text-muted-foreground`} />
+            <Loader2 className={`${UI_CLASSES.ICON_XL} text-muted-foreground animate-spin`} />
           </CardContent>
         </Card>
       </div>
@@ -223,9 +241,7 @@ export default function OAuthLinkCallbackPage({
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div
-            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
-          >
+          <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
             <AlertCircle className={`${UI_CLASSES.ICON_LG} text-destructive`} />
           </div>
           <CardTitle>Account Linking Failed</CardTitle>

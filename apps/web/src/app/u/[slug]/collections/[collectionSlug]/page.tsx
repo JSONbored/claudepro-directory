@@ -4,7 +4,7 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import  { type CollectionDetailData } from '@heyclaude/web-runtime/core';
+import { type CollectionDetailData } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -12,13 +12,19 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
+import {
+  UI_CLASSES,
+  NavLink,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle, Separator    } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+  Separator,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -30,17 +36,41 @@ export const dynamic = 'force-dynamic';
 // Whitelisted content types for outgoing links - use Constants from database types
 const ALLOWED_CONTENT_TYPES = Constants.public.Enums.content_category;
 
+/**
+ * Checks whether a content category string is allowed for public collections.
+ *
+ * @param type - The content category identifier to validate (e.g., "article", "image")
+ * @returns `true` if `type` is listed in the module's allowed content types, `false` otherwise.
+ *
+ * @see ALLOWED_CONTENT_TYPES
+ */
 function isValidContentType(type: string): boolean {
   return (ALLOWED_CONTENT_TYPES as readonly string[]).includes(type);
 }
 
-// Slug must be alphanumeric/dash/underscore, no slashes, no protocol
+/**
+ * Checks whether a slug contains only lowercase letters, digits, hyphens, or underscores.
+ *
+ * @param slug - The candidate slug to validate (no slashes, no protocol).
+ * @returns `true` if `slug` is a non-empty string composed only of lowercase ASCII letters, digits, `-`, or `_`; `false` otherwise.
+ *
+ * @see getSafeContentLink
+ */
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string') return false;
-  return /^[a-zA-Z0-9-_]+$/.test(slug);
+  return /^[a-z0-9-_]+$/.test(slug);
 }
 
-function getSafeContentLink(item: { content_slug: string; content_type: string; }): null | string {
+/**
+ * Produces an internal path for a content item when its content type and slug are valid.
+ *
+ * @param item - Object with `content_type` and `content_slug` fields to validate
+ * @returns The path `/content_type/content_slug` if both values are valid, `null` otherwise
+ *
+ * @see isValidContentType
+ * @see isValidSlug
+ */
+function getSafeContentLink(item: { content_slug: string; content_type: string }): null | string {
   if (isValidContentType(item.content_type) && isValidSlug(item.content_slug)) {
     return `/${item.content_type}/${item.content_slug}`;
   }
@@ -48,15 +78,28 @@ function getSafeContentLink(item: { content_slug: string; content_type: string; 
 }
 
 interface PublicCollectionPageProperties {
-  params: Promise<{ collectionSlug: string; slug: string; }>;
+  params: { collectionSlug: string; slug: string };
 }
 
-export async function generateMetadata({ params }: PublicCollectionPageProperties): Promise<Metadata> {
-  const { slug, collectionSlug } = await params;
+/**
+ * Generate page metadata for a public collection detail and warm the data cache for the subsequent render.
+ *
+ * Attempts a non-blocking fetch of the collection detail to pre-populate caches; fetch errors are logged but do not prevent metadata from being produced.
+ *
+ * @param params - Route parameters containing `slug` (user slug) and `collectionSlug`
+ * @returns Page metadata for the route `/u/:slug/collections/:collectionSlug`
+ *
+ * @see getPublicCollectionDetail
+ * @see generatePageMetadata
+ */
+export async function generateMetadata({
+  params,
+}: PublicCollectionPageProperties): Promise<Metadata> {
+  const { slug, collectionSlug } = params;
 
   // Generate requestId for metadata generation (separate from page render)
   const metadataRequestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const metadataLogger = logger.child({
     requestId: metadataRequestId,
@@ -86,12 +129,28 @@ export async function generateMetadata({ params }: PublicCollectionPagePropertie
   });
 }
 
+/**
+ * Renders the public collection detail page for a user's collection, including header, items list, and stats.
+ *
+ * Fetches the collection data for the given user and collection slugs, triggers a 404 when the collection is missing,
+ * and conditionally shows owner controls and safe item links. Also emits a non-blocking view tracking pulse.
+ *
+ * @param params - Route parameters for the page.
+ * @param params.slug - The user slug (profile owner) from the route.
+ * @param params.collectionSlug - The collection slug from the route.
+ * @returns The React element tree for the public collection page.
+ *
+ * @see getPublicCollectionDetail
+ * @see getAuthenticatedUser
+ * @see getSafeContentLink
+ * @see generateRequestId
+ */
 export default async function PublicCollectionPage({ params }: PublicCollectionPageProperties) {
-  const { slug, collectionSlug } = await params;
+  const { slug, collectionSlug } = params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -107,9 +166,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   });
 
   // Create child logger with viewer context if available
-  const viewerLogger = currentUser?.id 
-    ? reqLogger.child({ viewerId: currentUser.id })
-    : reqLogger;
+  const viewerLogger = currentUser?.id ? reqLogger.child({ viewerId: currentUser.id }) : reqLogger;
 
   // Section: Collection Detail Fetch
   let collectionData: CollectionDetailData | null = null;
@@ -141,7 +198,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   const { user: profileUser, collection, items, is_owner } = collectionData;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       {/* Track view - non-blocking */}
       <Pulse
         variant="view"
@@ -166,21 +223,25 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <div>
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-2`}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <h1 className="font-bold text-3xl">{collection?.name ?? 'Untitled Collection'}</h1>
+                <h1 className="text-3xl font-bold">{collection?.name ?? 'Untitled Collection'}</h1>
                 <UnifiedBadge variant="base" style="outline">
                   Public
                 </UnifiedBadge>
               </div>
-              {is_owner ? <Link href={`/account/library/${collection?.slug}`}>
+              {is_owner ? (
+                <Link href={`/account/library/${collection?.slug}`}>
                   <Button variant="outline" size="sm">
                     Manage Collection
                   </Button>
-                </Link> : null}
+                </Link>
+              ) : null}
             </div>
 
-            {collection?.description ? <p className="max-w-3xl text-muted-foreground">{collection.description}</p> : null}
+            {collection?.description ? (
+              <p className="text-muted-foreground max-w-3xl">{collection.description}</p>
+            ) : null}
 
-            <div className="mt-2 text-muted-foreground text-sm">
+            <div className="text-muted-foreground mt-2 text-sm">
               Created by <NavLink href={`/u/${slug}`}>{profileUser?.name ?? slug}</NavLink> •{' '}
               {collection?.item_count ?? 0} {(collection?.item_count ?? 0) === 1 ? 'item' : 'items'}{' '}
               • {collection?.view_count ?? 0} views
@@ -189,7 +250,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
           {/* Collection Items */}
           <div>
-            <h2 className="mb-4 font-semibold text-xl">Items in this Collection</h2>
+            <h2 className="mb-4 text-xl font-semibold">Items in this Collection</h2>
 
             {!items || items.length === 0 ? (
               <Card>
@@ -208,15 +269,13 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                       content_type: string;
                       id: string;
                     } =>
-                      item.id !== null &&
-                      item.content_type !== null &&
-                      item.content_slug !== null
+                      item.id !== null && item.content_type !== null && item.content_slug !== null
                   )
                   .map((item, index) => (
                     <Card key={item.id}>
                       <CardHeader>
                         <div className="flex items-start gap-4">
-                          <div className="w-8 font-bold text-2xl text-muted-foreground/50">
+                          <div className="text-muted-foreground/50 w-8 text-2xl font-bold">
                             {index + 1}
                           </div>
                           <div className="flex-1">
@@ -226,7 +285,9 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                               </UnifiedBadge>
                               <CardTitle className="text-lg">{item.content_slug}</CardTitle>
                             </div>
-                            {item.notes ? <CardDescription className="mt-2">{item.notes}</CardDescription> : null}
+                            {item.notes ? (
+                              <CardDescription className="mt-2">{item.notes}</CardDescription>
+                            ) : null}
                           </div>
                           {(() => {
                             const safeLink = getSafeContentLink({
@@ -269,26 +330,26 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <div className="grid gap-4 sm:grid-cols-3">
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="font-medium text-sm">Total Items</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Items</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-bold text-2xl">{collection?.item_count ?? 0}</div>
+                <div className="text-2xl font-bold">{collection?.item_count ?? 0}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="font-medium text-sm">Views</CardTitle>
+                <CardTitle className="text-sm font-medium">Views</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-bold text-2xl">{collection?.view_count ?? 0}</div>
+                <div className="text-2xl font-bold">{collection?.view_count ?? 0}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="font-medium text-sm">Created</CardTitle>
+                <CardTitle className="text-sm font-medium">Created</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-medium text-base">
+                <div className="text-base font-medium">
                   {collection?.created_at
                     ? new Date(collection.created_at).toLocaleDateString('en-US', {
                         month: 'long',

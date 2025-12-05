@@ -4,6 +4,8 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
     "rootDir": "src",
     "outDir": "dist",
     "module": "NodeNext",

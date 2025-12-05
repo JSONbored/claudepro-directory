@@ -224,10 +224,21 @@ let shutdownHandlersRegistered = false;
  * Uses a callback-based approach for maximum compatibility
  */
 function flushAndExit(signal: string): void {
-  // Log the shutdown signal (this log will be flushed)
-  // Pino API is object-first, but we structure it to emphasize the message
-  // eslint-disable-next-line architectural-rules/enforce-message-first-logger-api -- Pino's native API is object-first
-  logger.info({ signal }, 'Process shutting down, flushing logs...');
+  // Suppress shutdown log for CLI tools (generators) to reduce noise
+  // Only log for beforeExit in non-CLI contexts (web servers, API routes, etc.)
+  // Check for pnpm-specific env vars or generator/bin script paths
+  const isCliTool = process.env['PNPM_SCRIPT_SRC_DIR'] !== undefined ||
+                    process.env['PNPM_PACKAGE_NAME'] !== undefined ||
+                    process.argv[1]?.includes('generators') ||
+                    process.argv[1]?.includes('bin/');
+  
+  // Only log shutdown message for non-CLI tools or for actual termination signals (SIGTERM/SIGINT)
+  if (!isCliTool || (signal !== 'beforeExit')) {
+    // Log the shutdown signal (this log will be flushed)
+    // Pino API is object-first, but we structure it to emphasize the message
+    // eslint-disable-next-line architectural-rules/enforce-message-first-logger-api -- Pino's native API is object-first
+    logger.info({ signal }, 'Process shutting down, flushing logs...');
+  }
   
   // Flush all buffered logs
   logger.flush((err?: Error) => {

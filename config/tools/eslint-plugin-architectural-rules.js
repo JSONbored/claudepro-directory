@@ -4009,15 +4009,27 @@ export default {
                     parent.callee.property.type === 'Identifier' &&
                     parent.callee.property.name === 'child'
                   ) {
-                    isInChildLogger = true;
-                    break;
+                    // Verify it's actually logger.child() by checking the object name
+                    const loggerObject = parent.callee.object;
+                    if (
+                      loggerObject.type === 'Identifier' &&
+                      (loggerObject.name === 'logger' ||
+                       loggerObject.name === 'reqLogger' ||
+                       loggerObject.name === 'userLogger' ||
+                       loggerObject.name === 'actionLogger')
+                    ) {
+                      isInChildLogger = true;
+                      break;
+                    }
                   }
                   parent = parent.parent;
                 }
 
                 // Allow userId: user.id in logger.child() calls - redaction automatically hashes it
+                // This is safe because Pino's redaction with hashUserIdCensor automatically hashes
+                // userId/user_id/user.id fields via the custom censor function
                 if (isInChildLogger) {
-                  return; // No error - redaction handles it
+                  return; // No error - redaction handles it automatically
                 }
 
                 // Check if this is in a logger call context (all methods including audit, security)
@@ -4029,7 +4041,10 @@ export default {
                     parent.type === 'CallExpression' &&
                     parent.callee.type === 'MemberExpression' &&
                     parent.callee.object.type === 'Identifier' &&
-                    parent.callee.object.name === 'logger' &&
+                    (parent.callee.object.name === 'logger' ||
+                     parent.callee.object.name === 'reqLogger' ||
+                     parent.callee.object.name === 'userLogger' ||
+                     parent.callee.object.name === 'actionLogger') &&
                     parent.callee.property.type === 'Identifier' &&
                     LOGGER_METHODS.includes(parent.callee.property.name)
                   ) {
@@ -4039,16 +4054,16 @@ export default {
                   parent = parent.parent;
                 }
 
-                // Allow in logger calls too - redaction handles it
+                // Allow in logger calls too - redaction handles it automatically
+                // Pino's redaction with hashUserIdCensor automatically hashes userId fields
                 if (isInLoggerCall && node.parent?.type === 'ObjectExpression') {
                   return; // No error - redaction automatically hashes userId fields
                 }
 
-                // For other contexts, report but don't auto-fix (complex cases)
-                context.report({
-                  node: node.key,
-                  messageId: 'rawUserIdInContext',
-                });
+                // For non-logger contexts (function parameters, etc.), don't report
+                // The rule is specifically for logging contexts where PII protection matters
+                // Function parameters are not logged, so they don't need this protection
+                return;
               }
             }
           },

@@ -81,6 +81,17 @@ export const SENSITIVE_PATTERNS = [
   'user.userId',
   'user.user_id',
   
+  // Email fields (PII) - added to catch root-level email logging
+  'email',
+  'emailAddress',
+  'email_address',
+  'userEmail',
+  'user_email',
+  'recipientEmail',
+  'recipient_email',
+  'senderEmail',
+  'sender_email',
+  
   // IP Address fields (PII under GDPR)
   'ip',
   'ipAddress',
@@ -155,30 +166,51 @@ const USER_ID_PATHS = [
 ] as const;
 
 /**
+ * Email paths that should be hashed (not just redacted)
+ * Maintains traceability while protecting PII
+ */
+const EMAIL_PATHS = [
+  'email',
+  'emailAddress',
+  'email_address',
+  'userEmail',
+  'user_email',
+  'recipientEmail',
+  'recipient_email',
+  'senderEmail',
+  'sender_email',
+  'user.email',
+] as const;
+
+/**
  * Custom censor function for Pino redaction
- * Hashes user IDs (maintains traceability) while redacting other sensitive data
- * This maintains traceability for user IDs while protecting PII (GDPR/CCPA compliant)
+ * Hashes user IDs and emails (maintains traceability) while redacting other sensitive data
+ * This maintains traceability for user IDs/emails while protecting PII (GDPR/CCPA compliant)
  * 
  * @param value - The value to censor
  * @param path - The path to the key being redacted (e.g., ['user', 'id'] or ['userId'])
- * @returns Hashed user ID for user ID paths, '[REDACTED]' for other sensitive data
+ * @returns Hashed value for user ID/email paths, '[REDACTED]' for other sensitive data
  * 
  * @see {@link https://getpino.io/#/docs/redaction | Pino Redaction with Custom Censor}
  */
 function hashUserIdCensor(value: unknown, path: string[]): string {
-  // Check if this is a user ID path that should be hashed
-  const isUserIdPath = USER_ID_PATHS.some(userIdPath => {
-    // Match exact path or nested path (e.g., 'userId' matches ['userId'], 'user.id' matches ['user', 'id'])
-    const userIdPathParts = userIdPath.split('.');
-    if (path.length === userIdPathParts.length) {
-      return path.every((part, i) => part === userIdPathParts[i]);
+  // Helper to match paths
+  const matchesPath = (paths: readonly string[]) => paths.some(targetPath => {
+    const pathParts = targetPath.split('.');
+    if (path.length === pathParts.length) {
+      return path.every((part, i) => part === pathParts[i]);
     }
     return false;
   });
   
   // Hash user IDs (maintains traceability for correlation across logs)
-  if (isUserIdPath && typeof value === 'string' && value.length > 0) {
+  if (matchesPath(USER_ID_PATHS) && typeof value === 'string' && value.length > 0) {
     return hashUserId(value);
+  }
+  
+  // Hash emails (maintains traceability while protecting PII)
+  if (matchesPath(EMAIL_PATHS) && typeof value === 'string' && value.includes('@')) {
+    return hashEmail(value, false); // Maximum privacy - redact domain like userSerializer
   }
   
   // Standard redaction for other sensitive data (passwords, tokens, etc.)
@@ -191,11 +223,51 @@ function hashUserIdCensor(value: unknown, path: string[]): string {
  * 
  * @remarks
  * The `service` field is added dynamically by each package (web-runtime, edge-runtime, etc.)
- * The `env` field is automatically set from `NODE_ENV`
+ * The `env` field is automatically set from `VERCEL_ENV` (if available) or `NODE_ENV` as fallback
+ * VERCEL_ENV correctly distinguishes between production, preview, and development
+ * while NODE_ENV is always 'production' on Vercel for all environments
+ * 
+ * For local builds: NODE_ENV is 'production' (set by Next.js), but we detect this is a local build
+ * and use 'build' instead to distinguish from actual production deployments
  */
 export const BASE_CONTEXT = {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- Runtime check for Edge compatibility
-  env: (typeof process !== 'undefined' && process.env ? process.env['NODE_ENV'] : undefined) ?? 'development',
+  env: (() => {
+    if (typeof process === 'undefined' || !process.env) {
+      return 'development';
+    }
+    
+    // Priority 1: VERCEL_ENV (most accurate - distinguishes production/preview/development on Vercel)
+    if (process.env['VERCEL_ENV']) {
+      return process.env['VERCEL_ENV'];
+    }
+    
+    // Priority 2: Detect local build (NODE_ENV=production but not on Vercel)
+    // Next.js sets NODE_ENV=production during build, even locally
+    // We detect this by checking if we're NOT on Vercel and NODE_ENV is production
+    const isVercel = process.env['VERCEL'] === '1' || process.env['VERCEL_URL'];
+    const isBuildPhase = process.env['NEXT_PHASE'] === 'phase-production-build' || 
+                         process.env['NEXT_PHASE'] === 'phase-production-server';
+    const nodeEnvIsProduction = process.env['NODE_ENV'] === 'production';
+    
+    // If NODE_ENV is production but we're not on Vercel, this is a local build
+    if (nodeEnvIsProduction && !isVercel) {
+      // Check if this is during build phase
+      if (isBuildPhase || (typeof process.argv !== 'undefined' && process.argv.some(arg => arg.includes('next') && (arg.includes('build') || arg.includes('export'))))) {
+        return 'build'; // Local build - distinguish from production
+      }
+      // Otherwise, it's local production mode (unlikely but possible)
+      return 'production';
+    }
+    
+    // Priority 3: NODE_ENV (fallback for non-Vercel environments)
+    if (process.env['NODE_ENV']) {
+      return process.env['NODE_ENV'];
+    }
+    
+    // Default: development
+    return 'development';
+  })(),
   // Service name will be overridden by each package
   // version: process.env?.npm_package_version || '0.0.0',
 } as const;

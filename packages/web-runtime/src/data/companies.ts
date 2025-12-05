@@ -3,68 +3,79 @@
 import { CompaniesService } from '@heyclaude/data-layer';
 import { Constants, type Database } from '@heyclaude/database-types';
 import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { getCacheTtl } from '../cache-config.ts';
 import { searchCompaniesUnified } from '../edge/search-client.ts';
 import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
+import { createSupabaseServerClient } from '../supabase/server.ts';
 import { generateRequestId } from '../utils/request-id.ts';
 
 import { normalizeRpcResult } from './content-helpers.ts';
 
 const JOBS_CATEGORY = Constants.public.Enums.content_category[9] as string; // 'jobs'
 
-
 const COMPANY_DETAIL_TTL_KEY = 'cache.company_detail.ttl_seconds';
 
 type GetCompanyAdminProfileReturn =
   Database['public']['Functions']['get_company_admin_profile']['Returns'];
 
-export async function getCompanyAdminProfile(
-  companyId: string
-): Promise<GetCompanyAdminProfileReturn[number] | null> {
-  const requestId = generateRequestId();
-  const requestLogger = logger.child({
-    requestId,
-    operation: 'getCompanyAdminProfile',
-    module: 'data/companies',
-  });
+/**
+ * Get company admin profile
+ *
+ * CRITICAL: This function uses React.cache() for request-level deduplication only.
+ * It does NOT use Next.js unstable_cache() because:
+ * 1. Company admin profiles are user-specific and require cookies() for auth
+ * 2. cookies() cannot be called inside unstable_cache() (Next.js restriction)
+ *
+ * React.cache() provides request-level deduplication within the same React Server Component tree,
+ * which is safe and appropriate for user-specific data.
+ */
+export const getCompanyAdminProfile = cache(
+  async (companyId: string): Promise<GetCompanyAdminProfileReturn[number] | null> => {
+    const requestId = generateRequestId();
+    const requestLogger = logger.child({
+      requestId,
+      operation: 'getCompanyAdminProfile',
+      module: 'data/companies',
+    });
 
-  if (!companyId) {
-    return null;
-  }
-
-  try {
-    const data = await fetchCached(
-      (client) => new CompaniesService(client).getCompanyAdminProfile({ p_company_id: companyId }),
-      {
-        keyParts: ['company-admin', companyId],
-        tags: ['companies', `company-id-${companyId}`],
-        ttlKey: COMPANY_DETAIL_TTL_KEY,
-        useAuth: true,
-        fallback: null,
-        logMeta: { companyId },
-      }
-    );
-
-    const normalized = normalizeRpcResult(data);
-    if (!normalized) {
-      requestLogger.warn('getCompanyAdminProfile: company not found', {
-        companyId,
-      });
+    if (!companyId) {
       return null;
     }
 
-    return normalized as GetCompanyAdminProfileReturn[number] | null;
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to get company admin profile');
-    requestLogger.error('getCompanyAdminProfile failed', normalized, {
-      companyId,
-    });
-    throw normalized;
+    try {
+      // Create authenticated client OUTSIDE of any cache scope
+      const client = await createSupabaseServerClient();
+      const service = new CompaniesService(client);
+
+      const data = await service.getCompanyAdminProfile({ p_company_id: companyId });
+
+      const normalized = normalizeRpcResult(data);
+      if (!normalized) {
+        requestLogger.warn('getCompanyAdminProfile: company not found', {
+          companyId,
+        });
+        return null;
+      }
+
+      requestLogger.info('getCompanyAdminProfile: fetched successfully', {
+        companyId,
+        hasResult: Boolean(normalized),
+      });
+
+      return normalized as GetCompanyAdminProfileReturn[number] | null;
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to get company admin profile');
+      requestLogger.error('getCompanyAdminProfile failed', normalized, {
+        companyId,
+      });
+      throw normalized;
+    }
   }
-}
+);
 
 export async function getCompanyProfile(
   slug: string
@@ -109,7 +120,8 @@ export async function getCompaniesList(
 
   try {
     return await fetchCached(
-      (client) => new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
+      (client) =>
+        new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
       {
         keyParts: ['companies-list', limit, offset],
         tags: ['companies', JOBS_CATEGORY],
@@ -147,7 +159,7 @@ async function fetchCompanySearchResults(
   });
 
   const { trackPerformance } = await import('../utils/performance-metrics');
-  
+
   try {
     const { result } = await trackPerformance(
       async () => {
@@ -167,7 +179,7 @@ async function fetchCompanySearchResults(
         logLevel: 'info', // Log all operations for observability
       }
     );
-    
+
     return result;
   } catch (error) {
     // trackPerformance already logs the error, but we log again with context about fallback behavior

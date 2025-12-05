@@ -38,7 +38,7 @@ import {
   X,
 } from '@heyclaude/web-runtime/icons';
 import { useClientLogger } from '@heyclaude/web-runtime/logging/client';
-import  { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import {
   Badge,
   Button,
@@ -61,7 +61,7 @@ import {
   type ValidationState,
 } from '@/src/components/core/forms/wizard/animated-form-field';
 import { InlinePreview } from '@/src/components/core/forms/wizard/inline-preview';
-import  { type WizardStep } from '@/src/components/core/forms/wizard/progress-indicator';
+import { type WizardStep } from '@/src/components/core/forms/wizard/progress-indicator';
 import {
   SocialProofBar,
   StepSocialProof,
@@ -132,6 +132,18 @@ const DEFAULT_FORM_DATA: FormData = {
   // thumbnail_url is optional, don't include in default
 };
 
+/**
+ * Renders and orchestrates a multi-step client-side submission wizard for creating and submitting content.
+ *
+ * The component manages wizard state, form data, draft persistence, template loading and application,
+ * thumbnail validation/upload, social-proof fetching, quality scoring, and the final submission flow.
+ *
+ * @returns The wizard UI as a React element, including step content, navigation controls, inline preview, and social proof.
+ *
+ * @see WizardLayout
+ * @see DraftManager
+ * @see useTemplateApplication
+ */
 export default function WizardSubmissionPage() {
   // Onboarding toasts
   useOnboardingToasts({ enabled: true, context: 'wizard' });
@@ -328,9 +340,9 @@ export default function WizardSubmissionPage() {
         const bytes = new Uint8Array(buffer);
         const isValidImage =
           // JPEG: FF D8 FF
-          (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) ||
+          (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) ||
           // PNG: 89 50 4E 47
-          (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) ||
+          (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) ||
           // WebP: 52 49 46 46 ... 57 45 42 50
           (bytes[0] === 0x52 &&
             bytes[1] === 0x49 &&
@@ -877,7 +889,15 @@ export default function WizardSubmissionPage() {
 }
 
 /**
- * Step 1: Type Selection
+ * Renders the "Choose Your Submission Type" step UI for the submission wizard.
+ *
+ * Displays a header with decorative icon and social proof, and renders the type selection cards.
+ *
+ * @param props.selected - Currently selected submission content type.
+ * @param props.onSelect - Callback invoked when a submission type is chosen.
+ * @returns The JSX element for the type selection step.
+ *
+ * @see WizardSubmissionPage
  */
 function StepTypeSelection({
   selected,
@@ -902,8 +922,8 @@ function StepTypeSelection({
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className="font-bold text-3xl text-foreground">Choose Your Submission Type</h2>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <h2 className="text-foreground text-3xl font-bold">Choose Your Submission Type</h2>
+        <p className="text-muted-foreground mt-3 text-lg">
           What would you like to share with the community?
         </p>
         <div className="mt-4 flex justify-center">
@@ -917,7 +937,22 @@ function StepTypeSelection({
 }
 
 /**
- * Step 2: Basic Information
+ * Render the "Basic Information" step of the submission wizard, providing inputs for name,
+ * description, author, GitHub URL, and an optional thumbnail upload with preview and removal.
+ *
+ * Provides live validation state for the name and description fields and invokes callbacks
+ * when form values change, an image is selected for thumbnail generation, or the thumbnail is removed.
+ *
+ * @param props.data - Current form values for the step.
+ * @param props.onChange - Called with partial updates to form data when any field changes.
+ * @param props.onImageUpload - Handler invoked with a selected image file to generate/upload a thumbnail.
+ * @param props.isUploadingThumbnail - Whether a thumbnail is currently being generated/uploaded.
+ * @param props.thumbnailPreview - Local or remote URL to render the thumbnail preview, or `null` if none.
+ * @param props.onRemoveThumbnail - Callback to remove the current thumbnail and clear its preview.
+ * @returns The JSX for step 2 (basic information) of the wizard.
+ *
+ * @see WizardSubmissionPage
+ * @see AnimatedFormField
  */
 function StepBasicInfo({
   data,
@@ -976,8 +1011,8 @@ function StepBasicInfo({
         >
           <FileText className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className="font-bold text-3xl text-foreground">Tell us about it</h2>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <h2 className="text-foreground text-3xl font-bold">Tell us about it</h2>
+        <p className="text-muted-foreground mt-3 text-lg">
           Give your submission a clear name and description
         </p>
       </motion.div>
@@ -1085,14 +1120,14 @@ function StepBasicInfo({
                 <div className="flex items-center gap-4">
                   <label
                     htmlFor="thumbnail-upload"
-                    className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed px-4 py-3 transition-colors hover:bg-accent/50"
+                    className="hover:bg-accent/50 flex cursor-pointer items-center gap-2 rounded-lg border border-dashed px-4 py-3 transition-colors"
                     style={{
                       borderColor: TOKENS.colors.border.light,
                       ...(isUploadingThumbnail && { opacity: 0.6, pointerEvents: 'none' }),
                     }}
                   >
-                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                    <span className="font-medium text-sm">
+                    <ImageIcon className="text-muted-foreground h-5 w-5" />
+                    <span className="text-sm font-medium">
                       {isUploadingThumbnail ? 'Generating thumbnail...' : 'Choose image'}
                     </span>
                     <input
@@ -1140,7 +1175,7 @@ function StepBasicInfo({
                         onClick={onRemoveThumbnail}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        className="-right-2 -top-2 absolute flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm"
+                        className="bg-destructive text-destructive-foreground absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full shadow-sm"
                         disabled={isUploadingThumbnail}
                       >
                         <X className="h-4 w-4" />
@@ -1158,7 +1193,20 @@ function StepBasicInfo({
 }
 
 /**
- * Step 3: Configuration (Type-Specific)
+ * Render the configuration step of the submission wizard for the selected content type.
+ *
+ * @param submissionType - The selected content type which controls which type-specific fields are shown.
+ * @param data - Current type-specific form values (e.g., systemPrompt, temperature, npmPackage).
+ * @param onChange - Callback invoked with updated type-specific data when any field changes.
+ * @param templates - Optional templates available for the current content type shown in the quick-select.
+ * @param templatesLoading - When true, show a loading skeleton for the template selector.
+ * @param onApplyTemplate - Optional callback invoked when a template is applied from the quick-select.
+ * @param getHighlightClasses - Optional helper that returns CSS classes to highlight a given field path (e.g., "type_specific.systemPrompt").
+ * @returns The rendered React element for the configuration step.
+ *
+ * @see StepSocialProof
+ * @see TemplateQuickSelect
+ * @see AnimatedFormField
  */
 function StepConfiguration({
   submissionType,
@@ -1194,8 +1242,8 @@ function StepConfiguration({
         >
           <Code className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className="font-bold text-3xl text-foreground">Configuration Details</h2>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <h2 className="text-foreground text-3xl font-bold">Configuration Details</h2>
+        <p className="text-muted-foreground mt-3 text-lg">
           Type-specific settings for your {submissionType}
         </p>
         <div className="mt-4 flex justify-center">
@@ -1413,7 +1461,12 @@ function StepConfiguration({
 }
 
 /**
- * Step 4: Examples & Tags
+ * Renders the "Examples & Tags" wizard step allowing users to add, remove, and review usage examples and discovery tags.
+ *
+ * @param data - Current form data containing `examples` and `tags`.
+ * @param onChange - Callback invoked with partial `FormData` updates when examples or tags change.
+ * @see WizardSubmissionPage
+ * @see StepSocialProof
  */
 function StepExamplesTags({
   data,
@@ -1467,8 +1520,8 @@ function StepExamplesTags({
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
-        <h2 className="font-bold text-3xl text-foreground">Examples & Tags</h2>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <h2 className="text-foreground text-3xl font-bold">Examples & Tags</h2>
+        <p className="text-muted-foreground mt-3 text-lg">
           Help others understand and discover your submission
         </p>
         <div className="mt-4 flex justify-center">
@@ -1540,14 +1593,14 @@ function StepExamplesTags({
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.9 }}
                         transition={TOKENS.animations.spring.snappy}
-                        className="group flex items-start gap-3 rounded-lg border p-3 transition-all hover:border-accent-primary/50"
+                        className="group hover:border-accent/50 flex items-start gap-3 rounded-lg border p-3 transition-all"
                         style={{
                           backgroundColor: TOKENS.colors.background.primary,
                           borderColor: TOKENS.colors.border.default,
                         }}
                       >
                         <div
-                          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-bold text-xs"
+                          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
                           style={{
                             backgroundColor: `${TOKENS.colors.accent.primary}20`,
                             color: TOKENS.colors.accent.primary,
@@ -1581,7 +1634,7 @@ function StepExamplesTags({
                     borderColor: TOKENS.colors.border.light,
                   }}
                 >
-                  <Code className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+                  <Code className="text-muted-foreground mx-auto mb-3 h-10 w-10" />
                   <p className="text-muted-foreground text-sm">
                     No examples yet. Add some to help users understand!
                   </p>
@@ -1608,7 +1661,7 @@ function StepExamplesTags({
             <CardTitle className="flex items-center gap-2">
               <Tag className="h-5 w-5" />
               Tags
-              <span className="ml-auto font-normal text-muted-foreground text-sm">
+              <span className="text-muted-foreground ml-auto text-sm font-normal">
                 {data.tags.length} tags
               </span>
             </CardTitle>
@@ -1683,7 +1736,7 @@ function StepExamplesTags({
                                 removeTag(tagIndex);
                               }
                             }}
-                            className="ml-1 rounded-full p-0.5 transition-colors hover:bg-accent-primary/20"
+                            className="hover:bg-accent/20 ml-1 rounded-full p-0.5 transition-colors"
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -1701,7 +1754,7 @@ function StepExamplesTags({
                     borderColor: TOKENS.colors.border.light,
                   }}
                 >
-                  <Tag className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+                  <Tag className="text-muted-foreground mx-auto mb-2 h-8 w-8" />
                   <p className="text-muted-foreground text-sm">
                     No tags yet. Add tags to improve discoverability!
                   </p>

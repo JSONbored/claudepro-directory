@@ -6,10 +6,7 @@
   "tasks": {
     "build:skills:exec": {
       "dependsOn": ["generators:build"],
-      "outputs": [
-        "content/skills/*.zip",
-        "apps/web/public/downloads/skills/*.zip"
-      ],
+      "outputs": ["content/skills/*.zip", "apps/web/public/downloads/skills/*.zip"],
       "inputs": [
         "content/skills/*.json",
         "content/skills/*.zip",
@@ -22,13 +19,15 @@
       "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
     },
     "generate:service-worker:exec": {
-      "dependsOn": ["generators:build"],
       "outputs": ["apps/web/public/service-worker.js"],
       "inputs": [
-        "packages/generators/src/**/*",
+        "packages/generators/src/commands/generate-service-worker.ts",
+        "packages/generators/src/bin/generate-service-worker.ts",
+        "packages/generators/src/toolkit/cache.ts",
+        "packages/generators/src/toolkit/logger.ts",
+        "packages/generators/templates/service-worker.template.js",
         "packages/web-runtime/src/data/config/category/category-config.ts",
-        "apps/web/src/lib/data/config/constants.ts",
-        "apps/web/src/lib/data/config/constants.server.ts",
+        "packages/shared-runtime/src/config/security.ts",
         "package.json"
       ],
       "cache": true
@@ -43,6 +42,7 @@
         "apps/web/package.json",
         "packages/**/src/**/*.{ts,tsx}",
         "packages/**/package.json",
+        "packages/**/tsconfig.json",
         "!packages/generators/**",
         "!packages/edge-runtime/**",
         "!**/*.test.{ts,tsx}",
@@ -51,10 +51,7 @@
         "pnpm-lock.yaml",
         "tsconfig.json"
       ],
-      "dependsOn": [
-        "^build",
-        "generate:service-worker:exec"
-      ]
+      "dependsOn": ["^build", "generate:service-worker:exec"]
     },
     "lint:build": {
       "outputs": [],
@@ -76,10 +73,7 @@
     },
     "type-check:edge": {
       "outputs": [],
-      "inputs": [
-        "apps/edge/functions/**/*",
-        "apps/edge/supabase/deno.json"
-      ],
+      "inputs": ["apps/edge/functions/**/*", "apps/edge/supabase/deno.json"],
       "cache": true
     },
     "lint": {
@@ -92,19 +86,17 @@
       "outputs": [],
       "cache": true
     },
-      "lint:edge": {
-        "outputs": [],
-        "inputs": [
-          "apps/edge/functions/**/*"
-        ],
-        "cache": true
-      },
+    "lint:edge": {
+      "outputs": [],
+      "inputs": ["apps/edge/functions/**/*"],
+      "cache": true
+    },
     "test:unit": {
       "outputs": ["coverage/**"],
       "cache": true
     },
     "generators:build": {
-      "outputs": ["packages/generators/dist/**", "packages/generators/tsconfig.tsbuildinfo"],
+      "outputs": ["packages/generators/dist/**", "packages/generators/.tsbuildinfo"],
       "inputs": [
         "packages/generators/src/**/*",
         "packages/generators/tsconfig.json",
@@ -119,7 +111,7 @@
       ]
     },
     "@heyclaude/web-runtime#build": {
-      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "outputs": ["dist/**", ".tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true,
       "dependsOn": [
@@ -129,22 +121,19 @@
       ]
     },
     "@heyclaude/data-layer#build": {
-      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "outputs": ["dist/**", ".tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true,
-      "dependsOn": [
-        "@heyclaude/database-types#build",
-        "@heyclaude/shared-runtime#build"
-      ]
+      "dependsOn": ["@heyclaude/database-types#build", "@heyclaude/shared-runtime#build"]
     },
     "@heyclaude/shared-runtime#build": {
-      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "outputs": ["dist/**", ".tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true,
       "dependsOn": ["@heyclaude/database-types#build"]
     },
     "@heyclaude/database-types#build": {
-      "outputs": ["dist/**", "tsconfig.tsbuildinfo"],
+      "outputs": ["dist/**", ".tsbuildinfo"],
       "inputs": ["src/**/*", "tsconfig.json", "package.json"],
       "cache": true
     },
@@ -169,18 +158,30 @@
     "sync:db:exec": {
       "dependsOn": ["generators:build"],
       "cache": false,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_PROJECT_REF"]
+      "passThroughEnv": [
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "SUPABASE_PROJECT_REF"
+      ]
     },
     "sync:db:full:exec": {
       "dependsOn": ["generators:build"],
       "cache": false,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_PROJECT_REF"]
+      "passThroughEnv": [
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "SUPABASE_PROJECT_REF"
+      ]
     },
     "sync:db:types:exec": {
       "dependsOn": ["generators:build"],
       "outputs": ["packages/database-types/src/**/*"],
       "cache": true,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_PROJECT_REF"]
+      "passThroughEnv": [
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "SUPABASE_PROJECT_REF"
+      ]
     },
     "backup:db:exec": {
       "dependsOn": ["generators:build"],
@@ -237,6 +238,7 @@
   "globalDependencies": ["package.json", "pnpm-lock.yaml"],
   "globalEnv": [
     "NODE_ENV",
+    "VERCEL_ENV",
     "NEXT_PUBLIC_SUPABASE_URL",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY"
   ],
@@ -269,11 +271,13 @@
     "VIEW_COUNT_SALT",
     "WEBHOOK_SECRET",
     "GITHUB_TOKEN",
-    "GITHUB_OWNER",
+    "GITHUB_REPO_OWNER",
+    "GITHUB_REPO_NAME",
     "GITHUB_REPO",
     "GITHUB_BRANCH",
     "RESEND_API_KEY",
     "RESEND_AUDIENCE_ID",
+    "RESEND_FROM_EMAIL",
     "RESEND_WEBHOOK_SECRET",
     "CRON_SECRET",
     "BETTERSTACK_HEARTBEAT_WEEKLY_TASKS",
@@ -283,10 +287,13 @@
     "R2_SECRET_ACCESS_KEY",
     "R2_ENDPOINT",
     "R2_BUCKET_NAME",
-    "EXPERIMENTATION_CONFIG_ITEM_KEY",
-    "STATSIG_SERVER_API_KEY",
-    "EXPERIMENTATION_CONFIG",
-    "AUTONOMA_CLIENT_ID",
-    "AUTONOMA_SECRET_ID"
+    "INNGEST_EVENT_KEY",
+    "INNGEST_SIGNING_KEY",
+    "DISCORD_ERROR_WEBHOOK_URL",
+    "POLAR_WEBHOOK_SECRET",
+    "DISCORD_CHANGELOG_WEBHOOK_URL",
+    "DISCORD_ANNOUNCEMENTS_WEBHOOK_URL",
+    "DISCORD_SUBMISSIONS_WEBHOOK_URL",
+    "DISCORD_JOBS_WEBHOOK_URL"
   ]
 }

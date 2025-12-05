@@ -112,7 +112,7 @@ export function createSearchContext(options?: {
 }
 
 /**
- * Builds a standardized log context for notification router (flux-station) operations.
+ * Builds a standardized log context for notification router operations.
  *
  * @param action - The action name or operation being performed
  * @param options - Optional identifiers and metadata
@@ -136,7 +136,7 @@ export function createNotificationRouterContext(
   }
 ): Record<string, unknown> {
   return {
-    function: 'flux-station',
+    function: 'notification-router',
     action,
     request_id: crypto.randomUUID(),
     started_at: new Date().toISOString(),

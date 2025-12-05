@@ -1,7 +1,11 @@
 import 'server-only';
 
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { generateRequestId, logger, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import {
+  generateRequestId,
+  logger,
+  createErrorResponse,
+} from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   jsonResponse,
@@ -9,7 +13,7 @@ import {
   buildCacheHeaders,
   handleOptionsRequest,
 } from '@heyclaude/web-runtime/server';
-import  { type NextRequest } from 'next/server';
+import { type NextRequest } from 'next/server';
 
 const CORS = getWithAuthCorsHeaders;
 

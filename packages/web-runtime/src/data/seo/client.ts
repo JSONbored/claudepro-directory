@@ -1,15 +1,14 @@
 import 'server-only';
 
 import { SeoService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
 
 function shouldSkipRpcCall(): boolean {
   const hasEnvironmentVariables =
-    Boolean(env.NEXT_PUBLIC_SUPABASE_URL) &&
-    Boolean(env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    Boolean(env.NEXT_PUBLIC_SUPABASE_URL) && Boolean(env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   return !hasEnvironmentVariables;
 }
 
@@ -113,7 +112,8 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
   }
 
   const result = await fetchCached(
-    (client) => new SeoService(client).generateMetadata({ p_route: route, p_include: 'metadata,schemas' }),
+    (client) =>
+      new SeoService(client).generateMetadata({ p_route: route, p_include: 'metadata,schemas' }),
     {
       keyParts: ['seo-metadata-schemas', route],
       tags: ['seo', `seo-${route}`, 'structured-data'],

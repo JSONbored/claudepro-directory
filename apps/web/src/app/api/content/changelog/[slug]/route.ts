@@ -13,15 +13,33 @@ import {
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient, badRequestResponse, getOnlyCorsHeaders, buildCacheHeaders  } from '@heyclaude/web-runtime/server';
+import {
+  createSupabaseAnonClient,
+  badRequestResponse,
+  getOnlyCorsHeaders,
+  buildCacheHeaders,
+} from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+/**
+ * Serve a changelog entry as an LLMs-compliant plain-text file for the given slug.
+ *
+ * Validates the `format` query parameter (must be `llms-entry`), retrieves the
+ * prepared LLMs-formatted text for the requested changelog entry, converts any
+ * literal `\n` sequences to real newlines, and returns the result with
+ * appropriate security, CORS, and cache headers.
+ *
+ * @param request - The incoming NextRequest for this API route
+ * @param params - An object with a Promise that resolves to route params; must include `slug`
+ * @returns A NextResponse containing the plaintext LLMs-formatted changelog entry on success, or a 400/standardized error response on failure
+ *
+ * @see ContentService#getChangelogEntryLlmsTxt
+ * @see createSupabaseAnonClient
+ * @see buildSecurityHeaders
+ */
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({
     requestId,
@@ -33,9 +51,10 @@ export async function GET(
   try {
     const { slug } = await params;
     const url = new URL(request.url);
-    const format = (url.searchParams.get('format') ?? 'llms-entry').toLowerCase();
+    const format = url.searchParams.get('format')?.toLowerCase();
 
-    if (format !== 'llms-entry') {
+    // Default to 'llms-entry' format if not specified; validate if provided
+    if (format && format !== 'llms-entry') {
       return badRequestResponse(`Invalid format '${format}' for changelog entry`, CORS);
     }
 
@@ -47,7 +66,17 @@ export async function GET(
 
     if (!data) {
       reqLogger.warn('Changelog entry LLMs.txt not found', { slug });
-      return badRequestResponse('Changelog entry LLMs.txt not found or invalid', CORS);
+      return NextResponse.json(
+        { error: 'Changelog entry LLMs.txt not found' },
+        {
+          status: 404,
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            ...buildSecurityHeaders(),
+            ...CORS,
+          },
+        }
+      );
     }
 
     const formatted = data.replaceAll(String.raw`\n`, '\n');
@@ -77,6 +106,13 @@ export async function GET(
   }
 }
 
+/**
+ * Handle CORS preflight requests by returning a 204 No Content response with CORS headers.
+ *
+ * @returns A NextResponse with status 204 (No Content) and the route's CORS headers applied.
+ * @see CORS
+ * @see getOnlyCorsHeaders
+ */
 export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,

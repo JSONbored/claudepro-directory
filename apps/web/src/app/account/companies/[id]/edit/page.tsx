@@ -2,25 +2,23 @@
  * Edit Company Page - Update existing company via edge function
  */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserCompanyById,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/server';
-import { Button,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -41,6 +39,23 @@ interface EditCompanyPageProperties {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Renders the Edit Company page for the company identified by the route `id`.
+ *
+ * Fetches the authenticated user, loads the company for that user, and renders a pre-populated
+ * company edit form when access is allowed. If the user is unauthenticated this page
+ * redirects to the login route. If the company cannot be loaded this page returns an
+ * error card; if the company does not exist or access is denied this page triggers a 404.
+ *
+ * @param props.params - Route parameters containing the `id` of the company to edit.
+ * @returns The page element that displays the edit form pre-populated with the company data,
+ *          or an error card / redirect / 404 response when appropriate.
+ *
+ * @see CompanyForm
+ * @see getUserCompanyById
+ * @see getAuthenticatedUser
+ * @see ROUTES.ACCOUNT_COMPANIES
+ */
 export default async function EditCompanyPage({ params }: EditCompanyPageProperties) {
   const { id } = await params;
 
@@ -137,7 +152,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Edit Company</h1>
+        <h1 className="mb-2 text-3xl font-bold">Edit Company</h1>
         <p className="text-muted-foreground">Update your company profile information</p>
       </div>
 

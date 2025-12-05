@@ -6,7 +6,7 @@
 import 'server-only';
 
 import { SeoService } from '@heyclaude/data-layer';
-import  { type Json } from '@heyclaude/database-types';
+import { type Json } from '@heyclaude/database-types';
 import { buildSecurityHeaders, sanitizeRoute, serializeJsonLd } from '@heyclaude/shared-runtime';
 import {
   generateRequestId,
@@ -14,7 +14,12 @@ import {
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient, badRequestResponse, getOnlyCorsHeaders, buildCacheHeaders  } from '@heyclaude/web-runtime/server';
+import {
+  createSupabaseAnonClient,
+  badRequestResponse,
+  getOnlyCorsHeaders,
+  buildCacheHeaders,
+} from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;

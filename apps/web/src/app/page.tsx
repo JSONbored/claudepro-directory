@@ -1,6 +1,6 @@
 /** Homepage consuming homepageConfigs for runtime-tunable categories */
 
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { trackRPCFailure } from '@heyclaude/web-runtime/core';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -8,9 +8,9 @@ import {
   getHomepageCategoryIds,
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
-import  { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
 import { HomePageLoading } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 
@@ -23,11 +23,13 @@ import { RecentlyViewedRail } from '@/src/components/features/home/recently-view
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
 
@@ -48,8 +50,23 @@ interface HomePageProperties {
 }
 
 /**
- * Top Contributors Server Component
- * Fetches top contributors data for the homepage
+ * Server component that renders the homepage top contributors.
+ *
+ * Fetches homepage data for the homepage categories, filters out entries missing
+ * required identity fields, and normalizes each contributor by ensuring `id`,
+ * `slug`, and `name` are present, defaulting `tier` to `"free"` when absent,
+ * and adding a `created_at` ISO timestamp. If fetching homepage data fails,
+ * the failure is tracked with scope `top-contributors` and the component
+ * renders with an empty contributor list.
+ *
+ * This component runs during server rendering and does not declare its own ISR.
+ *
+ * @returns A React element rendering TopContributors populated with the processed contributors.
+ *
+ * @see getHomepageData
+ * @see getHomepageCategoryIds
+ * @see trackRPCFailure
+ * @see TopContributors
  */
 async function TopContributorsServer() {
   const categoryIds = getHomepageCategoryIds;
@@ -90,21 +107,28 @@ async function TopContributorsServer() {
 }
 
 /**
- * OPTIMIZATION: Streaming SSR Homepage
+ * Server component that renders the homepage using streaming Suspense boundaries to reduce time-to-first-byte.
  *
- * The homepage is now split into streaming Suspense boundaries:
- * 1. Hero section - streams immediately (no data fetching)
- * 2. Search facets - streams in parallel (non-blocking)
- * 3. Homepage content - streams when ready (non-blocking)
- * 4. Top contributors - lazy loaded below fold
+ * Renders the page as a set of streaming sections so the hero can appear immediately while other data loads:
+ * - Hero: renders immediately and receives a best-effort member count fetched from `getHomepageData` (falls back to 0 on failure).
+ * - Search facets: fetched in parallel and streamed independently.
+ * - Homepage content: rendered within a Suspense boundary and streamed when its data is ready.
+ * - Top contributors and newsletter CTA: lazy-loaded below the fold.
  *
- * This improves TTFB by ~50% (200-300ms → 100-150ms) by allowing
- * the hero section to render immediately while other data loads.
+ * @param searchParams - A promise resolving to the page's query parameters (awaited so search params are available before render).
+ * @returns The homepage React element composed of streaming Suspense boundaries and lazy sections.
+ *
+ * @see HomepageHeroServer
+ * @see HomepageContentServerWrapper
+ * @see TopContributorsServer
+ * @see getHomepageData
+ * @see trackRPCFailure
+ * @see revalidate
  */
 export default async function HomePage({ searchParams }: HomePageProperties) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger
   const reqLogger = logger.child({
     requestId,
@@ -137,7 +161,7 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
   const searchFiltersPromise = HomepageSearchFacetsServer();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <div className="relative overflow-hidden">
         {/* Hero section - streams immediately (no data fetching) */}
         <HomepageHeroServer memberCount={memberCount} />
@@ -169,7 +193,15 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
 }
 
 /**
- * Wrapper component that awaits search filters and passes to content server
+ * Resolves provided search filter options and renders HomepageContentServer with those filters.
+ *
+ * This server-side wrapper ensures the `searchFiltersPromise` is fulfilled before rendering the content
+ * server, preventing the child component from rendering without the required search filters.
+ *
+ * @param props.searchFiltersPromise - A promise that resolves to the search filter options to pass to HomepageContentServer.
+ *
+ * @see HomepageContentServer
+ * @see SearchFilterOptions
  */
 async function HomepageContentServerWrapper({
   searchFiltersPromise,

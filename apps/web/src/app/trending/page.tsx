@@ -8,13 +8,13 @@ import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getTrendingPageData } from '@heyclaude/web-runtime/data';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
-import  { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
-import  {
+import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
+import {
   type DisplayableContent,
   type HomepageContentItem,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES, UnifiedBadge  } from '@heyclaude/web-runtime/ui';
-import  { type Metadata } from 'next';
+import { UI_CLASSES, UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 
@@ -23,11 +23,13 @@ import { TrendingContent } from '@/src/components/core/shared/trending-content';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
-      default: module_.NewsletterCTAVariant,
-    })),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
+      (module_) => ({
+        default: module_.NewsletterCTAVariant,
+      })
+    ),
   {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
 
@@ -38,16 +40,40 @@ const NewsletterCTAVariant = dynamicImport(
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 900; // 15 minutes for trending data
+export const revalidate = 900; /**
+ * Provide metadata for the Trending page.
+ *
+ * @returns Page metadata for the '/trending' route.
+ * @see generatePageMetadata
+ * @see revalidate
+ */
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/trending');
 }
 
+/**
+ * Renders the Trending page showing trending, popular, and recent configurations, applying
+ * category and limit query parameters when present.
+ *
+ * Fetches cached trending data (see `getTrendingPageData`) and maps it into display-ready
+ * lists for the page header, content columns, and newsletter CTA. Category query values are
+ * validated; invalid category parameters are logged and ignored. Trending data is periodically
+ * refreshed according to the page's revalidation policy.
+ *
+ * @param props.searchParams - Search parameters from the request; supports `category` (string or single-element array)
+ *   and `limit` (number, defaults to 12, clamped to 100).
+ * @returns The React element for the Trending page containing header, content sections, and newsletter CTA.
+ *
+ * @see getTrendingPageData
+ * @see mapTrendingMetrics
+ * @see mapPopularContent
+ * @see mapRecentContent
+ */
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  
+
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
@@ -65,7 +91,8 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
     return category;
   })();
   const limit = Math.min(Number(rawParameters?.['limit']) || 12, 100);
-  const normalizedCategory = categoryParameter && isValidCategory(categoryParameter) ? categoryParameter : null;
+  const normalizedCategory =
+    categoryParameter && isValidCategory(categoryParameter) ? categoryParameter : null;
 
   // Section: Category Validation
   if (categoryParameter && !normalizedCategory) {
@@ -96,20 +123,20 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   const pageTitleId = 'trending-page-title';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <section className="relative overflow-hidden px-4 py-24" aria-labelledby={pageTitleId}>
         <div className="container mx-auto text-center">
           <div className="mx-auto max-w-3xl">
             <UnifiedBadge
               variant="base"
               style="outline"
-              className="mb-6 border-accent/20 bg-accent/5 text-accent"
+              className="border-accent/20 bg-accent/5 text-accent mb-6"
             >
-              <TrendingUp className="mr-1 h-3 w-3 text-accent" aria-hidden="true" />
+              <TrendingUp className="text-accent mr-1 h-3 w-3" aria-hidden="true" />
               Trending
             </UnifiedBadge>
 
-            <h1 id={pageTitleId} className="mb-6 font-bold text-4xl md:text-6xl">
+            <h1 id={pageTitleId} className="mb-6 text-4xl font-bold md:text-6xl">
               Trending Configurations
             </h1>
 
@@ -246,6 +273,19 @@ function mapRecentContent(
   });
 }
 
+/**
+ * Normalize a raw content record into a HomepageContentItem suitable for display.
+ *
+ * @param input - Raw content fields; optional properties are normalized and given sensible defaults:
+ *                `title` defaults to `slug`, `description` defaults to an empty string,
+ *                `author` defaults to `"Community"`, `tags` defaults to `[]`, `source` defaults to `"community"`,
+ *                `created_at`/`date_added` default to the current ISO timestamp when both are missing,
+ *                `viewCount`/`copyCount` default to `0`. The `featured` flag is set when `featuredScore` is provided.
+ * @returns The normalized HomepageContentItem with canonical field names (`view_count`, `copy_count`, `created_at`, `date_added`, etc.) and defaults applied.
+ *
+ * @see mapTrendingMetrics
+ * @see mapPopularContent
+ */
 function toHomepageContentItem(input: {
   author?: null | string;
   category: Database['public']['Enums']['content_category'];

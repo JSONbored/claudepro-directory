@@ -1,0 +1,53 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+.next
+out
+dist
+build
+.turbo
+
+# Generated files
+**/*.generated.*
+**/*.generated.ts
+**/*.generated.tsx
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Public assets (don't format)
+public/**/*.js
+public/**/*.css
+public/service-worker.js
+
+# Config files that should maintain their format
+*.config.js
+*.config.mjs
+*.config.ts

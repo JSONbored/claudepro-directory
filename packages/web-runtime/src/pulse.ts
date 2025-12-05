@@ -41,7 +41,7 @@ export async function enqueuePulseEvent(
 
     const { error } = await pgmqClient.rpc('send', {
       queue_name: PULSE_QUEUE_NAME,
-      msg: {
+      message: {
         user_id: event.user_id ?? null,
         content_type: event.content_type ?? null,
         content_slug: event.content_slug ?? null,
@@ -49,6 +49,7 @@ export async function enqueuePulseEvent(
         session_id: event.session_id ?? null,
         metadata: event.metadata ?? null,
       },
+      sleep_seconds: 0,
     });
 
     if (error) {

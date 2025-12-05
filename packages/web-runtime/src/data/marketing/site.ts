@@ -7,7 +7,7 @@ import { cache } from 'react';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import { generateRequestId } from '../../utils/request-id.ts';
-import { getContentCount } from "../content/index.ts";
+import { getContentCount } from '../content/index.ts';
 
 const DESCRIPTION_FALLBACK =
   'Open-source directory of Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.';
@@ -17,10 +17,12 @@ const HERO_DEFAULTS = {
   monthlyPageViews: 16_000,
 };
 
-const VERCEL_ANALYTICS_TOKEN = (env as Record<string, unknown>)['VERCEL_WEB_ANALYTICS_TOKEN'] as string | undefined;
+const VERCEL_ANALYTICS_TOKEN = (env as Record<string, unknown>)['VERCEL_WEB_ANALYTICS_TOKEN'] as
+  | string
+  | undefined;
 const VERCEL_PROJECT_ID =
-  (env as Record<string, unknown>)['VERCEL_PROJECT_ID'] as string | undefined ??
-  (env as Record<string, unknown>)['NEXT_PUBLIC_VERCEL_PROJECT_ID'] as string | undefined;
+  ((env as Record<string, unknown>)['VERCEL_PROJECT_ID'] as string | undefined) ??
+  ((env as Record<string, unknown>)['NEXT_PUBLIC_VERCEL_PROJECT_ID'] as string | undefined);
 
 interface VisitorStats {
   monthlyPageViews: number;
@@ -47,7 +49,7 @@ const getVisitorStats = unstable_cache(
     });
 
     const { trackPerformance } = await import('../../utils/performance-metrics.ts');
-    
+
     if (!(VERCEL_ANALYTICS_TOKEN && VERCEL_PROJECT_ID)) {
       return HERO_DEFAULTS;
     }
@@ -88,7 +90,7 @@ const getVisitorStats = unstable_cache(
           logLevel: 'info',
         }
       );
-      
+
       return result;
     } catch (error) {
       // trackPerformance logs performance metrics, but we need explicit error logging

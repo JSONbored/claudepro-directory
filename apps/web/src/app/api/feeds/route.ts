@@ -5,7 +5,7 @@
 
 import 'server-only';
 
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
@@ -14,7 +14,12 @@ import {
   normalizeError,
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient, badRequestResponse, getOnlyCorsHeaders, buildCacheHeaders  } from '@heyclaude/web-runtime/server';
+import {
+  createSupabaseAnonClient,
+  badRequestResponse,
+  getOnlyCorsHeaders,
+  buildCacheHeaders,
+} from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
@@ -25,6 +30,16 @@ type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 type FeedType = 'atom' | 'rss';
 const SUPPORTED_TYPES = new Set<FeedType>(['rss', 'atom']);
 
+/**
+ * Convert a raw string to a validated ContentCategory or return null.
+ *
+ * Accepts a string or null and returns the matching ContentCategory when the
+ * input matches one of the known CONTENT_CATEGORY_VALUES; returns `null` for
+ * falsy or unrecognized inputs.
+ *
+ * @param value - The raw category value to validate (may be `null`)
+ * @returns `ContentCategory` if `value` is a known category, `null` otherwise
+ */
 function toContentCategory(value: null | string): ContentCategory | null {
   if (!value) return null;
   return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory)
@@ -32,6 +47,17 @@ function toContentCategory(value: null | string): ContentCategory | null {
     : null;
 }
 
+/**
+ * Execute a Supabase RPC call with request-scoped logging and unified error handling.
+ *
+ * Logs the RPC failure when an error is present, rethrows the original Error if the RPC returned an Error,
+ * and otherwise throws a new Error when the RPC returned an error-like value or null data.
+ *
+ * @param rpcName - Human-readable RPC identifier used in logs and error messages
+ * @param rpcCall - Function that executes the RPC and resolves to an object with `data` (T or null) and `error` (any)
+ * @param reqLogger - Request-scoped logger (result of `logger.child(...)`) used to record RPC failures
+ * @returns The RPC `data` when the call succeeds
+ */
 async function executeRpcWithLogging<T>(
   rpcName: string,
   rpcCall: () => PromiseLike<{ data: null | T; error: unknown }>,
@@ -40,7 +66,11 @@ async function executeRpcWithLogging<T>(
   const { data, error } = await rpcCall();
   if ((error !== null && error !== undefined) || data == null) {
     if (error !== null && error !== undefined) {
-      reqLogger.error('RPC call failed in generateFeedPayload', normalizeError(error), {
+      reqLogger.error('RPC call failed', normalizeError(error), {
+        rpcName,
+      });
+    } else {
+      reqLogger.error('RPC returned null data without error', undefined, {
         rpcName,
       });
     }
@@ -52,12 +82,27 @@ async function executeRpcWithLogging<T>(
   return data;
 }
 
+/**
+ * Generate an XML feed payload and accompanying metadata for the requested feed type and category.
+ *
+ * Selects the appropriate Supabase RPCs to produce either a changelog feed or a content feed in
+ * RSS or Atom format, and returns the XML body together with the correct Content-Type and a
+ * human-readable source label.
+ *
+ * @param type - Feed format to generate: 'rss' or 'atom'
+ * @param category - Content category name, `'changelog'` for changelog feeds, `null` for all content
+ * @param supabase - Supabase anonymous client used to call database RPCs
+ * @param reqLogger - Request-scoped logger used for RPC call logging and error context
+ * @returns An object containing `xml` (the feed XML string), `contentType` (HTTP Content-Type header value), and `source` (a short label describing the feed origin)
+ * @see executeRpcWithLogging
+ * @see toContentCategory
+ */
 async function generateFeedPayload(
   type: FeedType,
   category: null | string,
   supabase: ReturnType<typeof createSupabaseAnonClient>,
   reqLogger: ReturnType<typeof logger.child>
-): Promise<{ contentType: string; source: string; xml: string; }> {
+): Promise<{ contentType: string; source: string; xml: string }> {
   if (category === 'changelog') {
     if (type === 'rss') {
       const rpcArgs = {
@@ -189,6 +234,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * Responds to CORS preflight (OPTIONS) requests with a 204 No Content and CORS headers.
+ *
+ * @returns A NextResponse with HTTP status 204 and only CORS headers set.
+ * @see getOnlyCorsHeaders
+ */
 export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,

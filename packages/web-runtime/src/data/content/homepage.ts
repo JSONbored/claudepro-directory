@@ -1,7 +1,7 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import  { type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { cache } from 'react';
 
 import { fetchCached } from '../../cache/fetch-cached.ts';
@@ -25,15 +25,21 @@ export const getHomepageData = cache(
     });
 
     try {
+      // CRITICAL: Use sorted, joined string for cache key to ensure stability
+      // The categoryIds array order might vary, so we sort and join to create a stable key
+      // This prevents cache misses due to array order differences
+      const sortedCategoryIds = [...categoryIds].toSorted().join(',');
+
       return await fetchCached(
-        (client) => new ContentService(client).getHomepageOptimized({ p_category_ids: [...categoryIds] }),
+        (client) =>
+          new ContentService(client).getHomepageOptimized({ p_category_ids: [...categoryIds] }),
         {
-          // Next.js automatically handles serialization of keyParts array
-          keyParts: ['homepage', ...categoryIds],
+          // Use stable string key instead of array to prevent cache key variations
+          keyParts: ['homepage', sortedCategoryIds],
           tags: ['homepage', 'content', 'trending'],
           ttlKey: 'cache.homepage.ttl_seconds',
           fallback: null,
-          logMeta: { categoryIds, categoryCount: categoryIds.length },
+          logMeta: { categoryIds: sortedCategoryIds, categoryCount: categoryIds.length },
         }
       );
     } catch (error) {

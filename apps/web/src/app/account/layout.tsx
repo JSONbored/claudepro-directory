@@ -15,6 +15,24 @@ import { AuthSignOutButton } from '@/src/components/core/buttons/auth/auth-signo
 import { AccountSidebar } from '@/src/components/features/account/account-sidebar';
 import { AccountSidebarSkeleton } from '@/src/components/features/account/account-sidebar-skeleton';
 
+/**
+ * Renders the account dashboard layout and enforces user authentication for its children.
+ *
+ * This server component ensures a user is authenticated (redirecting to /login if not), attempts a session
+ * refresh when the current session is near expiry, and derives user metadata (display name and avatar)
+ * to pass to the sidebar. The layout renders a top navigation bar, a Suspense-wrapped sidebar (non-blocking),
+ * and a main content area guarded by multi-factor authentication.
+ *
+ * @param children - Content rendered inside the layout's main area
+ * @returns The account layout element containing the top bar, Suspense-wrapped sidebar, and MFA-protected main content
+ *
+ * @see getAuthenticatedUser
+ * @see createSupabaseServerClient
+ * @see AccountSidebar
+ * @see AccountSidebarSkeleton
+ * @see AccountMFAGuard
+ * @see AuthSignOutButton
+ */
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   // Authentication check - required in layout for route protection
   // eslint-disable-next-line architectural-rules/no-blocking-operations-in-layouts -- Required for protected route authentication
@@ -65,13 +83,14 @@ export default async function AccountLayout({ children }: { children: React.Reac
   const userMetadata = user.user_metadata;
   const fullName = typeof userMetadata['full_name'] === 'string' ? userMetadata['full_name'] : null;
   const name = typeof userMetadata['name'] === 'string' ? userMetadata['name'] : null;
-  const avatarUrl = typeof userMetadata['avatar_url'] === 'string' ? userMetadata['avatar_url'] : null;
+  const avatarUrl =
+    typeof userMetadata['avatar_url'] === 'string' ? userMetadata['avatar_url'] : null;
   const picture = typeof userMetadata['picture'] === 'string' ? userMetadata['picture'] : null;
   const userNameMetadata = fullName ?? name ?? user.email ?? null;
   const userImageMetadata = avatarUrl ?? picture ?? null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <div className="border-b px-4 py-4">
         <div className="container mx-auto flex items-center justify-between">
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} group`}>
@@ -95,7 +114,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
               userImageMetadata={userImageMetadata}
             />
           </Suspense>
-          
+
           <div className="md:col-span-3">
             <AccountMFAGuard>{children}</AccountMFAGuard>
           </div>

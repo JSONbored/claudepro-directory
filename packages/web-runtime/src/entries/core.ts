@@ -54,6 +54,7 @@ export * from '../types/category.ts';
 export * from '../utils/category-validation.ts';
 export * from '../utils/content-highlights.ts';
 export * from '../utils/url-validation.ts';
+export * from '../utils/url-safety.ts';
 // Logging utilities - use barrel exports instead
 // export * from '../utils/log-context.ts'; // Use @heyclaude/web-runtime/logging/server instead
 // export * from '../utils/request-context.ts'; // Use @heyclaude/web-runtime/logging/server instead

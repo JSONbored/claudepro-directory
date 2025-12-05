@@ -1,18 +1,39 @@
 import 'server-only';
 
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError, validateLimit, validateQueryString } from '@heyclaude/shared-runtime';
-import { generateRequestId, logger, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseAnonClient,
+import {
+  generateRequestId,
+  logger,
+  createErrorResponse,
+} from '@heyclaude/web-runtime/logging/server';
+import {
+  createSupabaseAnonClient,
   badRequestResponse,
   jsonResponse,
   getWithAuthCorsHeaders,
   buildCacheHeaders,
-  handleOptionsRequest } from '@heyclaude/web-runtime/server';
-import  { type NextRequest } from 'next/server';
+  handleOptionsRequest,
+} from '@heyclaude/web-runtime/server';
+import { type NextRequest } from 'next/server';
 
 const CORS = getWithAuthCorsHeaders;
 
+/**
+ * Handle GET requests for search autocomplete and return matching suggestions based on the user's query.
+ *
+ * Validates query string and `limit` parameters, queries the database via a Supabase RPC for historical
+ * search suggestions, and responds with a JSON payload containing `suggestions` and the original `query`.
+ * Validation failures produce a 400 response; RPC or unexpected failures produce a structured error response.
+ *
+ * @param request - The incoming NextRequest for the autocomplete endpoint
+ * @returns A Response containing JSON `{ suggestions, query }` with HTTP 200 on success, or an error response on failure
+ *
+ * @see validateQueryString
+ * @see validateLimit
+ * @see createSupabaseAnonClient
+ * @see createErrorResponse
+ */
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -42,10 +63,11 @@ export async function GET(request: NextRequest) {
   reqLogger.info('Autocomplete request received', { query });
 
   const supabase = createSupabaseAnonClient();
-  const rpcArgs: DatabaseGenerated['public']['Functions']['get_search_suggestions_from_history']['Args'] = {
-    p_query: query,
-    p_limit: limit,
-  };
+  const rpcArgs: DatabaseGenerated['public']['Functions']['get_search_suggestions_from_history']['Args'] =
+    {
+      p_query: query,
+      p_limit: limit,
+    };
 
   try {
     const { data, error } = await supabase.rpc('get_search_suggestions_from_history', rpcArgs);
