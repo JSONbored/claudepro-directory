@@ -1259,7 +1259,13 @@ export async function UnifiedDetailPage({
                 variant="enhanced-list"
                 title="Troubleshooting"
                 description="Common issues and solutions"
-                items={troubleshooting as Array<string | { issue: string; solution: string }>}
+                items={
+                  troubleshooting as Array<
+                    | string
+                    | { issue: string; solution: string }
+                    | { question: string; answer: string }
+                  >
+                }
                 dotColor="bg-red-500"
               />
             )}

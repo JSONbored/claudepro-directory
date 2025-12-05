@@ -1,3 +1,4 @@
+import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -47,61 +48,6 @@ const NewsletterCTAVariant = dynamicImport(
  */
 export const revalidate = 86_400;
 
-/**
- * Validate and canonicalize an external website URL for safe use in anchor hrefs.
- *
- * Allows `https:` URLs universally and `http:` only for localhost addresses.
- * Rejects URLs containing username or password components, trims and lowercases the hostname,
- * removes trailing dots and default ports (80 for HTTP, 443 for HTTPS).
- *
- * @param url - The input URL to validate; may be `null` or `undefined`.
- * @returns The canonicalized, safe href string when the input is an allowed URL, `null` otherwise.
- *
- * @see /companies page where this is used to render external company links
- */
-function getSafeWebsiteUrl(url: null | string | undefined): null | string {
-  if (!url || typeof url !== 'string') return null;
-
-  try {
-    const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol (or HTTP for localhost/development)
-    const isLocalhost =
-      parsed.hostname === 'localhost' ||
-      parsed.hostname === '127.0.0.1' ||
-      parsed.hostname === '::1';
-    if (parsed.protocol === 'https:') {
-      // HTTPS always allowed
-    } else if (parsed.protocol === 'http:' && isLocalhost) {
-      // HTTP allowed only for local development
-    } else {
-      return null;
-    }
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // Normalize hostname
-    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-    // Remove default ports
-    if (parsed.port === '80' || parsed.port === '443') {
-      parsed.port = '';
-    }
-
-    // Return canonicalized href (guaranteed to be normalized and safe)
-    return parsed.href;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Provide metadata for the /companies page.
- *
- * Used by Next.js to supply route metadata such as title, description, and Open Graph data.
- *
- * @returns The Metadata object for the /companies route.
- *
- * @see generatePageMetadata
- */
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/companies');
 }
@@ -115,9 +61,9 @@ export async function generateMetadata(): Promise<Metadata> {
  * @returns The page's React element tree for the /companies route.
  *
  * @see getCompaniesList
- * @see getSafeWebsiteUrl
+ * @see getSafeWebsiteUrl from @heyclaude/web-runtime/core
  * @see generatePageMetadata
- * @see revalidate (defined on line 49 in this file)
+ * @see revalidate (defined on line 48 in this file)
  */
 export default async function CompaniesPage() {
   // Generate single requestId for this page request

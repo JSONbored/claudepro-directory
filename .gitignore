@@ -42,6 +42,9 @@ lerna-debug.log*
 .cursor/
 docs/
 
+# Migration planning (analysis only, no code changes)
+.migration/
+
 # CodeRabbit generated reports/summaries (should not be committed)
 DELIVERABLES.md
 FINAL_TEST_REPORT.md

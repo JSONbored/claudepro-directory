@@ -64,7 +64,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     listPage: {
       searchPlaceholder: "Search MCP servers...",
       badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
-      
+
     },
     detailPage: {
       displayConfig: true,
@@ -78,7 +78,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: true,
       troubleshooting: true,
       examples: true,
-      requirements: false,
+      requirements: true,
     },
     metadata: {
       showGitHubLink: true,
@@ -116,7 +116,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     listPage: {
       searchPlaceholder: "Search hooks...",
       badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
-      
+
     },
     detailPage: {
       displayConfig: true,
@@ -168,7 +168,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     listPage: {
       searchPlaceholder: "Search skills...",
       badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
-      
+
     },
     detailPage: {
       displayConfig: false,
@@ -220,7 +220,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     listPage: {
       searchPlaceholder: "Search commands...",
       badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
-      
+
     },
     detailPage: {
       displayConfig: false,
@@ -272,7 +272,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     listPage: {
       searchPlaceholder: "Search changelog...",
       badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
-      
+
     },
     detailPage: {
       displayConfig: false,
@@ -324,7 +324,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     listPage: {
       searchPlaceholder: "Search jobs...",
       badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
-      
+
     },
     detailPage: {
       displayConfig: false,
@@ -376,7 +376,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     listPage: {
       searchPlaceholder: "Search collections...",
       badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
-      
+
     },
     detailPage: {
       displayConfig: false,
@@ -404,15 +404,15 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
   },
   "rules": {
     id: "rules" as const,
-    title: "Rule",
-    pluralTitle: "Rules",
+    title: "CLAUDE.md",
+    pluralTitle: "CLAUDE.md",
     description: "Custom rules to guide Claude's behavior and responses in your projects.",
     icon: ICON_MAP['BookOpen'] ?? FileText,
     colorScheme: "red-500",
     showOnHomepage: true,
     keywords: "Claude rules, custom rules, behavior rules, project rules, .cursorrules",
     metaDescription: "Custom rules for Claude in October 2025. Define coding standards, architectural guidelines, and project-specific behavior for consistent AI assistance.",
-    typeName: "Rule",
+    typeName: "CLAUDE.md",
     generateFullContent: true,
     metadataFields: ["title","description","category","slug","created_at","updated_at"],
     buildConfig: {
@@ -428,7 +428,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     listPage: {
       searchPlaceholder: "Search rules...",
       badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
-      
+
     },
     detailPage: {
       displayConfig: true,
@@ -436,13 +436,13 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     sections: {
       features: true,
-      installation: false,
+      installation: true,
       use_cases: true,
       configuration: true,
-      security: false,
+      security: true,
       troubleshooting: true,
       examples: true,
-      requirements: false,
+      requirements: true,
     },
     metadata: {
       showGitHubLink: true,
@@ -480,7 +480,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     listPage: {
       searchPlaceholder: "Search AI agents...",
       badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
-      
+
     },
     detailPage: {
       displayConfig: true,
@@ -532,7 +532,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     listPage: {
       searchPlaceholder: "Search statuslines...",
       badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
-      
+
     },
     detailPage: {
       displayConfig: true,
@@ -584,7 +584,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     listPage: {
       searchPlaceholder: "Search guides...",
       badges: [{ text: (count: number) => `{count} items`.replace('{count}', String(count)) }],
-      
+
     },
     detailPage: {
       displayConfig: false,
