@@ -156,12 +156,8 @@ export async function generateMetadata({
  * @see ChangelogContent
  * @see StructuredData
  */
-export default async function ChangelogEntryPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
+export default async function ChangelogEntryPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();

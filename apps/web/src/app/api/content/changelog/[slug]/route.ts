@@ -65,7 +65,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     if (!data) {
       reqLogger.warn('Changelog entry LLMs.txt not found', { slug });
-      return badRequestResponse('Changelog entry LLMs.txt not found or invalid', CORS);
+      return NextResponse.json(
+        { error: 'Changelog entry LLMs.txt not found' },
+        {
+          status: 404,
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            ...buildSecurityHeaders(),
+            ...CORS,
+          },
+        }
+      );
     }
 
     const formatted = data.replaceAll(String.raw`\n`, '\n');

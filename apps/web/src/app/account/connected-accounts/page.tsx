@@ -129,7 +129,7 @@ export default async function ConnectedAccountsPage() {
     </div>
   );
 
-  const identities = identitiesData?.identities ?? [];
+  const identities = (identitiesData ?? { identities: [] }).identities ?? [];
   if (identities.length === 0) {
     userLogger.info('ConnectedAccountsPage: no OAuth identities found', {
       section: 'identities-data-fetch',

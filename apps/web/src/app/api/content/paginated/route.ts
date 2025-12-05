@@ -91,6 +91,13 @@ export async function GET(request: NextRequest) {
 
     const category = categoryParam === 'all' ? undefined : toContentCategory(categoryParam);
 
+    if (categoryParam !== 'all' && category === undefined) {
+      return badRequestResponse(
+        `Invalid category '${categoryParam}'. Valid categories: all, ${CONTENT_CATEGORY_VALUES.join(', ')}`,
+        CORS
+      );
+    }
+
     reqLogger.info('Paginated content request received', {
       offset: offsetParam,
       limit: limitParam,

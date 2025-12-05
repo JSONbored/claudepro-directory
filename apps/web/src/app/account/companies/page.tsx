@@ -247,19 +247,29 @@ export default async function CompaniesPage() {
                       <div className="flex flex-1 items-start gap-4">
                         {(() => {
                           // Validate logo URL is safe (should be from Supabase storage or trusted domain)
-                          if (!company.logo) return null;
+                          if (!company.logo) {
+                            return (
+                              <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                                <Building2 className="text-muted-foreground h-8 w-8" />
+                              </div>
+                            );
+                          }
                           try {
                             const parsed = new URL(company.logo);
                             // Only allow HTTPS
-                            if (parsed.protocol !== 'https:') return null;
+                            if (parsed.protocol !== 'https:') {
+                              return (
+                                <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                                  <Building2 className="text-muted-foreground h-8 w-8" />
+                                </div>
+                              );
+                            }
                             // Allow Supabase storage (public bucket path) or common CDN domains
                             // Restrict to specific CDN patterns to prevent subdomain abuse
                             const isSupabaseHost =
                               parsed.hostname.endsWith('.supabase.co') ||
                               parsed.hostname.endsWith('.supabase.in');
-                            const isCloudinary =
-                              parsed.hostname === 'res.cloudinary.com' ||
-                              /^[a-z0-9-]+\.cloudinary\.com$/.test(parsed.hostname);
+                            const isCloudinary = parsed.hostname === 'res.cloudinary.com';
                             const isAwsS3 =
                               /^[a-z0-9-]+\.s3\.amazonaws\.com$/.test(parsed.hostname) ||
                               /^s3\.[a-z0-9-]+\.amazonaws\.com$/.test(parsed.hostname);
@@ -268,7 +278,13 @@ export default async function CompaniesPage() {
                                 parsed.pathname.startsWith('/storage/v1/object/public/')) ||
                               isCloudinary ||
                               isAwsS3;
-                            if (!isTrustedSource) return null;
+                            if (!isTrustedSource) {
+                              return (
+                                <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                                  <Building2 className="text-muted-foreground h-8 w-8" />
+                                </div>
+                              );
+                            }
                             return (
                               <Image
                                 src={company.logo}
@@ -280,14 +296,13 @@ export default async function CompaniesPage() {
                               />
                             );
                           } catch {
-                            return null;
+                            return (
+                              <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                                <Building2 className="text-muted-foreground h-8 w-8" />
+                              </div>
+                            );
                           }
                         })()}
-                        {!company.logo && (
-                          <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
-                            <Building2 className="text-muted-foreground h-8 w-8" />
-                          </div>
-                        )}
                         <div className="flex-1">
                           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                             <CardTitle>{company.name}</CardTitle>

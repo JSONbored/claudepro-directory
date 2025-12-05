@@ -65,7 +65,7 @@ function SafeWebsiteLink({
 }
 
 interface CompanyPageProperties {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export const revalidate = 1800; // 30min ISR (fallback if edge function cache misses)
@@ -129,7 +129,7 @@ export async function generateStaticParams() {
  * @see generatePageMetadata
  */
 export async function generateMetadata({ params }: CompanyPageProperties): Promise<Metadata> {
-  const { slug } = params;
+  const { slug } = await params;
   return generatePageMetadata('/companies/:slug', {
     params: { slug },
   });
@@ -149,7 +149,7 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
  * @see generateStaticParams
  */
 export default async function CompanyPage({ params }: CompanyPageProperties) {
-  const { slug } = params;
+  const { slug } = await params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();

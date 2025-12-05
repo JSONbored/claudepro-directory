@@ -128,8 +128,27 @@ export async function GET(request: NextRequest) {
   const jobEmploymentParam = url.searchParams.get('job_employment') ?? undefined;
   const jobExperienceParam = url.searchParams.get('job_experience') ?? undefined;
   const jobRemoteParam = url.searchParams.get('job_remote');
-  const jobRemote =
-    jobRemoteParam === 'true' ? true : jobRemoteParam === 'false' ? false : undefined;
+  let jobRemote: boolean | undefined;
+  switch (jobRemoteParam) {
+    case null: {
+      jobRemote = undefined;
+
+      break;
+    }
+    case 'true': {
+      jobRemote = true;
+
+      break;
+    }
+    case 'false': {
+      jobRemote = false;
+
+      break;
+    }
+    default: {
+      return badRequestResponse('Invalid job_remote parameter. Must be "true" or "false".', CORS);
+    }
+  }
 
   const jobCategory = validateEnumValue<JobCategory>(jobCategoryParam, JOB_CATEGORY_VALUES);
   const jobEmployment = validateEnumValue<JobEmployment>(jobEmploymentParam, JOB_EMPLOYMENT_VALUES);
