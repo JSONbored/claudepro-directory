@@ -3,13 +3,13 @@ import { getSkeletonKeys, Skeleton } from '@heyclaude/web-runtime/ui';
 const CODE_LINE_KEYS = getSkeletonKeys(8);
 
 /**
- * Render a full-page skeleton UI for the category/[slug] page while content is loading.
+ * Full-page skeleton UI placeholder for the category/[slug] page shown while content loads.
  *
- * The component renders header placeholders (back button, title, metadata), a responsive two-column
- * content area with a content card and a multi-line code-block skeleton, and a right-hand sidebar
- * skeleton to mimic the final page layout during load.
+ * Renders header placeholders (back button, title, metadata), a responsive two-column layout with
+ * a content card and a multi-line code-block skeleton, and a right-hand sidebar skeleton to
+ * mimic the final page layout during loading.
  *
- * @returns A React element containing skeleton placeholders for header, main content, code block, and sidebar.
+ * @returns A React element containing skeleton placeholders for the header, main content, code block, and sidebar.
  *
  * @see getSkeletonKeys from @heyclaude/web-runtime/ui
  * @see Skeleton from @heyclaude/web-runtime/ui

@@ -183,7 +183,14 @@ function isValidSlug(slug: string): boolean {
   return /^[a-z0-9-_]+$/.test(slug);
 }
 
-// Strict type validation - must be in allowlist
+/**
+ * Checks whether a string is one of the allowed submission_type values.
+ *
+ * @param type - Candidate submission type string to validate
+ * @returns `true` if `type` is one of the allowed submission_type values, `false` otherwise.
+ *
+ * @see ALLOWED_TYPES
+ */
 function isSafeType(type: string): type is Database['public']['Enums']['submission_type'] {
   return (ALLOWED_TYPES as readonly string[]).includes(type);
 }
@@ -212,17 +219,13 @@ function getSafeContentUrl(
 }
 
 /**
- * Render the "My Submissions" account page, fetching the current user's submissions and displaying them.
+ * Render the authenticated user's submissions page.
  *
- * Fetches the authenticated user and the user's dashboard submissions, validates and formats submission
- * data, and returns the server-rendered UI for listing submissions, creating a new submission, and
- * showing informational guidance.
+ * Fetches the current request's authenticated user and their dashboard submissions, validates
+ * external PR and internal content links, and renders the appropriate UI (submissions list,
+ * sign-in prompt, or error message) for this server-rendered page.
  *
- * Data fetching is performed on the server for the current request; errors during dashboard fetching
- * render a simple error message. Links to GitHub PRs and internal content pages are validated before
- * being exposed.
- *
- * @returns The rendered submissions page as a React Server Component subtree.
+ * @returns A React Server Component subtree representing the submissions page.
  *
  * @see SubmissionCard
  * @see getUserDashboard
@@ -371,8 +374,15 @@ export default async function SubmissionsPage() {
   };
 
   /**
-   * Get safe PR link props or null if PR URL is invalid
-   * Extracts and validates PR components, then constructs a safe URL
+   * Produce safe GitHub PR link properties for a submission when its PR reference is valid.
+   *
+   * Validates and normalizes a submission's PR reference and returns an object suitable for link props.
+   *
+   * @param submission - A submission record (one element from `submissions`) that may contain `pr_url` and/or `pr_number`.
+   * @returns `{ href: string }` with a canonical, validated GitHub PR URL if a safe PR link can be constructed, `null` otherwise.
+   *
+   * @see extractPrComponents
+   * @see buildSafePrUrl
    */
   function getPrLinkProperties(submission: (typeof submissions)[number]) {
     const components = submission.pr_url ? extractPrComponents(submission.pr_url) : null;

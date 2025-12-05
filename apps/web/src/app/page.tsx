@@ -50,15 +50,18 @@ interface HomePageProperties {
 }
 
 /**
- * Server component that fetches, sanitizes, and renders the homepage top contributors.
+ * Server component that renders the homepage top contributors.
  *
- * Fetches homepage data using category IDs, tracks RPC failures scoped to the
- * "top-contributors" section on error, filters out invalid contributor entries,
- * normalizes each contributor (ensuring `id`, `slug`, `name`, defaulting `tier`
- * to `"free"`, and adding a `created_at` timestamp), and renders the
- * TopContributors component with the processed list.
+ * Fetches homepage data for the homepage categories, filters out entries missing
+ * required identity fields, and normalizes each contributor by ensuring `id`,
+ * `slug`, and `name` are present, defaulting `tier` to `"free"` when absent,
+ * and adding a `created_at` ISO timestamp. If fetching homepage data fails,
+ * the failure is tracked with scope `top-contributors` and the component
+ * renders with an empty contributor list.
  *
- * @returns A React element rendering the TopContributors component populated with processed contributor objects.
+ * This component runs during server rendering and does not declare its own ISR.
+ *
+ * @returns A React element rendering TopContributors populated with the processed contributors.
  *
  * @see getHomepageData
  * @see getHomepageCategoryIds
@@ -190,7 +193,15 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
 }
 
 /**
- * Wrapper component that awaits search filters and passes to content server
+ * Resolves provided search filter options and renders HomepageContentServer with those filters.
+ *
+ * This server-side wrapper ensures the `searchFiltersPromise` is fulfilled before rendering the content
+ * server, preventing the child component from rendering without the required search filters.
+ *
+ * @param props.searchFiltersPromise - A promise that resolves to the search filter options to pass to HomepageContentServer.
+ *
+ * @see HomepageContentServer
+ * @see SearchFilterOptions
  */
 async function HomepageContentServerWrapper({
   searchFiltersPromise,

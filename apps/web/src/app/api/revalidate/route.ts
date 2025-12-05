@@ -36,17 +36,16 @@ const RevalidateRequestSchema = z.object({
 });
 
 /**
- * Handle POST requests to trigger on-demand ISR revalidation and cache tag invalidation.
+ * Trigger on-demand ISR revalidation and cache tag invalidation for specified targets.
  *
- * Parses and validates a JSON payload containing a secret and one or more revalidation targets,
- * verifies the secret against the environment, revalidates Next.js paths and tags, logs the outcome,
- * and returns a JSON response describing which paths/tags were revalidated or an error.
+ * Validates the JSON payload, verifies the secret, revalidates Next.js paths derived from
+ * `category`/`slug`, invalidates the provided cache `tags`, logs the outcome, and returns a
+ * JSON summary of the revalidation actions.
  *
- * Expected request body shape: { secret: string, category?: string, slug?: string, tags?: string[] }.
+ * Expected request body: { secret: string, category?: string, slug?: string, tags?: string[] }.
  *
- * @param {NextRequest} request - Incoming Next.js request containing the JSON payload for revalidation.
- * @returns {NextResponse} JSON response indicating success and the revalidated paths/tags, or an error payload with an appropriate HTTP status.
- *
+ * @param request - Incoming Next.js request containing the JSON payload for revalidation
+ * @returns A NextResponse JSON object with `revalidated: true`, optional `paths` and `tags` arrays, and a `timestamp`, or an error payload with an appropriate HTTP status
  * @see RevalidateRequestSchema
  * @see revalidatePath
  * @see revalidateTag

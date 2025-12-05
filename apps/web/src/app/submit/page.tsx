@@ -83,8 +83,12 @@ function formatTimeAgo(dateString: string): string {
 }
 
 /**
- * Type guard: Check if a value is a valid content_category
- * Uses only generated types from @heyclaude/database-types
+ * Determines whether a string is a valid `content_category` enum value.
+ *
+ * @param value - The string to validate as a content category
+ * @returns `true` if `value` is a member of the `content_category` enum, `false` otherwise
+ *
+ * @see Constants.public.Enums.content_category
  */
 function isValidContentCategory(
   value: string

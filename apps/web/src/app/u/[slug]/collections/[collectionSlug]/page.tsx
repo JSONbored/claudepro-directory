@@ -62,10 +62,10 @@ function isValidSlug(slug: string): boolean {
 }
 
 /**
- * Produce a safe internal path to a content item when its type and slug are valid.
+ * Produces an internal path for a content item when its content type and slug are valid.
  *
- * @param item - Object containing `content_type` and `content_slug` for the content item
- * @returns The path string `/[content_type]/[content_slug]` when both values are valid, or `null` when not
+ * @param item - Object with `content_type` and `content_slug` fields to validate
+ * @returns The path `/content_type/content_slug` if both values are valid, `null` otherwise
  *
  * @see isValidContentType
  * @see isValidSlug

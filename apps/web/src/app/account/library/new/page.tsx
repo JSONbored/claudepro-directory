@@ -21,9 +21,9 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Produce the page metadata for the account library "create collection" route.
+ * Provide page metadata for the account library "create collection" route.
  *
- * @returns Page metadata for the '/account/library/new' route.
+ * @returns Metadata for the '/account/library/new' page
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {

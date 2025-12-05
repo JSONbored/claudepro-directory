@@ -64,17 +64,17 @@ function isSponsorshipActive(
 }
 
 /**
- * Render the account Sponsorships page: authenticate the user, load and display their sponsorship campaigns with stats and controls.
+ * Render the account Sponsorships page and display the user's sponsorship campaigns with controls and statistics.
  *
- * Attempts to authenticate the current request, loads the user's sponsorships, and renders one of:
- * - a sign-in prompt when unauthenticated,
+ * Authenticates the current request, loads the authenticated user's sponsorships, and renders one of:
+ * - a sign-in prompt when the request is unauthenticated,
  * - an error message when sponsorships cannot be loaded,
  * - an empty-state CTA when the user has no sponsorships,
- * - or a list of sponsorship cards sorted newest-first showing status badges, impressions/clicks/CTR, and an impressions progress bar when applicable.
+ * - or a grid of sponsorship cards (newest-first) showing status badges, impressions, clicks, CTR, and an impressions progress bar when applicable.
  *
- * This is a server component that performs per-request data fetching and logging; it relies on request-scoped logging, getAuthenticatedUser for authentication, getUserSponsorships for data, and isSponsorshipActive to determine campaign activity. The page is rendered dynamically on the server.
+ * This is a server component that performs per-request data fetching and request-scoped logging.
  *
- * @returns The rendered JSX for the Sponsorships page (heading, CTAs, and a grid of sponsorship cards or appropriate fallback UIs).
+ * @returns The JSX for the Sponsorships page (heading, CTAs, and either a sign-in prompt, error message, empty-state CTA, or a grid of sponsorship cards).
  *
  * @see getAuthenticatedUser
  * @see getUserSponsorships

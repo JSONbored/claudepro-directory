@@ -11,11 +11,11 @@ export interface ChangelogListClientProps {
 }
 
 /**
- * Render a timeline of changelog entries without filter tabs.
+ * Renders a changelog timeline without filter tabs.
  *
- * Renders the full timeline using ChangelogTimelineView when entries are present; when `entries` is empty, displays a centered "No changelog entries found." message.
+ * When `entries` is empty, displays a centered "No changelog entries found." message; otherwise renders the full timeline via ChangelogTimelineView.
  *
- * @param entries - Array of changelog entries to display in the timeline
+ * @param entries - Changelog entries to display
  *
  * @see ChangelogTimelineView
  */

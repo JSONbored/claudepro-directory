@@ -16,13 +16,13 @@ import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtim
 import { type NextRequest } from 'next/server';
 
 /**
- * Handle GET requests to /api/inngest by forwarding the incoming Next.js request to the Inngest runtime handler.
+ * Forward incoming GET requests at /api/inngest to the Inngest runtime handler.
  *
- * Creates a per-request logger and delegates processing to the underlying Inngest GET handler.
+ * Creates a per-request logger for tracing and delegates the Next.js request and context to the underlying Inngest GET handler.
  *
- * @param request - The incoming Next.js request object for the route.
- * @param context - Route handler context provided by Next.js (opaque; forwarded to the Inngest handler).
- * @returns The Response produced by the Inngest runtime handler.
+ * @param {NextRequest} request - The incoming Next.js request object for the route.
+ * @param {unknown} context - Route handler context provided by Next.js (opaque; forwarded to the Inngest handler).
+ * @returns {Promise<Response>} The Response produced by the Inngest runtime handler.
  *
  * @see {@link @heyclaude/web-runtime/inngest~GET} - Underlying Inngest GET handler
  * @see {@link @heyclaude/web-runtime/logging/server~generateRequestId} - Request ID generator used for tracing
@@ -47,14 +47,14 @@ export async function GET(request: NextRequest, context: unknown) {
 }
 
 /**
- * Handle POST requests to /api/inngest by delegating to the Inngest POST handler with per-request tracing.
+ * Forward POST requests to /api/inngest to the Inngest POST handler while creating a per-request logger.
  *
- * Creates a per-request logger and forwards the incoming `request` and `context` to `inngestPOST`; on failure the original error is normalized and logged before being re-thrown.
+ * If the underlying handler throws, the error is normalized and logged before being re-thrown.
  *
  * @param request - NextRequest - The incoming request for the API route.
  * @param context - unknown - The Next.js route handler context provided to the API route.
  * @returns Promise<Response> - The HTTP response produced by the Inngest POST handler.
- * @throws Any error thrown by the underlying `inngestPOST` handler is re-thrown after being normalized and logged.
+ * @throws Any error thrown by the underlying `inngestPOST` handler is normalized, logged, and then re-thrown.
  * @see {@link inngestPOST}
  * @see {@link generateRequestId}
  * @see {@link logger}
@@ -78,10 +78,10 @@ export async function POST(request: NextRequest, context: unknown) {
 }
 
 /**
- * Handle PUT requests to /api/inngest by forwarding the request to the Inngest sync handler while scoping logs and normalizing errors.
+ * Forward PUT requests to the Inngest sync handler while scoping a per-request logger and normalizing errors.
  *
- * @param request - The Next.js request object for the incoming HTTP request
- * @param context - The route context forwarded to the Inngest handler
+ * @param request - NextRequest: The Next.js request object for the incoming HTTP request
+ * @param context - unknown: The route context forwarded to the Inngest handler
  * @returns The Response produced by the Inngest PUT handler
  * @see {@link @heyclaude/web-runtime/inngest#PUT}
  * @see {@link @heyclaude/web-runtime/logging/server.generateRequestId}

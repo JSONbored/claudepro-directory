@@ -335,23 +335,23 @@ function validateEnumValue<T extends string>(
 }
 
 /**
- * Dispatches the search request to the appropriate backend (jobs, unified, or content) and returns matching rows along with the total count.
+ * Dispatches the search to the appropriate backend ('jobs', 'unified', or 'content') and returns matching rows with a total count.
  *
- * @param params.authors - string[] | undefined — Optional list of author slugs to filter content results.
- * @param params.categories - string[] | undefined — Optional list of content categories to filter content results.
- * @param params.entities - string[] | undefined — Optional list of entity types to include for unified searches; when omitted or empty, defaults to the module's DEFAULT_ENTITIES.
- * @param params.jobCategory - JobCategory | undefined — Optional job category to filter job searches.
- * @param params.jobEmployment - JobEmployment | undefined — Optional employment type to filter job searches.
- * @param params.jobExperience - JobExperience | undefined — Optional experience level to filter job searches.
- * @param params.jobRemote - boolean | undefined — Optional flag to restrict job searches to remote-only roles; included in job backend args only when defined.
- * @param params.limit - number — Maximum number of results to return.
- * @param params.offset - number — Number of results to skip (pagination offset).
- * @param params.query - string — The raw search query string; may be empty.
- * @param params.searchService - SearchService — SearchService instance used to perform backend searches.
- * @param params.searchType - SearchType — The type of search to perform: `'jobs'`, `'unified'`, or `'content'`.
- * @param params.sort - SortType — Sort order to apply for content searches.
- * @param params.tags - string[] | undefined — Optional list of tags to filter content results.
- * @returns An object with `results` (array of matching rows) and `totalCount` (the total number of matching items; prefers a backend-provided total when available, otherwise falls back to `results.length`).
+ * @param params.authors - Optional list of author slugs to filter content results.
+ * @param params.categories - Optional list of content categories to filter content results.
+ * @param params.entities - Optional list of entity types to include for unified searches; when omitted or empty, defaults to DEFAULT_ENTITIES.
+ * @param params.jobCategory - Optional job category to filter job searches.
+ * @param params.jobEmployment - Optional employment type to filter job searches.
+ * @param params.jobExperience - Optional experience level to filter job searches.
+ * @param params.jobRemote - Optional flag to restrict job searches to remote-only roles; included in job backend args only when defined.
+ * @param params.limit - Maximum number of results to return.
+ * @param params.offset - Number of results to skip (pagination offset).
+ * @param params.query - The raw search query string; may be empty.
+ * @param params.searchService - SearchService instance used to perform backend searches.
+ * @param params.searchType - The type of search to perform: `'jobs'`, `'unified'`, or `'content'`.
+ * @param params.sort - Sort order to apply for content searches.
+ * @param params.tags - Optional list of tags to filter content results.
+ * @returns An object containing `results` (array of matching rows) and `totalCount` (the total number of matching items; prefers a backend-provided total when available, otherwise falls back to `results.length`).
  */
 async function executeSearch(params: {
   authors?: string[] | undefined;
@@ -546,6 +546,14 @@ async function trackSearchAnalytics(
   }
 }
 
+/**
+ * Choose the effective search type based on requested entities and whether job-specific filters are present.
+ *
+ * @param entities - An optional array of entity names to restrict the search (e.g., `['job']`). `undefined` or an empty array means no entity restriction.
+ * @param hasJobFilters - `true` when job-specific filters (category, employment, experience, remote) are present.
+ * @returns The selected SearchType: `'jobs'` when the search targets job results, `'unified'` when one or more non-job entities are specified, or `'content'` when there is no entity restriction.
+ * @see executeSearch
+ */
 function determineSearchType(entities: string[] | undefined, hasJobFilters: boolean): SearchType {
   if (entities?.length === 1 && entities[0] === 'job') {
     return 'jobs';

@@ -147,15 +147,16 @@ function CategorySection({
 }
 
 /**
- * Render supplemental changelog content (JSON sections or HTML) and the accordion sections after structured changes.
+ * Render supplemental changelog content and accordion sections after structured changes.
  *
- * When structured changes are present this component will render metadata sections or remaining markdown-derived HTML;
- * when structured changes are absent it will render metadata sections or the full markdown content.
+ * Depending on whether structured/category changes are displayed, renders either JSON-derived metadata sections
+ * or remaining markdown-derived HTML to avoid duplicating category or accordion content, then always renders
+ * accordion sections when `entry.content` is present.
  *
- * @param entry - Changelog entry object; `entry.content` is used as the source markdown for additional HTML and for accordion sections
+ * @param entry - Changelog entry whose `content` (markdown) is the source for additional HTML and accordion sections
  * @param metadataSections - Optional JSON-derived guide sections to render via JSONSectionRenderer
- * @param hasStructuredChanges - Whether the changelog's structured/category changes are being displayed; affects which content is shown to avoid duplication
- * @returns A JSX fragment containing the additional content (metadata or HTML) and the ChangelogAccordionSections component when applicable
+ * @param hasStructuredChanges - If true, category headings are stripped from the markdown to prevent duplicate content
+ * @returns A JSX fragment containing the additional content (metadata or sanitized HTML) and accordion sections when applicable
  *
  * @see JSONSectionRenderer
  * @see TrustedHTML

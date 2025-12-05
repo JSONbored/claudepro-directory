@@ -162,11 +162,13 @@ function transformHealthResult(
 /**
  * Handle GET /api/status by querying the `get_api_health` RPC and returning a normalized health report.
  *
- * Transforms the RPC result into a camelCase health object and returns it as JSON with CORS and cache headers.
- * HTTP status mapping: `healthy` or `degraded` => 200, any other status => 503. If the RPC returns an error or an unexpected exception occurs, an error response is returned.
+ * Queries the database via a Supabase anon client, transforms the RPC result into a camelCase health
+ * object, and responds with JSON including CORS and cache headers. HTTP status is 200 for `healthy`
+ * or `degraded`, and 503 for any other status. If the RPC returns an error or an unexpected exception
+ * occurs, a structured error response is returned.
  *
- * @param _request - NextRequest: the incoming Next.js request (unused)
- * @returns A NextResponse containing the health report JSON on success, or a structured error response on failure
+ * @param _request - NextRequest representing the incoming request (unused)
+ * @returns A NextResponse containing the transformed health report JSON on success, or a structured error response on failure
  *
  * @see transformHealthResult
  * @see createSupabaseAnonClient
@@ -226,6 +228,14 @@ export async function GET(_request: NextRequest) {
   }
 }
 
+/**
+ * Responds to HTTP OPTIONS requests with CORS headers and no response body.
+ *
+ * Returns a 204 No Content response including only the CORS headers required for preflight requests.
+ *
+ * @returns A NextResponse with status 204 and CORS headers.
+ * @see getOnlyCorsHeaders
+ */
 export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,

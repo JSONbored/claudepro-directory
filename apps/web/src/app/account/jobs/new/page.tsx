@@ -17,9 +17,9 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Produce metadata for the "/account/jobs/new" page.
+ * Generate metadata for the /account/jobs/new page.
  *
- * @returns The Next.js `Metadata` object for the new job creation page.
+ * @returns Metadata for the new job creation page.
  *
  * @see generatePageMetadata
  */
@@ -69,15 +69,15 @@ export default async function NewJobPage() {
   }
 
   /**
-   * Handle submission of the new-job form: create the job, start checkout if payment is required, or redirect to the jobs list.
+   * Create a job from submitted form data, initiating checkout if payment is required or redirecting to the jobs list when no payment is needed.
    *
-   * @param data - The job creation payload submitted from the JobForm
+   * @param data - The payload from JobForm used to create the job
    * @returns An object describing the outcome:
-   * - `{ success: true, requiresPayment: true, checkoutUrl, message }` when creation succeeded and a checkout URL is provided,
-   * - `{ success: false, requiresPayment: true, message }` when creation indicates payment is required but no checkout URL could be started,
-   * - `{ success: false, message }` when job creation failed.
-   * The function will perform a redirect to `/account/jobs` when creation succeeds and no payment is required.
-   * @throws Normalized errors when the createJob call throws, when `result.serverError` is present, or when the action returns malformed/missing data.
+   * - `{ success: true, requiresPayment: true, checkoutUrl: string, message: string }` when creation succeeded and a checkout URL is provided,
+   * - `{ success: false, requiresPayment: true, message: string }` when creation indicates payment is required but no checkout URL could be started,
+   * - `{ success: false, message: string }` when job creation failed.
+   * Note: when creation succeeds and `requiresPayment` is `false`, the function performs a redirect to `/account/jobs` instead of returning.
+   * @throws Normalized errors when the `createJob` call throws, when `result.serverError` is present, or when the action returns malformed/missing data
    *
    * @see createJob
    * @see normalizeError

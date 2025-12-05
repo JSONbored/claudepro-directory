@@ -37,10 +37,10 @@ interface AnalyticsPageProperties {
 }
 
 /**
- * Generate metadata for the sponsorship analytics page identified by the route `id`.
+ * Generates metadata for the sponsorship analytics page for the given route `id`.
  *
- * @param params - A promise resolving to route parameters; must provide `id` for the sponsorship
- * @returns Metadata for the sponsorship analytics page for the provided `id`
+ * @param params - A promise resolving to route parameters; must resolve to an object containing `id`
+ * @returns Metadata for the sponsorship analytics page corresponding to `id`
  *
  * @see generatePageMetadata
  * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata

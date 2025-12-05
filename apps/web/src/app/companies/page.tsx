@@ -48,17 +48,23 @@ const NewsletterCTAVariant = dynamicImport(
  */
 export const revalidate = 86_400;
 
+/**
+ * Produce page metadata for the Companies page.
+ *
+ * @returns The metadata object for the `/companies` route.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/companies');
 }
 
 /**
- * Renders the Companies directory page and its list of company cards.
+ * Render the Companies directory page including a hero, a responsive grid of company cards, and a newsletter CTA.
  *
- * Fetches up to 50 companies, logs request-scoped diagnostics, and renders a hero, a responsive grid of company cards (with optional logo, industry, description, stats, featured badge, and validated external website links), and a newsletter CTA.
+ * Fetches the companies list (requesting up to 50 entries) and renders each company's card with optional logo, industry, description, stats, featured badge, and a validated external website link. The page uses incremental static regeneration with revalidate = 86400 (24 hours).
  *
- * @throws When loading the companies list fails — the underlying error is normalized and rethrown.
- * @returns The page's React element tree for the /companies route.
+ * @throws A normalized error when loading the companies list fails.
+ * @returns The React element tree for the /companies route.
  *
  * @see getCompaniesList
  * @see getSafeWebsiteUrl from @heyclaude/web-runtime/core

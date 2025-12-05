@@ -5,7 +5,7 @@ import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
 /**
- * Generate the page metadata configured for the site's Privacy page.
+ * Provide page metadata used by Next.js for the site's Privacy page.
  *
  * @returns The Next.js Metadata object for the "/privacy" page.
  * @see generatePageMetadata

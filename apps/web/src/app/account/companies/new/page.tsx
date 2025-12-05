@@ -27,12 +27,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Renders the "Create Company" page, ensuring the request is authenticated and redirecting to the login page when not.
+ * Render the Create Company page and enforce server-side authentication, redirecting unauthenticated requests to /login.
  *
- * Performs a server-side authentication check using getAuthenticatedUser; unauthenticated requests are redirected to "/login".
- * Generates a request-scoped ID for instrumentation and returns a React element containing the page header and a CompanyForm in create mode.
- *
- * @returns A React element rendering the "Create Company" page.
+ * @returns A React element that renders the Create Company page, including the header and a `CompanyForm` in create mode.
  *
  * @see getAuthenticatedUser
  * @see CompanyForm

@@ -72,10 +72,16 @@ const NewsletterCTAVariant = dynamicImport(
 export const revalidate = 900;
 
 /**
- * Streaming Jobs Count Badge
- * Fetches total job count independently to avoid duplicate RPC calls
- * OPTIMIZATION: This component streams its own data, eliminating the
- * redundant count-only query in the main page component.
+ * Renders a badge that displays the total number of jobs by fetching the count separately.
+ *
+ * This server component streams its own count data to avoid duplicating a count-only RPC in the main page render.
+ * On success it shows the fetched total; on error it logs a normalized warning and renders the badge with `0` jobs.
+ *
+ * @returns A JSX element rendering a badge with the total job count.
+ *
+ * @see getFilteredJobs
+ * @see normalizeError
+ * @see UnifiedBadge
  */
 async function JobsCountBadge() {
   let totalJobs = 0;
@@ -124,19 +130,23 @@ export async function generateMetadata({
 }
 
 /**
- * Renders the jobs listing section for a given set of filter and pagination parameters.
+ * Render the jobs listing section for a given filter and pagination state.
  *
- * Fetches matching jobs from the server and renders either a total-empty state, a filtered-empty state, or a list of JobCard entries. When any filter is active (searchQuery, category, employment, experience, or remote) the fetch is performed without caching (uncached SSR); otherwise the page-level ISR revalidation applies. Results are sorted client-side according to the provided `sort` option.
+ * Fetches matching jobs and renders one of: a "no jobs available" total-empty state, a
+ * "no jobs found" filtered-empty state, or a grid of JobCard entries. When any filter is
+ * active (searchQuery, category, employment, experience, or remote) the server fetch is
+ * performed without caching (uncached SSR). When no filters are active the page-level ISR
+ * revalidation applies. Retrieved results are sorted client-side according to `sort`.
  *
  * @param props.searchQuery - Full-text search string to filter job titles and descriptions.
  * @param props.category - Category filter (omit or `undefined` to ignore).
  * @param props.employment - Employment type filter (e.g., "full-time", "part-time"; omit or `undefined` to ignore).
  * @param props.experience - Experience level filter (e.g., "junior", "senior"; omit or `undefined` to ignore).
  * @param props.remote - Remote-only filter; `true` restricts to remote roles, `false` restricts to non-remote, `undefined` ignores this filter.
- * @param props.sort - Sort option to apply after fetching (`'newest' | 'oldest' | 'salary'`).
- * @param props.limit - Maximum number of jobs to request for this page.
+ * @param props.sort - Sort option applied after fetching (`'newest' | 'oldest' | 'salary'`).
+ * @param props.limit - Maximum number of jobs requested for this page.
  * @param props.offset - Offset for pagination.
- * @returns A JSX element containing either the jobs list or an appropriate empty state card.
+ * @returns A JSX element containing either the jobs list or an appropriate empty-state card.
  *
  * @see getFilteredJobs
  * @see applyJobSorting
@@ -279,25 +289,21 @@ async function JobsListSection({
 }
 
 /**
- * Renders the Jobs page: a server-rendered, filterable jobs listing with a streaming total-count badge,
- * persistent filter form, active-filter chips, and a two-column layout containing the job list and sidebar cards.
+ * Render the server-side Jobs page with filters, active-filter chips, a streaming total-count badge, and a two-column jobs + sidebar layout.
  *
- * The page parses and normalizes query parameters (search, category, employment, experience, remote, sort, page, limit),
- * enforces bounds for pagination and limit, and builds navigation URLs that preserve or remove filters.
- * The total job count is provided via the streaming JobsCountBadge component; the main job list is rendered by JobsListSection.
+ * Renders a persistent filter form (search, category, employment, experience, remote, sort, pagination) and a job results section that uses server-side fetching plus client-side sorting; the total job count is streamed via JobsCountBadge while job results are rendered by JobsListSection.
  *
- * @param props.searchParams - Query parameters accepted:
- *   - q, query, or search: full-text search string
- *   - category: job category (e.g., "engineering") or "all"
- *   - employment: employment type (e.g., "full time") or "any"
- *   - experience: experience level (e.g., "entry") or "any"
+ * @param props.searchParams - Query parameters to control filtering and pagination. Recognized keys:
+ *   - q, query, search: full-text search string
+ *   - category: job category (use "all" or omit for no category filter)
+ *   - employment: employment type (use "any" or omit for no employment filter)
+ *   - experience: experience level (use "any" or omit for no experience filter)
  *   - remote: "true" to filter remote-only
  *   - sort: "newest" | "oldest" | "salary" (defaults to "newest")
- *   - page: 1-based page number (clamped to [1, 10000])
+ *   - page: 1-based page number (clamped to 1–10000)
  *   - limit: items per page (defaults to 20, max 100)
  *
- * @returns The page JSX containing header/hero, filter form with active filters and Clear All, a streaming jobs count badge,
- *          the JobsListSection (with server-side data fetching and client-side sorting), and sidebar components.
+ * @returns The page JSX containing the hero header, streaming JobsCountBadge, filter form with active-filter chips and Clear All action, the JobsListSection (server fetch + client sorting), sidebar components, and Newsletter CTA.
  *
  * @see JobsCountBadge
  * @see JobsListSection
@@ -697,13 +703,13 @@ type SortOption = 'newest' | 'oldest' | 'salary';
 const SORT_VALUES = new Set<SortOption>(['newest', 'oldest', 'salary']);
 
 /**
- * Sorts a list of job records according to the specified sort option.
+ * Order job records by posted date or by parsed salary.
  *
- * Sorts by `posted_at` (newest or oldest) or by numeric salary value (highest first).
+ * Supports the `'newest'`, `'oldest'`, and `'salary'` sort modes.
  *
- * @param jobs - Array of job records to sort; if falsy or not an array, an empty array is returned
- * @param sort - Sort option: `'newest'`, `'oldest'`, or `'salary'`
- * @returns The input jobs sorted according to `sort`; returns an empty array for invalid input
+ * @param jobs - Job objects to sort (as returned from the jobs query); if not an array, the function returns an empty array
+ * @param sort - Sort mode: `'newest'`, `'oldest'`, or `'salary'`
+ * @returns The input jobs sorted according to `sort`; returns an empty array when `jobs` is not a valid array
  *
  * @see extractSalaryValue - Parses salary strings into numeric values used for salary sorting
  */

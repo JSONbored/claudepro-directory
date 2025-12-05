@@ -170,22 +170,17 @@ export interface DetailHeaderActionsProps {
 }
 
 /**
- * Render interactive header actions for a content detail view.
+ * Render the interactive header and sticky actions sidebar for a content detail view.
  *
- * Renders back navigation, primary/secondary actions, pin/share controls, copy and download flows,
- * and a sticky actions sidebar when appropriate. Copy and download behaviours may be overridden
- * via props or rely on utilities like `getContentForCopy` and `sanitizePathSegment`.
- *
- * @param item - The content detail object (typically a ContentItem) used to derive title, slug, description, content, and download URLs
- * @param typeName - Human-readable content type label (shown as a badge)
- * @param category - Content category (used for routing, downloads, and analytics)
+ * @param item - Content detail object (typically a ContentItem) used to derive title, slug, description, content, and download URLs
+ * @param typeName - Human-readable content type label displayed as a badge
+ * @param category - Content category used for routing, download selection, and analytics
  * @param hasContent - Whether the item exposes copyable content; toggles content-specific action UI
- * @param displayTitle - Title to display in the header (falls back to item.title or item.slug when absent)
- * @param primaryAction - Primary CTA shown in the actions sidebar; its `type` determines special handling (e.g., `download`)
- * @param secondaryActions - Optional list of additional serializable actions rendered as secondary buttons
- * @param onCopyContent - Optional override callback invoked when the Copy Content button is pressed; if provided, the component will delegate copy handling to this function
- *
- * @returns The React element that composes the detail header actions UI.
+ * @param displayTitle - Title shown in the header (falls back to item.title or item.slug when absent)
+ * @param primaryAction - Primary CTA shown in the actions sidebar; its `type` triggers special handling (e.g., `download`)
+ * @param secondaryActions - Optional array of additional serializable actions rendered as secondary buttons
+ * @param onCopyContent - Optional override invoked when the Copy Content button is pressed; when provided, the component delegates copy handling to this callback
+ * @returns The React element composing the detail header and actions UI
  *
  * @see sanitizePathSegment
  * @see getContentForCopy

@@ -4,12 +4,11 @@ import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
 /**
- * Provide page metadata for the Cookies page used by Next.js.
+ * Provides page metadata for the Cookies page used by Next.js.
  *
- * This metadata object describes the Cookie Policy page and is produced at build time;
- * revalidation for this route is disabled (static generation with no ISR).
+ * Metadata is generated at build time for the '/cookies' route; revalidation is disabled (static generation, no ISR).
  *
- * @returns The `Metadata` for the Cookies page.
+ * @returns Metadata object describing the Cookies page.
  *
  * @see generatePageMetadata
  * @see {@link https://nextjs.org/docs/app/api-reference/functions/generate-metadata Next.js generate metadata}

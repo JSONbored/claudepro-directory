@@ -80,11 +80,11 @@ function formatStatValue(value: null | number | undefined): string {
 }
 
 /**
- * Renders the Community page including hero content, aggregated community statistics, contribution guidance, and an email CTA.
+ * Render the Community page including hero content, aggregated stats, contribution guidance, and an email CTA.
  *
- * Fetches directory and homepage metrics, logs configuration gaps and data-fetch errors, and supplies safe defaults when data is unavailable.
+ * Fetches community directory, configuration count, and homepage metrics and uses safe defaults when those data sources are unavailable.
  *
- * @returns The page's React element tree (JSX) for server rendering.
+ * @returns The React element tree for the Community page
  *
  * @see getCommunityDirectory
  * @see getConfigurationCount

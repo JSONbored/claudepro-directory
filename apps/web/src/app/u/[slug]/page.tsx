@@ -51,9 +51,18 @@ function isValidSlug(slug: string): boolean {
 }
 
 /**
- * Get safe content URL from type and slug
- * Returns null if either is invalid
- * Uses centralized CONTENT_CATEGORY_VALUES to ensure consistency
+ * Build a validated, sanitized URL path for a content item.
+ *
+ * Validates that `type` is a recognized content category and that `slug`
+ * can be sanitized into a valid path segment; returns `null` if validation fails.
+ *
+ * @param type - Content category (must be a valid content category string)
+ * @param slug - Candidate slug to sanitize and validate for use in the path
+ * @returns The path in the form `/{type}/{sanitizedSlug}` when valid, `null` otherwise
+ *
+ * @see sanitizeSlug
+ * @see isValidSlug
+ * @see isContentCategory
  */
 function getSafeContentUrl(type: string, slug: string): null | string {
   // Validate content type using centralized constant

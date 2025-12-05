@@ -27,10 +27,10 @@ export function removeAccordionSectionsFromContent(content: string): string {
 /**
  * Remove top-level changelog category sections and their content from markdown.
  *
- * This strips sections headed by "## Added", "## Changed", "## Fixed", "## Removed", "## Deprecated", and "## Security" along with their following content so the same changes are not shown twice when structured change data is rendered separately.
+ * Strips sections headed by `## Added`, `## Changed`, `## Fixed`, `## Removed`, `## Deprecated`, and `## Security` along with their following content so those changes are not duplicated when structured change data is rendered separately.
  *
- * @param content - The markdown content to sanitize. If falsy or not a string, the input is returned unchanged.
- * @returns The sanitized markdown string with matching category sections removed and excess blank lines collapsed.
+ * @param {string} content - The markdown content to sanitize; if falsy or not a string, the original input is returned unchanged.
+ * @returns {string} The sanitized markdown string with matching category sections removed and runs of three or more newlines collapsed to two; returns the original input unchanged for invalid input.
  * @see removeAccordionSectionsFromContent
  */
 export function removeCategorySectionsFromContent(content: string): string {

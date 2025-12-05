@@ -169,6 +169,14 @@ function CodeGroupTabs({
   );
 }
 
+/**
+ * Render a vertical list of strings with a leading colored dot for each item.
+ *
+ * @param items - Strings to render as list rows; each string becomes one list item.
+ * @param color - CSS class(es) applied to the dot indicator (typically Tailwind color classes).
+ *
+ * @see UI_CLASSES
+ */
 function List({ items, color }: { items: string[]; color: string }) {
   return (
     <ul className="space-y-2">
@@ -197,6 +205,17 @@ const getEnhancedListKey = (item: EnhancedListItem, index: number) => {
   return `enhanced-object-${title}-${content.slice(0, 50)}-${index}`;
 };
 
+/**
+ * Renders a vertical list of items where each entry is either a simple string or a structured Q&A / issue-solution pair.
+ *
+ * For string items the component renders a single-line row with a colored dot and text. For object items it renders a titled row (question or issue) with supporting content (answer or solution) and the same colored dot.
+ *
+ * @param items - Array of items to render. Each item may be a `string`, `{ issue: string; solution: string }`, or `{ question: string; answer: string }`.
+ * @param color - CSS class (typically a Tailwind color class) applied to the leading dot for each list item.
+ * @returns A React element representing the rendered list.
+ *
+ * @see getEnhancedListKey
+ */
 function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: string }) {
   return (
     <ul className="space-y-4">

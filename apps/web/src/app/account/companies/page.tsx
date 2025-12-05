@@ -43,9 +43,10 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Validate company website URL is safe for use in href
- * Only allows absolute URLs with http:// or https:// protocol
- * Strictly validates to prevent XSS and protocol-relative URLs
+ * Determine whether a string is a safe absolute HTTP(S) URL suitable for use in an href.
+ *
+ * @param url - The candidate URL to validate; may be null or undefined.
+ * @returns `true` if `url` is a non-empty string that parses as an absolute URL with `http:` or `https:` protocol, `false` otherwise.
  */
 function isAllowedHttpUrl(url: null | string | undefined): boolean {
   if (!url || typeof url !== 'string') return false;

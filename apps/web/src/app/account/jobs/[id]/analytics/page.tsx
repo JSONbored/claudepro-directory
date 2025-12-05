@@ -44,6 +44,14 @@ function formatStatus(rawStatus: string): string {
   return rawStatus.replaceAll('_', ' ').replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/**
+ * Map a job status to its configured badge color.
+ *
+ * @param status - The job status to map
+ * @returns The CSS/color token associated with `status`
+ *
+ * @see BADGE_COLORS.jobStatus
+ */
 function getStatusColor(status: JobStatus): string {
   return BADGE_COLORS.jobStatus[status];
 }

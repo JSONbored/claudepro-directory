@@ -32,12 +32,14 @@ interface RouteContext {
 type HttpMethod = 'GET' | 'POST';
 
 /**
- * Route a Flux API request to the runtime, building per-request logging and returning a HTTP response.
+ * Route a Flux API request to the Flux runtime, build per-request logging, and return the resulting HTTP response.
  *
- * @param method - HTTP method for the Flux operation ('GET' or 'POST')
- * @param request - The incoming Next.js request object
- * @param context - Route context containing resolved route params (expects `params.path` as string[])
- * @returns A Response produced by the Flux runtime for the given route and method, or an error Response if processing failed
+ * Routes the incoming request to the runtime using the supplied HTTP method and the dynamic path segments resolved from `context.params.path`.
+ *
+ * @param method - 'GET' or 'POST' indicating the Flux operation to perform
+ * @param request - The Next.js request object for the incoming HTTP request
+ * @param context - Route context whose `params` promise resolves to an object containing `path: string[]` (dynamic route segments)
+ * @returns A Response produced by the Flux runtime for the requested route and method, or an error Response when processing fails
  *
  * @see routeFluxRequest
  * @see normalizeError
@@ -78,11 +80,11 @@ async function handleFluxRequest(
 }
 
 /**
- * Handle GET requests for the Flux catch-all API route by delegating to the Flux router.
+ * Handles GET requests for the Flux catch-all API route by delegating to the Flux router.
  *
- * @param request - NextRequest: Incoming Next.js request object for the GET operation.
- * @param context - RouteContext: Route context whose `params.path` promise resolves to the array of dynamic path segments for this request.
- * @returns Response: The HTTP Response produced by the Flux router for this GET request.
+ * @param request - NextRequest - Incoming Next.js request object for the GET operation.
+ * @param context - RouteContext - Route context whose `params.path` resolves to the array of dynamic path segments for this request.
+ * @returns Response - The HTTP response produced by the Flux router for this GET request.
  * @see routeFluxRequest
  * @see handleFluxRequest
  * @see generateRequestId
@@ -108,12 +110,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
 }
 
 /**
- * Handle CORS preflight and OPTIONS requests for the Flux catch-all API route.
+ * Produce a CORS preflight response for the Flux catch-all API route.
  *
- * Delegates to the runtime's `handleOptions` helper to produce the appropriate
- * preflight response with allowed methods and headers.
+ * Delegates to the runtime's handleOptions helper to create a Response with
+ * appropriate CORS headers and allowed methods for OPTIONS requests.
  *
- * @returns The `Response` produced by `handleOptions`, configured for CORS/preflight.
+ * @returns A Response configured for CORS preflight (allowed methods and headers).
  * @see {@link @heyclaude/web-runtime/flux~handleOptions}
  */
 export function OPTIONS() {

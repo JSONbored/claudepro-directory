@@ -39,11 +39,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the Account Activity page, enforcing authentication and displaying the user's activity summary and timeline with tolerant handling of partial data failures.
+ * Render the Account Activity page for the authenticated user.
  *
- * If the user is unauthenticated, returns a sign-in prompt. If both activity summary and timeline fail to load, returns a global "Activity unavailable" fallback. If one source loads while the other fails, shows the available data and hides the failed section while logging the error.
- *
- * Data fetched: authenticated user, activity summary, and activity timeline. Uses request- and user-scoped logging for diagnostics.
+ * Requires authentication and displays the user's activity summary and timeline.
+ * If one data source fails the page shows available data and a localized fallback for the failed section;
+ * if both sources fail, a global "Activity unavailable" fallback is rendered.
  *
  * @returns The React element tree for the Account Activity page.
  *
