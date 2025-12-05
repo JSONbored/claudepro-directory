@@ -182,34 +182,50 @@ function List({ items, color }: { items: string[]; color: string }) {
   );
 }
 
-type EnhancedListItem = string | { issue: string; solution: string };
+type EnhancedListItem =
+  | string
+  | { issue: string; solution: string }
+  | { question: string; answer: string };
 
-const getEnhancedListKey = (item: EnhancedListItem, index: number) =>
-  typeof item === 'string'
-    ? `enhanced-string-${item.slice(0, 50)}-${index}`
-    : `enhanced-object-${item.issue}-${item.solution.slice(0, 50)}-${index}`;
+const getEnhancedListKey = (item: EnhancedListItem, index: number) => {
+  if (typeof item === 'string') {
+    return `enhanced-string-${item.slice(0, 50)}-${index}`;
+  }
+  // Support both old format (issue/solution) and new format (question/answer)
+  const title = 'question' in item ? item.question : item.issue;
+  const content = 'answer' in item ? item.answer : item.solution;
+  return `enhanced-object-${title}-${content.slice(0, 50)}-${index}`;
+};
 
 function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: string }) {
   return (
     <ul className="space-y-4">
-      {items.map((item, index) =>
-        typeof item === 'string' ? (
-          <li key={getEnhancedListKey(item, index)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-            <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
-            <span className="text-sm leading-relaxed">{item}</span>
-          </li>
-        ) : (
+      {items.map((item, index) => {
+        if (typeof item === 'string') {
+          return (
+            <li key={getEnhancedListKey(item, index)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+              <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
+              <span className="text-sm leading-relaxed">{item}</span>
+            </li>
+          );
+        }
+
+        // Support both old format (issue/solution) and new Schema.org format (question/answer)
+        const title = 'question' in item ? item.question : item.issue;
+        const content = 'answer' in item ? item.answer : item.solution;
+
+        return (
           <li key={getEnhancedListKey(item, index)} className="space-y-2">
             <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
               <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
               <div className="space-y-1">
-                <p className="font-medium text-foreground text-sm">{item.issue}</p>
-                <p className="text-muted-foreground text-sm leading-relaxed">{item.solution}</p>
+                <p className="font-medium text-foreground text-sm">{title}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">{content}</p>
               </div>
             </div>
           </li>
-        )
-      )}
+        );
+      })}
     </ul>
   );
 }

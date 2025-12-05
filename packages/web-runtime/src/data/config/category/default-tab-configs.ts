@@ -67,7 +67,7 @@ const STANDARD_NO_EXAMPLES_TABS: ReadonlyArray<TabConfig> = [
 ] as const;
 
 /**
- * Simple tabs WITHOUT Examples - for rules
+ * Simple tabs WITHOUT Examples - for rules (legacy, kept for backward compatibility)
  * These have minimal structure with content + troubleshooting
  */
 const SIMPLE_TABS: ReadonlyArray<TabConfig> = [
@@ -92,6 +92,42 @@ const SIMPLE_TABS: ReadonlyArray<TabConfig> = [
     sections: ['reviews', 'related'],
     lazy: true,
     order: 3,
+  },
+] as const;
+
+/**
+ * Rules tabs WITH Examples - for CLAUDE.md files
+ * Includes examples tab for rule usage examples
+ */
+const RULES_TABS: ReadonlyArray<TabConfig> = [
+  {
+    id: 'overview',
+    label: 'Overview',
+    mobileLabel: 'Overview',
+    sections: ['content', 'description', 'features', 'use_cases', 'requirements'],
+    order: 1,
+  },
+  {
+    id: 'examples',
+    label: 'Examples',
+    mobileLabel: 'Examples',
+    sections: ['examples'],
+    order: 2,
+  },
+  {
+    id: 'installation',
+    label: 'Installation & Config',
+    mobileLabel: 'Setup',
+    sections: ['installation', 'configuration', 'security', 'troubleshooting'],
+    order: 3,
+  },
+  {
+    id: 'discussion',
+    label: 'Discussion',
+    mobileLabel: 'Discuss',
+    sections: ['reviews', 'related'],
+    lazy: true,
+    order: 4,
   },
 ] as const;
 
@@ -187,8 +223,8 @@ export const DEFAULT_TAB_CONFIGS: Readonly<
   agents: STANDARD_NO_EXAMPLES_TABS,
   hooks: STANDARD_NO_EXAMPLES_TABS,
   statuslines: STANDARD_NO_EXAMPLES_TABS,
-  // Simple content categories → minimal tabs
-  rules: SIMPLE_TABS,
+  // Rules with Examples tab and full sections
+  rules: RULES_TABS,
   // Commands with Examples tab
   commands: COMMANDS_TABS,
   // Special layouts

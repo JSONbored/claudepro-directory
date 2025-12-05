@@ -59,16 +59,22 @@ function SafeWebsiteLink({
 }
 
 interface CompanyPageProperties {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }
 
 export const revalidate = 1800; // 30min ISR (fallback if edge function cache misses)
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
+ * Limit to top 10 companies to optimize build time for static pre-rendering.
+ * Remaining company pages are rendered on demand via dynamicParams with ISR.
+ */
+const MAX_STATIC_COMPANIES = 10;
+
+/**
  * Produce route params for pre-rendering company pages at build time.
  *
- * Generates up to 10 { slug } objects for static pre-rendering; remaining company pages are rendered on demand via dynamicParams with ISR. On failure, logs the error and returns an empty array.
+ * Generates up to MAX_STATIC_COMPANIES { slug } objects for static pre-rendering; remaining company pages are rendered on demand via dynamicParams with ISR. On failure, logs the error and returns an empty array.
  *
  * @returns An array of objects each containing a `slug` string for a company page; empty if fetching fails or no slugs are available.
  *
@@ -76,11 +82,9 @@ export const dynamicParams = true; // Allow unknown slugs to be rendered on dema
  * @see {@link getCompaniesList} from @heyclaude/web-runtime/data
  * @see {@link generateRequestId}
  * @see {@link normalizeError}
+ * @see {@link MAX_STATIC_COMPANIES}
  */
 export async function generateStaticParams() {
-  // Limit to top 10 companies to optimize build time
-  const MAX_STATIC_COMPANIES = 10;
-
   // Generate requestId for static params generation (build-time)
   const staticParamsRequestId = generateRequestId();
 
@@ -111,7 +115,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: CompanyPageProperties): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug } = params;
   return generatePageMetadata('/companies/:slug', {
     params: { slug },
   });
@@ -139,7 +143,7 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
  * @see generateStaticParams
  */
 export default async function CompanyPage({ params }: CompanyPageProperties) {
-  const { slug } = await params;
+  const { slug } = params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
@@ -407,14 +411,25 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
                   <CardTitle className="text-lg">Interested in joining?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
-                    {company.website
-                      ? 'Visit their website to learn more about the company and culture.'
-                      : 'Check back regularly for new opportunities!'}
-                  </p>
-                  <SafeWebsiteLink url={company.website} className={UI_CLASSES.LINK_ACCENT}>
-                    Visit Website
-                  </SafeWebsiteLink>
+                  {(() => {
+                    const safeWebsiteUrl = getSafeWebsiteUrl(company.website);
+                    const hasWebsite = Boolean(safeWebsiteUrl);
+
+                    return (
+                      <>
+                        <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
+                          {hasWebsite
+                            ? 'Visit their website to learn more about the company and culture.'
+                            : 'Check back regularly for new opportunities!'}
+                        </p>
+                        {hasWebsite ? (
+                          <SafeWebsiteLink url={safeWebsiteUrl} className={UI_CLASSES.LINK_ACCENT}>
+                            Visit Website
+                          </SafeWebsiteLink>
+                        ) : null}
+                      </>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </aside>

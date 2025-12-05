@@ -3551,6 +3551,19 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      build_item_list_schema_for_rules: {
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["item_list_schema_result"]
+        SetofOptions: {
+          from: "*"
+          to: "item_list_schema_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       build_job_discord_embed: {
         Args: { p_job_id: string }
         Returns: Database["public"]["CompositeTypes"]["discord_embed"]
@@ -3609,6 +3622,19 @@ export type Database = {
         }
       }
       build_static_route_json_ld: { Args: { p_path: string }; Returns: Json }
+      build_tech_article_schema: {
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["tech_article_schema"]
+        SetofOptions: {
+          from: "*"
+          to: "tech_article_schema"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       calculate_content_popularity_score: {
         Args: {
           p_bookmark_count: number
