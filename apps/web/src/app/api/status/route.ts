@@ -160,13 +160,13 @@ function transformHealthResult(
 }
 
 /**
- * Handle GET /api/status requests by retrieving API health from the database RPC and returning a normalized health report.
+ * Handle GET /api/status by querying the `get_api_health` RPC and returning a normalized health report.
  *
- * Calls the `get_api_health` RPC, transforms the RPC result into a camelCase health object, and returns a JSON response with CORS and cache headers.
- * HTTP status mapping: `healthy` or `degraded` => 200, any other status => 503. If the RPC returns an error or a runtime exception occurs, an error response is returned.
+ * Transforms the RPC result into a camelCase health object and returns it as JSON with CORS and cache headers.
+ * HTTP status mapping: `healthy` or `degraded` => 200, any other status => 503. If the RPC returns an error or an unexpected exception occurs, an error response is returned.
  *
- * @param _request - The incoming Next.js request (unused).
- * @returns A NextResponse containing the health report JSON on success, or an error response on failure.
+ * @param _request - NextRequest: the incoming Next.js request (unused)
+ * @returns A NextResponse containing the health report JSON on success, or a structured error response on failure
  *
  * @see transformHealthResult
  * @see createSupabaseAnonClient

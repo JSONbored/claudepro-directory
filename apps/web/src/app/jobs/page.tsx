@@ -100,6 +100,17 @@ async function JobsCountBadge() {
   );
 }
 
+/**
+ * Build metadata for the jobs listing page using URL query parameters.
+ *
+ * Reads `category` and `remote` from the provided `searchParams` and returns
+ * metadata scoped to the `/jobs` route that reflects those filter values.
+ *
+ * @param searchParams - A (potentially thenable) object containing URL query parameters; `category` is used as a string and `remote` is interpreted as `true` only when its value equals the string `"true"`.
+ * @returns Metadata for the `/jobs` page with filter context for `category` and `remote`.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({
   searchParams,
 }: PagePropsWithSearchParams): Promise<Metadata> {
@@ -113,18 +124,19 @@ export async function generateMetadata({
 }
 
 /**
- * Renders the jobs list section: fetches filtered jobs, applies client-side sorting, and displays empty or results states.
+ * Renders the jobs listing section for a given set of filter and pagination parameters.
  *
- * This server component requests jobs via the RPC helper `getFilteredJobs`. When any filter is active (searchQuery, category, employment, experience, or remote) the fetch is performed without caching (uncached SSR) to ensure up-to-date results; otherwise ISR is allowed per page-level revalidation. Results are sorted client-side using `applyJobSorting`, and the component renders a full list, a "no jobs found" message when filters return zero results, or a "no jobs available yet" message when the total count is zero.
+ * Fetches matching jobs from the server and renders either a total-empty state, a filtered-empty state, or a list of JobCard entries. When any filter is active (searchQuery, category, employment, experience, or remote) the fetch is performed without caching (uncached SSR); otherwise the page-level ISR revalidation applies. Results are sorted client-side according to the provided `sort` option.
  *
  * @param props.searchQuery - Full-text search string to filter job titles and descriptions.
  * @param props.category - Category filter (omit or `undefined` to ignore).
  * @param props.employment - Employment type filter (e.g., "full-time", "part-time"; omit or `undefined` to ignore).
  * @param props.experience - Experience level filter (e.g., "junior", "senior"; omit or `undefined` to ignore).
- * @param props.remote - Remote-only filter; when `true` restricts results to remote roles, when `false` restricts to non-remote, omit (`undefined`) to ignore.
+ * @param props.remote - Remote-only filter; `true` restricts to remote roles, `false` restricts to non-remote, `undefined` ignores this filter.
  * @param props.sort - Sort option to apply after fetching (`'newest' | 'oldest' | 'salary'`).
  * @param props.limit - Maximum number of jobs to request for this page.
  * @param props.offset - Offset for pagination.
+ * @returns A JSX element containing either the jobs list or an appropriate empty state card.
  *
  * @see getFilteredJobs
  * @see applyJobSorting
@@ -684,6 +696,17 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 type SortOption = 'newest' | 'oldest' | 'salary';
 const SORT_VALUES = new Set<SortOption>(['newest', 'oldest', 'salary']);
 
+/**
+ * Sorts a list of job records according to the specified sort option.
+ *
+ * Sorts by `posted_at` (newest or oldest) or by numeric salary value (highest first).
+ *
+ * @param jobs - Array of job records to sort; if falsy or not an array, an empty array is returned
+ * @param sort - Sort option: `'newest'`, `'oldest'`, or `'salary'`
+ * @returns The input jobs sorted according to `sort`; returns an empty array for invalid input
+ *
+ * @see extractSalaryValue - Parses salary strings into numeric values used for salary sorting
+ */
 function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
   if (!(jobs && Array.isArray(jobs))) return [];
   const clone = [...jobs];
@@ -712,12 +735,12 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
 }
 
 /**
- * Convert a salary string into a numeric value suitable for comparison and sorting.
+ * Parse a salary string into a numeric value suitable for sorting and comparison.
  *
- * Accepts values with commas, optional "k" suffix (e.g., "40k", "40.5k"), optional decimals, and optional ranges (e.g., "40k-60k"); when a range is provided the higher endpoint is returned.
+ * Accepts numbers with commas, optional "k" suffix (e.g., "40k", "40.5k"), optional decimals, and optional ranges (e.g., "40k-60k"); when a range is provided the higher endpoint is returned.
  *
  * @param raw - Salary text to parse; may be `null` or `undefined`.
- * @returns The parsed numeric salary (largest endpoint of a range), or `0` if parsing fails.
+ * @returns The numeric salary value representing the highest endpoint of the input, or `0` if parsing fails.
  * @see applyJobSorting
  */
 function extractSalaryValue(raw: null | string | undefined) {

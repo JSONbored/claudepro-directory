@@ -79,7 +79,32 @@ export async function generateMetadata({ searchParams }: SearchPageProperties): 
   });
 }
 
-// Deferred Results Section Component for PPR
+/**
+ * Renders the search results section and fetches matching content for the current query and filters.
+ *
+ * Performs a server-side fetch of search results. When `query` is non-empty or `hasUserFilters` is true,
+ * the fetch is performed without caching to ensure fresh results.
+ *
+ * @param props.query - The user-entered search query string.
+ * @param props.filters - SearchFilters used to constrain the search (sort, categories, tags, authors, limit).
+ * @param props.hasUserFilters - True when the user has applied any non-empty filter or sort.
+ * @param props.facetOptions.authors - Available author facet values for the UI.
+ * @param props.facetOptions.categories - Available category facet values for the UI.
+ * @param props.facetOptions.tags - Available tag facet values for the UI.
+ * @param props.fallbackSuggestions - Fallback/zero-state suggestions to show when there are no query results.
+ * @param props.quickTags - Precomputed quick tag values for the UI.
+ * @param props.quickAuthors - Precomputed quick author values for the UI.
+ * @param props.quickCategories - Precomputed quick category values for the UI.
+ * @param props.requestId - Correlation identifier used for request-scoped logging.
+ *
+ * @returns A React element containing a configured ContentSearchClient rendered with fetched results and facet data.
+ *
+ * @throws When the backend search fetch fails, a normalized error is thrown.
+ *
+ * @see ContentSearchClient
+ * @see searchContent
+ * @see normalizeError
+ */
 async function SearchResultsSection({
   query,
   filters,
@@ -157,10 +182,12 @@ async function SearchResultsSection({
 }
 
 /**
- * Render the search page: resolves query and filters from route parameters, loads search facets and zero-state suggestions, and renders the search UI with results and a recently viewed sidebar.
+ * Renders the search page by resolving route parameters into a query and filters, loading search facets and optional zero-state suggestions, and composing the results UI with facet controls and a recently viewed sidebar.
  *
- * @param searchParams - A promise that resolves to route query parameters (may include `q`, `category`, `tags`, `author`, `sort`); used to derive the search query and filters for the page.
- * @returns The rendered search page element containing the search input, results section, facet controls, zero-state/fallback suggestions, and the recently viewed sidebar.
+ * If there is no query and no user filters, homepage data is queried to provide zero-state suggestions.
+ *
+ * @param searchParams - Promise resolving to route query parameters (may include `q`, `category`, `tags`, `author`, `sort`) used to derive the search query and filters.
+ * @returns The rendered React element for the search page containing the search input, results section, facet controls, zero-state/fallback suggestions, and the recently viewed sidebar.
  *
  * @see getSearchFacets
  * @see getHomepageData

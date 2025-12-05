@@ -40,7 +40,13 @@ const NewsletterCTAVariant = dynamicImport(
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 900; // 15 minutes for trending data
+export const revalidate = 900; /**
+ * Provide metadata for the Trending page.
+ *
+ * @returns Page metadata for the '/trending' route.
+ * @see generatePageMetadata
+ * @see revalidate
+ */
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/trending');

@@ -163,24 +163,22 @@ async function SidebarWithRelated({
 }
 
 /**
- * Renders the unified detail page for a content item, including header, metadata, content/code sections,
- * configuration, installation, examples, sidebars, and optional tabbed layout.
+ * Render the full detail page for a content item, including header, metadata, content sections,
+ * configuration, installation, examples, and sidebars; optionally renders a tabbed layout.
  *
- * This server-rendered component performs server-side preprocessing (syntax highlighting, language detection,
- * filename generation, markdown heading extraction, and config formatting) in parallel before streaming the UI.
- * It also suspends to stream view-count and related-items data when promises are provided.
+ * Performs server-side preprocessing (syntax highlighting, language detection, filename generation,
+ * and heading extraction) and can stream view-count and related-items data via provided promises.
  *
- * @param props.item - The content item row or expanded content detail used to build the page.
- * @param props.relatedItems - Eagerly provided related items for the sidebar (optional).
- * @param props.viewCount - Pre-fetched view count to render immediately (optional).
- * @param props.copyCount - Pre-fetched copy count to render immediately (optional).
- * @param props.relatedItemsPromise - Promise that resolves to related items; used to stream sidebar content (optional).
- * @param props.viewCountPromise - Promise that resolves to the view count; used to stream metadata (optional).
- * @param props.copyCountPromise - Promise that resolves to the copy count; used to stream metadata (optional).
- * @param props.collectionSections - React node containing collection-specific sections to include in the main content (optional).
- * @param props.tabsEnabled - When true and the category config defines tabs, the page renders a tabbed layout instead of the default single-column layout.
- *
- * @returns The fully rendered detail page JSX for the provided content item.
+ * @param props.item - Content row or expanded content detail used to build the page.
+ * @param props.relatedItems - Eagerly provided related items for the sidebar.
+ * @param props.viewCount - Pre-fetched view count to render immediately.
+ * @param props.copyCount - Pre-fetched copy count to render immediately.
+ * @param props.relatedItemsPromise - Promise that resolves to related items for streaming into the sidebar.
+ * @param props.viewCountPromise - Promise that resolves to the view count for streaming into metadata.
+ * @param props.copyCountPromise - Promise that resolves to the copy count for streaming into metadata.
+ * @param props.collectionSections - React node with collection-specific sections to include in the main content.
+ * @param props.tabsEnabled - When true and the category configuration defines tabs, render the tabbed layout.
+ * @returns The JSX for the rendered detail page for the provided content item.
  *
  * @see getCategoryConfig
  * @see highlightCode

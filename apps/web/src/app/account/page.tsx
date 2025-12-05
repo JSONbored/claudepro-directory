@@ -210,7 +210,14 @@ export default async function AccountDashboard() {
     }
   }
 
-  // Helper to safely extract categoryData
+  /**
+   * Safely extracts the `categoryData` map from account dashboard homepage data, returning an empty object if the structure is missing or invalid.
+   *
+   * @param homepageData - The `homepage` field from the account dashboard bundle (may be null, undefined, or malformed)
+   * @returns A record mapping category keys to arrays of `HomepageContentItem`; an empty object if no valid `categoryData` is present
+   *
+   * @see getAccountDashboardBundle
+   */
   function extractHomepageCategoryData(
     homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage']
   ): Record<string, HomepageContentItem[]> {

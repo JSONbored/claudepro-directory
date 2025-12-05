@@ -36,6 +36,12 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Generate page metadata for the account settings route.
+ *
+ * @returns The Next.js page metadata for the '/account/settings' route.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/settings');
 }

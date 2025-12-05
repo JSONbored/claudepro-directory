@@ -40,8 +40,17 @@ export interface TabSectionRendererProps {
 }
 
 /**
- * Renders a single section based on section ID
- * Returns null if section should not be displayed
+ * Render the appropriate content section for a given `sectionId` using the provided item, preprocessed sectionData, and feature/config flags.
+ *
+ * @param sectionId - Identifier of the section to render (e.g., 'content', 'features', 'installation', 'security', 'guide_sections').
+ * @param item - The content item being rendered; typically includes metadata such as `category` and `slug`.
+ * @param sectionData - Preprocessed data required by sections (may include configData, installationData, examplesData, features, useCases, requirements, troubleshooting, guideSections, collectionSections, securityItems, etc.).
+ * @param config - Feature flags and type information that control which sections are enabled and affect section titles/formatting (including `sections` and `typeName`).
+ * @returns The React element for the requested section, or `null` when the section is disabled or has no data to display.
+ *
+ * @see UnifiedSection
+ * @see JSONSectionRenderer
+ * @see ReviewListSection
  */
 export function TabSectionRenderer({
   sectionId,

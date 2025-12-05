@@ -24,17 +24,16 @@ import { NextRequest, NextResponse } from 'next/server';
 const CORS = getOnlyCorsHeaders;
 
 /**
- * Handles GET requests to fetch a company profile by slug.
+ * Handle GET /api/company requests and return a company profile identified by the `slug` query parameter.
  *
- * Attempts to read the `slug` query parameter from the incoming request and returns the company profile
- * retrieved from the `get_company_profile` Supabase RPC. Responds with appropriate error responses when
- * the slug is missing, the RPC returns an error, or an unexpected exception occurs.
+ * Reads the `slug` query parameter from the request, invokes the `get_company_profile` Supabase RPC, and
+ * returns the profile JSON with cache and metadata headers when successful. Returns a 400 response when
+ * `slug` is missing, mirrors RPC errors when the RPC returns an error, and returns a generic error response
+ * for unexpected exceptions.
  *
- * @param request - The incoming Next.js request containing query parameters.
- * @returns The HTTP response:
- *  - 200 with the company profile JSON and cache + metadata headers when successful.
- *  - 400 when the `slug` query parameter is missing.
- *  - An error response mirroring RPC errors or internal exceptions for other failures.
+ * @param {NextRequest} request - The incoming Next.js request containing query parameters.
+ * @returns {Response} 200 with the company profile JSON and cache/metadata headers on success; 400 when the
+ * `slug` parameter is missing; an error response mirroring RPC or internal errors otherwise.
  *
  * @see buildCacheHeaders
  * @see createErrorResponse

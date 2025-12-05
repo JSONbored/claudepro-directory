@@ -293,15 +293,22 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * Handle CORS preflight (OPTIONS) requests for the search API route.
+ *
+ * @returns A Response configured for an HTTP OPTIONS preflight, including appropriate CORS headers.
+ * @see handleOptionsRequest
+ * @see CORS
+ */
 export function OPTIONS() {
   return handleOptionsRequest(CORS);
 }
 
 /**
- * Parse a comma-separated string into an array of trimmed, non-empty values.
+ * Convert a comma-separated string into an array of trimmed, non-empty values.
  *
- * @param value - A comma-separated string or `null`
- * @returns An array of trimmed, non-empty strings, or `undefined` if `value` is `null`, empty, or contains no valid parts
+ * @param {null | string} value - The comma-separated input string, or `null` to indicate absence.
+ * @returns {string[] | undefined} An array of trimmed, non-empty strings parsed from `value`, or `undefined` if `value` is `null`, empty, or contains no valid parts.
  */
 function parseCsvParam(value: null | string): string[] | undefined {
   if (!value) return undefined;
@@ -328,24 +335,23 @@ function validateEnumValue<T extends string>(
 }
 
 /**
- * Execute a search using the provided SearchService and parameters, dispatching to the appropriate
- * search backend based on `searchType` and returning matching rows with a total count.
+ * Dispatches the search request to the appropriate backend (jobs, unified, or content) and returns matching rows along with the total count.
  *
- * @param params.authors - Optional list of author slugs to filter content results.
- * @param params.categories - Optional list of content categories to filter content results.
- * @param params.entities - Optional list of entity types to include for unified searches; defaults to the service's default entities when omitted.
- * @param params.jobCategory - Optional job category to filter job searches.
- * @param params.jobEmployment - Optional employment type to filter job searches.
- * @param params.jobExperience - Optional experience level to filter job searches.
- * @param params.jobRemote - Optional flag to restrict job searches to remote-only roles.
- * @param params.limit - Maximum number of results to return.
- * @param params.offset - Number of results to skip (pagination offset).
- * @param params.query - The raw search query string.
- * @param params.searchService - Instance of SearchService used to perform backend searches.
- * @param params.searchType - The type of search to perform: 'jobs', 'unified', or 'content'.
- * @param params.sort - Sort order for content searches.
- * @param params.tags - Optional list of tags to filter content results.
- * @returns An object containing `results` (array of result rows) and `totalCount` (the total number of matching items; prefers a backend-provided total when available, otherwise the length of `results`).
+ * @param params.authors - string[] | undefined — Optional list of author slugs to filter content results.
+ * @param params.categories - string[] | undefined — Optional list of content categories to filter content results.
+ * @param params.entities - string[] | undefined — Optional list of entity types to include for unified searches; when omitted or empty, defaults to the module's DEFAULT_ENTITIES.
+ * @param params.jobCategory - JobCategory | undefined — Optional job category to filter job searches.
+ * @param params.jobEmployment - JobEmployment | undefined — Optional employment type to filter job searches.
+ * @param params.jobExperience - JobExperience | undefined — Optional experience level to filter job searches.
+ * @param params.jobRemote - boolean | undefined — Optional flag to restrict job searches to remote-only roles; included in job backend args only when defined.
+ * @param params.limit - number — Maximum number of results to return.
+ * @param params.offset - number — Number of results to skip (pagination offset).
+ * @param params.query - string — The raw search query string; may be empty.
+ * @param params.searchService - SearchService — SearchService instance used to perform backend searches.
+ * @param params.searchType - SearchType — The type of search to perform: `'jobs'`, `'unified'`, or `'content'`.
+ * @param params.sort - SortType — Sort order to apply for content searches.
+ * @param params.tags - string[] | undefined — Optional list of tags to filter content results.
+ * @returns An object with `results` (array of matching rows) and `totalCount` (the total number of matching items; prefers a backend-provided total when available, otherwise falls back to `results.length`).
  */
 async function executeSearch(params: {
   authors?: string[] | undefined;

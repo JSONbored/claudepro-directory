@@ -22,14 +22,13 @@ export interface AccordionSection {
 }
 
 /**
- * Extracts "Technical Details" and "Deployment" sections from markdown and returns them as accordion-ready objects.
+ * Parse a markdown string and extract "Technical Details" and "Deployment" sections as accordion-ready objects.
  *
- * The parser looks for level-3 headers (`### Technical Details` or `### Deployment`) and captures each section's
- * content up to the next `###` header or the end of the string. For each non-empty section it computes the number
- * of bullet items (lines starting with `- `) and includes that count in the returned `title`.
+ * Captures each section's content, counts lines starting with `- ` as items, and appends the count to the returned
+ * `title` when greater than zero.
  *
- * @param content - Markdown string to parse; falsy or non-string values produce an empty result.
- * @returns An array of `AccordionSection` objects for each found section. Returns an empty array if no matching sections are found or input is invalid.
+ * @param content - Markdown string to parse; falsy or non-string values produce an empty array.
+ * @returns An array of AccordionSection objects for each found non-empty section, or an empty array if none are found.
  *
  * @see AccordionSection
  * @see ChangelogAccordionSections
@@ -93,12 +92,10 @@ interface AccordionSectionItemProps {
 }
 
 /**
- * Renders a single collapsible accordion item for a changelog section.
+ * Render a single collapsible accordion item for a changelog section.
  *
- * Displays the section title in the trigger and the section's sanitized HTML content in the collapsible panel.
- *
- * @param section - The accordion section data to render (title, HTML content, and bullet item count).
- * @returns The accordion item element for the provided section.
+ * @param section - Accordion section data containing the display title, HTML content to render, and bullet item count
+ * @returns The accordion item element for the given section
  *
  * @see AccordionSection
  * @see ChangelogAccordionSections

@@ -48,6 +48,15 @@ function getStatusColor(status: JobStatus): string {
   return BADGE_COLORS.jobStatus[status];
 }
 
+/**
+ * Produce page metadata for the job analytics route using the provided route parameters.
+ *
+ * @param params - An object (as a promise) containing route params; `id` is the job identifier used to build the metadata.
+ * @returns A `Metadata` object for the "/account/jobs/:id/analytics" page scoped to the given job id.
+ *
+ * @see generatePageMetadata
+ * @see JobAnalyticsPage
+ */
 export async function generateMetadata({ params }: JobAnalyticsPageProperties): Promise<Metadata> {
   const { id } = await params;
   return generatePageMetadata('/account/jobs/:id/analytics', { params: { id } });

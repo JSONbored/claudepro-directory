@@ -43,6 +43,13 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Produce page metadata for the account Library route.
+ *
+ * @returns The Next.js `Metadata` object configured for the "/account/library" page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/library');
 }

@@ -230,6 +230,17 @@ interface PageProperties {
   searchParams: Promise<{ answers?: string }>;
 }
 
+/**
+ * Generate metadata for the results page using the route `id`.
+ *
+ * Builds base metadata via `generatePageMetadata` for the `/tools/config-recommender/results/:id` route and adds robots directives to prevent indexing while allowing link following.
+ *
+ * @param props - Page properties containing route parameters.
+ * @param props.params - An object (possibly a promise) with an `id` route parameter identifying the result.
+ * @returns The Next.js Metadata object for the results page, including `robots: { index: false, follow: true }`.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ params }: PageProperties): Promise<Metadata> {
   const { id } = await params;
   const baseMetadata = await generatePageMetadata('/tools/config-recommender/results/:id', {

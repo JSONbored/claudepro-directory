@@ -8,13 +8,13 @@
 import { Skeleton, UI_CLASSES, Separator } from '@heyclaude/web-runtime/ui';
 
 /**
- * Render a loading skeleton layout for a changelog entry detail page.
+ * Render a skeleton UI for the changelog entry detail page.
  *
- * Renders placeholder skeletons that mirror the final changelog detail layout:
- * back navigation, header (date, title, canonical URL), a TL;DR box,
- * category badges, content paragraphs, and repeated section headers.
+ * Displays placeholder skeletons that mirror the final changelog detail layout:
+ * back navigation, header (date, title, canonical URL), a TL;DR box, category badges,
+ * content paragraphs, and repeated section headers to indicate loading state.
  *
- * @returns A React element representing the skeleton UI for the changelog entry detail.
+ * @returns A React element containing the skeleton layout for the changelog entry detail.
  *
  * @see Skeleton
  * @see Separator

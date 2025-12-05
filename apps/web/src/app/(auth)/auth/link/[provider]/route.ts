@@ -18,19 +18,16 @@ import { type NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 /**
- * Initiates an OAuth provider linking flow by redirecting the client to the correct next step.
+ * Initiates an OAuth provider linking flow by redirecting the client to the appropriate next step.
  *
- * Validates the route `provider` parameter, preserves an optional `next` return path, and redirects:
- * - to the connected accounts page with an `error=invalid_provider` query when the provider is invalid;
+ * Validates the route `provider` parameter and preserves an optional `next` return path. Redirects:
+ * - to the connected accounts page with `error=invalid_provider` when the provider is invalid;
  * - to the login page with a `redirect` back to the link route (including `next`) when the user is not authenticated;
  * - to the client-side callback route that starts the provider link flow (including `next`) when the user is authenticated.
  *
- * @param request - The incoming NextRequest for this route.
- * @param params - A Promise resolving to an object containing the route `provider` string.
- * @returns A NextResponse performing a redirect to one of:
- *          - `${origin}/account/connected-accounts?error=invalid_provider` when the provider is invalid,
- *          - `${origin}/login?redirect=/auth/link/{provider}[?next=...]` when the user is not authenticated,
- *          - `${origin}/auth/link/{provider}/callback?next=...` when the user is authenticated.
+ * @param request - The incoming NextRequest for this route
+ * @param params - A Promise resolving to an object containing the route `provider` string
+ * @returns A NextResponse performing a redirect to one of the target URLs described above
  *
  * @see generateRequestId
  * @see isValidProvider

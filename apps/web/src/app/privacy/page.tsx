@@ -5,9 +5,9 @@ import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
 /**
- * Produce the page metadata for the privacy page.
+ * Generate the page metadata configured for the site's Privacy page.
  *
- * @returns The Next.js `Metadata` object for the "/privacy" page.
+ * @returns The Next.js Metadata object for the "/privacy" page.
  * @see generatePageMetadata
  * @see {@link Metadata}
  */
@@ -22,14 +22,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export const revalidate = false;
 
 /**
- * Renders the Privacy Policy page, including the last-updated date and policy sections.
+ * Render the Privacy Policy page displaying the site's last-updated date and policy sections.
  *
- * The component reads the site's last updated date and displays policy sections covering
- * information collection, use, sharing, cookies, security, user rights, children's privacy,
- * policy changes, and contact information. Internal navigation links point to the Cookies and
+ * The component obtains the site's last-updated date, displays it, and presents policy sections
+ * covering information collection, use, sharing, cookies, security, user rights, children's
+ * privacy, changes, and contact information. Internal navigation links point to the Cookies and
  * Contact pages.
  *
- * @returns The rendered Privacy Policy page as a JSX element.
+ * @returns The Privacy Policy page as a JSX element.
  *
  * @see getLastUpdatedDate
  * @see APP_CONFIG

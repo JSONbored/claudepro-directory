@@ -16,6 +16,12 @@ import { CompanyForm } from '@/src/components/core/forms/company-form';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Provide page metadata for the '/account/companies/new' route.
+ *
+ * @returns The Metadata object for the Create Company page.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies/new');
 }

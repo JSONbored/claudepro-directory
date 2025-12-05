@@ -28,30 +28,29 @@ import { ActivityTimeline } from '@/src/components/features/user-activity/activi
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Generates page metadata for the account Activity page.
+ *
+ * @returns The Next.js `Metadata` object for the "/account/activity" route.
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/activity');
 }
 
 /**
- * Renders the Account Activity page: enforces authentication, loads the user's activity summary and timeline in parallel (allowing partial failures), and displays a summary card and an activity timeline or appropriate fallbacks.
+ * Render the Account Activity page, enforcing authentication and displaying the user's activity summary and timeline with tolerant handling of partial data failures.
  *
- * If the user is unauthenticated this returns a sign-in prompt. If both activity summary and timeline fail to load, this returns a global "Activity unavailable" fallback. Partial failures are tolerated: available data is shown while failed pieces are logged and hidden.
+ * If the user is unauthenticated, returns a sign-in prompt. If both activity summary and timeline fail to load, returns a global "Activity unavailable" fallback. If one source loads while the other fails, shows the available data and hides the failed section while logging the error.
  *
- * Data fetched:
- * - User authentication via getAuthenticatedUser
- * - Activity summary via getUserActivitySummary
- * - Activity timeline via getUserActivityTimeline
+ * Data fetched: authenticated user, activity summary, and activity timeline. Uses request- and user-scoped logging for diagnostics.
  *
- * Logging:
- * - Creates a request-scoped logger and a user-scoped logger (user identifiers are redacted per logger configuration).
- *
- * @returns The React element tree for the Activity page.
+ * @returns The React element tree for the Account Activity page.
  *
  * @see getAuthenticatedUser
  * @see getUserActivitySummary
  * @see getUserActivityTimeline
  * @see ActivityTimeline
- * @see logger
  */
 export default async function ActivityPage() {
   // Generate single requestId for this page request
@@ -113,6 +112,16 @@ export default async function ActivityPage() {
     getUserActivityTimeline({ userId: user.id, limit: 50, offset: 0 }),
   ]);
 
+  /**
+   * Normalize a settled activity-data result, log any rejection, and return the fulfilled value or `null`.
+   *
+   * @param name - Human-readable name of the data being loaded (used in error messages and logs)
+   * @param result - The settled promise result to inspect
+   * @returns The fulfilled value of type `T` if present, `null` if the promise was rejected
+   *
+   * @see normalizeError
+   * @see ActivityPage
+   */
   function handleDataResult<T>(name: string, result: PromiseSettledResult<null | T>): null | T {
     if (result.status === 'fulfilled') {
       return result.value;

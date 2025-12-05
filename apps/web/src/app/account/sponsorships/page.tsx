@@ -26,6 +26,13 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * Provide the page metadata for the /account/sponsorships route.
+ *
+ * @returns The Metadata object used by Next.js for the /account/sponsorships page
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/sponsorships');
 }
