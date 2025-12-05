@@ -35,9 +35,9 @@ interface CollectionPageProperties {
 }
 
 /**
- * Create page metadata for a collection page using the route `'/account/library/:slug'`.
+ * Generate metadata for the collection page at the '/account/library/:slug' route.
  *
- * @param params - A promise resolving to route parameters containing `slug`
+ * @param params - Object providing route parameters; the resolved value includes `slug`
  * @returns Metadata for the collection page
  *
  * @see generatePageMetadata

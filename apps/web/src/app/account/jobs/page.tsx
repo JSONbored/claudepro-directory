@@ -61,18 +61,24 @@ const USD_FORMATTER = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
 });
 
+/**
+ * Format an amount in cents as a US dollar string, optionally appending a monthly suffix.
+ *
+ * @param cents - Monetary amount in integer cents (e.g., 2500 for $25.00)
+ * @param isSubscription - When true, append `/month` to indicate a recurring monthly price
+ * @returns The formatted USD price string (e.g., "$25" or "$25/month")
+ * @see USD_FORMATTER
+ */
 function formatPriceLabel(cents: number, isSubscription?: boolean | null): string {
   const base = USD_FORMATTER.format(cents / 100);
   return isSubscription ? `${base}/month` : base;
 }
 
 /**
- * Converts a string into title case by capitalizing the first letter of each word.
- *
- * Splits the input on spaces, underscores, or hyphens and joins the segments with single spaces.
+ * Convert a string to title case by capitalizing the first letter of each word.
  *
  * @param value - The input string to convert
- * @returns The input with each word capitalized and joined by single spaces
+ * @returns The input string with each word capitalized and segments separated by single spaces
  *
  * @see humanizeStatus
  */
@@ -97,10 +103,10 @@ function humanizeStatus(value?: null | string): string {
 }
 
 /**
- * Resolves the human-readable label for a job plan.
+ * Get the human-readable label for a job plan.
  *
  * @param plan - The job plan enum value; may be `undefined` or `null`
- * @returns The label for the provided `plan`. If `plan` is missing, returns the label for the one-time plan.
+ * @returns The human-readable label for `plan`; defaults to the One-Time label when `plan` is missing.
  *
  * @see JOB_PLAN_LABELS
  */

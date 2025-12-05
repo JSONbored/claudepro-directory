@@ -22,10 +22,10 @@ export interface AccordionSection {
 }
 
 /**
- * Parse a markdown string and extract "Technical Details" and "Deployment" sections as accordion-ready objects.
+ * Extracts "Technical Details" and "Deployment" sections from a markdown string as accordion-ready objects.
  *
- * Captures each section's content, counts lines starting with `- ` as items, and appends the count to the returned
- * `title` when greater than zero.
+ * Each returned section includes its text content, the number of bullet items it contains, and a title
+ * that appends the item count in parentheses when the count is greater than zero.
  *
  * @param content - Markdown string to parse; falsy or non-string values produce an empty array.
  * @returns An array of AccordionSection objects for each found non-empty section, or an empty array if none are found.

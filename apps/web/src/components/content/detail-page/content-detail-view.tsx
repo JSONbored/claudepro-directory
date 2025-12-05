@@ -134,6 +134,17 @@ async function ViewCountMetadata({
   return <DetailMetadata item={item} viewCount={viewCount} copyCount={resolvedCopyCount} />;
 }
 
+/**
+ * Render a DetailSidebar for a content item after resolving its related items.
+ *
+ * @param item - The content row or expanded content detail to display in the sidebar.
+ * @param relatedItemsPromise - Promise that resolves to the list of related content items.
+ * @param config - Sidebar configuration including `typeName` and optional display metadata:
+ *                 `categoryLabel`, `showGitHubLink`, and `githubPathPrefix`.
+ * @returns The DetailSidebar React node populated with the resolved related items.
+ *
+ * @see DetailSidebar
+ */
 async function SidebarWithRelated({
   item,
   relatedItemsPromise,
@@ -163,11 +174,9 @@ async function SidebarWithRelated({
 }
 
 /**
- * Render the full detail page for a content item, including header, metadata, content sections,
- * configuration, installation, examples, and sidebars; optionally renders a tabbed layout.
+ * Render the detail page for a content item, composing the header, metadata, main content sections, and sidebars.
  *
- * Performs server-side preprocessing (syntax highlighting, language detection, filename generation,
- * and heading extraction) and can stream view-count and related-items data via provided promises.
+ * Renders configuration, installation, examples, content/code sections, and optional tabbed layouts; supports streaming of view and copy counts via promise props and accepts pre-fetched or eagerly provided related items for the sidebar.
  *
  * @param props.item - Content row or expanded content detail used to build the page.
  * @param props.relatedItems - Eagerly provided related items for the sidebar.
@@ -178,7 +187,7 @@ async function SidebarWithRelated({
  * @param props.copyCountPromise - Promise that resolves to the copy count for streaming into metadata.
  * @param props.collectionSections - React node with collection-specific sections to include in the main content.
  * @param props.tabsEnabled - When true and the category configuration defines tabs, render the tabbed layout.
- * @returns The JSX for the rendered detail page for the provided content item.
+ * @returns The JSX element for the rendered detail page for the provided content item.
  *
  * @see getCategoryConfig
  * @see highlightCode

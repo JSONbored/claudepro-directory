@@ -24,16 +24,15 @@ import { NextRequest, NextResponse } from 'next/server';
 const CORS = getOnlyCorsHeaders;
 
 /**
- * Handle GET /api/company requests and return a company profile identified by the `slug` query parameter.
+ * Handle GET /api/company requests and return the company profile identified by the `slug` query parameter.
  *
- * Reads the `slug` query parameter from the request, invokes the `get_company_profile` Supabase RPC, and
- * returns the profile JSON with cache and metadata headers when successful. Returns a 400 response when
- * `slug` is missing, mirrors RPC errors when the RPC returns an error, and returns a generic error response
- * for unexpected exceptions.
+ * Reads the `slug` query parameter, calls the `get_company_profile` Supabase RPC, and responds with the profile
+ * JSON including cache and metadata headers on success. Returns a 400 Bad Request when `slug` is missing, mirrors
+ * RPC errors when the RPC returns an error, and returns a generic error response for unexpected exceptions.
  *
- * @param {NextRequest} request - The incoming Next.js request containing query parameters.
- * @returns {Response} 200 with the company profile JSON and cache/metadata headers on success; 400 when the
- * `slug` parameter is missing; an error response mirroring RPC or internal errors otherwise.
+ * @param request - The incoming Next.js request containing query parameters (expects `slug`)
+ * @returns The HTTP response: `200` with the company profile JSON and cache/metadata headers on success; `400` when
+ * the `slug` parameter is missing; an error response mirroring RPC or internal errors otherwise.
  *
  * @see buildCacheHeaders
  * @see createErrorResponse
@@ -98,6 +97,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * Handle CORS preflight (OPTIONS) requests for the company API route.
+ *
+ * Responds with 204 No Content and includes only the configured CORS headers.
+ *
+ * @returns A NextResponse with HTTP status 204 and CORS headers applied.
+ * @see {@link CORS}
+ */
 export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,

@@ -99,6 +99,26 @@ function clampLimit(rawLimit: number): number {
   return Math.min(Math.max(rawLimit, 1), 100);
 }
 
+/**
+ * Convert database trending rows into frontend-ready trending item objects.
+ *
+ * Maps each LooseTrendingRow to an object with normalized fields (category, slug, title,
+ * description, author, tags, source) and numeric metrics (viewCount, copyCount, bookmarkCount,
+ * popularity, engagementScore, freshnessScore). If a row field is missing it will be omitted
+ * (set to `undefined`) and `fallbackCategory` or `DEFAULT_CATEGORY` is used when the row's
+ * category is absent.
+ *
+ * @param rows - Array of database rows containing trending metrics (LooseTrendingRow[])
+ * @param fallbackCategory - Category to use when a row's category is null/undefined; when this is
+ *   also null, `DEFAULT_CATEGORY` is applied
+ * @returns An array of normalized trending items suitable for frontend consumption, with fields:
+ *   `category`, `slug`, `title`, `description`, `author`, `tags`, `source`, `viewCount`,
+ *   `copyCount`, `bookmarkCount`, `popularity`, `engagementScore`, and `freshnessScore`
+ *
+ * @see mapPopularRows
+ * @see mapRecentRows
+ * @see DEFAULT_CATEGORY
+ */
 function mapTrendingRows(rows: LooseTrendingRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
     category:
@@ -119,18 +139,11 @@ function mapTrendingRows(rows: LooseTrendingRow[], fallbackCategory: ContentCate
 }
 
 /**
- * Map database "popular" rows into frontend-friendly popular item objects.
+ * Convert database popular rows into frontend-friendly popular item objects.
  *
- * Transforms each LoosePopularRow into an object with these properties:
- * `category` (uses row.category, or `fallbackCategory`, or `DEFAULT_CATEGORY`),
- * `slug`, `title` (falls back to `slug` when missing), `description`, `author`,
- * `tags` (only included when the source value is an array),
- * `viewCount`, `copyCount`, and `popularity`.
- *
- * @param rows - Array of database rows representing popular content
- * @param fallbackCategory - Category to use when a row's category is null/undefined
- * @returns An array of mapped popular item objects with keys:
- * `category`, `slug`, `title`, `description?`, `author?`, `tags?`, `viewCount?`, `copyCount?`, `popularity?`
+ * @param rows - Array of database rows representing popular content (`LoosePopularRow[]`)
+ * @param fallbackCategory - Category to use when a row's category is null or undefined (`ContentCategory | null`)
+ * @returns An array of mapped popular items where each object contains `category`, `slug`, `title`, and optionally `description`, `author`, `tags`, `viewCount`, `copyCount`, and `popularity`
  * @see DEFAULT_CATEGORY
  */
 function mapPopularRows(rows: LoosePopularRow[], fallbackCategory: ContentCategory | null) {
@@ -149,11 +162,11 @@ function mapPopularRows(rows: LoosePopularRow[], fallbackCategory: ContentCatego
 }
 
 /**
- * Normalize recent-content database rows into frontend-ready items, applying a fallback category when missing.
+ * Convert recent-content database rows into frontend-ready items, filling missing categories with the provided fallback or the default.
  *
- * @param rows - LooseRecentRow[] - Array of recent-content rows; individual rows may contain partial or optional fields
- * @param fallbackCategory - ContentCategory | null - Category to use when a row's `category` is null; if `null`, `DEFAULT_CATEGORY` is applied
- * @returns An array of mapped items with the shape: `{ category: ContentCategory, slug: string, title: string, description?: string, author?: string, tags?: string[], created_at?: string }`
+ * @param rows - LooseRecentRow[]: Array of recent-content rows; individual rows may contain partial or optional fields
+ * @param fallbackCategory - ContentCategory | null: Category to use when a row's `category` is null; if `null`, `DEFAULT_CATEGORY` is applied
+ * @returns An array of mapped items: `{ category: ContentCategory, slug: string, title: string, description?: string, author?: string, tags?: string[], created_at?: string }`
  * @see mapPopularRows
  * @see mapTrendingRows
  */
@@ -170,13 +183,13 @@ function mapRecentRows(rows: LooseRecentRow[], fallbackCategory: ContentCategory
 }
 
 /**
- * Produce sidebar-ready items from trending rows.
+ * Create sidebar-ready items from trending rows.
  *
- * Maps each input row to an object with a display title, a category-prefixed slug path, and a localized views string.
- *
- * @param rows - Array of trending rows to transform
- * @param fallbackCategory - Category to use when a row has no category; if `null`, the module `DEFAULT_CATEGORY` is used
- * @returns An array of sidebar items with properties `{ title: string; slug: string; views: string }` where `slug` is `/<category>/<slug>` and `views` is formatted like `"1,234 views"`
+ * @param rows - (LooseTrendingRow[]) Array of trending rows to transform
+ * @param fallbackCategory - (ContentCategory | null) Category to use when a row has no category; if `null`, `DEFAULT_CATEGORY` is used
+ * @returns {Array<{ title: string; slug: string; views: string }>} Array of sidebar items where `slug` is `/<category>/<slug>` and `views` is formatted like `"1,234 views"`
+ * @see mapSidebarRecent
+ * @see DEFAULT_CATEGORY
  */
 function mapSidebarTrending(rows: LooseTrendingRow[], fallbackCategory: ContentCategory | null) {
   return rows.map((row) => ({
@@ -365,6 +378,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * Responds to HTTP OPTIONS requests with no content and CORS headers.
+ *
+ * @returns A NextResponse with status 204 (No Content) and the allowed CORS headers applied.
+ * @see getOnlyCorsHeaders - the set of CORS headers included in the response
+ * @see NextResponse - Next.js response helper used to build the response
+ */
 export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,

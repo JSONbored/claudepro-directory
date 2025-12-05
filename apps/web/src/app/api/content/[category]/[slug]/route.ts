@@ -50,15 +50,21 @@ function getProperty(obj: unknown, key: string): unknown {
   return desc?.value;
 }
 
+/**
+ * Removes control characters (CR, LF, tab, backspace, form feed, vertical tab) and trims surrounding whitespace from a header value.
+ *
+ * @param val - The header value to sanitize (string)
+ * @returns The sanitized header value (string) with control characters removed and trimmed
+ */
 function sanitizeHeaderValue(val: string): string {
   return val.replaceAll(/[\r\n\t\b\f\v]/g, '').trim();
 }
 
 /**
- * Cleans a filename by removing control characters, quotes, backslashes, and surrounding whitespace.
+ * Sanitizes a filename by removing control characters, double quotes, backslashes, and trimming surrounding whitespace.
  *
- * @param name - The input filename to sanitize
- * @returns A safe filename string; if the sanitized result is empty, returns `export.md`
+ * @param {string} name - The input filename to sanitize.
+ * @returns {string} A safe filename; returns `export.md` if the sanitized result is empty.
  */
 function sanitizeFilename(name: string): string {
   let cleaned = name
@@ -146,17 +152,17 @@ async function handleJsonFormat(
 }
 
 /**
- * Produce a Markdown export for a content record and return an HTTP response containing the result.
+ * Produce a Markdown export for a content record.
  *
  * Parses `includeMetadata` and `includeFooter` from the provided `url`, invokes the
- * `generate_markdown_export` RPC with the given `category` and `slug`, and returns either the
- * generated Markdown payload with appropriate headers or a JSON error response on failure.
+ * `generate_markdown_export` RPC for the given `category` and `slug`, and returns a
+ * NextResponse containing the generated Markdown or a structured JSON error.
  *
  * @param category - DatabaseGenerated['public']['Enums']['content_category']: content category to export
  * @param slug - string: content record slug to export
  * @param url - URL: request URL used to read query params `includeMetadata` and `includeFooter`
- * @param reqLogger - ReturnType<typeof logger.child>: request-scoped logger for error/context logging
- * @returns A NextResponse containing the Markdown payload (status 200) or a JSON error payload (status 400)
+ * @param reqLogger - ReturnType<typeof logger.child>: request-scoped logger for error and context logging
+ * @returns A NextResponse containing the Markdown payload on success (status 200) or a JSON error payload on failure (status 400)
  *
  * @see generate_markdown_export RPC
  * @see sanitizeFilename
@@ -255,17 +261,15 @@ async function handleMarkdownFormat(
 }
 
 /**
- * Generate and return an LLMs.txt representation for a content item.
+ * Generate an LLMs.txt representation for a content item and return it as a plain text HTTP response.
  *
- * Calls the `generate_item_llms_txt` Supabase RPC with the provided category and slug,
- * and returns the generated text as a plain text HTTP response. If the RPC returns no data,
- * a 404 JSON response is returned. If the RPC returns an error, an error response created
- * by `createErrorResponse` is returned.
+ * Calls the `generate_item_llms_txt` Supabase RPC with the provided category and slug and responds with
+ * the RPC-produced text when found; returns a JSON error response when the item is not found or the RPC fails.
  *
- * @param category - Content category enum identifying the type of content to export
+ * @param category - Database content category enum identifying the type of content to export
  * @param slug - Content slug identifying the specific item to export
- * @param reqLogger - Scoped logger for request-scoped logging
- * @returns A NextResponse containing the LLMs.txt content as plain text on success, or a JSON error response (status 4xx/5xx) when not found or on RPC error.
+ * @param reqLogger - Scoped logger used for request-scoped logging and RPC error reporting
+ * @returns A NextResponse containing the LLMs.txt content as `text/plain; charset=utf-8` with appropriate security and cache headers on success, or a JSON error response (status 4xx/5xx) on RPC errors or when content is not found
  *
  * @see generate_item_llms_txt (Supabase RPC)
  * @see createErrorResponse
@@ -504,6 +508,12 @@ export async function GET(
   }
 }
 
+/**
+ * Handle CORS preflight requests by returning a 204 No Content response with CORS headers.
+ *
+ * @returns {NextResponse} A 204 No Content response configured with the `getOnlyCorsHeaders` CORS headers.
+ * @see getOnlyCorsHeaders
+ */
 export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,

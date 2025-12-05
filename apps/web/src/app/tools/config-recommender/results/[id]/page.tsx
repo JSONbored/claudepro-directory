@@ -259,14 +259,14 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
 /**
  * Render the Configuration Recommender results page for a given result ID.
  *
- * Decodes and validates an encoded `answers` query parameter, fetches personalized
- * configuration recommendations from the backend, normalizes the returned items,
- * constructs a shareable URL, and renders the results UI. If `answers` is missing,
- * decoding fails, or the recommendations response is empty, the page triggers a 404.
+ * Decodes and validates the base64url-encoded `answers` query parameter, fetches
+ * personalized configuration recommendations, normalizes returned items, and
+ * renders the results UI with a shareable URL. If `answers` is missing,
+ * fails validation/decoding, or backend recommendations are absent, the page
+ * responds with a 404.
  *
  * @param props.params - Route parameters containing the `id` of the results set
  * @param props.searchParams - Query parameters; must include `answers` (base64url-encoded JSON)
- *
  * @returns The React element that displays the recommendations and a shareable URL
  *
  * @see decodeQuizAnswers

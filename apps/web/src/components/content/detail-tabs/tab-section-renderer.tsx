@@ -40,13 +40,13 @@ export interface TabSectionRendererProps {
 }
 
 /**
- * Render the appropriate content section for a given `sectionId` using the provided item, preprocessed sectionData, and feature/config flags.
+ * Render the content subsection identified by `sectionId` for the given item using preprocessed section data and feature flags.
  *
- * @param sectionId - Identifier of the section to render (e.g., 'content', 'features', 'installation', 'security', 'guide_sections').
- * @param item - The content item being rendered; typically includes metadata such as `category` and `slug`.
- * @param sectionData - Preprocessed data required by sections (may include configData, installationData, examplesData, features, useCases, requirements, troubleshooting, guideSections, collectionSections, securityItems, etc.).
- * @param config - Feature flags and type information that control which sections are enabled and affect section titles/formatting (including `sections` and `typeName`).
- * @returns The React element for the requested section, or `null` when the section is disabled or has no data to display.
+ * @param sectionId - Section identifier (e.g., 'content', 'features', 'installation', 'security', 'guide_sections')
+ * @param item - The content item being rendered; provides metadata such as `category` and `slug`
+ * @param sectionData - Preprocessed data required by sections (e.g., configData, installationData, examplesData, features, useCases, requirements, troubleshooting, guideSections, collectionSections, securityItems)
+ * @param config - Feature flags and type information that enable or configure specific sections (including `sections` and `typeName`)
+ * @returns A React element for the requested section, or `null` when the section is disabled or has no data to display
  *
  * @see UnifiedSection
  * @see JSONSectionRenderer

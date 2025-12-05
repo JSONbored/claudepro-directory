@@ -56,9 +56,11 @@ const NewsletterCTAVariant = dynamicImport(
 export const revalidate = 86_400;
 
 /**
- * Produce the Next.js page metadata for the Config Recommender route.
+ * Generate the page metadata for the Config Recommender route.
  *
- * @returns The resolved `Metadata` object for the `/tools/config-recommender` page.
+ * Produces the Metadata object consumed by Next.js for the `/tools/config-recommender` page.
+ *
+ * @returns The metadata for the `/tools/config-recommender` page.
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {

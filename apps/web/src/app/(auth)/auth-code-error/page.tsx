@@ -20,9 +20,9 @@ const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
 export const dynamic = 'force-dynamic';
 
 /**
- * Produce the page metadata for the authentication code error route.
+ * Generate page metadata for the authentication code error route.
  *
- * @returns Metadata for the auth code error page
+ * @returns The metadata object for the authentication code error page.
  * @see generatePageMetadata
  * @see AUTH_CODE_ERROR_PATH
  * @see {@link https://nextjs.org/docs/app/building-your-application/metadata Metadata (Next.js)}

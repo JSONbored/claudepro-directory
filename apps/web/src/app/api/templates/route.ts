@@ -22,16 +22,16 @@ export const runtime = 'nodejs';
 /**
  * Handle GET requests to fetch content templates for a specified category.
  *
- * Validates the `category` query parameter, returns a 400 JSON error when the
- * category is missing or invalid, and on success returns a JSON payload with
- * templates and metadata while setting cache control headers suitable for
- * CDN/edge caching.
+ * Validates the `category` query parameter and returns either a success payload
+ * with templates and metadata, a 400 JSON error when the category is missing or
+ * invalid, or a standardized error response for internal failures. Successful
+ * responses include Cache-Control headers suitable for CDN/edge caching.
  *
- * @param request - The incoming NextRequest containing URL search parameters.
- * @returns A NextResponse containing either:
- *  - On success (status 200): `{ success: true, templates: Array, category: string, count: number }`
- *  - On invalid category (status 400): `{ error: 'Invalid category', message: string }`
- *  - On internal error: a standardized error response produced by `createErrorResponse`.
+ * @param request - The incoming NextRequest whose URL search parameters may include `category`
+ * @returns A NextResponse containing:
+ *  - On success (status 200): an object `{ success: true, templates: Array, category: string, count: number }`
+ *  - On invalid category (status 400): an object `{ error: 'Invalid category', message: string }`
+ *  - On internal error: a standardized error response produced by `createErrorResponse`
  *
  * @see VALID_CATEGORIES
  * @see getContentTemplates

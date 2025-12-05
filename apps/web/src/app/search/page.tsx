@@ -66,6 +66,14 @@ interface SearchPageProperties {
   }>;
 }
 
+/**
+ * Build metadata for the search page, using the resolved search query when available.
+ *
+ * @param searchParams - A promise resolving to an object containing optional search parameters (e.g., `q`) used to tailor the metadata.
+ * @returns The `Metadata` for the search page with a title and description that include the query when present.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata({ searchParams }: SearchPageProperties): Promise<Metadata> {
   const resolvedParameters = await searchParams;
   const query = resolvedParameters.q ?? '';
@@ -80,26 +88,25 @@ export async function generateMetadata({ searchParams }: SearchPageProperties): 
 }
 
 /**
- * Renders the search results section and fetches matching content for the current query and filters.
+ * Render the search results section and present matching content for the current query and filters.
  *
- * Performs a server-side fetch of search results. When `query` is non-empty or `hasUserFilters` is true,
- * the fetch is performed without caching to ensure fresh results.
+ * Fetches search results server-side; when `query` is non-empty or `hasUserFilters` is true, the fetch is performed without caching to prefer fresh results.
  *
- * @param props.query - The user-entered search query string.
- * @param props.filters - SearchFilters used to constrain the search (sort, categories, tags, authors, limit).
- * @param props.hasUserFilters - True when the user has applied any non-empty filter or sort.
- * @param props.facetOptions.authors - Available author facet values for the UI.
- * @param props.facetOptions.categories - Available category facet values for the UI.
- * @param props.facetOptions.tags - Available tag facet values for the UI.
- * @param props.fallbackSuggestions - Fallback/zero-state suggestions to show when there are no query results.
- * @param props.quickTags - Precomputed quick tag values for the UI.
- * @param props.quickAuthors - Precomputed quick author values for the UI.
- * @param props.quickCategories - Precomputed quick category values for the UI.
- * @param props.requestId - Correlation identifier used for request-scoped logging.
+ * @param query - The user-entered search query string (trimmed and truncated upstream).
+ * @param filters - SearchFilters that constrain the search (sort, categories, tags, authors, limit).
+ * @param hasUserFilters - True when any non-empty filter or a valid sort is applied by the user.
+ * @param facetOptions.authors - Available author facet values for the UI.
+ * @param facetOptions.categories - Available category facet values for the UI.
+ * @param facetOptions.tags - Available tag facet values for the UI.
+ * @param fallbackSuggestions - Fallback/zero-state suggestions to display when results are absent.
+ * @param quickTags - Precomputed quick tag suggestions for the UI.
+ * @param quickAuthors - Precomputed quick author suggestions for the UI.
+ * @param quickCategories - Precomputed quick category suggestions for the UI.
+ * @param requestId - Correlation identifier used for request-scoped logging.
  *
- * @returns A React element containing a configured ContentSearchClient rendered with fetched results and facet data.
+ * @returns A React element (ContentSearchClient) configured with fetched results, facets, quick values, and suggestions.
  *
- * @throws When the backend search fetch fails, a normalized error is thrown.
+ * @throws A normalized error when the backend search fetch fails.
  *
  * @see ContentSearchClient
  * @see searchContent
@@ -408,6 +415,18 @@ function deriveQuickCategories(
     .slice(0, limit);
 }
 
+/**
+ * Produce an ordered list of suggestions with duplicate `slug` values removed and capped to a maximum length.
+ *
+ * If `items` is not an array or is empty, an empty array is returned.
+ *
+ * @param items - Array of suggestion-like objects; each item may include an optional `slug` string used to detect duplicates. The first occurrence of a given `slug` is kept and later duplicates are dropped.
+ * @param limit - Maximum number of items to include in the returned array.
+ * @returns An array containing up to `limit` items with duplicate `slug` values removed, preserving the original input order.
+ *
+ * @see rankFacetValues
+ * @see deriveQuickCategories
+ */
 function dedupeSuggestions<T extends { slug?: null | string }>(items: T[], limit: number): T[] {
   if (!Array.isArray(items) || items.length === 0) {
     return [];

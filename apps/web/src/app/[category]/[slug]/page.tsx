@@ -31,15 +31,16 @@ export const revalidate = 7200;
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
- * Generate a list of static route parameters ({ category, slug }) for a subset of popular content to pre-render at build time.
+ * Produce a list of static route params ({ category, slug }) for a subset of popular content to pre-render at build time.
  *
- * Limits the number of entries per homepage category (controlled by MAX_ITEMS_PER_CATEGORY) and relies on Next.js dynamic params and ISR to serve pages not included in this list on-demand.
+ * This selects up to MAX_ITEMS_PER_CATEGORY items per homepage category and returns their { category, slug } pairs. Pages not included in the returned list are served on-demand via Next.js dynamic params and ISR (revalidate = 7200).
  *
- * @returns An array of objects with `category` and `slug` to be used as static params for pre-rendering
+ * @returns An array of objects each containing `category` and `slug` for use as static params
  *
  * @see getHomepageCategoryIds
  * @see getContentByCategory
  * @see dynamicParams
+ * @see revalidate
  */
 export async function generateStaticParams() {
   // Dynamic imports only for data modules (category/content)
@@ -175,10 +176,10 @@ export async function generateMetadata({
 /**
  * Render the content detail page for a given category and slug.
  *
- * Validates the category and category configuration, fetches core content synchronously (blocking for LCP), and initiates analytics and related-item fetches asynchronously for Suspense. Conditionally includes recently-viewed tracking for supported categories and a collection-specific section when the item is a collection. Triggers a 404 (via notFound()) when the category, category config, or core content is missing.
+ * Validates the category and category configuration, fetches the core content (blocking for LCP), initiates analytics and related-item fetches for Suspense, and conditionally includes recently-viewed tracking and a collection-specific section. Triggers a 404 via `notFound()` when the category, category config, or core content is missing.
  *
- * @param params - Promise resolving to an object with `category` and `slug` route parameters
- * @returns A React element representing the requested content detail page
+ * @param params - A promise that resolves to an object with `category` and `slug` route parameters
+ * @returns A React element representing the content detail page for the requested category and slug
  *
  * @see getContentDetailCore
  * @see getContentAnalytics

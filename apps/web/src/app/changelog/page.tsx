@@ -54,13 +54,13 @@ const NewsletterCTAVariant = dynamicImport(
 export const revalidate = 3600;
 
 /**
- * Builds metadata for the /changelog route and includes RSS and Atom feed alternates.
+ * Generate page metadata for the /changelog route, including RSS and Atom feed alternates.
  *
  * If metadata generation fails, returns a sensible fallback metadata object with a default
- * title, description, and the same feed alternates.
+ * title and description while preserving the feed alternates.
  *
- * @returns Page metadata for the /changelog route. Includes `alternates.types` entries for
- *          `application/rss+xml` and `application/atom+xml` pointing to the site's feed URLs.
+ * @returns Page metadata for the changelog route. `alternates.types` contains
+ *          `application/rss+xml` and `application/atom+xml` entries pointing to the site's feed URLs.
  *
  * @see generatePageMetadata
  * @see APP_CONFIG
@@ -109,11 +109,20 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the Changelog page with server-loaded entries, client-side filtering, structured data, and a newsletter CTA.
+ * Render the Changelog page using server-side loaded entries, client-side filtering, structured data, and a newsletter CTA.
  *
- * Loads published changelog entries, displays totals and latest release information, and delegates interactive filtering to the client-side list component. If loading fails, a minimal fallback UI is returned.
+ * Loads published changelog entries (with normalized keywords and contributors), computes category counts from the overview metadata, and renders a stats header plus the client-side ChangelogListClient for interactive filtering. If data loading fails, returns a minimal fallback UI instead of throwing.
  *
- * @returns The React element for the changelog page, or a minimal fallback UI when data loading fails.
+ * Server-side behavior:
+ * - Fetches changelog overview via getChangelogOverview with publishedOnly=true.
+ * - Uses server-side data to populate the client list and category counts.
+ * - Page is intended to be served with ISR (revalidation configured at the file level).
+ *
+ * @returns A React element representing the changelog page; returns a minimal fallback UI when data loading fails.
+ *
+ * @see getChangelogOverview
+ * @see ChangelogListClient
+ * @see StructuredData
  */
 export default async function ChangelogPage() {
   // Generate single requestId for this page request

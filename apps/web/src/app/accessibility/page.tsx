@@ -5,12 +5,14 @@ import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
 /**
- * Generate page metadata for the /accessibility route.
+ * Provide metadata for the /accessibility page.
  *
- * Used by Next.js to populate the document head for the accessibility page.
+ * Used by Next.js to populate the document head (title, description, Open Graph, etc.)
+ * for the accessibility page.
  *
- * @returns The Metadata object for the /accessibility page.
+ * @returns The Metadata object for the /accessibility route.
  * @see generatePageMetadata
+ * @see revalidate
  */
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/accessibility');
@@ -29,12 +31,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export const revalidate = 3600;
 
 /**
- * Render the site's Accessibility Statement page.
+ * Renders the site's Accessibility Statement page.
  *
- * This server component reads the site's last-updated timestamp and contact channels at render time
- * and is intended to be statically generated as part of the page's ISR/revalidation cycle.
+ * This server component reads the site's last-updated timestamp and public contact channels at render time and is intended to be statically generated and revalidated according to the module's ISR configuration.
  *
- * @returns The React element for the full Accessibility Statement page.
+ * @returns A React element containing the complete Accessibility Statement page.
  * @see getLastUpdatedDate
  * @see getContactChannels
  * @see APP_CONFIG

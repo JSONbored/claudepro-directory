@@ -30,6 +30,16 @@ type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 type FeedType = 'atom' | 'rss';
 const SUPPORTED_TYPES = new Set<FeedType>(['rss', 'atom']);
 
+/**
+ * Convert a raw string to a validated ContentCategory or return null.
+ *
+ * Accepts a string or null and returns the matching ContentCategory when the
+ * input matches one of the known CONTENT_CATEGORY_VALUES; returns `null` for
+ * falsy or unrecognized inputs.
+ *
+ * @param value - The raw category value to validate (may be `null`)
+ * @returns `ContentCategory` if `value` is a known category, `null` otherwise
+ */
 function toContentCategory(value: null | string): ContentCategory | null {
   if (!value) return null;
   return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory)
@@ -220,6 +230,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * Responds to CORS preflight (OPTIONS) requests with a 204 No Content and CORS headers.
+ *
+ * @returns A NextResponse with HTTP status 204 and only CORS headers set.
+ * @see getOnlyCorsHeaders
+ */
 export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,

@@ -30,12 +30,10 @@ import { use, useEffect, useRef, useState } from 'react';
 export const dynamic = 'force-dynamic';
 
 /**
- * Initiates an OAuth account linking flow for the provided provider and renders either a loading UI while redirecting or an error UI on failure.
- *
- * Validates the provider and the `next` return URL, requires an authenticated user (otherwise redirects to the login page while preserving a validated `next`), constructs a callback URL with `link=true`, invokes Supabase to begin the OAuth linking flow, and navigates the browser to the provider's OAuth URL. On failure, displays a user-facing error and a button to return to the Connected Accounts page.
+ * Initiates an OAuth account linking flow for a given provider and renders either a loading UI while redirecting or an error UI on failure.
  *
  * @param params - A promise resolving to an object with the OAuth provider slug (for example, `{ provider: 'github' }`)
- * @returns The component's rendered JSX showing the linking/loading state or an error state
+ * @returns The page's React element showing a loading state while redirecting to the provider or an error state if linking fails
  *
  * @see isValidProvider
  * @see validateNextParameter

@@ -36,12 +36,12 @@ import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
 /**
- * Render an external anchor for a validated website URL, or return `null` when the URL is not safe.
+ * Render an external anchor for a validated website URL or nothing when the URL is not safe.
  *
  * @param url - The website URL to validate; may be `null` or `undefined`. If not a safe URL, nothing is rendered.
  * @param children - Content to display inside the anchor element.
  * @param className - Optional CSS class names applied to the anchor.
- * @returns An anchor element pointing to the validated URL, or `null` if validation fails.
+ * @returns An anchor element for the validated URL, or `null` if the URL is not safe.
  *
  * @see {@link @heyclaude/web-runtime/core#getSafeWebsiteUrl}
  */
@@ -78,11 +78,11 @@ export const dynamicParams = true; // Allow unknown slugs to be rendered on dema
 const MAX_STATIC_COMPANIES = 10;
 
 /**
- * Produce route params for pre-rendering company pages at build time.
+ * Produce route params for build-time pre-rendering of a subset of company pages.
  *
- * Generates up to MAX_STATIC_COMPANIES { slug } objects for static pre-rendering; remaining company pages are rendered on demand via dynamicParams with ISR. On failure, logs the error and returns an empty array.
+ * Generates up to MAX_STATIC_COMPANIES `{ slug }` objects for static pre-rendering; remaining company pages are rendered on demand via dynamic routing with ISR. If fetching companies fails or no slugs are available, returns an empty array.
  *
- * @returns An array of objects each containing a `slug` string for a company page; empty if fetching fails or no slugs are available.
+ * @returns An array of objects each containing a `slug` string for a company page; empty if no slugs are available or fetching fails.
  *
  * @see {@link /apps/web/src/app/companies/[slug]/page.tsx | CompanyPage}
  * @see {@link getCompaniesList} from @heyclaude/web-runtime/data
@@ -121,13 +121,10 @@ export async function generateStaticParams() {
 }
 
 /**
- * Produces page metadata for the company route using the provided slug.
+ * Create metadata for the company detail page using the route slug.
  *
- * Resolves the `slug` from the incoming route params and delegates metadata creation
- * to `generatePageMetadata` for the /companies/:slug route.
- *
- * @param params - Object containing route parameters; expects a `slug` promise that resolves to the company slug.
- * @returns The page `Metadata` for the company detail route.
+ * @param params - Route parameters containing the `slug` of the company
+ * @returns The `Metadata` object for the /companies/:slug page
  *
  * @see generatePageMetadata
  */
@@ -139,21 +136,13 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
 }
 
 /**
- * Render the company profile page for a given slug, including the company header,
- * active job listings, and a sidebar with hiring statistics and site CTA.
+ * Render the company profile page for a given company slug, including the header, active job listings, and sidebar stats.
  *
- * This server component fetches the company profile by slug and returns a 404
- * when the company is not found. The rendered page includes:
- * - StructuredData for the route
- * - Company header (logo or placeholder, name, featured badge, description, metadata, website)
- * - Main content with active positions or a "No Active Positions" callout
- * - Sidebar with company stats and a website CTA
- *
- * Data fetching uses the app's RPC materialized view and participates in the
- * file-level ISR configuration (revalidation settings applied at the route level).
+ * The component fetches the company profile by `slug` and triggers a 404 when the company is not found.
+ * Data is fetched server-side and participates in the file-level ISR configuration (revalidation applied at the route level).
  *
  * @param params - Route params object containing the `slug` of the company
- * @returns The company profile page element containing header, listings, and stats
+ * @returns The React element tree for the company profile page (header, listings, and stats)
  *
  * @see getCompanyProfile
  * @see SafeWebsiteLink

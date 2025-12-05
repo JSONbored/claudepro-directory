@@ -16,14 +16,15 @@ import { AccountSidebar } from '@/src/components/features/account/account-sideba
 import { AccountSidebarSkeleton } from '@/src/components/features/account/account-sidebar-skeleton';
 
 /**
- * Renders the protected account dashboard layout and enforces authentication.
+ * Renders the account dashboard layout and enforces user authentication for its children.
  *
- * Performs authentication and session handling for the current request, refreshes the session when near expiry,
- * and provides user metadata to the sidebar. The layout includes a top navigation bar, a Suspense-wrapped sidebar,
+ * This server component ensures a user is authenticated (redirecting to /login if not), attempts a session
+ * refresh when the current session is near expiry, and derives user metadata (display name and avatar)
+ * to pass to the sidebar. The layout renders a top navigation bar, a Suspense-wrapped sidebar (non-blocking),
  * and a main content area guarded by multi-factor authentication.
  *
  * @param children - Content rendered inside the layout's main area
- * @returns The account layout React element containing the top bar, Suspense-wrapped sidebar, and protected main content
+ * @returns The account layout element containing the top bar, Suspense-wrapped sidebar, and MFA-protected main content
  *
  * @see getAuthenticatedUser
  * @see createSupabaseServerClient

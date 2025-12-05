@@ -273,6 +273,19 @@ function mapRecentContent(
   });
 }
 
+/**
+ * Normalize a raw content record into a HomepageContentItem suitable for display.
+ *
+ * @param input - Raw content fields; optional properties are normalized and given sensible defaults:
+ *                `title` defaults to `slug`, `description` defaults to an empty string,
+ *                `author` defaults to `"Community"`, `tags` defaults to `[]`, `source` defaults to `"community"`,
+ *                `created_at`/`date_added` default to the current ISO timestamp when both are missing,
+ *                `viewCount`/`copyCount` default to `0`. The `featured` flag is set when `featuredScore` is provided.
+ * @returns The normalized HomepageContentItem with canonical field names (`view_count`, `copy_count`, `created_at`, `date_added`, etc.) and defaults applied.
+ *
+ * @see mapTrendingMetrics
+ * @see mapPopularContent
+ */
 function toHomepageContentItem(input: {
   author?: null | string;
   category: Database['public']['Enums']['content_category'];
