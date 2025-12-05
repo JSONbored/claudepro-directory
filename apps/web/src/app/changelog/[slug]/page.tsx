@@ -147,7 +147,7 @@ export async function generateMetadata({
  * Fetches the changelog entry, triggers a 404 when the entry is not found, and renders
  * page chrome (read progress, view tracking, structured data) and the entry content.
  *
- * @param params - Object containing the `slug` of the changelog entry to render.
+ * @param params - Promise that resolves to an object containing the `slug` of the changelog entry to render.
  * @returns The server-rendered React element for the changelog entry page.
  * @throws A normalized error when loading the changelog entry fails.
  *
@@ -156,8 +156,12 @@ export async function generateMetadata({
  * @see ChangelogContent
  * @see StructuredData
  */
-export default async function ChangelogEntryPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default async function ChangelogEntryPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();

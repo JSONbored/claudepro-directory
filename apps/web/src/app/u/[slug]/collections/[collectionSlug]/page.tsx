@@ -49,16 +49,16 @@ function isValidContentType(type: string): boolean {
 }
 
 /**
- * Checks whether a slug contains only letters, digits, hyphens, or underscores.
+ * Checks whether a slug contains only lowercase letters, digits, hyphens, or underscores.
  *
  * @param slug - The candidate slug to validate (no slashes, no protocol).
- * @returns `true` if `slug` is a non-empty string composed only of ASCII letters, digits, `-`, or `_`; `false` otherwise.
+ * @returns `true` if `slug` is a non-empty string composed only of lowercase ASCII letters, digits, `-`, or `_`; `false` otherwise.
  *
  * @see getSafeContentLink
  */
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string') return false;
-  return /^[a-zA-Z0-9-_]+$/.test(slug);
+  return /^[a-z0-9-_]+$/.test(slug);
 }
 
 /**

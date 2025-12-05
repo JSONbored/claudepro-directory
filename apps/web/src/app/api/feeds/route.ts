@@ -66,7 +66,11 @@ async function executeRpcWithLogging<T>(
   const { data, error } = await rpcCall();
   if ((error !== null && error !== undefined) || data == null) {
     if (error !== null && error !== undefined) {
-      reqLogger.error('RPC call failed in generateFeedPayload', normalizeError(error), {
+      reqLogger.error('RPC call failed', normalizeError(error), {
+        rpcName,
+      });
+    } else {
+      reqLogger.error('RPC returned null data without error', undefined, {
         rpcName,
       });
     }

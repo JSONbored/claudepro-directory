@@ -118,7 +118,7 @@ export default async function ConnectedAccountsPage() {
     userLogger.error('ConnectedAccountsPage: getUserIdentitiesData threw', normalized, {
       section: 'identities-data-fetch',
     });
-    // getUserIdentitiesData returns { identities: [] } on error, not null
+    // Fallback to empty identities array on error
     identitiesData = { identities: [] };
   }
 
@@ -129,7 +129,7 @@ export default async function ConnectedAccountsPage() {
     </div>
   );
 
-  const identities = (identitiesData ?? { identities: [] }).identities ?? [];
+  const identities = identitiesData?.identities ?? [];
   if (identities.length === 0) {
     userLogger.info('ConnectedAccountsPage: no OAuth identities found', {
       section: 'identities-data-fetch',

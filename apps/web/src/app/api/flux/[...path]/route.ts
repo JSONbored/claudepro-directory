@@ -70,7 +70,7 @@ async function handleFluxRequest(
     reqLogger.error(`Flux ${method} request failed`, normalized, {
       path: params.path.join('/'),
     });
-    return createErrorResponse(error, {
+    return createErrorResponse(normalized, {
       route,
       operation: `FluxAPI:${method}`,
       method,

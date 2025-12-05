@@ -110,7 +110,7 @@ export default function ConfigRecommenderPage() {
             </UnifiedBadge>
 
             {/* Title */}
-            <h1 className="from-foreground to-foreground/70 mb-6 bg-linear-to-r bg-clip-text text-4xl font-bold text-transparent md:text-5xl lg:text-6xl">
+            <h1 className="from-foreground to-foreground/70 mb-6 bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent md:text-5xl lg:text-6xl">
               Find Your Perfect Claude Configuration
             </h1>
 

@@ -69,7 +69,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see getCompaniesList
  * @see getSafeWebsiteUrl from @heyclaude/web-runtime/core
  * @see generatePageMetadata
- * @see revalidate (defined on line 48 in this file)
+ * @see revalidate (defined on line 49 in this file)
  */
 export default async function CompaniesPage() {
   // Generate single requestId for this page request

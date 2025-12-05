@@ -51,9 +51,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { slug } = await params;
     const url = new URL(request.url);
-    const format = (url.searchParams.get('format') ?? 'llms-entry').toLowerCase();
+    const format = url.searchParams.get('format')?.toLowerCase();
 
-    if (format !== 'llms-entry') {
+    // Default to 'llms-entry' format if not specified; validate if provided
+    if (format && format !== 'llms-entry') {
       return badRequestResponse(`Invalid format '${format}' for changelog entry`, CORS);
     }
 

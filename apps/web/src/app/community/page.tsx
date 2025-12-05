@@ -54,11 +54,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Dynamic Rendering Required
+ * Incremental Static Regeneration (ISR)
  *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * This page uses ISR with a 24-hour revalidation period for better performance and SEO.
+ * Data is fetched at build time and periodically refreshed.
  */
 export const revalidate = 86_400;
 

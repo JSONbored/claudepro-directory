@@ -281,12 +281,14 @@ function FooterComponent() {
                   src={`${EXTERNAL_SERVICES.betterstack.status}/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
                   width="250"
                   height="30"
-                  frameBorder="0"
-                  scrolling="no"
                   title="System Status"
                   className="rounded-md"
                   loading="lazy"
-                  style={{ colorScheme: 'normal' }}
+                  style={{ 
+                    colorScheme: 'normal',
+                    border: 0,
+                    overflow: 'hidden',
+                  }}
                 />
               )}
             </div>

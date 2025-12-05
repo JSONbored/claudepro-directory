@@ -12,7 +12,7 @@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@heyclaude/web-runtime/ui';
 import { ChevronDown, ChevronUp } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES, ANIMATION_CONSTANTS } from '@heyclaude/web-runtime/ui';
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { SanitizedHTML } from './sanitized-html';
 
 export interface AccordionSection {
@@ -102,6 +102,35 @@ interface AccordionSectionItemProps {
  */
 function AccordionSectionItem({ section }: AccordionSectionItemProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [htmlContent, setHtmlContent] = useState<string>('');
+
+  // Convert markdown to HTML on client side
+  useEffect(() => {
+    if (typeof window !== 'undefined' && section.content) {
+      import('marked').then(({ marked }) => {
+        try {
+          // Configure marked for GitHub Flavored Markdown (GFM) support
+          marked.use({
+            gfm: true,
+            breaks: false,
+            pedantic: false,
+          });
+          const html = marked.parse(section.content, { async: false }) as string;
+          setHtmlContent(html);
+        } catch (error) {
+          // Fallback to empty string on error
+          console.error('[AccordionSectionItem] Failed to parse markdown', error);
+          setHtmlContent('');
+        }
+      }).catch((error) => {
+        // Fallback if marked fails to load
+        console.error('[AccordionSectionItem] Failed to load marked', error);
+        setHtmlContent('');
+      });
+    } else {
+      setHtmlContent('');
+    }
+  }, [section.content]);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-4">
@@ -119,7 +148,7 @@ function AccordionSectionItem({ section }: AccordionSectionItemProps) {
       </CollapsibleTrigger>
       <CollapsibleContent className={`${UI_CLASSES.PADDING_X_DEFAULT} ${UI_CLASSES.PADDING_Y_DEFAULT}`}>
         <div className="prose prose-slate dark:prose-invert max-w-none prose-sm prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1">
-          <SanitizedHTML html={section.content} />
+          <SanitizedHTML html={htmlContent} />
         </div>
       </CollapsibleContent>
     </Collapsible>
