@@ -218,7 +218,7 @@ async function executeSearchDirect<T>(
 
 async function executeSearch<T>(
   options: UnifiedSearchOptions,
-  cacheTags: string[],
+  _cacheTags: string[],
   noCache = false,
 ): Promise<UnifiedSearchResponse<T>> {
   // For search queries with filters, bypass cache (cache: 'no-store' equivalent)
@@ -226,31 +226,9 @@ async function executeSearch<T>(
     return executeSearchDirect<T>(options);
   }
   
-  const { fetchCached } = await import('../cache/fetch-cached.ts');
-  
-  return fetchCached(
-    async (_client: SupabaseClient<Database>) => {
-        // Use executeSearchDirect which creates its own client
-        // (client parameter is required by fetchCached but not used here)
-        return executeSearchDirect<T>(options);
-    },
-    {
-       tags: cacheTags,
-       ttlKey: 'cache.content_list.ttl_seconds',
-       fallback: {
-           results: [],
-           query: options.query,
-           filters: {},
-           pagination: { total: 0, limit: 0, offset: 0, hasMore: false },
-           performance: { dbTime: 0, totalTime: 0 },
-           searchType: 'unified' as const
-       }
-    },
-    'unified-search',
-    options.query,
-    options.filters?.limit ?? 10,
-    ...(options.entities ?? ['content'])
-  );
+  // Direct execution - no caching wrapper needed
+  // Cache Components should be used in data functions, not here
+  return executeSearchDirect<T>(options);
 }
 
 export async function searchUnified<T = ContentSearchResult | UnifiedSearchResult>(

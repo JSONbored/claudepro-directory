@@ -39,12 +39,13 @@ interface VercelAnalyticsResponse {
 /**
  * Get visitor stats from Vercel Analytics
  *
- * Uses 'use cache' to cache visitor statistics for 1 hour.
+ * Uses 'use cache' to cache visitor statistics.
  * This data is public and same for all users, so it can be cached at build time.
+ * Visitor stats change hourly, so we use the 'hours' cacheLife profile.
  */
 async function getVisitorStats(): Promise<VisitorStats> {
   'use cache';
-  cacheLife({ stale: 1800, revalidate: 3600, expire: 7200 }); // 30min stale, 1hr revalidate, 2hr expire
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   cacheTag('marketing-visitor-stats');
 
   // Create request-scoped child logger - do not mutate shared logger in cached function
@@ -115,16 +116,15 @@ async function getVisitorStats(): Promise<VisitorStats> {
 /**
  * Get content description copy with count
  * Uses 'use cache' to cache the description. This data is public and same for all users.
+ * Content description changes periodically, so we use the 'half' cacheLife profile.
  */
 export async function getContentDescriptionCopy(): Promise<string> {
   'use cache';
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { cacheLife, cacheTag } = await import('next/cache');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for content description (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('marketing');
   cacheTag('content-description');
 
@@ -157,16 +157,15 @@ export interface PartnerHeroStats {
 /**
  * Get partner hero stats (configuration count and visitor stats)
  * Uses 'use cache' to cache hero stats. This data is public and same for all users.
+ * Hero stats change periodically, so we use the 'half' cacheLife profile.
  */
 export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
   'use cache';
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { cacheLife, cacheTag } = await import('next/cache');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for partner hero stats (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('marketing');
   cacheTag('partner-hero-stats');
 

@@ -8,6 +8,10 @@ export * from '../actions/search.ts';
 export * from '../actions/jobs.ts';
 export * from '../actions/notifications.ts';
 export * from '../actions/user.ts';
+
+// Export input types (can't export from 'use server' files)
+export type { CreateJobInput } from '../actions/jobs.ts';
+export type { AddBookmarkInput, RemoveBookmarkInput } from '../actions/user.ts';
 export * from '../actions/create-job.generated.ts';
 export * from '../actions/update-job.generated.ts';
 export * from '../actions/delete-job.generated.ts';

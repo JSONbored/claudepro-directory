@@ -44,22 +44,29 @@ export const getReviewsWithStats = optionalAuthAction
   .action(async ({ parsedInput, ctx }) => {
     const { content_type, content_slug, sort_by, limit, offset } = parsedInput;
 
-    const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
+    try {
+      const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
 
-    const data = await getReviewsWithStatsData({
-      contentType: content_type,
-      contentSlug: content_slug,
-      sortBy: sort_by,
-      limit,
-      offset,
-      ...(ctx.userId ? { userId: ctx.userId } : {}),
-    });
+      const data = await getReviewsWithStatsData({
+        contentType: content_type,
+        contentSlug: content_slug,
+        sortBy: sort_by,
+        limit,
+        offset,
+        ...(ctx.userId ? { userId: ctx.userId } : {}),
+      });
 
-    if (!data) {
-      throw new Error('Failed to fetch reviews. Please try again.');
+      if (!data) {
+        // Error is already logged by getReviewsWithStatsData, just throw user-friendly message
+        throw new Error('Failed to fetch reviews. Please try again.');
+      }
+
+      return data;
+    } catch (error) {
+      // Error is already logged by getReviewsWithStatsData or safe-action wrapper
+      // Re-throw to let safe-action handle it
+      throw error;
     }
-
-    return data;
   });
 
 // ============================================

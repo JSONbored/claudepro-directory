@@ -23,7 +23,6 @@ export * from './rpc/run-rpc.ts';
 export * from './seo/generator.ts';
 export * from './data/seo/client.ts';
 export * from './data/content/detail.ts'; // 'use server' but often used in server contexts directly
-export * from './cache-config.ts';
 export * from './cache-tags.ts';
 export * from './proxy/next.ts';
 

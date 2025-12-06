@@ -16,7 +16,6 @@ export async function getHomepageData(
 ): Promise<Database['public']['Functions']['get_homepage_optimized']['Returns'] | null> {
   'use cache';
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
 
@@ -25,9 +24,8 @@ export async function getHomepageData(
   // This prevents cache misses due to array order differences
   const sortedCategoryIds = [...categoryIds].toSorted().join(',');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.homepage.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for homepage data that changes hourly
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   cacheTag('homepage');
   cacheTag('content');
   cacheTag('trending');

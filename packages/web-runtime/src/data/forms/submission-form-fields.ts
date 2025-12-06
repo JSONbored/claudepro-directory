@@ -126,13 +126,11 @@ async function fetchFieldsForContentType(
 ): Promise<SubmissionFormSection> {
   'use cache';
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.templates.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for form field templates (changes every 2 hours)
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   cacheTag('templates');
   cacheTag(`submission-${contentType}`);
 
@@ -159,48 +157,52 @@ async function fetchFieldsForContentType(
 
     if (!result?.fields) {
       // logger.error() normalizes errors internally, so pass raw error
-      requestLogger.error('Failed to load form fields', new Error('RPC returned null or no fields'), {
-        contentType,
-        source: 'SubmissionFormConfig',
-      });
+      requestLogger.error(
+        'Failed to load form fields',
+        new Error('RPC returned null or no fields'),
+        {
+          contentType,
+          source: 'SubmissionFormConfig',
+        }
+      );
       return emptySection();
     }
 
-  const section = emptySection();
+    const section = emptySection();
 
-  for (const item of result.fields) {
-    const field = mapField(item);
-    if (!field) continue;
+    for (const item of result.fields) {
+      const field = mapField(item);
+      if (!field) continue;
 
-    if (item.field_group === 'common' && field.name === 'name' && field.type === 'text') {
-      section.nameField = field;
-      continue;
+      if (item.field_group === 'common' && field.name === 'name' && field.type === 'text') {
+        section.nameField = field;
+        continue;
+      }
+
+      switch (item.field_group) {
+        case 'common': {
+          section.common.push(field);
+          break;
+        }
+        case 'type_specific': {
+          section.typeSpecific.push(field);
+          break;
+        }
+        case 'tags': {
+          section.tags.push(field);
+          break;
+        }
+        case null: {
+          // Handle null field_group - add to common by default
+          section.common.push(field);
+          break;
+        }
+        default: {
+          section.common.push(field);
+          break;
+        }
+      }
     }
-
-    switch (item.field_group) {
-      case 'common': {
-        section.common.push(field);
-        break;
-      }
-      case 'type_specific': {
-        section.typeSpecific.push(field);
-        break;
-      }
-      case 'tags': {
-        section.tags.push(field);
-        break;
-      }
-      case null: {
-        // Handle null field_group - add to common by default
-        section.common.push(field);
-        break;
-      }
-      default: {
-        section.common.push(field);
-        break;
-      }
-    }
-  }
 
     requestLogger.info('fetchFieldsForContentType: fetched successfully', {
       contentType,

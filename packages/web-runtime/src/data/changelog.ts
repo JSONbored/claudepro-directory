@@ -6,6 +6,7 @@ import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../logger.ts';
 import { generateRequestId } from '../utils/request-id.ts';
+
 import { QUERY_LIMITS } from './config/constants.ts';
 import './changelog.shared.ts';
 
@@ -13,8 +14,6 @@ import './changelog.shared.ts';
 export * from './changelog.shared.ts';
 
 const CHANGELOG_TAG = 'changelog';
-const CHANGELOG_TTL_KEY = 'cache.changelog.ttl_seconds';
-const CHANGELOG_DETAIL_TTL_KEY = 'cache.changelog_detail.ttl_seconds';
 
 function createEmptyOverview(
   limit: number,
@@ -54,13 +53,11 @@ export async function getChangelogOverview(
 
   const { category, publishedOnly = true, featuredOnly = false, limit = 50, offset = 0 } = options;
 
-  const { getCacheTtl } = await import('../cache-config.ts');
   const { isBuildTime } = await import('../build-time.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl(CHANGELOG_TTL_KEY);
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for changelog overview (changes hourly)
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   cacheTag(CHANGELOG_TAG);
   if (category) {
     cacheTag(`changelog-category-${category}`);
@@ -120,18 +117,21 @@ export async function getChangelogOverview(
  * Get changelog entry by slug
  * Uses 'use cache' to cache changelog entries. This data is public and same for all users.
  */
+/**
+ * Get changelog entry by slug
+ * Uses 'use cache' to cache changelog entries. This data is public and same for all users.
+ * Changelog entries change periodically, so we use the 'hours' cacheLife profile.
+ */
 export async function getChangelogEntryBySlug(
   slug: string
 ): Promise<Database['public']['Tables']['changelog']['Row'] | null> {
   'use cache';
 
-  const { getCacheTtl } = await import('../cache-config.ts');
   const { isBuildTime } = await import('../build-time.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl(CHANGELOG_DETAIL_TTL_KEY);
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for changelog entries (changes every 2 hours)
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   cacheTag(CHANGELOG_TAG);
   cacheTag(`changelog-${slug}`);
 

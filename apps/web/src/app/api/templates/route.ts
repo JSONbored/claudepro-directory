@@ -83,7 +83,6 @@ export async function GET(request: NextRequest) {
       category: validCategory,
       count: templates.length,
       cacheTags: ['templates', `templates-${validCategory}`],
-      cacheTTL: 300,
     });
 
     // Return success response

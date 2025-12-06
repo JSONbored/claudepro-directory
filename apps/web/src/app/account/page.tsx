@@ -80,18 +80,6 @@ export default async function AccountDashboard() {
     module: 'apps/web/src/app/account',
   });
 
-  return (
-    <Suspense fallback={<div className="space-y-6">Loading dashboard...</div>}>
-      <AccountDashboardContent reqLogger={reqLogger} />
-    </Suspense>
-  );
-}
-
-async function AccountDashboardContent({
-  reqLogger,
-}: {
-  reqLogger: ReturnType<typeof logger.child>;
-}) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'AccountDashboard' });
 
@@ -126,10 +114,36 @@ async function AccountDashboardContent({
     section: 'authentication',
   });
 
+  return (
+    <div className="space-y-6">
+      {/* Dashboard header and stats - bundle data in Suspense for streaming */}
+      <Suspense fallback={<div className="space-y-6">Loading dashboard...</div>}>
+        <DashboardHeaderAndStats userId={user.id} userLogger={userLogger} />
+      </Suspense>
+
+      {/* Quick actions and content sections - in separate Suspense for streaming */}
+      <Suspense fallback={<div className="space-y-6">Loading content...</div>}>
+        <DashboardContent userId={user.id} userLogger={userLogger} />
+      </Suspense>
+    </div>
+  );
+}
+
+/**
+ * Server component that fetches dashboard bundle and renders header with stats.
+ * Wrapped in Suspense to allow streaming.
+ */
+async function DashboardHeaderAndStats({
+  userId,
+  userLogger,
+}: {
+  userId: string;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
   // Section: Dashboard Bundle
   let bundleData: Awaited<ReturnType<typeof getAccountDashboardBundle>> | null = null;
   try {
-    bundleData = await getAccountDashboardBundle(user.id);
+    bundleData = await getAccountDashboardBundle(userId);
     userLogger.info('AccountDashboard: dashboard bundle loaded', {
       section: 'dashboard-bundle',
       hasDashboard: !!bundleData.dashboard,
@@ -144,11 +158,8 @@ async function AccountDashboardContent({
     throw normalized;
   }
 
-  // bundleData is guaranteed to be non-null after successful await
-  // (getAccountDashboardBundle returns Promise<AccountDashboardBundle>, not Promise<AccountDashboardBundle | null>)
   const dashboardData = bundleData.dashboard;
   const libraryData = bundleData.library;
-  const homepageData = bundleData.homepage;
 
   if (!dashboardData) {
     const normalized = normalizeError(
@@ -159,26 +170,23 @@ async function AccountDashboardContent({
       section: 'dashboard-bundle',
     });
     return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Dashboard unavailable</CardTitle>
-            <CardDescription>
-              We couldn&apos;t load your account data. Please refresh the page or try again later.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.HOME}>Go to home</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Dashboard unavailable</CardTitle>
+          <CardDescription>
+            We couldn&apos;t load your account data. Please refresh the page or try again later.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild>
+            <Link href={ROUTES.HOME}>Go to home</Link>
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
   const { bookmark_count, profile } = dashboardData;
-
   const bookmarkCount = bookmark_count;
   const accountAge = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
@@ -188,122 +196,14 @@ async function AccountDashboardContent({
     (bookmark) => bookmark.content_slug !== null && bookmark.content_type !== null
   );
   const recentBookmarks = bookmarks.slice(0, 3);
-
-  // Section: Recent Bookmarks
-  const recentlySavedContentResults = await Promise.all(
-    recentBookmarks.map(async (bookmark) => {
-      try {
-        const category = bookmark.content_type as Database['public']['Enums']['content_category'];
-        const slug = bookmark.content_slug as string;
-        const detail = await getContentDetailCore({ category, slug });
-        return detail?.content ?? null;
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to load bookmark content');
-        userLogger.warn('AccountDashboard: getContentDetailCore failed for bookmark', {
-          err: normalized,
-          section: 'recent-bookmarks',
-          slug: bookmark.content_slug,
-          category: bookmark.content_type,
-        });
-        return null;
-      }
-    })
-  );
-  userLogger.info('AccountDashboard: recent bookmarks loaded', {
-    section: 'recent-bookmarks',
-    bookmarkCount: recentBookmarks.length,
-    loadedCount: recentlySavedContentResults.filter(Boolean).length,
-  });
-  const recentlySavedContent = recentlySavedContentResults.filter(
-    (item): item is Database['public']['Tables']['content']['Row'] =>
-      item !== null && typeof item === 'object'
-  );
-
-  const bookmarkedSlugs = new Set(
-    bookmarks.map((bookmark) => `${bookmark.content_type ?? ''}/${bookmark.content_slug ?? ''}`)
-  );
-
-  const savedTags = new Set<string>();
-  for (const contentItem of recentlySavedContent) {
-    const tagList = ensureStringArray((contentItem as { tags?: string[] }).tags);
-    for (const tag of tagList) {
-      if (tag) {
-        savedTags.add(tag.trim().toLowerCase());
-      }
-    }
-  }
-
-  /**
-   * Safely extracts the `categoryData` map from account dashboard homepage data, returning an empty object if the structure is missing or invalid.
-   *
-   * @param homepageData - The `homepage` field from the account dashboard bundle (may be null, undefined, or malformed)
-   * @returns A record mapping category keys to arrays of `HomepageContentItem`; an empty object if no valid `categoryData` is present
-   *
-   * @see getAccountDashboardBundle
-   */
-  function extractHomepageCategoryData(
-    homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage']
-  ): Record<string, HomepageContentItem[]> {
-    if (
-      homepageData?.content === null ||
-      homepageData?.content === undefined ||
-      typeof homepageData.content !== 'object'
-    ) {
-      return {};
-    }
-    const content = homepageData.content as {
-      categoryData?: Record<string, HomepageContentItem[]>;
-    };
-    return content.categoryData ?? {};
-  }
-
-  const homepageCategoryData = extractHomepageCategoryData(homepageData);
-
-  const homepageItems = Object.values(homepageCategoryData).flatMap((bucket) =>
-    Array.isArray(bucket) ? bucket : []
-  );
-
-  const candidateRecommendations =
-    savedTags.size > 0
-      ? homepageItems.filter((item) =>
-          ensureStringArray(item.tags).some((tag) => savedTags.has(tag.toLowerCase()))
-        )
-      : homepageItems;
-
-  // Section: Recommendations
-  const recommendations = candidateRecommendations
-    .filter(
-      (item) =>
-        typeof item.slug === 'string' &&
-        item.slug !== '' &&
-        !bookmarkedSlugs.has(`${item.category}/${item.slug}`) &&
-        typeof item.title === 'string' &&
-        item.title !== ''
-    )
-    .slice(0, 3);
-  userLogger.info('AccountDashboard: recommendations generated', {
-    section: 'recommendations',
-    candidateCount: candidateRecommendations.length,
-    finalCount: recommendations.length,
-    savedTagsCount: savedTags.size,
-  });
-
   const latestBookmark = recentBookmarks[0];
   const resumeBookmarkHref =
     latestBookmark?.content_slug && latestBookmark.content_type
       ? `/${latestBookmark.content_type}/${latestBookmark.content_slug}`
       : null;
 
-  // Final summary log
-  userLogger.info('AccountDashboard: page render completed', {
-    section: 'page-render',
-    bookmarkCount,
-    recommendationsCount: recommendations.length,
-    recentlySavedCount: recentlySavedContent.length,
-  });
-
   return (
-    <div className="space-y-6">
+    <>
       <div>
         <h1 className="mb-2 text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back, {profile?.name ?? 'User'}!</p>
@@ -382,77 +282,291 @@ async function AccountDashboardContent({
           />
         </CardContent>
       </Card>
+    </>
+  );
+}
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recently Saved</CardTitle>
-            <CardDescription>Your latest bookmarks at a glance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {recentlySavedContent.length > 0 ? (
-              <RecentlySavedGrid items={recentlySavedContent} />
-            ) : (
-              <EmptyRecentlySavedState />
-            )}
-          </CardContent>
-        </Card>
+/**
+ * Server component that fetches dashboard content (recent bookmarks, recommendations).
+ * Wrapped in Suspense to allow streaming.
+ */
+async function DashboardContent({
+  userId,
+  userLogger,
+}: {
+  userId: string;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
+  // Fetch dashboard bundle for library and homepage data
+  let bundleData: Awaited<ReturnType<typeof getAccountDashboardBundle>> | null = null;
+  try {
+    bundleData = await getAccountDashboardBundle(userId);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load account dashboard bundle');
+    userLogger.error(
+      'AccountDashboard: getAccountDashboardBundle threw in DashboardContent',
+      normalized,
+      {
+        section: 'dashboard-content',
+      }
+    );
+    throw normalized;
+  }
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recommended next</CardTitle>
-            <CardDescription>Suggestions based on your saved tags</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {recommendations.length > 0 ? (
-              <ul className="space-y-3">
-                {recommendations.map((item) => {
-                  const firstTag = ensureStringArray(item.tags)[0];
-                  const itemHref = `/${item.category}/${item.slug}`;
-                  const similarHref = firstTag
-                    ? `/search?tags=${encodeURIComponent(firstTag)}`
-                    : null;
-                  return (
-                    <li
-                      key={`${item.category}-${item.slug}`}
-                      className="border-border/60 bg-muted/20 rounded-xl border p-3"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold">{item.title}</p>
-                          {item.description ? (
-                            <p className="text-muted-foreground line-clamp-2 text-sm">
-                              {item.description}
-                            </p>
-                          ) : null}
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <NavLink href={itemHref} className="text-sm font-medium">
-                            Explore →
-                          </NavLink>
-                          {similarHref ? (
-                            <NavLink
-                              href={similarHref}
-                              className="text-muted-foreground hover:text-foreground text-xs"
-                            >
-                              Explore similar →
-                            </NavLink>
-                          ) : null}
-                        </div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground text-sm">
-                Start bookmarking configs to receive personalized recommendations.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+  const libraryData = bundleData.library;
+  const homepageData = bundleData.homepage;
+
+  const bookmarks = (libraryData?.bookmarks ?? []).filter(
+    (bookmark) => bookmark.content_slug !== null && bookmark.content_type !== null
+  );
+  const recentBookmarks = bookmarks.slice(0, 3);
+  const bookmarkedSlugs = new Set(
+    bookmarks.map((bookmark) => `${bookmark.content_type ?? ''}/${bookmark.content_slug ?? ''}`)
+  );
+
+  // Section: Recent Bookmarks - in separate Suspense for streaming
+  return (
+    <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+      <Suspense
+        fallback={
+          <Card>
+            <CardContent className="py-12">
+              <div className="h-48 animate-pulse" />
+            </CardContent>
+          </Card>
+        }
+      >
+        <RecentlySavedSection recentBookmarks={recentBookmarks} userLogger={userLogger} />
+      </Suspense>
+
+      <Suspense
+        fallback={
+          <Card>
+            <CardContent className="py-12">
+              <div className="h-48 animate-pulse" />
+            </CardContent>
+          </Card>
+        }
+      >
+        <RecommendationsSection
+          homepageData={homepageData}
+          bookmarkedSlugs={bookmarkedSlugs}
+          recentBookmarks={recentBookmarks}
+          userLogger={userLogger}
+        />
+      </Suspense>
     </div>
+  );
+}
+
+/**
+ * Server component that fetches recent bookmark content details and renders the grid.
+ * Wrapped in Suspense to allow streaming.
+ */
+async function RecentlySavedSection({
+  recentBookmarks,
+  userLogger,
+}: {
+  recentBookmarks: Array<{
+    content_slug: null | string;
+    content_type: null | string;
+  }>;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
+  // Section: Recent Bookmarks
+  const recentlySavedContentResults = await Promise.all(
+    recentBookmarks.map(async (bookmark) => {
+      try {
+        const category = bookmark.content_type as Database['public']['Enums']['content_category'];
+        const slug = bookmark.content_slug as string;
+        const detail = await getContentDetailCore({ category, slug });
+        return detail?.content ?? null;
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to load bookmark content');
+        userLogger.warn('AccountDashboard: getContentDetailCore failed for bookmark', {
+          err: normalized,
+          section: 'recent-bookmarks',
+          slug: bookmark.content_slug,
+          category: bookmark.content_type,
+        });
+        return null;
+      }
+    })
+  );
+  userLogger.info('AccountDashboard: recent bookmarks loaded', {
+    section: 'recent-bookmarks',
+    bookmarkCount: recentBookmarks.length,
+    loadedCount: recentlySavedContentResults.filter(Boolean).length,
+  });
+  const recentlySavedContent = recentlySavedContentResults.filter(
+    (item): item is Database['public']['Tables']['content']['Row'] =>
+      item !== null && typeof item === 'object'
+  );
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Recently Saved</CardTitle>
+        <CardDescription>Your latest bookmarks at a glance</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {recentlySavedContent.length > 0 ? (
+          <RecentlySavedGrid items={recentlySavedContent} />
+        ) : (
+          <EmptyRecentlySavedState />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * Server component that computes and renders recommendations.
+ * Wrapped in Suspense to allow streaming.
+ */
+async function RecommendationsSection({
+  homepageData,
+  bookmarkedSlugs,
+  recentBookmarks,
+  userLogger,
+}: {
+  bookmarkedSlugs: Set<string>;
+  homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage'];
+  recentBookmarks: Array<{
+    content_slug: null | string;
+    content_type: null | string;
+  }>;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
+  // Fetch recent bookmark content to extract saved tags
+  const recentlySavedContentResults = await Promise.all(
+    recentBookmarks.map(async (bookmark) => {
+      try {
+        const category = bookmark.content_type as Database['public']['Enums']['content_category'];
+        const slug = bookmark.content_slug as string;
+        const detail = await getContentDetailCore({ category, slug });
+        return detail?.content ?? null;
+      } catch {
+        return null;
+      }
+    })
+  );
+  const recentlySavedContent = recentlySavedContentResults.filter(
+    (item): item is Database['public']['Tables']['content']['Row'] =>
+      item !== null && typeof item === 'object'
+  );
+
+  const savedTags = new Set<string>();
+  for (const contentItem of recentlySavedContent) {
+    const tagList = ensureStringArray((contentItem as { tags?: string[] }).tags);
+    for (const tag of tagList) {
+      if (tag) {
+        savedTags.add(tag.trim().toLowerCase());
+      }
+    }
+  }
+
+  /**
+   * Safely extracts the `categoryData` map from account dashboard homepage data, returning an empty object if the structure is missing or invalid.
+   */
+  function extractHomepageCategoryData(
+    homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage']
+  ): Record<string, HomepageContentItem[]> {
+    if (
+      homepageData?.content === null ||
+      homepageData?.content === undefined ||
+      typeof homepageData.content !== 'object'
+    ) {
+      return {};
+    }
+    const content = homepageData.content as {
+      categoryData?: Record<string, HomepageContentItem[]>;
+    };
+    return content.categoryData ?? {};
+  }
+
+  const homepageCategoryData = extractHomepageCategoryData(homepageData);
+  const homepageItems = Object.values(homepageCategoryData).flatMap((bucket) =>
+    Array.isArray(bucket) ? bucket : []
+  );
+
+  const candidateRecommendations =
+    savedTags.size > 0
+      ? homepageItems.filter((item) =>
+          ensureStringArray(item.tags).some((tag) => savedTags.has(tag.toLowerCase()))
+        )
+      : homepageItems;
+
+  // Section: Recommendations
+  const recommendations = candidateRecommendations
+    .filter(
+      (item) =>
+        typeof item.slug === 'string' &&
+        item.slug !== '' &&
+        !bookmarkedSlugs.has(`${item.category}/${item.slug}`) &&
+        typeof item.title === 'string' &&
+        item.title !== ''
+    )
+    .slice(0, 3);
+  userLogger.info('AccountDashboard: recommendations generated', {
+    section: 'recommendations',
+    candidateCount: candidateRecommendations.length,
+    finalCount: recommendations.length,
+    savedTagsCount: savedTags.size,
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Recommended next</CardTitle>
+        <CardDescription>Suggestions based on your saved tags</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {recommendations.length > 0 ? (
+          <ul className="space-y-3">
+            {recommendations.map((item) => {
+              const firstTag = ensureStringArray(item.tags)[0];
+              const itemHref = `/${item.category}/${item.slug}`;
+              const similarHref = firstTag ? `/search?tags=${encodeURIComponent(firstTag)}` : null;
+              return (
+                <li
+                  key={`${item.category}-${item.slug}`}
+                  className="border-border/60 bg-muted/20 rounded-xl border p-3"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold">{item.title}</p>
+                      {item.description ? (
+                        <p className="text-muted-foreground line-clamp-2 text-sm">
+                          {item.description}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <NavLink href={itemHref} className="text-sm font-medium">
+                        Explore →
+                      </NavLink>
+                      {similarHref ? (
+                        <NavLink
+                          href={similarHref}
+                          className="text-muted-foreground hover:text-foreground text-xs"
+                        >
+                          Explore similar →
+                        </NavLink>
+                      ) : null}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="text-muted-foreground text-sm">
+            Start bookmarking configs to receive personalized recommendations.
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

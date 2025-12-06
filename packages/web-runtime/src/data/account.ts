@@ -10,8 +10,6 @@ import { logger } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
 import { generateRequestId } from '../utils/request-id.ts';
 
-// MIGRATED: All functions now use 'use cache: private' instead of React.cache() for Cache Components compatibility
-
 const USER_TIER_VALUES = Constants.public.Enums.user_tier;
 
 const accountDashboardSchema = z.object({
@@ -734,6 +732,195 @@ export async function getUserIdentitiesData(
       userId,
     });
     return { identities: [] };
+  }
+}
+
+/**
+ * Check if content is bookmarked by user
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ */
+export async function isBookmarked(input: {
+  content_slug: string;
+  content_type: Database['public']['Enums']['content_category'];
+  userId: string;
+}): Promise<boolean> {
+  'use cache: private';
+  const { userId, content_type, content_slug } = input;
+
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag('user-bookmarks');
+  cacheTag(`user-${userId}`);
+  cacheTag(`content-${content_slug}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'isBookmarked',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+    const result = await service.isBookmarked({
+      p_user_id: userId,
+      p_content_type: content_type,
+      p_content_slug: content_slug,
+    });
+
+    return result ?? false;
+  } catch (error) {
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('isBookmarked: unexpected error', errorForLogging, {
+      userId,
+      content_type,
+      content_slug,
+    });
+    return false;
+  }
+}
+
+/**
+ * Check if user is following another user
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ */
+export async function isFollowing(input: {
+  followerId: string;
+  followingId: string;
+}): Promise<boolean> {
+  'use cache: private';
+  const { followerId, followingId } = input;
+
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag('users');
+  cacheTag(`user-${followerId}`);
+  cacheTag(`user-${followingId}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'isFollowing',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+    const result = await service.isFollowing({
+      follower_id: followerId,
+      following_id: followingId,
+    });
+
+    return result ?? false;
+  } catch (error) {
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('isFollowing: unexpected error', errorForLogging, {
+      followerId,
+      followingId,
+    });
+    return false;
+  }
+}
+
+/**
+ * Batch check bookmark status for multiple items
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ */
+export async function isBookmarkedBatch(input: {
+  items: Array<{
+    content_slug: string;
+    content_type: Database['public']['Enums']['content_category'];
+  }>;
+  userId: string;
+}): Promise<Database['public']['Functions']['is_bookmarked_batch']['Returns']> {
+  'use cache: private';
+  const { userId, items } = input;
+
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag('user-bookmarks');
+  cacheTag(`user-${userId}`);
+  // Include sorted item keys in cache tag for proper cache key generation
+  const itemKey = items
+    .map((i) => `${i.content_type}:${i.content_slug}`)
+    .sort()
+    .join(',');
+  cacheTag(`bookmark-batch-${itemKey}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'isBookmarkedBatch',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+    const result = await service.isBookmarkedBatch({
+      p_user_id: userId,
+      p_items: items,
+    });
+
+    return result ?? [];
+  } catch (error) {
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('isBookmarkedBatch: unexpected error', errorForLogging, {
+      userId,
+      itemCount: items.length,
+    });
+    return [];
+  }
+}
+
+/**
+ * Batch check follow status for multiple users
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ */
+export async function isFollowingBatch(input: {
+  followedUserIds: string[];
+  followerId: string;
+}): Promise<Database['public']['Functions']['is_following_batch']['Returns']> {
+  'use cache: private';
+  const { followerId, followedUserIds } = input;
+
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag('users');
+  cacheTag(`user-${followerId}`);
+  // Include sorted user IDs in cache tag for proper cache key generation
+  const userIdsKey = [...followedUserIds].sort().join(',');
+  cacheTag(`follow-batch-${userIdsKey}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'isFollowingBatch',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+    const result = await service.isFollowingBatch({
+      p_follower_id: followerId,
+      p_followed_user_ids: followedUserIds,
+    });
+
+    return result ?? [];
+  } catch (error) {
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('isFollowingBatch: unexpected error', errorForLogging, {
+      followerId,
+      followedUserCount: followedUserIds.length,
+    });
+    return [];
   }
 }
 

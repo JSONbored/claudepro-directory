@@ -13,17 +13,16 @@ type ContactCommandsRow =
 /**
  * Fetch contact commands
  * Uses 'use cache' to cache contact commands. This data is public and same for all users.
+ * Contact commands change periodically, so we use the 'hours' cacheLife profile.
  */
 export async function fetchContactCommands(): Promise<ContactCommandsRow | null> {
   'use cache';
 
-  const { getCacheTtl } = await import('../cache-config.ts');
   const { isBuildTime } = await import('../build-time.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.contact.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for contact commands (changes hourly)
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   cacheTag('contact');
 
   const requestId = generateRequestId();

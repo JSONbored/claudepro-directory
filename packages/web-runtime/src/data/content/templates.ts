@@ -17,21 +17,20 @@ type MergedTemplateItem = ContentTemplateItem &
 /**
  * Get content templates
  * Uses 'use cache' to cache content templates. This data is public and same for all users.
+ * Templates change periodically, so we use the 'hours' cacheLife profile.
  */
 export async function getContentTemplates(
   category: Database['public']['Enums']['content_category']
 ): Promise<MergedTemplateItem[]> {
   'use cache';
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
   const { generateRequestId } = await import('../../utils/request-id.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.templates.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for templates (changes every 2 hours)
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   cacheTag('templates');
   cacheTag(`templates-${category}`);
 

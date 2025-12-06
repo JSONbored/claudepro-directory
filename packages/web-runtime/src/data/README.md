@@ -14,27 +14,32 @@ All cached reads and repository-wide configuration now live under `src/lib/data`
 When adding a new cached read:
 
 1. Create a module inside the appropriate domain folder (or a new folder if the domain does not yet exist).
-2. Use `fetchCachedRpc` for any Supabase RPC reads so cache TTL/tag behaviour stays consistent.
+2. Use `'use cache'` or `'use cache: private'` with `cacheLife()` profiles and `cacheTag()` for Cache Components.
 3. Export the helper from the domain `index.ts` (or create one) so consumers import from `@/src/lib/data/<domain>`.
 
-## Typed Cache Config Accessors
+## Cache Components Pattern
 
-Never read from `cacheConfigs()` directly. Instead, use the typed helpers from `src/lib/data/config/cache-config.ts`:
+All data functions use Next.js Cache Components with `cacheLife()` profiles:
 
 ```ts
-import { getCacheTtl, getCacheInvalidateTags } from '@/src/lib/data/config/cache-config';
-
-const ttl = getCacheTtl('cache.content_detail.ttl_seconds');
-const tags = getCacheInvalidateTags('cache.invalidate.content_create');
+export async function getData() {
+  'use cache'; // or 'use cache: private' for user-specific data
+  cacheLife('hours'); // Use named profile from next.config.mjs
+  cacheTag('data');
+  cacheTag(`data-${id}`); // Include dynamic identifiers in tags
+  
+  // Your data fetching code
+  return data;
+}
 ```
 
-These helpers:
-
-- Provide compile-time key validation via `CacheTtlKey` / `CacheInvalidateKey`
-- Return correctly typed values (numbers or `readonly string[]`)
-- Use static configuration defaults
-
-If you need the full cache config object (e.g., to prime a promise), use `getCacheConfigSnapshot()` instead of calling `cacheConfigs()` directly.
+Available `cacheLife` profiles (configured in `next.config.mjs`):
+- `'minutes'` - 5min stale, 1min revalidate, 1hr expire
+- `'quarter'` - 15min stale, 5min revalidate, 2hr expire
+- `'half'` - 30min stale, 10min revalidate, 3hr expire
+- `'hours'` - 1hr stale, 15min revalidate, 1 day expire
+- `'stable'` - 6hr stale, 1hr revalidate, 7 days expire
+- `'static'` - 1 day stale, 6hr revalidate, 30 days expire
 
 ## Guidelines
 

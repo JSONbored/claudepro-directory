@@ -7,9 +7,6 @@
 
 import { z } from 'zod';
 import { rateLimitedAction } from './safe-action.ts';
-import { fetchCached } from '../cache/fetch-cached.ts';
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Get Popular Searches
@@ -28,21 +25,6 @@ export const getPopularSearches = rateLimitedAction
   )
   .metadata({ actionName: 'search.getPopularSearches', category: 'analytics' })
   .action(async ({ parsedInput }) => {
-    return fetchCached(
-      async (client: SupabaseClient<Database>) => {
-        const { data, error } = await client.rpc('get_trending_searches', {
-          limit_count: parsedInput.limit,
-        });
-        if (error) throw error;
-        return data as Database['public']['Functions']['get_trending_searches']['Returns'];
-      },
-      {
-        tags: ['search', 'popular-searches'],
-        ttlKey: 'cache.search_facets.ttl_seconds', // Reuse existing TTL config
-        fallback: [],
-        logMeta: { limit: parsedInput.limit },
-      },
-      'popular-searches',
-      parsedInput.limit
-    );
+    const { getPopularSearches } = await import('../data/search/facets.ts');
+    return getPopularSearches(parsedInput.limit);
   });

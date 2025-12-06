@@ -153,30 +153,16 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
 
   reqLogger.info('HomePage: rendering homepage');
 
-  // Fetch member count for hero (lightweight, can be done in parallel with other data)
-  // We'll use a default value for the hero and update it when content loads
-  const categoryIds = getHomepageCategoryIds;
-  const homepageResultPromise = getHomepageData(categoryIds).catch((error: unknown) => {
-    trackRPCFailure('get_homepage_optimized', error, {
-      section: 'hero',
-      categoryIds: categoryIds.length,
-      purpose: 'member-count',
-    });
-    return null;
-  });
-
-  // Get member count for hero (non-blocking, can use default if slow)
-  const homepageResult = await homepageResultPromise;
-  const memberCount = homepageResult?.member_count ?? 0;
-
   // Fetch search facets in parallel (non-blocking, streams separately)
   const searchFiltersPromise = HomepageSearchFacetsServer();
 
   return (
     <div className="bg-background min-h-screen">
       <div className="relative overflow-hidden">
-        {/* Hero section - streams immediately (no data fetching) */}
-        <HomepageHeroServer memberCount={memberCount} />
+        {/* Hero section - streams immediately with Suspense boundary for member count */}
+        <Suspense fallback={<HomepageHeroServer memberCount={0} />}>
+          <HomepageHeroWithMemberCount />
+        </Suspense>
 
         <LazySection>
           <RecentlyViewedRail />
@@ -202,6 +188,33 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
       </div>
     </div>
   );
+}
+
+/**
+ * Server component that fetches member count and renders the homepage hero.
+ *
+ * This component is wrapped in a Suspense boundary to allow the hero to stream
+ * immediately with a fallback value, then update when the actual member count loads.
+ *
+ * @returns The HomepageHeroServer component with the fetched member count
+ *
+ * @see HomepageHeroServer
+ * @see getHomepageData
+ * @see trackRPCFailure
+ */
+async function HomepageHeroWithMemberCount() {
+  const categoryIds = getHomepageCategoryIds;
+  const homepageResult = await getHomepageData(categoryIds).catch((error: unknown) => {
+    trackRPCFailure('get_homepage_optimized', error, {
+      section: 'hero',
+      categoryIds: categoryIds.length,
+      purpose: 'member-count',
+    });
+    return null;
+  });
+
+  const memberCount = homepageResult?.member_count ?? 0;
+  return <HomepageHeroServer memberCount={memberCount} />;
 }
 
 /**

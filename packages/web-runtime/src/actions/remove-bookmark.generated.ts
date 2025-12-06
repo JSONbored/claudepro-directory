@@ -14,7 +14,6 @@ const removeBookmarkSchema = z.object({
   content_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']),
   content_slug: z.string()
 });
-export type RemoveBookmarkInput = z.infer<typeof removeBookmarkSchema>;
 
 export const removeBookmark = authedAction
   .metadata({ actionName: 'removeBookmark', category: 'user' })
@@ -39,11 +38,7 @@ export const removeBookmark = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -52,13 +47,9 @@ export const removeBookmark = authedAction
       revalidatePath(`/account`);
       revalidatePath(`/account/library`);
       revalidateTag(`user-bookmarks`, 'default');
+      revalidateTag(`users`, 'default');
       revalidateTag(`user-${ctx.userId}`, 'default');
       revalidateTag(`content-${parsedInput.content_slug}`, 'default');
-      
-      await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.bookmark_delete']
-      });
 
       
 

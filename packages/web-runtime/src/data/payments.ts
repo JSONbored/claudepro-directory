@@ -156,10 +156,30 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
   }
 }
 
+/**
+ * Get job billing summaries for a list of job IDs
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific billing data.
+ * This allows cookies() to be used inside the cache scope (via createSupabaseServerClient)
+ * while still providing per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (jobIds in cache tag)
+ * - Not prerendered (runs at request time)
+ */
 export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBillingSummaryEntry[]> {
+  'use cache: private';
+
   if (jobIds.length === 0) {
     return [];
   }
+
+  // Configure cache
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  // Create cache tag from sorted jobIds for stable cache key
+  const sortedJobIds = [...jobIds].sort().join('-');
+  cacheTag(`job-billing-${sortedJobIds}`);
 
   // Create request-scoped child logger to avoid race conditions
   const requestId = generateRequestId();

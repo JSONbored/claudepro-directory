@@ -2,7 +2,6 @@ import { MiscService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag, revalidateTag } from 'next/cache';
 
-import { getCacheInvalidateTags } from '../cache-config.ts';
 import { logger } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
 import { generateRequestId } from '../utils/request-id.ts';
@@ -11,15 +10,15 @@ export type ActiveNotificationRecord =
   Database['public']['Functions']['get_active_notifications']['Returns'][number];
 
 const DEFAULT_NOTIFICATION_TAG = 'notifications' as const;
-// Removed TTL_KEY - no longer used since we use 'use cache: private' instead of fetchCached
-const INVALIDATION_KEY = 'cache.invalidate.notifications' as const;
 
 export function getNotificationCacheTags(userId: string): string[] {
-  const dynamicTags = getCacheInvalidateTags(INVALIDATION_KEY);
-  const tags = new Set<string>([DEFAULT_NOTIFICATION_TAG, `user-${userId}`]);
-  for (const tag of dynamicTags) {
-    tags.add(tag);
-  }
+  // Direct tag array for cache invalidation
+  const tags = new Set<string>([
+    DEFAULT_NOTIFICATION_TAG,
+    `user-${userId}`,
+    'notifications',
+    'users',
+  ]);
   return [...tags];
 }
 

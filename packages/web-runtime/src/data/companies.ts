@@ -4,7 +4,6 @@ import { CompaniesService } from '@heyclaude/data-layer';
 import { Constants, type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
-import { getCacheTtl } from '../cache-config.ts';
 import { searchCompaniesUnified } from '../edge/search-client.ts';
 import { logger } from '../logger.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
@@ -13,8 +12,6 @@ import { generateRequestId } from '../utils/request-id.ts';
 import { normalizeRpcResult } from './content-helpers.ts';
 
 const JOBS_CATEGORY = Constants.public.Enums.content_category[9] as string; // 'jobs'
-
-const COMPANY_DETAIL_TTL_KEY = 'cache.company_detail.ttl_seconds';
 
 type GetCompanyAdminProfileReturn =
   Database['public']['Functions']['get_company_admin_profile']['Returns'];
@@ -86,6 +83,7 @@ export async function getCompanyAdminProfile(
 /**
  * Get company profile by slug
  * Uses 'use cache' to cache company profiles. This data is public and same for all users.
+ * Company profiles change periodically, so we use the 'half' cacheLife profile.
  */
 export async function getCompanyProfile(
   slug: string
@@ -95,9 +93,8 @@ export async function getCompanyProfile(
   const { isBuildTime } = await import('../build-time.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl(COMPANY_DETAIL_TTL_KEY);
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for company profiles (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('companies');
   cacheTag(JOBS_CATEGORY);
   cacheTag(`company-${slug}`);
@@ -141,6 +138,7 @@ export async function getCompanyProfile(
 /**
  * Get companies list
  * Uses 'use cache' to cache companies lists. This data is public and same for all users.
+ * Company lists change periodically, so we use the 'half' cacheLife profile.
  */
 export async function getCompaniesList(
   limit = 50,
@@ -148,13 +146,11 @@ export async function getCompaniesList(
 ): Promise<Database['public']['Functions']['get_companies_list']['Returns']> {
   'use cache';
 
-  const { getCacheTtl } = await import('../cache-config.ts');
   const { isBuildTime } = await import('../build-time.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.company_list.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for company lists (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('companies');
   cacheTag(JOBS_CATEGORY);
 
@@ -261,6 +257,7 @@ async function fetchCompanySearchResults(
  *
  * Uses 'use cache' to cache search results. Query and limit become part of the cache key.
  * This data is public and same for all users with the same query, so it can be cached.
+ * Company search results change frequently, so we use the 'quarter' cacheLife profile.
  */
 export async function searchCompanies(query: string, limit = 10): Promise<CompanySearchResult[]> {
   'use cache';
@@ -269,8 +266,8 @@ export async function searchCompanies(query: string, limit = 10): Promise<Compan
     return [];
   }
 
-  const ttl = getCacheTtl('cache.company_search.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'quarter' profile for company search (changes every 5 minutes)
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2 hours expire
   cacheTag('company-search');
 
   // query and limit are automatically part of cache key

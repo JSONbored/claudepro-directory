@@ -40,7 +40,7 @@ Data fetching and Supabase interactions.
 -   **Supabase Clients**: `createSupabaseServerClient`, `createSupabaseBrowserClient`.
 -   **Content**: `getContentBySlug`, `getFeaturedJobs`, `getChangelog`.
 -   **User**: `getAuthenticatedUser`, `getUserProfile`.
--   **RPC**: `cachedRPC`, `fetchCachedRpc` (Cached Remote Procedure Calls).
+-   **RPC**: Direct Supabase RPC calls with Cache Components (`'use cache'` / `'use cache: private'`).
 
 ### 🛠 Core & Utils
 Essential utilities and configuration.

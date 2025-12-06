@@ -5,7 +5,6 @@ import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { isBuildTime } from '../build-time.ts';
-import { getCacheTtl } from '../cache-config.ts';
 import { logger } from '../logger.ts';
 import { createSupabaseAnonClient } from '../supabase/server-anon.ts';
 import { generateRequestId } from '../utils/request-id.ts';
@@ -22,20 +21,18 @@ const PROMISE_REJECTED_STATUS = 'rejected' as const;
 // Note: getLayoutFlags is exported from data-client.ts (client-safe entry point)
 // Do not export from here to avoid 'use server' restrictions
 
-const NAVIGATION_TTL_KEY = 'cache.navigation.ttl_seconds';
-
 /**
  * Get navigation menu
  * Uses 'use cache' to cache navigation menu data. This data is public and same for all users.
+ * Navigation data changes very rarely, so we use the 'stable' cacheLife profile.
  */
 export async function getNavigationMenu(): Promise<
   Database['public']['Functions']['get_navigation_menu']['Returns']
 > {
   'use cache';
 
-  // Configure cache
-  const ttl = getCacheTtl(NAVIGATION_TTL_KEY);
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'stable' profile for rarely-changing navigation data
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire
   cacheTag('navigation');
   cacheTag('ui');
 
@@ -87,13 +84,13 @@ export async function getNavigationMenu(): Promise<
 /**
  * Get layout data (announcements and navigation)
  * Uses 'use cache' to cache layout data. This data is public and same for all users.
+ * Layout data (navigation + announcements) changes very rarely, so we use the 'stable' cacheLife profile.
  */
 export async function getLayoutData(): Promise<LayoutData> {
   'use cache';
 
-  // Configure cache - use navigation TTL since layout primarily contains navigation
-  const ttl = getCacheTtl(NAVIGATION_TTL_KEY);
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'stable' profile for rarely-changing layout data
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire
   cacheTag('layout');
   cacheTag('ui');
   cacheTag('navigation');

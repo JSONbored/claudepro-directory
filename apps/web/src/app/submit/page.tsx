@@ -223,16 +223,48 @@ export default async function SubmitPage() {
   });
 
   return (
-    <Suspense
-      fallback={<div className="container mx-auto px-4 py-8">Loading submission form...</div>}
-    >
-      <SubmitPageContent reqLogger={reqLogger} />
-    </Suspense>
+    <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">
+      {/* Hero Header - Dashboard stats in Suspense for streaming */}
+      <Suspense fallback={<SubmitPageHero stats={{ total: 0, pending: 0, merged_this_week: 0 }} />}>
+        <SubmitPageHeroWithStats reqLogger={reqLogger} />
+      </Suspense>
+
+      <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
+        <div className="w-full min-w-0">
+          {/* Form Configuration and Templates in separate Suspense boundaries */}
+          <Suspense fallback={<div className="bg-muted/20 h-96 animate-pulse rounded-lg" />}>
+            <SubmitFormWithConfig reqLogger={reqLogger} />
+          </Suspense>
+        </div>
+
+        <aside className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
+          {/* Job Promo Card - Priority #1 */}
+          <JobsPromo />
+
+          {/* Dashboard Stats and Recent Activity in Suspense */}
+          <Suspense fallback={<div className="bg-muted/20 h-48 animate-pulse rounded-lg" />}>
+            <SubmitPageSidebar reqLogger={reqLogger} />
+          </Suspense>
+        </aside>
+      </div>
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className="px-4 py-12">
+        <NewsletterCTAVariant source="content_page" variant="hero" />
+      </section>
+    </div>
   );
 }
 
-async function SubmitPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
-  // Section: Submission Dashboard
+/**
+ * Server component that fetches dashboard stats and renders the hero.
+ * Wrapped in Suspense to allow streaming.
+ */
+async function SubmitPageHeroWithStats({
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
   let dashboardData: Awaited<ReturnType<typeof getSubmissionDashboard>> = null;
   try {
     dashboardData = await getSubmissionDashboard(5, 5);
@@ -252,14 +284,20 @@ async function SubmitPageContent({ reqLogger }: { reqLogger: ReturnType<typeof l
     // Continue with null dashboardData - page will render with fallback empty data
   }
 
-  if (!dashboardData) {
-    reqLogger.warn('SubmitPage: getSubmissionDashboard returned no data', {
-      section: 'submission-dashboard',
-      recentCount: 5,
-      statsCount: 5,
-    });
-  }
+  const stats = {
+    total: dashboardData?.stats?.total ?? 0,
+    pending: dashboardData?.stats?.pending ?? 0,
+    merged_this_week: dashboardData?.stats?.merged_this_week ?? 0,
+  };
 
+  return <SubmitPageHero stats={stats} />;
+}
+
+/**
+ * Server component that fetches form configuration and templates, then renders the form.
+ * Wrapped in Suspense to allow streaming.
+ */
+async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Form Configuration
   let formConfig: Awaited<ReturnType<typeof getSubmissionFormFields>> | null = null;
   try {
@@ -295,6 +333,7 @@ async function SubmitPageContent({ reqLogger }: { reqLogger: ReturnType<typeof l
       .filter((category): category is Database['public']['Enums']['content_category'] =>
         isValidContentCategory(category)
       );
+
   // Section: Content Templates
   let templates: Awaited<ReturnType<typeof getContentTemplates>> = [];
   try {
@@ -330,6 +369,33 @@ async function SubmitPageContent({ reqLogger }: { reqLogger: ReturnType<typeof l
     });
   }
 
+  return <SubmitFormClient formConfig={formConfig} templates={templates} />;
+}
+
+/**
+ * Server component that fetches dashboard data and renders the sidebar.
+ * Wrapped in Suspense to allow streaming.
+ */
+async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
+  let dashboardData: Awaited<ReturnType<typeof getSubmissionDashboard>> = null;
+  try {
+    dashboardData = await getSubmissionDashboard(5, 5);
+    reqLogger.info('SubmitPage: submission dashboard loaded for sidebar', {
+      section: 'submission-dashboard',
+      recentCount: 5,
+      statsCount: 5,
+      hasData: !!dashboardData,
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load submission dashboard');
+    reqLogger.error('SubmitPage: getSubmissionDashboard failed for sidebar', normalized, {
+      section: 'submission-dashboard',
+      recentCount: 5,
+      statsCount: 5,
+    });
+    // Continue with null dashboardData - page will render with fallback empty data
+  }
+
   const stats = {
     total: dashboardData?.stats?.total ?? 0,
     pending: dashboardData?.stats?.pending ?? 0,
@@ -360,68 +426,49 @@ async function SubmitPageContent({ reqLogger }: { reqLogger: ReturnType<typeof l
     });
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">
-      {/* Hero Header with animations */}
-      <SubmitPageHero stats={stats} />
+    <>
+      {/* Stats Card - 3-column grid */}
+      <Card>
+        <CardHeader>
+          <CardTitle className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'text-sm font-medium')}>
+            <TrendingUp className={UI_CLASSES.ICON_SM} />
+            Community Stats
+          </CardTitle>
+        </CardHeader>
+        <CardContent className={UI_CLASSES.GRID_COLS_3_GAP_2}>
+          {/* Total */}
+          <div className={cn('rounded-lg p-3 text-center', 'bg-blue-500/10')}>
+            <div className="text-2xl font-bold text-blue-400">{stats.total}</div>
+            <div className={UI_CLASSES.TEXT_XS_MUTED}>Total</div>
+          </div>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
-        <div className="w-full min-w-0">
-          <SubmitFormClient formConfig={formConfig} templates={templates} />
-        </div>
+          {/* Pending */}
+          <div className={cn('rounded-lg p-3 text-center', 'bg-yellow-500/10')}>
+            <div className="text-2xl font-bold text-yellow-400">{stats.pending}</div>
+            <div className={UI_CLASSES.TEXT_XS_MUTED}>Pending</div>
+          </div>
 
-        <aside className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
-          {/* Job Promo Card - Priority #1 */}
-          <JobsPromo />
+          {/* This Week */}
+          <div className={cn('rounded-lg p-3 text-center', 'bg-green-500/10')}>
+            <div className="text-2xl font-bold text-green-400">{stats.merged_this_week}</div>
+            <div className={UI_CLASSES.TEXT_XS_MUTED}>This Week</div>
+          </div>
+        </CardContent>
+      </Card>
 
-          {/* Stats Card - 3-column grid */}
-          <Card>
-            <CardHeader>
-              <CardTitle className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'text-sm font-medium')}>
-                <TrendingUp className={UI_CLASSES.ICON_SM} />
-                Community Stats
-              </CardTitle>
-            </CardHeader>
-            <CardContent className={UI_CLASSES.GRID_COLS_3_GAP_2}>
-              {/* Total */}
-              <div className={cn('rounded-lg p-3 text-center', 'bg-blue-500/10')}>
-                <div className="text-2xl font-bold text-blue-400">{stats.total}</div>
-                <div className={UI_CLASSES.TEXT_XS_MUTED}>Total</div>
-              </div>
-
-              {/* Pending */}
-              <div className={cn('rounded-lg p-3 text-center', 'bg-yellow-500/10')}>
-                <div className="text-2xl font-bold text-yellow-400">{stats.pending}</div>
-                <div className={UI_CLASSES.TEXT_XS_MUTED}>Pending</div>
-              </div>
-
-              {/* This Week */}
-              <div className={cn('rounded-lg p-3 text-center', 'bg-green-500/10')}>
-                <div className="text-2xl font-bold text-green-400">{stats.merged_this_week}</div>
-                <div className={UI_CLASSES.TEXT_XS_MUTED}>This Week</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Combined Recent + Tips Tabbed Card */}
-          <SidebarActivityCard
-            recentMerged={recentMerged}
-            tips={SUBMISSION_TIPS}
-            typeLabels={Object.fromEntries(
-              Object.entries(TYPE_LABELS).map(([key, value]) => [
-                mapSubmissionTypeToContentCategory(
-                  key as Database['public']['Enums']['submission_type']
-                ),
-                value,
-              ])
-            )}
-          />
-        </aside>
-      </div>
-
-      {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className="px-4 py-12">
-        <NewsletterCTAVariant source="content_page" variant="hero" />
-      </section>
-    </div>
+      {/* Combined Recent + Tips Tabbed Card */}
+      <SidebarActivityCard
+        recentMerged={recentMerged}
+        tips={SUBMISSION_TIPS}
+        typeLabels={Object.fromEntries(
+          Object.entries(TYPE_LABELS).map(([key, value]) => [
+            mapSubmissionTypeToContentCategory(
+              key as Database['public']['Enums']['submission_type']
+            ),
+            value,
+          ])
+        )}
+      />
+    </>
   );
 }

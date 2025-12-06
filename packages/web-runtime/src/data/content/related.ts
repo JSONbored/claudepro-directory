@@ -48,15 +48,13 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
     };
   }
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
   const { generateRequestId } = await import('../../utils/request-id.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.related_content.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for related content (changes hourly)
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   const tags = generateContentTags(category, null, ['related-content']);
   for (const tag of tags) {
     cacheTag(tag);

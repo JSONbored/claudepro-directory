@@ -7,22 +7,19 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import {
-  getActiveAnnouncement as fetchActiveAnnouncement,
-  getCacheTtl,
-} from '@heyclaude/web-runtime/server';
+import { getActiveAnnouncement as fetchActiveAnnouncement } from '@heyclaude/web-runtime/server';
 import { cacheLife, cacheTag } from 'next/cache';
 
 /**
  * Get active announcement from database
  *
- * Uses 'use cache' to cache active announcement with config-controlled TTL.
+ * Uses 'use cache' to cache active announcement with cacheLife profile.
  * This data is public and same for all users, so it can be cached at build time.
  */
 export async function getActiveAnnouncement(): Promise<Database['public']['Tables']['announcements']['Row'] | null> {
   'use cache';
-  const ttl = getCacheTtl('cache.announcements.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Use 'hours' profile: 1hr stale, 15min revalidate, 1 day expire
+  cacheLife('hours');
   cacheTag('announcements');
 
   try {

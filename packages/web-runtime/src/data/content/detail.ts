@@ -6,7 +6,6 @@ import { Constants } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { isBuildTime } from '../../build-time.ts';
-import { getCacheTtl } from '../../cache-config.ts';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import { createSupabaseAnonClient } from '../../supabase/server-anon.ts';
@@ -58,9 +57,9 @@ export async function getContentDetailComplete(input: {
     return null;
   }
 
-  // Configure cache - category and slug are automatically part of cache key
-  const ttl = getCacheTtl('cache.content_detail.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for content detail (changes every 4 hours)
+  // Category and slug are automatically part of cache key
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   const tags = generateContentTags(category, slug);
   for (const tag of tags) {
     cacheTag(tag);
@@ -134,9 +133,9 @@ export async function getContentDetailCore(input: {
     return null;
   }
 
-  // Configure cache - category and slug are automatically part of cache key
-  const ttl = getCacheTtl('cache.content_detail.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for content detail core (changes every 4 hours)
+  // Category and slug are automatically part of cache key
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   const tags = generateContentTags(category, slug);
   for (const tag of tags) {
     cacheTag(tag);
@@ -210,9 +209,9 @@ export async function getContentAnalytics(input: {
     return null;
   }
 
-  // Configure cache - category and slug are automatically part of cache key
-  const ttl = getCacheTtl('cache.content_detail.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for content analytics (changes every 4 hours)
+  // Category and slug are automatically part of cache key
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   const tags = generateContentTags(category, slug);
   for (const tag of tags) {
     cacheTag(tag);

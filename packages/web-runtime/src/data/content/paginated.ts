@@ -42,15 +42,13 @@ export async function getPaginatedContent({
 
   const normalizedCategory = category ? toContentCategory(category) : undefined;
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
   const { generateRequestId } = await import('../../utils/request-id.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.content_paginated.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'static' profile for paginated content (changes daily)
+  cacheLife('static'); // 1 day stale, 6 hours revalidate, 30 days expire
   const tags = generateContentTags(normalizedCategory ?? null, null, ['content-paginated']);
   for (const tag of tags) {
     cacheTag(tag);

@@ -10,21 +10,20 @@ import { generateContentTags } from '../content-helpers.ts';
 /**
  * Get content by category
  * Uses 'use cache' to cache content lists. This data is public and same for all users.
+ * Content lists change periodically, so we use the 'hours' cacheLife profile.
  */
 export async function getContentByCategory(
   category: Database['public']['Enums']['content_category']
 ): Promise<Database['public']['Functions']['get_enriched_content_list']['Returns']> {
   'use cache';
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
   const { generateRequestId } = await import('../../utils/request-id.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for content lists
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   const tags = generateContentTags(category);
   for (const tag of tags) {
     cacheTag(tag);
@@ -73,6 +72,7 @@ export async function getContentByCategory(
 /**
  * Get content by slug
  * Uses 'use cache' to cache content details. This data is public and same for all users.
+ * Content details change periodically, so we use the 'hours' cacheLife profile.
  */
 export async function getContentBySlug(
   category: Database['public']['Enums']['content_category'],
@@ -80,15 +80,13 @@ export async function getContentBySlug(
 ): Promise<Database['public']['CompositeTypes']['enriched_content_item'] | null> {
   'use cache';
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
   const { generateRequestId } = await import('../../utils/request-id.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.content_detail.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'hours' profile for content details
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   const tags = generateContentTags(category, slug);
   for (const tag of tags) {
     cacheTag(tag);
@@ -144,13 +142,13 @@ export async function getContentBySlug(
 /**
  * Get all content with optional filters
  * Uses 'use cache' to cache filtered content lists. This data is public and same for all users.
+ * Content lists change periodically, so we use the 'half' cacheLife profile.
  */
 export async function getAllContent(
   filters?: ContentFilterOptions
 ): Promise<Database['public']['CompositeTypes']['enriched_content_item'][]> {
   'use cache';
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
@@ -159,9 +157,8 @@ export async function getAllContent(
 
   const category = filters?.categories?.[0];
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for content lists (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('content-all');
   if (category) {
     const tags = generateContentTags(category);
@@ -223,22 +220,20 @@ export async function getAllContent(
 /**
  * Get content count for a category
  * Uses 'use cache' to cache content counts. This data is public and same for all users.
+ * Content counts change periodically, so we use the 'half' cacheLife profile.
  */
 export async function getContentCount(
   category?: Database['public']['Enums']['content_category']
 ): Promise<number> {
   'use cache';
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
-  const { cacheLife, cacheTag } = await import('next/cache');
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
   const { generateRequestId } = await import('../../utils/request-id.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for content counts (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   const tags = generateContentTags(category);
   for (const tag of tags) {
     cacheTag(tag);
@@ -290,6 +285,7 @@ export async function getContentCount(
 /**
  * Get trending content
  * Uses 'use cache' to cache trending content. This data is public and same for all users.
+ * Trending content changes periodically, so we use the 'half' cacheLife profile.
  */
 export async function getTrendingContent(
   category?: Database['public']['Enums']['content_category'],
@@ -297,15 +293,13 @@ export async function getTrendingContent(
 ): Promise<Database['public']['Functions']['get_trending_content']['Returns']> {
   'use cache';
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
   const { generateRequestId } = await import('../../utils/request-id.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for trending content (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('trending');
   if (category) {
     cacheTag(`trending-${category}`);
@@ -394,15 +388,13 @@ export async function getTrendingPageData(
   const { category = null, limit = 12 } = parameters;
   const safeLimit = Math.min(Math.max(limit, 1), 100);
 
-  const { getCacheTtl } = await import('../../cache-config.ts');
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
   const { generateRequestId } = await import('../../utils/request-id.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for trending page data (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('trending');
   cacheTag('trending-page');
 

@@ -31,7 +31,6 @@ const createJobSchema = z.object({
   tier: z.enum(['standard', 'featured']),
   plan: z.enum(['one-time', 'subscription'])
 });
-export type CreateJobInput = z.infer<typeof createJobSchema>;
 
 export const createJob = authedAction
   .metadata({ actionName: 'createJob', category: 'content' })
@@ -75,11 +74,7 @@ export const createJob = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -90,12 +85,8 @@ export const createJob = authedAction
       revalidateTag(`job-${result?.job_id}`, 'default');
       revalidateTag(`company-${result?.company_id}`, 'default');
       revalidateTag(`company-id-${result?.company_id}`, 'default');
-      
-      const cacheConfig = getCacheConfigSnapshot();
-      await nextInvalidateByKeys({
-        cacheConfig,
-        invalidateKeys: ['cache.invalidate.job_create']
-      });
+      revalidateTag(`jobs`, 'default');
+      revalidateTag(`companies`, 'default');
 
       
       // Lazy load hook to avoid server-only side effects at top level

@@ -202,20 +202,6 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
     module: 'apps/web/src/app/account/jobs',
   });
 
-  return (
-    <Suspense fallback={<div className="space-y-6">Loading jobs...</div>}>
-      <MyJobsPageContent searchParams={searchParams} reqLogger={reqLogger} />
-    </Suspense>
-  );
-}
-
-async function MyJobsPageContent({
-  searchParams,
-  reqLogger,
-}: {
-  reqLogger: ReturnType<typeof logger.child>;
-  searchParams: Promise<{ job_id?: string; payment?: string }> | undefined;
-}) {
   const resolvedSearchParameters = searchParams ? await searchParams : {};
   const paymentStatus = resolvedSearchParameters.payment;
   const paymentJobId = resolvedSearchParameters.job_id;
@@ -255,11 +241,139 @@ async function MyJobsPageContent({
     section: 'authentication',
   });
 
+  return (
+    <div className="space-y-6">
+      {/* Payment success alert - rendered immediately if paymentStatus is present */}
+      {paymentStatus === 'success' && paymentJobId ? (
+        <Suspense fallback={null}>
+          <PaymentSuccessAlert
+            paymentJobId={paymentJobId}
+            userId={user.id}
+            userLogger={userLogger}
+          />
+        </Suspense>
+      ) : null}
+
+      {/* Jobs list with header - dashboard data in Suspense for streaming */}
+      <Suspense fallback={<div className="space-y-6">Loading jobs...</div>}>
+        <JobsListWithHeader userId={user.id} userLogger={userLogger} />
+      </Suspense>
+    </div>
+  );
+}
+
+/**
+ * Server component that fetches payment job data and renders success alert.
+ * Wrapped in Suspense to allow streaming.
+ */
+async function PaymentSuccessAlert({
+  paymentJobId,
+  userId,
+  userLogger,
+}: {
+  paymentJobId: string;
+  userId: string;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
+  // Fetch dashboard to get the job
+  let data: Database['public']['Functions']['get_user_dashboard']['Returns'] | null = null;
+  try {
+    data = await getUserDashboard(userId);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user dashboard for payment alert');
+    userLogger.error('MyJobsPage: getUserDashboard failed for payment alert', normalized);
+    return null;
+  }
+
+  // Extract jobs from dashboard
+  const jobs: Array<Database['public']['Tables']['jobs']['Row']> = (() => {
+    const jobsData = data?.jobs;
+    if (jobsData === undefined || jobsData === null || !Array.isArray(jobsData)) {
+      return [];
+    }
+    return jobsData.filter(
+      (item): item is Database['public']['Tables']['jobs']['Row'] =>
+        item !== null && typeof item === 'object' && 'id' in item && typeof item['id'] === 'string'
+    );
+  })();
+
+  const paymentJob = jobs.find((job) => job.id === paymentJobId) ?? null;
+  const jobIds = [paymentJobId].filter(Boolean);
+
+  // Fetch billing summary for this job
+  let billingSummaries: JobBillingSummaryEntry[] = [];
+  if (jobIds.length > 0) {
+    try {
+      billingSummaries = await getJobBillingSummaries(jobIds);
+    } catch (error) {
+      const normalized = normalizeError(
+        error,
+        'Failed to load job billing summary for payment alert'
+      );
+      userLogger.error('MyJobsPage: getJobBillingSummaries failed for payment alert', normalized);
+    }
+  }
+
+  const paymentJobSummary = billingSummaries.find((s) => s.job_id === paymentJobId) ?? null;
+  const paymentAlertPlanLabel = resolvePlanLabel(
+    paymentJobSummary?.plan ?? paymentJob?.plan ?? null
+  );
+  const paymentAlertTierLabel = resolveTierLabel(
+    paymentJobSummary?.tier ?? paymentJob?.tier ?? null
+  );
+  const paymentAlertPrice =
+    paymentJobSummary?.price_cents == undefined
+      ? null
+      : formatPriceLabel(paymentJobSummary.price_cents, paymentJobSummary.is_subscription);
+  const paymentAlertRenewal = (() => {
+    if (paymentJobSummary?.is_subscription && paymentJobSummary.subscription_renews_at) {
+      return `Renews ${formatRelativeDate(paymentJobSummary.subscription_renews_at, {
+        style: 'simple',
+      })}`;
+    }
+    if (paymentJobSummary?.is_subscription && paymentJobSummary.subscription_status) {
+      return humanizeStatus(paymentJobSummary.subscription_status);
+    }
+    if (paymentJob?.expires_at) {
+      return `Expires ${formatRelativeDate(paymentJob.expires_at)}`;
+    }
+    return null;
+  })();
+
+  return (
+    <Alert className="border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-200/30 dark:bg-emerald-950/40 dark:text-emerald-100">
+      <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+      <AlertTitle>Payment confirmed</AlertTitle>
+      <AlertDescription className="space-y-1 text-sm">
+        <p>
+          {paymentJob?.title ? `${paymentJob.title} is now live.` : 'Your job listing is now live.'}
+        </p>
+        <p className="text-xs text-emerald-900/80 sm:text-sm dark:text-emerald-100/80">
+          {paymentAlertPlanLabel} • {paymentAlertTierLabel}
+          {paymentAlertPrice ? ` • ${paymentAlertPrice}` : ''}
+          {paymentAlertRenewal ? ` • ${paymentAlertRenewal}` : ''}
+        </p>
+      </AlertDescription>
+    </Alert>
+  );
+}
+
+/**
+ * Server component that fetches dashboard data and renders jobs list with header.
+ * Wrapped in Suspense to allow streaming.
+ */
+async function JobsListWithHeader({
+  userId,
+  userLogger,
+}: {
+  userId: string;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
   // Section: Dashboard Data Fetch
   let data: Database['public']['Functions']['get_user_dashboard']['Returns'] | null = null;
   let fetchError = false;
   try {
-    data = await getUserDashboard(user.id);
+    data = await getUserDashboard(userId);
     userLogger.info('MyJobsPage: dashboard data loaded', {
       section: 'dashboard-data-fetch',
       hasData: !!data,
@@ -281,21 +395,19 @@ async function MyJobsPageContent({
 
   if (fetchError) {
     return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Job listings unavailable</CardTitle>
-            <CardDescription>
-              We couldn&apos;t load your job dashboard. Please refresh or try again later.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline">
-              <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Job listings unavailable</CardTitle>
+          <CardDescription>
+            We couldn&apos;t load your job dashboard. Please refresh or try again later.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild variant="outline">
+            <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -344,95 +456,9 @@ async function MyJobsPageContent({
   }
 
   const jobIds = jobs.map((job) => job.id).filter(Boolean);
-  let billingSummaries: JobBillingSummaryEntry[] = [];
-  if (jobIds.length > 0) {
-    try {
-      billingSummaries = await getJobBillingSummaries(jobIds);
-    } catch (error) {
-      const normalized = normalizeError(error, 'Failed to load job billing summaries');
-      userLogger.error('MyJobsPage: getJobBillingSummaries failed', normalized);
-    }
-  }
-  const billingSummaryMap = new Map<string, JobBillingSummaryEntry>();
-  for (const summary of billingSummaries) {
-    if (summary.job_id) {
-      billingSummaryMap.set(summary.job_id, summary);
-    }
-  }
-  const paymentJobSummary =
-    paymentStatus === 'success' && paymentJobId
-      ? (billingSummaryMap.get(paymentJobId) ?? null)
-      : null;
-  const paymentJob =
-    paymentStatus === 'success' && paymentJobId
-      ? (jobs.find((job) => job.id === paymentJobId) ?? null)
-      : null;
-  const paymentAlertPlanLabel = resolvePlanLabel(
-    paymentJobSummary?.plan ?? paymentJob?.plan ?? null
-  );
-  const paymentAlertTierLabel = resolveTierLabel(
-    paymentJobSummary?.tier ?? paymentJob?.tier ?? null
-  );
-  const paymentAlertPrice =
-    paymentJobSummary?.price_cents == undefined
-      ? null
-      : formatPriceLabel(paymentJobSummary.price_cents, paymentJobSummary.is_subscription);
-  const paymentAlertRenewal = (() => {
-    if (paymentJobSummary?.is_subscription && paymentJobSummary.subscription_renews_at) {
-      return `Renews ${formatRelativeDate(paymentJobSummary.subscription_renews_at, {
-        style: 'simple',
-      })}`;
-    }
-    if (paymentJobSummary?.is_subscription && paymentJobSummary.subscription_status) {
-      return humanizeStatus(paymentJobSummary.subscription_status);
-    }
-    if (paymentJob?.expires_at) {
-      return `Expires ${formatRelativeDate(paymentJob.expires_at)}`;
-    }
-    return null;
-  })();
-
-  const getPlanBadge = (
-    plan: Database['public']['Enums']['job_plan'] | null | undefined,
-    tier?: Database['public']['Enums']['job_tier'] | null
-  ) => {
-    if (tier === 'featured') {
-      return (
-        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PUBLISHED}>
-          Featured
-        </UnifiedBadge>
-      );
-    }
-    if (plan === 'subscription') {
-      return (
-        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PREMIUM}>
-          Subscription
-        </UnifiedBadge>
-      );
-    }
-    return null;
-  };
 
   return (
-    <div className="space-y-6">
-      {paymentStatus === 'success' && (
-        <Alert className="border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-200/30 dark:bg-emerald-950/40 dark:text-emerald-100">
-          <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
-          <AlertTitle>Payment confirmed</AlertTitle>
-          <AlertDescription className="space-y-1 text-sm">
-            <p>
-              {paymentJob?.title
-                ? `${paymentJob.title} is now live.`
-                : 'Your job listing is now live.'}
-            </p>
-            <p className="text-xs text-emerald-900/80 sm:text-sm dark:text-emerald-100/80">
-              {paymentAlertPlanLabel} • {paymentAlertTierLabel}
-              {paymentAlertPrice ? ` • ${paymentAlertPrice}` : ''}
-              {paymentAlertRenewal ? ` • ${paymentAlertRenewal}` : ''}
-            </p>
-          </AlertDescription>
-        </Alert>
-      )}
+    <>
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
           <h1 className="mb-2 text-3xl font-bold">My Job Listings</h1>
@@ -465,129 +491,184 @@ async function MyJobsPageContent({
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {jobs.map((job) => {
-            const summary = billingSummaryMap.get(job.id);
-            const planLabel = resolvePlanLabel(summary?.plan ?? job.plan);
-            const tierLabel = resolveTierLabel(summary?.tier ?? job.tier);
-            const planPriceLabel =
-              summary?.price_cents == undefined
-                ? null
-                : formatPriceLabel(summary.price_cents, summary.is_subscription);
-            const renewalCopy = summary?.is_subscription
-              ? [
-                  summary.subscription_status ? humanizeStatus(summary.subscription_status) : null,
-                  summary.subscription_renews_at
-                    ? `Renews ${formatRelativeDate(summary.subscription_renews_at, {
-                        style: 'simple',
-                      })}`
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .join(' • ')
-              : job.expires_at
-                ? `Active until ${formatRelativeDate(job.expires_at)}`
-                : null;
-            const paymentCopy =
-              summary?.last_payment_at && summary.last_payment_amount !== null
-                ? `${formatPriceLabel(summary.last_payment_amount, false)} • Received ${formatRelativeDate(
-                    summary.last_payment_at
-                  )}`
-                : summary?.last_payment_at
-                  ? `Last payment ${formatRelativeDate(summary.last_payment_at)}`
-                  : null;
-            const showBillingCard =
-              Boolean(planPriceLabel ?? renewalCopy ?? paymentCopy) || Boolean(summary);
-
-            return (
-              <Card key={job.id}>
-                <CardHeader>
-                  <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
-                    <div className="flex-1">
-                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                        <UnifiedBadge
-                          variant="base"
-                          style="outline"
-                          className={getStatusColor(job.status)}
-                        >
-                          {job.status}
-                        </UnifiedBadge>
-                        {getPlanBadge(job.plan, job.tier)}
-                      </div>
-                      <CardTitle className="mt-2">{job.title}</CardTitle>
-                      <CardDescription>
-                        {job.company} • {job.location ?? 'Remote'} • {job.type}
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent>
-                  <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                      <Eye className="h-4 w-4" />
-                      {job.view_count ?? 0} views
-                    </div>
-                    {job.posted_at ? <div>Posted {formatRelativeDate(job.posted_at)}</div> : null}
-                    {job.expires_at ? (
-                      <div>Expires {formatRelativeDate(job.expires_at)}</div>
-                    ) : null}
-                  </div>
-                  {showBillingCard ? (
-                    <div className="border-muted bg-muted/20 mb-4 rounded-lg border border-dashed p-3 text-xs sm:text-sm">
-                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                        <span className="text-foreground font-semibold">Billing</span>
-                        <UnifiedBadge variant="base" style="outline" className="capitalize">
-                          {planLabel} • {tierLabel}
-                        </UnifiedBadge>
-                      </div>
-                      <div className="text-muted-foreground mt-2 space-y-1">
-                        {planPriceLabel ? <p>Price: {planPriceLabel}</p> : null}
-                        {renewalCopy ? <p>{renewalCopy}</p> : null}
-                        {paymentCopy ? <p>{paymentCopy}</p> : null}
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div className={UI_CLASSES.FLEX_GAP_2}>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/account/jobs/${job.id}/edit`}>
-                        <Edit className="mr-1 h-3 w-3" />
-                        Edit
-                      </Link>
-                    </Button>
-
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/account/jobs/${job.id}/analytics`}>
-                        <BarChart className="mr-1 h-3 w-3" />
-                        Analytics
-                      </Link>
-                    </Button>
-
-                    {job.slug ? (
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/jobs/${job.slug}`}>
-                          <ExternalLink className="mr-1 h-3 w-3" />
-                          View
-                        </Link>
-                      </Button>
-                    ) : null}
-
-                    {(() => {
-                      const status = job.status;
-                      return status === 'active' || status === 'draft' ? (
-                        <JobToggleButton jobId={job.id} currentStatus={status} />
-                      ) : null;
-                    })()}
-
-                    <JobDeleteButton jobId={job.id} />
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <Suspense fallback={<div className="grid gap-4">Loading job details...</div>}>
+          <JobsListWithBilling jobs={jobs} jobIds={jobIds} userLogger={userLogger} />
+        </Suspense>
       )}
+    </>
+  );
+}
+
+/**
+ * Server component that fetches billing summaries and renders jobs list.
+ * Wrapped in Suspense to allow streaming billing data separately.
+ */
+async function JobsListWithBilling({
+  jobs,
+  jobIds,
+  userLogger,
+}: {
+  jobIds: string[];
+  jobs: Array<Database['public']['Tables']['jobs']['Row']>;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
+  let billingSummaries: JobBillingSummaryEntry[] = [];
+  if (jobIds.length > 0) {
+    try {
+      billingSummaries = await getJobBillingSummaries(jobIds);
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to load job billing summaries');
+      userLogger.error('MyJobsPage: getJobBillingSummaries failed', normalized);
+    }
+  }
+  const billingSummaryMap = new Map<string, JobBillingSummaryEntry>();
+  for (const summary of billingSummaries) {
+    if (summary.job_id) {
+      billingSummaryMap.set(summary.job_id, summary);
+    }
+  }
+
+  const getPlanBadge = (
+    plan: Database['public']['Enums']['job_plan'] | null | undefined,
+    tier?: Database['public']['Enums']['job_tier'] | null
+  ) => {
+    if (tier === 'featured') {
+      return (
+        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PUBLISHED}>
+          Featured
+        </UnifiedBadge>
+      );
+    }
+    if (plan === 'subscription') {
+      return (
+        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PREMIUM}>
+          Subscription
+        </UnifiedBadge>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <div className="grid gap-4">
+      {jobs.map((job) => {
+        const summary = billingSummaryMap.get(job.id);
+        const planLabel = resolvePlanLabel(summary?.plan ?? job.plan);
+        const tierLabel = resolveTierLabel(summary?.tier ?? job.tier);
+        const planPriceLabel =
+          summary?.price_cents == undefined
+            ? null
+            : formatPriceLabel(summary.price_cents, summary.is_subscription);
+        const renewalCopy = summary?.is_subscription
+          ? [
+              summary.subscription_status ? humanizeStatus(summary.subscription_status) : null,
+              summary.subscription_renews_at
+                ? `Renews ${formatRelativeDate(summary.subscription_renews_at, {
+                    style: 'simple',
+                  })}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(' • ')
+          : job.expires_at
+            ? `Active until ${formatRelativeDate(job.expires_at)}`
+            : null;
+        const paymentCopy =
+          summary?.last_payment_at && summary.last_payment_amount !== null
+            ? `${formatPriceLabel(summary.last_payment_amount, false)} • Received ${formatRelativeDate(
+                summary.last_payment_at
+              )}`
+            : summary?.last_payment_at
+              ? `Last payment ${formatRelativeDate(summary.last_payment_at)}`
+              : null;
+        const showBillingCard =
+          Boolean(planPriceLabel ?? renewalCopy ?? paymentCopy) || Boolean(summary);
+
+        return (
+          <Card key={job.id}>
+            <CardHeader>
+              <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                <div className="flex-1">
+                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                    <UnifiedBadge
+                      variant="base"
+                      style="outline"
+                      className={getStatusColor(job.status)}
+                    >
+                      {job.status}
+                    </UnifiedBadge>
+                    {getPlanBadge(job.plan, job.tier)}
+                  </div>
+                  <CardTitle className="mt-2">{job.title}</CardTitle>
+                  <CardDescription>
+                    {job.company} • {job.location ?? 'Remote'} • {job.type}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent>
+              <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                  <Eye className="h-4 w-4" />
+                  {job.view_count ?? 0} views
+                </div>
+                {job.posted_at ? <div>Posted {formatRelativeDate(job.posted_at)}</div> : null}
+                {job.expires_at ? <div>Expires {formatRelativeDate(job.expires_at)}</div> : null}
+              </div>
+              {showBillingCard ? (
+                <div className="border-muted bg-muted/20 mb-4 rounded-lg border border-dashed p-3 text-xs sm:text-sm">
+                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                    <span className="text-foreground font-semibold">Billing</span>
+                    <UnifiedBadge variant="base" style="outline" className="capitalize">
+                      {planLabel} • {tierLabel}
+                    </UnifiedBadge>
+                  </div>
+                  <div className="text-muted-foreground mt-2 space-y-1">
+                    {planPriceLabel ? <p>Price: {planPriceLabel}</p> : null}
+                    {renewalCopy ? <p>{renewalCopy}</p> : null}
+                    {paymentCopy ? <p>{paymentCopy}</p> : null}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className={UI_CLASSES.FLEX_GAP_2}>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/account/jobs/${job.id}/edit`}>
+                    <Edit className="mr-1 h-3 w-3" />
+                    Edit
+                  </Link>
+                </Button>
+
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/account/jobs/${job.id}/analytics`}>
+                    <BarChart className="mr-1 h-3 w-3" />
+                    Analytics
+                  </Link>
+                </Button>
+
+                {job.slug ? (
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/jobs/${job.slug}`}>
+                      <ExternalLink className="mr-1 h-3 w-3" />
+                      View
+                    </Link>
+                  </Button>
+                ) : null}
+
+                {(() => {
+                  const status = job.status;
+                  return status === 'active' || status === 'draft' ? (
+                    <JobToggleButton jobId={job.id} currentStatus={status} />
+                  ) : null;
+                })()}
+
+                <JobDeleteButton jobId={job.id} />
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

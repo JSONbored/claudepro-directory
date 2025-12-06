@@ -21,7 +21,6 @@ const updateCompanySchema = z.object({
   industry: z.string().nullable().optional(),
   using_cursor_since: z.string().nullable().optional()
 });
-export type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
 
 export const updateCompany = authedAction
   .metadata({ actionName: 'updateCompany', category: 'content' })
@@ -57,11 +56,7 @@ export const updateCompany = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -72,11 +67,7 @@ export const updateCompany = authedAction
       revalidatePath(`/companies`);
       revalidateTag(`company-${result?.company?.slug}`, 'default');
       revalidateTag(`company-id-${result?.company?.id}`, 'default');
-      
-      await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.company_update']
-      });
+      revalidateTag(`companies`, 'default');
 
       
 

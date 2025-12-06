@@ -14,7 +14,6 @@ const markReviewHelpfulSchema = z.object({
   review_id: z.string().uuid(),
   helpful: z.boolean()
 });
-export type MarkReviewHelpfulInput = z.infer<typeof markReviewHelpfulSchema>;
 
 export const markReviewHelpful = authedAction
   .metadata({ actionName: 'markReviewHelpful', category: 'user' })
@@ -39,11 +38,7 @@ export const markReviewHelpful = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -51,11 +46,7 @@ export const markReviewHelpful = authedAction
       
       revalidatePath(`/${result?.content_type}/${result?.content_slug}`);
       revalidateTag(`reviews:${result?.content_type}:${result?.content_slug}`, 'default');
-      
-      await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.review_helpful']
-      });
+      revalidateTag(`content`, 'default');
 
       
 

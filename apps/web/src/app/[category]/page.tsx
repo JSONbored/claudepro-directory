@@ -180,9 +180,13 @@ async function CategoryPageContent({
   const config = getCategoryConfig(typedCategory);
   if (!config) {
     // logger.error() normalizes errors internally, so pass raw error
-    routeLogger.error('CategoryPage: missing category config', new Error('Category config is null'), {
-      category,
-    });
+    routeLogger.error(
+      'CategoryPage: missing category config',
+      new Error('Category config is null'),
+      {
+        category,
+      }
+    );
     notFound();
   }
 

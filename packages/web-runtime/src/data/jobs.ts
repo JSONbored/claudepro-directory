@@ -124,20 +124,16 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
 /**
  * Get jobs list without filters (cached)
  * Uses 'use cache' to cache jobs lists. This data is public and same for all users.
+ * Jobs lists change periodically, so we use the 'half' cacheLife profile.
  */
-async function getJobsListCached(
-  limit: number,
-  offset: number
-): Promise<JobsFilterResult | null> {
+async function getJobsListCached(limit: number, offset: number): Promise<JobsFilterResult | null> {
   'use cache';
 
-  const { getCacheTtl } = await import('../cache-config.ts');
   const { isBuildTime } = await import('../build-time.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.jobs.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for jobs lists (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('jobs-list');
 
   const requestId = generateRequestId();
@@ -184,6 +180,7 @@ async function getJobsListCached(
 /**
  * Get filtered jobs with search/filters (cached)
  * Uses 'use cache' to cache filtered jobs. This data is public and same for all users.
+ * Filtered jobs change periodically, so we use the 'half' cacheLife profile.
  */
 async function getFilteredJobsCached(
   rpcArguments: Database['public']['Functions']['filter_jobs']['Args'],
@@ -198,13 +195,11 @@ async function getFilteredJobsCached(
 ): Promise<JobsFilterResult | null> {
   'use cache';
 
-  const { getCacheTtl } = await import('../cache-config.ts');
   const { isBuildTime } = await import('../build-time.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.jobs.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for filtered jobs (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('jobs-search');
 
   const requestId = generateRequestId();
@@ -411,18 +406,17 @@ export async function getFilteredJobs(
 /**
  * Gets a single job by slug
  * Uses 'use cache' to cache job details. This data is public and same for all users.
+ * Job details change periodically, so we use the 'half' cacheLife profile.
  */
 export async function getJobBySlug(slug: string) {
   'use cache';
 
-  const { getCacheTtl } = await import('../cache-config.ts');
   const { cacheLife, cacheTag } = await import('next/cache');
   const { isBuildTime } = await import('../build-time.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.jobs_detail.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for job details (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag(`job-${slug}`);
   cacheTag('jobs');
 
@@ -465,6 +459,7 @@ export async function getJobBySlug(slug: string) {
 /**
  * Retrieve a list of featured jobs for display.
  * Uses 'use cache' to cache featured jobs. This data is public and same for all users.
+ * Featured jobs change periodically, so we use the 'half' cacheLife profile.
  *
  * @param limit - Maximum number of featured jobs to return (default 5)
  * @returns An array of featured job records; returns an empty array if none are available or if an error occurs
@@ -472,14 +467,12 @@ export async function getJobBySlug(slug: string) {
 export async function getFeaturedJobs(limit = 5) {
   'use cache';
 
-  const { getCacheTtl } = await import('../cache-config.ts');
   const { cacheLife, cacheTag } = await import('next/cache');
   const { isBuildTime } = await import('../build-time.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.jobs.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for featured jobs (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('jobs-featured');
   cacheTag('jobs');
 

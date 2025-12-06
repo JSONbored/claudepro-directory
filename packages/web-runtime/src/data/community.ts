@@ -15,20 +15,19 @@ export type CollectionDetailData =
 /**
  * Get community directory via RPC (cached)
  * Uses 'use cache' to cache directory listings. This data is public and same for all users.
+ * Community directory changes periodically, so we use the 'half' cacheLife profile.
  */
 async function getCommunityDirectoryRpc(
   limit: number
 ): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
   'use cache';
 
-  const { getCacheTtl } = await import('../cache-config.ts');
   const { cacheLife, cacheTag } = await import('next/cache');
   const { isBuildTime } = await import('../build-time.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
-  // Configure cache
-  const ttl = getCacheTtl('cache.community.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'half' profile for community directory (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('community');
   cacheTag('users');
 
@@ -114,7 +113,11 @@ export async function getCommunityDirectory(options: {
       pulseUserSearch(searchQuery.trim(), allUsers.length).catch((error) => {
         // logger.error() normalizes errors internally, so pass raw error
         const errorForLogging: Error | string =
-          error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+          error instanceof Error
+            ? error
+            : error instanceof String
+              ? error.toString()
+              : String(error);
         // Use child logger for callback to maintain isolation
         const callbackLogger = logger.child({
           requestId: callbackRequestId,

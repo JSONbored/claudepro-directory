@@ -209,8 +209,6 @@ export async function GET() {
         totalUsers,
       },
       cacheTags: ['stats', 'social-proof'],
-      cacheTTL: 300,
-      revalidate: 300,
     });
 
     // Generate ETag from timestamp and stats hash for conditional requests

@@ -7,7 +7,7 @@
  */
 
 import { getNewsletterCountAction } from '@heyclaude/web-runtime/actions';
-import { CACHE_TTL, POLLING_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
+import { POLLING_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useRef, useState } from 'react';
 
@@ -20,20 +20,19 @@ export interface UseNewsletterCountReturn {
 const CACHE_KEY = 'newsletter_count';
 const CACHE_TIMESTAMP_KEY = 'newsletter_count_ts';
 
-// Default values (will be overridden by static config)
-const DEFAULT_CACHE_TTL_MS = 300_000; // 5 minutes (300 seconds)
+// Client-side localStorage cache TTL (not related to server-side Cache Components)
+const LOCAL_STORAGE_CACHE_TTL_MS = 300_000; // 5 minutes (300 seconds)
 const DEFAULT_POLL_INTERVAL_MS = 300_000; // 5 minutes
 
 /**
  * Hook to fetch and poll newsletter subscriber count
  * Features: localStorage caching, visibility-based polling optimization
- * Loads config from static defaults client-side (avoids build-time server calls)
  */
 export function useNewsletterCount(): UseNewsletterCountReturn {
   const [count, setCount] = useState<null | number>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [cacheTtlMs, setCacheTtlMs] = useState(DEFAULT_CACHE_TTL_MS);
+  const [cacheTtlMs, setCacheTtlMs] = useState(LOCAL_STORAGE_CACHE_TTL_MS);
   const [pollIntervalMs, setPollIntervalMs] = useState(DEFAULT_POLL_INTERVAL_MS);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const configLoadedRef = useRef(false);
@@ -43,11 +42,10 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
     if (configLoadedRef.current) return;
     configLoadedRef.current = true;
 
-    // Load from unified config
-    const cacheTtlSeconds = CACHE_TTL.newsletter_count ?? 300;
-    setCacheTtlMs(cacheTtlSeconds * 1000);
+    // Use default localStorage cache TTL (5 minutes)
+    setCacheTtlMs(LOCAL_STORAGE_CACHE_TTL_MS);
 
-    const pollInterval = POLLING_CONFIG.newsletter_count_ms ?? 300_000;
+    const pollInterval = POLLING_CONFIG.newsletter_count_ms ?? DEFAULT_POLL_INTERVAL_MS;
     setPollIntervalMs(pollInterval);
   }, []);
 

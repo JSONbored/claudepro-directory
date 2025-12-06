@@ -5,16 +5,28 @@
  * PostgreSQL validates ALL data. TypeScript provides compile-time types only.
  */
 
-import { AccountService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { runRpc } from './run-rpc-instance.ts';
 import { authedAction } from './safe-action.ts';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
-import type { CacheConfig, CacheInvalidateKey, CacheInvalidateKeyLegacy } from '../cache-config.ts';
 import { logger } from '../logger.ts';
+
+// Export input types for generated bookmark actions (can't export from 'use server' files)
+const addBookmarkSchema = z.object({
+  content_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']),
+  content_slug: z.string(),
+  notes: z.string().optional()
+});
+
+const removeBookmarkSchema = z.object({
+  content_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']),
+  content_slug: z.string()
+});
+
+export type AddBookmarkInput = z.infer<typeof addBookmarkSchema>;
+export type RemoveBookmarkInput = z.infer<typeof removeBookmarkSchema>;
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -56,24 +68,14 @@ const USER_SURFACE_PATHS: Record<UserSurface, string> = {
 };
 
 async function invalidateUserCaches({
-  cacheConfig,
-  invalidateKeys,
-  extraTags,
+  tags: extraTags,
   userIds,
 }: {
-  cacheConfig?: CacheConfig;
-  invalidateKeys?: (CacheInvalidateKey | CacheInvalidateKeyLegacy)[];
-  extraTags?: string[];
+  tags?: string[];
   userIds?: Array<string | null | undefined>;
 }): Promise<void> {
-  const { resolveInvalidateTags, revalidateCacheTags } = await import('../cache-tags.ts');
+  const { revalidateCacheTags } = await import('../cache-tags.ts');
   const tags = new Set(extraTags ?? []);
-  if (invalidateKeys?.length) {
-    const resolved = resolveInvalidateTags(invalidateKeys, cacheConfig);
-    for (const tag of resolved) {
-      tags.add(tag);
-    }
-  }
 
   if (tags.size) {
     revalidateCacheTags([...tags]);
@@ -130,8 +132,6 @@ export const updateProfile = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { getCacheConfigSnapshot } = await import('../cache-config.ts');
-    const cacheConfig = getCacheConfigSnapshot();
     const result = await runRpc<Database['public']['Functions']['update_user_profile']['Returns']>(
       'update_user_profile',
       {
@@ -176,8 +176,7 @@ export const updateProfile = authedAction
     });
 
     await invalidateUserCaches({
-      cacheConfig,
-      invalidateKeys: ['cache.invalidate.user_update'],
+      tags: ['users', `user-${ctx.userId}`],
       userIds: [ctx.userId],
     });
 
@@ -185,8 +184,6 @@ export const updateProfile = authedAction
   });
 
 async function refreshProfileFromOAuthInternal(userId: string) {
-  const { getCacheConfigSnapshot } = await import('../cache-config.ts');
-  const cacheConfig = getCacheConfigSnapshot();
   const result = await runRpc<
     Database['public']['Functions']['refresh_profile_from_oauth']['Returns']
   >(
@@ -204,8 +201,7 @@ async function refreshProfileFromOAuthInternal(userId: string) {
   });
 
   await invalidateUserCaches({
-    cacheConfig,
-    invalidateKeys: ['cache.invalidate.user_profile_oauth'],
+    tags: ['users', `user-${userId}`],
     userIds: [userId],
   });
 
@@ -241,29 +237,12 @@ export const isBookmarkedAction = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { fetchCached } = await import('../cache/fetch-cached.ts');
-    // Use AccountService instead of generic cache lookup
-    const data = await fetchCached(
-      (client: SupabaseClient<Database>) =>
-        new AccountService(client).isBookmarked({
-          p_user_id: ctx.userId,
-          p_content_type: parsedInput.content_type,
-          p_content_slug: parsedInput.content_slug,
-        }),
-      {
-        tags: ['user-bookmarks', `user-${ctx.userId}`, `content-${parsedInput.content_slug}`],
-        ttlKey: 'cache.user_bookmarks.ttl_seconds',
-        useAuth: true,
-        fallback: false,
-        logMeta: { namespace: 'user-actions' },
-      },
-      'user-bookmark',
-      ctx.userId,
-      parsedInput.content_type,
-      parsedInput.content_slug
-    );
-
-    return data;
+    const { isBookmarked } = await import('../data/account.ts');
+    return isBookmarked({
+      userId: ctx.userId,
+      content_type: parsedInput.content_type,
+      content_slug: parsedInput.content_slug,
+    });
   });
 
 export const addBookmarkBatch = authedAction
@@ -288,8 +267,6 @@ export const addBookmarkBatch = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { getCacheConfigSnapshot } = await import('../cache-config.ts');
-    const cacheConfig = getCacheConfigSnapshot();
 
     // Construct composite type array from parsed input
     const items: Database['public']['CompositeTypes']['bookmark_item_input'][] =
@@ -313,9 +290,7 @@ export const addBookmarkBatch = authedAction
 
     await revalidateUserSurfaces({ accountSections: ['account', 'library'] });
     await invalidateUserCaches({
-      cacheConfig,
-      invalidateKeys: ['cache.invalidate.bookmark_create'],
-      extraTags: ['user-bookmarks'],
+      tags: ['user-bookmarks', 'users', `user-${ctx.userId}`],
       userIds: [ctx.userId],
     });
 
@@ -337,8 +312,6 @@ export const toggleFollow = authedAction
   })
   .inputSchema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug }, ctx }) => {
-    const { getCacheConfigSnapshot } = await import('../cache-config.ts');
-    const cacheConfig = getCacheConfigSnapshot();
     const result = await runRpc<Database['public']['Functions']['toggle_follow']['Returns']>(
       'toggle_follow',
       {
@@ -358,9 +331,7 @@ export const toggleFollow = authedAction
       accountSections: ['account'],
     });
     await invalidateUserCaches({
-      cacheConfig,
-      invalidateKeys: ['cache.invalidate.follow'],
-      extraTags: ['users'],
+      tags: ['users', `user-${ctx.userId}`, `user-${user_id}`],
       userIds: [ctx.userId, user_id],
     });
 
@@ -375,26 +346,11 @@ export const isFollowingAction = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { fetchCached } = await import('../cache/fetch-cached.ts');
-    const data = await fetchCached(
-      (client: SupabaseClient<Database>) =>
-        new AccountService(client).isFollowing({
-          follower_id: ctx.userId,
-          following_id: parsedInput.user_id,
-        }),
-      {
-        tags: ['users', `user-${ctx.userId}`, `user-${parsedInput.user_id}`],
-        ttlKey: 'cache.user_profile.ttl_seconds',
-        useAuth: true,
-        fallback: false,
-        logMeta: { namespace: 'user-actions' },
-      },
-      'user-follow-status',
-      ctx.userId,
-      parsedInput.user_id
-    );
-
-    return data;
+    const { isFollowing } = await import('../data/account.ts');
+    return isFollowing({
+      followerId: ctx.userId,
+      followingId: parsedInput.user_id,
+    });
   });
 
 /**
@@ -417,24 +373,11 @@ export const getBookmarkStatusBatch = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { fetchCached } = await import('../cache/fetch-cached.ts');
-    const data = await fetchCached(
-      (client: SupabaseClient<Database>) =>
-        new AccountService(client).isBookmarkedBatch({
-          p_user_id: ctx.userId,
-          p_items: parsedInput.items,
-        }),
-      {
-        tags: ['user-bookmarks', `user-${ctx.userId}`],
-        ttlKey: 'cache.user_bookmarks.ttl_seconds',
-        useAuth: true,
-        fallback: [],
-        logMeta: { namespace: 'user-actions' },
-      },
-      'user-bookmark-batch',
-      ctx.userId,
-      ...parsedInput.items.map((i) => `${i.content_type}:${i.content_slug}`)
-    );
+    const { isBookmarkedBatch } = await import('../data/account.ts');
+    const data = await isBookmarkedBatch({
+      userId: ctx.userId,
+      items: parsedInput.items,
+    });
 
     // Ensure data is an array before mapping
     const results = Array.isArray(data) ? data : [];
@@ -455,24 +398,11 @@ export const getFollowStatusBatch = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { fetchCached } = await import('../cache/fetch-cached.ts');
-    const data = await fetchCached(
-      (client: SupabaseClient<Database>) =>
-        new AccountService(client).isFollowingBatch({
-          p_follower_id: ctx.userId,
-          p_followed_user_ids: parsedInput.user_ids,
-        }),
-      {
-        tags: ['users', `user-${ctx.userId}`],
-        ttlKey: 'cache.user_profile.ttl_seconds',
-        useAuth: true,
-        fallback: [],
-        logMeta: { namespace: 'user-actions' },
-      },
-      'user-follow-batch',
-      ctx.userId,
-      ...parsedInput.user_ids.sort()
-    );
+    const { isFollowingBatch } = await import('../data/account.ts');
+    const data = await isFollowingBatch({
+      followerId: ctx.userId,
+      followedUserIds: parsedInput.user_ids,
+    });
 
     // Ensure data is an array
     const results = Array.isArray(data) ? data : [];
@@ -483,7 +413,7 @@ export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .inputSchema(z.void())
   .action(async ({ ctx }) => {
-    // Use data function instead of fetchCached to avoid cookies() in unstable_cache() error
+    // Use data function with 'use cache: private' for Cache Components support
     const { getUserActivitySummary } = await import('../data/account.ts');
     const data = await getUserActivitySummary(ctx.userId);
     return data;
@@ -493,7 +423,7 @@ export const getActivityTimeline = authedAction
   .metadata({ actionName: 'getActivityTimeline', category: 'user' })
   .inputSchema(activityFilterSchema)
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
-    // Use data function instead of fetchCached to avoid cookies() in unstable_cache() error
+    // Use data function with 'use cache: private' for Cache Components support
     const { getUserActivityTimeline } = await import('../data/account.ts');
     const data = await getUserActivityTimeline({
       userId: ctx.userId,
@@ -508,7 +438,7 @@ export const getUserIdentities = authedAction
   .metadata({ actionName: 'getUserIdentities', category: 'user' })
   .inputSchema(z.void())
   .action(async ({ ctx }) => {
-    // Use data function instead of fetchCached to avoid cookies() in unstable_cache() error
+    // Use data function with 'use cache: private' for Cache Components support
     const { getUserIdentitiesData } = await import('../data/account.ts');
     const data = await getUserIdentitiesData(ctx.userId);
     return data;
@@ -524,8 +454,6 @@ export async function ensureUserRecord(params: {
 }) {
   'use server';
 
-  const { getCacheConfigSnapshot } = await import('../cache-config.ts');
-  const cacheConfig = getCacheConfigSnapshot();
   await runRpc<Database['public']['Tables']['users']['Row']>(
     'ensure_user_record',
     {
@@ -543,8 +471,7 @@ export async function ensureUserRecord(params: {
   );
 
   await invalidateUserCaches({
-    cacheConfig,
-    invalidateKeys: ['cache.invalidate.user_update'],
+    tags: ['users', `user-${params.id}`],
     userIds: [params.id],
   });
 }

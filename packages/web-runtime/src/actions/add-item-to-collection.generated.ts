@@ -17,7 +17,6 @@ const addItemToCollectionSchema = z.object({
   notes: z.string().nullable().optional(),
   order: z.number().nullable().optional()
 });
-export type AddItemToCollectionInput = z.infer<typeof addItemToCollectionSchema>;
 
 export const addItemToCollection = authedAction
   .metadata({ actionName: 'addItemToCollection', category: 'user' })
@@ -52,11 +51,7 @@ export const addItemToCollection = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
-      const { revalidatePath } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
+      const { revalidatePath, revalidateTag } = await import('next/cache');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -64,11 +59,8 @@ export const addItemToCollection = authedAction
       
       revalidatePath(`/account/library`);
       revalidatePath(`/account/library/${result?.collection?.slug}`);
-      
-      await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.collection_items']
-      });
+      revalidateTag(`collections`, 'default');
+      revalidateTag(`users`, 'default');
 
       
 

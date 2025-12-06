@@ -6,7 +6,6 @@ import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { isBuildTime } from '../../build-time.ts';
-import { getCacheTtl } from '../../cache-config.ts';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import { createSupabaseAnonClient } from '../../supabase/server-anon.ts';
@@ -47,9 +46,9 @@ export async function getSEOMetadata(route: string): Promise<null | {
     return null;
   }
 
-  // Configure cache - route is automatically part of cache key
-  const ttl = getCacheTtl('cache.seo.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'static' profile for SEO metadata (changes daily)
+  // Route is automatically part of cache key
+  cacheLife('static'); // 1 day stale, 6 hours revalidate, 30 days expire
   cacheTag('seo');
   cacheTag(`seo-${route}`);
 
@@ -161,9 +160,9 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
     return null;
   }
 
-  // Configure cache - route is automatically part of cache key
-  const ttl = getCacheTtl('cache.seo.ttl_seconds');
-  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  // Configure cache - use 'static' profile for SEO metadata with schemas (changes daily)
+  // Route is automatically part of cache key
+  cacheLife('static'); // 1 day stale, 6 hours revalidate, 30 days expire
   cacheTag('seo');
   cacheTag(`seo-${route}`);
   cacheTag('structured-data');
