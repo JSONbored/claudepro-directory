@@ -31,12 +31,14 @@ import {
 import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
 
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
-export const revalidate = 7200;
-export const dynamicParams = true; // Allow jobs not pre-rendered to be rendered on-demand
+// MIGRATED: Removed export const revalidate = 7200 (incompatible with Cache Components)
+// MIGRATED: Removed export const dynamicParams = true (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * ISR: 2 hours (7200s) - Job postings are relatively stable
@@ -58,7 +60,12 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  // Generate requestId for metadata generation (separate from page render)
+
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate requestId for metadata generation (separate from page render, after connection() to allow Date.now())
   const metadataRequestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -119,15 +126,18 @@ export async function generateStaticParams() {
     const jobs = jobsResult?.jobs ?? [];
 
     if (jobs.length === 0) {
-      reqLogger.warn('generateStaticParams: no jobs available, returning no static params');
-      return [];
+      reqLogger.warn('generateStaticParams: no jobs available, returning placeholder');
+      // Cache Components requires at least one result for build-time validation
+      // Return a placeholder that will be handled dynamically (404 in page component)
+      return [{ slug: '__placeholder__' }];
     }
 
     return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
     reqLogger.error('JobPage: getFilteredJobs threw in generateStaticParams', normalized);
-    return [];
+    // Cache Components requires at least one result - return placeholder on error
+    return [{ slug: '__placeholder__' }];
   }
 }
 
@@ -153,7 +163,11 @@ export default async function JobPage({ params }: PageProps) {
   const rawParameters = await params;
   const validationResult = slugParamsSchema.safeParse(rawParameters);
 
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
   const slug = validationResult.success
     ? validationResult.data.slug

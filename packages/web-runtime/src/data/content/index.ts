@@ -2,157 +2,368 @@ import 'server-only';
 
 import { ContentService, TrendingService, type ContentFilterOptions } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import { cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../../cache/fetch-cached.ts';
-import { toLogContextValue } from '../../logger.ts';
 import { QUERY_LIMITS } from '../config/constants.ts';
 import { generateContentTags } from '../content-helpers.ts';
 
-// OPTIMIZATION: Wrapped with React.cache() for request-level deduplication
-// This prevents duplicate calls within the same request (React Server Component tree)
-export const getContentByCategory = cache(
-  async (
-    category: Database['public']['Enums']['content_category']
-  ): Promise<Database['public']['Functions']['get_enriched_content_list']['Returns']> => {
-    const result = await fetchCached(
-      (client) =>
-        new ContentService(client).getEnrichedContentList({
-          p_category: category,
-          p_limit: QUERY_LIMITS.content.default,
-          p_offset: 0,
-        }),
-      {
-        keyParts: ['content', category],
-        tags: generateContentTags(category),
-        ttlKey: 'cache.content_list.ttl_seconds',
-        fallback: [],
-        logMeta: { category },
-      }
-    );
-    return result;
-  }
-);
+/**
+ * Get content by category
+ * Uses 'use cache' to cache content lists. This data is public and same for all users.
+ */
+export async function getContentByCategory(
+  category: Database['public']['Enums']['content_category']
+): Promise<Database['public']['Functions']['get_enriched_content_list']['Returns']> {
+  'use cache';
 
-export const getContentBySlug = cache(
-  async (
-    category: Database['public']['Enums']['content_category'],
-    slug: string
-  ): Promise<Database['public']['CompositeTypes']['enriched_content_item'] | null> => {
-    return fetchCached(
-      async (client) => {
-        // Manual service had getEnrichedContentBySlug which called get_enriched_content_list with p_slugs
-        const data = await new ContentService(client).getEnrichedContentList({
-          p_category: category,
-          p_slugs: [slug],
-          p_limit: 1,
-          p_offset: 0,
-        });
-        return data[0] ?? null;
-      },
-      {
-        keyParts: ['content', category, slug],
-        tags: generateContentTags(category, slug),
-        ttlKey: 'cache.content_detail.ttl_seconds',
-        fallback: null,
-        logMeta: { category, slug },
-      }
-    );
+  const { getCacheTtl } = await import('../../cache-config.ts');
+  const { isBuildTime } = await import('../../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+  const { logger } = await import('../../logger.ts');
+  const { generateRequestId } = await import('../../utils/request-id.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  const tags = generateContentTags(category);
+  for (const tag of tags) {
+    cacheTag(tag);
   }
-);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getContentByCategory',
+    module: 'data/content/index',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new ContentService(client).getEnrichedContentList({
+      p_category: category,
+      p_limit: QUERY_LIMITS.content.default,
+      p_offset: 0,
+    });
+
+    reqLogger.info('getContentByCategory: fetched successfully', {
+      category,
+      count: result.length,
+    });
+
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getContentByCategory: failed', errorForLogging, {
+      category,
+    });
+    return [];
+  }
+}
+
+/**
+ * Get content by slug
+ * Uses 'use cache' to cache content details. This data is public and same for all users.
+ */
+export async function getContentBySlug(
+  category: Database['public']['Enums']['content_category'],
+  slug: string
+): Promise<Database['public']['CompositeTypes']['enriched_content_item'] | null> {
+  'use cache';
+
+  const { getCacheTtl } = await import('../../cache-config.ts');
+  const { isBuildTime } = await import('../../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+  const { logger } = await import('../../logger.ts');
+  const { generateRequestId } = await import('../../utils/request-id.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.content_detail.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  const tags = generateContentTags(category, slug);
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getContentBySlug',
+    module: 'data/content/index',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    // Manual service had getEnrichedContentBySlug which called get_enriched_content_list with p_slugs
+    const data = await new ContentService(client).getEnrichedContentList({
+      p_category: category,
+      p_slugs: [slug],
+      p_limit: 1,
+      p_offset: 0,
+    });
+
+    const result = data[0] ?? null;
+    reqLogger.info('getContentBySlug: fetched successfully', {
+      category,
+      slug,
+      found: Boolean(result),
+    });
+
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getContentBySlug: failed', errorForLogging, {
+      category,
+      slug,
+    });
+    return null;
+  }
+}
 
 // REMOVED: getFullContentBySlug - redundant wrapper, use getContentBySlug directly
 
-export const getAllContent = cache(
-  async (
-    filters?: ContentFilterOptions
-  ): Promise<Database['public']['CompositeTypes']['enriched_content_item'][]> => {
-    const category = filters?.categories?.[0];
+/**
+ * Get all content with optional filters
+ * Uses 'use cache' to cache filtered content lists. This data is public and same for all users.
+ */
+export async function getAllContent(
+  filters?: ContentFilterOptions
+): Promise<Database['public']['CompositeTypes']['enriched_content_item'][]> {
+  'use cache';
 
-    return fetchCached(
-      async (client) => {
-        const result = await new ContentService(client).getContentPaginated({
-          ...(category ? { p_category: category } : {}),
-          ...(filters?.tags ? { p_tags: filters.tags } : {}),
-          ...(filters?.search ? { p_search: filters.search } : {}),
-          ...(filters?.author ? { p_author: filters.author } : {}),
-          p_order_by: filters?.orderBy ?? 'created_at',
-          p_order_direction: filters?.orderDirection ?? 'desc',
-          p_limit: filters?.limit ?? QUERY_LIMITS.content.default,
-          p_offset: 0,
-        });
-        return (result.items ??
-          []) as Database['public']['CompositeTypes']['enriched_content_item'][];
-      },
-      {
-        // Next.js automatically handles serialization of keyParts array
-        keyParts: [
-          'content-all',
-          category ?? 'all',
-          ...(filters?.tags ?? []),
-          filters?.search ?? '',
-          filters?.author ?? '',
-          filters?.orderBy ?? 'created_at',
-          filters?.orderDirection ?? 'desc',
-          filters?.limit ?? QUERY_LIMITS.content.default,
-        ],
-        tags: ['content-all'],
-        ttlKey: 'cache.content_list.ttl_seconds',
-        fallback: [] as Database['public']['CompositeTypes']['enriched_content_item'][],
-        ...(filters
-          ? { logMeta: { filters: toLogContextValue(filters as Record<string, unknown>) } }
-          : {}),
-      }
-    );
-  }
-);
+  const { getCacheTtl } = await import('../../cache-config.ts');
+  const { isBuildTime } = await import('../../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+  const { logger } = await import('../../logger.ts');
+  const { generateRequestId } = await import('../../utils/request-id.ts');
+  const { toLogContextValue } = await import('../../logger.ts');
 
-export const getContentCount = cache(
-  async (category?: Database['public']['Enums']['content_category']): Promise<number> => {
-    return fetchCached(
-      async (client) => {
-        const result = await new ContentService(client).getContentPaginated({
-          ...(category ? { p_category: category } : {}),
-          p_limit: 1,
-          p_offset: 0,
-          p_order_by: 'created_at',
-          p_order_direction: 'desc',
-        });
-        return result.pagination?.total_count ?? 0;
-      },
-      {
-        keyParts: ['content-count', category ?? 'all'],
-        tags: generateContentTags(category),
-        ttlKey: 'cache.content_list.ttl_seconds',
-        fallback: 0,
-        logMeta: { category: category ?? 'all' },
-      }
-    );
-  }
-);
+  const category = filters?.categories?.[0];
 
-export const getTrendingContent = cache(
-  async (category?: Database['public']['Enums']['content_category'], limit = 20) => {
-    return fetchCached(
-      (client) =>
-        new TrendingService(client).getTrendingContent({
-          ...(category ? { p_category: category } : {}),
-          p_limit: limit,
-        }),
-      {
-        keyParts: ['trending', category ?? 'all', limit],
-        tags: ['trending', ...(category ? [`trending-${category}`] : ['trending-all'])],
-        ttlKey: 'cache.content_list.ttl_seconds',
-        fallback: [],
-        logMeta: { category: category ?? 'all', limit },
-      }
-    );
+  // Configure cache
+  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('content-all');
+  if (category) {
+    const tags = generateContentTags(category);
+    for (const tag of tags) {
+      cacheTag(tag);
+    }
   }
-);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getAllContent',
+    module: 'data/content/index',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new ContentService(client).getContentPaginated({
+      ...(category ? { p_category: category } : {}),
+      ...(filters?.tags ? { p_tags: filters.tags } : {}),
+      ...(filters?.search ? { p_search: filters.search } : {}),
+      ...(filters?.author ? { p_author: filters.author } : {}),
+      p_order_by: filters?.orderBy ?? 'created_at',
+      p_order_direction: filters?.orderDirection ?? 'desc',
+      p_limit: filters?.limit ?? QUERY_LIMITS.content.default,
+      p_offset: 0,
+    });
+
+    const items = (result.items ??
+      []) as Database['public']['CompositeTypes']['enriched_content_item'][];
+
+    reqLogger.info('getAllContent: fetched successfully', {
+      category: category ?? 'all',
+      count: items.length,
+      ...(filters ? { filters: toLogContextValue(filters as Record<string, unknown>) } : {}),
+    });
+
+    return items;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getAllContent: failed', errorForLogging, {
+      category: category ?? 'all',
+      ...(filters ? { filters: toLogContextValue(filters as Record<string, unknown>) } : {}),
+    });
+    return [];
+  }
+}
+
+/**
+ * Get content count for a category
+ * Uses 'use cache' to cache content counts. This data is public and same for all users.
+ */
+export async function getContentCount(
+  category?: Database['public']['Enums']['content_category']
+): Promise<number> {
+  'use cache';
+
+  const { getCacheTtl } = await import('../../cache-config.ts');
+  const { cacheLife, cacheTag } = await import('next/cache');
+  const { isBuildTime } = await import('../../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+  const { logger } = await import('../../logger.ts');
+  const { generateRequestId } = await import('../../utils/request-id.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  const tags = generateContentTags(category);
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getContentCount',
+    module: 'data/content/index',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new ContentService(client).getContentPaginated({
+      ...(category ? { p_category: category } : {}),
+      p_limit: 1,
+      p_offset: 0,
+      p_order_by: 'created_at',
+      p_order_direction: 'desc',
+    });
+
+    const count = result.pagination?.total_count ?? 0;
+    reqLogger.info('getContentCount: fetched successfully', {
+      category: category ?? 'all',
+      count,
+    });
+
+    return count;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getContentCount: failed', errorForLogging, {
+      category: category ?? 'all',
+    });
+    return 0;
+  }
+}
+
+/**
+ * Get trending content
+ * Uses 'use cache' to cache trending content. This data is public and same for all users.
+ */
+export async function getTrendingContent(
+  category?: Database['public']['Enums']['content_category'],
+  limit = 20
+): Promise<Database['public']['Functions']['get_trending_content']['Returns']> {
+  'use cache';
+
+  const { getCacheTtl } = await import('../../cache-config.ts');
+  const { isBuildTime } = await import('../../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+  const { logger } = await import('../../logger.ts');
+  const { generateRequestId } = await import('../../utils/request-id.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('trending');
+  if (category) {
+    cacheTag(`trending-${category}`);
+  } else {
+    cacheTag('trending-all');
+  }
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getTrendingContent',
+    module: 'data/content/index',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new TrendingService(client).getTrendingContent({
+      ...(category ? { p_category: category } : {}),
+      p_limit: limit,
+    });
+
+    reqLogger.info('getTrendingContent: fetched successfully', {
+      category: category ?? 'all',
+      limit,
+      count: result.length,
+    });
+
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getTrendingContent: failed', errorForLogging, {
+      category: category ?? 'all',
+      limit,
+    });
+    return [];
+  }
+}
 
 // REMOVED: getFilteredContent - redundant wrapper, use getAllContent directly
 
-export const getConfigurationCount = cache(async () => getContentCount());
+/**
+ * Get configuration count (alias for getContentCount with no category)
+ * Uses 'use cache' to cache configuration counts. This data is public and same for all users.
+ */
+export async function getConfigurationCount(): Promise<number> {
+  'use cache';
+  return getContentCount();
+}
 
 interface TrendingPageParameters {
   category?: Database['public']['Enums']['content_category'] | null;
@@ -171,62 +382,92 @@ interface TrendingPageDataResult {
   trending: TrendingMetricsRows;
 }
 
+/**
+ * Get trending page data (trending metrics, popular, and recent content)
+ * Uses 'use cache' to cache trending page data. This data is public and same for all users.
+ */
 export async function getTrendingPageData(
   parameters: TrendingPageParameters = {}
 ): Promise<TrendingPageDataResult> {
+  'use cache';
+
   const { category = null, limit = 12 } = parameters;
   const safeLimit = Math.min(Math.max(limit, 1), 100);
 
-  const [trending, popular, recent] = await Promise.all([
-    fetchCached(
-      (client) =>
-        new TrendingService(client).getTrendingMetrics({
-          ...(category ? { p_category: category } : {}),
-          p_limit: safeLimit,
-        }),
-      {
-        keyParts: ['trending-metrics', category ?? 'all', safeLimit],
-        tags: ['trending', 'trending-page'],
-        ttlKey: 'cache.content_list.ttl_seconds',
-        fallback: [],
-        logMeta: { category: category ?? 'all', limit: safeLimit },
-      }
-    ),
-    fetchCached(
-      (client) =>
-        new TrendingService(client).getPopularContent({
-          ...(category ? { p_category: category } : {}),
-          p_limit: safeLimit,
-        }),
-      {
-        keyParts: ['trending-popular', category ?? 'all', safeLimit],
-        tags: ['trending', 'trending-popular'],
-        ttlKey: 'cache.content_list.ttl_seconds',
-        fallback: [],
-        logMeta: { category: category ?? 'all', limit: safeLimit },
-      }
-    ),
-    fetchCached(
-      (client) =>
-        new TrendingService(client).getRecentContent({
-          ...(category ? { p_category: category } : {}),
-          p_limit: safeLimit,
-          p_days: 30,
-        }),
-      {
-        keyParts: ['trending-recent', category ?? 'all', safeLimit, 30],
-        tags: ['trending', 'trending-recent'],
-        ttlKey: 'cache.content_list.ttl_seconds',
-        fallback: [],
-        logMeta: { category: category ?? 'all', limit: safeLimit },
-      }
-    ),
-  ]);
+  const { getCacheTtl } = await import('../../cache-config.ts');
+  const { isBuildTime } = await import('../../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+  const { logger } = await import('../../logger.ts');
+  const { generateRequestId } = await import('../../utils/request-id.ts');
 
-  return {
-    trending,
-    popular,
-    recent,
-    totalCount: trending.length,
-  };
+  // Configure cache
+  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('trending');
+  cacheTag('trending-page');
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getTrendingPageData',
+    module: 'data/content/index',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const trendingService = new TrendingService(client);
+
+    const [trending, popular, recent] = await Promise.all([
+      trendingService.getTrendingMetrics({
+        ...(category ? { p_category: category } : {}),
+        p_limit: safeLimit,
+      }),
+      trendingService.getPopularContent({
+        ...(category ? { p_category: category } : {}),
+        p_limit: safeLimit,
+      }),
+      trendingService.getRecentContent({
+        ...(category ? { p_category: category } : {}),
+        p_limit: safeLimit,
+        p_days: 30,
+      }),
+    ]);
+
+    reqLogger.info('getTrendingPageData: fetched successfully', {
+      category: category ?? 'all',
+      limit: safeLimit,
+      trendingCount: trending.length,
+      popularCount: popular.length,
+      recentCount: recent.length,
+    });
+
+    return {
+      trending,
+      popular,
+      recent,
+      totalCount: trending.length,
+    };
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getTrendingPageData: failed', errorForLogging, {
+      category: category ?? 'all',
+      limit: safeLimit,
+    });
+    return {
+      trending: [],
+      popular: [],
+      recent: [],
+      totalCount: 0,
+    };
+  }
 }

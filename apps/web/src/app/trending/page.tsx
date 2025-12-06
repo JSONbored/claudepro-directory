@@ -16,12 +16,14 @@ import {
 import { UI_CLASSES, UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
 
-export const revalidate = 900;
+// MIGRATED: Removed export const revalidate = 900 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * ISR: 15 minutes (900s) - Trending content updates frequently
@@ -48,6 +50,9 @@ const NewsletterCTAVariant = dynamicImport(
  */
 
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/trending');
 }
 
@@ -70,6 +75,10 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see mapRecentContent
  */
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
 
@@ -81,6 +90,25 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
     module: 'apps/web/src/app/trending',
   });
 
+  return (
+    <Suspense
+      fallback={<div className="container mx-auto px-4 py-8">Loading trending content...</div>}
+    >
+      <TrendingPageContent
+        searchParams={searchParams ?? Promise.resolve({})}
+        reqLogger={reqLogger}
+      />
+    </Suspense>
+  );
+}
+
+async function TrendingPageContent({
+  searchParams,
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const rawParameters = await searchParams;
   const categoryParameter = (() => {
     const category = rawParameters?.['category'];

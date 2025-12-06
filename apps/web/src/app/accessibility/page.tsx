@@ -1,10 +1,14 @@
 import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
-export const revalidate = false;
+// MIGRATED: Removed export const revalidate = false (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * Static Generation: Accessibility page is fully static and never changes
@@ -22,6 +26,9 @@ export const revalidate = false;
  * @see revalidate
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return await generatePageMetadata('/accessibility');
 }
 
@@ -36,9 +43,42 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see APP_CONFIG
  * @see revalidate
  */
-export default function AccessibilityPage() {
+export default async function AccessibilityPage() {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
+  const requestId = generateRequestId();
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'AccessibilityPage',
+    route: '/accessibility',
+    module: 'apps/web/src/app/accessibility',
+  });
+
+  return (
+    <Suspense
+      fallback={<div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">Loading...</div>}
+    >
+      <AccessibilityPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function AccessibilityPageContent({
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
   const lastUpdated = getLastUpdatedDate();
   const channels = getContactChannels();
+
+  reqLogger.info('AccessibilityPage: rendering page', {
+    section: 'page-render',
+  });
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">

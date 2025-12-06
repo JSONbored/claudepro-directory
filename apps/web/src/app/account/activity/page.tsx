@@ -18,11 +18,14 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Generates page metadata for the account Activity page.
@@ -31,6 +34,9 @@ export const runtime = 'nodejs';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/activity');
 }
 
@@ -49,7 +55,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ActivityTimeline
  */
 export default async function ActivityPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
   const operation = 'ActivityPage';
   const route = '/account/activity';
@@ -63,6 +73,14 @@ export default async function ActivityPage() {
     module: modulePath,
   });
 
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading activity...</div>}>
+      <ActivityPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'ActivityPage' });
 

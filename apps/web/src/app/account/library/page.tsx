@@ -35,9 +35,12 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// MIGRATED: Added Suspense boundary for dynamic getAuthenticatedUser access (Cache Components requirement)
 
 /**
  * Dynamic Rendering Required
@@ -52,6 +55,9 @@ export const runtime = 'nodejs';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/library');
 }
 
@@ -68,7 +74,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see normalizeError - used to normalize fetch errors for logging
  */
 export default async function LibraryPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -79,6 +89,14 @@ export default async function LibraryPage() {
     module: 'apps/web/src/app/account/library',
   });
 
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading library...</div>}>
+      <LibraryPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });
 

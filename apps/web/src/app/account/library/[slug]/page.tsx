@@ -5,7 +5,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   UnifiedBadge,
@@ -20,11 +20,14 @@ import {
 import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -45,6 +48,9 @@ interface CollectionPageProperties {
  * @see {@link https://nextjs.org/docs/app/api-reference/functions/generate-metadata | Next.js generateMetadata}
  */
 export async function generateMetadata({ params }: CollectionPageProperties): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
@@ -65,19 +71,50 @@ export async function generateMetadata({ params }: CollectionPageProperties): Pr
  * @see generatePageMetadata
  */
 export default async function CollectionDetailPage({ params }: CollectionPageProperties) {
-  const { slug } = await params;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation: 'CollectionDetailPage',
-    route: `/account/library/${slug}`,
     module: 'apps/web/src/app/account/library/[slug]',
   });
 
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading collection...</div>}>
+      <CollectionDetailPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function CollectionDetailPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ slug: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { slug } = await params;
+  const route = `/account/library/${slug}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
+
+  return <CollectionDetailContent slug={slug} reqLogger={routeLogger} />;
+}
+
+async function CollectionDetailContent({
+  slug,
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+  slug: string;
+}) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'CollectionDetailPage' });
 
@@ -90,6 +127,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
 
   // Create new child logger with user context
   // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
+  // Note: reqLogger here is actually routeLogger passed from parent
   const userLogger = reqLogger.child({
     userId: user.id, // Redaction will automatically hash this
   });
@@ -108,8 +146,10 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       hasData: !!collectionData,
     });
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load collection detail for account view');
-    userLogger.error('CollectionDetailPage: getCollectionDetail threw', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    userLogger.error('CollectionDetailPage: getCollectionDetail threw', errorForLogging, {
       section: 'collection-data-fetch',
     });
     hasError = true;

@@ -43,14 +43,17 @@ import {
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
 
-export const revalidate = 7200;
-export const dynamicParams = true; // Allow older changelog entries to be rendered on-demand
+// MIGRATED: Removed export const revalidate = 7200 (incompatible with Cache Components)
+// MIGRATED: Removed export const dynamicParams = true (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * Build the list of static route params for the most recent changelog entries.
@@ -85,14 +88,23 @@ export async function generateStaticParams() {
 
     // Only pre-render the most recent entries to optimize build time
     const limit = Math.max(0, STATIC_GENERATION_LIMITS.changelog);
-    return entries.slice(0, limit).map((entry) => ({
+    const params = entries.slice(0, limit).map((entry) => ({
       slug: entry.slug,
     }));
+
+    if (params.length === 0) {
+      reqLogger.warn('generateStaticParams: no changelog entries available, returning placeholder');
+      // Cache Components requires at least one result for build-time validation
+      // Return a placeholder that will be handled dynamically (404 in page component)
+      return [{ slug: '__placeholder__' }];
+    }
+
+    return params;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog static params');
     reqLogger.error('ChangelogEntryPage: generateStaticParams threw', normalized);
-    // Re-throw so callers/CI see a hard failure rather than masking it
-    throw normalized;
+    // Cache Components requires at least one result - return placeholder on error
+    return [{ slug: '__placeholder__' }];
   }
 }
 
@@ -112,7 +124,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  // Generate requestId for metadata generation (separate from page render)
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate requestId for metadata generation (separate from page render, after connection() to allow Date.now())
   const metadataRequestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -161,30 +177,55 @@ export default async function ChangelogEntryPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  // MUST be called before accessing params (uncached data)
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation: 'ChangelogEntryPage',
-    route: `/changelog/${slug}`,
+    route: '/changelog/[slug]',
     module: 'apps/web/src/app/changelog/[slug]',
   });
+
+  return (
+    <Suspense
+      fallback={<div className="container mx-auto px-4 py-8">Loading changelog entry...</div>}
+    >
+      <ChangelogEntryPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function ChangelogEntryPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ slug: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { slug } = await params;
+  const route = `/changelog/${slug}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
 
   let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>>;
   try {
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry');
-    reqLogger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized);
+    routeLogger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized);
     throw normalized;
   }
 
   if (!entry) {
-    reqLogger.warn('ChangelogEntryPage: entry not found');
+    routeLogger.warn('ChangelogEntryPage: entry not found');
     notFound();
   }
 

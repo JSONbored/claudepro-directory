@@ -31,10 +31,12 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
+import { connection } from 'next/server';
 
 import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 
-export const revalidate = 86_400;
+// MIGRATED: Removed export const revalidate = 86_400 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -82,8 +84,12 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see QuizForm
  * @see NewsletterCTAVariant
  */
-export default function ConfigRecommenderPage() {
-  // Generate single requestId for this page request
+export default async function ConfigRecommenderPage() {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions

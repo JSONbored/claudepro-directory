@@ -2,13 +2,16 @@
 
 import { MiscService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import { cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../cache/fetch-cached';
-import { logger, normalizeError } from '../index';
-import { generateRequestId } from '../utils/request-id';
+import { isBuildTime } from '../build-time.ts';
+import { getCacheTtl } from '../cache-config.ts';
+import { logger } from '../logger.ts';
+import { createSupabaseAnonClient } from '../supabase/server-anon.ts';
+import { generateRequestId } from '../utils/request-id.ts';
 
 import { getActiveAnnouncement } from './announcements';
+import { DEFAULT_LAYOUT_DATA, type LayoutData } from './layout/constants';
 
 /**
  * Promise status constant (JavaScript standard, not database enum)
@@ -21,35 +24,55 @@ const PROMISE_REJECTED_STATUS = 'rejected' as const;
 
 const NAVIGATION_TTL_KEY = 'cache.navigation.ttl_seconds';
 
-export async function getNavigationMenu(
-  requestId?: string
-): Promise<Database['public']['Functions']['get_navigation_menu']['Returns']> {
-  // Use provided requestId or generate one as fallback
-  const navRequestId = requestId ?? generateRequestId();
+/**
+ * Get navigation menu
+ * Uses 'use cache' to cache navigation menu data. This data is public and same for all users.
+ */
+export async function getNavigationMenu(): Promise<
+  Database['public']['Functions']['get_navigation_menu']['Returns']
+> {
+  'use cache';
+
+  // Configure cache
+  const ttl = getCacheTtl(NAVIGATION_TTL_KEY);
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('navigation');
+  cacheTag('ui');
+
+  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId: navRequestId,
+    requestId,
     operation: 'getNavigationMenu',
     module: 'data/layout',
   });
 
   try {
-    return await fetchCached((client) => new MiscService(client).getNavigationMenu(), {
-      keyParts: ['navigation-menu'],
-      tags: ['navigation', 'ui'],
-      ttlKey: NAVIGATION_TTL_KEY,
-      fallback: {
-        primary: null,
-        secondary: null,
-        actions: null,
-      },
-      logMeta: { namespace: 'navigation' },
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const service = new MiscService(client);
+    const result = await service.getNavigationMenu();
+
+    reqLogger.info('getNavigationMenu: fetched successfully', {
+      hasPrimary: Boolean(result?.primary),
+      hasSecondary: Boolean(result?.secondary),
+      hasActions: Boolean(result?.actions),
     });
+
+    return result;
   } catch (error) {
-    // Log error if fetchCached fails unexpectedly (e.g., cache system error)
-    // Note: fetchCached handles service call errors internally and returns fallback
-    const normalized = normalizeError(error, 'getNavigationMenu failed');
-    reqLogger.error('getNavigationMenu: unexpected error', normalized);
-    // Return fallback on unexpected errors
+    // logger.error() normalizes errors internally, so pass raw error
+    // Convert unknown error to Error | string for TypeScript
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getNavigationMenu: failed', errorForLogging);
+    // Return fallback on errors
     return {
       primary: null,
       secondary: null,
@@ -58,22 +81,24 @@ export async function getNavigationMenu(
   }
 }
 
-export interface LayoutData {
-  announcement: Database['public']['Tables']['announcements']['Row'] | null;
-  navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
-}
+// LayoutData and DEFAULT_LAYOUT_DATA are exported from ./layout/constants
+// to avoid 'use server' restrictions (constants cannot be exported from 'use server' files)
 
-const DEFAULT_LAYOUT_DATA: LayoutData = {
-  announcement: null,
-  navigationData: {
-    primary: null,
-    secondary: null,
-    actions: null,
-  },
-};
+/**
+ * Get layout data (announcements and navigation)
+ * Uses 'use cache' to cache layout data. This data is public and same for all users.
+ */
+export async function getLayoutData(): Promise<LayoutData> {
+  'use cache';
 
-export const getLayoutData = cache(async (): Promise<LayoutData> => {
-  // Create request-scoped child logger to avoid race conditions
+  // Configure cache - use navigation TTL since layout primarily contains navigation
+  const ttl = getCacheTtl(NAVIGATION_TTL_KEY);
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('layout');
+  cacheTag('ui');
+  cacheTag('navigation');
+  cacheTag('announcements');
+
   const requestId = generateRequestId();
   const reqLogger = logger.child({
     requestId,
@@ -84,7 +109,7 @@ export const getLayoutData = cache(async (): Promise<LayoutData> => {
   try {
     const [announcementResult, navigationResult] = await Promise.allSettled([
       getActiveAnnouncement(),
-      getNavigationMenu(requestId),
+      getNavigationMenu(),
     ]);
 
     const announcement =
@@ -93,12 +118,15 @@ export const getLayoutData = cache(async (): Promise<LayoutData> => {
         : null;
 
     if (announcementResult.status === PROMISE_REJECTED_STATUS) {
-      // Log error for failed announcement fetch
-      const normalized = normalizeError(
-        announcementResult.reason,
-        'Failed to load active announcement'
-      );
-      reqLogger.error('getLayoutData: announcement fetch failed', normalized, {
+      // logger.error() normalizes errors internally, so pass raw error
+      // Convert unknown error to Error | string for TypeScript
+      const errorForLogging: Error | string =
+        announcementResult.reason instanceof Error
+          ? announcementResult.reason
+          : announcementResult.reason instanceof String
+            ? announcementResult.reason.toString()
+            : String(announcementResult.reason);
+      reqLogger.error('getLayoutData: announcement fetch failed', errorForLogging, {
         source: 'layout-data',
         component: 'announcement',
       });
@@ -110,25 +138,38 @@ export const getLayoutData = cache(async (): Promise<LayoutData> => {
         : DEFAULT_LAYOUT_DATA.navigationData;
 
     if (navigationResult.status === PROMISE_REJECTED_STATUS) {
-      // Log error for failed navigation fetch
-      const normalized = normalizeError(navigationResult.reason, 'Failed to load navigation menu');
-      reqLogger.error('getLayoutData: navigation fetch failed', normalized, {
+      // logger.error() normalizes errors internally, so pass raw error
+      // Convert unknown error to Error | string for TypeScript
+      const errorForLogging: Error | string =
+        navigationResult.reason instanceof Error
+          ? navigationResult.reason
+          : navigationResult.reason instanceof String
+            ? navigationResult.reason.toString()
+            : String(navigationResult.reason);
+      reqLogger.error('getLayoutData: navigation fetch failed', errorForLogging, {
         source: 'layout-data',
         component: 'navigation',
       });
     }
+
+    reqLogger.info('getLayoutData: fetched successfully', {
+      hasAnnouncement: Boolean(announcement),
+      hasNavigation: Boolean(navigationData),
+    });
 
     return {
       announcement,
       navigationData,
     };
   } catch (error) {
-    // Log error for catastrophic failure (unexpected error from Promise.allSettled itself)
-    const normalized = normalizeError(error, 'Failed to fetch layout data');
-    reqLogger.error('getLayoutData: catastrophic failure, using defaults', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    // Convert unknown error to Error | string for TypeScript
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getLayoutData: catastrophic failure, using defaults', errorForLogging, {
       source: 'layout-data',
       fallbackStrategy: 'defaults',
     });
     return DEFAULT_LAYOUT_DATA;
   }
-});
+}

@@ -18,7 +18,8 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 
-export const revalidate = false;
+// MIGRATED: Removed export const revalidate = false (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 const helpTopics = [
   {

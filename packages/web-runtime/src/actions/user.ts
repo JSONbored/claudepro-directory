@@ -251,13 +251,16 @@ export const isBookmarkedAction = authedAction
           p_content_slug: parsedInput.content_slug,
         }),
       {
-        keyParts: ['user-bookmark', ctx.userId, parsedInput.content_type, parsedInput.content_slug],
         tags: ['user-bookmarks', `user-${ctx.userId}`, `content-${parsedInput.content_slug}`],
         ttlKey: 'cache.user_bookmarks.ttl_seconds',
         useAuth: true,
         fallback: false,
         logMeta: { namespace: 'user-actions' },
-      }
+      },
+      'user-bookmark',
+      ctx.userId,
+      parsedInput.content_type,
+      parsedInput.content_slug
     );
 
     return data;
@@ -380,13 +383,15 @@ export const isFollowingAction = authedAction
           following_id: parsedInput.user_id,
         }),
       {
-        keyParts: ['user-follow-status', ctx.userId, parsedInput.user_id],
         tags: ['users', `user-${ctx.userId}`, `user-${parsedInput.user_id}`],
         ttlKey: 'cache.user_profile.ttl_seconds',
         useAuth: true,
         fallback: false,
         logMeta: { namespace: 'user-actions' },
-      }
+      },
+      'user-follow-status',
+      ctx.userId,
+      parsedInput.user_id
     );
 
     return data;
@@ -420,13 +425,15 @@ export const getBookmarkStatusBatch = authedAction
           p_items: parsedInput.items,
         }),
       {
-        keyParts: ['user-bookmark-batch', ctx.userId, ...parsedInput.items.map(i => `${i.content_type}:${i.content_slug}`)],
         tags: ['user-bookmarks', `user-${ctx.userId}`],
         ttlKey: 'cache.user_bookmarks.ttl_seconds',
         useAuth: true,
         fallback: [],
         logMeta: { namespace: 'user-actions' },
-      }
+      },
+      'user-bookmark-batch',
+      ctx.userId,
+      ...parsedInput.items.map((i) => `${i.content_type}:${i.content_slug}`)
     );
 
     // Ensure data is an array before mapping
@@ -456,13 +463,15 @@ export const getFollowStatusBatch = authedAction
           p_followed_user_ids: parsedInput.user_ids,
         }),
       {
-        keyParts: ['user-follow-batch', ctx.userId, ...parsedInput.user_ids.sort()],
         tags: ['users', `user-${ctx.userId}`],
         ttlKey: 'cache.user_profile.ttl_seconds',
         useAuth: true,
         fallback: [],
         logMeta: { namespace: 'user-actions' },
-      }
+      },
+      'user-follow-batch',
+      ctx.userId,
+      ...parsedInput.user_ids.sort()
     );
 
     // Ensure data is an array

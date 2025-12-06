@@ -24,8 +24,11 @@ import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
-export const revalidate = 86_400;
+// MIGRATED: Removed export const revalidate = 86_400 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * ISR: 24 hours (86400s) - Companies list updates infrequently
@@ -51,6 +54,9 @@ const NewsletterCTAVariant = dynamicImport(
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return await generatePageMetadata('/companies');
 }
 
@@ -68,7 +74,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see revalidate (defined on line 49 in this file)
  */
 export default async function CompaniesPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -79,6 +89,14 @@ export default async function CompaniesPage() {
     module: 'apps/web/src/app/companies',
   });
 
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading companies...</div>}>
+      <CompaniesPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Companies List
   let companiesResponse: Awaited<ReturnType<typeof getCompaniesList>> | null = null;
   try {

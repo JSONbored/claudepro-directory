@@ -1,10 +1,9 @@
 import { MiscService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import { revalidateTag } from 'next/cache';
-import { cache } from 'react';
+import { cacheLife, cacheTag, revalidateTag } from 'next/cache';
 
 import { getCacheInvalidateTags } from '../cache-config.ts';
-import { logger, normalizeError } from '../index.ts';
+import { logger } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
 import { generateRequestId } from '../utils/request-id.ts';
 
@@ -12,7 +11,7 @@ export type ActiveNotificationRecord =
   Database['public']['Functions']['get_active_notifications']['Returns'][number];
 
 const DEFAULT_NOTIFICATION_TAG = 'notifications' as const;
-// Removed TTL_KEY - no longer used since we use React.cache() instead of fetchCached
+// Removed TTL_KEY - no longer used since we use 'use cache: private' instead of fetchCached
 const INVALIDATION_KEY = 'cache.invalidate.notifications' as const;
 
 export function getNotificationCacheTags(userId: string): string[] {
@@ -38,8 +37,10 @@ export function revalidateNotificationCache(userId: string): void {
     try {
       revalidateTag(tag, 'default');
     } catch (error) {
-      // Log error with normalized error object
-      reqLogger.error('Failed to revalidate notification cache tag', normalizeError(error), {
+      // logger.error() normalizes errors internally, so pass raw error
+      const errorForLogging: Error | string =
+        error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+      reqLogger.error('Failed to revalidate notification cache tag', errorForLogging, {
         tag,
         userId,
       });
@@ -55,51 +56,62 @@ interface NotificationFetchParameters {
 /**
  * Get active notifications for a user
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because:
- * 1. Notifications are user-specific and require cookies() for auth
- * 2. cookies() cannot be called inside unstable_cache() (Next.js restriction)
- * 3. User-specific data should not be cached across requests anyway
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
  *
- * React.cache() provides request-level deduplication within the same React Server Component tree,
- * which is safe and appropriate for user-specific data.
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId and dismissedIds in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getActiveNotifications = cache(
-  async ({
-    userId,
-    dismissedIds = [],
-  }: NotificationFetchParameters): Promise<ActiveNotificationRecord[]> => {
-    // Create request-scoped child logger to avoid race conditions
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getActiveNotifications',
-      module: 'data/notifications',
+export async function getActiveNotifications({
+  userId,
+  dismissedIds = [],
+}: NotificationFetchParameters): Promise<ActiveNotificationRecord[]> {
+  'use cache: private';
+
+  // Configure cache
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  const tags = getNotificationCacheTags(userId);
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
+  if (dismissedIds.length > 0) {
+    cacheTag(`notifications-dismissed-${dismissedIds.sort().join('-')}`);
+  }
+
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getActiveNotifications',
+    module: 'data/notifications',
+  });
+
+  try {
+    // Can use cookies() inside 'use cache: private'
+    const client = await createSupabaseServerClient();
+    const service = new MiscService(client);
+
+    const result = await service.getActiveNotifications({ p_dismissed_ids: dismissedIds });
+
+    reqLogger.info('getActiveNotifications: fetched successfully', {
+      userId,
+      dismissedCount: dismissedIds.length,
+      notificationCount: result.length,
     });
 
-    try {
-      // Create authenticated client OUTSIDE of any cache scope
-      // This is safe because React.cache() only deduplicates within the same request
-      const client = await createSupabaseServerClient();
-      const service = new MiscService(client);
-
-      const result = await service.getActiveNotifications({ p_dismissed_ids: dismissedIds });
-
-      reqLogger.info('getActiveNotifications: fetched successfully', {
-        userId,
-        dismissedCount: dismissedIds.length,
-        notificationCount: result.length,
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getActiveNotifications failed');
-      reqLogger.error('getActiveNotifications: unexpected error', normalized, {
-        userId,
-        dismissedCount: dismissedIds.length,
-      });
-      // Return fallback on errors
-      return [];
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getActiveNotifications: unexpected error', errorForLogging, {
+      userId,
+      dismissedCount: dismissedIds.length,
+    });
+    // Return fallback on errors
+    return [];
   }
-);
+}

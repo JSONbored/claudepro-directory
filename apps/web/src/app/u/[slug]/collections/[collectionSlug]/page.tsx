@@ -11,7 +11,7 @@ import {
   getPublicCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   NavLink,
@@ -27,10 +27,13 @@ import {
 import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { Pulse } from '@/src/components/core/infra/pulse';
 
-export const dynamic = 'force-dynamic';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 // Whitelisted content types for outgoing links - use Constants from database types
 const ALLOWED_CONTENT_TYPES = Constants.public.Enums.content_category;
@@ -77,7 +80,7 @@ function getSafeContentLink(item: { content_slug: string; content_type: string }
 }
 
 interface PublicCollectionPageProperties {
-  params: { collectionSlug: string; slug: string };
+  params: Promise<{ collectionSlug: string; slug: string }>;
 }
 
 /**
@@ -94,9 +97,13 @@ interface PublicCollectionPageProperties {
 export async function generateMetadata({
   params,
 }: PublicCollectionPageProperties): Promise<Metadata> {
-  const { slug, collectionSlug } = params;
+  const { slug, collectionSlug } = await params;
 
-  // Generate requestId for metadata generation (separate from page render)
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate requestId for metadata generation (separate from page render, after connection() to allow Date.now())
   const metadataRequestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -107,19 +114,11 @@ export async function generateMetadata({
     module: 'apps/web/src/app/u/[slug]/collections/[collectionSlug]',
   });
 
-  try {
-    // Warm cache for subsequent page render - this fetch in generateMetadata
-    // ensures the data is cached when the page component fetches the same data
-    await getPublicCollectionDetail({
-      userSlug: slug,
-      collectionSlug,
-    });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load collection detail for metadata');
-    metadataLogger.error('PublicCollectionPage: metadata fetch failed', normalized, {
-      section: 'metadata-generation',
-    });
-  }
+  // Note: Removed getPublicCollectionDetail call from generateMetadata to avoid cookies() access during prerendering
+  // The page component will fetch the data when needed
+  metadataLogger.info('PublicCollectionPage: generating metadata', {
+    section: 'metadata-generation',
+  });
 
   return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
     params: { slug, collectionSlug },
@@ -145,18 +144,39 @@ export async function generateMetadata({
  * @see generateRequestId
  */
 export default async function PublicCollectionPage({ params }: PublicCollectionPageProperties) {
-  const { slug, collectionSlug } = params;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation: 'PublicCollectionPage',
-    route: `/u/${slug}/collections/${collectionSlug}`,
     module: 'apps/web/src/app/u/[slug]/collections/[collectionSlug]',
   });
+
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading collection...</div>}>
+      <PublicCollectionPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function PublicCollectionPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ collectionSlug: string; slug: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { slug, collectionSlug } = await params;
+  const route = `/u/${slug}/collections/${collectionSlug}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
 
   // Get current user (if logged in) for ownership check
   const { user: currentUser } = await getAuthenticatedUser({
@@ -165,7 +185,9 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   });
 
   // Create child logger with viewer context if available
-  const viewerLogger = currentUser?.id ? reqLogger.child({ viewerId: currentUser.id }) : reqLogger;
+  const viewerLogger = currentUser?.id
+    ? routeLogger.child({ viewerId: currentUser.id })
+    : routeLogger;
 
   // Section: Collection Detail Fetch
   let collectionData: CollectionDetailData | null = null;
@@ -180,11 +202,13 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
       hasData: !!collectionData,
     });
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load collection detail for page render');
-    viewerLogger.error('PublicCollectionPage: getPublicCollectionDetail threw', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    viewerLogger.error('PublicCollectionPage: getPublicCollectionDetail threw', errorForLogging, {
       section: 'collection-detail-fetch',
     });
-    throw normalized;
+    throw error;
   }
 
   if (!collectionData) {

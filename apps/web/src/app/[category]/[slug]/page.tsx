@@ -9,7 +9,7 @@ import { Constants, type Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
 import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getCategoryConfig,
@@ -19,6 +19,8 @@ import {
 } from '@heyclaude/web-runtime/server';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
 import { UnifiedDetailPage } from '@/src/components/content/detail-page/content-detail-view';
@@ -27,8 +29,8 @@ import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 
-export const revalidate = 7200;
-export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
+// Note: revalidate and dynamicParams removed - Cache Components uses cacheLife instead
+// dynamicParams behavior is default with Cache Components (unknown slugs render on demand)
 
 /**
  * Produce a list of static route params ({ category, slug }) for a subset of popular content to pre-render at build time.
@@ -85,14 +87,22 @@ export async function generateStaticParams() {
           route,
           module: modulePath,
         });
-        const normalized = normalizeError(
-          error,
-          'Failed to load content for category in generateStaticParams'
+        // logger.error() normalizes errors internally, so pass raw error
+        // Convert unknown error to Error | string for TypeScript
+        const errorForLogging: Error | string =
+          error instanceof Error
+            ? error
+            : error instanceof String
+              ? error.toString()
+              : String(error);
+        reqLogger.error(
+          'generateStaticParams: failed to load content for category',
+          errorForLogging,
+          {
+            category,
+            section: 'static-params-generation',
+          }
         );
-        reqLogger.error('generateStaticParams: failed to load content for category', normalized, {
-          category,
-          section: 'static-params-generation',
-        });
         return { category, params: [] };
       }
     })
@@ -103,6 +113,12 @@ export async function generateStaticParams() {
     if (result.status === 'fulfilled') {
       parameters.push(...result.value.params);
     }
+  }
+
+  if (parameters.length === 0) {
+    // Cache Components requires at least one result for build-time validation
+    // Return a placeholder that will be handled dynamically (404 in page component)
+    return [{ category: 'agents', slug: '__placeholder__' }];
   }
 
   return parameters;
@@ -156,14 +172,39 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { category, slug } = await params;
 
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate requestId for metadata generation (separate from page render, after connection() to allow Date.now())
+  const metadataRequestId = generateRequestId();
+
+  // Create request-scoped child logger to avoid race conditions
+  const metadataLogger = logger.child({
+    requestId: metadataRequestId,
+    operation: 'DetailPageMetadata',
+    route: `/${category}/${slug}`,
+    module: 'apps/web/src/app/[category]/[slug]',
+  });
+
   // Validate category at compile time
   if (!isValidCategory(category)) {
+    metadataLogger.warn('Invalid category in generateMetadata', {
+      section: 'category-validation',
+      category,
+    });
     return generatePageMetadata('/:category/:slug', {
       params: { category, slug },
     });
   }
 
   const config = getCategoryConfig(category);
+
+  metadataLogger.info('DetailPage: generating metadata', {
+    section: 'metadata-generation',
+    category,
+    slug,
+  });
 
   return generatePageMetadata('/:category/:slug', {
     params: { category, slug },
@@ -193,25 +234,45 @@ export default async function DetailPage({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }) {
-  const { category, slug } = await params;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
   const operation = 'DetailPage';
-  const route = `/${category}/${slug}`;
   const modulePath = 'apps/web/src/app/[category]/[slug]/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
-    route,
     module: modulePath,
   });
 
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading content...</div>}>
+      <DetailPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function DetailPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ category: string; slug: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { category, slug } = await params;
+  const route = `/${category}/${slug}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
+
   // Section: Category Validation
   if (!isValidCategory(category)) {
-    reqLogger.warn('Invalid category in detail page', {
+    routeLogger.warn('Invalid category in detail page', {
       section: 'category-validation',
     });
     notFound();
@@ -219,11 +280,8 @@ export default async function DetailPage({
 
   const config = getCategoryConfig(category);
   if (!config) {
-    const normalized = normalizeError(
-      new Error('Category config is null'),
-      'DetailPage: missing category config'
-    );
-    reqLogger.error('DetailPage: missing category config', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    routeLogger.error('DetailPage: missing category config', new Error('Category config is null'), {
       section: 'category-validation',
     });
     notFound();
@@ -244,17 +302,20 @@ export default async function DetailPage({
       env.NEXT_PHASE === 'phase-production-build' || env.VERCEL_ENV === 'production';
 
     if (suppressMissingContentWarning) {
-      reqLogger.debug('DetailPage: content not found during build/production (expected)', {
+      routeLogger.debug('DetailPage: content not found during build/production (expected)', {
         section: 'core-content-fetch',
         category,
         slug,
       });
     } else {
-      reqLogger.warn('DetailPage: get_content_detail_core returned null - content may not exist', {
-        section: 'core-content-fetch',
-        category,
-        slug,
-      });
+      routeLogger.warn(
+        'DetailPage: get_content_detail_core returned null - content may not exist',
+        {
+          section: 'core-content-fetch',
+          category,
+          slug,
+        }
+      );
     }
     notFound();
   }
@@ -263,14 +324,14 @@ export default async function DetailPage({
 
   // Null safety: If content doesn't exist in database, return 404
   if (!fullItem) {
-    reqLogger.warn('Content not found in RPC response', {
+    routeLogger.warn('Content not found in RPC response', {
       section: 'core-content-fetch',
       rpcFunction: 'get_content_detail_core',
     });
     notFound();
   }
 
-  reqLogger.info('DetailPage: core content loaded', {
+  routeLogger.info('DetailPage: core content loaded', {
     section: 'core-content-fetch',
   });
 
@@ -296,7 +357,7 @@ export default async function DetailPage({
   // This eliminates runtime overhead and follows DRY principles
 
   // Final summary log
-  reqLogger.info('DetailPage: page render completed', {
+  routeLogger.info('DetailPage: page render completed', {
     section: 'page-render',
     category,
     slug,

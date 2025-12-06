@@ -8,7 +8,8 @@ import { type Metadata } from 'next';
 
 import { ConsultingClient } from '@/src/components/features/consulting/consulting-page-content';
 
-export const revalidate = 86_400;
+// MIGRATED: Removed export const revalidate = 86_400 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * Static generation - marketing page that doesn't change

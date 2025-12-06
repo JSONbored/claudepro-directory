@@ -23,14 +23,17 @@ import {
 import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import {
   ProfileEditForm,
   RefreshProfileButton,
 } from '@/src/components/core/forms/profile-edit-form';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Generates metadata for the account settings page.
@@ -39,6 +42,9 @@ export const runtime = 'nodejs';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/settings');
 }
 
@@ -59,7 +65,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see RefreshProfileButton
  */
 export default async function SettingsPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -70,6 +80,14 @@ export default async function SettingsPage() {
     module: 'apps/web/src/app/account/settings',
   });
 
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading settings...</div>}>
+      <SettingsPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function SettingsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
 

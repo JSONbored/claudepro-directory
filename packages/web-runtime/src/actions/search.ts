@@ -37,11 +37,12 @@ export const getPopularSearches = rateLimitedAction
         return data as Database['public']['Functions']['get_trending_searches']['Returns'];
       },
       {
-        keyParts: ['popular-searches', parsedInput.limit],
         tags: ['search', 'popular-searches'],
         ttlKey: 'cache.search_facets.ttl_seconds', // Reuse existing TTL config
         fallback: [],
         logMeta: { limit: parsedInput.limit },
-      }
+      },
+      'popular-searches',
+      parsedInput.limit
     );
   });

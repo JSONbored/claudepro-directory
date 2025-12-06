@@ -9,10 +9,13 @@ import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
 
-export const dynamic = 'force-dynamic';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -276,23 +279,48 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
  * @see ResultsDisplay
  */
 export default async function ResultsPage({ params, searchParams }: PageProperties) {
-  const resolvedParameters = await params;
-  const resolvedSearchParameters = await searchParams;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation: 'ConfigRecommenderResults',
-    route: `/tools/config-recommender/results/${resolvedParameters.id}`,
     module: 'apps/web/src/app/tools/config-recommender/results/[id]',
   });
 
+  return (
+    <Suspense
+      fallback={<div className="container mx-auto px-4 py-8">Loading recommendations...</div>}
+    >
+      <ResultsPageContent params={params} searchParams={searchParams} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function ResultsPageContent({
+  params,
+  searchParams,
+  reqLogger,
+}: {
+  params: Promise<{ id: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+  searchParams: Promise<{ answers?: string }>;
+}) {
+  const resolvedParameters = await params;
+  const resolvedSearchParameters = await searchParams;
+  const route = `/tools/config-recommender/results/${resolvedParameters.id}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
+
   // Section: Answers Validation
   if (!resolvedSearchParameters.answers) {
-    reqLogger.warn('ConfigRecommenderResults: accessed without answers parameter', {
+    routeLogger.warn('ConfigRecommenderResults: accessed without answers parameter', {
       section: 'answers-validation',
     });
     notFound();
@@ -301,15 +329,21 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
   // Section: Answers Decoding
   let answers: DecodedQuizAnswers;
   try {
-    answers = decodeQuizAnswers(resolvedSearchParameters.answers, resolvedParameters.id, reqLogger);
-    reqLogger.info('ConfigRecommenderResults: answers decoded successfully', {
+    answers = decodeQuizAnswers(
+      resolvedSearchParameters.answers,
+      resolvedParameters.id,
+      routeLogger
+    );
+    routeLogger.info('ConfigRecommenderResults: answers decoded successfully', {
       section: 'answers-decoding',
       useCase: answers.useCase,
       experienceLevel: answers.experienceLevel,
     });
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to decode quiz answers');
-    reqLogger.error('ConfigRecommenderResults: failed to decode quiz answers', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    routeLogger.error('ConfigRecommenderResults: failed to decode quiz answers', errorForLogging, {
       section: 'answers-decoding',
     });
     notFound();
@@ -323,7 +357,7 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
     ...(answers.p_integrations && { integrations: answers.p_integrations }),
     ...(answers.p_focus_areas && { focusAreas: answers.p_focus_areas }),
   });
-  reqLogger.info('ConfigRecommenderResults: recommendations fetched', {
+  routeLogger.info('ConfigRecommenderResults: recommendations fetched', {
     section: 'recommendations-fetch',
     useCase: answers.useCase,
     experienceLevel: answers.experienceLevel,
@@ -331,13 +365,10 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
   });
 
   if (!enrichedResult?.results) {
-    const recommendationsError = normalizeError(
-      new Error('Recommendations result is null'),
-      'get_recommendations returned no data'
-    );
-    reqLogger.error(
+    // logger.error() normalizes errors internally, so pass raw error
+    routeLogger.error(
       'ConfigRecommenderResults: get_recommendations returned no data',
-      recommendationsError,
+      new Error('Recommendations result is null'),
       {
         section: 'recommendations-fetch',
         useCase: answers.useCase,
@@ -351,7 +382,7 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
     results: normalizeRecommendationResults(
       enrichedResult.results,
       resolvedParameters.id,
-      reqLogger
+      routeLogger
     ),
     answers,
     id: resolvedParameters.id,
@@ -360,7 +391,7 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
 
   const shareUrl = `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParameters.id}?answers=${resolvedSearchParameters.answers}`;
 
-  reqLogger.info('ConfigRecommenderResults: page viewed', {
+  routeLogger.info('ConfigRecommenderResults: page viewed', {
     section: 'page-render',
     useCase: answers.useCase,
     experienceLevel: answers.experienceLevel,

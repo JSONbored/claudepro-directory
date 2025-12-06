@@ -3,11 +3,8 @@
 import { MiscService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { unstable_cache } from 'next/cache';
-import { cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../../cache/fetch-cached.ts';
-import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import {
   type SubmissionContentType,
@@ -120,9 +117,25 @@ function emptySection(): SubmissionFormSection {
   };
 }
 
+/**
+ * Fetch fields for a content type (cached)
+ * Uses 'use cache' to cache form field configuration. This data is public and same for all users.
+ */
 async function fetchFieldsForContentType(
   contentType: SubmissionContentType
 ): Promise<SubmissionFormSection> {
+  'use cache';
+
+  const { getCacheTtl } = await import('../../cache-config.ts');
+  const { isBuildTime } = await import('../../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.templates.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('templates');
+  cacheTag(`submission-${contentType}`);
+
   // Create request-scoped child logger to avoid race conditions
   const requestId = generateRequestId();
   const requestLogger = logger.child({
@@ -132,28 +145,26 @@ async function fetchFieldsForContentType(
     module: 'data/forms/submission-form-fields',
   });
 
-  const result = await fetchCached(
-    (client) => new MiscService(client).getFormFieldConfig({ p_form_type: contentType }),
-    {
-      keyParts: ['submission-form-fields', contentType],
-      tags: ['templates', `submission-${contentType}`],
-      ttlKey: 'cache.templates.ttl_seconds',
-      fallback: null,
-      logMeta: { contentType },
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
     }
-  );
 
-  if (!result?.fields) {
-    const normalized = normalizeError(
-      new Error('RPC returned null or no fields'),
-      'Failed to load form fields'
-    );
-    requestLogger.error('Failed to load form fields', normalized, {
-      contentType,
-      source: 'SubmissionFormConfig',
-    });
-    return emptySection();
-  }
+    const result = await new MiscService(client).getFormFieldConfig({ p_form_type: contentType });
+
+    if (!result?.fields) {
+      // logger.error() normalizes errors internally, so pass raw error
+      requestLogger.error('Failed to load form fields', new Error('RPC returned null or no fields'), {
+        contentType,
+        source: 'SubmissionFormConfig',
+      });
+      return emptySection();
+    }
 
   const section = emptySection();
 
@@ -191,7 +202,22 @@ async function fetchFieldsForContentType(
     }
   }
 
-  return section;
+    requestLogger.info('fetchFieldsForContentType: fetched successfully', {
+      contentType,
+      fieldCount: section.common.length + section.typeSpecific.length + section.tags.length,
+    });
+
+    return section;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    requestLogger.error('fetchFieldsForContentType: failed', errorForLogging, {
+      contentType,
+      source: 'SubmissionFormConfig',
+    });
+    return emptySection();
+  }
 }
 
 async function loadSubmissionFormFields(): Promise<SubmissionFormConfig> {
@@ -215,9 +241,20 @@ async function fetchSubmissionSections(
   return config;
 }
 
-export const getSubmissionFormFields = cache(async () => {
-  return unstable_cache(loadSubmissionFormFields, ['submission-form-config'], {
+/**
+ * Get submission form fields configuration
+ *
+ * Uses 'use cache' to cache form field configuration for 6 hours.
+ * This data is public and same for all users, so it can be cached at build time.
+ */
+export async function getSubmissionFormFields(): Promise<SubmissionFormConfig> {
+  'use cache';
+  cacheLife({
+    stale: FORM_FIELDS_CACHE_SECONDS / 2,
     revalidate: FORM_FIELDS_CACHE_SECONDS,
-    tags: [FORM_FIELDS_CACHE_TAG],
-  })();
-});
+    expire: FORM_FIELDS_CACHE_SECONDS * 2,
+  });
+  cacheTag(FORM_FIELDS_CACHE_TAG);
+
+  return loadSubmissionFormFields();
+}

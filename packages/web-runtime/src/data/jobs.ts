@@ -3,10 +3,8 @@ import 'server-only';
 import { JobsService, SearchService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { logError } from '@heyclaude/shared-runtime';
-import { type SupabaseClient } from '@supabase/supabase-js';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../cache/fetch-cached.ts';
-import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
 import { pulseJobSearch } from '../pulse.ts';
 import { generateRequestId } from '../utils/request-id.ts';
@@ -111,11 +109,149 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
     return result;
   } catch (error) {
     // trackPerformance already logs the error, but we log again with context about fallback behavior
-    const normalized = normalizeError(error, 'Job filtering failed, returning null');
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
     reqLogger.warn('Job filtering failed, returning null', {
-      err: normalized,
+      err: errorForLogging,
       ...filtersLog,
       fallbackStrategy: 'null',
+    });
+    return null;
+  }
+}
+
+/**
+ * Get jobs list without filters (cached)
+ * Uses 'use cache' to cache jobs lists. This data is public and same for all users.
+ */
+async function getJobsListCached(
+  limit: number,
+  offset: number
+): Promise<JobsFilterResult | null> {
+  'use cache';
+
+  const { getCacheTtl } = await import('../cache-config.ts');
+  const { isBuildTime } = await import('../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.jobs.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('jobs-list');
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getJobsListCached',
+    module: 'data/jobs',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new SearchService(client).filterJobs({
+      ...(limit === undefined ? {} : { p_limit: limit }),
+      ...(offset === undefined ? {} : { p_offset: offset }),
+    });
+
+    reqLogger.info('getJobsListCached: fetched successfully', {
+      limit,
+      offset,
+      hasResult: Boolean(result),
+    });
+
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getJobsListCached: failed', errorForLogging, {
+      limit,
+      offset,
+    });
+    return null;
+  }
+}
+
+/**
+ * Get filtered jobs with search/filters (cached)
+ * Uses 'use cache' to cache filtered jobs. This data is public and same for all users.
+ */
+async function getFilteredJobsCached(
+  rpcArguments: Database['public']['Functions']['filter_jobs']['Args'],
+  searchQuery: string,
+  category: string,
+  employment: string,
+  experience: string,
+  remote: boolean,
+  limit: number,
+  offset: number,
+  sort: string
+): Promise<JobsFilterResult | null> {
+  'use cache';
+
+  const { getCacheTtl } = await import('../cache-config.ts');
+  const { isBuildTime } = await import('../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.jobs.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('jobs-search');
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getFilteredJobsCached',
+    module: 'data/jobs',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new SearchService(client).filterJobs(rpcArguments);
+
+    reqLogger.info('getFilteredJobsCached: fetched successfully', {
+      searchQuery,
+      category,
+      employment,
+      experience,
+      remote,
+      limit,
+      offset,
+      sort,
+      hasResult: Boolean(result),
+    });
+
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getFilteredJobsCached: failed', errorForLogging, {
+      searchQuery,
+      category,
+      employment,
+      experience,
+      remote,
+      limit,
+      offset,
+      sort,
     });
     return null;
   }
@@ -163,24 +299,12 @@ export async function getFilteredJobs(
   // If no filters, use standard list (cached)
   if (!hasFilters) {
     try {
-      return await fetchCached(
-        (client: SupabaseClient<Database>) =>
-          new SearchService(client).filterJobs({
-            ...(limit === undefined ? {} : { p_limit: limit }),
-            ...(offset === undefined ? {} : { p_offset: offset }),
-          }),
-        {
-          keyParts: ['jobs-all', limit ?? 0, offset ?? 0],
-          tags: ['jobs-list'],
-          ttlKey: 'cache.jobs.ttl_seconds',
-          fallback: null,
-          logMeta: filtersLog,
-        }
-      );
+      return await getJobsListCached(limit ?? 0, offset ?? 0);
     } catch (error) {
-      // Log error if fetchCached fails unexpectedly (e.g., cache system error)
-      const normalized = normalizeError(error, 'getFilteredJobs: failed to fetch jobs list');
-      reqLogger.error('getFilteredJobs: failed to fetch jobs list', normalized, {
+      // logger.error() normalizes errors internally, so pass raw error
+      const errorForLogging: Error | string =
+        error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+      reqLogger.error('getFilteredJobs: failed to fetch jobs list', errorForLogging, {
         ...filtersLog,
       });
       return null;
@@ -262,31 +386,22 @@ export async function getFilteredJobs(
       rpcArguments.p_offset = offset;
     }
 
-    return fetchCached(
-      (client: SupabaseClient<Database>) => new SearchService(client).filterJobs(rpcArguments),
-      {
-        // Next.js automatically handles serialization of keyParts array
-        keyParts: [
-          'jobs-filtered',
-          searchQuery ?? '',
-          category ?? 'all',
-          employment ?? 'any',
-          experience ?? 'any',
-          remote ?? false,
-          limit ?? 0,
-          offset ?? 0,
-          sort ?? 'newest',
-        ],
-        tags: ['jobs-search'],
-        ttlKey: 'cache.jobs.ttl_seconds',
-        fallback: null,
-        logMeta: filtersLog,
-      }
+    return await getFilteredJobsCached(
+      rpcArguments,
+      searchQuery ?? '',
+      category ?? 'all',
+      employment ?? 'any',
+      experience ?? 'any',
+      remote ?? false,
+      limit ?? 0,
+      offset ?? 0,
+      sort ?? 'newest'
     );
   } catch (error) {
-    // Log error if fetchCached fails unexpectedly (e.g., cache system error)
-    const normalized = normalizeError(error, 'Failed to fetch filtered jobs');
-    reqLogger.error('Failed to fetch filtered jobs', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('Failed to fetch filtered jobs', errorForLogging, {
       ...filtersLog,
     });
     return null;
@@ -295,9 +410,22 @@ export async function getFilteredJobs(
 
 /**
  * Gets a single job by slug
+ * Uses 'use cache' to cache job details. This data is public and same for all users.
  */
 export async function getJobBySlug(slug: string) {
-  // Create request-scoped child logger to avoid race conditions
+  'use cache';
+
+  const { getCacheTtl } = await import('../cache-config.ts');
+  const { cacheLife, cacheTag } = await import('next/cache');
+  const { isBuildTime } = await import('../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.jobs_detail.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag(`job-${slug}`);
+  cacheTag('jobs');
+
   const requestId = generateRequestId();
   const reqLogger = logger.child({
     requestId,
@@ -306,20 +434,28 @@ export async function getJobBySlug(slug: string) {
   });
 
   try {
-    return await fetchCached(
-      (client: SupabaseClient<Database>) => new JobsService(client).getJobBySlug({ p_slug: slug }),
-      {
-        keyParts: ['job', slug],
-        tags: [`job-${slug}`],
-        ttlKey: 'cache.jobs_detail.ttl_seconds',
-        fallback: null,
-        logMeta: { slug },
-      }
-    );
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new JobsService(client).getJobBySlug({ p_slug: slug });
+
+    reqLogger.info('getJobBySlug: fetched successfully', {
+      slug,
+      hasResult: Boolean(result),
+    });
+
+    return result;
   } catch (error) {
-    // Log error if fetchCached fails unexpectedly (e.g., cache system error)
-    const normalized = normalizeError(error, 'getJobBySlug failed');
-    reqLogger.error('getJobBySlug: unexpected error', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getJobBySlug: unexpected error', errorForLogging, {
       slug,
     });
     return null;
@@ -328,12 +464,25 @@ export async function getJobBySlug(slug: string) {
 
 /**
  * Retrieve a list of featured jobs for display.
+ * Uses 'use cache' to cache featured jobs. This data is public and same for all users.
  *
  * @param limit - Maximum number of featured jobs to return (default 5)
  * @returns An array of featured job records; returns an empty array if none are available or if an error occurs
  */
 export async function getFeaturedJobs(limit = 5) {
-  // Create request-scoped child logger to avoid race conditions
+  'use cache';
+
+  const { getCacheTtl } = await import('../cache-config.ts');
+  const { cacheLife, cacheTag } = await import('next/cache');
+  const { isBuildTime } = await import('../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.jobs.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('jobs-featured');
+  cacheTag('jobs');
+
   const requestId = generateRequestId();
   const reqLogger = logger.child({
     requestId,
@@ -342,20 +491,28 @@ export async function getFeaturedJobs(limit = 5) {
   });
 
   try {
-    return await fetchCached(
-      (client: SupabaseClient<Database>) => new JobsService(client).getFeaturedJobs(),
-      {
-        keyParts: ['jobs-featured', limit],
-        tags: ['jobs-featured'],
-        ttlKey: 'cache.jobs.ttl_seconds',
-        fallback: [],
-        logMeta: { limit },
-      }
-    );
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new JobsService(client).getFeaturedJobs();
+
+    reqLogger.info('getFeaturedJobs: fetched successfully', {
+      limit,
+      count: result?.length ?? 0,
+    });
+
+    return result ?? [];
   } catch (error) {
-    // Log error if fetchCached fails unexpectedly (e.g., cache system error)
-    const normalized = normalizeError(error, 'getFeaturedJobs failed');
-    reqLogger.error('getFeaturedJobs: unexpected error', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getFeaturedJobs: unexpected error', errorForLogging, {
       limit,
     });
     return [];

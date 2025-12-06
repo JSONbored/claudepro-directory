@@ -16,10 +16,13 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { MFAFactorsListClient } from './mfa-factors-list-client';
 
-export const dynamic = 'force-dynamic';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 export const metadata: Metadata = {
   title: 'Two-Factor Authentication | Account Settings',
@@ -39,7 +42,11 @@ export const metadata: Metadata = {
  * @see redirect
  */
 export default async function MFASettingsPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger
@@ -50,6 +57,18 @@ export default async function MFASettingsPage() {
     module: 'apps/web/src/app/account/settings/mfa',
   });
 
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading MFA settings...</div>}>
+      <MFASettingsPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function MFASettingsPageContent({
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
   const { user } = await getAuthenticatedUser({
     requireUser: true,
     context: 'MFASettingsPage',

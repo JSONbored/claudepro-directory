@@ -14,8 +14,11 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
-export const dynamic = 'force-dynamic';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Added Suspense boundary for dynamic searchParams access (Cache Components requirement)
 
 const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
 
@@ -44,7 +47,43 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see logger
  */
 export default async function AuthCodeError(properties: PagePropsWithSearchParams) {
-  // Generate single requestId for this page request
+  return (
+    <Suspense
+      fallback={
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+              <AlertCircle className="text-destructive h-6 w-6" />
+            </div>
+            <CardTitle className="text-2xl">Authentication Error</CardTitle>
+            <CardDescription>Loading error details...</CardDescription>
+          </CardHeader>
+          <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
+            <Button asChild>
+              <Link href={ROUTES.LOGIN}>Try Again</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href={ROUTES.HOME}>Return Home</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      }
+    >
+      <AuthCodeErrorContent searchParams={properties.searchParams ?? Promise.resolve({})} />
+    </Suspense>
+  );
+}
+
+async function AuthCodeErrorContent({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
   const operation = 'AuthCodeErrorPage';
   const route = AUTH_CODE_ERROR_PATH;
@@ -58,7 +97,7 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
     module: modulePath,
   });
 
-  const searchParameters = await properties.searchParams;
+  const searchParameters = await searchParams;
 
   const rawCode = searchParameters?.['code'];
   const rawProvider = searchParameters?.['provider'];

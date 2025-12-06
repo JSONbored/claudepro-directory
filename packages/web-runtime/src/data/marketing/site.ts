@@ -1,10 +1,8 @@
 'use server';
 
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { unstable_cache } from 'next/cache';
-import { cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import { generateRequestId } from '../../utils/request-id.ts';
 import { getContentCount } from '../content/index.ts';
@@ -38,78 +36,98 @@ interface VercelAnalyticsResponse {
   };
 }
 
-const getVisitorStats = unstable_cache(
-  async (): Promise<VisitorStats> => {
-    // Create request-scoped child logger - do not mutate shared logger in cached function
-    const requestId = generateRequestId();
-    const requestLogger = logger.child({
-      requestId,
-      operation: 'getVisitorStats',
-      module: 'data/marketing/site',
-    });
+/**
+ * Get visitor stats from Vercel Analytics
+ *
+ * Uses 'use cache' to cache visitor statistics for 1 hour.
+ * This data is public and same for all users, so it can be cached at build time.
+ */
+async function getVisitorStats(): Promise<VisitorStats> {
+  'use cache';
+  cacheLife({ stale: 1800, revalidate: 3600, expire: 7200 }); // 30min stale, 1hr revalidate, 2hr expire
+  cacheTag('marketing-visitor-stats');
 
-    const { trackPerformance } = await import('../../utils/performance-metrics.ts');
+  // Create request-scoped child logger - do not mutate shared logger in cached function
+  const requestId = generateRequestId();
+  const requestLogger = logger.child({
+    requestId,
+    operation: 'getVisitorStats',
+    module: 'data/marketing/site',
+  });
 
-    if (!(VERCEL_ANALYTICS_TOKEN && VERCEL_PROJECT_ID)) {
-      return HERO_DEFAULTS;
-    }
+  const { trackPerformance } = await import('../../utils/performance-metrics.ts');
 
-    const now = Date.now();
-    const to = new Date(now);
-    const from = new Date(now - 30 * 24 * 60 * 60 * 1000);
+  if (!(VERCEL_ANALYTICS_TOKEN && VERCEL_PROJECT_ID)) {
+    return HERO_DEFAULTS;
+  }
 
-    const url = new URL(`https://api.vercel.com/v2/insights/${VERCEL_PROJECT_ID}/analytics`);
-    url.searchParams.set('from', from.toISOString());
-    url.searchParams.set('to', to.toISOString());
+  const now = Date.now();
+  const to = new Date(now);
+  const from = new Date(now - 30 * 24 * 60 * 60 * 1000);
 
-    try {
-      const { result } = await trackPerformance(
-        async () => {
-          const response = await fetch(url.toString(), {
-            headers: {
-              Authorization: `Bearer ${VERCEL_ANALYTICS_TOKEN}`,
-            },
-            next: { revalidate: 3600 },
-          });
+  const url = new URL(`https://api.vercel.com/v2/insights/${VERCEL_PROJECT_ID}/analytics`);
+  url.searchParams.set('from', from.toISOString());
+  url.searchParams.set('to', to.toISOString());
 
-          if (!response.ok) {
-            throw new Error(`Vercel analytics error: ${response.status} ${response.statusText}`);
-          }
+  try {
+    const { result } = await trackPerformance(
+      async () => {
+        const response = await fetch(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${VERCEL_ANALYTICS_TOKEN}`,
+          },
+        });
 
-          const data = (await response.json()) as VercelAnalyticsResponse;
-          return {
-            monthlyVisitors: Number(data.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
-            monthlyPageViews: Number(data.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
-          };
-        },
-        {
-          operation: 'getVisitorStats',
-          logger: requestLogger, // Use child logger to avoid passing requestId/operation repeatedly
-          requestId, // Pass requestId for return value
-          logMeta: { source: 'vercel-analytics-api' },
-          logLevel: 'info',
+        if (!response.ok) {
+          throw new Error(`Vercel analytics error: ${response.status} ${response.statusText}`);
         }
-      );
 
-      return result;
-    } catch (error) {
-      // trackPerformance logs performance metrics, but we need explicit error logging
-      const normalized = normalizeError(error, 'Visitor stats fetch failed, using defaults');
-      requestLogger.warn('Visitor stats fetch failed, using defaults', {
-        err: normalized,
-        source: 'vercel-analytics-api',
-        fallbackStrategy: 'defaults',
-      });
-      return HERO_DEFAULTS;
-    }
-  },
-  ['marketing-visitor-stats'],
-  { revalidate: 3600, tags: ['marketing-visitor-stats'] }
-);
+        const data = (await response.json()) as VercelAnalyticsResponse;
+        return {
+          monthlyVisitors: Number(data.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
+          monthlyPageViews: Number(data.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
+        };
+      },
+      {
+        operation: 'getVisitorStats',
+        logger: requestLogger, // Use child logger to avoid passing requestId/operation repeatedly
+        requestId, // Pass requestId for return value
+        logMeta: { source: 'vercel-analytics-api' },
+        logLevel: 'info',
+      }
+    );
 
-const getConfigurationCountCached = cache(async () => getContentCount());
+    return result;
+  } catch (error) {
+    // trackPerformance logs performance metrics, but we need explicit error logging
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    requestLogger.warn('Visitor stats fetch failed, using defaults', {
+      err: errorForLogging,
+      source: 'vercel-analytics-api',
+      fallbackStrategy: 'defaults',
+    });
+    return HERO_DEFAULTS;
+  }
+}
 
+/**
+ * Get content description copy with count
+ * Uses 'use cache' to cache the description. This data is public and same for all users.
+ */
 export async function getContentDescriptionCopy(): Promise<string> {
+  'use cache';
+
+  const { getCacheTtl } = await import('../../cache-config.ts');
+  const { cacheLife, cacheTag } = await import('next/cache');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('marketing');
+  cacheTag('content-description');
+
   // Create request-scoped child logger to avoid race conditions
   const requestId = generateRequestId();
   const requestLogger = logger.child({
@@ -119,12 +137,13 @@ export async function getContentDescriptionCopy(): Promise<string> {
   });
 
   try {
-    const count = await getConfigurationCountCached();
+    const count = await getContentCount();
     return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
   } catch (error) {
-    // Log error with normalized error object
-    const normalized = normalizeError(error, 'MarketingSite: failed to build content description');
-    requestLogger.error('MarketingSite: failed to build content description', normalized);
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    requestLogger.error('MarketingSite: failed to build content description', errorForLogging);
     return DESCRIPTION_FALLBACK;
   }
 }
@@ -135,7 +154,22 @@ export interface PartnerHeroStats {
   monthlyVisitors: number;
 }
 
+/**
+ * Get partner hero stats (configuration count and visitor stats)
+ * Uses 'use cache' to cache hero stats. This data is public and same for all users.
+ */
 export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
+  'use cache';
+
+  const { getCacheTtl } = await import('../../cache-config.ts');
+  const { cacheLife, cacheTag } = await import('next/cache');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.content_list.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('marketing');
+  cacheTag('partner-hero-stats');
+
   // Create request-scoped child logger to avoid race conditions
   const requestId = generateRequestId();
   const requestLogger = logger.child({
@@ -145,16 +179,17 @@ export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
   });
 
   try {
-    const configurationCount = await getConfigurationCountCached();
+    const configurationCount = await getContentCount();
     const visitorStats = await getVisitorStats();
     return {
       configurationCount,
       ...visitorStats,
     };
   } catch (error) {
-    // Log error with normalized error object
-    const normalized = normalizeError(error, 'MarketingSite: failed to load hero stats');
-    requestLogger.error('MarketingSite: failed to load hero stats', normalized);
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    requestLogger.error('MarketingSite: failed to load hero stats', errorForLogging);
     return {
       configurationCount: 0,
       ...HERO_DEFAULTS,

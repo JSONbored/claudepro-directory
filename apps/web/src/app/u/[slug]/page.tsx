@@ -12,7 +12,7 @@ import {
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   NavLink,
@@ -26,10 +26,13 @@ import {
 import { type Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { FollowButton } from '@/src/components/core/buttons/social/follow-button';
 
-export const dynamic = 'force-dynamic';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -155,6 +158,9 @@ interface UserProfilePageProperties {
  * @see generatePageMetadata
  */
 export async function generateMetadata({ params }: UserProfilePageProperties): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   const { slug } = await params;
   return generatePageMetadata('/u/:slug', {
     params: { slug },
@@ -177,22 +183,43 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
  * @see sanitizeDisplayText
  */
 export default async function UserProfilePage({ params }: UserProfilePageProperties) {
-  const { slug } = await params;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation: 'UserProfilePage',
-    route: `/u/${slug}`,
     module: 'apps/web/src/app/u/[slug]',
   });
 
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading profile...</div>}>
+      <UserProfilePageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function UserProfilePageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ slug: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { slug } = await params;
+  const route = `/u/${slug}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
+
   // Section: Slug Validation
   if (!isValidSlug(slug)) {
-    reqLogger.warn('UserProfilePage: invalid user slug', {
+    routeLogger.warn('UserProfilePage: invalid user slug', {
       section: 'slug-validation',
     });
     notFound();
@@ -204,7 +231,9 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
   });
 
   // Create child logger with viewer context if available
-  const viewerLogger = currentUser?.id ? reqLogger.child({ viewerId: currentUser.id }) : reqLogger;
+  const viewerLogger = currentUser?.id
+    ? routeLogger.child({ viewerId: currentUser.id })
+    : routeLogger;
 
   // Section: User Profile Fetch
   let profileData: Database['public']['Functions']['get_user_profile']['Returns'] | null = null;
@@ -218,11 +247,13 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
       hasProfile: !!profileData,
     });
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load user profile detail');
-    viewerLogger.error('UserProfilePage: get_user_profile threw', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    viewerLogger.error('UserProfilePage: get_user_profile threw', errorForLogging, {
       section: 'user-profile-fetch',
     });
-    throw normalized;
+    throw error;
   }
 
   if (!profileData) {

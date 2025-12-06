@@ -21,11 +21,14 @@ import {
 import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { CompanyForm } from '@/src/components/core/forms/company-form';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -33,6 +36,9 @@ export const runtime = 'nodejs';
  */
 
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/companies/:id/edit');
 }
 
@@ -58,27 +64,47 @@ interface EditCompanyPageProperties {
  * @see ROUTES.ACCOUNT_COMPANIES
  */
 export default async function EditCompanyPage({ params }: EditCompanyPageProperties) {
-  const { id } = await params;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
   const operation = 'EditCompanyPage';
-  const route = `/account/companies/${id}/edit`;
   const modulePath = 'apps/web/src/app/account/companies/[id]/edit/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
-    route,
     module: modulePath,
   });
+
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading company editor...</div>}>
+      <EditCompanyPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function EditCompanyPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ id: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { id } = await params;
+  const route = `/account/companies/${id}/edit`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
 
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'EditCompanyPage' });
 
   if (!user) {
-    reqLogger.warn('EditCompanyPage: unauthenticated access attempt', {
+    routeLogger.warn('EditCompanyPage: unauthenticated access attempt', {
       section: 'authentication',
       companyId: id,
     });
@@ -87,7 +113,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
 
   // Create new child logger with user context
   // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
-  const userLogger = reqLogger.child({
+  const userLogger = routeLogger.child({
     userId: user.id, // Redaction will automatically hash this
   });
 

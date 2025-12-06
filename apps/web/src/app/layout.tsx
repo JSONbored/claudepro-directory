@@ -3,15 +3,18 @@ import './view-transitions.css';
 import './micro-interactions.css';
 import './sugar-high.css';
 
-import { type Database } from '@heyclaude/database-types';
 import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import {
+  generatePageMetadata,
+  getLayoutData,
+  DEFAULT_LAYOUT_DATA,
+} from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import { unstable_cache } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import dynamicImport from 'next/dynamic';
 import localFont from 'next/font/local';
 import { ThemeProvider } from 'next-themes';
@@ -75,16 +78,19 @@ const geistMono = localFont({
   weight: '100 900',
 });
 
-const getCachedHomeMetadata = unstable_cache(
-  async () => {
-    return generatePageMetadata('/');
-  },
-  ['layout-home-metadata'],
-  {
-    revalidate: 86_400,
-    tags: ['homepage-metadata'],
-  }
-);
+/**
+ * Get cached homepage metadata
+ *
+ * Uses 'use cache' to cache homepage metadata for 24 hours.
+ * This data is public and same for all users, so it can be cached at build time.
+ */
+async function getCachedHomeMetadata(): Promise<Metadata> {
+  'use cache';
+  cacheLife({ stale: 43_200, revalidate: 86_400, expire: 172_800 }); // 12hr stale, 24hr revalidate, 48hr expire
+  cacheTag('homepage-metadata');
+
+  return generatePageMetadata('/');
+}
 
 async function getHomeMetadata() {
   return getCachedHomeMetadata();
@@ -153,17 +159,64 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const DEFAULT_LAYOUT_DATA: {
-  announcement: null;
-  navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
-} = {
-  announcement: null,
-  navigationData: {
-    primary: null,
-    secondary: null,
-    actions: null,
-  },
-};
+/**
+ * Simple server component fallback for Suspense
+ * Does not use any client-side hooks to avoid blocking during prerendering
+ */
+function LayoutFallback({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-background flex min-h-screen flex-col">
+      <main id="main-content" className="flex-1">
+        {children}
+      </main>
+    </div>
+  );
+}
+
+/**
+ * Server component wrapper that fetches layout data and passes it to LayoutContent
+ * Wrapped in Suspense to avoid blocking the layout render
+ */
+async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
+  const [layoutDataResult] = await Promise.allSettled([getLayoutData()]);
+
+  // Extract layout data with fallbacks
+  const layoutData =
+    layoutDataResult.status === 'fulfilled' ? layoutDataResult.value : DEFAULT_LAYOUT_DATA;
+
+  // Log any failures for monitoring (but don't block render)
+  // eslint-disable-next-line architectural-rules/no-hardcoded-enum-values -- PromiseSettledResult status is a standard JavaScript value, not a database enum
+  if (layoutDataResult.status === 'rejected') {
+    // Generate requestId for logging (after data access, so Date.now() is allowed)
+    const requestId = generateRequestId();
+    const reqLogger = logger.child({
+      requestId,
+      operation: 'RootLayout',
+      route: '/',
+      module: 'apps/web/src/app/layout',
+    });
+    // logger.error() normalizes errors internally, so pass raw error
+    // Convert unknown error to Error | string for TypeScript
+    const errorForLogging: Error | string =
+      layoutDataResult.reason instanceof Error
+        ? layoutDataResult.reason
+        : layoutDataResult.reason instanceof String
+          ? layoutDataResult.reason.toString()
+          : String(layoutDataResult.reason);
+    reqLogger.error('RootLayout: layout data fetch failed', errorForLogging, {
+      source: 'root-layout',
+    });
+  }
+
+  return (
+    <LayoutContent
+      announcement={layoutData.announcement}
+      navigationData={layoutData.navigationData}
+    >
+      {children}
+    </LayoutContent>
+  );
+}
 
 /**
  * Application root layout that renders the global HTML scaffold and top-level providers.
@@ -183,33 +236,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Generate single requestId for this layout request
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'RootLayout',
-    route: '/',
-    module: 'apps/web/src/app/layout',
-  });
-
-  // Fetch layout data (announcements and navigation)
-  const [layoutDataResult] = await Promise.allSettled([getLayoutData()]);
-
-  // Extract layout data with fallbacks
-  const layoutData =
-    layoutDataResult.status === 'fulfilled' ? layoutDataResult.value : DEFAULT_LAYOUT_DATA;
-
-  // Log any failures for monitoring (but don't block render)
-  // eslint-disable-next-line architectural-rules/no-hardcoded-enum-values -- PromiseSettledResult status is a standard JavaScript value, not a database enum
-  if (layoutDataResult.status === 'rejected') {
-    const normalized = normalizeError(layoutDataResult.reason, 'Failed to load layout data');
-    reqLogger.error('RootLayout: layout data fetch failed', normalized, {
-      source: 'root-layout',
-    });
-  }
-
   // Get component card config from static defaults
   const componentCardConfig = getComponentCardConfig();
 
@@ -252,7 +278,6 @@ export default async function RootLayout({
           <StructuredData route="/" />
         </Suspense>
         <ComponentConfigContextProvider value={componentCardConfig}>
-          {/* @ts-expect-error - next-themes ThemeProvider v0.4.6 types don't include children prop but it accepts them at runtime */}
           <ThemeProvider
             attribute="data-theme"
             defaultTheme="dark"
@@ -264,12 +289,9 @@ export default async function RootLayout({
             <PostCopyEmailProvider>
               <NotificationsProvider>
                 <ErrorBoundary>
-                  <LayoutContent
-                    announcement={layoutData.announcement}
-                    navigationData={layoutData.navigationData}
-                  >
-                    {children}
-                  </LayoutContent>
+                  <Suspense fallback={<LayoutFallback>{children}</LayoutFallback>}>
+                    <LayoutDataWrapper>{children}</LayoutDataWrapper>
+                  </Suspense>
                 </ErrorBoundary>
                 <Toaster />
                 <NotificationToastHandler />

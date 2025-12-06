@@ -16,11 +16,14 @@ import {
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -45,6 +48,9 @@ interface EditJobPageMetadataProperties {
 export async function generateMetadata({
   params,
 }: EditJobPageMetadataProperties): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   const { id } = await params;
   return generatePageMetadata('/account/jobs/:id/edit', { params: { id } });
 }
@@ -68,24 +74,45 @@ interface EditJobPageProperties {
  * @see JobForm
  */
 export default async function EditJobPage({ params }: EditJobPageProperties) {
-  const { id } = await params;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation: 'EditJobPage',
-    route: `/account/jobs/${id}/edit`,
     module: 'apps/web/src/app/account/jobs/[id]/edit',
   });
+
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading job editor...</div>}>
+      <EditJobPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function EditJobPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ id: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { id } = await params;
+  const route = `/account/jobs/${id}/edit`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
 
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
   if (!user) {
-    reqLogger.warn('EditJobPage: unauthenticated access attempt', {
+    routeLogger.warn('EditJobPage: unauthenticated access attempt', {
       section: 'authentication',
     });
     redirect('/login');
@@ -93,7 +120,7 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
 
   // Create new child logger with user context
   // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
-  const userLogger = reqLogger.child({
+  const userLogger = routeLogger.child({
     userId: user.id, // Redaction will automatically hash this
   });
 

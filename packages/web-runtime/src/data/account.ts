@@ -3,14 +3,14 @@
 import { AccountService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 import { z } from 'zod';
 
-import { logger, normalizeError } from '../index.ts';
+import { logger } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
 import { generateRequestId } from '../utils/request-id.ts';
 
-// Removed ACCOUNT_TTL_KEY - no longer used since we use React.cache() instead of fetchCached
+// MIGRATED: All functions now use 'use cache: private' instead of React.cache() for Cache Components compatibility
 
 const USER_TIER_VALUES = Constants.public.Enums.user_tier;
 
@@ -35,87 +35,101 @@ const accountDashboardSchema = z.object({
 /**
  * Get account dashboard
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because:
- * 1. Account data is user-specific and requires cookies() for auth
- * 2. cookies() cannot be called inside unstable_cache() (Next.js restriction)
- * 3. User-specific data should not be cached across requests anyway
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
  *
- * React.cache() provides request-level deduplication within the same React Server Component tree,
- * which is safe and appropriate for user-specific data.
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getAccountDashboard = cache(
-  async (
-    userId: string
-  ): Promise<Database['public']['Functions']['get_account_dashboard']['Returns'] | null> => {
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getAccountDashboard',
-      module: 'data/account',
+export async function getAccountDashboard(
+  userId: string
+): Promise<Database['public']['Functions']['get_account_dashboard']['Returns'] | null> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-dashboard-${userId}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getAccountDashboard',
+    module: 'data/account',
+  });
+
+  try {
+    // Can use cookies() inside 'use cache: private'
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getAccountDashboard({ p_user_id: userId });
+
+    reqLogger.info('getAccountDashboard: fetched successfully', {
+      userId,
+      hasResult: Boolean(result),
     });
 
-    try {
-      // Create authenticated client OUTSIDE of any cache scope
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
-
-      const result = await service.getAccountDashboard({ p_user_id: userId });
-
-      reqLogger.info('getAccountDashboard: fetched successfully', {
-        userId,
-        hasResult: Boolean(result),
-      });
-
-      return accountDashboardSchema.parse(result);
-    } catch (error) {
-      const normalized = normalizeError(error, 'getAccountDashboard failed');
-      reqLogger.error('getAccountDashboard: unexpected error', normalized, {
-        userId,
-      });
-      return null;
-    }
+    return accountDashboardSchema.parse(result);
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getAccountDashboard: unexpected error', errorForLogging, {
+      userId,
+    });
+    return null;
   }
-);
+}
 
 /**
  * Get user library (bookmarks)
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because user-specific data requires auth.
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getUserLibrary = cache(
-  async (
-    userId: string
-  ): Promise<Database['public']['Functions']['get_user_library']['Returns'] | null> => {
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getUserLibrary',
-      module: 'data/account',
+export async function getUserLibrary(
+  userId: string
+): Promise<Database['public']['Functions']['get_user_library']['Returns'] | null> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-library-${userId}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getUserLibrary',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getUserLibrary({ p_user_id: userId });
+
+    reqLogger.info('getUserLibrary: fetched successfully', {
+      userId,
+      hasResult: Boolean(result),
     });
 
-    try {
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
-
-      const result = await service.getUserLibrary({ p_user_id: userId });
-
-      reqLogger.info('getUserLibrary: fetched successfully', {
-        userId,
-        hasResult: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getUserLibrary failed');
-      reqLogger.error('getUserLibrary: unexpected error', normalized, {
-        userId,
-      });
-      return null;
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getUserLibrary: unexpected error', errorForLogging, {
+      userId,
+    });
+    return null;
   }
-);
+}
 
 export async function getUserBookmarksForCollections(
   userId: string
@@ -125,7 +139,7 @@ export async function getUserBookmarksForCollections(
   return bookmarks
     .filter(
       (
-        b
+        b: (typeof bookmarks)[number]
       ): b is typeof b & {
         content_slug: string;
         content_type: string;
@@ -141,7 +155,7 @@ export async function getUserBookmarksForCollections(
         b.created_at !== null &&
         b.updated_at !== null
     )
-    .map((b) => ({
+    .map((b: (typeof bookmarks)[number]) => ({
       id: b.id,
       user_id: b.user_id,
       content_type: b.content_type,
@@ -155,41 +169,51 @@ export async function getUserBookmarksForCollections(
 /**
  * Get user dashboard (jobs)
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because user-specific data requires auth.
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getUserDashboard = cache(
-  async (
-    userId: string
-  ): Promise<Database['public']['Functions']['get_user_dashboard']['Returns'] | null> => {
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getUserDashboard',
-      module: 'data/account',
+export async function getUserDashboard(
+  userId: string
+): Promise<Database['public']['Functions']['get_user_dashboard']['Returns'] | null> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-dashboard-${userId}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getUserDashboard',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getUserDashboard({ p_user_id: userId });
+
+    reqLogger.info('getUserDashboard: fetched successfully', {
+      userId,
+      hasResult: Boolean(result),
     });
 
-    try {
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
-
-      const result = await service.getUserDashboard({ p_user_id: userId });
-
-      reqLogger.info('getUserDashboard: fetched successfully', {
-        userId,
-        hasResult: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getUserDashboard failed');
-      reqLogger.error('getUserDashboard: unexpected error', normalized, {
-        userId,
-      });
-      return null;
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getUserDashboard: unexpected error', errorForLogging, {
+      userId,
+    });
+    return null;
   }
-);
+}
 
 export async function getUserJobById(
   userId: string,
@@ -203,265 +227,325 @@ export async function getUserJobById(
 /**
  * Get collection detail
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because user-specific data requires auth.
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId and slug in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getCollectionDetail = cache(
-  async (
-    userId: string,
-    slug: string
-  ): Promise<
-    Database['public']['Functions']['get_collection_detail_with_items']['Returns'] | null
-  > => {
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getCollectionDetail',
-      module: 'data/account',
+export async function getCollectionDetail(
+  userId: string,
+  slug: string
+): Promise<Database['public']['Functions']['get_collection_detail_with_items']['Returns'] | null> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-collection-${userId}-${slug}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getCollectionDetail',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getCollectionDetailWithItems({
+      p_user_id: userId,
+      p_slug: slug,
     });
 
-    try {
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
+    reqLogger.info('getCollectionDetail: fetched successfully', {
+      userId,
+      slug,
+      hasResult: Boolean(result),
+    });
 
-      const result = await service.getCollectionDetailWithItems({
-        p_user_id: userId,
-        p_slug: slug,
-      });
-
-      reqLogger.info('getCollectionDetail: fetched successfully', {
-        userId,
-        slug,
-        hasResult: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getCollectionDetail failed');
-      reqLogger.error('getCollectionDetail: unexpected error', normalized, {
-        userId,
-        slug,
-      });
-      return null;
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getCollectionDetail: unexpected error', errorForLogging, {
+      userId,
+      slug,
+    });
+    return null;
   }
-);
+}
 
 /**
  * Get user settings
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because user-specific data requires auth.
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getUserSettings = cache(
-  async (
-    userId: string
-  ): Promise<Database['public']['Functions']['get_user_settings']['Returns'] | null> => {
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getUserSettings',
-      module: 'data/account',
+export async function getUserSettings(
+  userId: string
+): Promise<Database['public']['Functions']['get_user_settings']['Returns'] | null> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-settings-${userId}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getUserSettings',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getUserSettings({ p_user_id: userId });
+
+    reqLogger.info('getUserSettings: fetched successfully', {
+      userId,
+      hasResult: Boolean(result),
     });
 
-    try {
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
-
-      const result = await service.getUserSettings({ p_user_id: userId });
-
-      reqLogger.info('getUserSettings: fetched successfully', {
-        userId,
-        hasResult: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getUserSettings failed');
-      reqLogger.error('getUserSettings: unexpected error', normalized, {
-        userId,
-      });
-      return null;
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getUserSettings: unexpected error', errorForLogging, {
+      userId,
+    });
+    return null;
   }
-);
+}
 
 /**
  * Get sponsorship analytics
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because user-specific data requires auth.
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId and sponsorshipId in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getSponsorshipAnalytics = cache(
-  async (
-    userId: string,
-    sponsorshipId: string
-  ): Promise<Database['public']['Functions']['get_sponsorship_analytics']['Returns'] | null> => {
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getSponsorshipAnalytics',
-      module: 'data/account',
+export async function getSponsorshipAnalytics(
+  userId: string,
+  sponsorshipId: string
+): Promise<Database['public']['Functions']['get_sponsorship_analytics']['Returns'] | null> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-sponsorship-analytics-${userId}-${sponsorshipId}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getSponsorshipAnalytics',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getSponsorshipAnalytics({
+      p_user_id: userId,
+      p_sponsorship_id: sponsorshipId,
     });
 
-    try {
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
+    reqLogger.info('getSponsorshipAnalytics: fetched successfully', {
+      userId,
+      sponsorshipId,
+      hasResult: Boolean(result),
+    });
 
-      const result = await service.getSponsorshipAnalytics({
-        p_user_id: userId,
-        p_sponsorship_id: sponsorshipId,
-      });
-
-      reqLogger.info('getSponsorshipAnalytics: fetched successfully', {
-        userId,
-        sponsorshipId,
-        hasResult: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getSponsorshipAnalytics failed');
-      reqLogger.error('getSponsorshipAnalytics: unexpected error', normalized, {
-        userId,
-        sponsorshipId,
-      });
-      return null;
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getSponsorshipAnalytics: unexpected error', errorForLogging, {
+      userId,
+      sponsorshipId,
+    });
+    return null;
   }
-);
+}
 
 /**
  * Get user companies
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because user-specific data requires auth.
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getUserCompanies = cache(
-  async (
-    userId: string
-  ): Promise<Database['public']['Functions']['get_user_companies']['Returns'] | null> => {
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getUserCompanies',
-      module: 'data/account',
+export async function getUserCompanies(
+  userId: string
+): Promise<Database['public']['Functions']['get_user_companies']['Returns'] | null> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-companies-${userId}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getUserCompanies',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getUserCompanies({ p_user_id: userId });
+
+    reqLogger.info('getUserCompanies: fetched successfully', {
+      userId,
+      hasResult: Boolean(result),
     });
 
-    try {
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
-
-      const result = await service.getUserCompanies({ p_user_id: userId });
-
-      reqLogger.info('getUserCompanies: fetched successfully', {
-        userId,
-        hasResult: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getUserCompanies failed');
-      reqLogger.error('getUserCompanies: unexpected error', normalized, {
-        userId,
-      });
-      return null;
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getUserCompanies: unexpected error', errorForLogging, {
+      userId,
+    });
+    return null;
   }
-);
+}
 
 /**
  * Get user sponsorships
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because user-specific data requires auth.
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getUserSponsorships = cache(
-  async (
-    userId: string
-  ): Promise<Database['public']['Functions']['get_user_sponsorships']['Returns']> => {
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getUserSponsorships',
-      module: 'data/account',
+export async function getUserSponsorships(
+  userId: string
+): Promise<Database['public']['Functions']['get_user_sponsorships']['Returns']> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-sponsorships-${userId}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getUserSponsorships',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getUserSponsorships({ p_user_id: userId });
+
+    reqLogger.info('getUserSponsorships: fetched successfully', {
+      userId,
+      hasResult: Boolean(result),
     });
 
-    try {
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
-
-      const result = await service.getUserSponsorships({ p_user_id: userId });
-
-      reqLogger.info('getUserSponsorships: fetched successfully', {
-        userId,
-        hasResult: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getUserSponsorships failed');
-      reqLogger.error('getUserSponsorships: unexpected error', normalized, {
-        userId,
-      });
-      return [];
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getUserSponsorships: unexpected error', errorForLogging, {
+      userId,
+    });
+    return [];
   }
-);
+}
 
 export async function getUserCompanyById(
   userId: string,
   companyId: string
 ): Promise<Database['public']['CompositeTypes']['user_companies_company'] | null> {
   const data = await getUserCompanies(userId);
-  const company = data?.companies?.find((c) => c.id === companyId);
+  const company = data?.companies?.find(
+    (c: Database['public']['CompositeTypes']['user_companies_company']) => c.id === companyId
+  );
   return company ?? null;
 }
 
 /**
  * Get submission dashboard
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because user-specific data requires auth.
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Cache keys include limits for different cache entries
+ * - Not prerendered (runs at request time)
  */
-export const getSubmissionDashboard = cache(
-  async (
-    recentLimit = 5,
-    contributorsLimit = 5
-  ): Promise<Database['public']['Functions']['get_submission_dashboard']['Returns'] | null> => {
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getSubmissionDashboard',
-      module: 'data/account',
+export async function getSubmissionDashboard(
+  recentLimit = 5,
+  contributorsLimit = 5
+): Promise<Database['public']['Functions']['get_submission_dashboard']['Returns'] | null> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`submission-dashboard-${recentLimit}-${contributorsLimit}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getSubmissionDashboard',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getSubmissionDashboard({
+      p_recent_limit: recentLimit,
+      p_contributors_limit: contributorsLimit,
     });
 
-    try {
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
+    reqLogger.info('getSubmissionDashboard: fetched successfully', {
+      recentLimit,
+      contributorsLimit,
+      hasResult: Boolean(result),
+    });
 
-      const result = await service.getSubmissionDashboard({
-        p_recent_limit: recentLimit,
-        p_contributors_limit: contributorsLimit,
-      });
-
-      reqLogger.info('getSubmissionDashboard: fetched successfully', {
-        recentLimit,
-        contributorsLimit,
-        hasResult: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getSubmissionDashboard failed');
-      reqLogger.error('getSubmissionDashboard: unexpected error', normalized, {
-        recentLimit,
-        contributorsLimit,
-      });
-      return null;
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getSubmissionDashboard: unexpected error', errorForLogging, {
+      recentLimit,
+      contributorsLimit,
+    });
+    return null;
   }
-);
+}
 
 /**
  * Account Dashboard Bundle - Shared data per request
@@ -483,145 +567,175 @@ export interface AccountDashboardBundle {
 /**
  * Get user activity summary
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because user-specific data requires auth.
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getUserActivitySummary = cache(
-  async (
-    userId: string
-  ): Promise<Database['public']['Functions']['get_user_activity_summary']['Returns'] | null> => {
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getUserActivitySummary',
-      module: 'data/account',
+export async function getUserActivitySummary(
+  userId: string
+): Promise<Database['public']['Functions']['get_user_activity_summary']['Returns'] | null> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-activity-summary-${userId}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getUserActivitySummary',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getUserActivitySummary({ p_user_id: userId });
+
+    reqLogger.info('getUserActivitySummary: fetched successfully', {
+      userId,
+      hasResult: Boolean(result),
     });
 
-    try {
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
-
-      const result = await service.getUserActivitySummary({ p_user_id: userId });
-
-      reqLogger.info('getUserActivitySummary: fetched successfully', {
-        userId,
-        hasResult: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getUserActivitySummary failed');
-      reqLogger.error('getUserActivitySummary: unexpected error', normalized, {
-        userId,
-      });
-      return {
-        total_posts: 0,
-        total_comments: 0,
-        total_votes: 0,
-        total_submissions: 0,
-        merged_submissions: 0,
-        total_activity: 0,
-      };
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getUserActivitySummary: unexpected error', errorForLogging, {
+      userId,
+    });
+    return {
+      total_posts: 0,
+      total_comments: 0,
+      total_votes: 0,
+      total_submissions: 0,
+      merged_submissions: 0,
+      total_activity: 0,
+    };
   }
-);
+}
 
 /**
  * Get user activity timeline
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because user-specific data requires auth.
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId, type, limit, offset in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getUserActivityTimeline = cache(
-  async (input: {
-    limit?: number | undefined;
-    offset?: number | undefined;
-    type?: string | undefined;
-    userId: string;
-  }): Promise<Database['public']['Functions']['get_user_activity_timeline']['Returns'] | null> => {
-    const { userId, type, limit = 20, offset = 0 } = input;
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getUserActivityTimeline',
-      module: 'data/account',
+export async function getUserActivityTimeline(input: {
+  limit?: number | undefined;
+  offset?: number | undefined;
+  type?: string | undefined;
+  userId: string;
+}): Promise<Database['public']['Functions']['get_user_activity_timeline']['Returns'] | null> {
+  'use cache: private';
+  const { userId, type, limit = 20, offset = 0 } = input;
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-activity-timeline-${userId}-${type ?? 'all'}-${limit}-${offset}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getUserActivityTimeline',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getUserActivityTimeline({
+      p_user_id: userId,
+      ...(type && { p_type: type }),
+      p_limit: limit,
+      p_offset: offset,
     });
 
-    try {
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
+    reqLogger.info('getUserActivityTimeline: fetched successfully', {
+      userId,
+      type: type ?? 'all',
+      limit,
+      offset,
+      hasResult: Boolean(result),
+    });
 
-      const result = await service.getUserActivityTimeline({
-        p_user_id: userId,
-        ...(type && { p_type: type }),
-        p_limit: limit,
-        p_offset: offset,
-      });
-
-      reqLogger.info('getUserActivityTimeline: fetched successfully', {
-        userId,
-        type: type ?? 'all',
-        limit,
-        offset,
-        hasResult: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getUserActivityTimeline failed');
-      reqLogger.error('getUserActivityTimeline: unexpected error', normalized, {
-        userId,
-        type: type ?? 'all',
-        limit,
-        offset,
-      });
-      return {
-        activities: [],
-        has_more: false,
-        total: 0,
-      };
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getUserActivityTimeline: unexpected error', errorForLogging, {
+      userId,
+      type: type ?? 'all',
+      limit,
+      offset,
+    });
+    return {
+      activities: [],
+      has_more: false,
+      total: 0,
+    };
   }
-);
+}
 
 /**
  * Get user identities
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because user-specific data requires auth.
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId in cache tag)
+ * - Not prerendered (runs at request time)
  */
-export const getUserIdentitiesData = cache(
-  async (
-    userId: string
-  ): Promise<Database['public']['Functions']['get_user_identities']['Returns'] | null> => {
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getUserIdentitiesData',
-      module: 'data/account',
+export async function getUserIdentitiesData(
+  userId: string
+): Promise<Database['public']['Functions']['get_user_identities']['Returns'] | null> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-identities-${userId}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getUserIdentitiesData',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+    const service = new AccountService(client);
+
+    const result = await service.getUserIdentities({ p_user_id: userId });
+
+    reqLogger.info('getUserIdentitiesData: fetched successfully', {
+      userId,
+      hasResult: Boolean(result),
     });
 
-    try {
-      const client = await createSupabaseServerClient();
-      const service = new AccountService(client);
-
-      const result = await service.getUserIdentities({ p_user_id: userId });
-
-      reqLogger.info('getUserIdentitiesData: fetched successfully', {
-        userId,
-        hasResult: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'getUserIdentitiesData failed');
-      reqLogger.error('getUserIdentitiesData: unexpected error', normalized, {
-        userId,
-      });
-      return { identities: [] };
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getUserIdentitiesData: unexpected error', errorForLogging, {
+      userId,
+    });
+    return { identities: [] };
   }
-);
+}
 
 export async function getAccountDashboardBundle(
   userId: string,

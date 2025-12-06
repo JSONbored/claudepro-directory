@@ -22,13 +22,16 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 
-export const dynamic = 'force-dynamic';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -179,6 +182,9 @@ function isValidRecentSubmission(submission: unknown): submission is {
  * @see import('next').Metadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/submit');
 }
 
@@ -201,7 +207,11 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 
 export default async function SubmitPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -212,6 +222,16 @@ export default async function SubmitPage() {
     module: 'apps/web/src/app/submit',
   });
 
+  return (
+    <Suspense
+      fallback={<div className="container mx-auto px-4 py-8">Loading submission form...</div>}
+    >
+      <SubmitPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function SubmitPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Submission Dashboard
   let dashboardData: Awaited<ReturnType<typeof getSubmissionDashboard>> = null;
   try {

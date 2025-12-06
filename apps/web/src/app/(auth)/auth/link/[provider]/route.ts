@@ -8,7 +8,8 @@ import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
-export const dynamic = 'force-dynamic';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required

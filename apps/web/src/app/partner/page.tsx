@@ -24,8 +24,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
-export const revalidate = 86_400;
+// MIGRATED: Removed export const revalidate = 86_400 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * Renders the Partner marketing page that presents pricing, benefits, and CTAs for advertising.
@@ -51,7 +54,11 @@ export const revalidate = 86_400;
  * @see logger
  */
 export default async function PartnerPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -62,9 +69,20 @@ export default async function PartnerPage() {
     module: 'app/partner',
   });
 
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading partner page...</div>}>
+      <PartnerPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   let pricing: ReturnType<typeof getPartnerPricing>;
   try {
     pricing = getPartnerPricing();
+    reqLogger.info('PartnerPage: pricing config loaded', {
+      section: 'pricing-config',
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load pricing config');
     reqLogger.error('PartnerPage: getPartnerPricing failed', normalized, {

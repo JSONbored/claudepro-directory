@@ -12,6 +12,7 @@ import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component
 import { HomePageLoading } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
@@ -21,7 +22,8 @@ import { HomepageHeroServer } from '@/src/components/features/home/homepage-hero
 import { HomepageSearchFacetsServer } from '@/src/components/features/home/homepage-search-facets-server';
 import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
 
-export const revalidate = 1800;
+// MIGRATED: Removed export const revalidate = 1800 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -41,6 +43,9 @@ const NewsletterCTAVariant = dynamicImport(
 );
 
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/');
 }
 
@@ -127,7 +132,15 @@ async function TopContributorsServer() {
  * @see revalidate
  */
 export default async function HomePage({ searchParams }: HomePageProperties) {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  // MUST be called before accessing searchParams (uncached data)
+  await connection();
+
+  // Access searchParams after connection() to establish dynamic context
+  await searchParams;
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger
@@ -137,8 +150,6 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
     route: '/',
     module: 'apps/web/src/app',
   });
-
-  await searchParams;
 
   reqLogger.info('HomePage: rendering homepage');
 

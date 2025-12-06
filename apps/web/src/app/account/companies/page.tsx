@@ -34,9 +34,12 @@ import {
 import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -69,6 +72,9 @@ function isAllowedHttpUrl(url: null | string | undefined): boolean {
  * @see /account/companies
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/companies');
 }
 
@@ -87,7 +93,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see logger
  */
 export default async function CompaniesPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
   const operation = 'CompaniesPage';
   const route = '/account/companies';
@@ -101,6 +111,14 @@ export default async function CompaniesPage() {
     module: modulePath,
   });
 
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading companies...</div>}>
+      <CompaniesPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'CompaniesPage' });
 
@@ -147,7 +165,7 @@ export default async function CompaniesPage() {
       companies = data.companies ?? [];
       userLogger.info('CompaniesPage: companies data loaded', {
         section: 'companies-data-fetch',
-        companiesCount: companies.length,
+        companiesCount: companies?.length ?? 0,
       });
     } else {
       userLogger.warn('CompaniesPage: getUserCompanies returned null', {
@@ -183,7 +201,7 @@ export default async function CompaniesPage() {
     );
   }
 
-  if (companies.length === 0) {
+  if ((companies?.length ?? 0) === 0) {
     userLogger.info('CompaniesPage: user has no companies', {
       section: 'companies-data-fetch',
     });
@@ -192,7 +210,7 @@ export default async function CompaniesPage() {
   // Final summary log
   userLogger.info('CompaniesPage: page render completed', {
     section: 'page-render',
-    companiesCount: companies.length,
+    companiesCount: companies?.length ?? 0,
   });
 
   return (
@@ -201,7 +219,7 @@ export default async function CompaniesPage() {
         <div>
           <h1 className="mb-2 text-3xl font-bold">My Companies</h1>
           <p className="text-muted-foreground">
-            {companies.length} {companies.length === 1 ? 'company' : 'companies'}
+            {companies?.length ?? 0} {(companies?.length ?? 0) === 1 ? 'company' : 'companies'}
           </p>
         </div>
         <Button asChild>
@@ -212,7 +230,7 @@ export default async function CompaniesPage() {
         </Button>
       </div>
 
-      {companies.length === 0 ? (
+      {(companies?.length ?? 0) === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center py-12">
             <Building2 className="text-muted-foreground mb-4 h-12 w-12" />
@@ -230,7 +248,7 @@ export default async function CompaniesPage() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {companies
+          {(companies ?? [])
             .filter(
               (
                 company

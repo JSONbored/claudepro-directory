@@ -15,11 +15,14 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -38,6 +41,9 @@ const ROUTE = '/account/connected-accounts';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata(ROUTE);
 }
 
@@ -52,7 +58,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ROUTES.LOGIN
  */
 export default async function ConnectedAccountsPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
   const operation = 'ConnectedAccountsPage';
   const route = ROUTE;
@@ -66,6 +76,18 @@ export default async function ConnectedAccountsPage() {
     module: modulePath,
   });
 
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading connected accounts...</div>}>
+      <ConnectedAccountsPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function ConnectedAccountsPageContent({
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'ConnectedAccountsPage' });
 

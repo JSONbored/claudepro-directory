@@ -2,10 +2,10 @@ import 'server-only';
 
 import { ChangelogService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../cache/fetch-cached.ts';
-
+import { logger } from '../logger.ts';
+import { generateRequestId } from '../utils/request-id.ts';
 import { QUERY_LIMITS } from './config/constants.ts';
 import './changelog.shared.ts';
 
@@ -15,9 +15,6 @@ export * from './changelog.shared.ts';
 const CHANGELOG_TAG = 'changelog';
 const CHANGELOG_TTL_KEY = 'cache.changelog.ttl_seconds';
 const CHANGELOG_DETAIL_TTL_KEY = 'cache.changelog_detail.ttl_seconds';
-// Cache key prefix - using enum value from Constants to avoid hardcoded enum value detection
-// 'changelog' is at index 10 in content_category enum
-const CACHE_KEY_PREFIX = Constants.public.Enums.content_category[10] as string;
 
 function createEmptyOverview(
   limit: number,
@@ -40,6 +37,10 @@ function createEmptyOverview(
   };
 }
 
+/**
+ * Get changelog overview
+ * Uses 'use cache' to cache changelog overview. This data is public and same for all users.
+ */
 export async function getChangelogOverview(
   options: {
     category?: Database['public']['Enums']['changelog_category'];
@@ -49,82 +50,162 @@ export async function getChangelogOverview(
     publishedOnly?: boolean;
   } = {}
 ): Promise<Database['public']['Functions']['get_changelog_overview']['Returns']> {
+  'use cache';
+
   const { category, publishedOnly = true, featuredOnly = false, limit = 50, offset = 0 } = options;
 
-  const result = await fetchCached(
-    (client) =>
-      new ChangelogService(client).getChangelogOverview({
-        ...(category ? { p_category: category } : {}),
-        p_published_only: publishedOnly,
-        p_featured_only: featuredOnly,
-        p_limit: limit,
-        p_offset: offset,
-      }),
-    {
-      keyParts: category
-        ? [CACHE_KEY_PREFIX, category, limit, offset]
-        : [CACHE_KEY_PREFIX, 'overview', limit, offset],
-      tags: [CHANGELOG_TAG, ...(category ? [`changelog-category-${category}`] : [])],
-      ttlKey: CHANGELOG_TTL_KEY,
-      fallback: createEmptyOverview(limit, offset),
-      logMeta: {
-        ...(category ? { category } : {}),
-        publishedOnly,
-        featuredOnly,
-        limit,
-        offset,
-      },
-    }
-  );
+  const { getCacheTtl } = await import('../cache-config.ts');
+  const { isBuildTime } = await import('../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
-  return result;
+  // Configure cache
+  const ttl = getCacheTtl(CHANGELOG_TTL_KEY);
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag(CHANGELOG_TAG);
+  if (category) {
+    cacheTag(`changelog-category-${category}`);
+  }
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getChangelogOverview',
+    module: 'data/changelog',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new ChangelogService(client).getChangelogOverview({
+      ...(category ? { p_category: category } : {}),
+      p_published_only: publishedOnly,
+      p_featured_only: featuredOnly,
+      p_limit: limit,
+      p_offset: offset,
+    });
+
+    reqLogger.info('getChangelogOverview: fetched successfully', {
+      ...(category ? { category } : {}),
+      publishedOnly,
+      featuredOnly,
+      limit,
+      offset,
+      entryCount: result.entries?.length ?? 0,
+    });
+
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getChangelogOverview: failed', errorForLogging, {
+      ...(category ? { category } : {}),
+      publishedOnly,
+      featuredOnly,
+      limit,
+      offset,
+    });
+    return createEmptyOverview(limit, offset);
+  }
 }
 
+/**
+ * Get changelog entry by slug
+ * Uses 'use cache' to cache changelog entries. This data is public and same for all users.
+ */
 export async function getChangelogEntryBySlug(
   slug: string
 ): Promise<Database['public']['Tables']['changelog']['Row'] | null> {
-  const result = await fetchCached(
-    (client) => new ChangelogService(client).getChangelogDetail({ p_slug: slug }),
-    {
-      keyParts: ['changelog-detail', slug],
-      tags: [CHANGELOG_TAG, `changelog-${slug}`],
-      ttlKey: CHANGELOG_DETAIL_TTL_KEY,
-      fallback: { entry: null },
-      logMeta: { slug },
+  'use cache';
+
+  const { getCacheTtl } = await import('../cache-config.ts');
+  const { isBuildTime } = await import('../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl(CHANGELOG_DETAIL_TTL_KEY);
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag(CHANGELOG_TAG);
+  cacheTag(`changelog-${slug}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getChangelogEntryBySlug',
+    module: 'data/changelog',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
     }
-  );
 
-  if (!result.entry) return null;
+    const result = await new ChangelogService(client).getChangelogDetail({ p_slug: slug });
 
-  const entry = result.entry;
-  return {
-    id: entry.id ?? '',
-    slug: entry.slug ?? '',
-    title: entry.title ?? '',
-    tldr: entry.tldr,
-    description: entry.description,
-    content: entry.content ?? '',
-    raw_content: entry.raw_content ?? '',
-    release_date: entry.release_date ?? '',
-    featured: entry.featured ?? false,
-    published: entry.published ?? false,
-    keywords: entry.keywords,
-    metadata: entry.metadata,
-    changes: entry.changes ?? {},
-    created_at: entry.created_at ?? '',
-    updated_at: entry.updated_at ?? '',
-    canonical_url: null,
-    commit_count: null,
-    contributors: null,
-    git_commit_sha: null,
-    json_ld: null,
-    og_image: null,
-    og_type: null,
-    robots_follow: null,
-    robots_index: null,
-    source: null,
-    twitter_card: null,
-  } as Database['public']['Tables']['changelog']['Row'];
+    if (!result.entry) {
+      reqLogger.info('getChangelogEntryBySlug: entry not found', {
+        slug,
+      });
+      return null;
+    }
+
+    const entry = result.entry;
+    const normalizedEntry = {
+      id: entry.id ?? '',
+      slug: entry.slug ?? '',
+      title: entry.title ?? '',
+      tldr: entry.tldr,
+      description: entry.description,
+      content: entry.content ?? '',
+      raw_content: entry.raw_content ?? '',
+      release_date: entry.release_date ?? '',
+      featured: entry.featured ?? false,
+      published: entry.published ?? false,
+      keywords: entry.keywords,
+      metadata: entry.metadata,
+      changes: entry.changes ?? {},
+      created_at: entry.created_at ?? '',
+      updated_at: entry.updated_at ?? '',
+      canonical_url: null,
+      commit_count: null,
+      contributors: null,
+      git_commit_sha: null,
+      json_ld: null,
+      og_image: null,
+      og_type: null,
+      robots_follow: null,
+      robots_index: null,
+      source: null,
+      twitter_card: null,
+    } as Database['public']['Tables']['changelog']['Row'];
+
+    reqLogger.info('getChangelogEntryBySlug: fetched successfully', {
+      slug,
+      hasEntry: Boolean(normalizedEntry),
+    });
+
+    return normalizedEntry;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getChangelogEntryBySlug: failed', errorForLogging, {
+      slug,
+    });
+    return null;
+  }
 }
 
 export async function getChangelog(): Promise<{

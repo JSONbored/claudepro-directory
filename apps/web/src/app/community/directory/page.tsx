@@ -8,7 +8,8 @@ import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
 
-export const dynamic = 'force-dynamic';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community/directory');
@@ -171,12 +172,20 @@ interface CommunityDirectoryPageProperties {
 export default async function CommunityDirectoryPage({
   searchParams,
 }: CommunityDirectoryPageProperties) {
+  return (
+    <Suspense fallback={<Skeleton size="xl" className="h-screen w-full" />}>
+      <CommunityDirectoryPageContent searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function CommunityDirectoryPageContent({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const resolvedParameters = await searchParams;
   const searchQuery = resolvedParameters.q ?? '';
 
-  return (
-    <Suspense fallback={<Skeleton size="xl" className="h-screen w-full" />}>
-      <CommunityDirectoryContent searchQuery={searchQuery} />
-    </Suspense>
-  );
+  return <CommunityDirectoryContent searchQuery={searchQuery} />;
 }

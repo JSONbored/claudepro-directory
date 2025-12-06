@@ -1,9 +1,9 @@
 'use server';
 
 import { type Database } from '@heyclaude/database-types';
-import { cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { logger, normalizeError } from '../index.ts';
+import { logger } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
 import { generateRequestId } from '../utils/request-id.ts';
 
@@ -51,7 +51,17 @@ function sanitizeBenefits(benefits: PaymentPlanRow['benefits']): null | string[]
   return filtered.length > 0 ? filtered : null;
 }
 
-export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogEntry[]> => {
+/**
+ * Get payment plan catalog
+ * Uses 'use cache' to cache payment plan catalog. This data is public and same for all users.
+ */
+export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]> {
+  'use cache';
+
+  // Configure cache
+  cacheLife({ stale: 300, revalidate: 3600, expire: 7200 }); // 5min stale, 1hr revalidate, 2hr expire
+  cacheTag('payment-plans');
+
   // Create request-scoped child logger to avoid race conditions
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -119,7 +129,7 @@ export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogE
       }
     }
 
-    return rows.map((entry) => ({
+    const result = rows.map((entry) => ({
       plan: entry.plan,
       tier: entry.tier,
       price_cents: entry.price_cents,
@@ -130,13 +140,21 @@ export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogE
       benefits: sanitizeBenefits(entry.benefits),
       product_type: entry.product_type,
     }));
+
+    reqLogger.info('getPaymentPlanCatalog: fetched successfully', {
+      count: result.length,
+    });
+
+    return result;
   } catch (error) {
     // trackPerformance logs performance metrics, but we need explicit error logging
-    const normalized = normalizeError(error, 'Failed to load payment_plan_catalog');
-    reqLogger.error('getPaymentPlanCatalog failed', normalized);
-    throw normalized;
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : typeof error === 'string' ? error : String(error);
+    reqLogger.error('getPaymentPlanCatalog failed', errorForLogging);
+    throw error;
   }
-});
+}
 
 export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBillingSummaryEntry[]> {
   if (jobIds.length === 0) {
@@ -213,10 +231,12 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
     return entries;
   } catch (error) {
     // trackPerformance logs performance metrics, but we need explicit error logging
-    const normalized = normalizeError(error, 'Failed to fetch job billing summaries');
-    reqLogger.error('getJobBillingSummaries failed', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : typeof error === 'string' ? error : String(error);
+    reqLogger.error('getJobBillingSummaries failed', errorForLogging, {
       jobCount: jobIds.length,
     });
-    throw normalized;
+    throw error;
   }
 }

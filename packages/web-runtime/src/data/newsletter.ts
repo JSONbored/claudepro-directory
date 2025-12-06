@@ -1,15 +1,36 @@
 'use server';
 
 import { NewsletterService } from '@heyclaude/data-layer';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../cache/fetch-cached.ts';
+import { isBuildTime } from '../build-time.ts';
+import { getCacheTtl } from '../cache-config.ts';
+import { createSupabaseAnonClient } from '../supabase/server-anon.ts';
 
+/**
+ * Get newsletter subscriber count
+ *
+ * Uses 'use cache' to cache newsletter count. This data is public and same for all users.
+ */
 export async function getNewsletterSubscriberCount(): Promise<null | number> {
-  return fetchCached((client) => new NewsletterService(client).getNewsletterSubscriberCount(), {
-    keyParts: ['newsletter-count'],
-    tags: ['newsletter', 'stats'],
-    ttlKey: 'cache.newsletter_count_ttl_s',
-    fallback: 0,
-    logMeta: { source: 'newsletter.actions' },
-  });
+  'use cache';
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.newsletter_count_ttl_s');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('newsletter');
+  cacheTag('stats');
+
+  // Use admin client during build for better performance, anon client at runtime
+  let client;
+  if (isBuildTime()) {
+    const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+    client = createSupabaseAdminClient();
+  } else {
+    client = createSupabaseAnonClient();
+  }
+
+  const service = new NewsletterService(client);
+  const result = await service.getNewsletterSubscriberCount();
+  return result ?? 0;
 }

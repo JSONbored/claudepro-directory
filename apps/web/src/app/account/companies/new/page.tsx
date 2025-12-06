@@ -6,11 +6,14 @@ import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runti
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { CompanyForm } from '@/src/components/core/forms/company-form';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -24,6 +27,9 @@ export const runtime = 'nodejs';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/companies/new');
 }
 
@@ -38,7 +44,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see logger
  */
 export default async function NewCompanyPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -49,6 +59,18 @@ export default async function NewCompanyPage() {
     module: 'apps/web/src/app/account/companies/new/page',
   });
 
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading company form...</div>}>
+      <NewCompanyPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function NewCompanyPageContent({
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
   const { user } = await getAuthenticatedUser({ context: 'NewCompanyPage' });
 
   if (!user) {

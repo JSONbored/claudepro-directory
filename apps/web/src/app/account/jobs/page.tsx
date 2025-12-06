@@ -35,12 +35,15 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
 import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-button';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -153,6 +156,9 @@ function getStatusColor(status: JobStatus): string {
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/jobs');
 }
 
@@ -181,11 +187,11 @@ interface MyJobsPageProperties {
  * @see resolveTierLabel
  */
 export default async function MyJobsPage({ searchParams }: MyJobsPageProperties) {
-  const resolvedSearchParameters = searchParams ? await searchParams : {};
-  const paymentStatus = resolvedSearchParameters.payment;
-  const paymentJobId = resolvedSearchParameters.job_id;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -195,6 +201,24 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
     route: '/account/jobs',
     module: 'apps/web/src/app/account/jobs',
   });
+
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading jobs...</div>}>
+      <MyJobsPageContent searchParams={searchParams} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function MyJobsPageContent({
+  searchParams,
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+  searchParams: Promise<{ job_id?: string; payment?: string }> | undefined;
+}) {
+  const resolvedSearchParameters = searchParams ? await searchParams : {};
+  const paymentStatus = resolvedSearchParameters.payment;
+  const paymentJobId = resolvedSearchParameters.job_id;
 
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'MyJobsPage' });

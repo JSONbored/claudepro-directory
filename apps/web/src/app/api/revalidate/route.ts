@@ -25,7 +25,7 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
 
 // Zod schema for revalidate request
 const RevalidateRequestSchema = z.object({

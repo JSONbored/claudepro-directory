@@ -1,9 +1,9 @@
 'use server';
 
 import { type Database } from '@heyclaude/database-types';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../../cache/fetch-cached.ts';
-import { logger, normalizeError } from '../../index.ts';
+import { logger } from '../../index.ts';
 import { generateRequestId } from '../../utils/request-id.ts';
 
 type SearchFacetsRow = Database['public']['Functions']['get_search_facets']['Returns'][number];
@@ -35,7 +35,23 @@ function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {
   };
 }
 
+/**
+ * Get search facets
+ * Uses 'use cache' to cache search facets. This data is public and same for all users.
+ */
 export async function getSearchFacets(): Promise<SearchFacetAggregate> {
+  'use cache';
+
+  const { getCacheTtl } = await import('../../cache-config.ts');
+  const { isBuildTime } = await import('../../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.search_facets.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  cacheTag('search');
+  cacheTag('search-facets');
+
   // Create request-scoped child logger to avoid race conditions
   const requestId = generateRequestId();
   const requestLogger = logger.child({
@@ -45,28 +61,27 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
   });
 
   try {
-    const facets = await fetchCached(
-      async (client) => {
-        const { data, error } = await client.rpc('get_search_facets');
-        if (error) {
-          // Log RPC error with proper context before throwing
-          // Note: Using explicit context here since this is a nested function scope
-          const normalized = normalizeError(error, 'RPC get_search_facets failed');
-          requestLogger.error('getSearchFacets: RPC call failed', normalized, {
-            rpcName: 'get_search_facets',
-          });
-          throw normalized;
-        }
-        return data.map((row) => normalizeFacetRow(row));
-      },
-      {
-        keyParts: ['search-facets'],
-        tags: ['search', 'search-facets'],
-        ttlKey: 'cache.search_facets.ttl_seconds',
-        fallback: [] as SearchFacetSummary[],
-        logMeta: { source: 'getSearchFacets' },
-      }
-    );
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const { data, error } = await client.rpc('get_search_facets');
+    if (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : typeof error === 'string' ? error : String(error);
+    requestLogger.error('getSearchFacets: RPC call failed', errorForLogging, {
+      rpcName: 'get_search_facets',
+    });
+    throw error;
+    }
+
+    const facets = data.map((row) => normalizeFacetRow(row));
 
     const tags = new Set<string>();
     const authors = new Set<string>();
@@ -78,6 +93,13 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
       for (const author of facet.authors) authors.add(author);
     }
 
+    requestLogger.info('getSearchFacets: fetched successfully', {
+      facetCount: facets.length,
+      tagCount: tags.size,
+      authorCount: authors.size,
+      categoryCount: categories.size,
+    });
+
     return {
       facets,
       tags: [...tags].toSorted((a, b) => a.localeCompare(b)),
@@ -85,20 +107,10 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
       categories: [...categories].toSorted((a, b) => a.localeCompare(b)),
     };
   } catch (error) {
-    // Log and rethrow - note: RPC errors logged above may also propagate here
-    // Skip re-logging if this is already an RPC error (detected by error message pattern)
-    const isRpcError =
-      error instanceof Error &&
-      (error.message.includes('RPC get_search_facets failed') ||
-        error.message.includes('get_search_facets'));
-
-    if (!isRpcError) {
-      // Only log if this is a cache error, not an RPC error
-      const normalized = normalizeError(error, 'getSearchFacets failed');
-      requestLogger.error('getSearchFacets: fetchCached failed', normalized);
-      throw normalized;
-    }
-    // RPC error already logged above, just rethrow
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : typeof error === 'string' ? error : String(error);
+    requestLogger.error('getSearchFacets: failed', errorForLogging);
     throw error;
   }
 }

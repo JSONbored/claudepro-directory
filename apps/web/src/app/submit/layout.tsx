@@ -2,7 +2,8 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { type Metadata } from 'next';
 import { type ReactNode } from 'react';
 
-export const dynamic = 'force-dynamic';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required

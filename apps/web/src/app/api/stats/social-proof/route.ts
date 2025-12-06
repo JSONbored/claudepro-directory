@@ -18,9 +18,9 @@ import {
   createErrorResponse,
 } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
-import { NextResponse } from 'next/server';
+import { connection, NextResponse } from 'next/server';
 
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
 
 /**
  * Provide live social proof metrics: top contributors this week, recent submission count,
@@ -57,7 +57,11 @@ export const runtime = 'nodejs';
  * @see Constants.public.Enums.submission_status
  */
 export async function GET() {
-  // Generate single requestId for this API request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this API request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions

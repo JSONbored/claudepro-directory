@@ -30,13 +30,16 @@ import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 import type React from 'react';
 
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
-export const revalidate = 1800; // 30min ISR (fallback if edge function cache misses)
-export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
+// MIGRATED: Removed export const revalidate = 1800 (incompatible with Cache Components)
+// MIGRATED: Removed export const dynamicParams = true (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * Render an external anchor for a validated website URL or nothing when the URL is not safe.
@@ -108,15 +111,25 @@ export async function generateStaticParams() {
     const result = await getCompaniesList(MAX_STATIC_COMPANIES, 0);
     const companies = result.companies ?? [];
 
-    return companies
+    const validCompanies = companies
       .filter((company): company is typeof company & { slug: string } => Boolean(company.slug))
       .map((company) => ({
         slug: company.slug,
       }));
+
+    if (validCompanies.length === 0) {
+      reqLogger.warn('generateStaticParams: no companies available, returning placeholder');
+      // Cache Components requires at least one result for build-time validation
+      // Return a placeholder that will be handled dynamically (404 in page component)
+      return [{ slug: '__placeholder__' }];
+    }
+
+    return validCompanies;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load companies for generateStaticParams');
     reqLogger.error('generateStaticParams: failed to load companies', normalized);
-    return [];
+    // Cache Components requires at least one result - return placeholder on error
+    return [{ slug: '__placeholder__' }];
   }
 }
 
@@ -130,6 +143,11 @@ export async function generateStaticParams() {
  */
 export async function generateMetadata({ params }: CompanyPageProperties): Promise<Metadata> {
   const { slug } = await params;
+
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
   return generatePageMetadata('/companies/:slug', {
     params: { slug },
   });
@@ -149,24 +167,45 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
  * @see generateStaticParams
  */
 export default async function CompanyPage({ params }: CompanyPageProperties) {
-  const { slug } = await params;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation: 'CompanyPage',
-    route: `/companies/${slug}`,
     module: 'apps/web/src/app/companies/[slug]',
   });
+
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading company...</div>}>
+      <CompanyPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function CompanyPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ slug: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { slug } = await params;
+  const route = `/companies/${slug}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
 
   // Section: Company Profile Fetch
   const profile = await getCompanyProfile(slug);
 
   if (!profile?.company) {
-    reqLogger.warn('CompanyPage: company not found', {
+    routeLogger.warn('CompanyPage: company not found', {
       section: 'company-profile-fetch',
     });
     notFound();

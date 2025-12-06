@@ -4,16 +4,19 @@ import {
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// MIGRATED: Added Suspense boundary for dynamic getAuthenticatedUser and params access (Cache Components requirement)
 
 /**
  * Dynamic Rendering Required
@@ -36,6 +39,9 @@ interface EditCollectionPageProperties {
 export async function generateMetadata({
   params,
 }: EditCollectionPageProperties): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
@@ -55,24 +61,47 @@ export async function generateMetadata({
  * @see getAuthenticatedUser
  */
 export default async function EditCollectionPage({ params }: EditCollectionPageProperties) {
-  const { slug } = await params;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation: 'EditCollectionPage',
-    route: `/account/library/${slug}/edit`,
+    route: '/account/library/[slug]/edit',
     module: 'apps/web/src/app/account/library/[slug]/edit',
+  });
+
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading collection editor...</div>}>
+      <EditCollectionPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function EditCollectionPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ slug: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { slug } = await params;
+
+  // Update logger with actual slug
+  const routeLogger = reqLogger.child({
+    route: `/account/library/${slug}/edit`,
   });
 
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'EditCollectionPage' });
 
   if (!user) {
-    reqLogger.warn('EditCollectionPage: unauthenticated access attempt', {
+    routeLogger.warn('EditCollectionPage: unauthenticated access attempt', {
       section: 'authentication',
     });
     redirect('/login');
@@ -80,7 +109,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
 
   // Create new child logger with user context
   // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
-  const userLogger = reqLogger.child({
+  const userLogger = routeLogger.child({
     userId: user.id, // Redaction will automatically hash this
   });
 
@@ -97,12 +126,13 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
       hasData: !!collectionData,
     });
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load collection detail for edit page');
-    // Wrapper API: error(message, error, context) - wrapper internally calls Pino with (logData, message)
-    userLogger.error('EditCollectionPage: getCollectionDetail threw', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    userLogger.error('EditCollectionPage: getCollectionDetail threw', errorForLogging, {
       section: 'collection-data-fetch',
     });
-    throw normalized;
+    throw error;
   }
 
   if (!collectionData) {

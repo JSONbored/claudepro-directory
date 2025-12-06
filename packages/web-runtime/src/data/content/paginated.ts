@@ -3,9 +3,8 @@
 import { ContentService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../../cache/fetch-cached.ts';
 import { generateContentTags } from '../content-helpers.ts';
 
 interface PaginatedContentParameters {
@@ -28,32 +27,75 @@ function toContentCategory(
     : undefined;
 }
 
-// OPTIMIZATION: Wrapped with React.cache() for request-level deduplication
-// This prevents duplicate calls within the same request (React Server Component tree)
-export const getPaginatedContent = cache(
-  async ({
-    category,
-    limit,
-    offset,
-  }: PaginatedContentParameters): Promise<
-    Database['public']['Functions']['get_content_paginated_slim']['Returns'] | null
-  > => {
-    const normalizedCategory = category ? toContentCategory(category) : undefined;
+/**
+ * Get paginated content
+ * Uses 'use cache' to cache paginated content lists. This data is public and same for all users.
+ */
+export async function getPaginatedContent({
+  category,
+  limit,
+  offset,
+}: PaginatedContentParameters): Promise<
+  Database['public']['Functions']['get_content_paginated_slim']['Returns'] | null
+> {
+  'use cache';
 
-    return fetchCached(
-      (client) =>
-        new ContentService(client).getContentPaginatedSlim({
-          ...(normalizedCategory ? { p_category: normalizedCategory } : {}),
-          p_limit: limit,
-          p_offset: offset,
-        }),
-      {
-        keyParts: ['content-paginated', normalizedCategory ?? category ?? 'all', limit, offset],
-        tags: generateContentTags(normalizedCategory ?? null, null, ['content-paginated']),
-        ttlKey: 'cache.content_paginated.ttl_seconds',
-        fallback: null,
-        logMeta: { category: normalizedCategory ?? category ?? 'all', limit, offset },
-      }
-    );
+  const normalizedCategory = category ? toContentCategory(category) : undefined;
+
+  const { getCacheTtl } = await import('../../cache-config.ts');
+  const { isBuildTime } = await import('../../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+  const { logger } = await import('../../logger.ts');
+  const { generateRequestId } = await import('../../utils/request-id.ts');
+
+  // Configure cache
+  const ttl = getCacheTtl('cache.content_paginated.ttl_seconds');
+  cacheLife({ stale: ttl / 2, revalidate: ttl, expire: ttl * 2 });
+  const tags = generateContentTags(normalizedCategory ?? null, null, ['content-paginated']);
+  for (const tag of tags) {
+    cacheTag(tag);
   }
-);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getPaginatedContent',
+    module: 'data/content/paginated',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new ContentService(client).getContentPaginatedSlim({
+      ...(normalizedCategory ? { p_category: normalizedCategory } : {}),
+      p_limit: limit,
+      p_offset: offset,
+    });
+
+    reqLogger.info('getPaginatedContent: fetched successfully', {
+      category: normalizedCategory ?? category ?? 'all',
+      limit,
+      offset,
+      hasResult: Boolean(result),
+    });
+
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getPaginatedContent: failed', errorForLogging, {
+      category: normalizedCategory ?? category ?? 'all',
+      limit,
+      offset,
+    });
+    return null;
+  }
+}

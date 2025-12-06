@@ -235,7 +235,6 @@ async function executeSearch<T>(
         return executeSearchDirect<T>(options);
     },
     {
-       keyParts: ['unified-search', options.query, options.filters?.limit ?? 10, ...(options.entities ?? ['content'])],
        tags: cacheTags,
        ttlKey: 'cache.content_list.ttl_seconds',
        fallback: {
@@ -246,7 +245,11 @@ async function executeSearch<T>(
            performance: { dbTime: 0, totalTime: 0 },
            searchType: 'unified' as const
        }
-    }
+    },
+    'unified-search',
+    options.query,
+    options.filters?.limit ?? 10,
+    ...(options.entities ?? ['content'])
   );
 }
 

@@ -35,13 +35,15 @@ import {
 import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { JobAlertsCard } from '@/src/components/core/domain/jobs/job-alerts-card';
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 
-export const revalidate = 900;
+// MIGRATED: Removed export const revalidate = 900 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * ISR: 15 minutes (900s) - Jobs update frequently but don't need real-time freshness
@@ -115,6 +117,9 @@ async function JobsCountBadge() {
 export async function generateMetadata({
   searchParams,
 }: PagePropsWithSearchParams): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   const rawParameters = await searchParams;
   return generatePageMetadata('/jobs', {
     filters: {
@@ -305,7 +310,15 @@ async function JobsListSection({
  * @see applyJobSorting
  */
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  // MUST be called before accessing searchParams (uncached data)
+  await connection();
+
+  // Section: Parameter Parsing
+  const rawParameters = (await searchParams) ?? {};
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -315,9 +328,6 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
     route: '/jobs',
     module: 'apps/web/src/app/jobs',
   });
-
-  // Section: Parameter Parsing
-  const rawParameters = (await searchParams) ?? {};
 
   const searchQuery =
     (rawParameters['q'] as string | undefined) ??

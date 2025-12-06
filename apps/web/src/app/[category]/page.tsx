@@ -36,16 +36,19 @@
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { ICON_NAME_MAP } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { ContentListServer } from '@/src/components/content/content-grid-list';
 
-export const dynamic = 'force-dynamic';
-export const dynamicParams = true; // Allow unknown categories to be rendered on demand (will 404 if invalid)
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const dynamicParams = true (incompatible with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -81,6 +84,9 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string }>;
 }): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   const { category } = await params;
 
   // Validate category and load config
@@ -125,24 +131,44 @@ export async function generateMetadata({
  * // /statuslines → Lists all statuslines with search/filter
  */
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
-  const { category } = await params;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
   const operation = 'CategoryPage';
-  const route = `/${category}`;
   const modulePath = 'apps/web/src/app/[category]/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
-    route,
     module: modulePath,
   });
 
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading category...</div>}>
+      <CategoryPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function CategoryPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ category: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { category } = await params;
+  const route = `/${category}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
+
   if (!isValidCategory(category)) {
-    reqLogger.warn('Invalid category in list page', {
+    routeLogger.warn('Invalid category in list page', {
       category,
     });
     notFound();
@@ -153,11 +179,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   const config = getCategoryConfig(typedCategory);
   if (!config) {
-    const normalized = normalizeError(
-      new Error('Category config is null'),
-      'CategoryPage: missing category config'
-    );
-    reqLogger.error('CategoryPage: missing category config', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    routeLogger.error('CategoryPage: missing category config', new Error('Category config is null'), {
       category,
     });
     notFound();
@@ -169,8 +192,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   try {
     items = await getContentByCategory(typedCategory);
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load category list content');
-    reqLogger.error('CategoryPage: getContentByCategory threw', normalized, {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    routeLogger.error('CategoryPage: getContentByCategory threw', errorForLogging, {
       category,
     });
     // Use empty array instead of re-throwing to prevent page crash
@@ -180,7 +205,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   }
   // Only log warning if no error occurred (to avoid duplicate logging)
   if (items.length === 0 && !hadError) {
-    reqLogger.warn('CategoryPage: getContentByCategory returned no items', {
+    routeLogger.warn('CategoryPage: getContentByCategory returned no items', {
       category,
     });
   }

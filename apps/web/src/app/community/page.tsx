@@ -28,8 +28,11 @@ import {
 import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
-export const revalidate = 86_400;
+// MIGRATED: Removed export const revalidate = 86_400 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * Incremental Static Regeneration (ISR)
@@ -60,6 +63,9 @@ const NewsletterCTAVariant = dynamicImport(
  */
 
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/community');
 }
 
@@ -94,7 +100,11 @@ function formatStatValue(value: null | number | undefined): string {
  * @see generateRequestId
  */
 export default async function CommunityPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -105,6 +115,14 @@ export default async function CommunityPage() {
     module: 'apps/web/src/app/community',
   });
 
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading community...</div>}>
+      <CommunityPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function CommunityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Configuration Check
   const channels = getContactChannels();
   if (!channels.discord) {
