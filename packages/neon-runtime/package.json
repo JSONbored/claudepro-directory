@@ -1,0 +1,42 @@
+{
+  "name": "@heyclaude/neon-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./config": "./src/config/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "lint": "eslint . --config ../../config/tools/eslint.config.mjs",
+    "type-check": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:db:pull": "prisma db pull",
+    "prisma:db:push": "prisma db push",
+    "test:misc": "tsx src/services/misc.test.ts",
+    "test:account": "tsx src/services/account.test.ts",
+    "test:quiz": "tsx src/services/quiz.test.ts",
+    "test:seo": "tsx src/services/seo.test.ts",
+    "compare:misc": "tsx src/services/misc.compare.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@neondatabase/serverless": "^1.0.0",
+    "@heyclaude/shared-runtime": "workspace:*",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0",
+    "typescript": "5.9.3",
+    "ws": "^8.18.0",
+    "@types/ws": "^8.5.13",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.2"
+  }
+}
