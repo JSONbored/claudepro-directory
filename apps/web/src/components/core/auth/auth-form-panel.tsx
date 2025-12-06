@@ -5,13 +5,13 @@
 'use client';
 
 import { motion } from 'motion/react';
-import type { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
 interface AuthFormPanelProps {
-  title?: string;
-  description?: string;
-  children: ReactNode;
   afterContent?: ReactNode;
+  children: ReactNode;
+  description?: string;
+  title?: string;
 }
 
 export function AuthFormPanel({
@@ -28,8 +28,8 @@ export function AuthFormPanel({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <h2 className="mb-4 text-center font-bold text-3xl">{title}</h2>
-        <p className="text-center text-muted-foreground text-sm">{description}</p>
+        <h2 className="mb-4 text-center text-3xl font-bold">{title}</h2>
+        <p className="text-muted-foreground text-center text-sm">{description}</p>
       </motion.div>
 
       {/* Icon grid - 3 columns */}
@@ -42,7 +42,7 @@ export function AuthFormPanel({
         {children}
       </motion.div>
 
-      {afterContent && (
+      {afterContent ? (
         <motion.div
           className="mt-8"
           initial={{ opacity: 0, y: 10 }}
@@ -51,7 +51,7 @@ export function AuthFormPanel({
         >
           {afterContent}
         </motion.div>
-      )}
+      ) : null}
     </div>
   );
 }

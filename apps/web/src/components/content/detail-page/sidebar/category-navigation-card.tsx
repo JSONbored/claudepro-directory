@@ -58,16 +58,17 @@
  */
 
 import { nonEmptyString } from '@heyclaude/shared-runtime';
-import type { LucideIcon } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import Link from 'next/link';
-import { z } from 'zod';
+import { type LucideIcon } from '@heyclaude/web-runtime/icons';
 import {
+  DIMENSIONS,
+  UI_CLASSES,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@heyclaude/web-runtime/ui';
+import Link from 'next/link';
+import { z } from 'zod';
 
 /**
  * Schema for category info
@@ -113,7 +114,7 @@ export function CategoryNavigationCard({
 
           return (
             <Tooltip key={key}>
-              <TooltipTrigger asChild={true}>
+              <TooltipTrigger asChild>
                 <Link
                   href={`${basePath}/${key}`}
                   className={`rounded-lg p-2 transition-all duration-200 ${
@@ -127,7 +128,7 @@ export function CategoryNavigationCard({
               </TooltipTrigger>
               <TooltipContent side="bottom" className={`${DIMENSIONS.TOOLTIP_MAX} text-xs`}>
                 <div className="font-semibold">{info.label}</div>
-                <div className="mt-0.5 text-muted-foreground">{info.description}</div>
+                <div className="text-muted-foreground mt-0.5">{info.description}</div>
               </TooltipContent>
             </Tooltip>
           );

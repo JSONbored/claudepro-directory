@@ -9,11 +9,12 @@ import { listMFAFactors, type MFAFactor, unenrollMFAFactor } from '@heyclaude/we
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertTriangle, CheckCircle, Loader2, Shield, Trash } from '@heyclaude/web-runtime/icons';
-import { errorToasts, successToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useCallback, useEffect, useState } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
 import {
+  errorToasts,
+  successToasts,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -21,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@heyclaude/web-runtime/ui';
+import { useCallback, useEffect, useState } from 'react';
 
 interface MFAFactorsListProps {
   onFactorUnenrolled?: () => void;
@@ -29,7 +31,7 @@ interface MFAFactorsListProps {
 export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
   const [factors, setFactors] = useState<MFAFactor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<null | string>(null);
   const [unenrollDialogOpen, setUnenrollDialogOpen] = useState(false);
   const [factorToUnenroll, setFactorToUnenroll] = useState<MFAFactor | null>(null);
   const [unenrolling, setUnenrolling] = useState(false);
@@ -61,9 +63,9 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
           level: 'warn',
         }
       );
-    } catch (err) {
+    } catch (error_) {
       // Error already logged by useLoggedAsync
-      const message = err instanceof Error ? err.message : 'Failed to load MFA factors';
+      const message = error_ instanceof Error ? error_.message : 'Failed to load MFA factors';
       setError(message);
       errorToasts.actionFailed('load MFA factors', message);
     } finally {
@@ -119,9 +121,9 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
           },
         }
       );
-    } catch (err) {
+    } catch (error_) {
       // Error already logged by useLoggedAsync
-      const message = err instanceof Error ? err.message : 'Failed to unenroll MFA factor';
+      const message = error_ instanceof Error ? error_.message : 'Failed to unenroll MFA factor';
       errorToasts.actionFailed('unenroll MFA factor', message);
     } finally {
       setUnenrolling(false);
@@ -131,14 +133,14 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className={`${UI_CLASSES.ICON_XL} animate-spin text-muted-foreground`} />
+        <Loader2 className={`${UI_CLASSES.ICON_XL} text-muted-foreground animate-spin`} />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive text-sm">
+      <div className="border-destructive/50 bg-destructive/10 text-destructive rounded-lg border p-4 text-sm">
         {error}
       </div>
     );
@@ -146,7 +148,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
 
   if (factors.length === 0) {
     return (
-      <div className="rounded-lg border bg-muted/30 p-4 text-center text-muted-foreground text-sm">
+      <div className="bg-muted/30 text-muted-foreground rounded-lg border p-4 text-center text-sm">
         No MFA factors enrolled. Enable two-factor authentication to get started.
       </div>
     );
@@ -158,10 +160,10 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
         {factors.map((factor) => (
           <div
             key={factor.id}
-            className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-accent/5"
+            className="hover:bg-accent/5 flex items-center justify-between rounded-lg border p-4 transition-colors"
           >
             <div className="flex items-center gap-4">
-              <div className="rounded-full border bg-accent/5 p-3">
+              <div className="bg-accent/5 rounded-full border p-3">
                 <Shield className={UI_CLASSES.ICON_LG} />
               </div>
               <div>
@@ -180,9 +182,11 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
                     </UnifiedBadge>
                   )}
                 </div>
-                <div className="mt-1 text-muted-foreground text-sm">
+                <div className="text-muted-foreground mt-1 text-sm">
                   <p>Type: {factor.factor_type.toUpperCase()}</p>
-                  {factor.factor_type === 'phone' && factor.phone && <p>Phone: {factor.phone}</p>}
+                  {factor.factor_type === 'phone' && factor.phone ? (
+                    <p>Phone: {factor.phone}</p>
+                  ) : null}
                   <p className="text-xs">
                     Added: {new Date(factor.created_at).toLocaleDateString()}
                   </p>
@@ -220,12 +224,12 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
               for two-factor authentication.
               <br />
               <br />
-              {factorToUnenroll && (
+              {factorToUnenroll ? (
                 <span className="font-medium">
                   Factor:{' '}
                   {factorToUnenroll.friendly_name || factorToUnenroll.factor_type.toUpperCase()}
                 </span>
-              )}
+              ) : null}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

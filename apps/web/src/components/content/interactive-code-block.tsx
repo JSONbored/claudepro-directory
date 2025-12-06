@@ -5,13 +5,7 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import {
-  isValidCategory,
-  logger,
-  logUnhandledPromise,
-  normalizeError,
-  type SharePlatform,
-} from '@heyclaude/web-runtime/core';
+import { isValidCategory, logUnhandledPromise, type SharePlatform } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
@@ -25,6 +19,7 @@ import {
   Share2,
   Twitter,
 } from '@heyclaude/web-runtime/icons';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
   copyScreenshotToClipboard,
   copyShareLink,
@@ -52,7 +47,7 @@ const CLIPBOARD_RESET_DEFAULT_MS = 2000;
 async function sanitizeShikiHtml(html: string): Promise<string> {
   if (!html || typeof html !== 'string') return '';
   // DOMPurify only works in browser - dynamically import
-  if (typeof window === 'undefined') {
+  if (globalThis.window === undefined) {
     return html; // During SSR, return unsanitized (will be sanitized on client)
   }
   try {
@@ -70,31 +65,36 @@ async function sanitizeShikiHtml(html: string): Promise<string> {
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load DOMPurify');
-    logger.warn('[Sanitize] Failed to load DOMPurify', {
-      err: normalized,
-      category: 'sanitize',
-      component: 'sanitizeShikiHtml',
-      recoverable: true,
-    });
+    logClientWarn(
+      '[Sanitize] Failed to load DOMPurify',
+      normalized,
+      'sanitizeShikiHtml.load',
+      {
+        component: 'sanitizeShikiHtml',
+        action: 'load-dompurify',
+        category: 'sanitize',
+        recoverable: true,
+      }
+    );
     return html; // Fallback to original HTML
   }
 }
 
 export interface ProductionCodeBlockProps {
-  /** Pre-rendered HTML from Sugar High (server-side) */
-  html: string;
+  /** Additional CSS classes */
+  className?: string | undefined;
   /** Raw code for copy functionality */
   code: string;
-  /** Programming language (for display) */
-  language?: string | undefined;
   /** Optional filename to display */
   filename?: string | undefined;
+  /** Pre-rendered HTML from Sugar High (server-side) */
+  html: string;
+  /** Programming language (for display) */
+  language?: string | undefined;
   /** Maximum visible lines before collapsing (default: 20) */
   maxLines?: number | undefined;
   /** Show line numbers (default: true) */
   showLineNumbers?: boolean | undefined;
-  /** Additional CSS classes */
-  className?: string | undefined;
 }
 
 /**
@@ -102,11 +102,11 @@ export interface ProductionCodeBlockProps {
  * Reusable dropdown for Twitter/LinkedIn/Copy actions
  */
 interface ShareDropdownProps {
-  currentUrl: string;
   category: string;
-  slug: string;
-  onShare: (platform: SharePlatform) => void;
+  currentUrl: string;
   onMouseLeave: () => void;
+  onShare: (platform: SharePlatform) => void;
+  slug: string;
 }
 
 function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: ShareDropdownProps) {
@@ -114,7 +114,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT} top-full z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
+      className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT} border-border bg-card/95 top-full z-50 mt-2 w-56 rounded-lg border p-2 shadow-xl backdrop-blur-md"
       onMouseLeave={onMouseLeave}
     >
       {/* Twitter Share */}
@@ -136,7 +136,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           })}
           onClick={() => onShare('twitter')}
         >
-          <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
+          <div className="hover:bg-accent/15 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all">
             <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-[#1DA1F2]/20`}>
               <Twitter className={`${UI_CLASSES.ICON_XS} text-[#1DA1F2]`} />
             </div>
@@ -165,7 +165,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           summary={`Check out this ${category} resource on claudepro.directory`}
           onClick={() => onShare('linkedin')}
         >
-          <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
+          <div className="hover:bg-accent/15 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all">
             <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-[#0A66C2]/20`}>
               <Linkedin className={`${UI_CLASSES.ICON_XS} text-[#0A66C2]`} />
             </div>
@@ -178,7 +178,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
       <button
         type="button"
         onClick={() => onShare('copy_link')}
-        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-foreground text-sm transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]"
+        className="text-foreground hover:bg-accent/15 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
       >
         <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-accent/20`}>
           <Copy className={UI_CLASSES.ICON_XS} />
@@ -212,18 +212,24 @@ export function ProductionCodeBlock({
 
   // Sanitize HTML on client side
   useEffect(() => {
-    if (typeof window !== 'undefined' && html) {
+    if (globalThis.window !== undefined && html) {
       sanitizeShikiHtml(html)
         .then((sanitized) => {
           setSafeHtml(sanitized);
         })
         .catch((error) => {
-          logger.warn('[Sanitize] Failed to sanitize HTML', {
-            err: error,
-            category: 'sanitize',
-            component: 'ProductionCodeBlock',
-            recoverable: true,
-          });
+          const normalized = normalizeError(error, 'Failed to sanitize HTML');
+          logClientWarn(
+            '[Sanitize] Failed to sanitize HTML',
+            normalized,
+            'ProductionCodeBlock.sanitize',
+            {
+              component: 'ProductionCodeBlock',
+              action: 'sanitize-html',
+              category: 'sanitize',
+              recoverable: true,
+            }
+          );
           setSafeHtml(html); // Fallback to original
         });
     }
@@ -238,13 +244,21 @@ export function ProductionCodeBlock({
 
     // Warn and use explicit sentinel for invalid categories to avoid misleading analytics
     if (!isValidCategory(rawCategory)) {
-      logger.warn('Invalid category in pathname, using fallback', {
-        rawCategory,
-        pathname,
-        fallback: Constants.public.Enums.content_category[0], // 'agents'
-      });
+      logClientWarn(
+        'Invalid category in pathname, using fallback',
+        undefined,
+        'ProductionCodeBlock.parsePathname',
+        {
+          component: 'ProductionCodeBlock',
+          action: 'parse-pathname',
+          rawCategory,
+          pathname,
+          fallback: Constants.public.Enums.content_category[0], // 'agents'
+        }
+      );
       return {
-        category: Constants.public.Enums.content_category[0] as Database['public']['Enums']['content_category'],
+        category: Constants.public.Enums
+          .content_category[0] as Database['public']['Enums']['content_category'],
         slug,
       };
     }
@@ -283,15 +297,20 @@ export function ProductionCodeBlock({
     } catch (error) {
       setIsCopied(false);
       const normalized = normalizeError(error, 'Copy failed');
-      logger.warn('[Clipboard] Copy failed', {
-        err: normalized,
-        category: 'clipboard',
-        component: 'ProductionCodeBlock',
-        recoverable: true,
-        userRetryable: true,
-        itemCategory: category,
-        itemSlug: slug,
-      });
+      logClientWarn(
+        '[Clipboard] Copy failed',
+        normalized,
+        'ProductionCodeBlock.handleCopy',
+        {
+          component: 'ProductionCodeBlock',
+          action: 'copy',
+          category: 'clipboard',
+          recoverable: true,
+          userRetryable: true,
+          itemCategory: category,
+          itemSlug: slug,
+        }
+      );
       toasts.error.copyFailed('code');
       return;
     }
@@ -364,15 +383,20 @@ export function ProductionCodeBlock({
     } catch (error) {
       toasts.error.screenshotFailed();
       const normalized = normalizeError(error, 'Screenshot generation failed');
-      logger.warn('[Share] Screenshot generation failed', {
-        err: normalized,
-        category: 'share',
-        component: 'ProductionCodeBlock',
-        recoverable: true,
-        userRetryable: true,
-        itemCategory: category,
-        itemSlug: slug,
-      });
+      logClientWarn(
+        '[Share] Screenshot generation failed',
+        normalized,
+        'ProductionCodeBlock.handleScreenshot',
+        {
+          component: 'ProductionCodeBlock',
+          action: 'screenshot',
+          category: 'share',
+          recoverable: true,
+          userRetryable: true,
+          itemCategory: category,
+          itemSlug: slug,
+        }
+      );
     } finally {
       clearTimeout(failsafeTimeout);
       setIsScreenshotting(false);
@@ -412,49 +436,52 @@ export function ProductionCodeBlock({
         const ext = languageExtensions[normalizedLanguage] || normalizedLanguage || 'txt';
         const baseSlug = slug?.trim() || 'untitled';
         const sanitizedSlug = baseSlug
-          .replace(/[/\\:*?"|<>]/g, '-')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-')
-          .replace(/^-+|-+$/g, '')
+          .replaceAll(/[/\\:*?"|<>]/g, '-')
+          .replaceAll(/\s+/g, '-')
+          .replaceAll(/-+/g, '-')
+          .replaceAll(/^-+|-+$/g, '')
           .slice(0, 64);
         const safeSlug = sanitizedSlug || 'untitled';
         downloadFilename = `code-${safeSlug}.${ext}`;
       }
-      
+
       // Create blob and download
       const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
       anchor.download = downloadFilename;
-      document.body.appendChild(anchor);
+      document.body.append(anchor);
       anchor.click();
-      document.body.removeChild(anchor);
+      anchor.remove();
       URL.revokeObjectURL(url);
 
       toasts.success.codeDownloadStarted();
 
       // Track download
-      pulse
-        .download({ category, slug, action_type: 'download_code' })
-        .catch((error) => {
-          logUnhandledPromise('interactive-code-block:download', error, {
-            category,
-            slug,
-          });
+      pulse.download({ category, slug, action_type: 'download_code' }).catch((error) => {
+        logUnhandledPromise('interactive-code-block:download', error, {
+          category,
+          slug,
         });
+      });
     } catch (error) {
       toasts.error.downloadFailed();
       const normalized = normalizeError(error, 'Download failed');
-      logger.warn('[Share] Download failed', {
-        err: normalized,
-        category: 'share',
-        component: 'ProductionCodeBlock',
-        recoverable: true,
-        userRetryable: true,
-        itemCategory: category,
-        itemSlug: slug,
-      });
+      logClientWarn(
+        '[Share] Download failed',
+        normalized,
+        'ProductionCodeBlock.handleDownload',
+        {
+          component: 'ProductionCodeBlock',
+          action: 'download',
+          category: 'share',
+          recoverable: true,
+          userRetryable: true,
+          itemCategory: category,
+          itemSlug: slug,
+        }
+      );
     }
   };
 
@@ -492,16 +519,21 @@ export function ProductionCodeBlock({
     } catch (error) {
       toasts.error.shareFailed();
       const normalized = normalizeError(error, 'Share failed');
-      logger.warn('[Share] Share failed', {
-        err: normalized,
-        category: 'share',
-        component: 'ProductionCodeBlock',
-        recoverable: true,
-        userRetryable: true,
-        itemCategory: category,
-        itemSlug: slug,
-        platform,
-      });
+      logClientWarn(
+        '[Share] Share failed',
+        normalized,
+        'ProductionCodeBlock.handleShare',
+        {
+          component: 'ProductionCodeBlock',
+          action: 'share',
+          category: 'share',
+          recoverable: true,
+          userRetryable: true,
+          itemCategory: category,
+          itemSlug: slug,
+          platform,
+        }
+      );
     }
   };
 
@@ -510,7 +542,7 @@ export function ProductionCodeBlock({
   return (
     <div className={`${UI_CLASSES.CODE_BLOCK_GROUP_WRAPPER} ${className}`}>
       {/* Header with filename, language badge, and action buttons */}
-      {filename && (
+      {filename ? (
         <div className={UI_CLASSES.CODE_BLOCK_HEADER}>
           <span className={UI_CLASSES.CODE_BLOCK_FILENAME}>{filename}</span>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
@@ -537,7 +569,7 @@ export function ProductionCodeBlock({
               </motion.button>
 
               {/* Share dropdown - positioned below button */}
-              {isShareOpen && (
+              {isShareOpen ? (
                 <ShareDropdown
                   currentUrl={currentUrl}
                   category={category}
@@ -545,7 +577,7 @@ export function ProductionCodeBlock({
                   onShare={handleShare}
                   onMouseLeave={() => setIsShareOpen(false)}
                 />
-              )}
+              ) : null}
             </div>
 
             {/* Copy button */}
@@ -575,19 +607,19 @@ export function ProductionCodeBlock({
             </motion.button>
 
             {/* Language badge - Polar-style minimal */}
-            {language && language !== 'text' && (
-              <div className="px-2 py-0.5 font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
+            {language && language !== 'text' ? (
+              <div className="text-muted-foreground px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
                 {language}
               </div>
-            )}
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Code block container - Polar-style clean design */}
       <div
         ref={codeBlockRef}
-        className="relative overflow-hidden rounded-lg border border-border transition-[height] duration-300 ease-in-out"
+        className="border-border relative overflow-hidden rounded-lg border transition-[height] duration-300 ease-in-out"
         style={{
           height: needsCollapse && !isExpanded ? maxHeight : 'auto',
         }}
@@ -618,7 +650,7 @@ export function ProductionCodeBlock({
               </motion.button>
 
               {/* Share dropdown - positioned below button */}
-              {isShareOpen && (
+              {isShareOpen ? (
                 <ShareDropdown
                   currentUrl={currentUrl}
                   category={category}
@@ -626,7 +658,7 @@ export function ProductionCodeBlock({
                   onShare={handleShare}
                   onMouseLeave={() => setIsShareOpen(false)}
                 />
-              )}
+              ) : null}
             </div>
 
             {/* Copy button */}
@@ -656,20 +688,18 @@ export function ProductionCodeBlock({
             </motion.button>
 
             {/* Language badge - Polar-style minimal */}
-            {language && language !== 'text' && (
-              <div className="px-2 py-0.5 font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
+            {language && language !== 'text' ? (
+              <div className="text-muted-foreground px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
                 {language}
               </div>
-            )}
+            ) : null}
           </div>
         )}
 
         {/* Gradient fade when collapsed */}
-        {needsCollapse && !isExpanded && (
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-20 bg-gradient-to-b from-transparent to-[#1e1e1e] dark:to-[#1e1e1e] [html[data-theme='light']_&]:to-[#fafafa]"
-          />
-        )}
+        {needsCollapse && !isExpanded ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-20 bg-gradient-to-b from-transparent to-[#1e1e1e] dark:to-[#1e1e1e] [html[data-theme='light']_&]:to-[#fafafa]" />
+        ) : null}
 
         {/* Server-rendered Shiki HTML */}
         <div
@@ -682,20 +712,18 @@ export function ProductionCodeBlock({
       </div>
 
       {/* Expand/collapse button - Polar-style minimal */}
-      {needsCollapse && (
+      {needsCollapse ? (
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex w-full items-center justify-center gap-1.5 border-border/40 border-t py-2 text-muted-foreground text-xs transition-colors hover:text-foreground"
+          className="border-border/40 text-muted-foreground hover:text-foreground flex w-full items-center justify-center gap-1.5 border-t py-2 text-xs transition-colors"
         >
-          <ChevronDown 
+          <ChevronDown
             className={`h-3.5 w-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
           />
-          <span>
-            {isExpanded ? 'Collapse' : `Show ${code.split('\n').length} lines`}
-          </span>
+          <span>{isExpanded ? 'Collapse' : `Show ${code.split('\n').length} lines`}</span>
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

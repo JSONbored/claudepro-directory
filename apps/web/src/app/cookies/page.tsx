@@ -1,7 +1,13 @@
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
+
+// MIGRATED: Removed export const revalidate = false (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * Provides page metadata for the Cookies page used by Next.js.
@@ -13,15 +19,17 @@ import { type Metadata } from 'next';
  * @see generatePageMetadata
  * @see {@link https://nextjs.org/docs/app/api-reference/functions/generate-metadata Next.js generate metadata}
  */
-export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/cookies');
-}
-
 /**
  * Static Generation: Legal pages are fully static and never change
- * revalidate: false = Static generation at build time (no automatic revalidation)
+ * No automatic revalidation - pages are statically generated at build time
  */
-export const revalidate = false;
+
+export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+  return generatePageMetadata('/cookies');
+}
 
 /**
  * Renders the Cookie Policy page and displays the current "Last updated" date.
@@ -33,8 +41,37 @@ export const revalidate = false;
  * @see generatePageMetadata
  * @see revalidate
  */
-export default function CookiesPage() {
+export default async function CookiesPage() {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
+  const requestId = generateRequestId();
+
+  // Create request-scoped child logger to avoid race conditions
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'CookiesPage',
+    route: '/cookies',
+    module: 'apps/web/src/app/cookies',
+  });
+
+  return (
+    <Suspense
+      fallback={<div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">Loading...</div>}
+    >
+      <CookiesPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function CookiesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
+
+  reqLogger.info('CookiesPage: rendering page', {
+    section: 'page-render',
+  });
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">

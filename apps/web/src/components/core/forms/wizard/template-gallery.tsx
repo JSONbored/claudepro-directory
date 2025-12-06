@@ -13,7 +13,7 @@
  * - First-time user onboarding tooltips
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import {
   ArrowRight,
   CheckCircle,
@@ -24,37 +24,44 @@ import {
   Users,
   Zap,
 } from '@heyclaude/web-runtime/icons';
-import { cn } from '@heyclaude/web-runtime/ui';
+import {
+  cn,
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, AlertDescription } from '@heyclaude/web-runtime/ui';
-import { Badge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
 // Type representing the merged structure (matches what getContentTemplates returns)
-type MergedTemplateItem = ContentTemplateItem & {
-  templateData: ContentTemplateItem['template_data'];
-} & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+type MergedTemplateItem = ContentTemplateItem &
+  (ContentTemplateItem['template_data'] extends Record<string, unknown>
     ? ContentTemplateItem['template_data']
-    : Record<string, unknown>);
+    : Record<string, unknown>) & {
+    templateData: ContentTemplateItem['template_data'];
+  };
 
 interface TemplateGalleryProps {
-  templates: MergedTemplateItem[];
+  className?: string;
   contentType: Database['public']['Enums']['content_category'] | null;
   onApplyTemplate: (template: MergedTemplateItem) => void;
-  className?: string;
+  templates: MergedTemplateItem[];
 }
 
 type TemplateWithStats = MergedTemplateItem & {
-  usageCount?: number;
-  trending?: boolean;
   featured?: boolean;
+  trending?: boolean;
+  usageCount?: number;
 };
 
 export function TemplateGallery({
@@ -63,7 +70,7 @@ export function TemplateGallery({
   onApplyTemplate,
   className,
 }: TemplateGalleryProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<null | string>(null);
 
   // Filter templates by selected content type and category
   const filteredTemplates = useMemo(() => {
@@ -85,7 +92,7 @@ export function TemplateGallery({
   // Extract unique categories for tabs
   const categories = useMemo(() => {
     const cats = new Set(templates.map((t) => t.category).filter(Boolean));
-    return Array.from(cats);
+    return [...cats];
   }, [templates]);
 
   // No templates available
@@ -116,7 +123,7 @@ export function TemplateGallery({
             <Sparkles className={cn('h-5 w-5', TOKENS.colors.accent)} />
           </motion.div>
           <div>
-            <h3 className="font-semibold text-lg">Popular Templates</h3>
+            <h3 className="text-lg font-semibold">Popular Templates</h3>
             <p className="text-muted-foreground text-sm">
               Start with proven examples from the community
             </p>
@@ -157,7 +164,7 @@ export function TemplateGallery({
 
       {/* Templates grid */}
       <AnimatePresence mode="popLayout">
-        <motion.div layout={true} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div layout className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredTemplates.map((template, index) => (
             <TemplateCard
               key={template.id}
@@ -176,7 +183,7 @@ export function TemplateGallery({
           animate={{ opacity: 1, scale: 1 }}
           className="rounded-xl border border-dashed p-12 text-center"
         >
-          <Sparkles className="mx-auto mb-3 h-12 w-12 text-muted-foreground/50" />
+          <Sparkles className="text-muted-foreground/50 mx-auto mb-3 h-12 w-12" />
           <p className="text-muted-foreground">No templates found for this category.</p>
         </motion.div>
       )}
@@ -188,9 +195,9 @@ export function TemplateGallery({
  * Individual Template Card
  */
 interface TemplateCardProps {
-  template: TemplateWithStats;
   index: number;
   onApply: () => void;
+  template: TemplateWithStats;
 }
 
 function TemplateCard({ template, index, onApply }: TemplateCardProps) {
@@ -237,7 +244,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
 
   return (
     <motion.div
-      layout={true}
+      layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
@@ -248,7 +255,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
       <Card
         className={cn(
           'group relative overflow-hidden transition-all duration-300',
-          'hover:shadow-amber-500/10 hover:shadow-lg',
+          'hover:shadow-lg hover:shadow-amber-500/10',
           'hover:border-amber-500/50',
           'cursor-pointer'
         )}
@@ -256,7 +263,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
       >
         {/* Badges overlay */}
         <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
-          {stats.featured && (
+          {stats.featured ? (
             <Badge
               variant="secondary"
               className={cn(
@@ -267,8 +274,8 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
               <Star className="h-3 w-3 fill-current" />
               Featured
             </Badge>
-          )}
-          {stats.isPopular && !stats.featured && (
+          ) : null}
+          {stats.isPopular && !stats.featured ? (
             <Badge
               variant="secondary"
               className={cn(
@@ -279,8 +286,8 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
               <Sparkles className="h-3 w-3" />
               Popular
             </Badge>
-          )}
-          {stats.trending && (
+          ) : null}
+          {stats.trending ? (
             <Badge
               variant="secondary"
               className={cn(
@@ -291,7 +298,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
               <TrendingUp className="h-3 w-3" />
               Trending
             </Badge>
-          )}
+          ) : null}
         </div>
 
         <CardHeader className="pb-3">
@@ -311,9 +318,9 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
 
         <CardContent className="space-y-4">
           {/* Description */}
-          {template.description && (
-            <p className="line-clamp-2 text-muted-foreground text-sm">{template.description}</p>
-          )}
+          {template.description ? (
+            <p className="text-muted-foreground line-clamp-2 text-sm">{template.description}</p>
+          ) : null}
 
           {/* Tags */}
           {tags.length > 0 && (
@@ -335,7 +342,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
           <div className="flex items-center justify-between border-t pt-3">
             {/* Usage count and rating */}
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+              <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
                 <Users className="h-3.5 w-3.5" />
                 <span>
                   {stats.usageCount > 0
@@ -345,12 +352,12 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
                     : 'New'}
                 </span>
               </div>
-              {stats.averageRating && stats.averageRating > 0 && (
-                <div className="flex items-center gap-1 text-amber-400 text-xs">
+              {stats.averageRating && stats.averageRating > 0 ? (
+                <div className="flex items-center gap-1 text-xs text-amber-400">
                   <Star className="h-3 w-3 fill-current" />
                   <span>{stats.averageRating.toFixed(1)}</span>
                 </div>
-              )}
+              ) : null}
             </div>
 
             {/* Apply button */}
@@ -393,11 +400,11 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
  * Compact Template Selector (for inline use in wizard steps)
  */
 interface TemplateQuickSelectProps {
-  templates: MergedTemplateItem[];
-  contentType: Database['public']['Enums']['content_category'] | null;
-  onApplyTemplate: (template: MergedTemplateItem) => void;
-  maxVisible?: number;
   className?: string;
+  contentType: Database['public']['Enums']['content_category'] | null;
+  maxVisible?: number;
+  onApplyTemplate: (template: MergedTemplateItem) => void;
+  templates: MergedTemplateItem[];
 }
 
 export function TemplateQuickSelect({
@@ -452,7 +459,7 @@ export function TemplateQuickSelect({
       className={cn('space-y-3', className)}
     >
       {/* Onboarding Tooltip */}
-      {showOnboarding && (
+      {showOnboarding ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: -10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -478,13 +485,13 @@ export function TemplateQuickSelect({
             </AlertDescription>
           </Alert>
         </motion.div>
-      )}
+      ) : null}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className={cn('h-4 w-4', TOKENS.colors.accent)} />
-          <span className="font-medium text-sm">Quick Start Templates</span>
+          <span className="text-sm font-medium">Quick Start Templates</span>
         </div>
-        {hasMore && (
+        {hasMore ? (
           <Button
             variant="ghost"
             size="sm"
@@ -493,7 +500,7 @@ export function TemplateQuickSelect({
           >
             {expanded ? 'Show Less' : `View All (${allTemplates.length})`}
           </Button>
-        )}
+        ) : null}
       </div>
 
       <div className="space-y-2">
@@ -501,7 +508,7 @@ export function TemplateQuickSelect({
           {displayTemplates.map((template, index) => (
             <motion.button
               key={template.id}
-              layout={true}
+              layout
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -513,7 +520,7 @@ export function TemplateQuickSelect({
               className={cn(
                 'flex w-full items-start gap-3 rounded-lg border p-3',
                 'text-left transition-all duration-200',
-                'hover:border-amber-500/50 hover:bg-accent/50',
+                'hover:bg-accent/50 hover:border-amber-500/50',
                 'group'
               )}
             >
@@ -525,12 +532,12 @@ export function TemplateQuickSelect({
                 )}
               />
               <div className="min-w-0 flex-1 space-y-1">
-                <div className="line-clamp-1 font-medium text-sm">{template.name}</div>
-                {template.description && (
-                  <div className="line-clamp-1 text-muted-foreground text-xs">
+                <div className="line-clamp-1 text-sm font-medium">{template.name}</div>
+                {template.description ? (
+                  <div className="text-muted-foreground line-clamp-1 text-xs">
                     {template.description}
                   </div>
-                )}
+                ) : null}
               </div>
               <ArrowRight
                 className={cn(
@@ -554,16 +561,16 @@ export function TemplateQuickSelectSkeleton({ className }: { className?: string 
   return (
     <div className={cn('space-y-3', className)}>
       <div className="flex items-center gap-2">
-        <div className="h-4 w-4 animate-pulse rounded bg-muted" />
-        <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+        <div className="bg-muted h-4 w-4 animate-pulse rounded" />
+        <div className="bg-muted h-4 w-32 animate-pulse rounded" />
       </div>
       <div className="space-y-2">
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex items-start gap-3 rounded-lg border p-3">
-            <div className="mt-0.5 h-4 w-4 animate-pulse rounded-full bg-muted" />
+            <div className="bg-muted mt-0.5 h-4 w-4 animate-pulse rounded-full" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
-              <div className="h-3 w-full animate-pulse rounded bg-muted" />
+              <div className="bg-muted h-4 w-3/4 animate-pulse rounded" />
+              <div className="bg-muted h-3 w-full animate-pulse rounded" />
             </div>
           </div>
         ))}

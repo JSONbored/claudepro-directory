@@ -1,0 +1,111 @@
+# Client/Server Boundary Rules
+# Enforces Next.js client/server boundaries
+
+---
+# Rule: Detect server-only imports in client components
+id: server-import-in-client
+language: TypeScript
+rule:
+  all:
+    - pattern: import $ITEMS from '@heyclaude/web-runtime/$MODULE'
+      kind: import_statement
+      has:
+        regex: (unstable_cache|headers|cookies|server)
+    - inside:
+        pattern: 'use client'
+message: "Client components cannot import server-only utilities. Use client-compatible alternatives from @heyclaude/web-runtime/logging/client"
+severity: error
+
+---
+# Rule: Detect Node.js APIs in client components
+id: nodejs-api-in-client
+language: TypeScript
+rule:
+  all:
+    - pattern: import $ITEMS from '$MODULE'
+      kind: import_statement
+      has:
+        regex: (^fs$|^path$|^crypto$|^os$|^util$)
+    - inside:
+        pattern: 'use client'
+message: "Client components cannot use Node.js APIs (fs, path, crypto, etc.). These are server-only"
+severity: error
+
+---
+# Rule: Detect browser APIs in server components
+id: browser-api-in-server
+language: TypeScript
+rule:
+  all:
+    - pattern: ($WINDOW|$DOCUMENT|$LOCALSTORAGE|$SESSIONSTORAGE)
+      kind: identifier
+      regex: (window|document|localStorage|sessionStorage)
+    - not:
+        inside:
+          pattern: 'use client'
+message: "Server components cannot use browser APIs (window, document, localStorage, etc.). Move to client component or use server-safe alternatives"
+severity: error
+
+---
+# Rule: Detect React hooks in server components
+id: react-hooks-in-server
+language: TypeScript
+rule:
+  all:
+    - pattern: ($HOOK)($$$)
+      kind: call_expression
+      has:
+        regex: (useState|useEffect|useCallback|useMemo|useRef|useContext)
+    - not:
+        inside:
+          pattern: 'use client'
+message: "Server components cannot use React hooks. Add 'use client' directive or move hook usage to a client component"
+severity: error
+
+---
+# Rule: Detect wrong logging import in client components
+id: wrong-logging-import-client
+language: TypeScript
+rule:
+  all:
+    - pattern: import { logger } from '@heyclaude/web-runtime/$MODULE'
+      kind: import_statement
+      has:
+        regex: (core|logging/server)
+    - inside:
+        pattern: 'use client'
+message: "Client components must use client logging utilities (logClientError, logClientWarn, etc.), not server logger. Import from @heyclaude/web-runtime/logging/client"
+severity: error
+
+---
+# Rule: Detect wrong logging import in server components
+id: wrong-logging-import-server
+language: TypeScript
+rule:
+  all:
+    - pattern: import { $CLIENT_LOGGER } from '@heyclaude/web-runtime/logging/client'
+      kind: import_statement
+      has:
+        regex: (logClientError|logClientWarn|logClientInfo)
+    - not:
+        inside:
+          pattern: 'use client'
+message: "Server components must use server logging (logger), not client logging utilities. Import logger from @heyclaude/web-runtime/logging/server"
+severity: error
+
+---
+# Rule: Detect missing 'use client' directive in component with hooks
+id: missing-use-client-directive
+language: TypeScript
+rule:
+  all:
+    - pattern: export (function|const) $COMPONENT($$$) { $$$ }
+      kind: function_declaration
+    - has:
+        pattern: ($HOOK)($$$)
+        regex: (useState|useEffect|useCallback|useMemo|useRef|useContext|useReducer)
+    - not:
+        precedes:
+          pattern: 'use client'
+message: "Components using React hooks must have 'use client' directive at the top of the file"
+severity: error

@@ -74,11 +74,33 @@ export function ParticlesBackground({
     const isMobile = window.innerWidth < 768;
     const particleCount = count ?? (isMobile ? 20 : 50);
 
-    // Set canvas size
+    // Set canvas size with max size validation
+    // Canvas has browser-imposed maximum dimensions (typically 16,384px)
+    const MAX_CANVAS_SIZE = 16384;
     const setCanvasSize = () => {
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      const baseWidth = canvas.offsetWidth;
+      const baseHeight = canvas.offsetHeight;
+      
+      // Calculate scaled dimensions
+      const scaledWidth = baseWidth * window.devicePixelRatio;
+      const scaledHeight = baseHeight * window.devicePixelRatio;
+      
+      // Cap dimensions to browser maximum
+      const cappedWidth = Math.min(scaledWidth, MAX_CANVAS_SIZE);
+      const cappedHeight = Math.min(scaledHeight, MAX_CANVAS_SIZE);
+      
+      canvas.width = cappedWidth;
+      canvas.height = cappedHeight;
+      
+      // Only scale if dimensions are within limits
+      if (scaledWidth <= MAX_CANVAS_SIZE && scaledHeight <= MAX_CANVAS_SIZE) {
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      } else {
+        // Scale proportionally if we hit the limit
+        const scaleX = cappedWidth / baseWidth;
+        const scaleY = cappedHeight / baseHeight;
+        ctx.scale(scaleX, scaleY);
+      }
     };
 
     setCanvasSize();

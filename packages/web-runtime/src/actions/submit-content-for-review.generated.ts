@@ -21,7 +21,6 @@ const submitContentForReviewSchema = z.object({
   github_url: z.string().optional(),
   tags: z.array(z.string()).optional()
 });
-export type SubmitContentForReviewInput = z.infer<typeof submitContentForReviewSchema>;
 
 export const submitContentForReview = authedAction
   .metadata({ actionName: 'submitContentForReview', category: 'content' })
@@ -52,22 +51,14 @@ export const submitContentForReview = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
-      const { revalidatePath } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
+      const { revalidatePath, revalidateTag } = await import('next/cache');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
       // We assume implicit success if no error thrown by runRpc.
       
       revalidatePath(`/account/submissions`);
-      
-      await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.submission_create']
-      });
+      revalidateTag(`submissions`, 'default');
 
       
 

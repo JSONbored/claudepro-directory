@@ -12,21 +12,30 @@ import {
   getMetadata,
   getSocialLinks,
   isValidCategory,
-  logger,
   logUnhandledPromise,
   sanitizeSlug,
 } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Copy, ExternalLink, Github, Thermometer } from '@heyclaude/web-runtime/icons';
-import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { BADGE_COLORS, getDisplayTitle, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
+import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';
+import {
+  BADGE_COLORS,
+  getDisplayTitle,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+
 import { useDetailQuickActions } from '../use-detail-quick-actions';
 
 /**
@@ -57,14 +66,14 @@ function isValidInternalPath(path: string): boolean {
  * Get safe content URL with validation
  * Returns null if category or slug is invalid
  */
-function getSafeContentItemUrl(category: string, slug: string): string | null {
+function getSafeContentItemUrl(category: string, slug: string): null | string {
   if (!(isValidCategory(category) && isValidSlug(slug))) return null;
   const sanitizedSlug = sanitizeSlug(slug);
   // sanitizeSlug only removes characters that isValidSlug already forbids,
   // so if slug passed isValidSlug, sanitizedSlug will also pass
   // Construct the URL
   const url = getContentItemUrl({
-    category: category as Database['public']['Enums']['content_category'],
+    category: category,
     slug: sanitizedSlug,
   });
   // Validate the final URL path to ensure it's safe
@@ -72,7 +81,7 @@ function getSafeContentItemUrl(category: string, slug: string): string | null {
   return url;
 }
 
-function getSafeDocumentationUrl(url: string | null | undefined): string | null {
+function getSafeDocumentationUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
 
   try {
@@ -98,21 +107,15 @@ function getSafeDocumentationUrl(url: string | null | undefined): string | null 
  * Props for DetailSidebar
  */
 export interface DetailSidebarProps {
-  item:
-    | ContentItem
-    | Database['public']['Functions']['get_content_detail_complete']['Returns']['content'];
-  relatedItems:
-    | ContentItem[]
-    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'];
   config: {
-    typeName: string;
     metadata?:
+      | undefined
       | {
           categoryLabel?: string;
-          showGitHubLink?: boolean;
           githubPathPrefix?: string;
-        }
-      | undefined;
+          showGitHubLink?: boolean;
+        };
+    typeName: string;
   };
   customRenderer?:
     | ((
@@ -125,6 +128,12 @@ export interface DetailSidebarProps {
         router: ReturnType<typeof useRouter>
       ) => React.ReactNode)
     | undefined;
+  item:
+    | ContentItem
+    | Database['public']['Functions']['get_content_detail_complete']['Returns']['content'];
+  relatedItems:
+    | ContentItem[]
+    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'];
 }
 
 /**
@@ -177,8 +186,8 @@ export const DetailSidebar = memo(function DetailSidebar({
     item: contentItem,
     metadata,
     packageName: packageName ?? null,
-    configurationObject: configurationObject as Record<string, unknown> | null,
-    mcpServers: mcpServers as Record<string, unknown> | null,
+    configurationObject: configurationObject as null | Record<string, unknown>,
+    mcpServers: mcpServers as null | Record<string, unknown>,
   });
 
   if (customRenderer) {
@@ -194,7 +203,7 @@ export const DetailSidebar = memo(function DetailSidebar({
             <CardTitle>Resources</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {showGitHubLink && githubUrl && (
+            {showGitHubLink && githubUrl ? (
               <Button
                 variant="outline"
                 className="w-full justify-start"
@@ -220,66 +229,74 @@ export const DetailSidebar = memo(function DetailSidebar({
                       );
                     });
                 }}
-                asChild={true}
+                asChild
               >
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
                   <Github className={UI_CLASSES.ICON_SM_LEADING} />
                   View on GitHub
                 </a>
               </Button>
-            )}
+            ) : null}
             {hasDocumentationUrl &&
-              'documentation_url' in contentItem &&
-              contentItem.documentation_url &&
-              (() => {
-                // Validate and sanitize documentation URL before rendering
-                const safeDocUrl = getSafeDocumentationUrl(contentItem.documentation_url);
-                if (!safeDocUrl) {
-                  logger.warn('NavigationSidebar: Invalid documentation URL rejected', {
-                    category: contentItem.category ?? 'null',
-                    slug: contentItem.slug ?? 'null',
-                    url: contentItem.documentation_url ?? 'null',
-                  });
-                  // Don't render link if URL is invalid or unsafe
-                  return null;
-                }
-                return (
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => {
-                      pulse
-                        .click({
-                          category: isValidCategory(contentItem.category)
-                            ? contentItem.category
-                            : null,
-                          slug: contentItem.slug || null,
-                          metadata: {
-                            action: 'external_link',
-                            link_type: 'documentation',
-                            target_url: safeDocUrl,
-                          },
-                        })
-                        .catch((error) => {
-                          logUnhandledPromise(
-                            'NavigationSidebar: documentation link click pulse failed',
-                            error,
-                            {
-                              category: contentItem.category ?? 'null',
-                              slug: contentItem.slug ?? 'null',
-                            }
-                          );
-                        });
-                    }}
-                    asChild={true}
-                  >
-                    <a href={safeDocUrl} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className={UI_CLASSES.ICON_SM_LEADING} />
-                      Documentation
-                    </a>
-                  </Button>
-                );
-              })()}
+            'documentation_url' in contentItem &&
+            contentItem.documentation_url
+              ? (() => {
+                  // Validate and sanitize documentation URL before rendering
+                  const safeDocUrl = getSafeDocumentationUrl(contentItem.documentation_url);
+                  if (!safeDocUrl) {
+                    logClientWarn(
+                      'NavigationSidebar: Invalid documentation URL rejected',
+                      undefined,
+                      'NavigationSidebar.render',
+                      {
+                        component: 'NavigationSidebar',
+                        action: 'render-documentation-link',
+                        category: contentItem.category ?? 'null',
+                        slug: contentItem.slug ?? 'null',
+                        url: contentItem.documentation_url ?? 'null',
+                      }
+                    );
+                    // Don't render link if URL is invalid or unsafe
+                    return null;
+                  }
+                  return (
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        pulse
+                          .click({
+                            category: isValidCategory(contentItem.category)
+                              ? contentItem.category
+                              : null,
+                            slug: contentItem.slug || null,
+                            metadata: {
+                              action: 'external_link',
+                              link_type: 'documentation',
+                              target_url: safeDocUrl,
+                            },
+                          })
+                          .catch((error) => {
+                            logUnhandledPromise(
+                              'NavigationSidebar: documentation link click pulse failed',
+                              error,
+                              {
+                                category: contentItem.category ?? 'null',
+                                slug: contentItem.slug ?? 'null',
+                              }
+                            );
+                          });
+                      }}
+                      asChild
+                    >
+                      <a href={safeDocUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className={UI_CLASSES.ICON_SM_LEADING} />
+                        Documentation
+                      </a>
+                    </Button>
+                  );
+                })()
+              : null}
           </CardContent>
         </Card>
       )}
@@ -291,13 +308,13 @@ export const DetailSidebar = memo(function DetailSidebar({
             <CardTitle>{`${config.typeName} Details`}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {contentItem.category && (
+            {contentItem.category ? (
               <div>
-                <h4 className={'mb-1 font-medium'}>Category</h4>
+                <h4 className="mb-1 font-medium">Category</h4>
                 <UnifiedBadge
                   variant="base"
                   style="default"
-                  className={`font-medium text-xs ${
+                  className={`text-xs font-medium ${
                     BADGE_COLORS.category[contentItem.category as CategoryType] ||
                     BADGE_COLORS.category.default
                   }`}
@@ -307,7 +324,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                     : contentItem.category.charAt(0).toUpperCase() + contentItem.category.slice(1)}
                 </UnifiedBadge>
               </div>
-            )}
+            ) : null}
 
             {(() => {
               if (
@@ -323,15 +340,13 @@ export const DetailSidebar = memo(function DetailSidebar({
               }
               return (
                 <div>
-                  <h4 className={'mb-1 font-medium'}>Temperature</h4>
+                  <h4 className="mb-1 font-medium">Temperature</h4>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                     <Thermometer className={`${UI_CLASSES.ICON_XS} text-orange-500`} />
                     <UnifiedBadge
                       variant="base"
                       style="outline"
-                      className={
-                        'border-orange-500/30 bg-orange-500/10 font-medium text-orange-600 text-xs'
-                      }
+                      className="border-orange-500/30 bg-orange-500/10 text-xs font-medium text-orange-600"
                     >
                       {String(config.temperature)}
                     </UnifiedBadge>
@@ -340,27 +355,27 @@ export const DetailSidebar = memo(function DetailSidebar({
               );
             })()}
 
-            {hasPackage && packageName && (
+            {hasPackage && packageName ? (
               <div>
-                <h4 className={'mb-1 font-medium'}>Package</h4>
+                <h4 className="mb-1 font-medium">Package</h4>
                 <UnifiedBadge variant="base" style="outline" className="font-mono text-xs">
                   {packageName}
                 </UnifiedBadge>
               </div>
-            )}
+            ) : null}
 
-            {hasAuth && (
+            {hasAuth ? (
               <div>
-                <h4 className={'mb-1 font-medium'}>Authentication</h4>
+                <h4 className="mb-1 font-medium">Authentication</h4>
                 <p className={UI_CLASSES.TEXT_SM_MUTED}>
                   {(metadata['requiresAuth'] as boolean) ? 'Required' : 'Not required'}
                 </p>
               </div>
-            )}
+            ) : null}
 
-            {hasPermissions && permissions.length > 0 && (
+            {hasPermissions && permissions.length > 0 ? (
               <div>
-                <h4 className={'mb-1 font-medium'}>Permissions</h4>
+                <h4 className="mb-1 font-medium">Permissions</h4>
                 <div className="flex flex-wrap gap-1">
                   {permissions.map((perm) => (
                     <UnifiedBadge key={perm} variant="base" style="outline" className="text-xs">
@@ -369,21 +384,21 @@ export const DetailSidebar = memo(function DetailSidebar({
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
 
-            {hasSource && 'source' in contentItem && contentItem.source && (
+            {hasSource && 'source' in contentItem && contentItem.source ? (
               <div>
-                <h4 className={'mb-1 font-medium'}>Source</h4>
+                <h4 className="mb-1 font-medium">Source</h4>
                 <UnifiedBadge variant="base" style="outline">
                   {contentItem.source}
                 </UnifiedBadge>
               </div>
-            )}
+            ) : null}
           </CardContent>
         </Card>
       )}
 
-      {!!quickActions.length && (
+      {quickActions.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
@@ -398,10 +413,10 @@ export const DetailSidebar = memo(function DetailSidebar({
               >
                 <Copy className={UI_CLASSES.ICON_SM_LEADING} />
                 <div className="text-left">
-                  <div className="font-medium text-sm">{action.label}</div>
-                  {action.description && (
+                  <div className="text-sm font-medium">{action.label}</div>
+                  {action.description ? (
                     <p className="text-muted-foreground text-xs">{action.description}</p>
-                  )}
+                  ) : null}
                 </div>
               </Button>
             ))}
@@ -410,7 +425,7 @@ export const DetailSidebar = memo(function DetailSidebar({
       )}
 
       {/* Related Items Card */}
-      {relatedItems && Array.isArray(relatedItems) && relatedItems.length > 0 && (
+      {relatedItems && Array.isArray(relatedItems) && relatedItems.length > 0 ? (
         <Card>
           <CardHeader>
             <CardTitle>{`Related ${config.typeName}s`}</CardTitle>
@@ -430,29 +445,43 @@ export const DetailSidebar = memo(function DetailSidebar({
               // Validate and sanitize URL before using
               const safeRelatedUrl = getSafeContentItemUrl(relatedCategory, relatedSlug);
               if (!safeRelatedUrl) {
-                logger.warn('NavigationSidebar: Invalid related item URL rejected', {
-                  category: relatedCategory,
-                  slug: relatedSlug,
-                  relatedItemTitle: getDisplayTitle({
-                    title:
-                      'title' in relatedItem && typeof relatedItem.title === 'string'
-                        ? relatedItem.title
-                        : null,
-                    slug: relatedSlug,
+                logClientWarn(
+                  'NavigationSidebar: Invalid related item URL rejected',
+                  undefined,
+                  'NavigationSidebar.render',
+                  {
+                    component: 'NavigationSidebar',
+                    action: 'render-related-item',
                     category: relatedCategory,
-                  }),
-                });
+                    slug: relatedSlug,
+                    relatedItemTitle: getDisplayTitle({
+                      title:
+                        'title' in relatedItem && typeof relatedItem.title === 'string'
+                          ? relatedItem.title
+                          : null,
+                      slug: relatedSlug,
+                      category: relatedCategory,
+                    }),
+                  }
+                );
                 return null;
               }
               // Explicit validation at point of use to satisfy static analysis
               // This ensures the URL is a safe internal path before using in Link
               // Type guard: after this check, safeRelatedUrl is guaranteed to be a valid internal path
               if (!isValidInternalPath(safeRelatedUrl)) {
-                logger.warn('NavigationSidebar: Invalid internal path rejected', {
-                  category: relatedCategory,
-                  slug: relatedSlug,
-                  url: safeRelatedUrl,
-                });
+                logClientWarn(
+                  'NavigationSidebar: Invalid internal path rejected',
+                  undefined,
+                  'NavigationSidebar.render',
+                  {
+                    component: 'NavigationSidebar',
+                    action: 'render-related-item',
+                    category: relatedCategory,
+                    slug: relatedSlug,
+                    url: safeRelatedUrl,
+                  }
+                );
                 return null;
               }
               // At this point, safeRelatedUrl is validated and safe for use in Next.js Link
@@ -462,10 +491,10 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <Link
                   key={relatedSlug}
                   href={validatedUrl}
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} block w-full cursor-pointer rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50`}
+                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} border-border hover:bg-muted/50 block w-full cursor-pointer rounded-lg border p-3 text-left transition-colors`}
                 >
-                  <div className={'min-w-0 flex-1'}>
-                    <h4 className="truncate font-medium text-sm">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="truncate text-sm font-medium">
                       {getDisplayTitle({
                         title:
                           'title' in relatedItem && typeof relatedItem.title === 'string'
@@ -475,19 +504,19 @@ export const DetailSidebar = memo(function DetailSidebar({
                         category: relatedCategory,
                       })}
                     </h4>
-                    <p className="truncate text-muted-foreground text-xs">
+                    <p className="text-muted-foreground truncate text-xs">
                       {'description' in relatedItem && typeof relatedItem.description === 'string'
                         ? relatedItem.description
                         : ''}
                     </p>
                   </div>
-                  <ExternalLink className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <ExternalLink className="text-muted-foreground ml-2 h-4 w-4 shrink-0" />
                 </Link>
               );
             })}
           </CardContent>
         </Card>
-      )}
+      ) : null}
 
       {/* Jobs Promotion */}
       <JobsPromo />

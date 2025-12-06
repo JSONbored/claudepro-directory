@@ -2,7 +2,8 @@ import { OG_DEFAULTS, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
 import { ImageResponse } from 'next/og';
 import { type NextRequest } from 'next/server';
 
-export const runtime = 'edge';
+// MIGRATED: Removed export const runtime = 'edge' (incompatible with Cache Components)
+// Note: Edge runtime may need to be configured differently with Cache Components
 
 /**
  * Generate an Open Graph image SVG/JSX using values from the request URL's search parameters.

@@ -15,16 +15,19 @@
  * ```
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
 import { useFormSubmit } from '@heyclaude/web-runtime/hooks';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  toasts,
+  UI_CLASSES,
+  UnifiedBadge,
+  FormField,
+  Button,
+  Checkbox,
+  Label,
+} from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { FormField } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Checkbox } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
 
 type Bookmark = Database['public']['Tables']['bookmarks']['Row'];
 type CollectionData = Database['public']['Tables']['user_collections']['Row'];
@@ -32,10 +35,10 @@ type CollectionData = Database['public']['Tables']['user_collections']['Row'];
 interface CollectionFormProps {
   /** User's existing bookmarks to optionally add to collection */
   bookmarks: Bookmark[];
-  /** Form mode - 'create' for new collections, 'edit' for existing */
-  mode: 'create' | 'edit';
   /** Existing collection data (required for edit mode) */
   collection?: CollectionData;
+  /** Form mode - 'create' for new collections, 'edit' for existing */
+  mode: 'create' | 'edit';
 }
 
 /**
@@ -80,8 +83,8 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
     if (mode === 'create' || !slug) {
       const generatedSlug = value
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
+        .replaceAll(/[^a-z0-9]+/g, '-')
+        .replaceAll(/^-+|-+$/g, '');
       setSlug(generatedSlug);
     }
   };
@@ -145,8 +148,8 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
         value={name}
         onChange={(e) => handleNameChange(e.target.value)}
         maxLength={100}
-        showCharCount={true}
-        required={true}
+        showCharCount
+        required
         disabled={isPending}
       />
 
@@ -171,7 +174,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         maxLength={500}
-        showCharCount={true}
+        showCharCount
         rows={3}
         disabled={isPending}
       />
@@ -185,10 +188,10 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           disabled={isPending}
         />
         <div className="flex-1">
-          <Label htmlFor={isPublicId} className="cursor-pointer font-medium text-base">
+          <Label htmlFor={isPublicId} className="cursor-pointer text-base font-medium">
             Public Collection
           </Label>
-          <p className={'text-muted-foreground text-sm'}>
+          <p className="text-muted-foreground text-sm">
             Make this collection visible on your public profile
           </p>
         </div>
@@ -199,7 +202,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
         <div className={UI_CLASSES.FORM_GROUP_SPACING}>
           <div>
             <Label className="text-base">Add Bookmarks (Optional)</Label>
-            <p className={'mt-1 text-muted-foreground text-sm'}>
+            <p className="text-muted-foreground mt-1 text-sm">
               Select bookmarks to add to this collection. You can add more later.
             </p>
           </div>
@@ -207,7 +210,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} rounded-md p-2 hover:bg-accent`}
+                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} hover:bg-accent rounded-md p-2`}
               >
                 <Checkbox
                   id={bookmark.id}
@@ -227,7 +230,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                 <div className="flex-1">
                   <Label
                     htmlFor={bookmark.id}
-                    className={`cursor-pointer font-normal text-sm ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
+                    className={`cursor-pointer text-sm font-normal ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
                   >
                     <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                       {bookmark.content_type}
@@ -239,7 +242,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             ))}
           </div>
           {selectedBookmarks.length > 0 && (
-            <p className={'text-muted-foreground text-sm'}>
+            <p className="text-muted-foreground text-sm">
               {selectedBookmarks.length} bookmark{selectedBookmarks.length === 1 ? '' : 's'}{' '}
               selected
             </p>
@@ -250,14 +253,14 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       {/* Empty bookmarks message */}
       {mode === 'create' && bookmarks.length === 0 && (
         <div className="rounded-lg border border-dashed p-6 text-center">
-          <p className={'text-muted-foreground text-sm'}>
+          <p className="text-muted-foreground text-sm">
             You don't have any bookmarks yet. Create the collection first and add bookmarks later.
           </p>
         </div>
       )}
 
       {/* Actions */}
-      <div className={'flex items-center gap-4 pt-4'}>
+      <div className="flex items-center gap-4 pt-4">
         <Button type="submit" disabled={isPending} className="flex-1 sm:flex-initial">
           {isPending
             ? mode === 'create'

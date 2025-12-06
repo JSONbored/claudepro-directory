@@ -39,7 +39,7 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
     cookies: {
       getAll() {
         const allCookies = cookieStore.getAll();
-        logger.info('Supabase getting cookies', {
+        logger.debug('Supabase getting cookies', {
           count: allCookies.length,
           names: allCookies.map((c) => c.name),
         });

@@ -29,6 +29,7 @@ import { type UnifiedCategoryConfig } from '../../../types/category.ts';
 
 type ContentCategory = Database['public']['Enums']['content_category'];
 
+// Type-safe icon map with explicit key-value pairs
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,
   Terminal,
@@ -41,6 +42,15 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Code,
 };
 
+// Helper function to safely get icon from map
+function getIcon(key: string): LucideIcon {
+  const icon: LucideIcon | undefined = ICON_MAP[key];
+  if (icon) {
+    return icon;
+  }
+  return FileText;
+}
+
 // Import enum values
 const CONFIG_FORMATS = Constants.public.Enums.config_format;
 const ACTION_TYPES = Constants.public.Enums.primary_action_type;
@@ -52,7 +62,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'MCP Servers',
     description:
       "Model Context Protocol servers that extend Claude's capabilities with external tools and data sources.",
-    icon: ICON_MAP['Server'] ?? FileText,
+    icon: getIcon('Server'),
     colorScheme: 'orange-500',
     showOnHomepage: true,
     keywords:
@@ -189,8 +199,8 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       features: true,
       installation: true,
       use_cases: true,
-      configuration: false,
-      security: false,
+      configuration: true,
+      security: true,
       troubleshooting: true,
       examples: true,
       requirements: true,

@@ -30,12 +30,12 @@ export default function ServerError() {
     const requestId = generateRequestId();
     const route = globalThis.location.pathname;
     const operation = 'ServerErrorPage';
-    const module = 'apps/web/src/app/500';
+    const modulePath = 'apps/web/src/app/500';
     const serverError = new Error('Server error (500)');
     logClientError('Server error page displayed', serverError, operation, {
       requestId,
       route,
-      module,
+      module: modulePath,
       userAgent: globalThis.navigator.userAgent,
       url: globalThis.location.href,
       segment: 'global',

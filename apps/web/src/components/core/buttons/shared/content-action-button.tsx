@@ -3,21 +3,20 @@
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { logClientWarning } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync, useButtonSuccess } from '@heyclaude/web-runtime/hooks';
-import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { toasts } from '@heyclaude/web-runtime/ui';
+import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { toasts, Button } from '@heyclaude/web-runtime/ui';
 import { Check, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 interface ContentActionButtonProps extends ButtonStyleProps {
-  url: string;
   action: (content: string) => Promise<void>;
-  label: string;
-  successMessage: string;
   icon: LucideIcon;
+  label: string;
   showIcon?: boolean;
+  successMessage: string;
   trackAnalytics?: () => Promise<void>;
+  url: string;
 }
 
 /**
@@ -29,9 +28,9 @@ function isSafeFetchUrl(url: string): boolean {
     // Allow relative URLs
     if (url.startsWith('/')) return true;
     // For absolute URLs, must be same origin
-    if (typeof window !== 'undefined') {
-      const urlObj = new URL(url, window.location.origin);
-      return urlObj.origin === window.location.origin;
+    if (globalThis.window !== undefined) {
+      const urlObj = new URL(url, globalThis.location.origin);
+      return urlObj.origin === globalThis.location.origin;
     }
     // Server-side: only allow relative URLs
     return url.startsWith('/');
@@ -123,14 +122,14 @@ export function ContentActionButton({
       className={className}
       style={{ opacity: isLoading ? 0.7 : 1 }}
     >
-      {showIcon && (
+      {showIcon ? (
         <motion.div
           animate={isSuccess ? { scale: [1, 1.2, 1] } : {}}
           transition={{ duration: 0.3 }}
         >
           <DisplayIcon className="h-4 w-4" />
         </motion.div>
-      )}
+      ) : null}
       {label}
     </Button>
   );

@@ -9,16 +9,13 @@
  */
 
 import { Search } from '@heyclaude/web-runtime/icons';
-import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { type DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES, UnifiedCardGrid, ConfigCard, Button } from '@heyclaude/web-runtime/ui';
 import { type FC, memo } from 'react';
-import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
-import { ConfigCard } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 export interface SearchSectionProps {
-  isSearching: boolean;
   filteredResults: readonly DisplayableContent[];
+  isSearching: boolean;
   onClearSearch: () => void;
   searchQuery?: string;
 }
@@ -34,9 +31,9 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
   return (
     <div className="mb-16">
       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
-        <h2 className={'font-bold text-2xl'}>
+        <h2 className="text-2xl font-bold">
           Search Results
-          <span className={'ml-2 text-muted-foreground'}>({filteredResults.length} found)</span>
+          <span className="text-muted-foreground ml-2">({filteredResults.length} found)</span>
         </h2>
         <Button variant="outline" onClick={onClearSearch} className="text-sm">
           Clear Search
@@ -47,7 +44,7 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
         <UnifiedCardGrid
           items={filteredResults}
           variant="normal"
-          infiniteScroll={true}
+          infiniteScroll
           batchSize={30}
           emptyMessage="No results found"
           ariaLabel="Search results"
@@ -56,16 +53,16 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
             <ConfigCard
               item={item}
               variant="default"
-              showCategory={true}
-              showActions={true}
+              showCategory
+              showActions
               {...(searchQuery ? { searchQuery } : {})}
             />
           )}
         />
       ) : (
         <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>
-          <Search className={'mx-auto mb-4 h-12 w-12 text-muted-foreground/50'} />
-          <h3 className={'mb-2 font-semibold text-lg'}>No results found</h3>
+          <Search className="text-muted-foreground/50 mx-auto mb-4 h-12 w-12" />
+          <h3 className="mb-2 text-lg font-semibold">No results found</h3>
           <p className="text-muted-foreground">
             Try different keywords or browse our featured content below
           </p>

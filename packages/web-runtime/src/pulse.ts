@@ -3,7 +3,7 @@
 import type { Database, Json } from '@heyclaude/database-types';
 import { logger } from './logger.ts';
 import { normalizeError } from './errors.ts';
-import { createSupabaseServerClient } from './supabase/server.ts';
+import { pgmqSend } from './supabase/pgmq-client.ts';
 import { getAuthenticatedUser } from './auth/get-authenticated-user.ts';
 
 const PULSE_QUEUE_NAME = 'pulse';
@@ -17,69 +17,29 @@ export interface PulseEvent {
   metadata?: Json | null;
 }
 
-export interface RpcClient {
-  schema: (schema: string) => {
-    rpc: (
-      name: string,
-      args: Record<string, unknown>
-    ) => Promise<{
-      data: unknown;
-      error: { message: string } | null;
-    }>;
-  };
-}
-
-export type CreateRpcClient = () => Promise<RpcClient>;
-
-export async function enqueuePulseEvent(
-  event: PulseEvent,
-  createClientFn: CreateRpcClient
-): Promise<void> {
-  try {
-    const supabase = await createClientFn();
-    const pgmqClient = supabase.schema('pgmq_public');
-
-    const { error } = await pgmqClient.rpc('send', {
-      queue_name: PULSE_QUEUE_NAME,
-      message: {
-        user_id: event.user_id ?? null,
-        content_type: event.content_type ?? null,
-        content_slug: event.content_slug ?? null,
-        interaction_type: event.interaction_type,
-        session_id: event.session_id ?? null,
-        metadata: event.metadata ?? null,
-      },
-      sleep_seconds: 0,
-    });
-
-    if (error) {
-      const normalizedError = normalizeError(error, 'Failed to enqueue pulse event');
-      logger.warn('Failed to enqueue pulse event', {
-        err: normalizedError,
-        interaction_type: event.interaction_type,
-        content_type: event.content_type ?? 'unknown',
-        ...(event.user_id && { user_id: event.user_id }),
-      });
-    }
-  } catch (error) {
-    const normalized = normalizeError(error, 'Pulse event enqueue exception');
-      logger.warn('Pulse event enqueue exception', {
-        err: normalized,
-        interaction_type: event.interaction_type,
-        content_type: event.content_type ?? 'unknown',
-        ...(event.user_id && { user_id: event.user_id }),
-      });
-  }
-}
-
+/**
+ * Enqueue a pulse event to the pgmq queue
+ * Uses service role key via pgmqSend() for proper permissions
+ */
 export async function enqueuePulseEventServer(event: PulseEvent): Promise<void> {
-  await enqueuePulseEvent(event, async () => {
-    const supabase = await createSupabaseServerClient();
-    // Type compatibility: SupabaseServerClient has a schema().rpc() method that matches RpcClient interface
-    // The schema('public').rpc() method signature is compatible with RpcClient.schema().rpc()
-    // We use a type assertion here because TypeScript doesn't recognize the structural compatibility
-    return supabase as unknown as RpcClient;
-  });
+  try {
+    await pgmqSend(PULSE_QUEUE_NAME, {
+      user_id: event.user_id ?? null,
+      content_type: event.content_type ?? null,
+      content_slug: event.content_slug ?? null,
+      interaction_type: event.interaction_type,
+      session_id: event.session_id ?? null,
+      metadata: event.metadata ?? null,
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to enqueue pulse event');
+    logger.warn('Failed to enqueue pulse event', {
+      err: normalized,
+      interaction_type: event.interaction_type,
+      content_type: event.content_type ?? 'unknown',
+      ...(event.user_id && { user_id: event.user_id }),
+    });
+  }
 }
 
 export async function pulseJobSearch(

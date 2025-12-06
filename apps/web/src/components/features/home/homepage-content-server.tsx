@@ -1,14 +1,17 @@
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
   trackMissingData,
   trackRPCFailure,
   trackValidationFailure,
 } from '@heyclaude/web-runtime/core';
-import { createWebAppContextWithId } from '@heyclaude/web-runtime/logging/server';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/server';
 import { getHomepageCategoryIds, getHomepageData } from '@heyclaude/web-runtime/server';
-import type { SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+
 import { HomePageClient } from '@/src/components/features/home/home-sections';
 
 /**
@@ -36,6 +39,7 @@ async function HomepageContentData() {
     trackMissingData('featured', 'homepageResult', {
       categoryIds: categoryIds.length,
       categoryIdsList: categoryIds,
+      note: 'RPC returned null - this indicates either RPC failure or no data in database',
     });
     return {
       homepageContentData: {
@@ -48,6 +52,17 @@ async function HomepageContentData() {
       memberCount: 0,
     };
   }
+
+  // Log what we received from RPC for debugging
+  logger.info('HomepageContentData: RPC result received', {
+    ...logContext,
+    hasContent: !!homepageResult.content,
+    contentType: typeof homepageResult.content,
+    memberCount: homepageResult.member_count ?? 0,
+    featuredJobsCount: Array.isArray(homepageResult.featured_jobs)
+      ? homepageResult.featured_jobs.length
+      : 0,
+  });
 
   const memberCount = homepageResult.member_count ?? 0;
   const featuredJobs = (homepageResult.featured_jobs as Array<unknown> | null) ?? [];
@@ -80,8 +95,48 @@ async function HomepageContentData() {
       'weekStart' in content
     ) {
       const categoryData = content['categoryData'] as Record<string, unknown>;
-      const stats = content['stats'] as Record<string, { total: number; featured: number }>;
+      const stats = content['stats'] as Record<string, { featured: number; total: number }>;
       const weekStart = content['weekStart'] as string;
+
+      // Log categoryData structure for debugging
+      const categoryKeys = Object.keys(categoryData);
+      const categoryCounts = Object.fromEntries(
+        categoryKeys.map((key) => [
+          key,
+          Array.isArray(categoryData[key]) ? (categoryData[key] as unknown[]).length : 0,
+        ])
+      );
+      const totalItems = Object.values(categoryCounts).reduce((sum, count) => sum + count, 0);
+
+      logger.info('HomepageContentData: Parsed categoryData', {
+        ...logContext,
+        categoryCount: categoryKeys.length,
+        categoryKeys,
+        categoryCounts,
+        totalItems,
+        expectedItems: categoryIds.length * 6, // 6 items per category
+        statsKeys: Object.keys(stats),
+        hasWeekStart: !!weekStart,
+      });
+
+      // Validate that we have data for expected categories
+      if (categoryKeys.length === 0) {
+        logger.warn('HomepageContentData: categoryData is empty', {
+          ...logContext,
+          expectedCategories: categoryIds.length,
+          categoryIds,
+          note: 'RPC returned empty categoryData - this may indicate a database or RPC issue',
+        });
+      } else if (totalItems < categoryIds.length * 3) {
+        // Warn if we have less than 3 items per category on average (should be 6)
+        logger.warn('HomepageContentData: categoryData has fewer items than expected', {
+          ...logContext,
+          expectedItems: categoryIds.length * 6,
+          actualItems: totalItems,
+          categoryCounts,
+          note: 'Expected 6 items per category, but received fewer',
+        });
+      }
 
       return {
         categoryData: categoryData as Record<string, unknown[]>,
@@ -171,11 +226,20 @@ export async function HomepageContentServer({
     ),
   });
 
+  // Empty categoryData is NOT expected - featured sections should always have data
+  // This indicates either:
+  // 1. RPC returned empty data (database/RPC issue)
+  // 2. Cache returned stale empty data (cache invalidation issue)
+  // 3. No content exists in database (data issue)
   if (Object.keys(serializedCategoryData).length === 0) {
     trackMissingData('featured', 'categoryData', {
       originalCategoryDataKeys: Object.keys(homepageContentData.categoryData),
       categoryIds: categoryIds.length,
       statsKeys: Object.keys(homepageContentData.stats),
+      hasStats: Object.keys(homepageContentData.stats).length > 0,
+      expectedCategories: categoryIds.length,
+      expectedItemsPerCategory: 6,
+      expectedTotalItems: categoryIds.length * 6,
     });
   }
 

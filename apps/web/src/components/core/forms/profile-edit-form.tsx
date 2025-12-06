@@ -5,31 +5,30 @@
  * Uses React Hook Form + generated Zod schema for validation.
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { toasts, UI_CLASSES, FormField, ToggleField, Button } from '@heyclaude/web-runtime/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTransition } from 'react';
-import type { Resolver } from 'react-hook-form';
+import { type Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { FormField, ToggleField } from '@heyclaude/web-runtime/ui';
+
 import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 // Profile data consolidated into users table - use generated types
 type ProfileData = Pick<
   Database['public']['Tables']['users']['Row'],
-  | 'display_name'
   | 'bio'
-  | 'work'
-  | 'website'
-  | 'social_x_link'
+  | 'display_name'
+  | 'follow_email'
   | 'interests'
   | 'profile_public'
-  | 'follow_email'
+  | 'social_x_link'
+  | 'website'
+  | 'work'
 >;
 
 const profileFormSchema = z.object({
@@ -146,7 +145,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         onChange={(e) => setValue('name', e.target.value, { shouldDirty: true })}
         placeholder="Your name"
         maxLength={100}
-        required={true}
+        required
         error={!!errors.name}
         {...(errors.name?.message && { errorMessage: errors.name.message })}
       />
@@ -158,7 +157,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         onChange={(e) => setValue('bio', e.target.value, { shouldDirty: true })}
         placeholder="Tell us about yourself..."
         maxLength={500}
-        showCharCount={true}
+        showCharCount
         rows={4}
         error={!!errors.bio}
         {...(errors.bio?.message && { errorMessage: errors.bio.message })}
@@ -208,8 +207,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         placeholder="Add an interest..."
         maxItems={10}
         maxLength={30}
-        noDuplicates={true}
-        showCounter={true}
+        noDuplicates
+        showCounter
         badgeStyle="secondary"
         description="Press Enter or click Add"
       />
@@ -236,11 +235,11 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         <Button type="submit" disabled={isPending || !isDirty}>
           {isPending ? 'Saving...' : 'Save Changes'}
         </Button>
-        {isDirty && (
+        {isDirty ? (
           <Button type="button" variant="outline" onClick={() => reset()}>
             Cancel
           </Button>
-        )}
+        ) : null}
       </div>
     </form>
   );

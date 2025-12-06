@@ -14,7 +14,6 @@ const updateJobSchema = z.object({
   job_id: z.string().uuid(),
   updates: z.any()
 });
-export type UpdateJobInput = z.infer<typeof updateJobSchema>;
 
 export const updateJob = authedAction
   .metadata({ actionName: 'updateJob', category: 'content' })
@@ -39,11 +38,7 @@ export const updateJob = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -53,12 +48,8 @@ export const updateJob = authedAction
       revalidatePath(`/account/jobs/${parsedInput.job_id}/edit`);
       revalidatePath(`/jobs`);
       revalidateTag(`job-${parsedInput.job_id}`, 'default');
-      
-      const cacheConfig = getCacheConfigSnapshot();
-      await nextInvalidateByKeys({
-        cacheConfig,
-        invalidateKeys: ['cache.invalidate.job_update']
-      });
+      revalidateTag(`jobs`, 'default');
+      revalidateTag(`companies`, 'default');
 
       
 

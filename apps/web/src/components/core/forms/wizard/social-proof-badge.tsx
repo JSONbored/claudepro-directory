@@ -16,11 +16,11 @@ import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/desi
 import { motion } from 'motion/react';
 
 interface SocialProofBadgeProps {
-  variant: 'contributors' | 'submissions' | 'success' | 'join';
+  className?: string;
   count?: number;
   names?: string[];
   percentage?: number;
-  className?: string;
+  variant: 'contributors' | 'join' | 'submissions' | 'success';
 }
 
 export function SocialProofBadge({
@@ -44,7 +44,7 @@ export function SocialProofBadge({
       >
         <Award className="h-4 w-4 text-purple-400" />
         <div className="flex flex-col">
-          <span className="font-medium text-purple-300 text-xs">Top Contributors</span>
+          <span className="text-xs font-medium text-purple-300">Top Contributors</span>
           {names.length > 0 && (
             <span className="text-[10px] text-purple-400/80">
               {names.slice(0, 2).join(', ')}
@@ -68,7 +68,7 @@ export function SocialProofBadge({
       >
         <TrendingUp className="h-4 w-4 text-blue-400" />
         <div className="flex flex-col">
-          <span className="font-medium text-blue-300 text-xs">{count} submissions</span>
+          <span className="text-xs font-medium text-blue-300">{count} submissions</span>
           <span className="text-[10px] text-blue-400/80">this week</span>
         </div>
       </motion.div>
@@ -87,7 +87,7 @@ export function SocialProofBadge({
       >
         <CheckCircle className="h-4 w-4 text-green-400" />
         <div className="flex flex-col">
-          <span className="font-medium text-green-300 text-xs">{percentage}% approved</span>
+          <span className="text-xs font-medium text-green-300">{percentage}% approved</span>
           <span className="text-[10px] text-green-400/80">success rate</span>
         </div>
       </motion.div>
@@ -105,7 +105,7 @@ export function SocialProofBadge({
         )}
       >
         <Users className="h-4 w-4 text-amber-400" />
-        <span className="font-medium text-amber-300 text-xs">
+        <span className="text-xs font-medium text-amber-300">
           Join {count.toLocaleString()} users
         </span>
       </motion.div>
@@ -119,13 +119,13 @@ export function SocialProofBadge({
  * Social Proof Bar - Horizontal collection of badges
  */
 interface SocialProofBarProps {
+  className?: string;
   stats: {
     contributors?: { count: number; names: string[] };
     submissions?: number;
-    successRate?: number | null;
+    successRate?: null | number;
     totalUsers?: number;
   };
-  className?: string;
 }
 
 export function SocialProofBar({ stats, className }: SocialProofBarProps) {
@@ -136,23 +136,25 @@ export function SocialProofBar({ stats, className }: SocialProofBarProps) {
       transition={TOKENS.animations.spring.smooth}
       className={cn('flex flex-wrap items-center gap-2', className)}
     >
-      {stats.contributors && stats.contributors.count > 0 && (
+      {stats.contributors && stats.contributors.count > 0 ? (
         <SocialProofBadge
           variant="contributors"
           count={stats.contributors.count}
           names={stats.contributors.names}
         />
-      )}
+      ) : null}
 
-      {stats.submissions && stats.submissions > 0 && (
+      {stats.submissions && stats.submissions > 0 ? (
         <SocialProofBadge variant="submissions" count={stats.submissions} />
-      )}
+      ) : null}
 
-      {stats.successRate && <SocialProofBadge variant="success" percentage={stats.successRate} />}
+      {stats.successRate ? (
+        <SocialProofBadge variant="success" percentage={stats.successRate} />
+      ) : null}
 
-      {stats.totalUsers && stats.totalUsers > 0 && (
+      {stats.totalUsers && stats.totalUsers > 0 ? (
         <SocialProofBadge variant="join" count={stats.totalUsers} />
-      )}
+      ) : null}
     </motion.div>
   );
 }
@@ -161,10 +163,10 @@ export function SocialProofBar({ stats, className }: SocialProofBarProps) {
  * Inline Social Proof - Compact single-line version
  */
 interface InlineSocialProofProps {
-  icon?: 'users' | 'sparkles' | 'trending';
-  text: string;
-  subtext?: string;
   className?: string;
+  icon?: 'sparkles' | 'trending' | 'users';
+  subtext?: string;
+  text: string;
 }
 
 export function InlineSocialProof({
@@ -184,12 +186,12 @@ export function InlineSocialProof({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={TOKENS.animations.spring.smooth}
-      className={cn('inline-flex items-center gap-1.5 text-muted-foreground text-xs', className)}
+      className={cn('text-muted-foreground inline-flex items-center gap-1.5 text-xs', className)}
     >
       {icons[icon]}
       <span>
         {text}
-        {subtext && <span className="text-muted-foreground/60"> {subtext}</span>}
+        {subtext ? <span className="text-muted-foreground/60"> {subtext}</span> : null}
       </span>
     </motion.div>
   );
@@ -199,7 +201,7 @@ export function InlineSocialProof({
  * Step Social Proof - Contextual proof for each wizard step
  */
 interface StepSocialProofProps {
-  step: 1 | 2 | 3 | 4 | 5;
+  className?: string;
   stats?: {
     step1?: string;
     step2?: string;
@@ -207,7 +209,7 @@ interface StepSocialProofProps {
     step4?: string;
     step5?: string;
   };
-  className?: string;
+  step: 1 | 2 | 3 | 4 | 5;
 }
 
 export function StepSocialProof({ step, stats, className }: StepSocialProofProps) {

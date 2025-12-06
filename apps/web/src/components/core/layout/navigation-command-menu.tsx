@@ -1,11 +1,10 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import * as Icons from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useRouter } from 'next/navigation';
-import { useEffect, useId, useState } from 'react';
+import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
+  UI_CLASSES,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -14,16 +13,18 @@ import {
   CommandList,
   CommandSeparator,
 } from '@heyclaude/web-runtime/ui';
+import { useRouter } from 'next/navigation';
+import { useEffect, useId, useState } from 'react';
 
 /**
  * Command palette navigation - Uses server-provided data from getNavigationMenu()
  */
 
 interface NavigationCommandMenuProps {
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
   /** Navigation data from server (required) */
   navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
+  onOpenChange?: (open: boolean) => void;
+  open?: boolean;
 }
 
 export function NavigationCommandMenu({
@@ -35,8 +36,26 @@ export function NavigationCommandMenu({
   const router = useRouter();
   const inputId = useId();
 
-  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const open = controlledOpen === undefined ? internalOpen : controlledOpen;
   const setOpen = onOpenChange || setInternalOpen;
+
+  // Log when dialog should be open but controlledOpen is undefined (indicates provider issue)
+  useEffect(() => {
+    if (open && controlledOpen === undefined && !internalOpen) {
+      logClientWarn(
+        '[NavigationCommandMenu] Dialog open state mismatch - controlledOpen is undefined',
+        new Error('CommandPaletteProvider may not be available'),
+        'NavigationCommandMenu.stateMismatch',
+        {
+          component: 'NavigationCommandMenu',
+          open,
+          controlledOpen: 'undefined',
+          internalOpen,
+          hasOnOpenChange: Boolean(onOpenChange),
+        }
+      );
+    }
+  }, [open, controlledOpen, internalOpen, onOpenChange]);
 
   // Keyboard shortcut handler (⌘K / Ctrl+K)
   useEffect(() => {
@@ -57,7 +76,7 @@ export function NavigationCommandMenu({
   };
 
   // Dynamic icon mapper
-  const getIcon = (icon_name: string | null | undefined) => {
+  const getIcon = (icon_name: null | string | undefined) => {
     if (!icon_name) return null;
     const IconModule = Icons as Record<string, unknown>;
     const Icon = IconModule[icon_name];
@@ -65,7 +84,7 @@ export function NavigationCommandMenu({
     // Type guard: check if it's a valid React component
     if (typeof Icon === 'function') {
       const IconComponent = Icon as React.ComponentType<{ className?: string }>;
-      return <IconComponent className={`${UI_CLASSES.ICON_SM} shrink-0 text-muted-foreground`} />;
+      return <IconComponent className={`${UI_CLASSES.ICON_SM} text-muted-foreground shrink-0`} />;
     }
     return null;
   };
@@ -81,13 +100,13 @@ export function NavigationCommandMenu({
           {getIcon(item.icon_name)}
           <div className="flex flex-col items-start">
             <span>{item.title}</span>
-            {item.description && (
+            {item.description ? (
               <span
                 className={`text-muted-foreground text-xs transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}
               >
                 {item.description}
               </span>
-            )}
+            ) : null}
           </div>
         </span>
       </CommandItem>
@@ -100,29 +119,29 @@ export function NavigationCommandMenu({
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
 
-        {navigationData.primary && navigationData.primary.length > 0 && (
+        {navigationData.primary && navigationData.primary.length > 0 ? (
           <>
             <CommandGroup heading="Primary Navigation">
               {navigationData.primary.map(renderItem).filter(Boolean)}
             </CommandGroup>
             <CommandSeparator />
           </>
-        )}
+        ) : null}
 
-        {navigationData.secondary && navigationData.secondary.length > 0 && (
+        {navigationData.secondary && navigationData.secondary.length > 0 ? (
           <>
             <CommandGroup heading="More">
               {navigationData.secondary.map(renderItem).filter(Boolean)}
             </CommandGroup>
             <CommandSeparator />
           </>
-        )}
+        ) : null}
 
-        {navigationData.actions && navigationData.actions.length > 0 && (
+        {navigationData.actions && navigationData.actions.length > 0 ? (
           <CommandGroup heading="Actions">
             {navigationData.actions.map(renderItem).filter(Boolean)}
           </CommandGroup>
-        )}
+        ) : null}
       </CommandList>
     </CommandDialog>
   );

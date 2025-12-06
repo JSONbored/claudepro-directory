@@ -1,12 +1,11 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
 
 interface DuplicateWarningProps {
   contentType: Database['public']['Enums']['content_category'];
@@ -34,7 +33,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export function DuplicateWarning({ contentType: _contentType, name }: DuplicateWarningProps) {
   const [checking, setChecking] = useState(false);
-  const [warning, setWarning] = useState<string | null>(null);
+  const [warning, setWarning] = useState<null | string>(null);
   const [debounceMs, setDebounceMs] = useState(300);
 
   // Load debounce value from config
@@ -85,7 +84,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
   if (checking) {
     return (
       <motion.div
-        className={'text-muted-foreground text-sm'}
+        className="text-muted-foreground text-sm"
         animate={{ opacity: [1, 0.5, 1] }}
         transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
       >
@@ -103,7 +102,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
       <AlertTriangle className={`${UI_CLASSES.ICON_SM} text-yellow-400`} />
       <AlertTitle className="text-yellow-400">Suggestion</AlertTitle>
       <AlertDescription>
-        <p className={'text-muted-foreground text-sm'}>{warning}</p>
+        <p className="text-muted-foreground text-sm">{warning}</p>
       </AlertDescription>
     </Alert>
   );

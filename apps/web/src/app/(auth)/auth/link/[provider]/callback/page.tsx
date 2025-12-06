@@ -26,10 +26,11 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 
-// Force dynamic rendering - auth callback pages should never be cached
-export const dynamic = 'force-dynamic';
-
 /**
+ * Note: This is a client component ('use client'), so segment config exports are not allowed.
+ * Dynamic rendering is inherited from the parent layout or route group if configured.
+ * Auth callback pages should never be cached - this is handled by the parent route configuration.
+ *
  * Initiates an OAuth account linking flow for a given provider and renders either a loading UI while redirecting or an error UI on failure.
  *
  * @param params - A promise resolving to an object with the OAuth provider slug (for example, `{ provider: 'github' }`)
@@ -99,7 +100,7 @@ export default function OAuthLinkCallbackPage({
       const requestId = generateRequestId();
       const operation = 'OAuthLinkCallback';
       const route = `/auth/link/${resolvedParameters.provider}/callback`;
-      const module = 'apps/web/src/app/(auth)/auth/link/[provider]/callback/page';
+      const modulePath = 'apps/web/src/app/(auth)/auth/link/[provider]/callback/page';
 
       try {
         // Get provider from params
@@ -123,7 +124,7 @@ export default function OAuthLinkCallbackPage({
           logClientWarn('OAuth link callback: user not authenticated', undefined, operation, {
             requestId,
             route,
-            module,
+            module: modulePath,
             provider: rawProvider,
           });
           // Guard redirect with mounted check and store timeout ID for cleanup
@@ -163,7 +164,7 @@ export default function OAuthLinkCallbackPage({
           logClientError('OAuth link callback: linkIdentity failed', error, operation, {
             requestId,
             route,
-            module,
+            module: modulePath,
             provider: rawProvider,
           });
           setStatus('error');
@@ -188,7 +189,7 @@ export default function OAuthLinkCallbackPage({
         logClientError('OAuth link callback: unexpected error', caughtError, operation, {
           requestId,
           route,
-          module,
+          module: modulePath,
           provider: resolvedParameters.provider,
         });
         setStatus('error');

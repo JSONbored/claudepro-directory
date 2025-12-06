@@ -15,7 +15,6 @@ const addBookmarkSchema = z.object({
   content_slug: z.string(),
   notes: z.string().optional()
 });
-export type AddBookmarkInput = z.infer<typeof addBookmarkSchema>;
 
 export const addBookmark = authedAction
   .metadata({ actionName: 'addBookmark', category: 'user' })
@@ -41,11 +40,7 @@ export const addBookmark = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -54,14 +49,9 @@ export const addBookmark = authedAction
       revalidatePath(`/account`);
       revalidatePath(`/account/library`);
       revalidateTag(`user-bookmarks`, 'default');
+      revalidateTag(`users`, 'default');
       revalidateTag(`user-${ctx.userId}`, 'default');
       revalidateTag(`content-${parsedInput.content_slug}`, 'default');
-      
-      const cacheConfig = getCacheConfigSnapshot();
-      await nextInvalidateByKeys({
-        cacheConfig,
-        invalidateKeys: ['cache.invalidate.bookmark_create']
-      });
 
       
 

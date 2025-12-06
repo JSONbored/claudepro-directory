@@ -28,15 +28,15 @@ import {
   Settings,
   User as UserIcon,
 } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { motion } from 'motion/react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { Avatar, AvatarFallback, AvatarImage } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
 import {
+  DIMENSIONS,
+  toasts,
+  UI_CLASSES,
+  Skeleton,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -44,6 +44,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@heyclaude/web-runtime/ui';
+import { motion } from 'motion/react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface UserMenuProps {
   className?: string;
@@ -108,10 +112,10 @@ export function UserMenu({ className }: UserMenuProps) {
     return (
       <div className={className}>
         <Button
-          asChild={true}
+          asChild
           variant="ghost"
           size="sm"
-          className="border-accent/20 bg-accent/10 font-medium text-accent text-xs hover:bg-accent hover:text-white"
+          className="border-accent/20 bg-accent/10 text-accent hover:bg-accent text-xs font-medium hover:text-white"
         >
           <Link href="/login" aria-label="Get started - Sign in with GitHub">
             <UserIcon className={UI_CLASSES.ICON_XS_LEADING} />
@@ -138,7 +142,7 @@ export function UserMenu({ className }: UserMenuProps) {
   return (
     <div className={className}>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild={true}>
+        <DropdownMenuTrigger asChild>
           <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -146,12 +150,14 @@ export function UserMenu({ className }: UserMenuProps) {
           >
             <Button
               variant="ghost"
-              className="relative h-8 w-8 rounded-full p-0 hover:ring-2 hover:ring-accent/30"
+              className="hover:ring-accent/30 relative h-8 w-8 rounded-full p-0 hover:ring-2"
               aria-label={`User menu for ${displayName}`}
             >
               <Avatar className={UI_CLASSES.ICON_XL}>
-                {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName || 'User avatar'} />}
-                <AvatarFallback className="bg-accent/20 font-semibold text-accent text-sm">
+                {avatarUrl ? (
+                  <AvatarImage src={avatarUrl} alt={displayName || 'User avatar'} />
+                ) : null}
+                <AvatarFallback className="bg-accent/20 text-accent text-sm font-semibold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -162,34 +168,34 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuContent
           className={`${DIMENSIONS.DROPDOWN_SM} sm:${DIMENSIONS.DROPDOWN_MD}`}
           align="end"
-          forceMount={true}
+          forceMount
         >
           {/* User Info */}
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col">
-              <p className="font-medium text-sm leading-none">{displayName}</p>
-              <p className="mt-1 text-muted-foreground text-xs leading-none">{user.email}</p>
+              <p className="text-sm leading-none font-medium">{displayName}</p>
+              <p className="text-muted-foreground mt-1 text-xs leading-none">{user.email}</p>
             </div>
           </DropdownMenuLabel>
 
           <DropdownMenuSeparator />
 
           {/* Navigation Links */}
-          <DropdownMenuItem asChild={true}>
+          <DropdownMenuItem asChild>
             <Link href="/account/settings">
               <Settings className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Settings</span>
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild={true}>
+          <DropdownMenuItem asChild>
             <Link href="/account/library">
               <BookOpen className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Library</span>
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild={true}>
+          <DropdownMenuItem asChild>
             <Link href="/account/activity">
               <Activity className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Activity</span>
@@ -202,7 +208,7 @@ export function UserMenu({ className }: UserMenuProps) {
           <DropdownMenuItem
             onClick={handleSignOut}
             disabled={signingOut}
-            className="cursor-pointer text-destructive focus:text-destructive"
+            className="text-destructive focus:text-destructive cursor-pointer"
           >
             <LogOut className={UI_CLASSES.ICON_SM_LEADING} />
             <span>{signingOut ? 'Signing out...' : 'Sign out'}</span>

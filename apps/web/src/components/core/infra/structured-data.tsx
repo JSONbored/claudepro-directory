@@ -5,7 +5,6 @@
 
 import { serializeJsonLd } from '@heyclaude/shared-runtime';
 import { getSEOMetadataWithSchemas } from '@heyclaude/web-runtime/data';
-import Script from 'next/script';
 
 interface StructuredDataProps {
   route: string;
@@ -36,11 +35,10 @@ export async function StructuredData({ route }: StructuredDataProps) {
               : JSON.parse(JSON.stringify(schema));
           schemaType = (parsed as { '@type'?: string })['@type'] || 'schema';
           // Use @id or @type + index for unique key
-          if ('@id' in parsed && typeof parsed['@id'] === 'string') {
-            schemaId = parsed['@id'];
-          } else {
-            schemaId = `${schemaType}-${index}`;
-          }
+          schemaId =
+            '@id' in parsed && typeof parsed['@id'] === 'string'
+              ? parsed['@id']
+              : `${schemaType}-${index}`;
         } catch {
           // Fallback if parsing fails
           schemaId = `schema-${index}`;
@@ -49,7 +47,7 @@ export async function StructuredData({ route }: StructuredDataProps) {
         const uniqueKey = `${schemaType}-${schemaId}`;
 
         return (
-          <Script
+          <script
             key={uniqueKey}
             id={`structured-data-${uniqueKey}`}
             type="application/ld+json"
@@ -57,7 +55,6 @@ export async function StructuredData({ route }: StructuredDataProps) {
             dangerouslySetInnerHTML={{
               __html: serialized,
             }}
-            strategy="afterInteractive"
           />
         );
       })}

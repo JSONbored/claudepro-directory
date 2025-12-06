@@ -23,7 +23,6 @@ export * from './rpc/run-rpc.ts';
 export * from './seo/generator.ts';
 export * from './data/seo/client.ts';
 export * from './data/content/detail.ts'; // 'use server' but often used in server contexts directly
-export * from './cache-config.ts';
 export * from './cache-tags.ts';
 export * from './proxy/next.ts';
 
@@ -54,6 +53,7 @@ export * from './data/changelog.ts';
 export * from './data/forms/submission-form-fields.ts';
 export * from './data/layout.ts';
 export { getLayoutData } from './data/layout.ts'; // Explicit export for build resolution
+export { DEFAULT_LAYOUT_DATA, type LayoutData } from './data/layout/constants.ts'; // Constants exported separately to avoid 'use server' restrictions
 export * from './data/config/categories.ts';
 export * from './data/config/category/index.ts';
 export * from './data/search/facets.ts';

@@ -14,22 +14,27 @@
  * @module components/domain/profile-card
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Award, ExternalLink, Users } from '@heyclaude/web-runtime/icons';
-import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  BADGE_COLORS,
+  UI_CLASSES,
+  UnifiedBadge,
+  BaseCard,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+} from '@heyclaude/web-runtime/ui';
 import { memo } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { BaseCard } from '@heyclaude/web-runtime/ui';
-import { Avatar, AvatarFallback, AvatarImage } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 /**
  * Validate and sanitize external URL for safe use in window.open
  * Only allows HTTPS/HTTP URLs, returns canonicalized URL or null if invalid
  */
-function getSafeExternalUrl(url: string | null | undefined): string | null {
+function getSafeExternalUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
 
   try {
@@ -60,41 +65,41 @@ function getSafeExternalUrl(url: string | null | undefined): string | null {
  * User profile data with runtime-added stats from materialized views
  * Supports both full user records and simplified user objects from RPCs
  */
-export type UserProfile = (
-  | Database['public']['Tables']['users']['Row']
-  | {
-      id: string;
-      slug: string;
-      name: string;
-      image: string | null;
-      bio: string | null;
-      work: string | null;
-      tier: Database['public']['Enums']['user_tier'];
-      created_at: string;
-      interests?: string[] | null;
-      website?: string | null;
-      social_x_link?: string | null;
-    }
-) & {
-  // Runtime-added stats (from materialized view)
-  total_contributions?: number;
+export type UserProfile = {
+  // Optional company data (from get_user_profile RPC)
+  company?: null | {
+    logo: null | string;
+    name: string;
+  };
   followers_count?: number;
   following_count?: number;
-  // Optional company data (from get_user_profile RPC)
-  company?: {
-    name: string;
-    logo: string | null;
-  } | null;
   // Optional fields that may be missing from simplified user objects
-  interests?: string[] | null;
-  website?: string | null;
-  social_x_link?: string | null;
-};
+  interests?: null | string[];
+  social_x_link?: null | string;
+  // Runtime-added stats (from materialized view)
+  total_contributions?: number;
+  website?: null | string;
+} & (
+  | Database['public']['Tables']['users']['Row']
+  | {
+      bio: null | string;
+      created_at: string;
+      id: string;
+      image: null | string;
+      interests?: null | string[];
+      name: string;
+      slug: string;
+      social_x_link?: null | string;
+      tier: Database['public']['Enums']['user_tier'];
+      website?: null | string;
+      work: null | string;
+    }
+);
 
 export interface ProfileCardProps {
-  user: UserProfile;
-  variant?: 'default' | 'compact';
   showActions?: boolean;
+  user: UserProfile;
+  variant?: 'compact' | 'default';
 }
 
 /**
@@ -153,21 +158,21 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
       renderHeader={() => (
         <div className="flex flex-col items-center gap-3 text-center">
           {/* Avatar */}
-          <Avatar className="h-16 w-16 ring-2 ring-accent/20 ring-offset-2 ring-offset-background">
-            {user.image && (
+          <Avatar className="ring-accent/20 ring-offset-background h-16 w-16 ring-2 ring-offset-2">
+            {user.image ? (
               <AvatarImage src={user.image} alt={`${username}'s avatar`} className="object-cover" />
-            )}
-            <AvatarFallback className="bg-accent/10 font-semibold text-accent text-lg">
+            ) : null}
+            <AvatarFallback className="bg-accent/10 text-accent text-lg font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
 
           {/* Username */}
           <div className="w-full min-w-0">
-            <h3 className="truncate font-semibold text-base">{username}</h3>
-            {user.work && (
-              <p className="mt-0.5 truncate text-muted-foreground text-sm">{user.work}</p>
-            )}
+            <h3 className="truncate text-base font-semibold">{username}</h3>
+            {user.work ? (
+              <p className="text-muted-foreground mt-0.5 truncate text-sm">{user.work}</p>
+            ) : null}
           </div>
         </div>
       )}
@@ -202,7 +207,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="h-7 gap-1.5 border-primary/20 bg-primary/10 font-medium text-primary"
+              className="border-primary/20 bg-primary/10 text-primary h-7 gap-1.5 font-medium"
             >
               <Award className={UI_CLASSES.ICON_XS} aria-hidden="true" />
               <span className={UI_CLASSES.TEXT_BADGE}>{user.total_contributions}</span>
@@ -214,7 +219,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="h-7 gap-1.5 border-border bg-muted/50 font-medium text-foreground"
+              className="border-border bg-muted/50 text-foreground h-7 gap-1.5 font-medium"
             >
               <Users className={UI_CLASSES.ICON_XS} aria-hidden="true" />
               <span className={UI_CLASSES.TEXT_BADGE}>{user.followers_count}</span>
@@ -225,86 +230,88 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
       renderActions={() => (
         <>
           {/* Website link */}
-          {user.website &&
-            (() => {
-              const safeWebsiteUrl = getSafeExternalUrl(user.website);
-              if (!safeWebsiteUrl) return null;
-              return (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    pulse
-                      .click({
-                        category: null,
-                        slug: null,
-                        metadata: {
-                          action: 'external_link',
-                          link_type: 'website',
-                          target_url: safeWebsiteUrl,
-                          user_slug: slug,
-                        },
-                      })
-                      .catch((error) => {
-                        logUnhandledPromise(
-                          'UserProfileCard: website link click pulse failed',
-                          error,
-                          {
+          {user.website
+            ? (() => {
+                const safeWebsiteUrl = getSafeExternalUrl(user.website);
+                if (!safeWebsiteUrl) return null;
+                return (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      pulse
+                        .click({
+                          category: null,
+                          slug: null,
+                          metadata: {
+                            action: 'external_link',
+                            link_type: 'website',
+                            target_url: safeWebsiteUrl,
                             user_slug: slug,
-                          }
-                        );
-                      });
-                    window.open(safeWebsiteUrl, '_blank');
-                  }}
-                  aria-label={`Visit ${displayName}'s website`}
-                >
-                  <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
-                </Button>
-              );
-            })()}
+                          },
+                        })
+                        .catch((error) => {
+                          logUnhandledPromise(
+                            'UserProfileCard: website link click pulse failed',
+                            error,
+                            {
+                              user_slug: slug,
+                            }
+                          );
+                        });
+                      window.open(safeWebsiteUrl, '_blank');
+                    }}
+                    aria-label={`Visit ${displayName}'s website`}
+                  >
+                    <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                  </Button>
+                );
+              })()
+            : null}
 
           {/* Twitter/X link */}
-          {user.social_x_link &&
-            (() => {
-              const safeSocialUrl = getSafeExternalUrl(user.social_x_link);
-              if (!safeSocialUrl) return null;
-              return (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    pulse
-                      .click({
-                        category: null,
-                        slug: null,
-                        metadata: {
-                          action: 'external_link',
-                          link_type: 'social',
-                          target_url: safeSocialUrl,
-                          user_slug: slug,
-                        },
-                      })
-                      .catch((error) => {
-                        logUnhandledPromise(
-                          'UserProfileCard: social link click pulse failed',
-                          error,
-                          {
+          {user.social_x_link
+            ? (() => {
+                const safeSocialUrl = getSafeExternalUrl(user.social_x_link);
+                if (!safeSocialUrl) return null;
+                return (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      pulse
+                        .click({
+                          category: null,
+                          slug: null,
+                          metadata: {
+                            action: 'external_link',
+                            link_type: 'social',
+                            target_url: safeSocialUrl,
                             user_slug: slug,
-                          }
-                        );
-                      });
-                    window.open(safeSocialUrl, '_blank');
-                  }}
-                  aria-label={`Visit ${displayName} on X/Twitter`}
-                >
-                  <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
-                </Button>
-              );
-            })()}
+                          },
+                        })
+                        .catch((error) => {
+                          logUnhandledPromise(
+                            'UserProfileCard: social link click pulse failed',
+                            error,
+                            {
+                              user_slug: slug,
+                            }
+                          );
+                        });
+                      window.open(safeSocialUrl, '_blank');
+                    }}
+                    aria-label={`Visit ${displayName} on X/Twitter`}
+                  >
+                    <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                  </Button>
+                );
+              })()
+            : null}
 
           {/* View profile button */}
           {(() => {
@@ -321,7 +328,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
                 className={`${UI_CLASSES.BUTTON_ICON_TEXT_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.location.href = safeProfileUrl;
+                  globalThis.location.href = safeProfileUrl;
                 }}
                 aria-label={`View ${displayName}'s profile`}
               >

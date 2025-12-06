@@ -1,6 +1,7 @@
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { AuthBrandPanel } from '@/src/components/core/auth/auth-brand-panel';
@@ -8,6 +9,15 @@ import { SplitAuthLayout } from '@/src/components/core/auth/auth-layout';
 import { AuthMobileHeader } from '@/src/components/core/auth/auth-mobile-header';
 
 import { LoginPanelClient } from './login-panel-client';
+
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This page is dynamic because searchParams is async (Next.js 15+) and requires runtime resolution.
+ */
 
 /**
  * Provide the page metadata for the login route.
@@ -19,13 +29,6 @@ import { LoginPanelClient } from './login-panel-client';
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/login');
 }
-
-/**
- * Dynamic Rendering Required
- *
- * This page is dynamic because searchParams is async (Next.js 15+) and requires runtime resolution.
- */
-export const dynamic = 'force-dynamic';
 
 /**
  * Render the login page layout and provide an optional redirect target to the client-side login panel.
@@ -45,20 +48,38 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ redirect?: string }>;
 }) {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const operation = 'LoginPage';
   const route = '/login';
-  const module = 'apps/web/src/app/(auth)/login/page';
+  const modulePath = 'apps/web/src/app/(auth)/login/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
     route,
-    module,
+    module: modulePath,
   });
 
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent searchParams={searchParams} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function LoginPageContent({
+  searchParams,
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+  searchParams: Promise<{ redirect?: string }>;
+}) {
   let redirectTo: string | undefined;
   try {
     const resolvedSearchParameters = await searchParams;
@@ -70,12 +91,10 @@ export default async function LoginPage({
   }
 
   return (
-    <Suspense fallback={null}>
-      <SplitAuthLayout
-        brandPanel={<AuthBrandPanel />}
-        mobileHeader={<AuthMobileHeader />}
-        authPanel={<LoginPanelClient {...(redirectTo ? { redirectTo } : {})} />}
-      />
-    </Suspense>
+    <SplitAuthLayout
+      brandPanel={<AuthBrandPanel />}
+      mobileHeader={<AuthMobileHeader />}
+      authPanel={<LoginPanelClient {...(redirectTo ? { redirectTo } : {})} />}
+    />
   );
 }

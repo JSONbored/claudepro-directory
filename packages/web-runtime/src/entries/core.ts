@@ -21,9 +21,6 @@ export {
   API_TIMEOUTS,
   TEST_TIMEOUTS,
   RETRY_CONFIG,
-  CACHE_TTL,
-  CACHE_BEHAVIOR,
-  CACHE_INVALIDATION,
   QUEUE_CONFIG,
   TOAST_MESSAGES,
   EMAIL_SUBJECTS,
@@ -73,7 +70,6 @@ export type { CategoryType } from '../ui/constants.ts';
 export type { SharePlatform } from '../client/share.ts';
 export type { JobType } from '../ui/constants.ts';
 export type { NotificationRecord } from '../notifications.ts';
-export type { CacheConfig, CacheInvalidateKey } from '../cache-config.ts';
 export { generateConfigRecommendations } from '../pulse-client.ts';
 export { getQuizConfiguration } from '../data/quiz.ts';
 export type { UseCopyToClipboardOptions } from '../hooks/use-copy-to-clipboard.ts';

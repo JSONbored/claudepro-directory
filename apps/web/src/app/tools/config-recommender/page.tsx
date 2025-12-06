@@ -31,8 +31,20 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
+import { connection } from 'next/server';
 
 import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
+
+// MIGRATED: Removed export const revalidate = 86_400 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
@@ -45,15 +57,6 @@ const NewsletterCTAVariant = dynamicImport(
     loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
-
-/**
- * Dynamic Rendering Required
- *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const revalidate = 86_400;
 
 /**
  * Generate the page metadata for the Config Recommender route.
@@ -81,8 +84,12 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see QuizForm
  * @see NewsletterCTAVariant
  */
-export default function ConfigRecommenderPage() {
-  // Generate single requestId for this page request
+export default async function ConfigRecommenderPage() {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions

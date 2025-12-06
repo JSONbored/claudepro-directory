@@ -4,9 +4,9 @@
  */
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
-import type { ComparisonTableProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { type ComparisonTableProps } from '@heyclaude/web-runtime/types/component.types';
 import {
+  UI_CLASSES,
   Card,
   CardContent,
   CardDescription,
@@ -26,20 +26,20 @@ export function ComparisonTable(props: ComparisonTableProps) {
 
   return (
     <Card className="my-8">
-      {(title || description) && (
+      {title || description ? (
         <CardHeader>
-          {title && <CardTitle>{title}</CardTitle>}
-          {description && <CardDescription>{description}</CardDescription>}
+          {title ? <CardTitle>{title}</CardTitle> : null}
+          {description ? <CardDescription>{description}</CardDescription> : null}
         </CardHeader>
-      )}
+      ) : null}
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b">
               <tr>
-                <th className={'p-4 text-left font-medium'}>Feature</th>
+                <th className="p-4 text-left font-medium">Feature</th>
                 {validHeaders.map((header) => (
-                  <th key={header} className={'p-4 text-left font-medium'}>
+                  <th key={header} className="p-4 text-left font-medium">
                     {header}
                   </th>
                 ))}
@@ -48,7 +48,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
             <tbody>
               {validItems.map((item) => (
                 <tr key={item.feature} className="border-b last:border-0">
-                  <td className={'p-4 font-medium'}>{item.feature}</td>
+                  <td className="p-4 font-medium">{item.feature}</td>
                   <td className="p-4">
                     {typeof item.option1 === 'boolean' ? (
                       item.option1 ? (

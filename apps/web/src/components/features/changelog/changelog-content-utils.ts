@@ -19,9 +19,12 @@ export function removeAccordionSectionsFromContent(content: string): string {
 
   // Match ### Technical Details and ### Deployment sections
   const sectionRegex = /### (Technical Details|Deployment)([\s\S]*?)(?=### |## |$)/g;
-  
+
   // Remove all matches
-  return content.replace(sectionRegex, '').replace(/\n{3,}/g, '\n\n').trim();
+  return content
+    .replaceAll(sectionRegex, '')
+    .replaceAll(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 /**
@@ -38,13 +41,14 @@ export function removeCategorySectionsFromContent(content: string): string {
 
   // Match ## Category headers and their content until next ## or ### or end
   // Categories: Added, Changed, Fixed, Removed, Deprecated, Security
-  const categoryRegex = /^## (Added|Changed|Fixed|Removed|Deprecated|Security)([\s\S]*?)(?=^## |^### |$)/gm;
-  
+  const categoryRegex =
+    /^## (Added|Changed|Fixed|Removed|Deprecated|Security)([\s\S]*?)(?=^## |^### |$)/gm;
+
   // Remove all category sections
-  let cleaned = content.replace(categoryRegex, '');
-  
+  let cleaned = content.replaceAll(categoryRegex, '');
+
   // Clean up extra newlines
-  cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
-  
+  cleaned = cleaned.replaceAll(/\n{3,}/g, '\n\n').trim();
+
   return cleaned;
 }

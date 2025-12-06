@@ -8,26 +8,31 @@
  */
 
 import { Eye, Sparkles, X } from '@heyclaude/web-runtime/icons';
-import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
-import { cn } from '@heyclaude/web-runtime/ui';
+import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import {
+  cn,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
-import { Badge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 interface InlinePreviewProps {
+  className?: string;
   formData: {
-    submission_type: SubmissionContentType;
-    name: string;
     description: string;
-    tags: string[];
     examples: string[];
+    name: string;
+    submission_type: SubmissionContentType;
+    tags: string[];
     type_specific: Record<string, unknown>;
   };
   qualityScore: number;
-  className?: string;
 }
 
 export function InlinePreview({ formData, qualityScore, className }: InlinePreviewProps) {
@@ -52,7 +57,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           </div>
           {qualityScore > 0 && (
             <div className="flex items-center gap-2">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+              <div className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${qualityScore}%` }}
@@ -73,7 +78,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
         </CardHeader>
         <CardContent className="space-y-3">
           {formData.description ? (
-            <p className="line-clamp-3 text-muted-foreground text-sm">{formData.description}</p>
+            <p className="text-muted-foreground line-clamp-3 text-sm">{formData.description}</p>
           ) : (
             <p className="text-muted-foreground/60 text-sm italic">No description yet...</p>
           )}
@@ -94,10 +99,10 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           )}
 
           {formData.examples.length > 0 && (
-            <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <Sparkles className="h-3 w-3" />
               <span>
-                {formData.examples.length} example{formData.examples.length !== 1 ? 's' : ''}
+                {formData.examples.length} example{formData.examples.length === 1 ? '' : 's'}
               </span>
             </div>
           )}
@@ -112,7 +117,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
       <div className={cn('hidden lg:block', className)}>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm">Live Preview</h3>
+            <h3 className="text-sm font-semibold">Live Preview</h3>
             <Button
               variant="ghost"
               size="sm"
@@ -124,7 +129,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           </div>
 
           <AnimatePresence mode="wait">
-            {isVisible && (
+            {isVisible ? (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -133,14 +138,14 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
               >
                 {previewCard}
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           {!isVisible && (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center text-muted-foreground text-xs"
+              className="text-muted-foreground text-center text-xs"
             >
               Preview hidden
             </motion.p>
@@ -161,7 +166,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
         </Button>
 
         <AnimatePresence>
-          {isMobileModalOpen && (
+          {isMobileModalOpen ? (
             <>
               <motion.div
                 initial={{ opacity: 0 }}
@@ -175,11 +180,11 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 transition={TOKENS.animations.spring.smooth}
-                className="-translate-y-1/2 sm:-translate-x-1/2 fixed inset-x-4 top-1/2 z-50 sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-md"
+                className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm text-white">Live Preview</h3>
+                    <h3 className="text-sm font-semibold text-white">Live Preview</h3>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -193,7 +198,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                 </div>
               </motion.div>
             </>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </>
@@ -204,9 +209,9 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
  * Preview Toggle Button (for wizard header)
  */
 interface PreviewToggleProps {
-  onClick: () => void;
-  isVisible: boolean;
   className?: string;
+  isVisible: boolean;
+  onClick: () => void;
 }
 
 export function PreviewToggle({ onClick, isVisible, className }: PreviewToggleProps) {

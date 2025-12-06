@@ -77,34 +77,71 @@ function getPolarMetadataValue<T = unknown>(payload: Record<string, unknown>, ke
 
 /**
  * Verify Vercel webhook signature using HMAC
+ * 
+ * Vercel sends webhook signatures in the x-vercel-signature header.
+ * The signature is an HMAC-SHA256 of the raw request body.
+ * 
+ * @see https://vercel.com/docs/observability/webhooks-overview/webhooks-api#securing-webhooks
  */
 function verifyVercelSignature(body: string, headers: Headers): boolean {
   const secret = process.env['VERCEL_WEBHOOK_SECRET'];
   if (!secret) {
-    logger.warn('VERCEL_WEBHOOK_SECRET not configured, skipping signature verification');
+    logger.warn('VERCEL_WEBHOOK_SECRET not configured, skipping signature verification', {
+      hasHeader: !!headers.get('x-vercel-signature'),
+    });
     return true; // Allow but log warning - set secret to enforce verification
   }
 
   const signature = headers.get('x-vercel-signature');
   if (!signature) {
+    logger.warn('Vercel webhook missing x-vercel-signature header');
     return false;
   }
 
   try {
+    // Vercel uses HMAC-SHA256 of the raw request body
     const expectedSignature = createHmac('sha256', secret)
-      .update(body)
+      .update(body, 'utf8') // Ensure UTF-8 encoding
       .digest('hex');
     
+    // Vercel signature might be in different formats:
+    // 1. Plain hex string
+    // 2. Prefixed with "sha256="
+    // Try both formats
+    const normalizedSignature = signature.startsWith('sha256=')
+      ? signature.slice(7) // Remove "sha256=" prefix
+      : signature;
+    
     // Constant-time comparison to prevent timing attacks
-    const sigBuffer = Buffer.from(signature, 'hex');
+    const sigBuffer = Buffer.from(normalizedSignature, 'hex');
     const expectedBuffer = Buffer.from(expectedSignature, 'hex');
     
     if (sigBuffer.length !== expectedBuffer.length) {
+      logger.warn('Vercel webhook signature length mismatch', {
+        receivedLength: sigBuffer.length,
+        expectedLength: expectedBuffer.length,
+        hasPrefix: signature.startsWith('sha256='),
+      });
       return false;
     }
     
-    return timingSafeEqual(sigBuffer, expectedBuffer);
-  } catch {
+    const isValid = timingSafeEqual(sigBuffer, expectedBuffer);
+    
+    if (!isValid) {
+      logger.warn('Vercel webhook signature verification failed', {
+        hasSecret: !!secret,
+        signatureLength: normalizedSignature.length,
+        expectedLength: expectedSignature.length,
+        hasPrefix: signature.startsWith('sha256='),
+      });
+    }
+    
+    return isValid;
+  } catch (error) {
+    logger.warn('Vercel webhook signature verification error', {
+      err: normalizeError(error, 'Signature verification exception'),
+      signatureLength: signature.length,
+    });
     return false;
   }
 }

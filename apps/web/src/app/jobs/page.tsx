@@ -35,20 +35,26 @@ import {
 import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { JobAlertsCard } from '@/src/components/core/domain/jobs/job-alerts-card';
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 
+// MIGRATED: Removed export const revalidate = 900 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
+
 /**
- * Dynamic Rendering Required
+ * ISR: 15 minutes (900s) - Jobs update frequently but don't need real-time freshness
  *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ * Hybrid Rendering Strategy:
+ * - Base job list (no filters) uses ISR with 15min revalidation
+ * - Filtered queries bypass cache (uncached SSR) for real-time results
  *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * Note: Using ISR instead of force-dynamic to enable caching while still allowing
+ * on-demand revalidation for filtered queries.
  */
-export const dynamic = 'force-dynamic';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
@@ -61,15 +67,6 @@ const NewsletterCTAVariant = dynamicImport(
     loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
-
-/**
- * ISR: 15 minutes (900s) - Jobs update frequently but don't need real-time freshness
- *
- * Hybrid Rendering Strategy:
- * - Base job list (no filters) uses ISR with 15min revalidation
- * - Filtered queries bypass cache (uncached SSR) for real-time results
- */
-export const revalidate = 900;
 
 /**
  * Renders a badge that displays the total number of jobs by fetching the count separately.
@@ -120,6 +117,9 @@ async function JobsCountBadge() {
 export async function generateMetadata({
   searchParams,
 }: PagePropsWithSearchParams): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   const rawParameters = await searchParams;
   return generatePageMetadata('/jobs', {
     filters: {
@@ -310,7 +310,15 @@ async function JobsListSection({
  * @see applyJobSorting
  */
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  // MUST be called before accessing searchParams (uncached data)
+  await connection();
+
+  // Section: Parameter Parsing
+  const rawParameters = (await searchParams) ?? {};
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -320,9 +328,6 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
     route: '/jobs',
     module: 'apps/web/src/app/jobs',
   });
-
-  // Section: Parameter Parsing
-  const rawParameters = (await searchParams) ?? {};
 
   const searchQuery =
     (rawParameters['q'] as string | undefined) ??

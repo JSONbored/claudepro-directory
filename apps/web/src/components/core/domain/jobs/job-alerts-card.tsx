@@ -1,19 +1,23 @@
 'use client';
 
 import { Constants } from '@heyclaude/database-types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
+import { useNewsletter } from '@heyclaude/web-runtime/hooks';
 import {
+  cn,
+  UI_CLASSES,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@heyclaude/web-runtime/ui';
-import { useNewsletter } from '@heyclaude/web-runtime/hooks';
+import { useState } from 'react';
 
 // Use Constants for enum values
 const EXPERIENCE_OPTIONS = [
@@ -48,7 +52,7 @@ const CATEGORY_OPTIONS = [
 interface JobAlertsCardProps {
   defaultCategory?: string;
   defaultExperience?: string;
-  defaultRemote?: 'remote' | 'any';
+  defaultRemote?: 'any' | 'remote';
 }
 
 export function JobAlertsCard({
@@ -98,7 +102,7 @@ export function JobAlertsCard({
               placeholder="you@example.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              required={true}
+              required
               aria-describedby={error ? 'job-alert-error' : undefined}
             />
           </div>
@@ -163,11 +167,11 @@ export function JobAlertsCard({
             </Select>
           </div>
 
-          {error && (
+          {error ? (
             <p id="job-alert-error" className="text-destructive text-sm">
               {error}
             </p>
-          )}
+          ) : null}
 
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Button type="submit" disabled={isSubmitting} className="flex-1">

@@ -6,15 +6,18 @@ import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runt
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
+
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
  * Authenticated route using cookies
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 /**
  * Generate metadata for the /account/jobs/new page.
@@ -24,6 +27,9 @@ export const runtime = 'nodejs';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/jobs/new');
 }
 
@@ -39,7 +45,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see createJob
  */
 export default async function NewJobPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions

@@ -8,19 +8,23 @@
  * - NavigationMobile: Sheet drawer (<md)
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
+import { ACTION_LINKS } from '@heyclaude/web-runtime/config/navigation';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { usePinboard } from '@heyclaude/web-runtime/hooks';
 import { Bookmark, DiscordIcon } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   POSITION_PATTERNS,
   RESPONSIVE_PATTERNS,
   UI_CLASSES,
+  Button,
 } from '@heyclaude/web-runtime/ui';
 import { motion, useScroll, useTransform } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { memo, useEffect, useState } from 'react';
+
 import { GitHubStarsButton } from '@/src/components/core/buttons/external/github-stars-button';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { NavigationCommandMenu } from '@/src/components/core/layout/navigation-command-menu';
@@ -28,10 +32,8 @@ import { NavigationDesktop } from '@/src/components/core/layout/navigation-deskt
 import { NavigationMobile } from '@/src/components/core/layout/navigation-mobile';
 import { NavigationTablet } from '@/src/components/core/layout/navigation-tablet';
 import { UserMenu } from '@/src/components/core/layout/user-menu';
+import { useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { ACTION_LINKS } from '@heyclaude/web-runtime/config/navigation';
-import { usePinboard } from '@heyclaude/web-runtime/hooks';
 
 interface NavigationProps {
   /** Hide Create button when FloatingActionBar is enabled */
@@ -43,7 +45,7 @@ interface NavigationProps {
 const NavigationComponent = ({ hideCreateButton = false, navigationData }: NavigationProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const { isOpen: commandPaletteOpen, openPalette, closePalette } = useCommandPalette();
   const pathname = usePathname();
   const { pinnedItems, isLoaded: pinboardLoaded } = usePinboard();
   const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
@@ -59,7 +61,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
   // SHA-2088: Optimized scroll handler with threshold check and rAF debouncing
   // Only updates state when crossing 20px threshold (prevents 98% of unnecessary re-renders)
   useEffect(() => {
-    let rafId: number | null = null;
+    let rafId: null | number = null;
 
     const handleScroll = () => {
       // Cancel pending frame to debounce
@@ -71,7 +73,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
       rafId = requestAnimationFrame(() => {
         const scrolled = window.scrollY > 20;
         // Only update state when crossing threshold (prevents re-render on every pixel)
-        setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
+        setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));
       });
     };
 
@@ -96,7 +98,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
       {/* Skip to main content link for keyboard navigation (WCAG 2.1 AA) */}
       <a
         href="#main-content"
-        className={`sr-only ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background`}
+        className={`sr-only ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} focus:bg-accent focus:text-accent-foreground focus:ring-accent focus:ring-offset-background focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100 focus:rounded-md focus:px-4 focus:py-2 focus:shadow-lg focus:ring-2 focus:ring-offset-2 focus:outline-none`}
       >
         Skip to main content
       </a>
@@ -104,7 +106,13 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
       {/* Global Command Menu (⌘K) */}
       <NavigationCommandMenu
         open={commandPaletteOpen}
-        onOpenChange={setCommandPaletteOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            openPalette();
+          } else {
+            closePalette();
+          }
+        }}
         navigationData={navigationData}
       />
 
@@ -114,7 +122,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
       >
         <div className="container mx-auto">
           <motion.nav
-            className={`rounded-2xl border border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW}`}
+            className={`border-border/50 bg-background/95 rounded-2xl border shadow-2xl backdrop-blur-xl ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW}`}
             style={{ backdropFilter: backdropBlur }}
             aria-label="Main navigation container"
           >
@@ -127,7 +135,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                 {/* Logo with Motion.dev scale animation - no size prop to avoid double animation */}
                 <Link
                   href={ROUTES.HOME}
-                  prefetch={true}
+                  prefetch
                   className={`${UI_CLASSES.FLEX_ITEMS_CENTER_FLEX_SHRINK_0} no-underline`}
                   aria-label="heyclaude - Go to homepage"
                 >
@@ -139,7 +147,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                 {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
                 <NavigationDesktop
                   isActive={isActive}
-                  onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
+                  onCommandPaletteOpen={openPalette}
                 />
 
                 {/* Tablet Navigation (768px-1279px) - Horizontal scroll with Motion.dev */}
@@ -160,7 +168,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                   >
                     <Bookmark className={UI_CLASSES.ICON_XS} />
                     {pinCount > 0 && (
-                      <span className="-right-1 -top-1 absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-semibold text-[10px] text-primary-foreground">
+                      <span className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold">
                         {pinCount > 99 ? '99+' : pinCount}
                       </span>
                     )}
@@ -172,13 +180,15 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                       return (
                         <Button
                           key={link.href}
-                          asChild={true}
+                          asChild
                           variant="outline"
                           size="sm"
                           className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}
                         >
-                          <Link href={link.href} prefetch={true}>
-                            {ActionIcon && <ActionIcon className={UI_CLASSES.ICON_XS_LEADING} />}
+                          <Link href={link.href} prefetch>
+                            {ActionIcon ? (
+                              <ActionIcon className={UI_CLASSES.ICON_XS_LEADING} />
+                            ) : null}
                             {link.label}
                           </Link>
                         </Button>
@@ -197,7 +207,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
 
                   <GitHubStarsButton className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`} />
 
-                  <UserMenu className={'hidden md:flex'} />
+                  <UserMenu className="hidden md:flex" />
 
                   {/* Mobile Menu - Show ONLY below md: (< 768px) */}
                   <NavigationMobile isActive={isActive} isOpen={isOpen} onOpenChange={setIsOpen} />

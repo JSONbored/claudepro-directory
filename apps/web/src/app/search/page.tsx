@@ -13,10 +13,22 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { ContentSearchClient } from '@/src/components/content/content-search';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
+
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
 
 const VALID_SORT_OPTIONS = new Set<SearchFilters['sort']>([
   'relevance',
@@ -47,15 +59,6 @@ function isValidSort(value: string | undefined): value is SearchFilters['sort'] 
   return value !== undefined && VALID_SORT_OPTIONS.has(value as SearchFilters['sort']);
 }
 
-/**
- * Dynamic Rendering Required
- *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const dynamic = 'force-dynamic';
-
 interface SearchPageProperties {
   searchParams: Promise<{
     author?: string;
@@ -75,6 +78,9 @@ interface SearchPageProperties {
  * @see generatePageMetadata
  */
 export async function generateMetadata({ searchParams }: SearchPageProperties): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   const resolvedParameters = await searchParams;
   const query = resolvedParameters.q ?? '';
 
@@ -203,9 +209,11 @@ async function SearchResultsSection({
  * @see RecentlyViewedSidebar
  */
 export default async function SearchPage({ searchParams }: SearchPageProperties) {
-  const resolvedParameters = await searchParams;
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
-  // Generate single requestId for this page request
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -215,6 +223,39 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
     route: '/search',
     module: 'apps/web/src/app/search',
   });
+
+  return (
+    <Suspense
+      fallback={
+        <main className="container mx-auto px-4 py-8">
+          <h1 className="mb-8 text-4xl font-bold">Search Claude Code Directory</h1>
+          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
+            <div>Loading search...</div>
+          </div>
+        </main>
+      }
+    >
+      <SearchPageContent searchParams={searchParams} reqLogger={reqLogger} requestId={requestId} />
+    </Suspense>
+  );
+}
+
+async function SearchPageContent({
+  searchParams,
+  reqLogger,
+  requestId,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+  requestId: string;
+  searchParams: Promise<{
+    author?: string;
+    category?: string;
+    q?: string;
+    sort?: string;
+    tags?: string;
+  }>;
+}) {
+  const resolvedParameters = await searchParams;
 
   const query = (resolvedParameters.q ?? '').trim().slice(0, 200);
 

@@ -1,13 +1,14 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
+
 import { ChangelogTimelineView } from '@/src/components/features/changelog/changelog-timeline-view';
 
 type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 
 export interface ChangelogListClientProps {
-  entries: ChangelogEntry[];
   categoryCounts: Record<string, number>;
+  entries: ChangelogEntry[];
 }
 
 /**
@@ -24,7 +25,7 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
     <div className="w-full">
       {entries.length === 0 ? (
         <output className="flex items-center justify-center py-12" aria-live="polite">
-          <p className="text-lg text-muted-foreground">No changelog entries found.</p>
+          <p className="text-muted-foreground text-lg">No changelog entries found.</p>
         </output>
       ) : (
         <ChangelogTimelineView entries={entries} />

@@ -1,6 +1,5 @@
+import { NumberTicker, ParticlesBackground } from '@heyclaude/web-runtime/ui';
 import dynamicImport from 'next/dynamic';
-import { NumberTicker } from '@heyclaude/web-runtime/ui';
-import { ParticlesBackground } from '@heyclaude/web-runtime/ui';
 
 const RollingText = dynamicImport(
   () => import('@heyclaude/web-runtime/ui').then((mod) => ({ default: mod.RollingText })),
@@ -20,24 +19,24 @@ const RollingText = dynamicImport(
  */
 export async function HomepageHeroServer({ memberCount }: { memberCount: number }) {
   return (
-    <section className={'relative border-border/50 border-b'} aria-label="Homepage hero">
+    <section className="border-border/50 relative border-b" aria-label="Homepage hero">
       {/* Particles Background */}
       <ParticlesBackground />
 
-      <div className={'container relative z-10 mx-auto px-4 py-10 sm:py-16 lg:py-24'}>
-        <div className={'mx-auto max-w-3xl text-center'}>
-          <h1 className="mb-4 font-bold text-3xl leading-tight tracking-tight sm:mb-6 sm:text-4xl sm:leading-tight lg:text-5xl lg:leading-tight">
+      <div className="relative z-10 container mx-auto px-4 py-10 sm:py-16 lg:py-24">
+        <div className="mx-auto max-w-3xl text-center">
+          <h1 className="mb-4 text-3xl leading-tight font-bold tracking-tight sm:mb-6 sm:text-4xl sm:leading-tight lg:text-5xl lg:leading-tight">
             <span className="block">The ultimate directory for Claude</span>
             <RollingText
               words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
               duration={3000}
-              className="block text-accent"
+              className="text-accent block"
             />
           </h1>
 
-          <p className="mx-auto max-w-2xl text-muted-foreground text-base leading-relaxed sm:text-lg lg:text-xl">
+          <p className="text-muted-foreground mx-auto max-w-2xl text-base leading-relaxed sm:text-lg lg:text-xl">
             Join{' '}
-            <NumberTicker value={memberCount} className="font-semibold text-accent" suffix="+" />{' '}
+            <NumberTicker value={memberCount} className="text-accent font-semibold" suffix="+" />{' '}
             members discovering and sharing the best Claude configurations. Explore expert rules,
             powerful MCP servers, specialized agents, automation hooks, and connect with the
             community building the future of AI.

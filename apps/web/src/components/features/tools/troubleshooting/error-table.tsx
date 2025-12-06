@@ -6,10 +6,10 @@
  */
 
 import { AlertTriangle, Info } from '@heyclaude/web-runtime/icons';
-import type { ErrorTableProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { type ErrorTableProps } from '@heyclaude/web-runtime/types/component.types';
 import {
+  UI_CLASSES,
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
@@ -38,17 +38,17 @@ export function ErrorTable(props: ErrorTableProps) {
     <Card className="my-8">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
+        {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b bg-muted/30">
+            <thead className="bg-muted/30 border-b">
               <tr>
-                <th className={'p-4 text-left font-medium'}>Error Code</th>
-                <th className={'p-4 text-left font-medium'}>Severity</th>
-                <th className={'p-4 text-left font-medium'}>Message</th>
-                <th className={'p-4 text-left font-medium'}>Solution</th>
+                <th className="p-4 text-left font-medium">Error Code</th>
+                <th className="p-4 text-left font-medium">Severity</th>
+                <th className="p-4 text-left font-medium">Message</th>
+                <th className="p-4 text-left font-medium">Solution</th>
               </tr>
             </thead>
             <tbody>
@@ -57,7 +57,7 @@ export function ErrorTable(props: ErrorTableProps) {
                   key={error.code}
                   className={`border-b last:border-0 ${index % 2 === 0 ? 'bg-muted/10' : ''}`}
                 >
-                  <td className={'p-4 font-mono text-sm'}>{error.code}</td>
+                  <td className="p-4 font-mono text-sm">{error.code}</td>
                   <td className="p-4">
                     <UnifiedBadge
                       variant="base"
@@ -70,8 +70,8 @@ export function ErrorTable(props: ErrorTableProps) {
                       </span>
                     </UnifiedBadge>
                   </td>
-                  <td className={'p-4 text-sm'}>{error.message}</td>
-                  <td className={'p-4 text-muted-foreground text-sm'}>{error.solution}</td>
+                  <td className="p-4 text-sm">{error.message}</td>
+                  <td className="text-muted-foreground p-4 text-sm">{error.solution}</td>
                 </tr>
               ))}
             </tbody>

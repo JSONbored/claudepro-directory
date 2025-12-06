@@ -13,7 +13,6 @@ import type { Database } from '@heyclaude/database-types';
 const removeItemFromCollectionSchema = z.object({
   remove_item_id: z.string().uuid().optional()
 });
-export type RemoveItemFromCollectionInput = z.infer<typeof removeItemFromCollectionSchema>;
 
 export const removeItemFromCollection = authedAction
   .metadata({ actionName: 'removeItemFromCollection', category: 'user' })
@@ -42,11 +41,7 @@ export const removeItemFromCollection = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
-      const { revalidatePath } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
+      const { revalidatePath, revalidateTag } = await import('next/cache');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -54,11 +49,8 @@ export const removeItemFromCollection = authedAction
       
       revalidatePath(`/account/library`);
       revalidatePath(`/account/library/${result?.collection?.slug}`);
-      
-      await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.collection_items']
-      });
+      revalidateTag(`collections`, 'default');
+      revalidateTag(`users`, 'default');
 
       
 

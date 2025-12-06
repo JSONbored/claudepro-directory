@@ -2,22 +2,23 @@
  * DetailHeader - Server Component for header section
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
-import type {
-  ContentItem,
-  UnifiedCategoryConfig,
+import {
+  type ContentItem,
+  type UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
 import { Breadcrumbs } from '@heyclaude/web-runtime/ui';
+
 import { DetailHeaderActions, type SerializableAction } from './detail-header-actions';
 
 export interface DetailHeaderProps {
+  config: UnifiedCategoryConfig;
   displayTitle: string;
   item:
     | ContentItem
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        ContentItem);
-  config: UnifiedCategoryConfig;
+    | (ContentItem &
+        Database['public']['Functions']['get_content_detail_complete']['Returns']['content']);
   onCopyContent?: (() => Promise<void>) | undefined;
 }
 
@@ -31,7 +32,7 @@ export interface DetailHeaderProps {
 export function DetailHeader({ displayTitle, item, config, onCopyContent }: DetailHeaderProps) {
   const hasContent = Boolean(
     ('content' in item && typeof (item as { content?: string }).content === 'string') ||
-      ('configuration' in item && (item as { configuration?: object }).configuration)
+    ('configuration' in item && (item as { configuration?: object }).configuration)
   );
 
   // Extract serializable action data - database stores { label, type } only
@@ -48,14 +49,10 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
   const categoryLabel = config.typeName.endsWith('s') ? config.typeName : `${config.typeName}s`;
 
   return (
-    <div className={'border-border border-b bg-code/50 backdrop-blur-sm'}>
+    <div className="border-border bg-code/50 border-b backdrop-blur-sm">
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumbs - minimal navigation trail */}
-        <Breadcrumbs
-          categoryLabel={categoryLabel}
-          currentTitle={displayTitle}
-          className="mb-2"
-        />
+        <Breadcrumbs categoryLabel={categoryLabel} currentTitle={displayTitle} className="mb-2" />
 
         {/* Client component for back button and actions */}
         <DetailHeaderActions

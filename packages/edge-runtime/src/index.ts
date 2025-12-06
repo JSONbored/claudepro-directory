@@ -52,4 +52,3 @@ export * from './utils/integrations/http-client.ts';
 // Config
 export * from './config/env.ts';
 export * from './config/email-config.ts';
-export * from './config/static-cache-config.ts';

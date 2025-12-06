@@ -2,53 +2,73 @@
 
 import { ContentService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import { cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../../cache/fetch-cached.ts';
-import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import { generateRequestId } from '../../utils/request-id.ts';
 
-// OPTIMIZATION: Wrapped with React.cache() for request-level deduplication
-// This prevents duplicate calls within the same request (React Server Component tree)
-export const getHomepageData = cache(
-  async (
-    categoryIds: readonly string[]
-  ): Promise<Database['public']['Functions']['get_homepage_optimized']['Returns'] | null> => {
-    // Create request-scoped child logger to avoid race conditions
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getHomepageData',
-      route: 'utility-function', // Utility function - no specific route
-      module: 'packages/web-runtime/src/data/content/homepage',
+/**
+ * Get homepage data
+ * Uses 'use cache' to cache homepage data. This data is public and same for all users.
+ */
+export async function getHomepageData(
+  categoryIds: readonly string[]
+): Promise<Database['public']['Functions']['get_homepage_optimized']['Returns'] | null> {
+  'use cache';
+
+  const { isBuildTime } = await import('../../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+
+  // CRITICAL: Use sorted, joined string for cache key to ensure stability
+  // The categoryIds array order might vary, so we sort and join to create a stable key
+  // This prevents cache misses due to array order differences
+  const sortedCategoryIds = [...categoryIds].toSorted().join(',');
+
+  // Configure cache - use 'hours' profile for homepage data that changes hourly
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  cacheTag('homepage');
+  cacheTag('content');
+  cacheTag('trending');
+
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getHomepageData',
+    route: 'utility-function', // Utility function - no specific route
+    module: 'packages/web-runtime/src/data/content/homepage',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new ContentService(client).getHomepageOptimized({
+      p_category_ids: [...categoryIds],
+      p_limit: 6, // 6 items per category for featured sections (8 categories × 6 = 48 items total)
     });
 
-    try {
-      // CRITICAL: Use sorted, joined string for cache key to ensure stability
-      // The categoryIds array order might vary, so we sort and join to create a stable key
-      // This prevents cache misses due to array order differences
-      const sortedCategoryIds = [...categoryIds].toSorted().join(',');
+    reqLogger.info('getHomepageData: fetched successfully', {
+      categoryIds: sortedCategoryIds,
+      categoryCount: categoryIds.length,
+      limit: 6,
+    });
 
-      return await fetchCached(
-        (client) =>
-          new ContentService(client).getHomepageOptimized({ p_category_ids: [...categoryIds] }),
-        {
-          // Use stable string key instead of array to prevent cache key variations
-          keyParts: ['homepage', sortedCategoryIds],
-          tags: ['homepage', 'content', 'trending'],
-          ttlKey: 'cache.homepage.ttl_seconds',
-          fallback: null,
-          logMeta: { categoryIds: sortedCategoryIds, categoryCount: categoryIds.length },
-        }
-      );
-    } catch (error) {
-      const normalized = normalizeError(error, 'getHomepageData failed');
-      reqLogger.error('getHomepageData failed', normalized, {
-        categoryIds,
-        categoryCount: categoryIds.length,
-      });
-      return null;
-    }
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    reqLogger.error('getHomepageData failed', errorForLogging, {
+      categoryIds,
+      categoryCount: categoryIds.length,
+    });
+    return null;
   }
-);
+}

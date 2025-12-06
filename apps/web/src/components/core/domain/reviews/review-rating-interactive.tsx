@@ -1,9 +1,8 @@
 'use client';
 
 import { Star } from '@heyclaude/web-runtime/icons';
-import type { ReviewRatingInteractiveProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { Rating, RatingButton } from '@heyclaude/web-runtime/ui';
+import { type ReviewRatingInteractiveProps } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES, Rating, RatingButton } from '@heyclaude/web-runtime/ui';
 
 /**
  * Interactive star rating input component
@@ -41,9 +40,9 @@ export function ReviewRatingInteractive({
           <RatingButton key={`star-${i + 1}`} size={iconSize} icon={<Star />} />
         ))}
       </Rating>
-      {showValue && (
-        <span className="ml-1 font-medium text-muted-foreground text-sm">{value.toFixed(1)}</span>
-      )}
+      {showValue ? (
+        <span className="text-muted-foreground ml-1 text-sm font-medium">{value.toFixed(1)}</span>
+      ) : null}
     </div>
   );
 }

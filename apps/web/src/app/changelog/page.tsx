@@ -31,9 +31,18 @@ import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtim
 import { UI_CLASSES, NavLink, Breadcrumbs } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
+import { connection } from 'next/server';
 
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
+
+// MIGRATED: Removed export const revalidate = 3600 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
+
+/**
+ * ISR: 1 hour (3600s) - Changelog list updates periodically
+ * Uses ISR for better performance while keeping content fresh
+ */
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
@@ -48,12 +57,6 @@ const NewsletterCTAVariant = dynamicImport(
 );
 
 /**
- * ISR: 1 hour (3600s) - Changelog list updates periodically
- * Uses ISR for better performance while keeping content fresh
- */
-export const revalidate = 3600;
-
-/**
  * Generate page metadata for the /changelog route, including RSS and Atom feed alternates.
  *
  * If metadata generation fails, returns a sensible fallback metadata object with a default
@@ -66,7 +69,11 @@ export const revalidate = 3600;
  * @see APP_CONFIG
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Generate requestId for metadata generation (separate from page render)
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate requestId for metadata generation (separate from page render, after connection() to allow Date.now())
   const metadataRequestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -125,7 +132,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see StructuredData
  */
 export default async function ChangelogPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions

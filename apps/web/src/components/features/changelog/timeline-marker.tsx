@@ -7,16 +7,16 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { ANIMATION_CONSTANTS } from '@heyclaude/web-runtime/ui';
-import Link from 'next/link';
 import { formatChangelogDateShort } from '@heyclaude/web-runtime/utils/changelog';
+import Link from 'next/link';
 
 interface TimelineMarkerProps {
   entry: Database['public']['Tables']['changelog']['Row'];
   isActive: boolean;
-  targetPath: string;
   onClick?: (() => void) | undefined;
+  targetPath: string;
 }
 
 // Sticky offset accounts for fixed header (64px) + padding (32px)
@@ -41,14 +41,12 @@ export function TimelineMarker({ entry, isActive, targetPath, onClick }: Timelin
       style={{ position: 'sticky', top: TIMELINE_MARKER_STICKY_OFFSET }}
     >
       {/* Horizontal connector line from marker dot to timeline - Minimal */}
-      <div className="absolute -left-5 top-[18px] h-px w-5 bg-border/40" aria-hidden="true" />
-      
+      <div className="bg-border/40 absolute top-[18px] -left-5 h-px w-5" aria-hidden="true" />
+
       {/* Minimal marker dot */}
       <div
-        className={`absolute -left-[21px] top-[14px] h-2 w-2 rounded-full transition-all ${
-          isActive
-            ? 'bg-primary'
-            : 'bg-border/60'
+        className={`absolute top-[14px] -left-[21px] h-2 w-2 rounded-full transition-all ${
+          isActive ? 'bg-primary' : 'bg-border/60'
         }`}
         aria-hidden="true"
       />
@@ -62,9 +60,9 @@ export function TimelineMarker({ entry, isActive, targetPath, onClick }: Timelin
         }`}
       >
         {/* Title and date - Minimal, compact */}
-        <div className="flex flex-col gap-0.5 min-w-0">
+        <div className="flex min-w-0 flex-col gap-0.5">
           <h3
-            className={`text-sm leading-snug ${isActive ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground'} group-hover:text-foreground ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} line-clamp-2`}
+            className={`text-sm leading-snug ${isActive ? 'text-foreground font-semibold' : 'text-muted-foreground font-normal'} group-hover:text-foreground ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} line-clamp-2`}
           >
             {entry.title}
           </h3>

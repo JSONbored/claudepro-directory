@@ -20,7 +20,6 @@ const createCompanySchema = z.object({
   industry: z.string().nullable().optional(),
   using_cursor_since: z.string().nullable().optional()
 });
-export type CreateCompanyInput = z.infer<typeof createCompanySchema>;
 
 export const createCompany = authedAction
   .metadata({ actionName: 'createCompany', category: 'content' })
@@ -55,11 +54,7 @@ export const createCompany = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -69,11 +64,7 @@ export const createCompany = authedAction
       revalidatePath(`/companies`);
       revalidateTag(`company-${result?.company?.slug}`, 'default');
       revalidateTag(`company-id-${result?.company?.id}`, 'default');
-      
-      await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.company_create']
-      });
+      revalidateTag(`companies`, 'default');
 
       
 

@@ -4,18 +4,17 @@
  * Handles full dropdown menus with descriptions
  */
 
+'use client';
+
+import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
 import { Briefcase, ChevronDown, Handshake, Users } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
   POSITION_PATTERNS,
   UI_CLASSES,
-} from '@heyclaude/web-runtime/ui';
-import Link from 'next/link';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { PrefetchLink } from '@heyclaude/web-runtime/ui';
-import { SearchTrigger } from '@/src/components/features/search/search-trigger';
-import {
+  UnifiedBadge,
+  PrefetchLink,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -24,12 +23,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@heyclaude/web-runtime/ui';
-import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+
+import { SearchTrigger } from '@/src/components/features/search/search-trigger';
 
 interface NavLinkProps {
-  href: string;
   children: React.ReactNode;
   className?: string;
+  href: string;
   isActive: (href: string) => boolean;
   onClick?: () => void;
 }
@@ -71,6 +73,30 @@ interface NavigationDesktopProps {
 }
 
 export function NavigationDesktop({ isActive, onCommandPaletteOpen }: NavigationDesktopProps) {
+  // Client-side hydration state to prevent SSR hydration mismatch with Radix UI IDs
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Don't render until mounted (prevents hydration mismatch with Radix UI generated IDs)
+  if (!isMounted) {
+    return (
+      <nav
+        className={`hidden xl:flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-xs`}
+        aria-label="Primary navigation"
+      >
+        {/* Placeholder to maintain layout during SSR */}
+        <div className="invisible">
+          {PRIMARY_NAVIGATION.map((link) => (
+            <span key={link.label}>{link.label}</span>
+          ))}
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <nav
       className={`hidden xl:flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-xs`}
@@ -81,7 +107,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
         if (link.children && link.children.length > 0) {
           return (
             <DropdownMenu key={link.label}>
-              <DropdownMenuTrigger asChild={true}>
+              <DropdownMenuTrigger asChild>
                 <button
                   type="button"
                   className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
@@ -90,7 +116,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                   <span className="relative">
                     {link.label}
                     <span
-                      className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} w-0 bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
+                      className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} bg-accent w-0 ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
                       aria-hidden="true"
                     />
                   </span>
@@ -102,37 +128,37 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                   {link.children.map((child) => {
                     const ChildIcon = child.icon;
                     return (
-                      <DropdownMenuItem key={child.href} asChild={true}>
+                      <DropdownMenuItem key={child.href} asChild>
                         <Link
                           href={child.href}
-                          prefetch={true}
+                          prefetch
                           className={UI_CLASSES.FLEX_INTERACTIVE_MENU_ITEM}
                         >
-                          {ChildIcon && (
+                          {ChildIcon ? (
                             <div className={`${UI_CLASSES.FLEX_ICON_WRAPPER_SM} bg-muted/50`}>
                               <ChildIcon
                                 className={`${UI_CLASSES.ICON_XS} text-muted-foreground`}
                                 aria-hidden="true"
                               />
                             </div>
-                          )}
+                          ) : null}
                           <div className={UI_CLASSES.FLEX_MIN_W_0_FLEX_1_COL_ITEMS_START_GAP_0_5}>
                             <div
-                              className={`${UI_CLASSES.FLEX_W_FULL_ITEMS_CENTER_GAP_1_5} truncate font-medium text-sm`}
+                              className={`${UI_CLASSES.FLEX_W_FULL_ITEMS_CENTER_GAP_1_5} truncate text-sm font-medium`}
                             >
                               {child.label}
-                              {child.isNew && (
+                              {child.isNew ? (
                                 <UnifiedBadge
                                   variant="new-indicator"
                                   label={`New: ${child.label}`}
                                 />
-                              )}
+                              ) : null}
                             </div>
-                            {child.description && (
-                              <div className="line-clamp-1 text-[11px] text-muted-foreground">
+                            {child.description ? (
+                              <div className="text-muted-foreground line-clamp-1 text-[11px]">
                                 {child.description}
                               </div>
-                            )}
+                            ) : null}
                           </div>
                         </Link>
                       </DropdownMenuItem>
@@ -160,7 +186,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
       })}
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild={true}>
+        <DropdownMenuTrigger asChild>
           <button
             type="button"
             className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
@@ -169,7 +195,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
             <span className="relative">
               More
               <span
-                className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} w-0 bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
+                className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} bg-accent w-0 ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
                 aria-hidden="true"
               />
             </span>
@@ -181,34 +207,34 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
           <div className={`${UI_CLASSES.MB_2} ${UI_CLASSES.GRID_COLS_2_GAP_4}`}>
             {SECONDARY_NAVIGATION.map((group) => (
               <div key={group.heading} className="space-y-2">
-                <DropdownMenuLabel className="px-2 py-1 font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
+                <DropdownMenuLabel className="text-muted-foreground px-2 py-1 text-[10px] font-semibold tracking-wider uppercase">
                   {group.heading}
                 </DropdownMenuLabel>
                 <DropdownMenuGroup className="space-y-0.5">
                   {group.links.map((link) => {
                     const IconComponent = link.icon;
                     return (
-                      <DropdownMenuItem key={link.href} asChild={true}>
+                      <DropdownMenuItem key={link.href} asChild>
                         <Link
                           href={link.href}
-                          prefetch={true}
+                          prefetch
                           className={UI_CLASSES.FLEX_INTERACTIVE_MENU_ITEM}
                         >
-                          {IconComponent && (
+                          {IconComponent ? (
                             <div className={`${UI_CLASSES.FLEX_ICON_WRAPPER_SM} bg-muted/50`}>
                               <IconComponent
                                 className={`${UI_CLASSES.ICON_XS} text-muted-foreground`}
                                 aria-hidden="true"
                               />
                             </div>
-                          )}
+                          ) : null}
                           <div className={UI_CLASSES.FLEX_MIN_W_0_FLEX_1_COL_ITEMS_START_GAP_0_5}>
-                            <div className="w-full truncate font-medium text-sm">{link.label}</div>
-                            {link.description && (
-                              <div className="line-clamp-1 text-[11px] text-muted-foreground">
+                            <div className="w-full truncate text-sm font-medium">{link.label}</div>
+                            {link.description ? (
+                              <div className="text-muted-foreground line-clamp-1 text-[11px]">
                                 {link.description}
                               </div>
-                            )}
+                            ) : null}
                           </div>
                         </Link>
                       </DropdownMenuItem>
@@ -222,38 +248,30 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
           {/* Footer Links - Community, Partner Program, Consulting */}
           <DropdownMenuSeparator className="my-2.5" />
           <div className={UI_CLASSES.GRID_COLS_3_GAP_2}>
-            <Link
-              href="/community"
-              prefetch={true}
-              className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}
-            >
+            <Link href="/community" prefetch className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}>
               <Users
-                className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-colors group-hover:text-accent`}
+                className={`${UI_CLASSES.ICON_SM} text-muted-foreground group-hover:text-accent transition-colors`}
                 aria-hidden="true"
               />
-              <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
+              <div className="text-foreground group-hover:text-accent text-sm font-medium transition-colors">
                 Community
               </div>
             </Link>
-            <Link href="/partner" prefetch={true} className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}>
+            <Link href="/partner" prefetch className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}>
               <Handshake
-                className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-colors group-hover:text-accent`}
+                className={`${UI_CLASSES.ICON_SM} text-muted-foreground group-hover:text-accent transition-colors`}
                 aria-hidden="true"
               />
-              <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
+              <div className="text-foreground group-hover:text-accent text-sm font-medium transition-colors">
                 Partner Program
               </div>
             </Link>
-            <Link
-              href="/consulting"
-              prefetch={true}
-              className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}
-            >
+            <Link href="/consulting" prefetch className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}>
               <Briefcase
-                className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-colors group-hover:text-accent`}
+                className={`${UI_CLASSES.ICON_SM} text-muted-foreground group-hover:text-accent transition-colors`}
                 aria-hidden="true"
               />
-              <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
+              <div className="text-foreground group-hover:text-accent text-sm font-medium transition-colors">
                 Consulting
               </div>
             </Link>

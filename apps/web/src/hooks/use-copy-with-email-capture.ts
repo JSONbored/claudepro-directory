@@ -15,10 +15,11 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
-import type { UseCopyToClipboardOptions } from '@heyclaude/web-runtime/core';
+import { type Database } from '@heyclaude/database-types';
+import { type UseCopyToClipboardOptions } from '@heyclaude/web-runtime/core';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
 import { useCallback } from 'react';
+
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 
 /**
@@ -26,45 +27,47 @@ import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-ca
  */
 export interface EmailCaptureContext {
   /**
-   * Type of content being copied
-   */
-  copyType: Database['public']['Enums']['copy_type'];
-
-  /**
    * Content category (agents, mcp, etc.)
    */
   category?: Database['public']['Enums']['content_category'];
 
   /**
-   * Content slug identifier
+   * Type of content being copied
    */
-  slug?: string;
+  copyType: Database['public']['Enums']['copy_type'];
 
   /**
    * Referrer URL for attribution
    */
   referrer?: string;
+
+  /**
+   * Content slug identifier
+   */
+  slug?: string;
 }
 
 /**
  * Options for copy with email capture
  */
-export interface UseCopyWithEmailCaptureOptions
-  extends Omit<UseCopyToClipboardOptions, 'onSuccess'> {
+export interface UseCopyWithEmailCaptureOptions extends Omit<
+  UseCopyToClipboardOptions,
+  'onSuccess'
+> {
   /**
    * Email capture context
    */
   emailContext: EmailCaptureContext;
 
   /**
-   * Custom success callback (called before modal trigger)
-   */
-  onSuccess?: () => void;
-
-  /**
    * Whether to enable email modal (default: true)
    */
   enableEmailModal?: boolean;
+
+  /**
+   * Custom success callback (called before modal trigger)
+   */
+  onSuccess?: () => void;
 }
 
 /**

@@ -2,36 +2,38 @@
 
 /** Homepage client consuming homepageConfigs for runtime-tunable featured categories */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { getHomepageConfigBundle } from '@heyclaude/web-runtime/config/static-configs';
 import {
   logUnhandledPromise,
   trackHomepageSectionError,
   trackMissingData,
 } from '@heyclaude/web-runtime/core';
-import {
-  getCategoryConfigs,
-  getCategoryStatsConfig,
-} from '@heyclaude/web-runtime/data';
+import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
-import type {
-  DisplayableContent,
-  FilterState,
-  HomePageClientProps,
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import {
+  type DisplayableContent,
+  type FilterState,
+  type HomePageClientProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  UI_CLASSES,
+  NumberTicker,
+  HomepageStatsSkeleton,
+  Skeleton,
+} from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+
 import {
   LazyFeaturedSections,
   LazySearchSection,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-home-sections';
-import { NumberTicker } from '@heyclaude/web-runtime/ui';
-import { HomepageStatsSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
@@ -123,10 +125,19 @@ function HomePageClientComponent({
       bundle = getHomepageConfigBundle();
     } catch (error) {
       // Log error but don't crash - fall back to server-provided data
-      console.warn('Failed to load homepage config bundle:', error);
+      const normalized = normalizeError(error, 'Failed to load homepage config bundle');
+      logClientWarn(
+        'Failed to load homepage config bundle',
+        normalized,
+        'HomePageClient.loadConfigBundle',
+        {
+          component: 'HomePageClient',
+          action: 'load-config-bundle',
+        }
+      );
       bundle = null;
     }
-    
+
     // Extract featured categories from homepage config with defensive checks
     const categories = Array.isArray(bundle?.homepageConfig?.['homepage.featured_categories'])
       ? bundle.homepageConfig['homepage.featured_categories']
@@ -206,7 +217,7 @@ function HomePageClientComponent({
             level: 'warn',
           }
         );
-      } catch (error) {
+      } catch {
         // Error already logged by useLoggedAsync, trackHomepageSectionError also called
         // No need to do anything else - error is handled
       } finally {
@@ -229,7 +240,7 @@ function HomePageClientComponent({
         logUnhandledPromise('HomePageClient: initial fetchAllConfigs failed', error);
       });
     }
-  }, [activeTab, allConfigs.length, fetchAllConfigs, isLoadingAllConfigs]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeTab, allConfigs.length, fetchAllConfigs, isLoadingAllConfigs]);
 
   const handleSearch = useCallback(
     async (query: string, categoryOverride?: string) => {
@@ -246,9 +257,8 @@ function HomePageClientComponent({
       try {
         await runLoggedAsync(
           async () => {
-            const { searchUnifiedClient } = await import(
-              '@heyclaude/web-runtime/edge/search-client'
-            );
+            const { searchUnifiedClient } =
+              await import('@heyclaude/web-runtime/edge/search-client');
 
             const effectiveTab = categoryOverride ?? activeTab;
             const categories =
@@ -340,7 +350,7 @@ function HomePageClientComponent({
       return dataSource || [];
     }
 
-    const lookupSet = slugLookupMaps[activeTab as keyof typeof slugLookupMaps];
+    const lookupSet = slugLookupMaps[activeTab];
     return lookupSet
       ? (dataSource || []).filter((item) => item.slug && lookupSet.has(item.slug))
       : dataSource || [];
@@ -377,8 +387,8 @@ function HomePageClientComponent({
   return (
     <>
       {/* Search Section */}
-      <section className={'container mx-auto px-4 pt-8 pb-12'}>
-        <div className={'mx-auto max-w-4xl'}>
+      <section className="container mx-auto px-4 pt-8 pb-12">
+        <div className="mx-auto max-w-4xl">
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
             onSearch={handleSearch}
@@ -409,7 +419,7 @@ function HomePageClientComponent({
                     return (
                       <Link key={categoryId} href={categoryRoute}>
                         <motion.div
-                          className="flex min-w-fit items-center gap-2 whitespace-nowrap rounded-lg border border-border/40 bg-card/50 px-4 py-2.5 backdrop-blur-sm"
+                          className="border-border/40 bg-card/50 flex min-w-fit items-center gap-2 rounded-lg border px-4 py-2.5 whitespace-nowrap backdrop-blur-sm"
                           whileTap={{ scale: 0.95 }}
                           transition={springDefault}
                         >
@@ -417,7 +427,7 @@ function HomePageClientComponent({
                             className={`${UI_CLASSES.ICON_SM} shrink-0-accent`}
                             aria-hidden="true"
                           />
-                          <span className="font-medium text-sm">
+                          <span className="text-sm font-medium">
                             <NumberTicker
                               value={
                                 typeof stats[categoryId] === 'number'
@@ -435,11 +445,7 @@ function HomePageClientComponent({
               </motion.div>
 
               {/* Desktop Stats - Full layout (unchanged) */}
-              <div
-                className={
-                  'mt-6 hidden flex-wrap justify-center gap-2 text-muted-foreground text-xs md:flex lg:gap-3 lg:text-sm'
-                }
-              >
+              <div className="text-muted-foreground mt-6 hidden flex-wrap justify-center gap-2 text-xs md:flex lg:gap-3 lg:text-sm">
                 {categoryStatsConfig.map(({ categoryId, icon: Icon, displayText, delay }) => {
                   // Get category route from ROUTES constant
                   const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
@@ -466,7 +472,7 @@ function HomePageClientComponent({
                         }}
                       >
                         <Icon
-                          className={`${UI_CLASSES.ICON_SM} transition-colors group-hover:text-accent`}
+                          className={`${UI_CLASSES.ICON_SM} group-hover:text-accent transition-colors`}
                           aria-hidden="true"
                         />
                         <span className={`transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}>
@@ -492,7 +498,7 @@ function HomePageClientComponent({
         </div>
       </section>
 
-      <section className={'container mx-auto px-4 pb-16'}>
+      <section className="container mx-auto px-4 pb-16">
         {/* Search Results Section - TanStack Virtual */}
         <LazySearchSection
           isSearching={isSearching}

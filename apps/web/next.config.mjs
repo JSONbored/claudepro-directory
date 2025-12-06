@@ -29,7 +29,7 @@ const nextConfig = {
   reactStrictMode: true,
   productionBrowserSourceMaps: false,
   reactCompiler: true,
-  cacheComponents: false,
+  cacheComponents: true,
   transpilePackages: [
     '@heyclaude/web-runtime',
     '@heyclaude/shared-runtime',

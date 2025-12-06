@@ -17,7 +17,7 @@ import {
 } from '@heyclaude/web-runtime/logging/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'nodejs';
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
 
 /**
  * Handle GET requests to fetch content templates for a specified category.
@@ -83,7 +83,6 @@ export async function GET(request: NextRequest) {
       category: validCategory,
       count: templates.length,
       cacheTags: ['templates', `templates-${validCategory}`],
-      cacheTTL: 300,
     });
 
     // Return success response

@@ -4,19 +4,17 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
+import { DIMENSIONS, UnifiedBadge, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CHANGELOG_CATEGORY_VALUES = Constants.public.Enums.changelog_category;
 
 export interface CategoryFilterProps {
   activeCategory: 'All' | Database['public']['Enums']['changelog_category'];
-  onCategoryChange: (category: 'All' | Database['public']['Enums']['changelog_category']) => void;
   categoryCounts: Record<string, number>;
+  onCategoryChange: (category: 'All' | Database['public']['Enums']['changelog_category']) => void;
 }
 
 const FILTER_CATEGORIES = ['All', ...CHANGELOG_CATEGORY_VALUES] as const;
@@ -25,7 +23,7 @@ export function CategoryFilter({ activeCategory, categoryCounts }: CategoryFilte
   return (
     <TabsList className="grid w-full gap-1 lg:w-auto lg:auto-cols-fr lg:grid-flow-col">
       {FILTER_CATEGORIES.map((category) => (
-        <TabsTrigger key={category} value={category} className={'flex items-center gap-2 text-sm'}>
+        <TabsTrigger key={category} value={category} className="flex items-center gap-2 text-sm">
           <span>{category}</span>
           <UnifiedBadge
             variant="base"

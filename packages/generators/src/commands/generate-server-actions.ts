@@ -29,7 +29,6 @@ interface ActionConfig {
     onSuccess?: string;
   };
   inputSchema?: string;
-  invalidateCacheConfigKeys?: string[];
   returnStyle?: 'first_row';
   revalidatePaths?: string[];
   revalidateTags?: string[];
@@ -111,9 +110,6 @@ function toKebabCase(str: string) {
   return str.replaceAll(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
-function toPascalCase(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
 
 function serializeArgValue(value: unknown): string {
   if (value === null) return 'null';
@@ -142,8 +138,6 @@ async function generateActionFile(
   const outputPath = join(WEB_RUNTIME_ROOT, 'actions', fileName);
 
   const authRequired = config.auth !== false; // Default true
-  const hasCacheInvalidation =
-    config.invalidateCacheConfigKeys && config.invalidateCacheConfigKeys.length > 0;
 
   // input mapping
   const rpcArgs: string[] = [];
@@ -204,7 +198,7 @@ async function generateActionFile(
 
   const schemaCode = config.inputSchema
     ? '' // Imported or externally defined
-    : `export const ${actionName}Schema = z.object({\n  ${zodFields.join(',\n  ')}\n});\nexport type ${toPascalCase(actionName)}Input = z.infer<typeof ${actionName}Schema>;`;
+    : `const ${actionName}Schema = z.object({\n  ${zodFields.join(',\n  ')}\n});`;
 
   const inputSchemaRef = config.inputSchema || `${actionName}Schema`;
 
@@ -239,15 +233,7 @@ async function generateActionFile(
     }
   }
 
-  if (hasCacheInvalidation) {
-    const keys = config.invalidateCacheConfigKeys?.map((k) => `'${k}'`).join(', ');
-    revalidations.push(`
-      const cacheConfig = getCacheConfigSnapshot();
-      await nextInvalidateByKeys({
-        cacheConfig,
-        invalidateKeys: [${keys}]
-      });`);
-  }
+  // Legacy: invalidateCacheConfigKeys is deprecated - migrate to revalidateTags in actions.config.ts
 
   const imports = [
     "import { z } from 'zod';",
@@ -320,13 +306,6 @@ export const ${actionName} = authedAction
       
       // Lazy import server-only dependencies
       ${hasRevalidatePath || hasRevalidateTag ? `const { revalidatePath, revalidateTag } = await import('next/cache');` : ''}
-      ${
-        hasCacheInvalidation
-          ? `
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');`
-          : ''
-      }
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?

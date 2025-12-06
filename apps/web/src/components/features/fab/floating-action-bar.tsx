@@ -13,25 +13,28 @@
  * - Context-aware actions (detail pages)
  */
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
+import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
+
 import { createDetailPageActions, createMainFABConfig, createSpeedDialActions } from './fab-config';
 import { SpeedDialItem } from './speed-dial-item';
 
 interface FloatingActionBarProps {
   /** Feature flags controlling which FAB actions to show */
   fabFlags: {
-    showSubmit: boolean;
-    showSearch: boolean;
-    showScrollToTop: boolean;
     showNotifications: boolean;
     showPinboard: boolean;
+    showScrollToTop: boolean;
+    showSearch: boolean;
+    showSubmit: boolean;
   };
 }
 
@@ -44,6 +47,7 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
   const [showPulse, setShowPulse] = useState(false);
   const fabRef = useRef<HTMLDivElement>(null);
   const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
+  const { openPalette: openCommandPalette } = useCommandPalette();
 
   // Notification state
   const { unreadCount, openSheet: openNotificationSheet, flags } = useNotificationsContext();
@@ -132,7 +136,15 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
       router.push('/submit');
     } catch (error) {
       const normalized = normalizeError(error, '[FloatingActionBar] Error navigating to /submit');
-      logger.error('[FloatingActionBar] Error navigating to /submit', normalized);
+      logClientError(
+        '[FloatingActionBar] Error navigating to /submit',
+        normalized,
+        'FloatingActionBar.mainFAB',
+        {
+          component: 'FloatingActionBar',
+          action: 'navigate-submit',
+        }
+      );
     }
   });
 
@@ -148,7 +160,15 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
           error,
           '[FloatingActionBar] Error opening notification sheet'
         );
-        logger.error('[FloatingActionBar] Error opening notification sheet', normalized);
+        logClientError(
+          '[FloatingActionBar] Error opening notification sheet',
+          normalized,
+          'FloatingActionBar.openNotification',
+          {
+            component: 'FloatingActionBar',
+            action: 'open-notification',
+          }
+        );
       }
     },
     () => {
@@ -157,7 +177,15 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
         router.push('/submit');
       } catch (error) {
         const normalized = normalizeError(error, '[FloatingActionBar] Error navigating to /submit');
-        logger.error('[FloatingActionBar] Error navigating to /submit', normalized);
+        logClientError(
+          '[FloatingActionBar] Error navigating to /submit',
+          normalized,
+          'FloatingActionBar.speedDialSubmit',
+          {
+            component: 'FloatingActionBar',
+            action: 'speed-dial-submit',
+          }
+        );
       }
     },
     () => {
@@ -169,7 +197,35 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
           error,
           '[FloatingActionBar] Error opening pinboard drawer'
         );
-        logger.error('[FloatingActionBar] Error opening pinboard drawer', normalized);
+        logClientError(
+          '[FloatingActionBar] Error opening pinboard drawer',
+          normalized,
+          'FloatingActionBar.openPinboard',
+          {
+            component: 'FloatingActionBar',
+            action: 'open-pinboard',
+          }
+        );
+      }
+    },
+    () => {
+      try {
+        setIsExpanded(false);
+        openCommandPalette();
+      } catch (error) {
+        const normalized = normalizeError(
+          error,
+          '[FloatingActionBar] Error opening command palette'
+        );
+        logClientError(
+          '[FloatingActionBar] Error opening command palette',
+          normalized,
+          'FloatingActionBar.openCommandPalette',
+          {
+            component: 'FloatingActionBar',
+            action: 'open-command-palette',
+          }
+        );
       }
     },
     {
@@ -184,7 +240,7 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
         // Copy link handler
         async () => {
           try {
-            const url = window.location.href;
+            const url = globalThis.location.href;
             await copyToClipboard(url);
             toasts.raw.success('Link copied!', {
               description: 'Paste anywhere to share this page.',
@@ -192,21 +248,26 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
             setIsExpanded(false);
           } catch (error) {
             const normalized = normalizeError(error, '[FAB] Error copying link');
-            logger.warn('[Clipboard] Copy link failed', {
-              err: normalized,
-              category: 'clipboard',
-              component: 'FloatingActionBar',
-              recoverable: true,
-              userRetryable: true,
-            });
+            logClientWarn(
+              '[Clipboard] Copy link failed',
+              normalized,
+              'FloatingActionBar.copyLink',
+              {
+                component: 'FloatingActionBar',
+                action: 'copy-link',
+                category: 'clipboard',
+                recoverable: true,
+                userRetryable: true,
+              }
+            );
           }
         },
         // Share handler
         async () => {
           try {
-            const url = window.location.href;
+            const url = globalThis.location.href;
             const title = document.title;
-            
+
             if (navigator.share) {
               await navigator.share({ title, url });
               toasts.raw.success('Shared!', {
@@ -225,7 +286,15 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
               return;
             }
             const normalized = normalizeError(error, '[FAB] Error sharing');
-            logger.error('[FAB] Error sharing', normalized);
+            logClientError(
+              '[FAB] Error sharing',
+              normalized,
+              'FloatingActionBar.share',
+              {
+                component: 'FloatingActionBar',
+                action: 'share',
+              }
+            );
           }
         }
       )
@@ -252,7 +321,15 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
       }
     } catch (error) {
       const normalized = normalizeError(error, '[FloatingActionBar] Error toggling expansion');
-      logger.error('[FloatingActionBar] Error toggling expansion', normalized);
+      logClientError(
+        '[FloatingActionBar] Error toggling expansion',
+        normalized,
+        'FloatingActionBar.toggleExpanded',
+        {
+          component: 'FloatingActionBar',
+          action: 'toggle-expansion',
+        }
+      );
     }
   }, [showPulse]);
 
@@ -263,16 +340,16 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
     <>
       {/* Backdrop overlay when expanded */}
       <AnimatePresence>
-        {isExpanded && (
+        {isExpanded ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
+            className="bg-background/60 fixed inset-0 z-40 backdrop-blur-sm"
             aria-hidden="true"
           />
-        )}
+        ) : null}
       </AnimatePresence>
 
       {/* FAB Container */}
@@ -289,7 +366,7 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
       >
         {/* Speed Dial Items (expand upward on desktop) */}
         <AnimatePresence>
-          {isExpanded && (
+          {isExpanded ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -300,18 +377,14 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
                 // Mobile: Horizontal row above main button
                 'max-md:mb-2 max-md:flex-row max-md:flex-wrap max-md:justify-center max-md:gap-2',
                 // Mobile expanded: card background
-                'max-md:rounded-2xl max-md:bg-card/95 max-md:p-3 max-md:shadow-lg max-md:backdrop-blur-md'
+                'max-md:bg-card/95 max-md:rounded-2xl max-md:p-3 max-md:shadow-lg max-md:backdrop-blur-md'
               )}
             >
               {visibleActions.map((action, index) => (
-                <SpeedDialItem
-                  key={action.id}
-                  {...action}
-                  delay={index * 0.05}
-                />
+                <SpeedDialItem key={action.id} {...action} delay={index * 0.05} />
               ))}
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
 
         {/* Main FAB Button */}
@@ -333,11 +406,15 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
               'shadow-accent/20 shadow-lg',
               'backdrop-blur-md will-change-transform',
               'hover:bg-accent/90',
-              'focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background',
+              'focus:ring-accent focus:ring-offset-background focus:ring-2 focus:ring-offset-2 focus:outline-none',
               // Pulse animation for first visit
               showPulse && 'animate-pulse'
             )}
-            aria-label={isExpanded ? 'Close quick actions (press F or Escape)' : 'Open quick actions (press F)'}
+            aria-label={
+              isExpanded
+                ? 'Close quick actions (press F or Escape)'
+                : 'Open quick actions (press F)'
+            }
             aria-expanded={isExpanded}
             type="button"
           >
@@ -363,32 +440,33 @@ export function FloatingActionBar({ fabFlags }: FloatingActionBarProps) {
                   stiffness: 500,
                   damping: 20,
                 }}
-                className="-right-1 -top-1 absolute flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 font-bold text-[10px] text-destructive-foreground shadow-md"
+                className="bg-destructive text-destructive-foreground absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold shadow-md"
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </motion.span>
             )}
 
             {/* Pulse ring animation */}
-            {showPulse && (
-              <span className="absolute inset-0 animate-ping rounded-full bg-accent/40" />
-            )}
+            {showPulse ? (
+              <span className="bg-accent/40 absolute inset-0 animate-ping rounded-full" />
+            ) : null}
           </motion.button>
         </div>
 
         {/* Keyboard hint (desktop only, when expanded) */}
         <AnimatePresence>
-          {isExpanded && (
+          {isExpanded ? (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="mt-2 text-center text-muted-foreground text-xs max-md:hidden"
+              className="text-muted-foreground mt-2 text-center text-xs max-md:hidden"
             >
-              Press <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">F</kbd> or{' '}
-              <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">Esc</kbd> to close
+              Press <kbd className="bg-muted rounded px-1.5 py-0.5 font-mono text-[10px]">F</kbd> or{' '}
+              <kbd className="bg-muted rounded px-1.5 py-0.5 font-mono text-[10px]">Esc</kbd> to
+              close
             </motion.p>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </>

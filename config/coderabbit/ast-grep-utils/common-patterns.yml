@@ -1,0 +1,67 @@
+# Common Utility Patterns
+# Reusable patterns for ast-grep rules
+
+---
+# Utility: Match any identifier that might be user input
+id: user-input-identifier
+pattern: $IDENTIFIER
+kind: identifier
+regex: (user|input|param|query|body|req\.body|req\.query|req\.params)
+
+---
+# Utility: Match server-only imports
+id: server-only-imports
+pattern: import $ITEMS from '$MODULE'
+kind: import_statement
+regex: (unstable_cache|headers|cookies|@heyclaude/web-runtime/(core|logging/server))
+
+---
+# Utility: Match client-only imports
+id: client-only-imports
+pattern: import $ITEMS from '$MODULE'
+kind: import_statement
+regex: (@heyclaude/web-runtime/logging/client)
+
+---
+# Utility: Match React hooks
+id: react-hooks
+pattern: $HOOK($$$)
+kind: call_expression
+regex: (useState|useEffect|useCallback|useMemo|useRef|useContext|useReducer|useTransition|useDeferredValue)
+
+---
+# Utility: Match browser APIs
+id: browser-apis
+pattern: $API
+kind: identifier
+regex: (window|document|localStorage|sessionStorage|navigator|location|history)
+
+---
+# Utility: Match Node.js APIs
+id: nodejs-apis
+pattern: import $ITEMS from '$MODULE'
+kind: import_statement
+regex: (^fs$|^path$|^crypto$|^os$|^util$|^http$|^https$|^net$|^stream$)
+
+---
+# Utility: Match PII fields
+id: pii-fields
+pattern: $FIELD: $VALUE
+kind: property
+regex: (userId|user_id|email|phone|ssn|socialSecurityNumber|creditCard|password|token|secret|apiKey)
+
+---
+# Utility: Match authentication checks
+id: auth-checks
+pattern: $CHECK($$$)
+kind: call_expression
+regex: (getUser|checkAuth|verifyToken|authenticate|authorize|requireAuth)
+
+---
+# Utility: Match database mutation methods
+id: database-mutations
+pattern: $SUPABASE.$METHOD($$$)
+kind: call_expression
+has:
+  kind: member_expression
+  regex: (\.insert|\.update|\.delete|\.upsert|\.rpc\(.*(create|update|delete|insert|upsert))

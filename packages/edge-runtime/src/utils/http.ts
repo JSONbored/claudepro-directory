@@ -3,7 +3,6 @@
  */
 
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
-import { getCacheConfigNumber } from '@heyclaude/edge-runtime/config/static-cache-config.ts';
 import { logError, createUtilityContext } from '@heyclaude/shared-runtime/logging.ts';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime/security-headers.ts';
 
@@ -281,31 +280,12 @@ const DEFAULT_CACHE_PRESETS = {
   config: { ttl: 60 * 60 * 24, stale: 60 * 60 * 48 }, // 1d / 2d (category configs)
 } as const;
 
-const CACHE_PRESET_CONFIG_MAP: Partial<Record<CachePresetKey, string>> = {
-  content_export: 'cache.content_export.ttl_seconds',
-  content_paginated: 'cache.content_paginated.ttl_seconds',
-  feeds: 'cache.feeds.ttl_seconds',
-  seo: 'cache.seo.ttl_seconds',
-  sitemap: 'cache.sitemap.ttl_seconds',
-  status: 'cache.status.ttl_seconds',
-  company_profile: 'cache.company_profile.ttl_seconds',
-  trending_page: 'cache.trending_page.ttl_seconds',
-  trending_sidebar: 'cache.trending_sidebar.ttl_seconds',
-  search: 'cache.search.ttl_seconds',
-  search_autocomplete: 'cache.search_autocomplete.ttl_seconds',
-  search_facets: 'cache.search_facets.ttl_seconds',
-  transform: 'cache.transform.ttl_seconds',
-  config: 'cache.config.ttl_seconds',
-};
-
 export type CachePresetKey = keyof typeof DEFAULT_CACHE_PRESETS;
 
 function resolveCachePreset(key: CachePresetKey, overrides?: { ttl?: number; stale?: number }) {
   const defaults = DEFAULT_CACHE_PRESETS[key];
-  const configKey = CACHE_PRESET_CONFIG_MAP[key];
-  const ttlFromConfig = configKey ? getCacheConfigNumber(configKey, defaults.ttl) : defaults.ttl;
 
-  const ttl = Math.max(1, overrides?.ttl ?? ttlFromConfig);
+  const ttl = Math.max(1, overrides?.ttl ?? defaults.ttl);
   const stale = Math.max(ttl, overrides?.stale ?? defaults.stale);
 
   return { ttl, stale };

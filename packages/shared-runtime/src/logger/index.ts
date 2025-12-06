@@ -112,21 +112,45 @@ export function createLogger(
     return pino(config, destination);
   }
   
-  // Create Vercel-compatible destination that uses console methods
-  // This ensures Vercel properly detects log levels:
+  // CRITICAL: Pino does NOT support using both transport and destination together!
+  // When a destination is passed to pino(), it overrides any transport.
+  // Strategy:
+  // - Development: Use pino-pretty transport (colored, readable logs)
+  // - Production: Use Vercel-compatible destination (proper log level routing for Vercel)
+  const isDevelopment = typeof process !== 'undefined' && process.env?.['NODE_ENV'] !== 'production';
+  const hasTransport = config.transport !== undefined;
+  
+  // Use pino-pretty in dev (if transport is configured), Vercel destination in production
+  if (hasTransport && isDevelopment) {
+    // Development: Use pino-pretty transport for colored, readable logs
+    // CRITICAL: According to Pino docs, when using transport in config, you should NOT pass
+    // a destination as the second argument. The inline config pattern is recommended:
+    // pino({ transport: {...}, ...otherConfig })
+    // 
+    // The pattern pino(config, transport) where transport is from pino.transport() 
+    // may not work correctly - docs explicitly warn against this.
+    // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
+    return pino(config);
+  }
+  
+  // Production or no transport: Use Vercel-compatible destination
+  // This ensures Vercel properly detects log levels via console methods:
   // - console.error() → error (red)
   // - console.warn() → warning (orange in streaming functions)
   // - console.log() → info (gray)
+  // IMPORTANT: Remove transport from config before passing destination
+  // (Pino will error if both are present)
+  const configWithoutTransport = { ...config };
+  delete configWithoutTransport.transport;
   const vercelDest = createVercelCompatibleDestination();
-  
   if (vercelDest) {
     // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
-    return pino(config, vercelDest);
+    return pino(configWithoutTransport, vercelDest);
   }
   
   // Browser/Edge fallback: use default Pino destination (stdout)
   // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
-  return pino(config);
+  return pino(configWithoutTransport);
 }
 
 /**

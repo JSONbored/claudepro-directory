@@ -10,12 +10,12 @@ type NewsletterConfig = Record<string, unknown>;
  * Format subscriber count for social proof display
  * Rounds to nearest friendly number (14 → "14+", 1,234 → "1.2k+")
  */
-export function formatSubscriberCount(count: number | null): string {
+export function formatSubscriberCount(count: null | number): string {
   if (!count || count === 0) return '10+'; // Minimum social proof
 
   if (count < 100) return `${count}+`;
   if (count < 1000) return `${Math.floor(count / 10) * 10}+`;
-  if (count < 10000) return `${(count / 1000).toFixed(1)}k+`;
+  if (count < 10_000) return `${(count / 1000).toFixed(1)}k+`;
   return `${Math.floor(count / 1000)}k+`;
 }
 
@@ -29,8 +29,8 @@ export function getCTAVariantCopy(
   subscriberCount: string,
   config?: NewsletterConfig
 ): {
-  headline: string;
   description: string;
+  headline: string;
 } {
   const variants = {
     aggressive: {
@@ -76,8 +76,8 @@ export function getContextualMessage(
   category?: string,
   config?: NewsletterConfig
 ): {
-  headline: string;
   description: string;
+  headline: string;
 } {
   const messages = {
     agents: {
@@ -126,7 +126,7 @@ export function getContextualMessage(
       headline: NEWSLETTER_CTA_CONFIG.headline,
       description: NEWSLETTER_CTA_CONFIG.description,
     },
-  } as const satisfies Record<string, { headline: string; description: string }>;
+  } as const satisfies Record<string, { description: string; headline: string }>;
 
   if (!(category && category in messages)) {
     return messages.default;

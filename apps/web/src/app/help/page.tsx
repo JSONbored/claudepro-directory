@@ -18,11 +18,8 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 
-/**
- * Static Generation: Help page is fully static content
- * No dynamic data fetching - can be pre-rendered at build time
- */
-export const revalidate = false;
+// MIGRATED: Removed export const revalidate = false (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 const helpTopics = [
   {

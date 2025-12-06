@@ -15,17 +15,17 @@
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { toggleFollow } from '@heyclaude/web-runtime/actions';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { Button } from '@heyclaude/web-runtime/ui';
 import { useOptimistic, useTransition } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 export interface FollowButtonProps {
+  className?: string;
+  initialIsFollowing: boolean;
+  size?: 'default' | 'icon' | 'lg' | 'sm';
   userId: string;
   userSlug: string;
-  initialIsFollowing: boolean;
-  variant?: 'default' | 'outline' | 'ghost';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
-  className?: string;
+  variant?: 'default' | 'ghost' | 'outline';
 }
 
 export function FollowButton({

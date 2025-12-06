@@ -19,7 +19,9 @@ import { UI_CLASSES } from '../../ui/constants.ts';
 import { Button } from './button.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card.tsx';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
+import type { FallbackProps } from 'react-error-boundary';
 import { useCallback } from 'react';
+import type { ComponentType } from 'react';
 
 /**
  * ErrorFallback component using web-runtime UI primitives
@@ -96,12 +98,24 @@ export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
     []
   );
 
+  const Fallback = fallback || ErrorFallback;
+
+  // Type assertion needed due to React 19 compatibility issue with react-error-boundary types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ErrorBoundaryComponent = ReactErrorBoundary as any as ComponentType<{
+    fallbackRender: (props: FallbackProps) => React.ReactElement;
+    onError: (error: Error, errorInfo: { componentStack?: string | null }) => void;
+    children: React.ReactNode;
+  }>;
+
   return (
-    <ReactErrorBoundary
-      FallbackComponent={fallback || ErrorFallback}
+    <ErrorBoundaryComponent
+      fallbackRender={({ error, resetErrorBoundary }: FallbackProps) => (
+        <Fallback error={error} resetErrorBoundary={resetErrorBoundary} />
+      )}
       onError={handleError}
     >
       {children}
-    </ReactErrorBoundary>
+    </ErrorBoundaryComponent>
   );
 }

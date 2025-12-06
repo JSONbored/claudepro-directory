@@ -193,7 +193,10 @@ export function SwipeableCardWrapper({
         dragElastic={0.2}
         dragMomentum={false}
         style={{ x }}
-        onDragEnd={(_event, info) => {
+        onDragEnd={(
+          _event: MouseEvent | TouchEvent | PointerEvent,
+          info: { offset: { x: number; y: number }; velocity: { x: number; y: number } }
+        ) => {
           try {
             // Swipe right threshold: 100px
             if (info.offset.x > 100 && onSwipeRight) {

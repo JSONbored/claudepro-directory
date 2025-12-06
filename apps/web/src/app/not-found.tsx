@@ -11,7 +11,6 @@ export async function generateMetadata(): Promise<Metadata> {
  * Static Generation: 404 page is fully static
  * No dynamic data fetching - can be pre-rendered at build time
  */
-export const revalidate = false;
 
 /**
  * Renders the site's 404 Not Found page using the NotFoundEmpty presentation.

@@ -10,9 +10,10 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { useEffect, useRef, useState } from 'react';
+
 import { ChangelogContent } from './changelog-content';
 import { TimelineMarker } from './timeline-marker';
 
@@ -59,7 +60,7 @@ function isValidInternalPath(path: string): boolean {
  * @see isValidInternalPath
  * @see sanitizeSlug
  */
-function getSafeChangelogPath(slug: string | null | undefined): string | null {
+function getSafeChangelogPath(slug: null | string | undefined): null | string {
   if (!slug || typeof slug !== 'string') return null;
   if (!isValidChangelogSlug(slug)) return null;
   const sanitized = sanitizeSlug(slug).toLowerCase();
@@ -87,7 +88,7 @@ interface ChangelogTimelineViewProps {
  * @see getSafeChangelogPath
  */
 export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
-  const [activeSlug, setActiveSlug] = useState<string | null>(entries[0]?.slug ?? null);
+  const [activeSlug, setActiveSlug] = useState<null | string>(entries[0]?.slug ?? null);
   const contentRefs = useRef<Map<string, HTMLElement>>(new Map());
   const observerRefs = useRef<Map<string, IntersectionObserver>>(new Map());
 
@@ -98,13 +99,13 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
     }
 
     // Clean up existing observers
-    observerRefs.current.forEach((observer) => observer.disconnect());
+    for (const [, observer] of observerRefs.current) observer.disconnect();
     observerRefs.current.clear();
 
     // Create observers for each entry
-    entries.forEach((entry) => {
+    for (const entry of entries) {
       const element = contentRefs.current.get(entry.slug);
-      if (!element) return;
+      if (!element) continue;
 
       const observer = new IntersectionObserver(
         ([intersectionEntry]) => {
@@ -131,11 +132,11 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
 
       observer.observe(element);
       observerRefs.current.set(entry.slug, observer);
-    });
+    }
 
     // Cleanup on unmount
     return () => {
-      observerRefs.current.forEach((observer) => observer.disconnect());
+      for (const [, observer] of observerRefs.current) observer.disconnect();
       observerRefs.current.clear();
     };
   }, [entries]);
@@ -162,7 +163,7 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
       {/* Timeline Column (Left) - Minimal design */}
       <div className="relative hidden md:block">
         {/* Vertical timeline line - Subtle */}
-        <div className="absolute left-3 top-0 bottom-0 w-px bg-border/40" aria-hidden="true" />
+        <div className="bg-border/40 absolute top-0 bottom-0 left-3 w-px" aria-hidden="true" />
 
         {/* Timeline markers */}
         <div className="relative pl-8">
@@ -190,9 +191,9 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
             key={entry.slug}
             id={`changelog-entry-${entry.slug}`}
             ref={setContentRef(entry.slug)}
-            className="scroll-mt-24 pt-6 md:pt-8 pb-12 md:pb-20 border-b border-border/20 last:border-b-0 last:pb-0"
+            className="border-border/20 scroll-mt-24 border-b pt-6 pb-12 last:border-b-0 last:pb-0 md:pt-8 md:pb-20"
           >
-            <ChangelogContent entry={entry} hideHeader={true} />
+            <ChangelogContent entry={entry} hideHeader />
           </section>
         ))}
       </div>

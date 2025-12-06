@@ -1,6 +1,6 @@
 import { trackRPCFailure } from '@heyclaude/web-runtime/core';
 import { getSearchFacets } from '@heyclaude/web-runtime/server';
-import type { SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
 
 /**
  * Homepage Search Facets Server Component

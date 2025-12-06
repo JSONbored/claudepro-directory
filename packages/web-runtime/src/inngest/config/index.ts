@@ -17,37 +17,43 @@ export const CONCURRENCY_LIMITS = {
    * Resend API - Email sending
    * Free tier: 100 emails/day, 3 emails/second
    * Pro tier: Higher limits
+   * NOTE: Inngest free tier max concurrency is 5
    */
-  RESEND_API: 10,
+  RESEND_API: 5,
 
   /**
    * Discord API - Webhook rate limits
    * Global: 50 requests per second
    * Per webhook: 5 requests per 2 seconds
+   * NOTE: Inngest free tier max concurrency is 5
    */
   DISCORD_WEBHOOKS: 5,
 
   /**
    * OpenAI/AI APIs - Rate limited
    * Varies by tier
+   * NOTE: Inngest free tier max concurrency is 5
    */
-  AI_APIS: 10,
+  AI_APIS: 5,
 
   /**
    * Database operations - Connection pool limits
+   * NOTE: Inngest free tier max concurrency is 5
    */
-  DATABASE: 20,
+  DATABASE: 5,
 
   /**
    * GitHub API
    * 5000 requests per hour for authenticated requests
+   * NOTE: Inngest free tier max concurrency is 5
    */
-  GITHUB_API: 15,
+  GITHUB_API: 5,
 
   /**
    * Polar API
+   * NOTE: Inngest free tier max concurrency is 5
    */
-  POLAR_API: 10,
+  POLAR_API: 5,
 } as const;
 
 /**

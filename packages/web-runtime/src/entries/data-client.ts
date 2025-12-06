@@ -58,7 +58,7 @@ export * from '../data/forms/submission-form-fields.ts';
 export { getLayoutFlags, type LayoutFlags } from '../data/layout/flags.ts';
 
 // Static Category Config - RAW CONSTANTS ONLY
-// Do NOT export getCategoryConfig (uses cache()) or other server functions
+// These are pure functions with no caching - safe to export
 export { 
   ALL_CATEGORY_IDS,
   HOMEPAGE_CATEGORY_IDS,

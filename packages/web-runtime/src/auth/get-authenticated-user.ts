@@ -36,9 +36,24 @@ export async function getAuthenticatedUserFromClient(
 
     if (error) {
       const normalized = normalizeError(error, 'Failed to fetch authenticated user');
-      logger.error(`${contextLabel}: supabase auth getUser failed`, normalized);
+      // When auth is optional (requireUser=false), missing session is expected and should be debug level
+      // Only log as error if auth is required or if it's an actual error (not just missing session)
       if (options?.requireUser) {
+        logger.error(`${contextLabel}: supabase auth getUser failed`, normalized);
         throw normalized;
+      }
+      // Optional auth: missing session is expected, log at debug level
+      // Only log as error if it's not a session missing error (e.g., network error)
+      if (error.message?.includes('session') || error.message?.includes('Auth session missing')) {
+        logger.debug(`${contextLabel}: no authenticated session (optional auth)`, {
+          errorMessage: normalized.message,
+          errorName: normalized.name,
+        });
+      } else {
+        // Actual error (network, etc.) - log as warn even for optional auth
+        logger.warn(`${contextLabel}: supabase auth getUser failed (optional auth)`, {
+          err: normalized,
+        });
       }
       return {
         user: null,

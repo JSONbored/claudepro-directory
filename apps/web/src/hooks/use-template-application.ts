@@ -5,9 +5,11 @@
  * Parses template data and maps it to form fields intelligently.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import { normalizeError } from '@heyclaude/web-runtime/core';
-import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+'use client';
+
+import { type Database } from '@heyclaude/database-types';
+import { normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { useCallback } from 'react';
 
 // Use generated type directly from @heyclaude/database-types
@@ -15,54 +17,55 @@ type ContentTemplatesResult = Database['public']['Functions']['get_content_templ
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
 // Type representing the merged structure (matches what getContentTemplates returns)
-type MergedTemplateItem = ContentTemplateItem & {
-  templateData: ContentTemplateItem['template_data'];
-} & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+type MergedTemplateItem = ContentTemplateItem &
+  (ContentTemplateItem['template_data'] extends Record<string, unknown>
     ? ContentTemplateItem['template_data']
-    : Record<string, unknown>);
+    : Record<string, unknown>) & {
+    templateData: ContentTemplateItem['template_data'];
+  };
 
 interface FormData {
-  submission_type: SubmissionContentType;
-  name: string;
-  description: string;
   author: string;
   author_profile_url?: string;
-  github_url?: string;
-  type_specific: Record<string, unknown>;
-  tags: string[];
-  examples: string[];
   category: string;
+  description: string;
+  examples: string[];
+  github_url?: string;
+  name: string;
+  submission_type: SubmissionContentType;
+  tags: string[];
+  type_specific: Record<string, unknown>;
 }
 
 interface UseTemplateApplicationProps {
-  onFormUpdate: (updates: Partial<FormData>) => void;
   currentFormData: FormData;
+  onFormUpdate: (updates: Partial<FormData>) => void;
   onTrackEvent?: (event: string, data?: Record<string, unknown>) => void;
 }
 
 interface TemplateData {
-  // Common fields
-  name?: string;
+  [key: string]: unknown;
+  command_content?: string;
   description?: string;
-  tags?: string[];
   examples?: string[];
 
+  featured?: boolean;
+  install_command?: string;
+  max_tokens?: number;
+  // Common fields
+  name?: string;
+  npm_package?: string;
+  rules_content?: string;
   // Type-specific fields
   system_prompt?: string;
+  tags?: string[];
+
   temperature?: number;
-  max_tokens?: number;
-  npm_package?: string;
-  install_command?: string;
   tools_description?: string;
-  rules_content?: string;
-  command_content?: string;
+  trending?: boolean;
 
   // Metadata
   usage_count?: number;
-  trending?: boolean;
-  featured?: boolean;
-
-  [key: string]: unknown;
 }
 
 export function useTemplateApplication({
@@ -166,7 +169,7 @@ function parseTemplateData(data: unknown): TemplateData {
     }
 
     return {};
-  } catch (_error) {
+  } catch {
     return {};
   }
 }
@@ -181,7 +184,7 @@ function mapTypeSpecificFields(
   const typeSpecific: Record<string, unknown> = {};
 
   switch (contentType) {
-    case 'agents':
+    case 'agents': {
       // Agent-specific fields
       if (templateData['system_prompt']) {
         typeSpecific['systemPrompt'] = templateData['system_prompt'];
@@ -193,8 +196,9 @@ function mapTypeSpecificFields(
         typeSpecific['maxTokens'] = templateData['max_tokens'];
       }
       break;
+    }
 
-    case 'mcp':
+    case 'mcp': {
       // MCP-specific fields
       if (templateData['npm_package']) {
         typeSpecific['npmPackage'] = templateData['npm_package'];
@@ -206,31 +210,36 @@ function mapTypeSpecificFields(
         typeSpecific['toolsDescription'] = templateData['tools_description'];
       }
       break;
+    }
 
-    case 'rules':
+    case 'rules': {
       // Rules-specific fields
       if (templateData['rules_content']) {
         typeSpecific['rulesContent'] = templateData['rules_content'];
       }
       break;
+    }
 
-    case 'commands':
+    case 'commands': {
       // Commands-specific fields
       if (templateData['command_content']) {
         typeSpecific['commandContent'] = templateData['command_content'];
       }
       break;
+    }
 
     case 'hooks':
     case 'statuslines':
-    case 'skills':
+    case 'skills': {
       // Generic fields for other types
       // Can be extended based on specific needs
       break;
+    }
 
-    default:
+    default: {
       // Handle unknown types gracefully
       break;
+    }
   }
 
   return typeSpecific;

@@ -8,10 +8,10 @@
 import { memo, useEffect, useState } from 'react';
 
 interface SanitizedHTMLProps {
-  /** HTML string to sanitize and render */
-  html: string;
   /** Additional CSS classes */
   className?: string;
+  /** HTML string to sanitize and render */
+  html: string;
   /** HTML id attribute */
   id?: string;
 }
@@ -24,42 +24,44 @@ export const SanitizedHTML = memo(({ html, className, id }: SanitizedHTMLProps) 
   const [safeHtml, setSafeHtml] = useState<string>(html);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && html && typeof html === 'string') {
-      import('dompurify').then((DOMPurify) => {
-        const sanitized = DOMPurify.default.sanitize(html, {
-    ALLOWED_TAGS: [
-      'p',
-      'br',
-      'strong',
-      'em',
-      'b',
-      'i',
-      'u',
-      'a',
-      'ul',
-      'ol',
-      'li',
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6',
-      'code',
-      'pre',
-      'blockquote',
-      'span',
-      'div',
-    ],
-    ALLOWED_ATTR: ['href', 'title', 'target', 'rel', 'class', 'id'],
-    ALLOWED_URI_REGEXP:
-      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+    if (globalThis.window !== undefined && html && typeof html === 'string') {
+      import('dompurify')
+        .then((DOMPurify) => {
+          const sanitized = DOMPurify.default.sanitize(html, {
+            ALLOWED_TAGS: [
+              'p',
+              'br',
+              'strong',
+              'em',
+              'b',
+              'i',
+              'u',
+              'a',
+              'ul',
+              'ol',
+              'li',
+              'h1',
+              'h2',
+              'h3',
+              'h4',
+              'h5',
+              'h6',
+              'code',
+              'pre',
+              'blockquote',
+              'span',
+              'div',
+            ],
+            ALLOWED_ATTR: ['href', 'title', 'target', 'rel', 'class', 'id'],
+            ALLOWED_URI_REGEXP:
+              /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+          });
+          setSafeHtml(sanitized);
+        })
+        .catch(() => {
+          // Fallback to original HTML if DOMPurify fails to load
+          setSafeHtml(html);
         });
-        setSafeHtml(sanitized);
-      }).catch(() => {
-        // Fallback to original HTML if DOMPurify fails to load
-        setSafeHtml(html);
-      });
     }
   }, [html]);
 

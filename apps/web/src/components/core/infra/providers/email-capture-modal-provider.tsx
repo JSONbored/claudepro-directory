@@ -15,18 +15,19 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+
 import { NewsletterModal } from '@/src/components/features/growth/newsletter/newsletter-modal';
 
 /**
  * Modal context data structure
  */
 interface ModalContext {
-  copyType: Database['public']['Enums']['copy_type'];
   category?: Database['public']['Enums']['content_category'];
-  slug?: string;
+  copyType: Database['public']['Enums']['copy_type'];
   referrer?: string;
+  slug?: string;
 }
 
 /**
@@ -34,14 +35,14 @@ interface ModalContext {
  */
 interface PostCopyEmailContextValue {
   /**
-   * Show the email capture modal
-   */
-  showModal: (context: ModalContext) => void;
-
-  /**
    * Whether modal has been shown this session
    */
   hasShownThisSession: boolean;
+
+  /**
+   * Show the email capture modal
+   */
+  showModal: (context: ModalContext) => void;
 }
 
 /**
@@ -129,11 +130,11 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
     };
 
     // Only attach listener on high-value pages (content pages, not homepage)
-    if (typeof window !== 'undefined' && window.location.pathname.includes('/')) {
+    if (globalThis.window !== undefined && globalThis.location.pathname.includes('/')) {
       document.addEventListener('mouseleave', handleMouseLeave);
       return () => document.removeEventListener('mouseleave', handleMouseLeave);
     }
-    return undefined;
+    return;
   }, [hasShownThisSession]);
 
   /**
@@ -185,7 +186,7 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
   return (
     <PostCopyEmailContext.Provider value={{ showModal, hasShownThisSession }}>
       {children}
-      {modalContext && (
+      {modalContext ? (
         <NewsletterModal
           source="modal"
           open={isOpen}
@@ -194,7 +195,7 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
           {...(modalContext.category && { category: modalContext.category })}
           {...(modalContext.slug && { slug: modalContext.slug })}
         />
-      )}
+      ) : null}
     </PostCopyEmailContext.Provider>
   );
 }

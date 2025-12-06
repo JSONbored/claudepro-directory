@@ -25,15 +25,15 @@
  * ```
  */
 
-import { useEffect } from 'react';
 import { type RecentlyViewedCategory, useRecentlyViewed } from '@heyclaude/web-runtime/hooks';
+import { useEffect } from 'react';
 
 export interface RecentlyViewedTrackerProps {
   category: RecentlyViewedCategory;
-  slug: string;
-  title: string;
   description: string;
+  slug: string;
   tags?: string[];
+  title: string;
 }
 
 export function RecentlyViewedTracker({

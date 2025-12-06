@@ -11,10 +11,10 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 
 interface OAuthProviderButtonProps {
-  provider: 'github' | 'google' | 'discord';
-  redirectTo?: string | undefined;
   className?: string;
   newsletterOptIn?: boolean;
+  provider: 'discord' | 'github' | 'google';
+  redirectTo?: string | undefined;
 }
 
 const PROVIDER_CONFIG = {
@@ -47,7 +47,7 @@ export function OAuthProviderButton({
   const handleSignIn = async () => {
     setLoading(true);
 
-    const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
+    const callbackUrl = new URL(`${globalThis.location.origin}/auth/callback`);
     callbackUrl.searchParams.set('newsletter', newsletterOptIn ? 'true' : 'false');
     if (redirectTo) {
       callbackUrl.searchParams.set('next', redirectTo);
@@ -99,7 +99,7 @@ export function OAuthProviderButton({
       </div>
 
       {/* Label below */}
-      <span className="font-medium text-foreground text-sm">
+      <span className="text-foreground text-sm font-medium">
         {loading ? 'Signing in...' : config.label}
       </span>
     </button>

@@ -9,9 +9,21 @@
  * - Notification badge (mobile only)
  */
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { ArrowUp, Bell, Bookmark, Copy, FileText, Plus, Search, Share2 } from '@heyclaude/web-runtime/icons';
-import type { MainFABConfig, SpeedDialAction } from '@heyclaude/web-runtime/types/component.types';
+import {
+  ArrowUp,
+  Bell,
+  Bookmark,
+  Copy,
+  FileText,
+  Plus,
+  Search,
+  Share2,
+} from '@heyclaude/web-runtime/icons';
+import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import {
+  type MainFABConfig,
+  type SpeedDialAction,
+} from '@heyclaude/web-runtime/types/component.types';
 
 export const handleScrollToTop = (): void => {
   try {
@@ -21,26 +33,27 @@ export const handleScrollToTop = (): void => {
     });
   } catch (error) {
     const normalized = normalizeError(error, '[FAB] Error scrolling to top');
-    logger.error('[FAB] Error scrolling to top', normalized);
+    logClientError('[FAB] Error scrolling to top', normalized, 'handleScrollToTop', {
+      component: 'FAB',
+      action: 'scroll-to-top',
+    });
   }
 };
 
-export const handleSearchClick = (): void => {
+/**
+ * Handle search click - opens the command palette
+ * This function should be called from within a component that has access to useCommandPalette hook
+ * For FAB, we pass the openPalette function directly instead of using this
+ */
+export const handleSearchClick = (openPalette: () => void): void => {
   try {
-    const searchInput = document.querySelector<HTMLInputElement>(
-      'input[type="search"], input[name="search"]'
-    );
-
-    if (searchInput) {
-      searchInput.focus();
-      searchInput.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
-    }
+    openPalette();
   } catch (error) {
-    const normalized = normalizeError(error, '[FAB] Error focusing search');
-    logger.error('[FAB] Error focusing search', normalized);
+    const normalized = normalizeError(error, '[FAB] Error opening command palette');
+    logClientError('[FAB] Error opening command palette', normalized, 'handleSearchClick', {
+      component: 'FAB',
+      action: 'open-command-palette',
+    });
   }
 };
 
@@ -61,12 +74,13 @@ export const createSpeedDialActions = (
   onNotificationsClick: () => void,
   onSubmitClick: () => void,
   onPinboardClick: () => void,
+  onSearchClick: () => void,
   flags: {
-    showSubmit: boolean;
-    showSearch: boolean;
-    showScrollToTop: boolean;
     showNotifications: boolean;
     showPinboard: boolean;
+    showScrollToTop: boolean;
+    showSearch: boolean;
+    showSubmit: boolean;
   }
 ): SpeedDialAction[] => [
   // Submit - All breakpoints
@@ -83,7 +97,7 @@ export const createSpeedDialActions = (
     id: 'search',
     icon: Search,
     label: 'Search (⌘K)',
-    onClick: handleSearchClick,
+    onClick: onSearchClick,
     show: flags.showSearch,
   },
 

@@ -5,24 +5,24 @@
  * Modal for sharing recommendation results
  */
 
-import { logger } from '@heyclaude/web-runtime/core';
 import { Facebook, Linkedin, Mail, Share2, Twitter } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { SimpleCopyButton } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
+import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
 import {
+  UI_CLASSES,
+  SimpleCopyButton,
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  Input,
 } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
 
 interface ShareResultsProps {
-  shareUrl: string;
-  resultCount: number;
   onClose: () => void;
+  resultCount: number;
+  shareUrl: string;
 }
 
 export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsProps) {
@@ -38,7 +38,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
   };
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
+    <Dialog open onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -54,7 +54,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           {/* Copy link */}
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Input
-              readOnly={true}
+              readOnly
               value={shareUrl}
               className="flex-1"
               onClick={(e) => e.currentTarget.select()}
@@ -69,20 +69,36 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               iconClassName={UI_CLASSES.ICON_SM}
               ariaLabel="Copy share link"
               onCopySuccess={() => {
-                logger.info('Share link copied', { from: 'share-results-dialog' });
+                logClientInfo(
+                  'Share link copied',
+                  'ShareResults.copyLink',
+                  {
+                    component: 'ShareResults',
+                    action: 'copy-link',
+                    from: 'share-results-dialog',
+                  }
+                );
               }}
             />
           </div>
 
           {/* Social share buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" size="sm" asChild={true} className="gap-2">
+            <Button variant="outline" size="sm" asChild className="gap-2">
               <a
                 href={shareLinks.twitter}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  logger.info('Recommendation results shared', { platform: 'twitter' });
+                  logClientInfo(
+                    'Recommendation results shared',
+                    'ShareResults.share',
+                    {
+                      component: 'ShareResults',
+                      action: 'share',
+                      platform: 'twitter',
+                    }
+                  );
                 }}
               >
                 <Twitter className={UI_CLASSES.ICON_SM} />
@@ -90,13 +106,21 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild={true} className="gap-2">
+            <Button variant="outline" size="sm" asChild className="gap-2">
               <a
                 href={shareLinks.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  logger.info('Recommendation results shared', { platform: 'linkedin' });
+                  logClientInfo(
+                    'Recommendation results shared',
+                    'ShareResults.share',
+                    {
+                      component: 'ShareResults',
+                      action: 'share',
+                      platform: 'linkedin',
+                    }
+                  );
                 }}
               >
                 <Linkedin className={UI_CLASSES.ICON_SM} />
@@ -104,13 +128,21 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild={true} className="gap-2">
+            <Button variant="outline" size="sm" asChild className="gap-2">
               <a
                 href={shareLinks.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  logger.info('Recommendation results shared', { platform: 'facebook' });
+                  logClientInfo(
+                    'Recommendation results shared',
+                    'ShareResults.share',
+                    {
+                      component: 'ShareResults',
+                      action: 'share',
+                      platform: 'facebook',
+                    }
+                  );
                 }}
               >
                 <Facebook className={UI_CLASSES.ICON_SM} />
@@ -118,11 +150,19 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild={true} className="gap-2">
+            <Button variant="outline" size="sm" asChild className="gap-2">
               <a
                 href={shareLinks.email}
                 onClick={() => {
-                  logger.info('Recommendation results shared', { platform: 'email' });
+                  logClientInfo(
+                    'Recommendation results shared',
+                    'ShareResults.share',
+                    {
+                      component: 'ShareResults',
+                      action: 'share',
+                      platform: 'email',
+                    }
+                  );
                 }}
               >
                 <Mail className={UI_CLASSES.ICON_SM} />

@@ -20,15 +20,19 @@
  */
 
 import { resolveFormIcon } from '@heyclaude/web-runtime/icons';
-import type {
-  FieldDefinition,
-  FormFieldConfig,
-  GridColumn,
+import {
+  type FieldDefinition,
+  type FormFieldConfig,
+  type GridColumn,
 } from '@heyclaude/web-runtime/types/component.types';
-import { getResponsiveGridClass, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
-import { Textarea } from '@heyclaude/web-runtime/ui';
+import {
+  getResponsiveGridClass,
+  POSITION_PATTERNS,
+  UI_CLASSES,
+  Input,
+  Label,
+  Textarea,
+} from '@heyclaude/web-runtime/ui';
 
 // ============================================================================
 // GRID LAYOUT SYSTEM
@@ -72,7 +76,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
         <div className="relative">
           {iconPosition === 'left' && (
             <div
-              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_LEFT} -translate-y-1/2 text-muted-foreground`}
+              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_LEFT} text-muted-foreground -translate-y-1/2`}
             >
               <Icon className={UI_CLASSES.ICON_SM} />
             </div>
@@ -87,7 +91,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
           />
           {iconPosition === 'right' && (
             <div
-              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_RIGHT} -translate-y-1/2 text-muted-foreground`}
+              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_RIGHT} text-muted-foreground -translate-y-1/2`}
             >
               <Icon className={UI_CLASSES.ICON_SM} />
             </div>
@@ -102,7 +106,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
           defaultValue={field.defaultValue}
         />
       )}
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText ? <p className="text-muted-foreground text-xs">{field.helpText}</p> : null}
     </div>
   );
 }
@@ -129,7 +133,7 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
         defaultValue={field.defaultValue}
         className={`${monoClass} resize-y`}
       />
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText ? <p className="text-muted-foreground text-xs">{field.helpText}</p> : null}
     </div>
   );
 }
@@ -157,7 +161,7 @@ function NumberFieldRenderer({ field, formId }: FieldRendererProps) {
         placeholder={field.placeholder}
         required={field.required}
       />
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText ? <p className="text-muted-foreground text-xs">{field.helpText}</p> : null}
     </div>
   );
 }
@@ -179,7 +183,7 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
         name={field.name}
         required={field.required}
         defaultValue={field.defaultValue}
-        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+        className="border-input bg-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
       >
         {field.options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -187,7 +191,7 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
           </option>
         ))}
       </select>
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText ? <p className="text-muted-foreground text-xs">{field.helpText}</p> : null}
     </div>
   );
 }
@@ -198,14 +202,18 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
  */
 function SingleFieldRenderer({ field, formId }: FieldRendererProps) {
   switch (field.type) {
-    case 'text':
+    case 'text': {
       return <TextFieldRenderer field={field} formId={formId} />;
-    case 'textarea':
+    }
+    case 'textarea': {
       return <TextareaFieldRenderer field={field} formId={formId} />;
-    case 'number':
+    }
+    case 'number': {
       return <NumberFieldRenderer field={field} formId={formId} />;
-    case 'select':
+    }
+    case 'select': {
       return <SelectFieldRenderer field={field} formId={formId} />;
+    }
   }
 }
 

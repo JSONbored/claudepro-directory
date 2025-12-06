@@ -1,15 +1,14 @@
 'use client';
 
 import { Search } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
 
 interface SearchTriggerProps {
-  onClick?: () => void;
-  variant?: 'outline' | 'minimal' | 'ghost' | 'default';
-  size?: 'sm' | 'md' | 'lg';
-  showShortcut?: boolean;
   className?: string;
+  onClick?: () => void;
+  showShortcut?: boolean;
+  size?: 'lg' | 'md' | 'sm';
+  variant?: 'default' | 'ghost' | 'minimal' | 'outline';
 }
 
 export function SearchTrigger({
@@ -30,18 +29,17 @@ export function SearchTrigger({
       <button
         type="button"
         onClick={onClick}
-        className={`group flex w-full max-w-md cursor-pointer items-center gap-3 rounded-lg border border-border bg-background px-4 py-2.5 text-muted-foreground transition-colors hover:border-border/80 hover:text-foreground ${className}
-        `}
+        className={`group border-border bg-background text-muted-foreground hover:border-border/80 hover:text-foreground flex w-full max-w-md cursor-pointer items-center gap-3 rounded-lg border px-4 py-2.5 transition-colors ${className}`}
       >
         <Search
           className={`${UI_CLASSES.ICON_SM} text-muted-foreground ${UI_CLASSES.GROUP_HOVER_ACCENT}`}
         />
-        <span className={'flex-1 text-left text-sm'}>Search content...</span>
-        {showShortcut && (
-          <div className={'flex items-center gap-1 text-xs'}>
-            <kbd className={'rounded border bg-muted px-1.5 py-0.5 text-xs'}>⌘K</kbd>
+        <span className="flex-1 text-left text-sm">Search content...</span>
+        {showShortcut ? (
+          <div className="flex items-center gap-1 text-xs">
+            <kbd className="bg-muted rounded border px-1.5 py-0.5 text-xs">⌘K</kbd>
           </div>
-        )}
+        ) : null}
       </button>
     );
   }
@@ -50,13 +48,13 @@ export function SearchTrigger({
     <Button variant={variant} onClick={onClick} className={`${sizeClasses[size]} ${className}`}>
       <Search className={UI_CLASSES.ICON_SM} />
       <span className="sr-only">Search</span>
-      {showShortcut && size !== 'sm' && (
-        <div className={'ml-2 flex items-center gap-1'}>
-          <kbd className={'hidden rounded border bg-muted px-1.5 py-0.5 text-xs sm:inline-block'}>
+      {showShortcut && size !== 'sm' ? (
+        <div className="ml-2 flex items-center gap-1">
+          <kbd className="bg-muted hidden rounded border px-1.5 py-0.5 text-xs sm:inline-block">
             ⌘K
           </kbd>
         </div>
-      )}
+      ) : null}
     </Button>
   );
 }

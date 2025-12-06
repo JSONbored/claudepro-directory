@@ -13,28 +13,9 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import { logger } from '@heyclaude/web-runtime/core';
-
-/**
- * Sanitizes path segment to prevent SSRF/path traversal.
- * Allows a-z, A-Z, 0-9, dash, underscore, dot, NO slash or backslash.
- * Returns null if invalid to allow graceful fallback instead of crashing.
- * Used to construct safe URLs.
- */
-function sanitizePathSegment(segment: string): string | null {
-  // Only allow a-z, A-Z, 0-9, dash, underscore, dot.
-  // No slashes, no backslashes, no semicolon, no control chars.
-  // Length restricted to 1-64 characters.
-  const SAFE_SEGMENT_REGEX = /^[a-zA-Z0-9._-]{1,64}$/;
-  if (!SAFE_SEGMENT_REGEX.test(segment)) {
-    return null;
-  }
-  return segment;
-}
-
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { useCopyToClipboard, usePulse } from '@heyclaude/web-runtime/hooks';
+import { useCopyToClipboard, usePulse, usePinboard } from '@heyclaude/web-runtime/hooks';
 import {
   ArrowLeft,
   Bookmark,
@@ -45,18 +26,40 @@ import {
   FileText,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
-import type { ContentItem, CopyType } from '@heyclaude/web-runtime/types/component.types';
-import { STATE_PATTERNS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
+import { type ContentItem, type CopyType } from '@heyclaude/web-runtime/types/component.types';
+import {
+  STATE_PATTERNS,
+  toasts,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
+} from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
+
 import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
 import { ShareMenu } from '@/src/components/core/buttons/social/share-menu';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
-import { Button } from '@heyclaude/web-runtime/ui';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import { usePinboard } from '@heyclaude/web-runtime/hooks';
+
+/**
+ * Sanitizes path segment to prevent SSRF/path traversal.
+ * Allows a-z, A-Z, 0-9, dash, underscore, dot, NO slash or backslash.
+ * Returns null if invalid to allow graceful fallback instead of crashing.
+ * Used to construct safe URLs.
+ */
+function sanitizePathSegment(segment: string): null | string {
+  // Only allow a-z, A-Z, 0-9, dash, underscore, dot.
+  // No slashes, no backslashes, no semicolon, no control chars.
+  // Length restricted to 1-64 characters.
+  const SAFE_SEGMENT_REGEX = /^[a-zA-Z0-9._-]{1,64}$/;
+  if (!SAFE_SEGMENT_REGEX.test(segment)) {
+    return null;
+  }
+  return segment;
+}
 
 /**
  * Determine copy type based on content item structure
@@ -64,8 +67,8 @@ import { usePinboard } from '@heyclaude/web-runtime/hooks';
 function determineCopyType(
   item:
     | ContentItem
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        ContentItem)
+    | (ContentItem &
+        Database['public']['Functions']['get_content_detail_complete']['Returns']['content'])
 ): CopyType {
   // Handle Json type - cast to ContentItem for property access
   const contentItem = item as ContentItem;
@@ -84,9 +87,9 @@ function determineCopyType(
 function getContentForCopy(
   item:
     | ContentItem
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        ContentItem)
-): string | null {
+    | (ContentItem &
+        Database['public']['Functions']['get_content_detail_complete']['Returns']['content'])
+): null | string {
   // Handle Json type - cast to ContentItem for property access
   const contentItem = item as ContentItem;
 
@@ -127,15 +130,15 @@ function getContentForCopy(
  * - 'custom': Custom action type
  */
 export type SerializableActionType =
-  | 'download'
-  | 'scroll'
-  | 'github_link'
-  | 'notification'
   | 'copy_command'
   | 'copy_script'
+  | 'custom'
   | 'deploy'
+  | 'download'
+  | 'github_link'
   | 'info'
-  | 'custom';
+  | 'notification'
+  | 'scroll';
 
 export interface SerializableAction {
   label: string;
@@ -143,15 +146,12 @@ export interface SerializableAction {
 }
 
 export interface DetailHeaderActionsProps {
+  category: Database['public']['Enums']['content_category'];
+  displayTitle: string;
+  hasContent: boolean;
   item:
     | ContentItem
     | Database['public']['Functions']['get_content_detail_complete']['Returns']['content'];
-  typeName: string;
-  category: Database['public']['Enums']['content_category'];
-  hasContent: boolean;
-  displayTitle: string;
-  primaryAction: SerializableAction;
-  secondaryActions?: SerializableAction[];
   /**
    * Optional custom copy handler.
    *
@@ -167,6 +167,9 @@ export interface DetailHeaderActionsProps {
    * in the component that uses DetailHeaderActions.
    */
   onCopyContent?: (() => Promise<void>) | undefined;
+  primaryAction: SerializableAction;
+  secondaryActions?: SerializableAction[];
+  typeName: string;
 }
 
 /**
@@ -198,7 +201,7 @@ export function DetailHeaderActions({
   onCopyContent,
 }: DetailHeaderActionsProps) {
   const router = useRouter();
-  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
+  const referrer = globalThis.window === undefined ? undefined : globalThis.location.pathname;
   const { copy: copyToClipboard } = useCopyToClipboard();
   const { showModal } = usePostCopyEmail();
   // Cast item to ContentItem for property access (content is Json type)
@@ -232,9 +235,9 @@ export function DetailHeaderActions({
   const pinned = isPinned(category, contentItem.slug);
 
   const shareUrl =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/${category}/${contentItem.slug}`
-      : '';
+    globalThis.window === undefined
+      ? ''
+      : `${globalThis.location.origin}/${category}/${contentItem.slug}`;
 
   const handleTogglePin = () => {
     // Capture state BEFORE toggling to show correct toast
@@ -338,7 +341,7 @@ export function DetailHeaderActions({
         ? `/api/content/mcp/${safeSlug}?format=storage`
         : `/api/content/skills/${safeSlug}?format=storage`;
 
-    window.location.href = downloadUrl;
+    globalThis.location.href = downloadUrl;
     pulse
       .download({
         category,
@@ -393,11 +396,7 @@ export function DetailHeaderActions({
   return (
     <>
       {/* Back navigation - minimal */}
-      <motion.div
-        whileHover={{ x: -2 }}
-        whileTap={{ scale: 0.97 }}
-        className="mb-4 inline-block"
-      >
+      <motion.div whileHover={{ x: -2 }} whileTap={{ scale: 0.97 }} className="mb-4 inline-block">
         <Button
           variant="ghost"
           size="sm"
@@ -428,29 +427,29 @@ export function DetailHeaderActions({
           </div>
 
           {/* Title - larger and more prominent */}
-          <h1 className="font-bold text-3xl tracking-tight lg:text-4xl">{displayTitle}</h1>
+          <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">{displayTitle}</h1>
 
           {/* Description - larger line height for readability */}
-          {contentItem.description && (
-            <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground lg:text-xl">
+          {contentItem.description ? (
+            <p className="text-muted-foreground max-w-2xl text-lg leading-relaxed lg:text-xl">
               {contentItem.description}
             </p>
-          )}
+          ) : null}
         </div>
 
         {/* Right column - Actions sidebar (sticky on desktop) */}
-        <aside className="space-y-3 rounded-lg border border-border/50 bg-card/50 p-4 lg:sticky lg:top-24 lg:self-start">
+        <aside className="border-border/50 bg-card/50 space-y-3 rounded-lg border p-4 lg:sticky lg:top-24 lg:self-start">
           {/* Primary CTA - Full width */}
-          {(!(primaryAction.type === 'download') || hasDownloadAvailable) && (
+          {!(primaryAction.type === 'download') || hasDownloadAvailable ? (
             <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.01 }}>
               <Button onClick={() => handleActionClick(primaryAction)} className="w-full">
                 {primaryAction.label}
               </Button>
             </motion.div>
-          )}
+          ) : null}
 
           {/* Conditional download button */}
-          {hasDownloadAvailable && primaryAction.type !== 'download' && (
+          {hasDownloadAvailable && primaryAction.type !== 'download' ? (
             <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.01 }}>
               <Button
                 onClick={() => {
@@ -463,10 +462,12 @@ export function DetailHeaderActions({
                 className="w-full"
               >
                 <Download className={UI_CLASSES.ICON_SM_LEADING} />
-                {category === Constants.public.Enums.content_category[1] ? 'Download .mcpb' : 'Download'}
+                {category === Constants.public.Enums.content_category[1]
+                  ? 'Download .mcpb'
+                  : 'Download'}
               </Button>
             </motion.div>
-          )}
+          ) : null}
 
           {/* Secondary actions row */}
           <div className="flex flex-wrap gap-2">
@@ -497,9 +498,11 @@ export function DetailHeaderActions({
               description={contentItem.description ?? undefined}
               utmCampaign={category}
               onShare={(platform) => {
-                pulse.share({ platform, category, slug: contentItem.slug, url: shareUrl }).catch(() => {
-                  // Silent fail for analytics
-                });
+                pulse
+                  .share({ platform, category, slug: contentItem.slug, url: shareUrl })
+                  .catch(() => {
+                    // Silent fail for analytics
+                  });
               }}
             />
           </div>
@@ -508,7 +511,7 @@ export function DetailHeaderActions({
           <Button
             variant="ghost"
             size="sm"
-            className="w-full justify-start text-muted-foreground"
+            className="text-muted-foreground w-full justify-start"
             onClick={openPinboardDrawer}
           >
             <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
@@ -516,7 +519,7 @@ export function DetailHeaderActions({
           </Button>
 
           {/* Content actions divider */}
-          {hasContent && (
+          {hasContent ? (
             <>
               <div className="border-border/50 border-t" />
               <div className="flex flex-wrap gap-2">
@@ -526,7 +529,12 @@ export function DetailHeaderActions({
                   transition={{ duration: 0.3 }}
                   className="flex-1"
                 >
-                  <Button variant="outline" onClick={handleCopyContent} size="sm" className="w-full">
+                  <Button
+                    variant="outline"
+                    onClick={handleCopyContent}
+                    size="sm"
+                    className="w-full"
+                  >
                     {copied ? (
                       <>
                         <Check className="mr-2 h-4 w-4 text-green-500" />
@@ -546,10 +554,17 @@ export function DetailHeaderActions({
                   const safeCategory = sanitizePathSegment(category);
                   const safeSlug = sanitizePathSegment(contentItem.slug);
                   if (!(safeCategory && safeSlug)) {
-                    logger.warn('DetailHeaderActions: Invalid category or slug for AI copy button', {
-                      category,
-                      slug: contentItem.slug,
-                    });
+                    logClientWarn(
+                      'DetailHeaderActions: Invalid category or slug for AI copy button',
+                      undefined,
+                      'DetailHeaderActions.render',
+                      {
+                        component: 'DetailHeaderActions',
+                        action: 'render-ai-copy-button',
+                        category,
+                        slug: contentItem.slug,
+                      }
+                    );
                     return null;
                   }
                   return (
@@ -641,10 +656,10 @@ export function DetailHeaderActions({
                 })()}
               </div>
             </>
-          )}
+          ) : null}
 
           {/* Secondary actions */}
-          {secondaryActions && secondaryActions.length > 0 && (
+          {secondaryActions && secondaryActions.length > 0 ? (
             <>
               <div className="border-border/50 border-t" />
               <div className="flex flex-wrap gap-2">
@@ -661,7 +676,7 @@ export function DetailHeaderActions({
                 ))}
               </div>
             </>
-          )}
+          ) : null}
         </aside>
       </div>
     </>

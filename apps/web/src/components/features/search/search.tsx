@@ -5,11 +5,11 @@
  * Search UI with filters. Analytics tracked via server action.
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { usePulse, useUnifiedSearch } from '@heyclaude/web-runtime/hooks';
 import {
   Bookmark,
   ChevronDown,
@@ -19,30 +19,36 @@ import {
   Search,
   X,
 } from '@heyclaude/web-runtime/icons';
-import type { FilterState, UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { usePathname } from 'next/navigation';
-import { memo, useCallback, useEffect, useId, useState } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
-import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Collapsible, CollapsibleContent } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
 import {
+  type FilterState,
+  type UnifiedSearchProps,
+} from '@heyclaude/web-runtime/types/component.types';
+import {
+  cn,
+  POSITION_PATTERNS,
+  UI_CLASSES,
+  UnifiedBadge,
+  ErrorBoundary,
+  Button,
+  Collapsible,
+  CollapsibleContent,
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@heyclaude/web-runtime/ui';
-import { useUnifiedSearch } from '@heyclaude/web-runtime/hooks';
+import { usePathname } from 'next/navigation';
+import { memo, useCallback, useEffect, useId, useState } from 'react';
+
+import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 function isValidContentCategory(
-  value: string | null | undefined
+  value: null | string | undefined
 ): value is Database['public']['Enums']['content_category'] {
   return (
     typeof value === 'string' &&
@@ -51,17 +57,15 @@ function isValidContentCategory(
 }
 
 function getCategoryFromPathname(
-  pathname: string | null | undefined
+  pathname: null | string | undefined
 ): Database['public']['Enums']['content_category'] | null {
   if (!pathname) return null;
   const category = pathname.split('/')[1];
   return isValidContentCategory(category) ? category : null;
 }
 
-export type { FilterState };
-
 const SearchErrorFallback = () => (
-  <div className="p-4 text-center text-muted-foreground">Error loading search</div>
+  <div className="text-muted-foreground p-4 text-center">Error loading search</div>
 );
 
 function UnifiedSearchComponent({
@@ -291,7 +295,7 @@ function UnifiedSearchComponent({
         <div className="space-y-3">
           <div className="relative">
             <div
-              className={`-translate-y-1/2 pointer-events-none ${POSITION_PATTERNS.ABSOLUTE_TOP_HALF} left-4 z-10`}
+              className={`pointer-events-none -translate-y-1/2 ${POSITION_PATTERNS.ABSOLUTE_TOP_HALF} left-4 z-10`}
             >
               <Search className={`${UI_CLASSES.ICON_MD} text-accent`} aria-hidden="true" />
             </div>
@@ -302,28 +306,26 @@ function UnifiedSearchComponent({
               value={localSearchQuery}
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               placeholder={placeholder}
-              className={
-                'h-14 w-full border-border/50 bg-card/50 pr-4 pl-12 text-base backdrop-blur-sm transition-smooth focus:border-accent/50 focus:bg-card'
-              }
+              className="border-border/50 bg-card/50 transition-smooth focus:border-accent/50 focus:bg-card h-14 w-full pr-4 pl-12 text-base backdrop-blur-sm"
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
               autoComplete="off"
             />
           </div>
 
-          {showPresetRail && (
+          {showPresetRail ? (
             <section
               aria-labelledby={presetSectionLabelId}
-              className="rounded-lg border border-border/60 bg-card/40 p-3"
+              className="border-border/60 bg-card/40 rounded-lg border p-3"
             >
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <p
                   id={presetSectionLabelId}
-                  className="font-semibold text-muted-foreground text-xs uppercase tracking-wide"
+                  className="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
                 >
                   Saved searches
                 </p>
-                {onSavePresetRequest && (
+                {onSavePresetRequest ? (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -335,24 +337,24 @@ function UnifiedSearchComponent({
                     <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>Save current filters</span>
                   </Button>
-                )}
+                ) : null}
               </div>
               {hasSavedSearches ? (
                 <ul className="flex flex-wrap gap-2" aria-live="polite">
                   {savedSearchPresets.map((preset) => (
                     <li
                       key={preset.id}
-                      className="flex items-center gap-1 rounded-full border border-border/60 bg-background/80 px-2 py-1"
+                      className="border-border/60 bg-background/80 flex items-center gap-1 rounded-full border px-2 py-1"
                     >
                       <button
                         type="button"
                         onClick={() => handlePresetSelect(preset.id)}
                         disabled={!canSelectSavedSearches}
                         className={cn(
-                          'flex items-center gap-2 rounded-full px-2 py-1 font-medium text-xs transition-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 sm:text-sm',
+                          'transition-smooth focus-visible:ring-accent/60 flex items-center gap-2 rounded-full px-2 py-1 text-xs font-medium focus-visible:ring-2 focus-visible:outline-none sm:text-sm',
                           canSelectSavedSearches
                             ? 'text-foreground hover:bg-accent/10'
-                            : 'cursor-not-allowed text-muted-foreground opacity-70'
+                            : 'text-muted-foreground cursor-not-allowed opacity-70'
                         )}
                         title={
                           preset.query
@@ -361,10 +363,10 @@ function UnifiedSearchComponent({
                         }
                         aria-label={`Apply preset ${preset.label}`}
                       >
-                        <Bookmark className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
+                        <Bookmark className="text-accent h-3.5 w-3.5" aria-hidden="true" />
                         <span className="max-w-32 truncate">{preset.label}</span>
                       </button>
-                      {canRemoveSavedSearches && (
+                      {canRemoveSavedSearches ? (
                         <button
                           type="button"
                           onClick={(event) => {
@@ -372,12 +374,12 @@ function UnifiedSearchComponent({
                             event.stopPropagation();
                             handlePresetRemove(preset.id);
                           }}
-                          className="rounded-full p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+                          className="text-muted-foreground hover:text-foreground focus-visible:ring-accent/60 rounded-full p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
                           aria-label={`Remove preset ${preset.label}`}
                         >
                           <X className="h-3 w-3" aria-hidden="true" />
                         </button>
-                      )}
+                      ) : null}
                     </li>
                   ))}
                 </ul>
@@ -389,10 +391,10 @@ function UnifiedSearchComponent({
                 </p>
               )}
             </section>
-          )}
+          ) : null}
 
-          {showFilters && (
-            <div className={'flex justify-end gap-2'}>
+          {showFilters ? (
+            <div className="flex justify-end gap-2">
               <Select
                 value={filters.sort || 'trending'}
                 onValueChange={(value) => handleSortChange(value as FilterState['sort'])}
@@ -400,9 +402,7 @@ function UnifiedSearchComponent({
               >
                 <SelectTrigger
                   id={sortSelectId}
-                  className={
-                    'h-10 w-auto border-border bg-background px-4 transition-smooth hover:bg-accent/10'
-                  }
+                  className="border-border bg-background transition-smooth hover:bg-accent/10 h-10 w-auto px-4"
                   aria-label="Sort configurations"
                 >
                   <span className="text-sm">Sort: </span>
@@ -420,7 +420,7 @@ function UnifiedSearchComponent({
                 size="default"
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className={cn(
-                  'h-10 gap-2 px-4 transition-smooth',
+                  'transition-smooth h-10 gap-2 px-4',
                   isFilterOpen && 'border-accent bg-accent/10'
                 )}
                 aria-expanded={isFilterOpen}
@@ -446,24 +446,24 @@ function UnifiedSearchComponent({
                 )}
               </Button>
             </div>
-          )}
+          ) : null}
         </div>
 
         <div
-          className={'text-muted-foreground text-sm'}
+          className="text-muted-foreground text-sm"
           id={searchResultsId}
           aria-live="polite"
           aria-atomic="true"
         >
-          {announcement && <span className="sr-only">{announcement}</span>}
-          {localSearchQuery && resultCount > 0 && (
+          {announcement ? <span className="sr-only">{announcement}</span> : null}
+          {localSearchQuery && resultCount > 0 ? (
             <span aria-hidden="true">
               {resultCount} {resultCount === 1 ? 'result' : 'results'} found
             </span>
-          )}
-          {localSearchQuery && resultCount === 0 && (
+          ) : null}
+          {localSearchQuery && resultCount === 0 ? (
             <span aria-hidden="true">No results found</span>
-          )}
+          ) : null}
         </div>
 
         <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen}>
@@ -480,7 +480,7 @@ function UnifiedSearchComponent({
                 onClearFilters={clearFilters}
                 onApplyFilters={applyFilters}
                 onCancel={() => setIsFilterOpen(false)}
-                showActions={true}
+                showActions
               />
             </section>
           </CollapsibleContent>
@@ -510,3 +510,5 @@ export const UnifiedSearch = memo(UnifiedSearchComponent, (prevProps, nextProps)
 });
 
 UnifiedSearch.displayName = 'UnifiedSearch';
+
+export { type FilterState } from '@heyclaude/web-runtime/types/component.types';

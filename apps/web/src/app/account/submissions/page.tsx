@@ -20,17 +20,24 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
+
+// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
+// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
+// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
  * Authenticated user submissions
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/submissions');
 }
 
@@ -234,7 +241,11 @@ function getSafeContentUrl(
  * @see extractPrComponents
  */
 export default async function SubmissionsPage() {
-  // Generate single requestId for this page request
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
+  // Generate single requestId for this page request (after connection() to allow Date.now())
   const requestId = generateRequestId();
 
   // Create request-scoped child logger to avoid race conditions
@@ -245,6 +256,18 @@ export default async function SubmissionsPage() {
     module: 'apps/web/src/app/account/submissions',
   });
 
+  return (
+    <Suspense fallback={<div className="space-y-6">Loading submissions...</div>}>
+      <SubmissionsPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function SubmissionsPageContent({
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'SubmissionsPage' });
 
@@ -335,16 +358,18 @@ export default async function SubmissionsPage() {
   }
 
   // Use Constants for enum values in Record keys
-  const SUBMISSION_STATUS_VARIANTS: Record<
+  // Use string literals directly to avoid unsafe assignment from array index access
+  // Enum values: 'pending', 'approved', 'rejected', 'spam', 'merged'
+  const SUBMISSION_STATUS_VARIANTS = {
+    pending: { icon: Clock, label: 'Pending Review' },
+    approved: { icon: CheckCircle, label: 'Approved' },
+    rejected: { icon: XCircle, label: 'Rejected' },
+    spam: { icon: XCircle, label: 'Spam' },
+    merged: { icon: CheckCircle, label: 'Merged ✓' },
+  } satisfies Record<
     Database['public']['Enums']['submission_status'],
     { icon: typeof Clock; label: string }
-  > = {
-    [Constants.public.Enums.submission_status[0]]: { icon: Clock, label: 'Pending Review' }, // 'pending'
-    [Constants.public.Enums.submission_status[1]]: { icon: CheckCircle, label: 'Approved' }, // 'approved'
-    [Constants.public.Enums.submission_status[4]]: { icon: CheckCircle, label: 'Merged ✓' }, // 'merged'
-    [Constants.public.Enums.submission_status[2]]: { icon: XCircle, label: 'Rejected' }, // 'rejected'
-    [Constants.public.Enums.submission_status[3]]: { icon: XCircle, label: 'Spam' }, // 'spam'
-  };
+  >;
 
   const getStatusBadge = (status: Database['public']['Enums']['submission_status']) => {
     const variant = SUBMISSION_STATUS_VARIANTS[status];
@@ -415,9 +440,7 @@ export default async function SubmissionsPage() {
     status: Database['public']['Enums']['submission_status']
   ): null | { href: string } {
     const safeUrl = getSafeContentUrl(type, slug);
-    return safeUrl && status === Constants.public.Enums.submission_status[4]
-      ? { href: safeUrl }
-      : null; // 'merged'
+    return safeUrl && status === 'merged' ? { href: safeUrl } : null;
   }
 
   // Log any submissions with missing IDs for data integrity monitoring

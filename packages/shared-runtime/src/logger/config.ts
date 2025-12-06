@@ -1373,7 +1373,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   // 
   // Parameters:
   // - mergeObject: The object being logged (provided by Pino, contains explicit context from log call)
-  // - level: Log level (0=trace, 10=debug, 20=info, 30=warn, 40=error, 50=fatal, 60=child)
+  // - level: Log level (10=trace, 20=debug, 30=info, 40=warn, 50=error, 60=fatal)
   // - logger: The Pino logger instance (used to read bindings)
   // 
   // Returns: Dynamic context object that will be merged with mergeObject via mixinMergeStrategy
@@ -1398,16 +1398,18 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     // Build dynamic context from bindings
     // Only include bindings that are commonly used for correlation and context
     // Use bracket notation for index signature access (TypeScript requirement)
+    // Pino log levels: trace=10, debug=20, info=30, warn=40, error=50, fatal=60
     const levelNameMap: Record<number, string> = {
-      0: 'trace',
-      10: 'debug',
-      20: 'info',
-      30: 'warn',
-      40: 'error',
-      50: 'fatal',
+      10: 'trace',
+      20: 'debug',
+      30: 'info',
+      40: 'warn',
+      50: 'error',
+      60: 'fatal',
     };
     const dynamicContext: Record<string, unknown> = {
-      ['logLevel']: level,
+      // Note: levelValue is already added by the formatter, so we don't duplicate it here
+      // We only add logLevelName for human-readable level names
       ['logLevelName']: levelNameMap[level] ?? 'unknown',
     };
     

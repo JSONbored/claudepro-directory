@@ -4,21 +4,21 @@
  * Horizontal scroll with first 5 nav items
  */
 
+import { PRIMARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
   POSITION_PATTERNS,
   UI_CLASSES,
+  PrefetchLink,
+  Button,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
-import { PrefetchLink } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { PRIMARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
 
 interface NavLinkProps {
-  href: string;
   children: React.ReactNode;
   className?: string;
+  href: string;
   isActive: (href: string) => boolean;
   onClick?: () => void;
 }
@@ -80,7 +80,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
             <NavLink
               href={link.href}
               isActive={isActive}
-              className="whitespace-nowrap px-3 py-2 text-xs"
+              className="px-3 py-2 text-xs whitespace-nowrap"
             >
               {link.label}
             </NavLink>
@@ -90,7 +90,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
           variant="ghost"
           size="sm"
           onClick={onMobileMenuOpen}
-          className="whitespace-nowrap text-xs"
+          className="text-xs whitespace-nowrap"
           aria-label="Open more navigation options"
         >
           More

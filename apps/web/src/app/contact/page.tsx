@@ -5,13 +5,14 @@ import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
 
-export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/contact');
-}
+// MIGRATED: Removed export const revalidate = 86_400 (incompatible with Cache Components)
+// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -20,7 +21,13 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 86_400;
+
+export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+  return generatePageMetadata('/contact');
+}
 
 /**
  * Renders the Contact page with available contact channels and supplemental information.
@@ -38,7 +45,11 @@ export const revalidate = 86_400;
  * @see ContactTerminal
  * @see ContactTerminalErrorBoundary
  */
-export default function ContactPage() {
+export default async function ContactPage() {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
   // Generate single requestId for this page request
   const requestId = generateRequestId();
 
@@ -50,6 +61,16 @@ export default function ContactPage() {
     module: 'apps/web/src/app/contact',
   });
 
+  return (
+    <Suspense
+      fallback={<div className="container mx-auto px-4 py-8">Loading contact information...</div>}
+    >
+      <ContactPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+async function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const channels = getContactChannels();
   if (!channels.email) {
     reqLogger.warn('ContactPage: email channel is not configured', {

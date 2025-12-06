@@ -5,36 +5,36 @@
  * All slug generation in PostgreSQL via job_slug() function.
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
-import type { CreateJobInput } from '@heyclaude/web-runtime';
-import type { PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data';
+import { type CreateJobInput } from '@heyclaude/web-runtime';
+import { type PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Star } from '@heyclaude/web-runtime/icons';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useEffect, useId, useMemo, useState, useTransition } from 'react';
-import { CompanySelector } from '@/src/components/core/forms/company-selector';
-import { FormField } from '@heyclaude/web-runtime/ui';
-import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
-import { Button } from '@heyclaude/web-runtime/ui';
 import {
+  toasts,
+  UI_CLASSES,
+  FormField,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@heyclaude/web-runtime/ui';
-import { Checkbox } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
-import {
+  Checkbox,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@heyclaude/web-runtime/ui';
+import { useEffect, useId, useMemo, useState, useTransition } from 'react';
+
+import { CompanySelector } from '@/src/components/core/forms/company-selector';
+import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const JOB_PLAN_VALUES = Constants.public.Enums.job_plan;
@@ -56,15 +56,15 @@ const PRICE_FORMATTER = new Intl.NumberFormat('en-US', {
 });
 
 interface PlanOption {
-  plan: Database['public']['Enums']['job_plan'];
+  benefits: null | string[];
+  billingCycleDays: null | number;
+  description: null | string;
+  featuredDeltaCents: null | number;
+  featuredPriceCents: null | number;
   isSubscription: boolean;
-  standardPriceCents: number | null;
-  featuredPriceCents: number | null;
-  featuredDeltaCents: number | null;
-  jobExpiryDays: number | null;
-  billingCycleDays: number | null;
-  description: string | null;
-  benefits: string[] | null;
+  jobExpiryDays: null | number;
+  plan: Database['public']['Enums']['job_plan'];
+  standardPriceCents: null | number;
 }
 
 const LEGACY_PLAN_OPTIONS: PlanOption[] = [
@@ -72,7 +72,7 @@ const LEGACY_PLAN_OPTIONS: PlanOption[] = [
     plan: 'one-time',
     isSubscription: false,
     standardPriceCents: 7900,
-    featuredPriceCents: 17800,
+    featuredPriceCents: 17_800,
     featuredDeltaCents: 9900,
     jobExpiryDays: 30,
     billingCycleDays: null,
@@ -83,7 +83,7 @@ const LEGACY_PLAN_OPTIONS: PlanOption[] = [
     plan: 'subscription',
     isSubscription: true,
     standardPriceCents: 5900,
-    featuredPriceCents: 10800,
+    featuredPriceCents: 10_800,
     featuredDeltaCents: 4900,
     jobExpiryDays: 30,
     billingCycleDays: 30,
@@ -127,9 +127,9 @@ interface JobFormProps {
   initialData?: Partial<CreateJobInput>;
   onSubmit: (
     data: CreateJobInput
-  ) => Promise<{ success: boolean; requiresPayment?: boolean; job?: unknown }>;
-  submitLabel?: string;
+  ) => Promise<{ job?: unknown; requiresPayment?: boolean; success: boolean }>;
   planCatalog: PaymentPlanCatalogEntry[];
+  submitLabel?: string;
 }
 
 export function JobForm({
@@ -152,7 +152,7 @@ export function JobForm({
 
     const grouped = new Map<
       Database['public']['Enums']['job_plan'],
-      { standard?: PaymentPlanCatalogEntry; featured?: PaymentPlanCatalogEntry }
+      { featured?: PaymentPlanCatalogEntry; standard?: PaymentPlanCatalogEntry }
     >();
 
     for (const entry of planCatalog) {
@@ -207,7 +207,7 @@ export function JobForm({
     () => planOptions.find((option) => option.plan === selectedPlan) ?? planOptions[0] ?? null,
     [planOptions, selectedPlan]
   );
-  const [companyId, setCompanyId] = useState<string | null>(initialData?.company_id || null);
+  const [companyId, setCompanyId] = useState<null | string>(initialData?.company_id || null);
   const [companyName, setCompanyName] = useState<string>(initialData?.company || '');
   const [isFeatured, setIsFeatured] = useState<boolean>(initialData?.tier === 'featured');
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
@@ -285,7 +285,7 @@ export function JobForm({
         }
         throw new Error('Invalid job plan');
       })(),
-      tier: (isFeatured ? 'featured' : 'standard') as Database['public']['Enums']['job_tier'],
+      tier: isFeatured ? 'featured' : 'standard',
       contact_email: contactEmail || undefined,
       company_logo: companyLogo || undefined,
     } as unknown as CreateJobInput;
@@ -318,10 +318,7 @@ export function JobForm({
         );
       } catch (error) {
         // Error already logged by useLoggedAsync
-        toasts.error.fromError(
-          normalizeError(error, 'Failed to save job'),
-          'Failed to save job'
-        );
+        toasts.error.fromError(normalizeError(error, 'Failed to save job'), 'Failed to save job');
       }
     });
   };
@@ -339,7 +336,7 @@ export function JobForm({
             label="Job Title"
             name="title"
             defaultValue={initialData?.title || ''}
-            required={true}
+            required
             placeholder="e.g., Senior AI Engineer"
           />
 
@@ -358,7 +355,7 @@ export function JobForm({
               label="Employment Type"
               name="type"
               defaultValue={initialData?.type || Constants.public.Enums.job_type[0]} // 'full-time'
-              required={true}
+              required
             >
               <SelectItem value={Constants.public.Enums.job_type[0]}>Full Time</SelectItem>
               <SelectItem value={Constants.public.Enums.job_type[1]}>Part Time</SelectItem>
@@ -377,7 +374,7 @@ export function JobForm({
                   | undefined) ||
                 (WORKPLACE_TYPE_VALUES[0] as Database['public']['Enums']['workplace_type'])
               }
-              required={true}
+              required
             >
               {WORKPLACE_TYPE_VALUES.map((value) => (
                 <SelectItem key={value} value={value}>
@@ -422,7 +419,7 @@ export function JobForm({
               label="Category"
               name="category"
               defaultValue={initialData?.category || 'engineering'}
-              required={true}
+              required
             >
               <SelectItem value="engineering">Engineering</SelectItem>
               <SelectItem value="design">Design</SelectItem>
@@ -453,7 +450,7 @@ export function JobForm({
             label="Job Description"
             name="description"
             defaultValue={initialData?.description || ''}
-            required={true}
+            required
             rows={6}
             placeholder="Describe the role, responsibilities, and what makes this opportunity great..."
             description="Minimum 50 characters"
@@ -510,8 +507,8 @@ export function JobForm({
             placeholder="e.g., AI, Python, Remote"
             minItems={1}
             maxItems={10}
-            noDuplicates={true}
-            showCounter={true}
+            noDuplicates
+            showCounter
             badgeStyle="outline"
           />
         </CardContent>
@@ -529,7 +526,7 @@ export function JobForm({
             name="link"
             type="url"
             defaultValue={initialData?.link || ''}
-            required={true}
+            required
             placeholder="https://company.com/careers/apply"
           />
 
@@ -587,8 +584,8 @@ export function JobForm({
               ))}
             </SelectContent>
           </Select>
-          {selectedPlanOption && (
-            <div className="mt-4 rounded-lg border border-border/50 bg-muted/20 p-4 text-sm">
+          {selectedPlanOption ? (
+            <div className="border-border/50 bg-muted/20 mt-4 rounded-lg border p-4 text-sm">
               <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                 <div>
                   <div className="font-semibold">{PLAN_LABELS[selectedPlanOption.plan]}</div>
@@ -598,7 +595,7 @@ export function JobForm({
                   </p>
                 </div>
                 {selectedPlanOption.standardPriceCents !== null && (
-                  <span className="font-semibold text-base">
+                  <span className="text-base font-semibold">
                     {formatPlanPrice(
                       selectedPlanOption.standardPriceCents,
                       selectedPlanOption.isSubscription
@@ -606,18 +603,18 @@ export function JobForm({
                   </span>
                 )}
               </div>
-              {planInfoSubtitle && (
+              {planInfoSubtitle ? (
                 <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-2`}>{planInfoSubtitle}</p>
-              )}
-              {selectedPlanOption.benefits && (
-                <ul className="mt-3 list-disc space-y-1 pl-4 text-muted-foreground text-xs">
+              ) : null}
+              {selectedPlanOption.benefits ? (
+                <ul className="text-muted-foreground mt-3 list-disc space-y-1 pl-4 text-xs">
                   {selectedPlanOption.benefits.map((benefit) => (
                     <li key={benefit}>{benefit}</li>
                   ))}
                 </ul>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
           <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-2`}>
             Payment via Polar.sh after submission. Job goes live immediately after payment
             confirmation.
@@ -633,17 +630,17 @@ export function JobForm({
               <div className="flex-1">
                 <Label
                   htmlFor={featuredCheckboxId}
-                  className="flex cursor-pointer items-center gap-2 font-semibold text-sm"
+                  className="flex cursor-pointer items-center gap-2 text-sm font-semibold"
                 >
                   <Star className={`${UI_CLASSES.ICON_SM} text-orange-500`} />
                   Make this a Featured Listing
                 </Label>
                 <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-1`}>{featuredUpsellDescription}</p>
-                {featuredUpgradeLabel && (
-                  <p className="mt-2 font-medium text-orange-600 text-sm dark:text-orange-400">
+                {featuredUpgradeLabel ? (
+                  <p className="mt-2 text-sm font-medium text-orange-600 dark:text-orange-400">
                     {featuredUpgradeLabel}
                   </p>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
@@ -661,7 +658,7 @@ export function JobForm({
         >
           {isPending ? 'Saving...' : submitLabel}
         </Button>
-        <Button type="button" variant="outline" asChild={true}>
+        <Button type="button" variant="outline" asChild>
           <a href={ROUTES.ACCOUNT_JOBS}>Cancel</a>
         </Button>
       </div>

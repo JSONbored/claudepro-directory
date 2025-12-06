@@ -238,8 +238,8 @@ export function getRecentlyViewedConfig() {
 
 /**
  * Check if confetti animations are enabled
- * @returns false (confetti disabled by default)
+ * @returns true (confetti enabled)
  */
 export function checkConfettiEnabled() {
-  return false;
+  return true;
 }
