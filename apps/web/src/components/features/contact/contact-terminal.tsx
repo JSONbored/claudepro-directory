@@ -13,64 +13,61 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import {
   getContactCommands,
   submitContactForm,
   trackTerminalCommandAction,
   trackTerminalFormSubmissionAction,
 } from '@heyclaude/web-runtime/actions';
-import { logger, logUnhandledPromise, normalizeError } from '@heyclaude/web-runtime/core';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync, useConfetti } from '@heyclaude/web-runtime/hooks';
 import { Check, X } from '@heyclaude/web-runtime/icons';
-import { cn } from '@heyclaude/web-runtime/ui';
-import { AnimatePresence, motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
+  cn,
   AnimatedSpan,
   Terminal,
   TypingAnimation,
-} from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import {
+  Button,
   Command,
   CommandEmpty,
   CommandGroup,
   CommandItem,
   CommandList,
-} from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
-import {
+  Input,
+  Label,
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  Textarea,
 } from '@heyclaude/web-runtime/ui';
-import { Textarea } from '@heyclaude/web-runtime/ui';
-import { useConfetti } from '@heyclaude/web-runtime/hooks';
+import { AnimatePresence, motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Internal type with non-nullable fields (after transformation)
-type ContactCommand = {
-  id: string;
-  text: string;
-  description: string | null;
-  category: string;
-  icon_name: Database['public']['Enums']['contact_command_icon'] | null;
+interface ContactCommand {
   action_type: Database['public']['Enums']['contact_action_type'];
-  action_value: string | null;
-  confetti_variant: Database['public']['Enums']['confetti_variant'] | null;
-  requires_auth: boolean;
+  action_value: null | string;
   aliases: string[];
-};
+  category: string;
+  confetti_variant: Database['public']['Enums']['confetti_variant'] | null;
+  description: null | string;
+  icon_name: Database['public']['Enums']['contact_command_icon'] | null;
+  id: string;
+  requires_auth: boolean;
+  text: string;
+}
 
 interface OutputLine {
-  id: string;
-  type: 'command' | 'output' | 'success' | 'error';
   content: string;
   icon?: React.ReactNode;
+  id: string;
+  type: 'command' | 'error' | 'output' | 'success';
 }
 
 export function ContactTerminal() {
@@ -78,7 +75,7 @@ export function ContactTerminal() {
   const { fireConfetti } = useConfetti();
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<null | string>(null);
   const [commands, setCommands] = useState<ContactCommand[]>([]);
   const [input, setInput] = useState('');
   const [output, setOutput] = useState<OutputLine[]>([]);
@@ -156,7 +153,7 @@ export function ContactTerminal() {
           level: 'warn',
         }
       );
-    } catch (error) {
+    } catch {
       // Error already logged by useLoggedAsync
       setLoadError('Failed to load commands. Please refresh the page.');
       addOutput('error', 'Failed to load commands. Please refresh the page.');
@@ -218,18 +215,20 @@ export function ContactTerminal() {
 
       // Handle different action types
       switch (command.action_type) {
-        case 'internal':
+        case 'internal': {
           handleInternalCommand(command);
           break;
+        }
 
-        case 'external':
+        case 'external': {
           if (command.action_value) {
             addOutput('success', `Opening: ${command.action_value}`, <Check className="h-3 w-3" />);
             window.open(command.action_value, '_blank', 'noopener,noreferrer');
           }
           break;
+        }
 
-        case 'route':
+        case 'route': {
           if (command.action_value) {
             addOutput(
               'success',
@@ -239,8 +238,9 @@ export function ContactTerminal() {
             router.push(command.action_value);
           }
           break;
+        }
 
-        case 'sheet':
+        case 'sheet': {
           if (command.action_value) {
             setSelectedCategory(
               command.action_value as Database['public']['Enums']['contact_category']
@@ -253,15 +253,20 @@ export function ContactTerminal() {
             );
           }
           break;
+        }
 
-        case 'easter-egg':
+        case 'easter-egg': {
           addOutput('success', command.action_value || '🎉 You found an easter egg!');
           break;
+        }
       }
 
-      // Fire confetti
+      // Fire confetti (if enabled)
       if (command.confetti_variant) {
-        fireConfetti(command.confetti_variant);
+        const confettiEnabled = checkConfettiEnabled();
+        if (confettiEnabled) {
+          fireConfetti(command.confetti_variant);
+        }
       }
 
       trackTerminalCommandAction({
@@ -279,9 +284,16 @@ export function ContactTerminal() {
         <X className="h-3 w-3" />
       );
       const normalized = normalizeError(error, 'Terminal command execution failed');
-      logger.error('Terminal command execution failed', normalized, {
-        commandId: command.id ?? 'unknown',
-      });
+      logClientError(
+        'Terminal command execution failed',
+        normalized,
+        'ContactTerminal.executeCommand',
+        {
+          component: 'ContactTerminal',
+          action: 'execute-command',
+          commandId: command.id ?? 'unknown',
+        }
+      );
       trackTerminalCommandAction({
         command_id: command.id ?? '',
         action_type: command.action_type ?? 'internal',
@@ -296,7 +308,7 @@ export function ContactTerminal() {
 
   const handleInternalCommand = (command: ContactCommand) => {
     switch (command.id) {
-      case 'help':
+      case 'help': {
         addOutput('output', '📋 Available commands:');
         for (const cmd of commands) {
           addOutput(
@@ -305,16 +317,19 @@ export function ContactTerminal() {
           );
         }
         break;
+      }
 
-      case 'clear':
+      case 'clear': {
         setOutput([]);
         addOutput('output', 'Terminal cleared. Type for suggestions or enter a command.');
         break;
+      }
 
-      default:
+      default: {
         if (command.action_value) {
           addOutput('output', command.action_value);
         }
+      }
     }
   };
 
@@ -372,7 +387,11 @@ export function ContactTerminal() {
               <Check className="h-3 w-3" />
             );
             setIsSheetOpen(false);
-            fireConfetti('success');
+            // Fire confetti (if enabled)
+            const confettiEnabled = checkConfettiEnabled();
+            if (confettiEnabled) {
+              fireConfetti('success');
+            }
             trackTerminalFormSubmissionAction({
               category: selectedCategory,
               success: true,
@@ -436,7 +455,7 @@ export function ContactTerminal() {
             animate={{ opacity: 1 }}
             className="space-y-2 text-center"
           >
-            <div className="animate-pulse text-primary text-sm">Loading terminal...</div>
+            <div className="text-primary animate-pulse text-sm">Loading terminal...</div>
             <div className="text-muted-foreground text-xs">Initializing commands</div>
           </motion.div>
         </div>
@@ -454,9 +473,9 @@ export function ContactTerminal() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4 text-center"
           >
-            <X className="mx-auto h-8 w-8 text-destructive" />
+            <X className="text-destructive mx-auto h-8 w-8" />
             <div className="space-y-2">
-              <div className="font-medium text-destructive text-sm">{loadError}</div>
+              <div className="text-destructive text-sm font-medium">{loadError}</div>
               <Button
                 variant="outline"
                 size="sm"
@@ -494,10 +513,10 @@ export function ContactTerminal() {
                   'flex items-start gap-2',
                   line.type === 'error' && 'text-destructive',
                   line.type === 'success' && 'text-green-500',
-                  line.type === 'command' && 'font-semibold text-primary'
+                  line.type === 'command' && 'text-primary font-semibold'
                 )}
               >
-                {line.icon && <span className="mt-0.5">{line.icon}</span>}
+                {line.icon ? <span className="mt-0.5">{line.icon}</span> : null}
                 {line.type === 'command' ? (
                   <TypingAnimation duration={20}>{line.content}</TypingAnimation>
                 ) : (
@@ -512,9 +531,9 @@ export function ContactTerminal() {
         {/* Input Area with Autocomplete */}
         <div className="relative">
           {/* Suggestions Dropdown */}
-          {showSuggestions && filteredCommands.length > 0 && (
+          {showSuggestions && filteredCommands.length > 0 ? (
             <div className="absolute right-0 bottom-full left-0 mb-2">
-              <Command className="rounded-lg border bg-popover shadow-lg">
+              <Command className="bg-popover rounded-lg border shadow-lg">
                 <CommandList className="max-h-[200px]">
                   <CommandEmpty>No commands found.</CommandEmpty>
                   <CommandGroup heading="Suggestions">
@@ -526,13 +545,13 @@ export function ContactTerminal() {
                         className="cursor-pointer"
                       >
                         <div className="flex w-full items-center gap-2">
-                          <span className="font-mono text-primary text-xs">$</span>
-                          <span className="font-medium text-sm">{cmd.text}</span>
-                          {cmd.description && (
-                            <span className="ml-auto truncate text-muted-foreground text-xs">
+                          <span className="text-primary font-mono text-xs">$</span>
+                          <span className="text-sm font-medium">{cmd.text}</span>
+                          {cmd.description ? (
+                            <span className="text-muted-foreground ml-auto truncate text-xs">
                               {cmd.description}
                             </span>
-                          )}
+                          ) : null}
                         </div>
                       </CommandItem>
                     ))}
@@ -540,11 +559,11 @@ export function ContactTerminal() {
                 </CommandList>
               </Command>
             </div>
-          )}
+          ) : null}
 
           {/* Input Prompt */}
-          <div className="flex items-center gap-2 border-border border-t pt-4">
-            <span className="font-semibold text-primary text-sm">$</span>
+          <div className="border-border flex items-center gap-2 border-t pt-4">
+            <span className="text-primary text-sm font-semibold">$</span>
             <input
               ref={inputRef}
               type="text"
@@ -552,10 +571,10 @@ export function ContactTerminal() {
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleSubmit}
               placeholder="Type a command or start typing for suggestions..."
-              className="flex-1 border-none bg-transparent text-sm outline-none placeholder:text-muted-foreground/50 focus:ring-0"
-              autoFocus={true}
+              className="placeholder:text-muted-foreground/50 flex-1 border-none bg-transparent text-sm outline-none focus:ring-0"
+              autoFocus
             />
-            {input && <span className="text-muted-foreground/50 text-xs">Press Enter ⏎</span>}
+            {input ? <span className="text-muted-foreground/50 text-xs">Press Enter ⏎</span> : null}
           </div>
         </div>
       </Terminal>
@@ -579,7 +598,7 @@ export function ContactTerminal() {
                 id="name"
                 name="name"
                 placeholder="Your name"
-                required={true}
+                required
                 disabled={isSubmitting}
               />
             </div>
@@ -591,7 +610,7 @@ export function ContactTerminal() {
                 name="email"
                 type="email"
                 placeholder="you@example.com"
-                required={true}
+                required
                 disabled={isSubmitting}
               />
             </div>
@@ -603,7 +622,7 @@ export function ContactTerminal() {
                 name="message"
                 placeholder="Tell us more..."
                 rows={6}
-                required={true}
+                required
                 disabled={isSubmitting}
                 className="resize-none"
               />

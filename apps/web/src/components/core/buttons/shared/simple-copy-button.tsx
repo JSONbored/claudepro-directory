@@ -1,22 +1,22 @@
 'use client';
 
-import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { logClientWarning } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
-import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { toasts } from '@heyclaude/web-runtime/ui';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { toasts, Button } from '@heyclaude/web-runtime/ui';
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 interface SimpleCopyButtonProps extends ButtonStyleProps {
-  content: string;
-  label?: string;
-  successMessage?: string;
-  errorMessage?: string;
-  showIcon?: boolean;
-  onCopySuccess?: () => void;
   ariaLabel?: string;
+  content: string;
+  errorMessage?: string;
   iconClassName?: string;
+  label?: string;
+  onCopySuccess?: () => void;
+  showIcon?: boolean;
+  successMessage?: string;
 }
 
 export function SimpleCopyButton({
@@ -56,15 +56,20 @@ export function SimpleCopyButton({
       setTimeout(() => setCopied(false), resetDelay);
     } catch (error) {
       const normalizedError = normalizeError(error, 'Copy operation failed');
-      logger.warn('[Clipboard] Copy failed', {
-        err: normalizedError,
-        category: 'clipboard',
-        component: 'SimpleCopyButton',
-        recoverable: true,
-        userRetryable: true,
-        hasContent: Boolean(content),
-        label: label ?? 'unnamed',
-      });
+      logClientWarn(
+        '[Clipboard] Copy failed',
+        normalizedError,
+        'SimpleCopyButton.handleCopy',
+        {
+          component: 'SimpleCopyButton',
+          action: 'copy',
+          category: 'clipboard',
+          recoverable: true,
+          userRetryable: true,
+          hasContent: Boolean(content),
+          label: label ?? 'unnamed',
+        }
+      );
       toasts.raw.error(errorMessage);
     }
   };
@@ -78,13 +83,14 @@ export function SimpleCopyButton({
       disabled={disabled || copied}
       aria-label={ariaLabel || (copied ? 'Copied to clipboard' : `Copy ${label || 'content'}`)}
     >
-      {showIcon &&
-        (copied ? (
+      {showIcon ? (
+        copied ? (
           <Check className={iconClassName} aria-hidden="true" />
         ) : (
           <Copy className={iconClassName} aria-hidden="true" />
-        ))}
-      {label && (copied ? 'Copied!' : label)}
+        )
+      ) : null}
+      {label ? (copied ? 'Copied!' : label) : null}
     </Button>
   );
 }

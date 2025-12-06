@@ -12,12 +12,13 @@ import { notFound, redirect } from 'next/navigation';
 
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated route
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 interface EditCollectionPageProperties {
   params: Promise<{ slug: string }>;

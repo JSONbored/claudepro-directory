@@ -21,7 +21,6 @@ import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
-export const revalidate = 300;
 
 /**
  * Provide live social proof metrics: top contributors this week, recent submission count,

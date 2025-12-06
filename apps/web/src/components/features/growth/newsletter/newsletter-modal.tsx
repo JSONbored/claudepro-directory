@@ -1,28 +1,29 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
-import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useEffect, useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
+import { usePulse, useNewsletter } from '@heyclaude/web-runtime/hooks';
 import {
+  cn,
+  toasts,
+  UI_CLASSES,
+  Button,
+  Input,
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from '@heyclaude/web-runtime/ui';
-import { useNewsletter } from '@heyclaude/web-runtime/hooks';
+import { useEffect, useState } from 'react';
 
 export interface NewsletterModalProps {
-  source: Database['public']['Enums']['newsletter_source'];
   category?: Database['public']['Enums']['content_category'];
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   copyType: Database['public']['Enums']['copy_type'];
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
   slug?: string;
+  source: Database['public']['Enums']['newsletter_source'];
 }
 
 export function NewsletterModal({
@@ -33,7 +34,7 @@ export function NewsletterModal({
   copyType,
   slug,
 }: NewsletterModalProps) {
-  const [showTime, setShowTime] = useState<number | null>(null);
+  const [showTime, setShowTime] = useState<null | number>(null);
   const pulse = usePulse();
 
   const { email, setEmail, isSubmitting, subscribe } = useNewsletter({
@@ -167,7 +168,7 @@ export function NewsletterModal({
               className="h-12 text-base"
               autoComplete="email"
               aria-label="Email address"
-              required={true}
+              required
             />
           </div>
 
@@ -176,7 +177,7 @@ export function NewsletterModal({
               type="submit"
               disabled={isSubmitting || !email.trim()}
               className={cn(
-                'flex-1 bg-linear-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90',
+                'from-accent to-primary hover:from-accent/90 hover:to-primary/90 flex-1 bg-linear-to-r',
                 isSubmitting && 'opacity-50'
               )}
             >
@@ -194,7 +195,7 @@ export function NewsletterModal({
           </div>
         </form>
 
-        <p className="mt-4 text-center text-muted-foreground text-xs">
+        <p className="text-muted-foreground mt-4 text-center text-xs">
           By subscribing, you agree to receive updates about Claude tools and resources.
         </p>
       </SheetContent>

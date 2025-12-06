@@ -9,12 +9,13 @@ import { redirect } from 'next/navigation';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated route using cookies
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 /**
  * Generate metadata for the /account/jobs/new page.

@@ -3,6 +3,8 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
+export const revalidate = false;
+
 /**
  * Provides page metadata for the Cookies page used by Next.js.
  *
@@ -13,15 +15,14 @@ import { type Metadata } from 'next';
  * @see generatePageMetadata
  * @see {@link https://nextjs.org/docs/app/api-reference/functions/generate-metadata Next.js generate metadata}
  */
+/**
+ * Static Generation: Legal pages are fully static and never change
+ * No automatic revalidation - pages are statically generated at build time
+ */
+
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/cookies');
 }
-
-/**
- * Static Generation: Legal pages are fully static and never change
- * revalidate: false = Static generation at build time (no automatic revalidation)
- */
-export const revalidate = false;
 
 /**
  * Renders the Cookie Policy page and displays the current "Last updated" date.

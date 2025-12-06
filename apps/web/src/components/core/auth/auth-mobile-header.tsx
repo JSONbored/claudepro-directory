@@ -6,6 +6,7 @@
 
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
+
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 
 export function AuthMobileHeader() {
@@ -18,11 +19,11 @@ export function AuthMobileHeader() {
       transition={{ duration: 0.5 }}
     >
       <div className="flex items-center gap-3">
-        <HeyClaudeLogo size="md" inView={true} duration={1.2} />
+        <HeyClaudeLogo size="md" inView duration={1.2} />
       </div>
 
       <motion.p
-        className="mt-2 text-white/90 text-xs"
+        className="mt-2 text-xs text-white/90"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}

@@ -9,20 +9,19 @@
 
 'use client';
 
-import { cn, RESPONSIVE_PATTERNS } from '@heyclaude/web-runtime/ui';
-import { HighlightText } from '@heyclaude/web-runtime/ui';
+import { cn, RESPONSIVE_PATTERNS, HighlightText } from '@heyclaude/web-runtime/ui';
 
 interface HeyClaudeLogoProps {
-  /**
-   * Size variant for different contexts
-   * @default "md"
-   */
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-
   /**
    * Additional CSS classes
    */
   className?: string;
+
+  /**
+   * Animation duration in seconds
+   * @default 1.5
+   */
+  duration?: number;
 
   /**
    * Whether to trigger animation only when in view
@@ -31,10 +30,10 @@ interface HeyClaudeLogoProps {
   inView?: boolean;
 
   /**
-   * Animation duration in seconds
-   * @default 1.5
+   * Size variant for different contexts
+   * @default "md"
    */
-  duration?: number;
+  size?: 'lg' | 'md' | 'sm' | 'xl';
 }
 
 /**

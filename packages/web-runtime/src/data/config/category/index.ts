@@ -32,13 +32,25 @@ export const getCategoryConfig = (
 export { VALID_CATEGORIES, isValidCategory } from '../../../utils/category-validation.ts';
 
 export const getCategoryStatsConfig = (): readonly CategoryStatsConfig[] => {
-  return Object.keys(CATEGORY_CONFIGS).map((id, index) => ({
-    categoryId: id as Database['public']['Enums']['content_category'],
-    icon: CATEGORY_CONFIGS[id as Database['public']['Enums']['content_category']].icon,
-    displayText:
-      CATEGORY_CONFIGS[id as Database['public']['Enums']['content_category']].pluralTitle,
-    delay: index * 100,
-  }));
+  // Iterate over CATEGORY_CONFIGS entries directly to satisfy TypeScript's type system.
+  // This ensures TypeScript knows config exists and is properly typed.
+  const entries = Object.entries(CATEGORY_CONFIGS) as Array<
+    [
+      Database['public']['Enums']['content_category'],
+      UnifiedCategoryConfig<Database['public']['Enums']['content_category']>,
+    ]
+  >;
+
+  return entries.map(([categoryId, config], index): CategoryStatsConfig => {
+    // Explicitly type the return to ensure type safety
+    const statsConfig: CategoryStatsConfig = {
+      categoryId,
+      icon: config.icon,
+      displayText: config.pluralTitle,
+      delay: index * 100,
+    };
+    return statsConfig;
+  });
 };
 
 /**

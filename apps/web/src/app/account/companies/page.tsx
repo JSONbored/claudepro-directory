@@ -35,12 +35,13 @@ import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated user companies
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 /**
  * Determine whether a string is a safe absolute HTTP(S) URL suitable for use in an href.
@@ -90,14 +91,14 @@ export default async function CompaniesPage() {
   const requestId = generateRequestId();
   const operation = 'CompaniesPage';
   const route = '/account/companies';
-  const module = 'apps/web/src/app/account/companies/page';
+  const modulePath = 'apps/web/src/app/account/companies/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
     route,
-    module,
+    module: modulePath,
   });
 
   // Section: Authentication

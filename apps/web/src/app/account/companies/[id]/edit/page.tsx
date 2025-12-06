@@ -24,12 +24,13 @@ import { notFound, redirect } from 'next/navigation';
 
 import { CompanyForm } from '@/src/components/core/forms/company-form';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated route
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies/:id/edit');
@@ -63,14 +64,14 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
   const requestId = generateRequestId();
   const operation = 'EditCompanyPage';
   const route = `/account/companies/${id}/edit`;
-  const module = 'apps/web/src/app/account/companies/[id]/edit/page';
+  const modulePath = 'apps/web/src/app/account/companies/[id]/edit/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
     route,
-    module,
+    module: modulePath,
   });
 
   // Section: Authentication

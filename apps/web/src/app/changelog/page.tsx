@@ -35,6 +35,13 @@ import dynamicImport from 'next/dynamic';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
 
+export const revalidate = 3600;
+
+/**
+ * ISR: 1 hour (3600s) - Changelog list updates periodically
+ * Uses ISR for better performance while keeping content fresh
+ */
+
 const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
@@ -46,12 +53,6 @@ const NewsletterCTAVariant = dynamicImport(
     loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
-
-/**
- * ISR: 1 hour (3600s) - Changelog list updates periodically
- * Uses ISR for better performance while keeping content fresh
- */
-export const revalidate = 3600;
 
 /**
  * Generate page metadata for the /changelog route, including RSS and Atom feed alternates.

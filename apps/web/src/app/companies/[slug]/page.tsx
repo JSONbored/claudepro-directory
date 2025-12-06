@@ -35,6 +35,9 @@ import type React from 'react';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
+export const revalidate = 1800; // 30min ISR (fallback if edge function cache misses)
+export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
+
 /**
  * Render an external anchor for a validated website URL or nothing when the URL is not safe.
  *
@@ -67,9 +70,6 @@ function SafeWebsiteLink({
 interface CompanyPageProperties {
   params: Promise<{ slug: string }>;
 }
-
-export const revalidate = 1800; // 30min ISR (fallback if edge function cache misses)
-export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
  * Limit to top 10 companies to optimize build time for static pre-rendering.

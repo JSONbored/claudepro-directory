@@ -23,12 +23,13 @@ import { notFound, redirect } from 'next/navigation';
 
 import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated route
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 interface CollectionPageProperties {
   params: Promise<{ slug: string }>;

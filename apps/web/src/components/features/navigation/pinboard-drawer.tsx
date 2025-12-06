@@ -1,22 +1,22 @@
 'use client';
 
 import { formatRelativeDate } from '@heyclaude/web-runtime';
+import { usePinboard } from '@heyclaude/web-runtime/hooks';
 import { BookmarkMinus, BookmarkPlus } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import Link from 'next/link';
-import { Button } from '@heyclaude/web-runtime/ui';
 import {
+  UI_CLASSES,
+  Button,
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from '@heyclaude/web-runtime/ui';
-import { usePinboard } from '@heyclaude/web-runtime/hooks';
+import Link from 'next/link';
 
 interface PinboardDrawerProps {
-  open: boolean;
   onOpenChange: (open: boolean) => void;
+  open: boolean;
 }
 
 export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
@@ -36,50 +36,50 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-4 flex items-center justify-between text-muted-foreground text-sm">
+        <div className="text-muted-foreground mt-4 flex items-center justify-between text-sm">
           <span>{hasPins ? `${pinnedItems.length} saved` : 'No pinned items yet'}</span>
-          {hasPins && (
+          {hasPins ? (
             <Button variant="ghost" size="sm" onClick={clearAll}>
               Clear all
             </Button>
-          )}
+          ) : null}
         </div>
 
         <div className="mt-6 space-y-4">
           {!isLoaded && (
-            <div className="space-y-3 rounded-lg border border-border/60 border-dashed p-4">
-              <div className="h-4 w-2/3 animate-pulse rounded bg-muted/60" />
-              <div className="h-3 w-5/6 animate-pulse rounded bg-muted/40" />
-              <div className="h-3 w-1/2 animate-pulse rounded bg-muted/30" />
+            <div className="border-border/60 space-y-3 rounded-lg border border-dashed p-4">
+              <div className="bg-muted/60 h-4 w-2/3 animate-pulse rounded" />
+              <div className="bg-muted/40 h-3 w-5/6 animate-pulse rounded" />
+              <div className="bg-muted/30 h-3 w-1/2 animate-pulse rounded" />
             </div>
           )}
 
-          {isLoaded && hasPins && (
+          {isLoaded && hasPins ? (
             <ul className="space-y-3">
               {pinnedItems.map((item) => (
                 <li
                   key={`${item.category}-${item.slug}`}
-                  className="rounded-lg border border-border/60 p-4"
+                  className="border-border/60 rounded-lg border p-4"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                      <p className="text-muted-foreground text-xs tracking-wide uppercase">
                         {item.category}
                         {item.typeName ? ` • ${item.typeName}` : ''}
                       </p>
                       <Link
                         href={`/${item.category}/${item.slug}`}
-                        className="mt-1 block font-semibold text-base text-primary hover:underline"
+                        className="text-primary mt-1 block text-base font-semibold hover:underline"
                         onClick={() => onOpenChange(false)}
                       >
                         {item.title}
                       </Link>
-                      {item.description && (
-                        <p className="mt-1 line-clamp-2 text-muted-foreground text-sm">
+                      {item.description ? (
+                        <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
                           {item.description}
                         </p>
-                      )}
-                      <p className="mt-2 text-muted-foreground text-xs">
+                      ) : null}
+                      <p className="text-muted-foreground mt-2 text-xs">
                         Pinned {formatRelativeDate(item.pinnedAt, { style: 'simple' })}
                       </p>
                     </div>
@@ -95,16 +95,16 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                 </li>
               ))}
             </ul>
-          )}
+          ) : null}
 
-          {isLoaded && !hasPins && (
-            <div className="rounded-lg border border-border/60 border-dashed p-6 text-center">
+          {isLoaded && !hasPins ? (
+            <div className="border-border/60 rounded-lg border border-dashed p-6 text-center">
               <p className="font-medium">Nothing pinned yet</p>
-              <p className="mt-2 text-muted-foreground text-sm">
+              <p className="text-muted-foreground mt-2 text-sm">
                 Tap “Pin for later” on any detail page to build your personal shortlist.
               </p>
             </div>
-          )}
+          ) : null}
         </div>
       </SheetContent>
     </Sheet>

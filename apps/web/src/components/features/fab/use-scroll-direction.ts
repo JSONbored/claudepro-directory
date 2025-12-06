@@ -15,23 +15,21 @@
 
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
-import type { ScrollState } from '@heyclaude/web-runtime/types/component.types';
+import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { type ScrollState } from '@heyclaude/web-runtime/types/component.types';
 import { useEffect, useState } from 'react';
 
 // Load config values at module initialization (sync) with fallbacks
 const timeoutConfig = getTimeoutConfig();
-const DEFAULT_SCROLL_THRESHOLD =
-  timeoutConfig?.['timeout.ui.scroll_direction_threshold_px'] ?? 300;
-const DEFAULT_SCROLL_HYSTERESIS =
-  timeoutConfig?.['timeout.ui.scroll_hysteresis_px'] ?? 10;
+const DEFAULT_SCROLL_THRESHOLD = timeoutConfig?.['timeout.ui.scroll_direction_threshold_px'] ?? 300;
+const DEFAULT_SCROLL_HYSTERESIS = timeoutConfig?.['timeout.ui.scroll_hysteresis_px'] ?? 10;
 
 interface UseScrollDirectionOptions {
-  /** Scroll threshold to show/hide FAB (px) */
-  threshold?: number;
   /** Hysteresis to prevent jitter (px) */
   hysteresis?: number;
+  /** Scroll threshold to show/hide FAB (px) */
+  threshold?: number;
 }
 
 /**
@@ -50,7 +48,7 @@ export function useScrollDirection({
   });
 
   useEffect(() => {
-    let rafId: number | null = null;
+    let rafId: null | number = null;
     let prevScrollY = window.scrollY;
 
     const handleScroll = () => {
@@ -101,12 +99,28 @@ export function useScrollDirection({
             prevScrollY = currentScrollY;
           } catch (error) {
             const normalized = normalizeError(error, '[useScrollDirection] Error in rAF callback');
-            logger.error('[useScrollDirection] Error in rAF callback', normalized);
+            logClientError(
+              '[useScrollDirection] Error in rAF callback',
+              normalized,
+              'useScrollDirection.handleScroll',
+              {
+                component: 'useScrollDirection',
+                action: 'raf-callback',
+              }
+            );
           }
         });
       } catch (error) {
         const normalized = normalizeError(error, '[useScrollDirection] Error in scroll handler');
-        logger.error('[useScrollDirection] Error in scroll handler', normalized);
+        logClientError(
+          '[useScrollDirection] Error in scroll handler',
+          normalized,
+          'useScrollDirection.handleScroll',
+          {
+            component: 'useScrollDirection',
+            action: 'scroll-handler',
+          }
+        );
       }
     };
 
@@ -118,7 +132,15 @@ export function useScrollDirection({
         error,
         '[useScrollDirection] Error in initial scroll check'
       );
-      logger.error('[useScrollDirection] Error in initial scroll check', normalized);
+      logClientError(
+        '[useScrollDirection] Error in initial scroll check',
+        normalized,
+        'useScrollDirection.init',
+        {
+          component: 'useScrollDirection',
+          action: 'initial-check',
+        }
+      );
     }
 
     // Passive listener for better scroll performance

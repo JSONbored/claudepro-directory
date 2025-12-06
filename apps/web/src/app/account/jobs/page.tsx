@@ -39,13 +39,14 @@ import Link from 'next/link';
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
 import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-button';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated user jobs
  * Runtime: Node.js (required for authenticated user data and Supabase server client)
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 const JOB_PLAN_LABELS: Record<Database['public']['Enums']['job_plan'], string> = {
   'one-time': 'One-Time',

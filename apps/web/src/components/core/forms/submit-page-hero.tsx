@@ -7,17 +7,16 @@
 'use client';
 
 import { CheckCircle, Clock, Send, Sparkles, Users } from '@heyclaude/web-runtime/icons';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cn, UI_CLASSES, BorderBeam } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
-import { BorderBeam } from '@heyclaude/web-runtime/ui';
 
 interface SubmitPageHeroProps {
-  stats: {
-    total: number;
-    pending: number;
-    merged_this_week: number;
-  };
   className?: string;
+  stats: {
+    merged_this_week: number;
+    pending: number;
+    total: number;
+  };
 }
 
 /**
@@ -66,7 +65,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
   return (
     <motion.div
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-border/50 bg-card',
+        'border-border/50 bg-card relative overflow-hidden rounded-2xl border',
         UI_CLASSES.PADDING_RELAXED,
         UI_CLASSES.MARGIN_RELAXED,
         className
@@ -85,7 +84,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
           <motion.div variants={itemVariants}>
             <div
               className={cn(
-                'inline-flex rounded-full border border-primary/20 bg-primary/10',
+                'border-primary/20 bg-primary/10 inline-flex rounded-full border',
                 UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2,
                 UI_CLASSES.PADDING_X_DEFAULT,
                 'py-1.5',
@@ -95,12 +94,12 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
               <motion.div variants={iconVariants}>
                 <Sparkles className={cn(UI_CLASSES.ICON_SM, 'text-primary')} />
               </motion.div>
-              <span className="font-medium text-primary">Community Contributions</span>
+              <span className="text-primary font-medium">Community Contributions</span>
             </div>
           </motion.div>
 
           {/* Title */}
-          <motion.h1 className="font-bold text-4xl lg:text-5xl" variants={itemVariants}>
+          <motion.h1 className="text-4xl font-bold lg:text-5xl" variants={itemVariants}>
             Share Your Configuration
           </motion.h1>
 
@@ -145,16 +144,16 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
           >
             <div
               className={cn(
-                'h-32 w-32 rounded-2xl border border-primary/20 bg-primary/10',
+                'border-primary/20 bg-primary/10 h-32 w-32 rounded-2xl border',
                 UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER
               )}
             >
-              <Send className="h-16 w-16 text-primary" />
+              <Send className="text-primary h-16 w-16" />
             </div>
 
             {/* Animated pulse ring */}
             <motion.div
-              className="absolute inset-0 rounded-2xl border-2 border-primary/30"
+              className="border-primary/30 absolute inset-0 rounded-2xl border-2"
               initial={{ scale: 1, opacity: 1 }}
               animate={{
                 scale: [1, 1.2, 1],

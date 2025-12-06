@@ -4,6 +4,8 @@ import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
+export const revalidate = false;
+
 /**
  * Provide page metadata used by Next.js for the site's Privacy page.
  *
@@ -11,15 +13,14 @@ import { type Metadata } from 'next';
  * @see generatePageMetadata
  * @see {@link Metadata}
  */
+/**
+ * Static Generation: Legal pages are fully static and never change
+ * No automatic revalidation - pages are statically generated at build time
+ */
+
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/privacy');
 }
-
-/**
- * Static Generation: Legal pages are fully static and never change
- * revalidate: false = Static generation at build time (no automatic revalidation)
- */
-export const revalidate = false;
 
 /**
  * Render the Privacy Policy page displaying the site's last-updated date and policy sections.

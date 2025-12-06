@@ -252,6 +252,7 @@ export default async function RootLayout({
           <StructuredData route="/" />
         </Suspense>
         <ComponentConfigContextProvider value={componentCardConfig}>
+          {/* @ts-expect-error - next-themes ThemeProvider v0.4.6 types don't include children prop but it accepts them at runtime */}
           <ThemeProvider
             attribute="data-theme"
             defaultTheme="dark"

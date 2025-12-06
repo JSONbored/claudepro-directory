@@ -8,7 +8,7 @@
  * Following existing UI patterns from the codebase
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import {
   addItemToCollection,
   removeItemFromCollection,
@@ -16,19 +16,20 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { isValidCategory, logClientWarning, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
 import {
+  toasts,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Separator,
 } from '@heyclaude/web-runtime/ui';
-import { Separator } from '@heyclaude/web-runtime/ui';
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
 
 /**
  * Validate slug is safe for use in URLs
@@ -42,7 +43,7 @@ function isValidSlug(slug: string): boolean {
  * Get safe content URL from type and slug
  * Returns null if either is invalid
  */
-function getSafeContentUrl(type: string, slug: string): string | null {
+function getSafeContentUrl(type: string, slug: string): null | string {
   if (!(isValidCategory(type) && isValidSlug(slug))) return null;
   const sanitizedSlug = sanitizeSlug(slug);
   if (!isValidSlug(sanitizedSlug)) return null;
@@ -53,9 +54,9 @@ type CollectionItem = Database['public']['Tables']['collection_items']['Row'];
 type Bookmark = Database['public']['Tables']['bookmarks']['Row'];
 
 interface CollectionItemManagerProps {
+  availableBookmarks: Bookmark[];
   collectionId: string;
   items: CollectionItem[];
-  availableBookmarks: Bookmark[];
 }
 
 export function CollectionItemManager({
@@ -209,16 +210,16 @@ export function CollectionItemManager({
   return (
     <div className="space-y-4">
       {/* Add Item Section */}
-      <div className={'flex items-end gap-2 pb-4'}>
+      <div className="flex items-end gap-2 pb-4">
         <div className="flex-1">
-          <div className={'mb-2 block font-medium text-sm'}>Add Bookmark to Collection</div>
+          <div className="mb-2 block text-sm font-medium">Add Bookmark to Collection</div>
           <Select value={selectedBookmarkId} onValueChange={setSelectedBookmarkId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a bookmark to add" />
             </SelectTrigger>
             <SelectContent>
               {availableToAdd.length === 0 ? (
-                <div className="p-2 text-muted-foreground text-sm">
+                <div className="text-muted-foreground p-2 text-sm">
                   All bookmarks have been added
                 </div>
               ) : (
@@ -251,7 +252,7 @@ export function CollectionItemManager({
       {/* Items List */}
       {items.length === 0 ? (
         <div className="rounded-lg border border-dashed py-12 text-center">
-          <p className={'text-muted-foreground'}>
+          <p className="text-muted-foreground">
             No items in this collection yet. Add bookmarks above to get started.
           </p>
         </div>
@@ -260,7 +261,7 @@ export function CollectionItemManager({
           {items.map((item: CollectionItem, index: number) => (
             <div
               key={item.id}
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50`}
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} bg-card hover:bg-accent/50 rounded-lg border p-3 transition-colors`}
             >
               {/* Order Controls */}
               <div className="flex flex-col gap-1">
@@ -287,7 +288,7 @@ export function CollectionItemManager({
               </div>
 
               {/* Order Number */}
-              <div className="w-8 text-center font-medium text-muted-foreground text-sm">
+              <div className="text-muted-foreground w-8 text-center text-sm font-medium">
                 #{index + 1}
               </div>
 
@@ -297,9 +298,11 @@ export function CollectionItemManager({
                   <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                     {item.content_type}
                   </UnifiedBadge>
-                  <span className="font-medium text-sm">{item.content_slug}</span>
+                  <span className="text-sm font-medium">{item.content_slug}</span>
                 </div>
-                {item.notes && <p className={'mt-1 text-muted-foreground text-xs'}>{item.notes}</p>}
+                {item.notes ? (
+                  <p className="text-muted-foreground mt-1 text-xs">{item.notes}</p>
+                ) : null}
               </div>
 
               {/* Actions */}
@@ -322,7 +325,7 @@ export function CollectionItemManager({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${UI_CLASSES.ICON_XL} p-0 text-destructive hover:text-destructive`}
+                  className={`${UI_CLASSES.ICON_XL} text-destructive hover:text-destructive p-0`}
                   onClick={() => handleRemove(item.id)}
                   disabled={isPending}
                   aria-label="Remove item"

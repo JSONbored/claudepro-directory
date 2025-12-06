@@ -15,9 +15,9 @@ import {
 import { type Metadata } from 'next';
 import Link from 'next/link';
 
-const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
-
 export const dynamic = 'force-dynamic';
+
+const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
 
 /**
  * Generate page metadata for the authentication code error route.
@@ -48,14 +48,14 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
   const requestId = generateRequestId();
   const operation = 'AuthCodeErrorPage';
   const route = AUTH_CODE_ERROR_PATH;
-  const module = 'apps/web/src/app/(auth)/auth-code-error/page';
+  const modulePath = 'apps/web/src/app/(auth)/auth-code-error/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
     route,
-    module,
+    module: modulePath,
   });
 
   const searchParameters = await properties.searchParams;

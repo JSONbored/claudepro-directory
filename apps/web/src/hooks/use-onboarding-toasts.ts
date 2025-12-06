@@ -10,17 +10,19 @@
  * - Context-aware messaging
  */
 
+'use client';
+
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useCallback, useEffect, useState } from 'react';
 
 interface OnboardingToast {
-  id: string;
-  title: string;
-  message: string;
   delay?: number;
   duration?: number;
+  id: string;
+  message: string;
+  title: string;
 }
 
 const ONBOARDING_TOASTS: OnboardingToast[] = [
@@ -42,7 +44,7 @@ const ONBOARDING_TOASTS: OnboardingToast[] = [
     id: 'wizard-templates',
     title: '✨ Pro Tip: Use Templates',
     message: 'Save time by starting with proven templates from the community.',
-    delay: 12000,
+    delay: 12_000,
     duration: 5000,
   },
 ];
@@ -50,9 +52,9 @@ const ONBOARDING_TOASTS: OnboardingToast[] = [
 const STORAGE_KEY = 'claudepro_onboarding_toasts_seen';
 
 interface OnboardingToastsOptions {
-  enabled?: boolean;
-  context?: 'wizard' | 'submit' | 'general';
+  context?: 'general' | 'submit' | 'wizard';
   customToasts?: OnboardingToast[];
+  enabled?: boolean;
 }
 
 export function useOnboardingToasts({
@@ -79,7 +81,14 @@ export function useOnboardingToasts({
           ? `${env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/active-notifications`
           : null;
         if (!fluxStationUrl) {
-          logger.warn('NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification fetch');
+          logClientWarn(
+            'NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification fetch',
+            undefined,
+            'fetchNotifications',
+            {
+              module: 'useOnboardingToasts',
+            }
+          );
           return;
         }
         const response = await fetch(fluxStationUrl, {
@@ -96,7 +105,7 @@ export function useOnboardingToasts({
           );
           setHasSeenToasts(hasOnboardingNotifs);
         }
-      } catch (_error) {
+      } catch {
         // Fallback to localStorage
         try {
           const seenToasts = localStorage.getItem(STORAGE_KEY);
@@ -112,7 +121,9 @@ export function useOnboardingToasts({
 
     fetchNotifications().catch((error: unknown) => {
       const normalized = normalizeError(error, 'Failed to fetch notifications');
-      logger.warn('Failed to fetch notifications', { error: normalized.message });
+      logClientWarn('Failed to fetch notifications', normalized, 'fetchNotifications', {
+        module: 'useOnboardingToasts',
+      });
     });
   }, [enabled, context, user]);
 
@@ -149,7 +160,14 @@ export function useOnboardingToasts({
           ? `${env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/notifications/create`
           : null;
         if (!fluxStationUrl) {
-          logger.warn('NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification creation');
+          logClientWarn(
+            'NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification creation',
+            undefined,
+            'createNotifications',
+            {
+              module: 'useOnboardingToasts',
+            }
+          );
           return;
         }
         for (const toast of toastsToShow) {
@@ -188,7 +206,9 @@ export function useOnboardingToasts({
 
     createNotifications().catch((error: unknown) => {
       const normalized = normalizeError(error, 'Failed to create onboarding notifications');
-      logger.warn('Failed to create onboarding notifications', { error: normalized.message });
+      logClientWarn('Failed to create onboarding notifications', normalized, 'createNotifications', {
+        module: 'useOnboardingToasts',
+      });
     });
   }, [enabled, hasSeenToasts, customToasts, user, context, markToastsAsSeen]);
 

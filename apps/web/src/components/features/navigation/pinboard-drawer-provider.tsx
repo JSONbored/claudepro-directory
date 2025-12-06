@@ -2,22 +2,23 @@
 
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+
 import { PinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer';
 
 interface PinboardDrawerContextValue {
-  openDrawer: () => void;
   closeDrawer: () => void;
+  openDrawer: () => void;
   toggleDrawer: () => void;
 }
 
-const PinboardDrawerContext = createContext<PinboardDrawerContextValue | null>(null);
+const PinboardDrawerContext = createContext<null | PinboardDrawerContextValue>(null);
 
 export function PinboardDrawerProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const pulse = usePulse();
 
   const trackDrawerEvent = useCallback(
-    (action: 'open' | 'close') => {
+    (action: 'close' | 'open') => {
       pulse
         .click({
           category: null,

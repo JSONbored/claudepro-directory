@@ -22,54 +22,54 @@ import {
   Sparkles,
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
-import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import Link from 'next/link';
-import { useState, useTransition } from 'react';
-import { BookmarkButton } from '@heyclaude/web-runtime/ui';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { BaseCard } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
 import {
+  POSITION_PATTERNS,
+  UI_CLASSES,
+  BookmarkButton,
+  UnifiedBadge,
+  BaseCard,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@heyclaude/web-runtime/ui';
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@heyclaude/web-runtime/ui';
-import { Separator } from '@heyclaude/web-runtime/ui';
-import { Slider } from '@heyclaude/web-runtime/ui';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
-import {
+  Separator,
+  Slider,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  toasts,
 } from '@heyclaude/web-runtime/ui';
+import Link from 'next/link';
+import { useState, useTransition } from 'react';
+
+import { ShareResults } from './share-results';
 
 // Type matching DecodedQuizAnswers from results page
-type DecodedQuizAnswers = {
-  useCase: Database['public']['Enums']['use_case_type'];
+interface DecodedQuizAnswers {
   experienceLevel: Database['public']['Enums']['experience_level'];
-  toolPreferences: string[];
-  p_integrations?: Database['public']['Enums']['integration_type'][];
   p_focus_areas?: Database['public']['Enums']['focus_area_type'][];
+  p_integrations?: Database['public']['Enums']['integration_type'][];
   teamSize?: string;
   timestamp?: string;
-};
+  toolPreferences: string[];
+  useCase: Database['public']['Enums']['use_case_type'];
+}
 
 type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
   answers: DecodedQuizAnswers;
-  id: string;
   generatedAt: string;
+  id: string;
 };
-
-import { toasts } from '@heyclaude/web-runtime/ui';
-import { ShareResults } from './share-results';
 
 interface ResultsDisplayProps {
   recommendations: RecommendationResponse;
@@ -116,7 +116,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               action: {
                 label: 'View Library',
                 onClick: () => {
-                  window.location.href = '/account/library';
+                  globalThis.location.href = '/account/library';
                 },
               },
             }
@@ -142,16 +142,16 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       <div className="space-y-4 text-center">
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
           <Sparkles className={`${UI_CLASSES.ICON_LG} text-primary`} />
-          <h1 className="font-bold text-3xl md:text-4xl">Your Personalized Recommendations</h1>
+          <h1 className="text-3xl font-bold md:text-4xl">Your Personalized Recommendations</h1>
         </div>
 
-        <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
           Based on your preferences, we found{' '}
           <strong>{total_matches ?? 0} matching configurations</strong>. Here are the top{' '}
           {results?.length ?? 0} best fits for your needs.
         </p>
 
-        <div className={'flex-wrap items-center justify-center gap-3'}>
+        <div className="flex-wrap items-center justify-center gap-3">
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
             <TrendingUp className={UI_CLASSES.ICON_XS_LEADING} />
             {(summary?.avg_match_score ?? 0).toFixed(0)}% Avg Match
@@ -165,7 +165,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </UnifiedBadge>
         </div>
 
-        <div className={'flex-wrap items-center justify-center gap-3'}>
+        <div className="flex-wrap items-center justify-center gap-3">
           <Button
             variant="default"
             size="sm"
@@ -185,7 +185,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             <Share2 className={UI_CLASSES.ICON_SM} />
             Share Results
           </Button>
-          <Button variant="outline" size="sm" asChild={true}>
+          <Button variant="outline" size="sm" asChild>
             <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className="gap-2">
               <RefreshCw className={UI_CLASSES.ICON_SM} />
               Start Over
@@ -195,7 +195,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       </div>
 
       <Collapsible open={showRefinePanel} onOpenChange={setShowRefinePanel}>
-        <CollapsibleTrigger asChild={true}>
+        <CollapsibleTrigger asChild>
           <Button variant="ghost" size="sm" className="w-full gap-2">
             <Settings className={UI_CLASSES.ICON_SM} />
             Adjust Preferences
@@ -215,7 +215,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className="font-medium text-sm">Minimum Match Score</span>
+                  <span className="text-sm font-medium">Minimum Match Score</span>
                   <span className="text-muted-foreground text-sm">{minScore}%</span>
                 </div>
                 <Slider
@@ -234,7 +234,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
               <div className="space-y-2">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className="font-medium text-sm">Maximum Results</span>
+                  <span className="text-sm font-medium">Maximum Results</span>
                   <span className="text-muted-foreground text-sm">{maxResults}</span>
                 </div>
                 <Slider
@@ -273,57 +273,57 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
             <div>
-              <span className="font-medium text-sm">Use Case</span>
-              <p className="mt-1 text-muted-foreground text-sm capitalize">
+              <span className="text-sm font-medium">Use Case</span>
+              <p className="text-muted-foreground mt-1 text-sm capitalize">
                 {String(answers.useCase).replace('-', ' ')}
               </p>
             </div>
             <div>
-              <span className="font-medium text-sm">Experience Level</span>
-              <p className="mt-1 text-muted-foreground text-sm capitalize">
+              <span className="text-sm font-medium">Experience Level</span>
+              <p className="text-muted-foreground mt-1 text-sm capitalize">
                 {String(answers.experienceLevel)}
               </p>
             </div>
             <div>
-              <span className="font-medium text-sm">Tool Preferences</span>
-              <p className="mt-1 text-muted-foreground text-sm">
+              <span className="text-sm font-medium">Tool Preferences</span>
+              <p className="text-muted-foreground mt-1 text-sm">
                 {Array.isArray(answers.toolPreferences) ? answers.toolPreferences.join(', ') : ''}
               </p>
             </div>
             {answers.p_integrations &&
-              Array.isArray(answers.p_integrations) &&
-              answers.p_integrations.length > 0 && (
-                <div>
-                  <span className="font-medium text-sm">Integrations</span>
-                  <p className="mt-1 text-muted-foreground text-sm">
-                    {answers.p_integrations.join(', ')}
-                  </p>
-                </div>
-              )}
-            {answers.p_focus_areas &&
-              Array.isArray(answers.p_focus_areas) &&
-              answers.p_focus_areas.length > 0 && (
-                <div>
-                  <span className="font-medium text-sm">Focus Areas</span>
-                  <p className="mt-1 text-muted-foreground text-sm">
-                    {answers.p_focus_areas.join(', ')}
-                  </p>
-                </div>
-              )}
-            {answers.teamSize && (
+            Array.isArray(answers.p_integrations) &&
+            answers.p_integrations.length > 0 ? (
               <div>
-                <span className="font-medium text-sm">Team Size</span>
-                <p className="mt-1 text-muted-foreground text-sm capitalize">
+                <span className="text-sm font-medium">Integrations</span>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  {answers.p_integrations.join(', ')}
+                </p>
+              </div>
+            ) : null}
+            {answers.p_focus_areas &&
+            Array.isArray(answers.p_focus_areas) &&
+            answers.p_focus_areas.length > 0 ? (
+              <div>
+                <span className="text-sm font-medium">Focus Areas</span>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  {answers.p_focus_areas.join(', ')}
+                </p>
+              </div>
+            ) : null}
+            {answers.teamSize ? (
+              <div>
+                <span className="text-sm font-medium">Team Size</span>
+                <p className="text-muted-foreground mt-1 text-sm capitalize">
                   {String(answers.teamSize)}
                 </p>
               </div>
-            )}
+            ) : null}
           </div>
         </CardContent>
       </Card>
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-        <TabsList className={'h-auto flex-wrap'}>
+        <TabsList className="h-auto flex-wrap">
           {categories.map((category) => {
             const count =
               category === 'all'
@@ -357,11 +357,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 // Validate slug pattern: alphanumeric start, then alphanumeric/hyphens/underscores, 3-32 chars
                 const slugPattern = /^[a-zA-Z0-9][a-zA-Z0-9-_]{2,32}$/;
                 if (
-                  !(
-                    allowedCategories.includes(
-                      result.category as (typeof allowedCategories)[number]
-                    ) && slugPattern.test(result.slug)
-                  )
+                  !(allowedCategories.includes(result.category) && slugPattern.test(result.slug))
                 ) {
                   // Skip rendering for invalid categories or invalid slugs
                   return null;
@@ -400,11 +396,11 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} z-10`}>
                       <TooltipProvider>
                         <Tooltip>
-                          <TooltipTrigger asChild={true}>
+                          <TooltipTrigger asChild>
                             <UnifiedBadge
                               variant="base"
                               style="secondary"
-                              className={`${getMatchScoreColor(matchScore)} px-3 py-1 font-bold text-base`}
+                              className={`${getMatchScoreColor(matchScore)} px-3 py-1 text-base font-bold`}
                             >
                               <Sparkles className={UI_CLASSES.ICON_XS_LEADING} />
                               {matchScore}%
@@ -447,7 +443,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         displayTitle={result.title}
                         description={result.description}
                         ariaLabel={`${result.title} - ${matchScore}% match`}
-                        {...(tags.length ? { tags } : {})}
+                        {...(tags.length > 0 ? { tags } : {})}
                         maxVisibleTags={4}
                         {...(author ? { author } : {})}
                         className="relative overflow-hidden transition-all hover:shadow-lg"
@@ -459,13 +455,13 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         renderContent={() => (
                           <>
                             <div
-                              className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} mb-3 rounded-lg bg-accent/50 p-3`}
+                              className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} bg-accent/50 mb-3 rounded-lg p-3`}
                             >
                               <Info
-                                className={`h-4 w-4 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                                className={`text-primary h-4 w-4 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                               />
                               <div>
-                                <p className="font-medium text-sm">Why recommended:</p>
+                                <p className="text-sm font-medium">Why recommended:</p>
                                 <p className="text-muted-foreground text-sm">{primaryReason}</p>
                               </div>
                             </div>
@@ -490,8 +486,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="group -mx-4 -mb-4 mt-2 w-full"
-                            asChild={true}
+                            className="group -mx-4 mt-2 -mb-4 w-full"
+                            asChild
                           >
                             <span className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
                               View Details
@@ -532,26 +528,26 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             instructions, examples, and documentation.
           </p>
           <div className={UI_CLASSES.FLEX_WRAP_GAP_3}>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href="/" className="gap-2">
                 Browse All Configs
                 <ArrowRight className={UI_CLASSES.ICON_SM} />
               </Link>
             </Button>
-            <Button variant="outline" asChild={true}>
+            <Button variant="outline" asChild>
               <Link href={ROUTES.GUIDES}>View Setup Guides</Link>
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {showShareModal && (
+      {showShareModal ? (
         <ShareResults
           shareUrl={shareUrl}
           resultCount={results?.length ?? 0}
           onClose={() => setShowShareModal(false)}
         />
-      )}
+      ) : null}
     </div>
   );
 }

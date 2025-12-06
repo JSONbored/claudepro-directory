@@ -16,19 +16,19 @@
  */
 
 import { Bot, Brain, Code, FileCode, Sparkles, Terminal, Zap } from '@heyclaude/web-runtime/icons';
-import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { motion } from 'motion/react';
 import { useCallback, useState } from 'react';
 
 interface TypeCard {
-  type: SubmissionContentType;
-  label: string;
-  description: string;
-  icon: typeof Bot;
   color: string;
+  description: string;
   examples: string[];
+  icon: typeof Bot;
+  label: string;
+  type: SubmissionContentType;
 }
 
 const TYPE_CARDS: TypeCard[] = [
@@ -91,13 +91,13 @@ const TYPE_CARDS: TypeCard[] = [
 ];
 
 interface TypeSelectionCardsProps {
-  selected?: SubmissionContentType;
-  onSelect: (type: SubmissionContentType) => void;
   className?: string;
+  onSelect: (type: SubmissionContentType) => void;
+  selected?: SubmissionContentType;
 }
 
 export function TypeSelectionCards({ selected, onSelect, className }: TypeSelectionCardsProps) {
-  const [hoveredCard, setHoveredCard] = useState<SubmissionContentType | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<null | SubmissionContentType>(null);
 
   const handleSelect = useCallback(
     (type: SubmissionContentType) => {
@@ -200,7 +200,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                   </motion.div>
 
                   {/* Selection Indicator */}
-                  {isSelected && (
+                  {isSelected ? (
                     <motion.div
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
@@ -225,13 +225,13 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                         />
                       </svg>
                     </motion.div>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* Label */}
                 <h3
                   className={cn(
-                    'mb-2 font-semibold text-lg transition-colors',
+                    'mb-2 text-lg font-semibold transition-colors',
                     isSelected
                       ? 'text-accent-primary'
                       : 'text-foreground group-hover:text-accent-primary'
@@ -244,7 +244,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                 </h3>
 
                 {/* Description */}
-                <p className="mb-3 text-muted-foreground text-sm leading-relaxed">
+                <p className="text-muted-foreground mb-3 text-sm leading-relaxed">
                   {card.description}
                 </p>
 
@@ -295,7 +295,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
 
       {/* Helper Text */}
       <motion.p
-        className="mt-6 text-center text-muted-foreground text-sm"
+        className="text-muted-foreground mt-6 text-center text-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
@@ -354,11 +354,11 @@ export function CompactTypeSelection({ selected, onSelect, className }: TypeSele
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="font-medium text-sm">{card.label}</div>
-                <div className="truncate text-muted-foreground text-xs">{card.description}</div>
+                <div className="text-sm font-medium">{card.label}</div>
+                <div className="text-muted-foreground truncate text-xs">{card.description}</div>
               </div>
 
-              {isSelected && (
+              {isSelected ? (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="shrink-0">
                   <svg
                     className="h-5 w-5"
@@ -375,7 +375,7 @@ export function CompactTypeSelection({ selected, onSelect, className }: TypeSele
                     />
                   </svg>
                 </motion.div>
-              )}
+              ) : null}
             </motion.button>
           );
         })}

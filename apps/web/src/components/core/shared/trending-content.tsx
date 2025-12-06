@@ -5,19 +5,24 @@
  */
 
 import { Clock, Star, TrendingUp } from '@heyclaude/web-runtime/icons';
-import type { TrendingContentProps } from '@heyclaude/web-runtime/types/component.types';
+import { type TrendingContentProps } from '@heyclaude/web-runtime/types/component.types';
+import {
+  UnifiedBadge,
+  UnifiedCardGrid,
+  ConfigCard,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@heyclaude/web-runtime/ui';
 import { useId } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
-import { ConfigCard } from '@heyclaude/web-runtime/ui';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
 
 interface TabConfig {
-  value: string;
-  label: string;
+  emptyMessage: string;
   heading: string;
   icon: typeof TrendingUp;
-  emptyMessage: string;
+  label: string;
+  value: string;
 }
 
 const TAB_CONFIGS: TabConfig[] = [
@@ -98,7 +103,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
             aria-labelledby={headingId}
           >
             <div>
-              <h2 id={headingId} className="mb-4 font-bold text-2xl">
+              <h2 id={headingId} className="mb-4 text-2xl font-bold">
                 {config.heading}
               </h2>
               <UnifiedCardGrid
@@ -107,6 +112,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                 emptyMessage={config.emptyMessage}
                 ariaLabel={`${config.label} content`}
                 prefetchCount={3}
+                keyExtractor={(item) => `${config.value}-${item.slug ?? ''}`}
                 renderCard={(item, index) => {
                   // ConfigCard accepts DisplayableContent union type
                   // ContentItem is part of that union, so spread is type-safe
@@ -114,22 +120,17 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
 
                   return (
                     <div key={item.slug} className="relative">
-                      {showRankBadge && index < 3 && (
+                      {showRankBadge && index < 3 ? (
                         <UnifiedBadge
-                          className="-top-2 -right-2 absolute z-10"
+                          className="absolute -top-2 -right-2 z-10"
                           variant="base"
                           style="default"
                           aria-label={`Rank ${index + 1}`}
                         >
                           #{index + 1}
                         </UnifiedBadge>
-                      )}
-                      <ConfigCard
-                        item={cardItem}
-                        variant="default"
-                        showCategory={true}
-                        showActions={true}
-                      />
+                      ) : null}
+                      <ConfigCard item={cardItem} variant="default" showCategory showActions />
                     </div>
                   );
                 }}

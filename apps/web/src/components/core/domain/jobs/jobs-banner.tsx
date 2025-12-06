@@ -7,11 +7,9 @@
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Check, TrendingUp } from '@heyclaude/web-runtime/icons';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cn, UI_CLASSES, Button, Card, CardContent } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent } from '@heyclaude/web-runtime/ui';
 
 export function JobsPromo() {
   return (
@@ -20,11 +18,11 @@ export function JobsPromo() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <Card className="overflow-hidden border-accent/20">
+      <Card className="border-accent/20 overflow-hidden">
         <CardContent className={cn(UI_CLASSES.SPACE_Y_4, UI_CLASSES.PADDING_COMFORTABLE)}>
           {/* Hook with honest growth story */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-            <h3 className={cn(UI_CLASSES.MARGIN_TIGHT, 'font-bold text-xl leading-tight')}>
+            <h3 className={cn(UI_CLASSES.MARGIN_TIGHT, 'text-xl leading-tight font-bold')}>
               Hire Claude Developers
             </h3>
             <p className={UI_CLASSES.TEXT_SM_MUTED}>
@@ -36,7 +34,7 @@ export function JobsPromo() {
           <motion.div
             className={cn(
               UI_CLASSES.SPACE_Y_2,
-              'rounded-lg border bg-card/50',
+              'bg-card/50 rounded-lg border',
               UI_CLASSES.PADDING_COMPACT
             )}
             initial={{ opacity: 0, scale: 0.95 }}
@@ -102,7 +100,7 @@ export function JobsPromo() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Button asChild={true} className="w-full">
+            <Button asChild className="w-full">
               <Link href={ROUTES.PARTNER}>View Pricing & Post Job</Link>
             </Button>
           </motion.div>

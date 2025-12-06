@@ -5,8 +5,8 @@
  * Edge caching: Static config-controlled TTL for global cache
  */
 
-import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { type Database } from '@heyclaude/database-types';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   getActiveAnnouncement as fetchActiveAnnouncement,
   getCacheTtl,

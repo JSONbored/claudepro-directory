@@ -26,9 +26,8 @@ import Link from 'next/link';
 
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
 
-export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/account');
-}
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * Dynamic Rendering Required
@@ -36,8 +35,10 @@ export async function generateMetadata(): Promise<Metadata> {
  * This page is dynamic because it displays user-specific account data.
  * Runtime: Node.js (required for authenticated user data and Supabase server client)
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account');
+}
 
 /**
  * Render the account dashboard page for the authenticated user.

@@ -20,12 +20,16 @@
  */
 
 import { X } from '@heyclaude/web-runtime/icons';
-import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  cn,
+  toasts,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
+  Input,
+  Label,
+} from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
 
 // =============================================================================
 // TYPES
@@ -35,43 +39,43 @@ import { Label } from '@heyclaude/web-runtime/ui';
  * Base props shared across all variants
  */
 interface ListItemManagerBaseProps {
-  /** Field label */
-  label: string;
-  /** Current list of items */
-  items: string[];
-  /** Callback when items change */
-  onChange: (items: string[]) => void;
-  /** Placeholder text for input */
-  placeholder?: string;
-  /** Helper text / description */
-  description?: string;
   /** Additional CSS classes */
   className?: string;
+  /** Helper text / description */
+  description?: string;
   /** Disabled state */
   disabled?: boolean;
-  /** Minimum number of items (shows error if below) */
-  minItems?: number;
+  /** Error message to display */
+  errorMessage?: string;
+  /** Current list of items */
+  items: string[];
+  /** Field label */
+  label: string;
   /** Maximum number of items (prevents adding more) */
   maxItems?: number;
   /** Maximum character length per item */
   maxLength?: number;
+  /** Minimum number of items (shows error if below) */
+  minItems?: number;
   /** Prevent duplicate items */
   noDuplicates?: boolean;
-  /** Show item counter (e.g., "5/10 items") */
-  showCounter?: boolean;
-  /** Error message to display */
-  errorMessage?: string;
+  /** Callback when items change */
+  onChange: (items: string[]) => void;
   /** Callback when field changes (for parent form state tracking) */
   onFieldChange?: () => void;
+  /** Placeholder text for input */
+  placeholder?: string;
+  /** Show item counter (e.g., "5/10 items") */
+  showCounter?: boolean;
 }
 
 /**
  * Badge variant props
  */
 export interface ListItemManagerBadgeProps extends ListItemManagerBaseProps {
-  variant: 'badge';
   /** Badge style variant */
-  badgeStyle?: 'secondary' | 'outline' | 'default';
+  badgeStyle?: 'default' | 'outline' | 'secondary';
+  variant: 'badge';
 }
 
 /**
@@ -85,9 +89,9 @@ export interface ListItemManagerListProps extends ListItemManagerBaseProps {
  * Custom render variant props
  */
 export interface ListItemManagerCustomProps extends ListItemManagerBaseProps {
-  variant: 'custom';
   /** Custom render function for each item */
   renderItem: (item: string, index: number, onRemove: () => void) => React.ReactNode;
+  variant: 'custom';
 }
 
 /**
@@ -95,8 +99,8 @@ export interface ListItemManagerCustomProps extends ListItemManagerBaseProps {
  */
 export type ListItemManagerProps =
   | ListItemManagerBadgeProps
-  | ListItemManagerListProps
-  | ListItemManagerCustomProps;
+  | ListItemManagerCustomProps
+  | ListItemManagerListProps;
 
 // =============================================================================
 // LIST ITEM MANAGER COMPONENT
@@ -170,7 +174,7 @@ export function ListItemManager(props: ListItemManagerProps) {
   const [currentInput, setCurrentInput] = useState('');
 
   // Validation helper
-  const validateItem = (value: string): { valid: boolean; error?: string } => {
+  const validateItem = (value: string): { error?: string; valid: boolean } => {
     const trimmed = value.trim();
 
     if (!trimmed) {
@@ -251,14 +255,14 @@ export function ListItemManager(props: ListItemManagerProps) {
       </div>
 
       {/* Description */}
-      {description && <p className="text-muted-foreground text-xs">{description}</p>}
+      {description ? <p className="text-muted-foreground text-xs">{description}</p> : null}
 
       {/* Counter */}
-      {showCounter && maxItems && (
+      {showCounter && maxItems ? (
         <p className="text-muted-foreground text-xs">
           {items.length}/{maxItems} {label.toLowerCase()} {items.length === 1 ? 'item' : 'items'}
         </p>
-      )}
+      ) : null}
 
       {/* Items Display */}
       {items.length > 0 && (
@@ -277,7 +281,7 @@ export function ListItemManager(props: ListItemManagerProps) {
                   <button
                     type="button"
                     onClick={() => handleRemove(index)}
-                    className="ml-1 hover:text-destructive"
+                    className="hover:text-destructive ml-1"
                     aria-label={`Remove ${item}`}
                     disabled={disabled}
                   >
@@ -326,25 +330,25 @@ export function ListItemManager(props: ListItemManagerProps) {
       )}
 
       {/* Min items error */}
-      {showMinError && (
+      {showMinError ? (
         <p className="text-destructive text-xs">
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
-      )}
+      ) : null}
 
       {/* Custom error message */}
-      {errorMessage && (
+      {errorMessage ? (
         <p className="text-destructive text-xs" role="alert">
           {errorMessage}
         </p>
-      )}
+      ) : null}
 
       {/* Empty state message for required fields */}
-      {minItems && items.length === 0 && (
+      {minItems && items.length === 0 ? (
         <p className="text-destructive text-xs">
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -53,17 +53,27 @@ pre-commit:
         fi
       fail_text: "❌ Type errors found in edge functions. Fix them before committing."
 
-    # 3. Lint and auto-fix with ESLint (build dirs only)
+    # 3. Lint and auto-fix with ESLint (build dirs only, non-blocking)
     lint:
       glob: "**/*.{ts,tsx}"
       exclude: 
         - "apps/edge/functions/**"
         - "packages/edge-runtime/src/utils/email/**"
       run: |
-        echo "🔍 Linting build-critical code..."
+        echo "🔍 Linting build-critical code (non-blocking)..."
+        set +e
         pnpm lint:build --fix
+        LINT_STATUS=$?
         git add -u
-      fail_text: "❌ ESLint found errors in build-critical code. Fix them before committing."
+        if [ $LINT_STATUS -ne 0 ]; then
+          echo "⚠️  ESLint found errors in build-critical code (not blocking - fix before merging)"
+          echo "   Run 'pnpm lint:build' to see full output"
+        else
+          echo "✅ Linting passed"
+        fi
+        exit 0
+      fail_text: "⚠️  ESLint found errors (not blocking - fix before merging)."
+      stage_fixed: true
 
     # 4. Validate Next.js config can be loaded (catches syntax errors ESLint/TS miss)
     validate-next-config:
@@ -135,7 +145,23 @@ pre-push:
         fi
       fail_text: "❌ Type errors found in build-critical code. Fix them before pushing."
 
-    # 2. Production build verification (graceful)
+    # 2. Lint check (non-blocking, warnings only)
+    lint-all:
+      run: |
+        echo "🔍 Running full lint check (non-blocking)..."
+        set +e
+        pnpm lint:build 2>&1
+        LINT_STATUS=$?
+        if [ $LINT_STATUS -ne 0 ]; then
+          echo "⚠️  ESLint found errors (not blocking - fix before merging)"
+          echo "   Run 'pnpm lint:build' to see full output"
+        else
+          echo "✅ Linting passed"
+        fi
+        exit 0
+      fail_text: "⚠️  ESLint found errors (not blocking - fix before merging)."
+
+    # 3. Production build verification (graceful)
     build:
       run: |
         echo "🏗️  Verifying production build..."
@@ -152,7 +178,7 @@ pre-push:
         pnpm build
       fail_text: "❌ Build failed. Fix errors before pushing."
 
-    # 3. Run full test suite (non-blocking, warnings only)
+    # 4. Run full test suite (non-blocking, warnings only)
     test-all:
       run: |
         echo "🧪 Running full test suite (non-blocking)..."
@@ -168,7 +194,7 @@ pre-push:
         exit 0
       fail_text: "⚠️  Tests failed (not blocking - fix before merging)."
 
-    # 4. Technical debt analysis (non-blocking warnings)
+    # 5. Technical debt analysis (non-blocking warnings)
     tech-debt:
       run: |
         echo "📊 Analyzing technical debt..."

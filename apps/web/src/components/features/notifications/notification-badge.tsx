@@ -18,6 +18,7 @@ import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { POSITION_PATTERNS } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
+
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 
 interface NotificationBadgeProps {
@@ -53,8 +54,7 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         transition={springBouncy}
-        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_BADGE} flex h-5 w-5 items-center justify-center rounded-full bg-destructive font-medium text-destructive-foreground text-xs shadow-md ${className}
-        `}
+        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_BADGE} bg-destructive text-destructive-foreground flex h-5 w-5 items-center justify-center rounded-full text-xs font-medium shadow-md ${className}`}
         aria-live="polite"
         aria-label={`${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`}
       >

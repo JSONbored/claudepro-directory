@@ -1,16 +1,23 @@
+'use client';
+
 /**
  * Tab Section Renderer - Maps section IDs to extracted section components
  * Uses dynamic imports for optimal code splitting and performance
+ *
+ * Note: This is a client component because it's imported by TabbedDetailLayout
+ * which is a client component for tab navigation and swipe gestures.
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
-import type {
-  ContentItem,
-  ProcessedSectionData,
-  SectionId,
+import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
+import {
+  type ContentItem,
+  type ProcessedSectionData,
+  type SectionId,
 } from '@heyclaude/web-runtime/types/component.types';
 import dynamic from 'next/dynamic';
+
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 
@@ -18,25 +25,25 @@ import { ReviewListSection } from '@/src/components/core/domain/reviews/review-l
 const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'));
 
 export interface TabSectionRendererProps {
-  sectionId: SectionId;
-  item:
-    | ContentItem
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        ContentItem);
-  sectionData: ProcessedSectionData;
   config: {
-    typeName: string;
     sections: {
+      configuration: boolean;
+      examples: boolean;
       features: boolean;
       installation: boolean;
-      use_cases: boolean;
-      configuration: boolean;
+      requirements: boolean;
       security: boolean;
       troubleshooting: boolean;
-      examples: boolean;
-      requirements: boolean;
+      use_cases: boolean;
     };
+    typeName: string;
   };
+  item:
+    | ContentItem
+    | (ContentItem &
+        Database['public']['Functions']['get_content_detail_complete']['Returns']['content']);
+  sectionData: ProcessedSectionData;
+  sectionId: SectionId;
 }
 
 /**
@@ -71,9 +78,10 @@ export function TabSectionRenderer({
   } = sectionData;
 
   switch (sectionId) {
-    case 'description':
+    case 'description': {
       // Description is handled in header/metadata, not as a separate section
       return null;
+    }
 
     case 'content':
     case 'code': {
@@ -165,13 +173,14 @@ export function TabSectionRenderer({
       );
     }
 
-    case 'installation':
+    case 'installation': {
       if (!(config.sections.installation && installationData)) return null;
       return (
         <UnifiedSection variant="installation" installationData={installationData} item={item} />
       );
+    }
 
-    case 'configuration':
+    case 'configuration': {
       if (!(config.sections.configuration && configData)) return null;
       return (
         <UnifiedSection
@@ -192,12 +201,14 @@ export function TabSectionRenderer({
                 })}
         />
       );
+    }
 
-    case 'examples':
+    case 'examples': {
       if (!(config.sections.examples && examplesData) || examplesData.length === 0) return null;
       return <UnifiedSection variant="examples" examples={examplesData} />;
+    }
 
-    case 'troubleshooting':
+    case 'troubleshooting': {
       if (!config.sections.troubleshooting || troubleshooting.length === 0) return null;
       return (
         <UnifiedSection
@@ -208,6 +219,7 @@ export function TabSectionRenderer({
           dotColor="bg-red-500"
         />
       );
+    }
 
     case 'security': {
       if (!(config.sections.security && sectionData.securityItems)) return null;
@@ -236,31 +248,42 @@ export function TabSectionRenderer({
       );
     }
 
-    case 'related':
+    case 'related': {
       // Related items handled in sidebar
       return null;
+    }
 
-    case 'collection_items':
+    case 'collection_items': {
       // Collection sections passed as pre-rendered React nodes
       return collectionSections ? collectionSections : null;
+    }
 
-    case 'guide_sections':
+    case 'guide_sections': {
       if (!guideSections || guideSections.length === 0) {
         // Log warning for debugging - guides should always have sections
         if (item.category === 'guides') {
-          console.warn('Guide sections missing or empty', {
-            slug: item.slug,
-            guideSectionsLength: guideSections?.length ?? 0,
-            guideSectionsType: typeof guideSections,
-          });
+          logClientWarn(
+            'Guide sections missing or empty',
+            undefined,
+            'TabSectionRenderer.guide_sections',
+            {
+              module: 'components/content/detail-tabs/tab-section-renderer',
+              component: 'TabSectionRenderer',
+              slug: item.slug,
+              guideSectionsLength: guideSections?.length ?? 0,
+              guideSectionsType: typeof guideSections,
+            }
+          );
         }
         return null;
       }
       // guideSections is already a processed array of sections with html
       // JSONSectionRenderer accepts arrays (checks Array.isArray internally)
       return <JSONSectionRenderer sections={guideSections} />;
+    }
 
-    default:
+    default: {
       return null;
+    }
   }
 }

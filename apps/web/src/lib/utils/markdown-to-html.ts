@@ -14,9 +14,9 @@
  * - Cached DOMPurify instance
  */
 
-import { marked } from 'marked';
-import DOMPurify from 'isomorphic-dompurify';
 import { normalizeError, logger } from '@heyclaude/web-runtime';
+import DOMPurify from 'isomorphic-dompurify';
+import { marked } from 'marked';
 
 // Configure marked for GitHub Flavored Markdown (GFM) support
 marked.use({
@@ -40,7 +40,7 @@ marked.use({
  * @see {@link https://github.com/markedjs/marked|marked} for Markdown parsing
  * @see {@link https://github.com/cure53/DOMPurify|DOMPurify} for HTML sanitization
  */
-export function markdownToHtml(markdown: string | null | undefined): string {
+export function markdownToHtml(markdown: null | string | undefined): string {
   if (!markdown || typeof markdown !== 'string' || markdown.trim().length === 0) {
     return '';
   }
@@ -49,7 +49,7 @@ export function markdownToHtml(markdown: string | null | undefined): string {
     // Parse markdown to HTML
     const html = marked.parse(markdown, {
       async: false, // Synchronous parsing for server-side
-    }) as string;
+    });
 
     // Sanitize HTML server-side for defense-in-depth
     return DOMPurify.sanitize(html);

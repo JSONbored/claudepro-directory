@@ -8,14 +8,15 @@ import { type Metadata } from 'next';
 
 import { ConsultingClient } from '@/src/components/features/consulting/consulting-page-content';
 
-export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/consulting');
-}
+export const revalidate = 86_400;
 
 /**
  * Static generation - marketing page that doesn't change
  */
-export const revalidate = 86_400;
+
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/consulting');
+}
 
 export default function ConsultingPage() {
   return (

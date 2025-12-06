@@ -3,15 +3,16 @@ import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server
 import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
-const SOURCE_ROUTE = '/account/bookmarks';
-const TARGET_ROUTE = '/account/library';
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * Dynamic Rendering Required
  * Authenticated route (legacy redirect)
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+
+const SOURCE_ROUTE = '/account/bookmarks';
+const TARGET_ROUTE = '/account/library';
 
 export async function generateMetadata(): Promise<Metadata> {
   // Use target route metadata since this redirects there
@@ -27,14 +28,14 @@ export default function BookmarksPage() {
   const requestId = generateRequestId();
   const operation = 'BookmarksPage';
   const route = SOURCE_ROUTE;
-  const module = 'apps/web/src/app/account/bookmarks/page';
+  const modulePath = 'apps/web/src/app/account/bookmarks/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
     route,
-    module,
+    module: modulePath,
   });
 
   reqLogger.info(`BookmarksPage: redirecting legacy ${SOURCE_ROUTE} to ${TARGET_ROUTE}`, {

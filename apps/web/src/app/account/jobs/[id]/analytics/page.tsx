@@ -29,12 +29,13 @@ import { redirect } from 'next/navigation';
 
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated route
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 interface JobAnalyticsPageProperties {
   params: Promise<{ id: string }>;

@@ -7,14 +7,14 @@
  */
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import {
   dismissNotificationsAction,
   getActiveNotificationsAction,
 } from '@heyclaude/web-runtime/actions';
-import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
 import { useAuthenticatedUser, useSafeAction } from '@heyclaude/web-runtime/hooks';
+import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import {
   createContext,
   useCallback,
@@ -28,23 +28,23 @@ import {
 type NotificationRecord = Database['public']['Tables']['notifications']['Row'];
 
 interface NotificationFeatureFlags {
+  enableFab: boolean;
   enableNotifications: boolean;
   enableSheet: boolean;
   enableToasts: boolean;
-  enableFab: boolean;
 }
 
 interface NotificationsContextValue {
-  notifications: NotificationRecord[];
-  unreadCount: number;
+  closeSheet: () => void;
   dismiss: (id: string) => void;
   dismissAll: () => void;
-  isSheetOpen: boolean;
-  openSheet: () => void;
-  closeSheet: () => void;
-  toggleSheet: () => void;
   flags: NotificationFeatureFlags;
+  isSheetOpen: boolean;
+  notifications: NotificationRecord[];
+  openSheet: () => void;
   refresh: () => Promise<void>;
+  toggleSheet: () => void;
+  unreadCount: number;
 }
 
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
@@ -77,7 +77,11 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
   // Check authentication state - only fetch notifications for authenticated users
   // This prevents auth errors for unauthenticated visitors browsing the site
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuthenticatedUser({
+  const {
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    status,
+  } = useAuthenticatedUser({
     context: 'NotificationsProvider',
   });
 
@@ -113,10 +117,28 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     // Only fetch notifications for authenticated users with notifications enabled
     // This prevents auth errors for unauthenticated visitors
     if (!flags.enableNotifications || !isAuthenticated) return;
+
+    // Double-check auth state before making request (defense against race conditions)
+    // If auth state changed, silently return (session might have expired)
+    if (status !== 'authenticated') return;
+
     try {
       const latest = await fetchNotifications({ dismissedIds: dismissedIdsRef.current });
 
       if (latest?.serverError) {
+        // Check if error is auth-related - if so, silently handle (session expired)
+        const isAuthError =
+          latest.serverError.includes('Unauthorized') ||
+          latest.serverError.includes('Auth session missing') ||
+          latest.serverError.includes('sign in');
+
+        if (isAuthError) {
+          // Session expired - silently clear notifications and return
+          // Don't log as error since this is expected when session expires
+          setNotifications([]);
+          return;
+        }
+
         logClientError(
           '[NotificationsProvider] Failed to refresh notifications (server error)',
           new Error(latest.serverError),
@@ -135,10 +157,24 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       }
 
       const payload = latest?.data as
-        | { notifications?: NotificationRecord[]; traceId?: string }
-        | undefined;
+        | undefined
+        | { notifications?: NotificationRecord[]; traceId?: string };
       setNotifications(payload?.notifications ?? []);
     } catch (error) {
+      // Check if error is auth-related - if so, silently handle (session expired)
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isAuthError =
+        errorMessage.includes('Unauthorized') ||
+        errorMessage.includes('Auth session missing') ||
+        errorMessage.includes('sign in');
+
+      if (isAuthError) {
+        // Session expired - silently clear notifications and return
+        // Don't log as error since this is expected when session expires
+        setNotifications([]);
+        return;
+      }
+
       logClientError(
         '[NotificationsProvider] Failed to refresh notifications',
         error,
@@ -149,7 +185,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         }
       );
     }
-  }, [fetchNotifications, flags.enableNotifications, isAuthenticated]);
+  }, [fetchNotifications, flags.enableNotifications, isAuthenticated, status]);
 
   useEffect(() => {
     try {
@@ -161,7 +197,11 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         }
       }
     } catch (error) {
-      logClientError('[NotificationsProvider] Failed to read dismissed IDs', error, 'NotificationsProvider.readDismissedIds');
+      logClientError(
+        '[NotificationsProvider] Failed to read dismissed IDs',
+        error,
+        'NotificationsProvider.readDismissedIds'
+      );
     } finally {
       setIsInitialized(true);
     }
@@ -170,28 +210,69 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     // Wait for both initialization and auth state resolution before fetching
     // This prevents auth errors for unauthenticated users
-    if (!(isInitialized && flags.enableNotifications && !isAuthLoading && isAuthenticated)) return;
+    // Also check status to ensure we're actually authenticated (not just loading)
+    if (
+      !(
+        isInitialized &&
+        flags.enableNotifications &&
+        !isAuthLoading &&
+        isAuthenticated &&
+        status === 'authenticated'
+      )
+    )
+      return;
     refresh().catch((error) => {
-      logClientError(
-        '[NotificationsProvider] Failed to refresh notifications on mount',
-        error,
-        'NotificationsProvider.mount'
-      );
+      // Silently handle auth errors (session might have expired)
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isAuthError =
+        errorMessage.includes('Unauthorized') ||
+        errorMessage.includes('Auth session missing') ||
+        errorMessage.includes('sign in');
+
+      if (!isAuthError) {
+        logClientError(
+          '[NotificationsProvider] Failed to refresh notifications on mount',
+          error,
+          'NotificationsProvider.mount'
+        );
+      }
     });
-  }, [flags.enableNotifications, isInitialized, isAuthLoading, isAuthenticated, refresh]);
+  }, [flags.enableNotifications, isInitialized, isAuthLoading, isAuthenticated, status, refresh]);
 
   useEffect(() => {
     // Only set up periodic refresh for authenticated users
-    if (!(flags.enableNotifications && isInitialized && !isAuthLoading && isAuthenticated)) {
-      return undefined;
+    // Also check status to ensure we're actually authenticated (not just loading)
+    if (
+      !(
+        flags.enableNotifications &&
+        isInitialized &&
+        !isAuthLoading &&
+        isAuthenticated &&
+        status === 'authenticated'
+      )
+    ) {
+      return;
     }
-    const id = window.setInterval(() => {
-      refresh().catch((error) =>
-        logClientError('[NotificationsProvider] Failed periodic refresh', error, 'NotificationsProvider.periodicRefresh')
-      );
-    }, 60000);
-    return () => window.clearInterval(id);
-  }, [flags.enableNotifications, isInitialized, isAuthLoading, isAuthenticated, refresh]);
+    const id = globalThis.setInterval(() => {
+      refresh().catch((error) => {
+        // Silently handle auth errors (session might have expired)
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const isAuthError =
+          errorMessage.includes('Unauthorized') ||
+          errorMessage.includes('Auth session missing') ||
+          errorMessage.includes('sign in');
+
+        if (!isAuthError) {
+          logClientError(
+            '[NotificationsProvider] Failed periodic refresh',
+            error,
+            'NotificationsProvider.periodicRefresh'
+          );
+        }
+      });
+    }, 60_000);
+    return () => globalThis.clearInterval(id);
+  }, [flags.enableNotifications, isInitialized, isAuthLoading, isAuthenticated, status, refresh]);
 
   const dismiss = useCallback(
     (id: string) => {
@@ -206,9 +287,14 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       performDismiss({ notificationIds: [id] })
         .then(() => refresh())
         .catch((error) => {
-          logClientError('[NotificationsProvider] Failed to persist dismissal', error, 'NotificationsProvider.dismiss', {
-            id,
-          });
+          logClientError(
+            '[NotificationsProvider] Failed to persist dismissal',
+            error,
+            'NotificationsProvider.dismiss',
+            {
+              id,
+            }
+          );
         });
     },
     [isAuthenticated, performDismiss, refresh]
@@ -219,15 +305,20 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     if (!isAuthenticated || notifications.length === 0) return;
 
     const ids = notifications.map((notification) => notification.id);
-    setDismissedIds((prev) => Array.from(new Set([...prev, ...ids])));
+    setDismissedIds((prev) => [...new Set([...prev, ...ids])]);
     setNotifications([]);
     performDismiss({ notificationIds: ids })
       .then(() => refresh())
       .catch((error) => {
-        logClientError('[NotificationsProvider] Failed to persist dismiss-all', error, 'NotificationsProvider.dismissAll', {
-          dismissedIds: ids, // Array support enables better log querying
-          count: ids.length,
-        });
+        logClientError(
+          '[NotificationsProvider] Failed to persist dismiss-all',
+          error,
+          'NotificationsProvider.dismissAll',
+          {
+            dismissedIds: ids, // Array support enables better log querying
+            count: ids.length,
+          }
+        );
       });
   }, [isAuthenticated, notifications, performDismiss, refresh]);
 

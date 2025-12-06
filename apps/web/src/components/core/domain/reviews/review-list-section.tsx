@@ -1,6 +1,6 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import {
   deleteReview,
   getReviewsWithStats,
@@ -12,17 +12,21 @@ import {
   logUnhandledPromise,
 } from '@heyclaude/web-runtime/core';
 import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';
-import type { ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { type ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';
+import {
+  toasts,
+  UI_CLASSES,
+  BaseCard,
+  Button,
+  Card,
+  Label,
+  StarDisplay,
+} from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
-import { BaseCard } from '@heyclaude/web-runtime/ui';
-import { ReviewForm } from '@/src/components/core/forms/review-form';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Card } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
 
-import { StarDisplay } from '@heyclaude/web-runtime/ui';
+import { ReviewForm } from '@/src/components/core/forms/review-form';
+
 import { ReviewRatingHistogram } from './review-rating-histogram';
 
 /**
@@ -39,7 +43,7 @@ export function ReviewListSection({
     NonNullable<Database['public']['Functions']['get_reviews_with_stats']['Returns']>['reviews']
   >([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<'recent' | 'helpful' | 'rating_high' | 'rating_low'>(
+  const [sortBy, setSortBy] = useState<'helpful' | 'rating_high' | 'rating_low' | 'recent'>(
     'recent'
   );
   const [page, setPage] = useState(1);
@@ -47,7 +51,7 @@ export function ReviewListSection({
   const [aggregateRating, setAggregateRating] = useState<
     Database['public']['CompositeTypes']['review_aggregate_rating'] | null
   >(null);
-  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [editingReviewId, setEditingReviewId] = useState<null | string>(null);
   const router = useRouter();
 
   const REVIEWS_PER_PAGE = 10;
@@ -157,7 +161,7 @@ export function ReviewListSection({
   return (
     <div className="space-y-6">
       {/* Aggregate Rating + Histogram */}
-      {aggregateRating?.count && aggregateRating.count > 0 && aggregateRating.distribution && (
+      {aggregateRating?.count && aggregateRating.count > 0 && aggregateRating.distribution ? (
         <ReviewRatingHistogram
           distribution={{
             '1': aggregateRating.distribution.rating_1 ?? 0,
@@ -169,11 +173,11 @@ export function ReviewListSection({
           totalReviews={aggregateRating.count}
           averageRating={aggregateRating.average ?? 0}
         />
-      )}
+      ) : null}
 
       {/* Sort Controls */}
       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
-        <h3 className="font-semibold text-lg">Reviews ({aggregateRating?.count ?? 0})</h3>
+        <h3 className="text-lg font-semibold">Reviews ({aggregateRating?.count ?? 0})</h3>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <Label htmlFor={sortSelectId} className="text-muted-foreground text-sm">
             Sort by:
@@ -199,7 +203,7 @@ export function ReviewListSection({
         </div>
       ) : (reviews ?? []).length === 0 ? (
         <Card className="bg-muted/50 p-8 text-center">
-          <Star className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" aria-hidden="true" />
+          <Star className="text-muted-foreground/30 mx-auto mb-3 h-12 w-12" aria-hidden="true" />
           <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
         </Card>
       ) : (
@@ -221,13 +225,13 @@ export function ReviewListSection({
       )}
 
       {/* Load More */}
-      {hasMore && !isLoading && (
+      {hasMore && !isLoading ? (
         <div className="pt-4 text-center">
           <Button variant="outline" onClick={handleLoadMore}>
             Load More Reviews
           </Button>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -246,14 +250,14 @@ function ReviewCardItem({
   isEditing,
   onCancelEdit,
 }: {
-  review: Database['public']['CompositeTypes']['review_with_stats_item'];
-  currentUserId?: string;
-  contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
-  onEdit?: () => void;
-  onDelete?: () => void;
+  contentType: Database['public']['Enums']['content_category'];
+  currentUserId?: string;
   isEditing?: boolean;
   onCancelEdit?: () => void;
+  onDelete?: () => void;
+  onEdit?: () => void;
+  review: Database['public']['CompositeTypes']['review_with_stats_item'];
 }) {
   const [showFullText, setShowFullText] = useState(false);
   if (!(review.user && review.id && review.rating)) return null;
@@ -288,7 +292,7 @@ function ReviewCardItem({
       author=""
       variant="review"
       showActions={false}
-      disableNavigation={true}
+      disableNavigation
       ariaLabel={`Review by ${review.user.name ?? 'Anonymous'}`}
       renderContent={() => (
         <div className="space-y-3">
@@ -296,32 +300,32 @@ function ReviewCardItem({
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
               <StarDisplay rating={review.rating ?? 0} size="sm" />
-              <span className="ml-1 text-muted-foreground text-xs">
+              <span className="text-muted-foreground ml-1 text-xs">
                 {(review.rating ?? 0).toFixed(1)}
               </span>
             </div>
-            {review.created_at && (
+            {review.created_at ? (
               <time className="text-muted-foreground text-xs" dateTime={review.created_at}>
                 {formatDistanceToNow(new Date(review.created_at))} ago
               </time>
-            )}
+            ) : null}
           </div>
 
           {/* Review Text */}
-          {reviewText && (
+          {reviewText ? (
             <div>
-              <p className="whitespace-pre-wrap text-foreground text-sm">{displayText}</p>
-              {needsTruncation && (
+              <p className="text-foreground text-sm whitespace-pre-wrap">{displayText}</p>
+              {needsTruncation ? (
                 <button
                   type="button"
                   onClick={() => setShowFullText(!showFullText)}
-                  className="mt-1 text-primary text-xs hover:underline"
+                  className="text-primary mt-1 text-xs hover:underline"
                 >
                   {showFullText ? 'Show less' : 'Read more'}
                 </button>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
 
           {/* Actions */}
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} pt-2`}>
@@ -350,7 +354,7 @@ function ReviewCardItem({
             )}
 
             {/* Edit/Delete for own review */}
-            {isOwnReview && (
+            {isOwnReview ? (
               <>
                 <Button
                   variant="ghost"
@@ -371,7 +375,7 @@ function ReviewCardItem({
                   Delete
                 </Button>
               </>
-            )}
+            ) : null}
           </div>
         </div>
       )}

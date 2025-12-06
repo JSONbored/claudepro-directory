@@ -18,10 +18,6 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 
-/**
- * Static Generation: Help page is fully static content
- * No dynamic data fetching - can be pre-rendered at build time
- */
 export const revalidate = false;
 
 const helpTopics = [

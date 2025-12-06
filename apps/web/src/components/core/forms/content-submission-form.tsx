@@ -13,9 +13,10 @@
 
 import { Constants, type Database } from '@heyclaude/database-types';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
-import { logger, normalizeError, ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
+import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
+import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useLoggedAsync, useConfetti } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   CheckCircle,
@@ -26,6 +27,7 @@ import {
   Send,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
   SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,
@@ -33,33 +35,42 @@ import {
   type SubmissionFormSection,
   type TextFieldDefinition,
 } from '@heyclaude/web-runtime/types/component.types';
-import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  cn,
+  toasts,
+  UI_CLASSES,
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Label,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Textarea,
+  FormSectionCard,
+} from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useEffect, useId, useState, useTransition } from 'react';
 import { z } from 'zod';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
-import { Textarea } from '@heyclaude/web-runtime/ui';
+
+import { DuplicateWarning } from './duplicate-warning';
+import { ContentTypeFieldRenderer } from './dynamic-form-field';
+import { ExamplesArrayInput } from './examples-array-input';
+import { TemplateSelector } from './template-selector';
 
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
 // Type representing the merged structure (matches what getContentTemplates returns)
-type MergedTemplateItem = ContentTemplateItem & {
-  templateData: ContentTemplateItem['template_data'];
-} & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+type MergedTemplateItem = ContentTemplateItem &
+  (ContentTemplateItem['template_data'] extends Record<string, unknown>
     ? ContentTemplateItem['template_data']
-    : Record<string, unknown>);
-
-import { FormSectionCard } from '@heyclaude/web-runtime/ui';
-import { DuplicateWarning } from './duplicate-warning';
-import { ContentTypeFieldRenderer } from './dynamic-form-field';
-import { ExamplesArrayInput } from './examples-array-input';
-import { TemplateSelector } from './template-selector';
+    : Record<string, unknown>) & {
+    templateData: ContentTemplateItem['template_data'];
+  };
 
 /**
  * Usage example schema (Zod)
@@ -68,7 +79,7 @@ import { TemplateSelector } from './template-selector';
  */
 const usageExampleSchema = z.object({
   title: z.string().min(1).max(100),
-  code: z.string().min(1).max(10000),
+  code: z.string().min(1).max(10_000),
   language: z.enum([
     'typescript',
     'javascript',
@@ -180,13 +191,14 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
     defaultMessage: 'Content submission failed',
     defaultRethrow: false,
   });
+  const { celebrateSubmission } = useConfetti();
 
   /** Submission result for success message display */
-  const [submissionResult, setSubmissionResult] = useState<{
-    submission_id: string;
-    status: Database['public']['Enums']['submission_status'];
+  const [submissionResult, setSubmissionResult] = useState<null | {
     message: string;
-  } | null>(null);
+    status: Database['public']['Enums']['submission_status'];
+    submission_id: string;
+  }>(null);
 
   /** Animation configs */
   const [springSmooth, setSpringSmooth] = useState({
@@ -261,7 +273,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         tokensInput.value = template['maxTokens'].toString();
     }
 
-    if (template.type === Constants.public.Enums.submission_type[2]) { // 'rules'
+    if (template.type === Constants.public.Enums.submission_type[2]) {
+      // 'rules'
       const rulesInput = form.querySelector('[name="rulesContent"]') as HTMLTextAreaElement;
       if (rulesInput && typeof template['rulesContent'] === 'string')
         rulesInput.value = template['rulesContent'];
@@ -275,7 +288,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         tokensInput.value = template['maxTokens'].toString();
     }
 
-    if (template.type === Constants.public.Enums.submission_type[1]) { // 'mcp'
+    if (template.type === Constants.public.Enums.submission_type[1]) {
+      // 'mcp'
       const npmInput = form.querySelector('[name="npmPackage"]') as HTMLInputElement;
       if (npmInput && typeof template['npmPackage'] === 'string')
         npmInput.value = template['npmPackage'];
@@ -345,9 +359,16 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     });
                   } catch (error) {
                     const normalized = normalizeError(error, 'Failed to parse examples JSON');
-                    logger.warn('Failed to parse examples JSON, field will be omitted', {
-                      error: normalized.message,
-                    });
+                    logClientWarn(
+                      'Failed to parse examples JSON, field will be omitted',
+                      normalized,
+                      'SubmitFormClient.parseExamples',
+                      {
+                        component: 'SubmitFormClient',
+                        action: 'parse-examples',
+                        error: normalized.message,
+                      }
+                    );
                     toasts.raw.warning('Examples field could not be parsed and will be omitted');
                     submissionData['examples'] = undefined;
                   }
@@ -428,10 +449,16 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
             if (result?.data?.success) {
               if (!result.data.submission_id) {
-                logger.warn('Success response missing submission ID', {
-                  component: 'SubmitFormClient',
-                  contentType,
-                });
+                logClientWarn(
+                  'Success response missing submission ID',
+                  undefined,
+                  'SubmitFormClient.handleSubmit',
+                  {
+                    component: 'SubmitFormClient',
+                    action: 'handle-submit',
+                    contentType,
+                  }
+                );
               }
 
               setSubmissionResult({
@@ -441,6 +468,13 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
               });
 
               toasts.success.submissionCreated(contentType);
+
+              // Fire confetti celebration for successful submission
+              const confettiEnabled = checkConfettiEnabled();
+              if (confettiEnabled) {
+                celebrateSubmission();
+              }
+
               window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
               throw new Error('Submission failed: unexpected response format');
@@ -479,14 +513,14 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   return (
     <>
       {/* Success Message with celebration animation */}
-      {submissionResult && (
+      {submissionResult ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: -20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={springSmooth}
         >
-          <Card className={'mb-6 border-green-500/20 bg-green-500/5'}>
-            <CardContent className={'pt-6'}>
+          <Card className="mb-6 border-green-500/20 bg-green-500/5">
+            <CardContent className="pt-6">
               <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_START}>
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
@@ -499,7 +533,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                 </motion.div>
                 <div className="min-w-0 flex-1">
                   <motion.p
-                    className="font-semibold text-green-600 text-lg dark:text-green-400"
+                    className="text-lg font-semibold text-green-600 dark:text-green-400"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
@@ -507,7 +541,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     Submission Successful! 🎉
                   </motion.p>
                   <motion.p
-                    className={'mt-1 text-muted-foreground text-sm'}
+                    className="text-muted-foreground mt-1 text-sm"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
@@ -515,7 +549,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     {submissionResult.message}
                   </motion.p>
                   <motion.p
-                    className={'mt-1 text-muted-foreground text-xs'}
+                    className="text-muted-foreground mt-1 text-xs"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
@@ -528,7 +562,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
             </CardContent>
           </Card>
         </motion.div>
-      )}
+      ) : null}
 
       {/* Main Form - Sectioned with visual hierarchy */}
       <form onSubmit={handleSubmit} className={UI_CLASSES.SPACE_Y_6}>
@@ -548,7 +582,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                 <Layers
                   className={cn(
                     UI_CLASSES.ICON_SM,
-                    '-translate-y-1/2 pointer-events-none absolute top-1/2 left-3',
+                    'pointer-events-none absolute top-1/2 left-3 -translate-y-1/2',
                     UI_CLASSES.TEXT_MUTED
                   )}
                 />
@@ -559,10 +593,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     setContentType(e.target.value as SubmissionContentType);
                     setName(''); // Reset name when type changes
                   }}
-                  required={true}
-                  className={
-                    'flex h-10 w-full rounded-md border border-input bg-background py-2 pr-3 pl-10 text-sm'
-                  }
+                  required
+                  className="border-input bg-background flex h-10 w-full rounded-md border py-2 pr-3 pl-10 text-sm"
                 >
                   {SUBMISSION_CONTENT_TYPES.map((type) => (
                     <option key={type} value={type}>
@@ -611,7 +643,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                 />
                 {name.length > 3 && (
                   <motion.div
-                    className="-translate-y-1/2 absolute top-1/2 right-3"
+                    className="absolute top-1/2 right-3 -translate-y-1/2"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={springBouncy}
@@ -645,7 +677,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Describe what your configuration does and how to use it..."
-                    required={true}
+                    required
                     rows={6}
                     className="resize-y font-sans"
                   />
@@ -656,7 +688,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                 <TabsContent value="preview" className="mt-2">
                   <div
                     className={cn(
-                      'min-h-[150px] rounded-md border border-input bg-background p-4',
+                      'border-input bg-background min-h-[150px] rounded-md border p-4',
                       'prose prose-sm dark:prose-invert max-w-none'
                     )}
                   >
@@ -722,7 +754,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <Button type="submit" disabled={isPending} className={'w-full flex-1 sm:flex-initial'}>
+          <Button type="submit" disabled={isPending} className="w-full flex-1 sm:flex-initial">
             {isPending ? (
               <>
                 <motion.div
@@ -752,8 +784,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           <div className={`${UI_CLASSES.FLEX_GAP_2} sm:gap-3`}>
             <Github className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
             <div className="min-w-0 flex-1">
-              <p className={'font-medium text-blue-400 text-sm'}>How it works</p>
-              <p className={'mt-1 text-muted-foreground text-sm'}>
+              <p className="text-sm font-medium text-blue-400">How it works</p>
+              <p className="text-muted-foreground mt-1 text-sm">
                 We'll automatically create a Pull Request with your submission. Our team reviews for
                 quality and accuracy, then merges it to make your contribution live!
               </p>

@@ -19,14 +19,23 @@
  * 3. Configuration - Type-specific fields with templates
  * 4. Examples & Tags - Usage examples with tag input
  * 5. Review & Submit - Celebration with confetti-style effects
+ *
+ * Note: This is a client component ('use client'), so segment config exports are not allowed.
+ * Dynamic rendering is inherited from the parent layout (submit/layout.tsx has dynamic = 'force-dynamic').
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
 import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
+import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
-import { useFieldHighlight, useFormTracking, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import {
+  useFieldHighlight,
+  useFormTracking,
+  useLoggedAsync,
+  useConfetti,
+} from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   Code,
@@ -75,12 +84,6 @@ import { WizardLayout } from '@/src/components/core/forms/wizard/wizard-layout';
 import { StepReviewSubmit } from '@/src/components/core/forms/wizard/wizard-steps';
 import { useOnboardingToasts } from '@/src/hooks/use-onboarding-toasts';
 import { useTemplateApplication } from '@/src/hooks/use-template-application';
-
-/**
- * Dynamic Rendering Required
- * Multi-step form with state
- */
-export const dynamic = 'force-dynamic';
 
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
@@ -153,6 +156,7 @@ export default function WizardSubmissionPage() {
     subscribe: false,
   });
   const formTracking = useFormTracking();
+  const { celebrateSubmission } = useConfetti();
 
   // Client-side logging with automatic component context
   const log = useClientLogger({
@@ -751,6 +755,12 @@ export default function WizardSubmissionPage() {
         draftManager.clear();
         toasts.success.submissionCreated(formData.submission_type);
 
+        // Fire confetti celebration for successful submission
+        const confettiEnabled = checkConfettiEnabled();
+        if (confettiEnabled) {
+          celebrateSubmission();
+        }
+
         // Redirect after celebration
         setTimeout(() => {
           router.push('/submit?success=true');
@@ -767,7 +777,7 @@ export default function WizardSubmissionPage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, formData, formTracking, qualityScore, draftManager, router, log]);
+  }, [user, formData, formTracking, qualityScore, draftManager, router, log, celebrateSubmission]);
 
   // Render step content
   const renderStepContent = () => {

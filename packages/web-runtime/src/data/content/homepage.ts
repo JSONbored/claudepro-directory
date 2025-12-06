@@ -32,14 +32,17 @@ export const getHomepageData = cache(
 
       return await fetchCached(
         (client) =>
-          new ContentService(client).getHomepageOptimized({ p_category_ids: [...categoryIds] }),
+          new ContentService(client).getHomepageOptimized({
+            p_category_ids: [...categoryIds],
+            p_limit: 6, // 6 items per category for featured sections (8 categories × 6 = 48 items total)
+          }),
         {
           // Use stable string key instead of array to prevent cache key variations
           keyParts: ['homepage', sortedCategoryIds],
           tags: ['homepage', 'content', 'trending'],
           ttlKey: 'cache.homepage.ttl_seconds',
           fallback: null,
-          logMeta: { categoryIds: sortedCategoryIds, categoryCount: categoryIds.length },
+          logMeta: { categoryIds: sortedCategoryIds, categoryCount: categoryIds.length, limit: 6 },
         }
       );
     } catch (error) {

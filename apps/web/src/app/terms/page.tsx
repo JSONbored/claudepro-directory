@@ -4,6 +4,8 @@ import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { UI_CLASSES, NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 
+export const revalidate = false;
+
 /**
  * Produce page metadata for the Terms page.
  *
@@ -12,15 +14,14 @@ import { type Metadata } from 'next';
  * @see generatePageMetadata
  * @see {@link import('next').Metadata}
  */
+/**
+ * Static Generation: Legal pages are fully static and never change
+ * No automatic revalidation - pages are statically generated at build time
+ */
+
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/terms');
 }
-
-/**
- * Static Generation: Legal pages are fully static and never change
- * revalidate: false = Static generation at build time (no automatic revalidation)
- */
-export const revalidate = false;
 
 /**
  * Renders the Terms of Service page showing the current "Last updated" date and contact links.

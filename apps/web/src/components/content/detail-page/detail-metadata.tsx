@@ -7,7 +7,7 @@
  * Performance: Eliminated from client bundle, server-rendered for instant display
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import {
   ensureStringArray,
   formatCopyCount,
@@ -16,17 +16,16 @@ import {
   getSocialLinks,
 } from '@heyclaude/web-runtime/core';
 import { Calendar, Copy, Eye, Tag, User } from '@heyclaude/web-runtime/icons';
-import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES, UnifiedBadge } from '@heyclaude/web-runtime/ui';
 
 export interface DetailMetadataProps {
+  copyCount?: number | undefined;
   item:
     | ContentItem
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        ContentItem);
+    | (ContentItem &
+        Database['public']['Functions']['get_content_detail_complete']['Returns']['content']);
   viewCount?: number | undefined;
-  copyCount?: number | undefined;
 }
 
 /**
@@ -43,8 +42,8 @@ const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 function getSafeAuthorProfileHref(
   item:
     | ContentItem
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        ContentItem)
+    | (ContentItem &
+        Database['public']['Functions']['get_content_detail_complete']['Returns']['content'])
 ): string {
   // Cast item to ContentItem for property access (content is Json type from RPC)
   const contentItem = item as ContentItem;
@@ -89,29 +88,42 @@ function getSafeAuthorProfileHref(
       .toLowerCase();
 
     // Strict mapping for allowed domains only - extract handle and reconstruct URL
-    if (hostname === 'github.com') {
-      // Extract username from path: /username (GitHub usernames: alphanumeric, hyphens, cannot start/end with hyphen)
-      const match = parsed.pathname.match(/^\/([A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)$/);
-      if (match?.[1]) {
-        handle = match[1];
-        return `https://github.com/${encodeURIComponent(handle)}`;
+    switch (hostname) {
+      case 'github.com': {
+        // Extract username from path: /username (GitHub usernames: alphanumeric, hyphens, cannot start/end with hyphen)
+        const match = parsed.pathname.match(/^\/([A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)$/);
+        if (match?.[1]) {
+          handle = match[1];
+          return `https://github.com/${encodeURIComponent(handle)}`;
+        }
+
+        break;
       }
-    } else if (hostname === 'twitter.com' || hostname === 'x.com') {
-      // Extract username from path: /username (no @)
-      const match = parsed.pathname.match(/^\/([A-Za-z0-9_]+)$/);
-      if (match?.[1]) {
-        handle = match[1];
-        return `https://twitter.com/${encodeURIComponent(handle)}`;
+      case 'twitter.com':
+      case 'x.com': {
+        // Extract username from path: /username (no @)
+        const match = parsed.pathname.match(/^\/([A-Za-z0-9_]+)$/);
+        if (match?.[1]) {
+          handle = match[1];
+          return `https://twitter.com/${encodeURIComponent(handle)}`;
+        }
+
+        break;
       }
-    } else if (hostname === 'linkedin.com' || hostname === 'www.linkedin.com') {
-      // Extract from /in/username or /company/username
-      const match = parsed.pathname.match(
-        /^\/(in|company)\/([A-Za-z0-9]([A-Za-z0-9-._]*[A-Za-z0-9])?)$/
-      );
-      if (match?.[1] && match[2]) {
-        // Only allow standard public profile structures
-        return `https://linkedin.com/${match[1]}/${encodeURIComponent(match[2])}`;
+      case 'linkedin.com':
+      case 'www.linkedin.com': {
+        // Extract from /in/username or /company/username
+        const match = parsed.pathname.match(
+          /^\/(in|company)\/([A-Za-z0-9]([A-Za-z0-9-._]*[A-Za-z0-9])?)$/
+        );
+        if (match?.[1] && match[2]) {
+          // Only allow standard public profile structures
+          return `https://linkedin.com/${match[1]}/${encodeURIComponent(match[2])}`;
+        }
+
+        break;
       }
+      // No default
     }
   } catch {
     // Ignore, fall through to fallback
@@ -137,40 +149,40 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
   return (
     <div className="container mx-auto px-4">
       {/* Author, Date & View Count Metadata */}
-      {hasMetadata && (
-        <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
-          {'author' in item &&
-            item.author &&
-            (() => {
-              // Get safe author profile URL - this function validates and sanitizes the URL
-              // It only allows relative paths or strictly mapped social media profile URLs
-              // (GitHub, Twitter/X, LinkedIn) with extracted handles, or falls back to default
-              const safeAuthorUrl = getSafeAuthorProfileHref(item);
-              // Explicit validation: getSafeAuthorProfileHref guarantees the URL is safe
-              // It validates protocol-relative URLs, path traversal, and only allows
-              // known social media domains with strict handle extraction, or safe relative paths
-              // At this point, safeAuthorUrl is validated and safe for use in external links
-              const validatedUrl: string = safeAuthorUrl;
-              return (
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <User className={UI_CLASSES.ICON_SM} />
-                  <a
-                    href={validatedUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-colors hover:text-foreground hover:underline"
-                  >
-                    {item.author}
-                  </a>
-                </div>
-              );
-            })()}
-          {'date_added' in item && item.date_added && (
+      {hasMetadata ? (
+        <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
+          {'author' in item && item.author
+            ? (() => {
+                // Get safe author profile URL - this function validates and sanitizes the URL
+                // It only allows relative paths or strictly mapped social media profile URLs
+                // (GitHub, Twitter/X, LinkedIn) with extracted handles, or falls back to default
+                const safeAuthorUrl = getSafeAuthorProfileHref(item);
+                // Explicit validation: getSafeAuthorProfileHref guarantees the URL is safe
+                // It validates protocol-relative URLs, path traversal, and only allows
+                // known social media domains with strict handle extraction, or safe relative paths
+                // At this point, safeAuthorUrl is validated and safe for use in external links
+                const validatedUrl: string = safeAuthorUrl;
+                return (
+                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                    <User className={UI_CLASSES.ICON_SM} />
+                    <a
+                      href={validatedUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-foreground transition-colors hover:underline"
+                    >
+                      {item.author}
+                    </a>
+                  </div>
+                );
+              })()
+            : null}
+          {'date_added' in item && item.date_added ? (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Calendar className={UI_CLASSES.ICON_SM} />
               <span>{formatDate(item.date_added)}</span>
             </div>
-          )}
+          ) : null}
           {typeof viewCount === 'number' && viewCount > 0 && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Eye className={UI_CLASSES.ICON_SM} />
@@ -184,9 +196,9 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
             </div>
           )}
         </div>
-      )}
+      ) : null}
       {/* Tags */}
-      {hasTags && tags.length > 0 && (
+      {hasTags && tags.length > 0 ? (
         <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
           <Tag className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} />
           {tags.map((tag) => (
@@ -195,7 +207,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
             </UnifiedBadge>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

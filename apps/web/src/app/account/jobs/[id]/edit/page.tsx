@@ -19,12 +19,13 @@ import { notFound, redirect } from 'next/navigation';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated route
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 type EditJobInput = Partial<CreateJobInput>;
 

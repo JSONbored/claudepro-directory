@@ -25,6 +25,8 @@ import dynamicImport from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 
+export const revalidate = 86_400;
+
 /**
  * ISR: 24 hours (86400s) - Companies list updates infrequently
  * Uses ISR instead of force-dynamic for better performance and SEO
@@ -41,12 +43,6 @@ const NewsletterCTAVariant = dynamicImport(
     loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
-
-/**
- * ISR: 24 hours (86400s) - Companies list updates infrequently
- * Uses ISR instead of force-dynamic for better performance and SEO
- */
-export const revalidate = 86_400;
 
 /**
  * Produce page metadata for the Companies page.

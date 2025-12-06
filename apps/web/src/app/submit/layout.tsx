@@ -2,6 +2,16 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { type Metadata } from 'next';
 import { type ReactNode } from 'react';
 
+export const dynamic = 'force-dynamic';
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This layout uses dynamic rendering for server-side data fetching and user-specific content.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+
 /**
  * Generate metadata for the "/submit" page.
  *
@@ -11,15 +21,6 @@ import { type ReactNode } from 'react';
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/submit');
 }
-
-/**
- * Dynamic Rendering Required
- *
- * This layout uses dynamic rendering for server-side data fetching and user-specific content.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const dynamic = 'force-dynamic';
 
 /**
  * Layout component that renders its child content unchanged for the "/submit" route.

@@ -23,12 +23,13 @@ import Link from 'next/link';
 
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated user submissions
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/submissions');
@@ -335,16 +336,18 @@ export default async function SubmissionsPage() {
   }
 
   // Use Constants for enum values in Record keys
-  const SUBMISSION_STATUS_VARIANTS: Record<
+  // Use string literals directly to avoid unsafe assignment from array index access
+  // Enum values: 'pending', 'approved', 'rejected', 'spam', 'merged'
+  const SUBMISSION_STATUS_VARIANTS = {
+    pending: { icon: Clock, label: 'Pending Review' },
+    approved: { icon: CheckCircle, label: 'Approved' },
+    rejected: { icon: XCircle, label: 'Rejected' },
+    spam: { icon: XCircle, label: 'Spam' },
+    merged: { icon: CheckCircle, label: 'Merged ✓' },
+  } satisfies Record<
     Database['public']['Enums']['submission_status'],
     { icon: typeof Clock; label: string }
-  > = {
-    [Constants.public.Enums.submission_status[0]]: { icon: Clock, label: 'Pending Review' }, // 'pending'
-    [Constants.public.Enums.submission_status[1]]: { icon: CheckCircle, label: 'Approved' }, // 'approved'
-    [Constants.public.Enums.submission_status[4]]: { icon: CheckCircle, label: 'Merged ✓' }, // 'merged'
-    [Constants.public.Enums.submission_status[2]]: { icon: XCircle, label: 'Rejected' }, // 'rejected'
-    [Constants.public.Enums.submission_status[3]]: { icon: XCircle, label: 'Spam' }, // 'spam'
-  };
+  >;
 
   const getStatusBadge = (status: Database['public']['Enums']['submission_status']) => {
     const variant = SUBMISSION_STATUS_VARIANTS[status];
@@ -415,9 +418,7 @@ export default async function SubmissionsPage() {
     status: Database['public']['Enums']['submission_status']
   ): null | { href: string } {
     const safeUrl = getSafeContentUrl(type, slug);
-    return safeUrl && status === Constants.public.Enums.submission_status[4]
-      ? { href: safeUrl }
-      : null; // 'merged'
+    return safeUrl && status === 'merged' ? { href: safeUrl } : null;
   }
 
   // Log any submissions with missing IDs for data integrity monitoring

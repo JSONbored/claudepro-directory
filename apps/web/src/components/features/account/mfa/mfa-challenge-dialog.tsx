@@ -5,32 +5,33 @@
 
 'use client';
 
-import type { MFAFactor } from '@heyclaude/web-runtime';
+import { type MFAFactor } from '@heyclaude/web-runtime';
 import { createMFAChallenge, listMFAFactors, verifyMFAChallenge } from '@heyclaude/web-runtime';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
-import { errorToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useCallback, useEffect, useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
 import {
+  errorToasts,
+  UI_CLASSES,
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  Input,
+  Label,
 } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
+import { useCallback, useEffect, useState } from 'react';
 
 interface MFAChallengeDialogProps {
-  open: boolean;
   onVerified: () => void;
+  open: boolean;
 }
 
 export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<null | string>(null);
   const [factors, setFactors] = useState<MFAFactor[]>([]);
   const [selectedFactor, setSelectedFactor] = useState<MFAFactor | null>(null);
   const [verifyCode, setVerifyCode] = useState('');
@@ -68,9 +69,9 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
           level: 'warn',
         }
       );
-    } catch (err) {
+    } catch (error_) {
       // Error already logged by useLoggedAsync
-      const message = err instanceof Error ? err.message : 'Failed to load MFA factors';
+      const message = error_ instanceof Error ? error_.message : 'Failed to load MFA factors';
       setError(message);
       errorToasts.actionFailed('load MFA factors', message);
     } finally {
@@ -128,9 +129,9 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
           },
         }
       );
-    } catch (err) {
+    } catch (error_) {
       // Error already logged by useLoggedAsync
-      const message = err instanceof Error ? err.message : 'Verification failed';
+      const message = error_ instanceof Error ? error_.message : 'Verification failed';
       setError(message);
       errorToasts.actionFailed('verify MFA', message);
       setVerifyCode('');
@@ -168,16 +169,16 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
           </DialogDescription>
         </DialogHeader>
 
-        {error && (
-          <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-destructive text-sm">
+        {error ? (
+          <div className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-md p-3 text-sm">
             <AlertCircle className={UI_CLASSES.ICON_SM} />
             <span>{error}</span>
           </div>
-        )}
+        ) : null}
 
         {loading && factors.length === 0 ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className={`${UI_CLASSES.ICON_XL} animate-spin text-muted-foreground`} />
+            <Loader2 className={`${UI_CLASSES.ICON_XL} text-muted-foreground animate-spin`} />
           </div>
         ) : (
           <div className="space-y-4">
@@ -190,7 +191,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
                     const factor = factors.find((f) => f.id === e.target.value);
                     setSelectedFactor(factor || null);
                   }}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                  className="border-input bg-background ring-offset-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
                   disabled={loading}
                 >
                   {factors.map((factor) => (
@@ -212,14 +213,14 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
                 maxLength={6}
                 value={verifyCode}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  const value = e.target.value.replaceAll(/\D/g, '').slice(0, 6);
                   setVerifyCode(value);
                   setError(null);
                 }}
                 placeholder="000000"
                 className="text-center font-mono text-lg tracking-widest"
                 disabled={loading}
-                autoFocus={true}
+                autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && verifyCode.length === 6 && !loading) {
                     handleVerify().catch(() => {

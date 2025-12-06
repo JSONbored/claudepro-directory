@@ -21,10 +21,6 @@ import Link from 'next/link';
 
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 
-/**
- * Dynamic Rendering Required
- * Authenticated user activity
- */
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -57,14 +53,14 @@ export default async function ActivityPage() {
   const requestId = generateRequestId();
   const operation = 'ActivityPage';
   const route = '/account/activity';
-  const module = 'apps/web/src/app/account/activity/page';
+  const modulePath = 'apps/web/src/app/account/activity/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
     route,
-    module,
+    module: modulePath,
   });
 
   // Section: Authentication

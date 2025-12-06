@@ -13,22 +13,22 @@
  * Design inspired by Supabase docs "ON THIS PAGE" sidebar
  */
 
-import type { ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
+import { type ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
 import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface SidebarTocProps {
-  headings?: ContentHeadingMetadata[] | null;
   className?: string;
+  headings?: ContentHeadingMetadata[] | null;
   /** Minimum headings required to render (default: 2) */
   minHeadings?: number;
 }
 
 interface NormalizedHeading {
-  id: string;
-  title: string;
   anchor: string;
+  id: string;
   level: number;
+  title: string;
 }
 
 function normalizeHeadings(
@@ -71,13 +71,13 @@ function normalizeHeadings(
     }
   }
 
-  return Array.from(deduped.values());
+  return [...deduped.values()];
 }
 
 export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const activeIdRef = useRef<string | null>(activeId);
+  const [activeId, setActiveId] = useState<null | string>(null);
+  const activeIdRef = useRef<null | string>(activeId);
 
   // Keep ref in sync with activeId state
   useEffect(() => {
@@ -90,22 +90,22 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
   }, [normalizedHeadings]);
 
   const updateHash = useCallback((id: string) => {
-    if (typeof window === 'undefined' || !id) return;
-    const { pathname, search } = window.location;
-    const currentHash = window.location.hash.replace('#', '');
+    if (globalThis.window === undefined || !id) return;
+    const { pathname, search } = globalThis.location;
+    const currentHash = globalThis.location.hash.replace('#', '');
     if (currentHash === id) return;
     const nextUrl = `${pathname}${search ? search : ''}#${id}`;
-    window.history.replaceState(null, '', nextUrl);
+    globalThis.history.replaceState(null, '', nextUrl);
   }, []);
 
   // Initialize active heading from URL hash or first heading
   useEffect(() => {
-    if (typeof window === 'undefined' || normalizedHeadings.length === 0) {
+    if (globalThis.window === undefined || normalizedHeadings.length === 0) {
       setActiveId(null);
       return;
     }
 
-    const hash = window.location.hash.replace('#', '');
+    const hash = globalThis.location.hash.replace('#', '');
     if (hash && normalizedHeadings.some((heading) => heading.id === hash)) {
       setActiveId(hash);
       return;
@@ -122,7 +122,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
 
   // IntersectionObserver for scroll-linked highlighting
   useEffect(() => {
-    if (typeof window === 'undefined' || normalizedHeadings.length === 0) {
+    if (globalThis.window === undefined || normalizedHeadings.length === 0) {
       return;
     }
 
@@ -166,14 +166,16 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
 
   const handleHeadingClick = useCallback(
     (heading: NormalizedHeading) => {
-      if (typeof window === 'undefined') return;
+      if (globalThis.window === undefined) return;
       const element = document.getElementById(heading.id);
       if (!element) {
         updateHash(heading.id);
         return;
       }
 
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const prefersReducedMotion = globalThis.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
       const offset = 96; // Account for sticky header
       const top = window.scrollY + element.getBoundingClientRect().top - offset;
 
@@ -196,7 +198,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
   return (
     <nav className={cn('py-2', className)} aria-label="On this page">
       {/* Header - Supabase style uppercase */}
-      <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+      <p className="text-muted-foreground mb-3 text-xs font-medium tracking-wider uppercase">
         On this page
       </p>
 

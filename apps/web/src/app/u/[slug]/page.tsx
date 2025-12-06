@@ -29,6 +29,8 @@ import { notFound } from 'next/navigation';
 
 import { FollowButton } from '@/src/components/core/buttons/social/follow-button';
 
+export const dynamic = 'force-dynamic';
+
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
@@ -143,11 +145,6 @@ function sanitizeDisplayText(text: null | string | undefined, fallback: string):
 interface UserProfilePageProperties {
   params: Promise<{ slug: string }>;
 }
-
-/**
- * ISR revalidation interval for user profile pages
- */
-export const revalidate = false;
 
 /**
  * Produce page metadata for a user profile route using the provided slug.

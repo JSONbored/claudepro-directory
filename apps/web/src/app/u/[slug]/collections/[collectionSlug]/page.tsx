@@ -30,7 +30,6 @@ import { notFound } from 'next/navigation';
 
 import { Pulse } from '@/src/components/core/infra/pulse';
 
-// Collection pages may have private content
 export const dynamic = 'force-dynamic';
 
 // Whitelisted content types for outgoing links - use Constants from database types

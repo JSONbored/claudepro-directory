@@ -29,6 +29,15 @@ import { type Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 
+export const revalidate = 86_400;
+
+/**
+ * Incremental Static Regeneration (ISR)
+ *
+ * This page uses ISR with a 24-hour revalidation period for better performance and SEO.
+ * Data is fetched at build time and periodically refreshed.
+ */
+
 const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
@@ -49,17 +58,10 @@ const NewsletterCTAVariant = dynamicImport(
  * @returns The metadata object for the community page.
  * @see {@link generatePageMetadata}
  */
+
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community');
 }
-
-/**
- * Incremental Static Regeneration (ISR)
- *
- * This page uses ISR with a 24-hour revalidation period for better performance and SEO.
- * Data is fetched at build time and periodically refreshed.
- */
-export const revalidate = 86_400;
 
 /**
  * Format a numeric statistic for display using compact English notation.

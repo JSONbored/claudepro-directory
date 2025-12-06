@@ -4,12 +4,12 @@
  * Pulse Component - Unified Declarative Tracking
  *
  * Consolidated tracking component that replaces UnifiedTracker and PwaInstallTracker.
- * Tracks views, page views, and PWA events via server actions.
+ * Tracks content views and PWA events via server actions.
  * Data stored in user_interactions table via pulse queue-based system.
+ * Note: Page views are tracked by Vercel Analytics and Umami Analytics (see PulseCannon).
  *
  * Variants:
  * - view: Content view tracking (with configurable delay)
- * - page-view: Page view tracking (immediate)
  * - pwa-install: PWA installation event (listens to DOM events)
  * - pwa-launch: PWA standalone launch (checks on mount)
  *
@@ -21,30 +21,20 @@
  * @module components/infra/pulse
  */
 
-import type { Database } from '@heyclaude/database-types';
-import { getPollingConfig } from '@heyclaude/web-runtime/config/static-configs';
-import {
-  logger,
-  logUnhandledPromise,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
+import { type Database } from '@heyclaude/database-types';
 import { trackInteraction } from '@heyclaude/web-runtime/client';
+import { getPollingConfig } from '@heyclaude/web-runtime/config/static-configs';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useState } from 'react';
 
 export type PulseProps =
   | {
-      variant: 'view';
       category: Database['public']['Enums']['content_category'];
-      slug: string;
       delay?: number;
       metadata?: Record<string, unknown>;
-    }
-  | {
-      variant: 'page-view';
-      category: Database['public']['Enums']['content_category'];
       slug: string;
-      sourcePage?: string;
-      delay?: number;
+      variant: 'view';
     }
   | {
       variant: 'pwa-install';
@@ -58,7 +48,7 @@ export type PulseProps =
  * Handles both immediate (delay=0) and delayed tracking
  */
 function useTrackingEffect(
-  trackingFn: () => undefined | Promise<unknown>,
+  trackingFn: () => Promise<unknown> | undefined,
   delay: number,
   deps: React.DependencyList
 ) {
@@ -69,18 +59,32 @@ function useTrackingEffect(
         if (result instanceof Promise) {
           result.catch((error) => {
             const normalized = normalizeError(error, 'Analytics tracking failed');
-            logger.warn('Analytics tracking failed', {
-              source: 'Pulse',
-              error: normalized.message,
-            });
+            logClientWarn(
+              'Analytics tracking failed',
+              normalized,
+              'Pulse.useTrackingEffect',
+              {
+                component: 'Pulse',
+                action: 'track-immediate',
+                source: 'Pulse',
+                error: normalized.message,
+              }
+            );
           });
         }
       } catch (error) {
         const normalized = normalizeError(error, 'Analytics tracking failed');
-        logger.warn('Analytics tracking failed', {
-          source: 'Pulse',
-          error: normalized.message,
-        });
+        logClientWarn(
+          'Analytics tracking failed',
+          normalized,
+          'Pulse.useTrackingEffect',
+          {
+            component: 'Pulse',
+            action: 'track-immediate',
+            source: 'Pulse',
+            error: normalized.message,
+          }
+        );
       }
       return;
     }
@@ -91,18 +95,32 @@ function useTrackingEffect(
         if (result instanceof Promise) {
           result.catch((error) => {
             const normalized = normalizeError(error, 'Analytics tracking failed');
-            logger.warn('Analytics tracking failed', {
-              source: 'Pulse',
-              error: normalized.message,
-            });
+            logClientWarn(
+              'Analytics tracking failed',
+              normalized,
+              'Pulse.useTrackingEffect',
+              {
+                component: 'Pulse',
+                action: 'track-delayed',
+                source: 'Pulse',
+                error: normalized.message,
+              }
+            );
           });
         }
       } catch (error) {
         const normalized = normalizeError(error, 'Analytics tracking failed');
-        logger.warn('Analytics tracking failed', {
-          source: 'Pulse',
-          error: normalized.message,
-        });
+        logClientWarn(
+          'Analytics tracking failed',
+          normalized,
+          'Pulse.useTrackingEffect',
+          {
+            component: 'Pulse',
+            action: 'track-delayed',
+            source: 'Pulse',
+            error: normalized.message,
+          }
+        );
       }
     }, delay);
 
@@ -117,10 +135,6 @@ function useTrackingEffect(
 export function Pulse(props: PulseProps) {
   if (props.variant === 'view') {
     return <ViewVariant {...props} />;
-  }
-
-  if (props.variant === 'page-view') {
-    return <PageViewVariant {...props} />;
   }
 
   if (props.variant === 'pwa-install') {
@@ -173,40 +187,6 @@ function ViewVariant({
 }
 
 /**
- * Page view variant - tracks page views (immediate by default)
- */
-function PageViewVariant({
-  category,
-  slug,
-  sourcePage,
-  delay = 0,
-}: Extract<PulseProps, { variant: 'page-view' }>) {
-  useTrackingEffect(
-    () => {
-      return trackInteraction({
-        interaction_type: 'view',
-        content_type: category,
-        content_slug: slug,
-        metadata: {
-          page: typeof window !== 'undefined' ? window.location.pathname : `/${category}/${slug}`,
-          source: sourcePage || 'direct',
-        },
-      }).catch((error) => {
-        logUnhandledPromise('Pulse:page-view', error, {
-          category,
-          slug,
-          source: sourcePage || 'direct',
-        });
-      });
-    },
-    delay,
-    [category, slug, sourcePage]
-  );
-
-  return null;
-}
-
-/**
  * PWA install variant - listens for PWA installation events
  * Listens to 'pwa-installed' DOM event dispatched by service-worker-init.js
  */
@@ -227,10 +207,10 @@ function PwaInstallVariant() {
     };
 
     // Listen for PWA events dispatched by service-worker-init.js
-    window.addEventListener('pwa-installed', handleInstalled);
+    globalThis.addEventListener('pwa-installed', handleInstalled);
 
     return () => {
-      window.removeEventListener('pwa-installed', handleInstalled);
+      globalThis.removeEventListener('pwa-installed', handleInstalled);
     };
   }, []);
 
@@ -244,7 +224,7 @@ function PwaInstallVariant() {
 function PwaLaunchVariant() {
   useEffect(() => {
     const handleStandaloneLaunch = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches) {
+      if (globalThis.matchMedia('(display-mode: standalone)').matches) {
         trackInteraction({
           content_type: null,
           content_slug: null,

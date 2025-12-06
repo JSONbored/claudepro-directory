@@ -1,492 +1,267 @@
-# CodeRabbit Configuration - Optimized for Solo Developer
-# This file limits which files CodeRabbit reviews to stay under the 100 file limit
-
-language: en-US
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+tone_instructions: >-
+  You're a friendly, helpful code reviewer who writes reviews like a senior developer explaining
+  things to a colleague over coffee. Be enthusiastic about good code, constructive about
+  improvements, and always explain the "why" behind suggestions.
 early_access: true
-enable_free_tier: true
-
 reviews:
-  # Chill profile = less strict, faster reviews, less noise
-  profile: chill
-  
-  # Don't block merges on suggestions
-  request_changes_workflow: false
-  
-  # Quick overview of changes
-  high_level_summary: true
-  
-  # Show review status but don't block commits (lefthook handles this)
-  review_status: true
-  commit_status: false
-  fail_commit_status: false
-  
-  # Reduce noise
-  collapse_walkthrough: false
-  changed_files_summary: true
-  poem: false
-  sequence_diagrams: false
+  fail_commit_status: true
   estimate_code_review_effort: false
-  
-  # Auto-review PRs
-  auto_review:
-    enabled: true
-    drafts: false
-  
-  # ============================================================================
-  # Finishing Touches - Auto-generate docstrings and unit tests
-  # ============================================================================
-  # When enabled, CodeRabbit will offer to generate docstrings and unit tests
-  # for new code in PRs. Can also trigger manually with:
-  # - @coderabbitai generate docstrings
-  # - @coderabbitai generate unit tests
-  finishing_touches:
-    docstrings:
-      enabled: true
-    unit_tests:
-      enabled: true
-  
-  # PATH FILTERS - Critical for staying under file limit (now 200 with Pro)
-  # Only include source code files that should be reviewed
-  # Exclude everything else (generated files, binaries, docs, etc.)
-  #
-  # ⚠️ IMPORTANT: CodeRabbit CLI discovers ALL files first, then applies filters
-  # If >25% are excluded, it fails. For full directory reviews, use PR reviews instead.
-  # For CLI, use --type committed/uncommitted to review only changed files.
+  auto_apply_labels: true
+  suggested_reviewers: false
   path_filters:
-    # ============================================
-    # INCLUDE PATHS (whitelist - ONLY these will be reviewed)
-    # ============================================
-    # When you have include paths, CodeRabbit ONLY reviews files matching these
-    # NOTE: For CLI with --type all, this still discovers all files first
-    # Use --type committed/uncommitted for CLI, or PR reviews for full directory reviews
-    
-    # Source code
-    - "apps/web/src/**/*.{ts,tsx}"
-    - "apps/edge/functions/**/*.{ts,tsx}"
-    - "packages/**/src/**/*.{ts,tsx}"
-    
-    # GitHub Actions workflows
-    - ".github/workflows/**/*.yml"
-    
-    # Root config files
-    - "turbo.json"
-    - "vitest.config.ts"
-    - "package.json"
-    - ".vercelignore"
-    - "tsconfig.json"
-    
-    # App config files
-    - "apps/web/next.config.mjs"
-    - "apps/web/vercel.json"
-    - "apps/web/package.json"
-    - "apps/web/tsconfig.json"
-    
-    # Package config files
-    - "packages/**/package.json"
-    - "packages/**/tsconfig.json"
-    
-    # ============================================
-    # EXCLUDE PATHS (further filtering within included paths)
-    # ============================================
-    # These exclude files from the included paths above
-    
-    # Exclude build/cache directories
-    - "!**/node_modules/**"
-    - "!**/.next/**"
-    - "!**/dist/**"
-    - "!**/out/**"
-    - "!**/.turbo/**"
-    - "!**/.build-cache/**"
-    - "!**/coverage/**"
-    - "!**/.nyc_output/**"
-    
-    # Exclude lock files (auto-generated, not useful to review)
-    - "!**/pnpm-lock.yaml"
-    - "!**/package-lock.json"
-    - "!**/yarn.lock"
-    
-    # Exclude documentation
-    - "!**/*.md"
-    - "!**/LICENSE"
-    - "!**/CHANGELOG.md"
-    - "!**/README.md"
-    
-    # Exclude style files
-    - "!**/*.css"
-    - "!**/*.scss"
-    - "!**/*.html"
-    
-    # Exclude generated files
-    - "!**/*.generated.ts"
-    - "!**/*.generated.tsx"
-    - "!packages/database-types/src/index.ts"
-    - "!packages/web-runtime/src/config/generated-config.ts"
-    - "!packages/web-runtime/src/data/config/category/category-config.generated.ts"
-    - "!apps/web/next-env.d.ts"
-    
-    # Exclude test files
-    - "!**/*.test.ts"
-    - "!**/*.test.tsx"
-    - "!**/*.spec.ts"
-    - "!**/*.spec.tsx"
-    - "!**/__tests__/**"
-    - "!**/tests/**"
-    
-    # Exclude binary files
-    - "!**/*.zip"
-    - "!**/*.png"
-    - "!**/*.jpg"
-    - "!**/*.jpeg"
-    - "!**/*.gif"
-    - "!**/*.svg"
-    - "!**/*.woff"
-    - "!**/*.woff2"
-    - "!**/*.ttf"
-    - "!**/*.eot"
-    - "!**/*.ico"
-    
-    # Exclude other files
-    - "!**/*.lock"
-    - "!**/*.log"
-    - "!**/*.cache"
-    - "!**/.env*"
-  
-  # Tool configuration - enable only what's relevant
+    - apps/web/src/**
+    - apps/edge/functions/**
+    - packages/**/src/**
+    - config/tools/**
+    - config/coding-standards/**
+    - .github/workflows/**
+    - .github/actions/**
+    - lefthook.yml
+    - .coderabbit.yaml
+    - package.json
+    - pnpm-lock.yaml
+    - tsconfig.json
+    - turbo.json
+    - '!.next/**'
+    - '!dist/**'
+    - '!dist-ssr/**'
+    - '!out/**'
+    - '!*.tsbuildinfo'
+    - '!tsconfig.tsbuildinfo'
+    - '!apps/web/.tsbuildinfo'
+    - '!apps/web/next-env.d.ts'
+    - '!node_modules/**'
+    - '!apps/edge/functions/node_modules/**'
+    - '!**/*.test.ts'
+    - '!**/*.test.tsx'
+    - '!**/*.spec.ts'
+    - '!**/*.spec.tsx'
+    - '!tests/**'
+    - '!__tests__/**'
+    - '!test-results/**'
+    - '!playwright-report/**'
+    - '!.playwright/**'
+    - '!*.spec.ts-snapshots/**'
+    - '!*.spec.tsx-snapshots/**'
+    - '!coverage/**'
+    - '!**/*.generated.ts'
+    - '!**/*.generated.tsx'
+    - '!packages/edge-runtime/src/utils/email/templates/template-map.json'
+    - '!.turbo/**'
+    - '!.eslintcache'
+    - '!.parcel-cache/**'
+    - '!.temp/**'
+    - '!.build-cache/**'
+    - '!.vercel/**'
+    - '!docs/**'
+    - '!.migration/**'
+    - '!.claude/**'
+    - '!.cursor/**'
+    - '!.env*'
+    - '!.env.example'
+    - '!apps/web/public/downloads/skills/*.zip'
+    - '!apps/edge/schema.sql'
+    - '!supabase/migrations/**'
+  pre_merge_checks:
+    docstrings:
+      mode: error
+      threshold: 90
+    title:
+      mode: error
+    description:
+      mode: error
+    issue_assessment:
+      mode: error
+    custom_checks:
+      - mode: error
+        name: Security Pattern Review
+        instructions: |-
+          Review code changes for security anti-patterns:
+                  
+                  1. Input validation:
+                     - User input used in database queries without sanitization
+                     - URL construction without validation
+                     - File path operations without sanitization
+                  
+                  2. Authentication/Authorization:
+                     - Missing auth checks in API routes
+                     - Missing auth checks in server actions
+                     - Direct database mutations without permission checks
+                  
+                  3. Data exposure:
+                     - PII logged without hashing (userId, email, etc.)
+                     - Sensitive data in error messages
+                     - API keys or secrets in code
+                  
+                  4. XSS/Injection:
+                     - Unsanitized user input in HTML
+                     - Dangerous eval() or Function() usage
+                     - SQL/NoSQL injection risks
+                  
+      - mode: error
+        name: Client/Server Boundary Validation
+        instructions: |-
+          Verify Next.js client/server boundaries are correctly enforced:
+                  
+                  1. Client components ('use client'):
+                     - Must not import server-only utilities (unstable_cache, headers, cookies)
+                     - Must not use Node.js APIs (fs, path, etc.)
+                     - Must use client-safe logging (logClientError, not logger from server)
+                  
+                  2. Server components:
+                     - Must not use browser APIs (window, document, localStorage)
+                     - Must not use React hooks (useState, useEffect, etc.)
+                     - Must use server logging (logger from @heyclaude/web-runtime/logging/server)
+                  
+                  3. API routes:
+                     - Must use NextRequest/NextResponse
+                     - Must handle CORS properly
+                     - Must validate inputs with Zod
+      - mode: warning
+        name: Logging Standards Compliance
+        instructions: >-
+          Verify that all changed files follow logging standards from
+          .cursor/rules/logging-instrumentation.mdc:
+                  
+                  1. Server components/pages must:
+                     - Track duration with withDuration()
+                     - Include requestId in all logs
+                     - Use normalizeError() in catch blocks
+                     - Have final summary log
+                  
+                  2. Client components with async operations must:
+                     - Use useLoggedAsync hook
+                     - Never use raw try/catch without logging
+                  
+                  3. API routes must:
+                     - Use createErrorResponse() for errors
+                     - Include route, operation, method in context
+
+          Check files in apps/web/src/**/*.{ts,tsx} and packages/web-runtime/src/**/*.ts
   tools:
-    # TypeScript/JavaScript tools
-    eslint:
-      enabled: true
-    biome:
-      enabled: false
-    
-    # Security tools
-    gitleaks:
-      enabled: true
-    
-    # Configuration file validation
-    actionlint:
-      enabled: true
-    yamllint:
-      enabled: true
-    
-    # GitHub integration
+    ast-grep:
+      rule_dirs:
+        - config/coderabbit/ast-grep-rules
+      util_dirs:
+        - config/coderabbit/ast-grep-utils
     github-checks:
-      enabled: true
-      timeout_ms: 90000
-    
-    # Disable unused tools (reduces noise and improves speed)
-    ruff:
-      enabled: false
-    rubocop:
-      enabled: false
-    swiftlint:
-      enabled: false
-    golangci-lint:
-      enabled: false
-    phpstan:
-      enabled: false
-    detekt:
-      enabled: false
-    buf:
-      enabled: false
-    regal:
-      enabled: false
-    pmd:
-      enabled: false
-    phpmd:
-      enabled: false
-    phpcs:
-      enabled: false
-    cppcheck:
-      enabled: false
-    circleci:
-      enabled: false
-    clippy:
-      enabled: false
-    sqlfluff:
-      enabled: false
-    prismaLint:
-      enabled: false
-    pylint:
-      enabled: false
-    shopifyThemeCheck:
-      enabled: false
-    luacheck:
-      enabled: false
-    brakeman:
-      enabled: false
-    dotenvLint:
-      enabled: false
-    htmlhint:
-      enabled: false
-    checkmake:
-      enabled: false
-    hadolint:
-      enabled: false
-    semgrep:
-      enabled: false
-    checkov:
-      enabled: false
-    markdownlint:
-      enabled: false
+      timeout_ms: 900000
     languagetool:
       enabled: false
-    shellcheck:
-      enabled: false
-    ast-grep:
-      essential_rules: false
-      rule_dirs: []
-      util_dirs: []
-      packages: []
-
 chat:
-  # Don't auto-reply (solo dev)
-  auto_reply: false
-
+  integrations:
+    jira:
+      usage: disabled
+    linear:
+      usage: enabled
 knowledge_base:
-  # Keep learning enabled to improve over time
-  opt_out: false
-  web_search:
-    enabled: true
   code_guidelines:
-    enabled: true
-    filePatterns: []
-  learnings:
-    scope: auto
-  issues:
-    scope: auto
-  pull_requests:
-    scope: auto
-
-# ============================================================================
-# Code Generation Configuration
-# ============================================================================
-# CodeRabbit can automatically generate docstrings and unit tests for your code changes.
-# Use: Comment "@coderabbitai generate docstrings" or "@coderabbitai generate unit tests"
-# in any PR, or check the checkboxes in CodeRabbit Walkthrough.
-#
-# Docstrings: Generated inline in source files (JSDoc format)
-# Unit Tests: Co-located with source files using *.test.ts naming
-# Example: content.ts → content.test.ts (same directory)
-# ============================================================================
+    filePatterns:
+      - config/coding-standards/*.md
+      - config/tools/ESLINT_RULES.md
+      - .github/CONTRIBUTING.md
+  jira:
+    usage: disabled
+  linear:
+    usage: enabled
+    team_keys:
+      - SHA
 code_generation:
   docstrings:
-    # Language for generated docstrings
-    language: "en-US"
     path_instructions:
-      # Shared Runtime - Core utilities and logging
-      - path: "packages/shared-runtime/src/**/*.ts"
-        instructions: |
-          Use JSDoc format with /** */ style comments.
-          Include @param tags for all parameters with types and descriptions.
-          Include @returns tag describing the return value and type.
-          Include @throws or @example when relevant.
-          Use @deprecated tag for deprecated functions/interfaces.
-          Include @see tags for related functions or documentation links.
-          Document error handling behavior and edge cases.
-          For context creation functions, document the structure of returned Record<string, unknown>.
-          For logging functions, document async behavior and flush requirements.
-          Follow existing patterns from packages/shared-runtime/src/logging.ts.
-      
-      # Edge Runtime - Deno-compatible utilities
-      - path: "packages/edge-runtime/src/**/*.ts"
-        instructions: |
-          Use JSDoc format with /** */ style comments.
-          Include @param tags for all parameters with types and descriptions.
-          Include @returns tag describing the return value and type.
-          Document Deno-specific considerations (no Node.js APIs).
-          Document error handling and logging patterns.
-          For HTTP utilities, document CORS and security headers.
-          For logger helpers, document bindings and mixin behavior.
-          Follow existing patterns from packages/edge-runtime/src/utils/logger-helpers.ts.
-      
-      # Web Runtime - Next.js server/client utilities
-      - path: "packages/web-runtime/src/**/*.ts"
-        instructions: |
-          Use JSDoc format with /** */ style comments.
-          Include @param tags for all parameters with types and descriptions.
-          Include @returns tag describing the return value and type.
-          Document server-only vs client-compatible functions clearly.
-          Use **⚠️ Server-Only Function** or **⚠️ Client-Compatible** markers.
-          Document Next.js API usage (unstable_cache, headers, cookies).
-          Document error handling and logging patterns.
-          For data access functions, document caching behavior and TTL.
-          For actions, document authentication requirements and rate limiting.
-          Follow existing patterns from packages/web-runtime/src/data/jobs.ts.
-      
-      # Data Layer - RPC services
-      - path: "packages/data-layer/src/**/*.ts"
-        instructions: |
-          Use JSDoc format with /** */ style comments.
-          Include @param tags for all parameters with types and descriptions.
-          Include @returns tag describing the return value and type.
-          Document RPC function names and database types used.
-          Document error handling and null/empty result behavior.
-          Document input validation and type guards.
-          Include @see tags referencing database function documentation.
-      
-      # Edge Functions - Route handlers
-      - path: "apps/edge/functions/**/*.ts"
-        instructions: |
-          Use JSDoc format with /** */ style comments.
-          Include @param tags for all parameters (Request, URL, etc.).
-          Include @returns tag describing Response structure.
-          Document HTTP method support (GET, POST, etc.).
-          Document CORS headers and security considerations.
-          Document error response formats.
-          Document logging and tracing patterns (initRequestLogging, traceRequestComplete).
-          For route handlers, document path patterns and query parameters.
-      
-      # Web App - Next.js pages and components
-      - path: "apps/web/src/**/*.{ts,tsx}"
-        instructions: |
-          Use JSDoc format with /** */ style comments.
-          For React components, document props with @param tags.
-          For server components, document data fetching and ISR behavior.
-          For API routes, document request/response formats.
-          Document Next.js-specific features (metadata, revalidation, etc.).
-          Include @see tags for related components or utilities.
-      
-      # Generator Commands - CLI utilities
-      - path: "packages/generators/src/**/*.ts"
-        instructions: |
-          Use JSDoc format with /** */ style comments.
-          Include @param tags for command-line arguments.
-          Document command usage and examples.
-          Document file system operations and side effects.
-          Document error handling and user feedback.
-      
-      # General TypeScript files (fallback)
-      - path: "**/*.ts"
-        instructions: |
-          Use JSDoc format with /** */ style comments.
-          Include @param tags for all parameters with types and descriptions.
-          Include @returns tag describing the return value and type.
-          Document function purpose, behavior, and edge cases.
-          Include @example when helpful for complex functions.
-          Do not generate docstrings for test files (*.test.ts, *.spec.ts).
-          Do not generate docstrings for generated files (*.generated.ts).
-          NEVER generate docstrings or any files in the repository root directory.
-          All generated content must be inline in source files only.
-  
+      - path: packages/shared-runtime/src/**/*.ts
+        instructions: >-
+          Use JSDoc format with /** */ style comments.           Include @param tags for all
+          parameters with types and descriptions.           Include @returns tag describing the
+          return value and type.           Include @throws or @example when relevant.           Use
+          @deprecated tag for deprecated functions/interfaces.           Include @see tags for
+          related functions or documentation links.           Document error handling behavior and
+          edge cases.           For context creation functions, document the structure of returned
+          Record<string, unknown>.           For logging functions, document async behavior and
+          flush requirements.           Follow existing patterns from
+          packages/shared-runtime/src/logging.ts.
+      - path: packages/edge-runtime/src/**/*.ts
+        instructions: >-
+          Use JSDoc format with /** */ style comments.           Include @param tags for all
+          parameters with types and descriptions.           Include @returns tag describing the
+          return value and type.           Document Deno-specific considerations (no Node.js
+          APIs).           Document error handling and logging patterns.           For HTTP
+          utilities, document CORS and security headers.           For logger helpers, document
+          bindings and mixin behavior.           Follow existing patterns from
+          packages/edge-runtime/src/utils/logger-helpers.ts.
+      - path: packages/web-runtime/src/**/*.ts
+        instructions: >-
+          Use JSDoc format with /** */ style comments.           Include @param tags for all
+          parameters with types and descriptions.           Include @returns tag describing the
+          return value and type.           Document server-only vs client-compatible functions
+          clearly.           Use **⚠️ Server-Only Function** or **⚠️ Client-Compatible**
+          markers.           Document Next.js API usage (unstable_cache, headers,
+          cookies).           Document error handling and logging patterns.           For data
+          access functions, document caching behavior and TTL.           For actions, document
+          authentication requirements and rate limiting.           Follow existing patterns from
+          packages/web-runtime/src/data/jobs.ts.
+      - path: packages/data-layer/src/**/*.ts
+        instructions: >-
+          Use JSDoc format with /** */ style comments.           Include @param tags for all
+          parameters with types and descriptions.           Include @returns tag describing the
+          return value and type.           Document RPC function names and database types
+          used.           Document error handling and null/empty result behavior.           Document
+          input validation and type guards.           Include @see tags referencing database
+          function documentation.
+      - path: apps/edge/functions/**/*.ts
+        instructions: >-
+          Use JSDoc format with /** */ style comments.           Include @param tags for all
+          parameters (Request, URL, etc.).           Include @returns tag describing Response
+          structure.           Document HTTP method support (GET, POST, etc.).           Document
+          CORS headers and security considerations.           Document error response
+          formats.           Document logging and tracing patterns (initRequestLogging,
+          traceRequestComplete).           For route handlers, document path patterns and query
+          parameters.
+      - path: apps/web/src/**/*.{ts,tsx}
+        instructions: >-
+          Use JSDoc format with /** */ style comments.           For React components, document
+          props with @param tags.           For server components, document data fetching and ISR
+          behavior.           For API routes, document request/response formats.           Document
+          Next.js-specific features (metadata, revalidation, etc.).           Include @see tags for
+          related components or utilities.
+      - path: packages/generators/src/**/*.ts
+        instructions: >-
+          Use JSDoc format with /** */ style comments.           Include @param tags for
+          command-line arguments.           Document command usage and examples.           Document
+          file system operations and side effects.           Document error handling and user
+          feedback.
+      - path: '**/*.ts'
+        instructions: >-
+          Use JSDoc format with /** */ style comments.           Include @param tags for all
+          parameters with types and descriptions.           Include @returns tag describing the
+          return value and type.           Document function purpose, behavior, and edge
+          cases.           Include @example when helpful for complex functions.           Do not
+          generate docstrings for test files (*.test.ts, *.spec.ts).           Do not generate
+          docstrings for generated files (*.generated.ts).           NEVER generate docstrings or
+          any files in the repository root directory.           All generated content must be inline
+          in source files only.
   unit_tests:
     path_instructions:
-      # Data Layer Services - RPC-focused testing
-      - path: "packages/data-layer/src/services/**/*.ts"
-        instructions: |
-          Use vitest for testing framework.
-          Mock SupabaseClient using vi.mock().
-          Test RPC error handling, input validation, and return types.
-          Use @heyclaude/database-types for type assertions.
-          Test edge cases: empty results, null values, database errors.
-          Follow the pattern from packages/edge-runtime/src/utils/integrations/resend.test.ts for mocking structure.
-          Co-locate tests: content.ts → content.test.ts (same directory).
-          NEVER create test files, summary files, report files, or any files in the repository root directory.
-          All test files must be co-located with their source files in the same directory.
-      
-      # Server Actions - Schema validation and auth
-      - path: "packages/web-runtime/src/actions/**/*.ts"
-        instructions: |
-          Use vitest for testing framework.
-          Test Zod schema validation (invalid inputs should fail).
-          Mock authentication context (authedAction vs optionalAuthAction).
-          Test rate limiting behavior.
-          Mock data layer services (don't call real RPCs).
-          Test error handling and logging.
-          Verify action metadata is correct.
-          Mock next/headers and next/cache (already set up in vitest.setup.ts).
-          Co-locate tests: content.ts → content.test.ts (same directory).
-          NEVER create test files, summary files, report files, or any files in the repository root directory.
-          All test files must be co-located with their source files in the same directory.
-      
-      # RPC Utilities - Error handling and logging
-      - path: "packages/web-runtime/src/rpc/**/*.ts"
-        instructions: |
-          Use vitest for testing framework.
-          Mock SupabaseClient and test error scenarios.
-          Verify error normalization and logging context.
-          Test timeout handling if applicable.
-          Co-locate tests: run-rpc.ts → run-rpc.test.ts (same directory).
-      
-      # Cache Utilities - Cache behavior
-      - path: "packages/web-runtime/src/cache/**/*.ts"
-        instructions: |
-          Use vitest for testing framework.
-          Mock Next.js unstable_cache (already set up in vitest.setup.ts).
-          Test cache key generation, TTL, and tag invalidation.
-          Test fallback values and cache miss scenarios.
-          Co-locate tests: fetch-cached.ts → fetch-cached.test.ts (same directory).
-      
-      # Validation Scripts - Pattern matching
-      - path: "packages/web-runtime/src/utils/validate-*.ts"
-        instructions: |
-          Use vitest for testing framework.
-          Test with valid and invalid config files.
-          Test pattern matching accuracy.
-          Test error message clarity.
-          Use file system mocks (vi.mock('fs')).
-          Co-locate tests: validate-next-config.ts → validate-next-config.test.ts (same directory).
-      
-      # Error Handling - Normalization
-      - path: "packages/web-runtime/src/errors.ts"
-        instructions: |
-          Use vitest for testing framework.
-          Test error normalization with various error types.
-          Test context preservation.
-          Test logging integration.
-          Co-locate tests: errors.ts → errors.test.ts (same directory).
-      
-      # Data Access Functions - Server-side data fetching
-      - path: "packages/web-runtime/src/data/**/*.ts"
-        instructions: |
-          Use vitest for testing framework.
-          Mock SupabaseClient and data layer services.
-          Test caching behavior (fetchCached wrapper).
-          Test error handling and fallback values.
-          Test input validation and type safety.
-          Co-locate tests: content.ts → content.test.ts (same directory).
-          NEVER create test files, summary files, report files, or any files in the repository root directory.
-          All test files must be co-located with their source files in the same directory.
-      
-      # Generator Commands - CLI utilities
-      - path: "packages/generators/src/commands/**/*.ts"
-        instructions: |
-          Use vitest for testing framework.
-          Test command-line argument parsing.
-          Mock file system operations (vi.mock('fs')).
-          Test error handling and user feedback.
-          Mock external API calls and database operations.
-          Co-locate tests: mcp-login.ts → mcp-login.test.ts (same directory).
-      
-      # Edge Runtime Utilities - Deno-compatible code
-      - path: "packages/edge-runtime/src/**/*.ts"
-        instructions: |
-          Use vitest for testing framework.
-          Test Deno-compatible code (no Node.js-specific APIs).
-          Mock Supabase and external services.
-          Test error handling and logging.
-          Follow existing test patterns from packages/edge-runtime/src/utils/integrations/resend.test.ts.
-          Co-locate tests: resend.ts → resend.test.ts (same directory).
-      
-      # Shared Runtime - Cross-platform utilities
-      - path: "packages/shared-runtime/src/**/*.ts"
-        instructions: |
-          Use vitest for testing framework.
-          Test isomorphic code (works in both Node.js and Deno).
-          Mock external dependencies.
-          Test error handling, validation, and utility functions.
-          Co-locate tests: error-handling.ts → error-handling.test.ts (same directory).
-      
-      # General TypeScript files (fallback)
-      - path: "**/*.ts"
-        instructions: |
-          Use vitest for testing framework.
-          Generate comprehensive test cases including edge cases and error conditions.
-          Include proper TypeScript types in test expectations.
-          Follow existing test patterns from packages/edge-runtime/src/utils/integrations/resend.test.ts.
-          Mock external dependencies (Supabase, Next.js APIs, etc.).
-          Co-locate tests with source files: source.ts → source.test.ts (same directory).
-          Use describe blocks for organization, it blocks for individual test cases.
-          Exclude generated files (*.generated.ts) and test files (*.test.ts, *.spec.ts).
-          NEVER create test files, summary files, report files, or any files in the repository root directory.
-          All test files must be co-located with their source files in the same directory.
+      - path: packages/data-layer/src/services/**/*.ts
+        instructions: '          Use vitest for testing framework.           Mock SupabaseClient using vi.mock().           Test RPC error handling, input validation, and return types.           Use @heyclaude/database-types for type assertions.           Test edge cases: empty results, null values, database errors.           Follow the pattern from packages/edge-runtime/src/utils/integrations/resend.test.ts for mocking structure.           Co-locate tests: content.ts → content.test.ts (same directory).           NEVER create test files, summary files, report files, or any files in the repository root directory.           All test files must be co-located with their source files in the same directory.'
+      - path: packages/web-runtime/src/actions/**/*.ts
+        instructions: '          Use vitest for testing framework.           Test Zod schema validation (invalid inputs should fail).           Mock authentication context (authedAction vs optionalAuthAction).           Test rate limiting behavior.           Mock data layer services (don''t call real RPCs).           Test error handling and logging.           Verify action metadata is correct.           Mock next/headers and next/cache (already set up in vitest.setup.ts).           Co-locate tests: content.ts → content.test.ts (same directory).           NEVER create test files, summary files, report files, or any files in the repository root directory.           All test files must be co-located with their source files in the same directory.'
+      - path: packages/web-runtime/src/rpc/**/*.ts
+        instructions: '          Use vitest for testing framework.           Mock SupabaseClient and test error scenarios.           Verify error normalization and logging context.           Test timeout handling if applicable.           Co-locate tests: run-rpc.ts → run-rpc.test.ts (same directory).'
+      - path: packages/web-runtime/src/cache/**/*.ts
+        instructions: '          Use vitest for testing framework.           Mock Next.js unstable_cache (already set up in vitest.setup.ts).           Test cache key generation, TTL, and tag invalidation.           Test fallback values and cache miss scenarios.           Co-locate tests: fetch-cached.ts → fetch-cached.test.ts (same directory).'
+      - path: packages/web-runtime/src/utils/validate-*.ts
+        instructions: '          Use vitest for testing framework.           Test with valid and invalid config files.           Test pattern matching accuracy.           Test error message clarity.           Use file system mocks (vi.mock(''fs'')).           Co-locate tests: validate-next-config.ts → validate-next-config.test.ts (same directory).'
+      - path: packages/web-runtime/src/errors.ts
+        instructions: '          Use vitest for testing framework.           Test error normalization with various error types.           Test context preservation.           Test logging integration.           Co-locate tests: errors.ts → errors.test.ts (same directory).'
+      - path: packages/web-runtime/src/data/**/*.ts
+        instructions: '          Use vitest for testing framework.           Mock SupabaseClient and data layer services.           Test caching behavior (fetchCached wrapper).           Test error handling and fallback values.           Test input validation and type safety.           Co-locate tests: content.ts → content.test.ts (same directory).           NEVER create test files, summary files, report files, or any files in the repository root directory.           All test files must be co-located with their source files in the same directory.'
+      - path: packages/generators/src/commands/**/*.ts
+        instructions: '          Use vitest for testing framework.           Test command-line argument parsing.           Mock file system operations (vi.mock(''fs'')).           Test error handling and user feedback.           Mock external API calls and database operations.           Co-locate tests: mcp-login.ts → mcp-login.test.ts (same directory).'
+      - path: packages/edge-runtime/src/**/*.ts
+        instructions: '          Use vitest for testing framework.           Test Deno-compatible code (no Node.js-specific APIs).           Mock Supabase and external services.           Test error handling and logging.           Follow existing test patterns from packages/edge-runtime/src/utils/integrations/resend.test.ts.           Co-locate tests: resend.ts → resend.test.ts (same directory).'
+      - path: packages/shared-runtime/src/**/*.ts
+        instructions: '          Use vitest for testing framework.           Test isomorphic code (works in both Node.js and Deno).           Mock external dependencies.           Test error handling, validation, and utility functions.           Co-locate tests: error-handling.ts → error-handling.test.ts (same directory).'
+      - path: '**/*.ts'
+        instructions: '          Use vitest for testing framework.           Generate comprehensive test cases including edge cases and error conditions.           Include proper TypeScript types in test expectations.           Follow existing test patterns from packages/edge-runtime/src/utils/integrations/resend.test.ts.           Mock external dependencies (Supabase, Next.js APIs, etc.).           Co-locate tests with source files: source.ts → source.test.ts (same directory).           Use describe blocks for organization, it blocks for individual test cases.           Exclude generated files (*.generated.ts) and test files (*.test.ts, *.spec.ts).           NEVER create test files, summary files, report files, or any files in the repository root directory.           All test files must be co-located with their source files in the same directory.'

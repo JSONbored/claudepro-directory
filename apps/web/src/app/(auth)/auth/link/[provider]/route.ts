@@ -8,6 +8,8 @@ import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Dynamic Rendering Required
  *
@@ -15,7 +17,6 @@ import { type NextRequest, NextResponse } from 'next/server';
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const dynamic = 'force-dynamic';
 
 /**
  * Initiates an OAuth provider linking flow by redirecting the client to the appropriate next step.

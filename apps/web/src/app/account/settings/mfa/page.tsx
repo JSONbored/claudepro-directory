@@ -19,13 +19,12 @@ import { redirect } from 'next/navigation';
 
 import { MFAFactorsListClient } from './mfa-factors-list-client';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Two-Factor Authentication | Account Settings',
   description: 'Manage your two-factor authentication settings',
 };
-
-// Force dynamic rendering for auth-protected pages
-export const dynamic = 'force-dynamic';
 
 /**
  * Render the MFA Settings page that lets an authenticated user view and manage multi-factor authentication.

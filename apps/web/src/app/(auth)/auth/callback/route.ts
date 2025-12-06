@@ -10,6 +10,8 @@ import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtim
 import { createSupabaseServerClient } from '@heyclaude/web-runtime/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Dynamic Rendering Required
  *
@@ -17,7 +19,6 @@ import { type NextRequest, NextResponse } from 'next/server';
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const dynamic = 'force-dynamic';
 
 /**
  * Handle the OAuth callback: exchange the authorization code, refresh the user profile, optionally subscribe the user to the newsletter, and redirect the user to the validated next URL.
@@ -43,14 +44,14 @@ export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   const operation = 'AuthCallback';
   const route = '/auth/callback';
-  const module = 'apps/web/src/app/(auth)/auth/callback/route';
+  const modulePath = 'apps/web/src/app/(auth)/auth/callback/route';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
     route,
-    module,
+    module: modulePath,
   });
 
   const { searchParams, origin } = new URL(request.url);

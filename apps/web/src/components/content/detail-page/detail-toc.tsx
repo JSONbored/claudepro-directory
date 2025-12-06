@@ -1,20 +1,20 @@
 'use client';
 
 import { ListTree } from '@heyclaude/web-runtime/icons';
-import type { ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
+import { type ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
 import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface DetailTocProps {
-  headings?: ContentHeadingMetadata[] | null;
   className?: string;
+  headings?: ContentHeadingMetadata[] | null;
 }
 
 interface NormalizedHeading {
-  id: string;
-  title: string;
   anchor: string;
+  id: string;
   level: number;
+  title: string;
 }
 
 function normalizeHeadings(
@@ -57,12 +57,12 @@ function normalizeHeadings(
     }
   }
 
-  return Array.from(deduped.values());
+  return [...deduped.values()];
 }
 
 export function DetailToc({ headings, className }: DetailTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<null | string>(null);
 
   const baseLevel = useMemo(() => {
     if (normalizedHeadings.length === 0) return 2;
@@ -70,21 +70,21 @@ export function DetailToc({ headings, className }: DetailTocProps) {
   }, [normalizedHeadings]);
 
   const updateHash = useCallback((id: string) => {
-    if (typeof window === 'undefined' || !id) return;
-    const { pathname, search } = window.location;
-    const currentHash = window.location.hash.replace('#', '');
+    if (globalThis.window === undefined || !id) return;
+    const { pathname, search } = globalThis.location;
+    const currentHash = globalThis.location.hash.replace('#', '');
     if (currentHash === id) return;
     const nextUrl = `${pathname}${search ? search : ''}#${id}`;
-    window.history.replaceState(null, '', nextUrl);
+    globalThis.history.replaceState(null, '', nextUrl);
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || normalizedHeadings.length === 0) {
+    if (globalThis.window === undefined || normalizedHeadings.length === 0) {
       setActiveId(null);
       return;
     }
 
-    const hash = window.location.hash.replace('#', '');
+    const hash = globalThis.location.hash.replace('#', '');
     if (hash && normalizedHeadings.some((heading) => heading.id === hash)) {
       setActiveId(hash);
       return;
@@ -99,7 +99,7 @@ export function DetailToc({ headings, className }: DetailTocProps) {
   }, [activeId, updateHash]);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || normalizedHeadings.length === 0) {
+    if (globalThis.window === undefined || normalizedHeadings.length === 0) {
       return;
     }
 
@@ -142,14 +142,16 @@ export function DetailToc({ headings, className }: DetailTocProps) {
 
   const handleHeadingClick = useCallback(
     (heading: NormalizedHeading) => {
-      if (typeof window === 'undefined') return;
+      if (globalThis.window === undefined) return;
       const element = document.getElementById(heading.id);
       if (!element) {
         updateHash(heading.id);
         return;
       }
 
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const prefersReducedMotion = globalThis.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
       const offset = 96;
       const top = window.scrollY + element.getBoundingClientRect().top - offset;
 
@@ -171,7 +173,7 @@ export function DetailToc({ headings, className }: DetailTocProps) {
   return (
     <nav
       className={cn(
-        'rounded-2xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur',
+        'border-border/60 bg-card/70 rounded-2xl border p-4 shadow-sm backdrop-blur',
         'lg:sticky lg:top-28',
         className
       )}
@@ -179,8 +181,8 @@ export function DetailToc({ headings, className }: DetailTocProps) {
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <ListTree className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <p className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+          <ListTree className="text-muted-foreground h-4 w-4" aria-hidden="true" />
+          <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
             On this page
           </p>
         </div>

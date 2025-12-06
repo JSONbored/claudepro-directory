@@ -1,12 +1,28 @@
 'use client';
 
+import { type Database } from '@heyclaude/database-types';
+import { type UnifiedSearchFilters } from '@heyclaude/web-runtime';
+import { searchUnifiedClient } from '@heyclaude/web-runtime/data';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { HelpCircle } from '@heyclaude/web-runtime/icons';
+import {
+  type ContentSearchClientProps,
+  type DisplayableContent,
+  type FilterState,
+} from '@heyclaude/web-runtime/types/component.types';
+import {
+  Button,
+  Skeleton,
+  ConfigCard,
+  ErrorBoundary,
+  UnifiedCardGrid,
+  ICON_NAME_MAP,
+} from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
-import { ConfigCard, ErrorBoundary } from '@heyclaude/web-runtime/ui';
-import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
+
+import { useSavedSearchPresets } from '@/src/hooks/use-saved-search-presets';
 
 const UnifiedSearch = dynamic(
   () =>
@@ -19,25 +35,12 @@ const UnifiedSearch = dynamic(
   }
 );
 
-import type { Database } from '@heyclaude/database-types';
-import type { UnifiedSearchFilters } from '@heyclaude/web-runtime';
-import { searchUnifiedClient } from '@heyclaude/web-runtime/data';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
-import { HelpCircle } from '@heyclaude/web-runtime/icons';
-import type {
-  ContentSearchClientProps,
-  DisplayableContent,
-  FilterState,
-} from '@heyclaude/web-runtime/types/component.types';
-import { ICON_NAME_MAP } from '@heyclaude/web-runtime/ui';
-import { useSavedSearchPresets } from '@/src/hooks/use-saved-search-presets';
-
 /**
  * Content Search Client - Edge Function Integration
  * Uses edge-cached search client for optimized search
  */
 
-type ExtractableValue = string | string[] | null | undefined;
+type ExtractableValue = null | string | string[] | undefined;
 
 function sanitizeStringList(values?: string[]): string[] {
   if (!Array.isArray(values)) return [];
@@ -49,7 +52,7 @@ function sanitizeStringList(values?: string[]): string[] {
       set.add(trimmed);
     }
   }
-  return Array.from(set).sort((a, b) => a.localeCompare(b));
+  return [...set].sort((a, b) => a.localeCompare(b));
 }
 
 function collectStringsFromItems<T>(
@@ -74,7 +77,7 @@ function collectStringsFromItems<T>(
       }
     }
   }
-  return Array.from(set).sort((a, b) => a.localeCompare(b));
+  return [...set].sort((a, b) => a.localeCompare(b));
 }
 
 const QUICK_TAG_LIMIT = 8;
@@ -83,7 +86,7 @@ const QUICK_CATEGORY_LIMIT = 6;
 const FALLBACK_SUGGESTION_LIMIT = 18;
 const FALLBACK_SUGGESTION_CHUNK_SIZE = 6;
 
-type QuickFilterType = 'tag' | 'author' | 'category';
+type QuickFilterType = 'author' | 'category' | 'tag';
 
 function dedupeContentItems<T extends DisplayableContent>(
   items: T[],
@@ -94,7 +97,7 @@ function dedupeContentItems<T extends DisplayableContent>(
 
   for (const item of items) {
     if (limit > 0 && unique.length >= limit) break;
-    const slug = (item as { slug?: string | null }).slug;
+    const slug = (item as { slug?: null | string }).slug;
     if (typeof slug === 'string' && slug.length > 0) {
       if (seenSlugs.has(slug)) continue;
       seenSlugs.add(slug);
@@ -121,11 +124,11 @@ function hasFilterCriteria(filters?: FilterState | null): boolean {
   if (!filters) return false;
   return Boolean(
     filters.category ||
-      filters.author ||
-      (filters.tags && filters.tags.length > 0) ||
-      filters.sort ||
-      filters.dateRange ||
-      filters.popularity
+    filters.author ||
+    (filters.tags && filters.tags.length > 0) ||
+    filters.sort ||
+    filters.dateRange ||
+    filters.popularity
   );
 }
 
@@ -166,8 +169,8 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
     const merged: T[] = [];
     const seen = new Set<string>();
 
-    [...items, ...searchResults].forEach((item, index) => {
-      const slug = (item as { slug?: string | null }).slug;
+    for (const [index, item] of [...items, ...searchResults].entries()) {
+      const slug = (item as { slug?: null | string }).slug;
       const key =
         typeof slug === 'string' && slug.length > 0 ? slug : `content-search-item-${index}`;
 
@@ -175,7 +178,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         seen.add(key);
         merged.push(item);
       }
-    });
+    }
 
     return merged;
   }, [items, searchResults]);
@@ -217,7 +220,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
           }
 
           if (nextFilters.sort) {
-            const sortMap: Record<string, 'relevance' | 'popularity' | 'newest' | 'alphabetical'> =
+            const sortMap: Record<string, 'alphabetical' | 'newest' | 'popularity' | 'relevance'> =
               {
                 relevance: 'relevance',
                 popularity: 'popularity',
@@ -321,24 +324,35 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
 
       let didChange = false;
 
-      if (type === 'tag') {
-        const nextTags = new Set(nextFilters.tags ?? []);
-        if (!nextTags.has(value)) {
-          nextTags.add(value);
-          nextFilters.tags = Array.from(nextTags);
-          didChange = true;
+      switch (type) {
+        case 'tag': {
+          const nextTags = new Set(nextFilters.tags);
+          if (!nextTags.has(value)) {
+            nextTags.add(value);
+            nextFilters.tags = [...nextTags];
+            didChange = true;
+          }
+
+          break;
         }
-      } else if (type === 'author') {
-        if (nextFilters.author !== value) {
-          nextFilters.author = value;
-          didChange = true;
+        case 'author': {
+          if (nextFilters.author !== value) {
+            nextFilters.author = value;
+            didChange = true;
+          }
+
+          break;
         }
-      } else if (type === 'category') {
-        const typedValue = value as Database['public']['Enums']['content_category'];
-        if (nextFilters.category !== typedValue) {
-          nextFilters.category = typedValue;
-          didChange = true;
+        case 'category': {
+          const typedValue = value as Database['public']['Enums']['content_category'];
+          if (nextFilters.category !== typedValue) {
+            nextFilters.category = typedValue;
+            didChange = true;
+          }
+
+          break;
         }
+        // No default
       }
 
       if (!didChange) {
@@ -409,7 +423,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         ? normalizedProvidedTags
         : collectStringsFromItems(
             combinedItems,
-            (item) => (item as { tags?: string[] | null }).tags ?? []
+            (item) => (item as { tags?: null | string[] }).tags ?? []
           );
 
     const derivedAuthors =
@@ -418,8 +432,8 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         : collectStringsFromItems(
             combinedItems,
             (item) =>
-              (item as { author?: string | null }).author ??
-              (item as { created_by?: string | null }).created_by ??
+              (item as { author?: null | string }).author ??
+              (item as { created_by?: null | string }).created_by ??
               null
           );
 
@@ -428,7 +442,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         ? normalizedProvidedCategories
         : collectStringsFromItems(
             combinedItems,
-            (item) => (item as { category?: string | null }).category ?? null
+            (item) => (item as { category?: null | string }).category ?? null
           );
 
     return {
@@ -472,8 +486,8 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
       <ConfigCard
         item={item}
         variant="default"
-        showCategory={true}
-        showActions={true}
+        showCategory
+        showActions
         searchQuery={searchQuery}
       />
     ),
@@ -506,7 +520,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
           <UnifiedCardGrid
             items={filteredItems}
             variant="normal"
-            infiniteScroll={true}
+            infiniteScroll
             batchSize={30}
             emptyMessage={`No ${title.toLowerCase()} found`}
             ariaLabel="Search results"
@@ -515,32 +529,32 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
               <ConfigCard
                 item={item}
                 variant="default"
-                showCategory={true}
-                showActions={true}
+                showCategory
+                showActions
                 searchQuery={searchQuery}
               />
             )}
           />
         </ErrorBoundary>
       ) : (
-        <div className="rounded-3xl border border-border/60 bg-card/40 p-8 text-center shadow-inner">
+        <div className="border-border/60 bg-card/40 rounded-3xl border p-8 text-center shadow-inner">
           {(() => {
-            const IconComponent = ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
+            const IconComponent = ICON_NAME_MAP[icon] || HelpCircle;
             return (
               <IconComponent
-                className="mx-auto mb-4 h-16 w-16 text-muted-foreground/50"
+                className="text-muted-foreground/50 mx-auto mb-4 h-16 w-16"
                 aria-hidden="true"
               />
             );
           })()}
-          <h2 className="mb-2 font-semibold text-lg">No {title.toLowerCase()} found</h2>
-          <p className="mb-6 text-muted-foreground">
+          <h2 className="mb-2 text-lg font-semibold">No {title.toLowerCase()} found</h2>
+          <p className="text-muted-foreground mb-6">
             Try a suggested filter or explore popular configurations from this week.
           </p>
 
-          {quickFiltersAvailable && (
+          {quickFiltersAvailable ? (
             <div className="mb-6 space-y-2">
-              <p className="text-muted-foreground text-xs uppercase tracking-wide">Quick filters</p>
+              <p className="text-muted-foreground text-xs tracking-wide uppercase">Quick filters</p>
               <div className="flex flex-wrap justify-center gap-2">
                 {resolvedQuickTagOptions.map((tag) => (
                   <Button
@@ -577,11 +591,11 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
 
           {visibleFallbackSuggestions.length > 0 && (
             <div className="space-y-3 text-left">
-              <p className="text-muted-foreground text-xs uppercase tracking-wide">
+              <p className="text-muted-foreground text-xs tracking-wide uppercase">
                 Trending &nbsp;•&nbsp; Suggested picks
               </p>
               <ErrorBoundary>
@@ -596,7 +610,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
                   renderCard={renderSuggestionCard}
                 />
               </ErrorBoundary>
-              {hasMoreFallbackSuggestions && (
+              {hasMoreFallbackSuggestions ? (
                 <div className="text-center">
                   <Button
                     variant="ghost"
@@ -607,7 +621,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
                     Show more suggestions
                   </Button>
                 </div>
-              )}
+              ) : null}
             </div>
           )}
         </div>

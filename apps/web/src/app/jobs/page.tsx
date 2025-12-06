@@ -41,14 +41,18 @@ import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { JobAlertsCard } from '@/src/components/core/domain/jobs/job-alerts-card';
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 
+export const revalidate = 900;
+
 /**
- * Dynamic Rendering Required
+ * ISR: 15 minutes (900s) - Jobs update frequently but don't need real-time freshness
  *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ * Hybrid Rendering Strategy:
+ * - Base job list (no filters) uses ISR with 15min revalidation
+ * - Filtered queries bypass cache (uncached SSR) for real-time results
  *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * Note: Using ISR instead of force-dynamic to enable caching while still allowing
+ * on-demand revalidation for filtered queries.
  */
-export const dynamic = 'force-dynamic';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
@@ -61,15 +65,6 @@ const NewsletterCTAVariant = dynamicImport(
     loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
-
-/**
- * ISR: 15 minutes (900s) - Jobs update frequently but don't need real-time freshness
- *
- * Hybrid Rendering Strategy:
- * - Base job list (no filters) uses ISR with 15min revalidation
- * - Filtered queries bypass cache (uncached SSR) for real-time results
- */
-export const revalidate = 900;
 
 /**
  * Renders a badge that displays the total number of jobs by fetching the count separately.

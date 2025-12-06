@@ -19,16 +19,16 @@ import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { useEffect, useRef } from 'react';
 
 interface SponsoredPulseProps {
-  /** UUID of the sponsored campaign */
-  sponsoredId: string;
-  /** Position in the feed (0-indexed) */
-  position?: number | undefined;
-  /** URL of the current page */
-  pageUrl?: string | undefined;
-  /** Target URL when clicked */
-  targetUrl: string;
   /** Children to wrap (usually the card) */
   children: React.ReactNode;
+  /** URL of the current page */
+  pageUrl?: string | undefined;
+  /** Position in the feed (0-indexed) */
+  position?: number | undefined;
+  /** UUID of the sponsored campaign */
+  sponsoredId: string;
+  /** Target URL when clicked */
+  targetUrl: string;
 }
 
 export function SponsoredPulse({
@@ -55,7 +55,8 @@ export function SponsoredPulse({
           // Fire-and-forget impression tracking via server action
           trackSponsoredImpression({
             sponsoredId,
-            pageUrl: pageUrl || (typeof window !== 'undefined' ? window.location.pathname : ''),
+            pageUrl:
+              pageUrl || (globalThis.window === undefined ? '' : globalThis.location.pathname),
             position: position ?? 0,
           }).catch((error) => {
             logUnhandledPromise('SponsoredPulse: impression failed', error, {

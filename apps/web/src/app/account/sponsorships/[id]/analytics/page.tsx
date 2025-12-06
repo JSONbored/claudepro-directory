@@ -23,12 +23,13 @@ import { notFound } from 'next/navigation';
 
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated route
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 type SponsorshipAnalytics = Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
 

@@ -19,12 +19,13 @@ import {
 import { type Metadata } from 'next';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated user sponsorships
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 /**
  * Provide the page metadata for the /account/sponsorships route.

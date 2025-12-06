@@ -9,6 +9,7 @@ import { requiresMFAChallenge } from '@heyclaude/web-runtime';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+
 import { MFAChallengeDialog } from '@/src/components/features/account/mfa/mfa-challenge-dialog';
 
 interface MFAGuardProps {
@@ -60,7 +61,9 @@ export function MFAGuard({ children }: MFAGuardProps) {
 
   return (
     <>
-      {requiresMFA && <MFAChallengeDialog open={mfaDialogOpen} onVerified={handleMFAVerified} />}
+      {requiresMFA ? (
+        <MFAChallengeDialog open={mfaDialogOpen} onVerified={handleMFAVerified} />
+      ) : null}
       {!requiresMFA && children}
     </>
   );

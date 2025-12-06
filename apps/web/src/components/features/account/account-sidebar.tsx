@@ -4,7 +4,6 @@
  * Wrapped in Suspense by parent layout for non-blocking data fetching
  */
 
-import type { User } from '@supabase/supabase-js';
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
 import { getUserSettings, getUserSponsorships } from '@heyclaude/web-runtime/data';
 import {
@@ -21,13 +20,14 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
+import { type User } from '@supabase/supabase-js';
 import Image from 'next/image';
 import Link from 'next/link';
 
 interface AccountSidebarProps {
   user: User;
-  userNameMetadata: string | null;
-  userImageMetadata: string | null;
+  userImageMetadata: null | string;
+  userNameMetadata: null | string;
 }
 
 export async function AccountSidebar({
@@ -125,7 +125,7 @@ export async function AccountSidebar({
             priority
           />
         ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
+          <div className="bg-accent flex h-12 w-12 items-center justify-center rounded-full">
             <UserIcon className="h-6 w-6" />
           </div>
         )}

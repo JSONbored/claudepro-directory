@@ -1,25 +1,25 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
-import { isValidCategory, logger, logUnhandledPromise, normalizeError } from '@heyclaude/web-runtime/core';
+import { isValidCategory, logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { useCopyToClipboard, usePulse } from '@heyclaude/web-runtime/hooks';
-import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { useCallback, useMemo } from 'react';
 
 export interface DetailQuickAction {
+  description?: string;
   key: string;
   label: string;
-  description?: string;
-  onClick: () => void | Promise<void>;
+  onClick: () => Promise<void> | void;
 }
 
 interface UseDetailQuickActionsParams {
+  configurationObject?: null | Record<string, unknown>;
   item: ContentItem;
+  mcpServers?: null | Record<string, unknown>;
   metadata: Record<string, unknown>;
-  packageName?: string | null;
-  configurationObject?: Record<string, unknown> | null;
-  mcpServers?: Record<string, unknown> | null;
+  packageName?: null | string;
 }
 
 export function useDetailQuickActions({
@@ -37,9 +37,7 @@ export function useDetailQuickActions({
     },
   });
 
-  const pulseCategory = isValidCategory(item.category)
-    ? (item.category as Database['public']['Enums']['content_category'])
-    : null;
+  const pulseCategory = isValidCategory(item.category) ? item.category : null;
   const contentSlug = typeof item.slug === 'string' ? item.slug : null;
 
   const trackCopyPulse = useCallback(
@@ -62,8 +60,7 @@ export function useDetailQuickActions({
   );
 
   const resolvedPackageName =
-    packageName ??
-    (typeof metadata['package'] === 'string' ? (metadata['package'] as string) : undefined);
+    packageName ?? (typeof metadata['package'] === 'string' ? metadata['package'] : undefined);
 
   const resolvedMcpServers =
     mcpServers ??
@@ -95,13 +92,18 @@ export function useDetailQuickActions({
             trackCopyPulse({ action: 'copy_install', manager: 'pnpm' });
           } catch (error) {
             const normalized = normalizeError(error, 'Copy pnpm command failed');
-            logger.warn('[Clipboard] Copy pnpm command failed', {
-              err: normalized,
-              category: 'clipboard',
-              component: 'useDetailQuickActions',
-              recoverable: true,
-              userRetryable: true,
-            });
+            logClientWarn(
+              '[Clipboard] Copy pnpm command failed',
+              normalized,
+              'useDetailQuickActions.copyPnpmCommand',
+              {
+                component: 'useDetailQuickActions',
+                action: 'copy-pnpm-command',
+                category: 'clipboard',
+                recoverable: true,
+                userRetryable: true,
+              }
+            );
             toasts.raw.error('Copy failed', {
               description: 'Unable to copy pnpm command.',
             });
@@ -124,13 +126,18 @@ export function useDetailQuickActions({
             trackCopyPulse({ action: 'copy_mcp_config' });
           } catch (error) {
             const normalized = normalizeError(error, 'Copy MCP config failed');
-            logger.warn('[Clipboard] Copy MCP config failed', {
-              err: normalized,
-              category: 'clipboard',
-              component: 'useDetailQuickActions',
-              recoverable: true,
-              userRetryable: true,
-            });
+            logClientWarn(
+              '[Clipboard] Copy MCP config failed',
+              normalized,
+              'useDetailQuickActions.copyMcpConfig',
+              {
+                component: 'useDetailQuickActions',
+                action: 'copy-mcp-config',
+                category: 'clipboard',
+                recoverable: true,
+                userRetryable: true,
+              }
+            );
             toasts.raw.error('Copy failed', {
               description: 'Unable to copy Claude Desktop configuration.',
             });
@@ -153,13 +160,18 @@ export function useDetailQuickActions({
             trackCopyPulse({ action: 'copy_configuration' });
           } catch (error) {
             const normalized = normalizeError(error, 'Copy configuration failed');
-            logger.warn('[Clipboard] Copy configuration failed', {
-              err: normalized,
-              category: 'clipboard',
-              component: 'useDetailQuickActions',
-              recoverable: true,
-              userRetryable: true,
-            });
+            logClientWarn(
+              '[Clipboard] Copy configuration failed',
+              normalized,
+              'useDetailQuickActions.copyConfiguration',
+              {
+                component: 'useDetailQuickActions',
+                action: 'copy-configuration',
+                category: 'clipboard',
+                recoverable: true,
+                userRetryable: true,
+              }
+            );
             toasts.raw.error('Copy failed', {
               description: 'Unable to copy configuration JSON.',
             });

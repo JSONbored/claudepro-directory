@@ -1,16 +1,13 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { usePulse, useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks';
 import { ArrowRight, Trash } from '@heyclaude/web-runtime/icons';
-import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { cn } from '@heyclaude/web-runtime/ui';
+import { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
+import { cn, ConfigCard, Button } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { memo, useMemo } from 'react';
-import { ConfigCard } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks';
 
 const MAX_RAIL_ITEMS = 6;
 
@@ -80,7 +77,9 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
     router.push(resumeSearchHref);
     if (!latestEntry) return;
     // Use plural route form for analytics category
-    const category = getCategoryRoute(latestEntry.category) as Database['public']['Enums']['content_category'];
+    const category = getCategoryRoute(
+      latestEntry.category
+    ) as Database['public']['Enums']['content_category'];
     pulse
       .click({
         category,
@@ -101,9 +100,9 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
   const handleClearHistory = () => {
     clearAll();
     // Use plural route form for analytics category
-    const category = latestEntry 
-      ? getCategoryRoute(latestEntry.category) as Database['public']['Enums']['content_category']
-      : 'agents' as Database['public']['Enums']['content_category'];
+    const category = latestEntry
+      ? (getCategoryRoute(latestEntry.category) as Database['public']['Enums']['content_category'])
+      : ('agents' as Database['public']['Enums']['content_category']);
     pulse
       .filter({
         category,
@@ -127,11 +126,11 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
       aria-labelledby="recently-viewed-rail-heading"
       className="container mx-auto space-y-6 px-4 py-8"
     >
-      <div className="mx-auto max-w-7xl space-y-6 rounded-2xl border border-border/60 bg-card/60 p-4 shadow-md backdrop-blur-xl sm:p-6">
+      <div className="border-border/60 bg-card/60 mx-auto max-w-7xl space-y-6 rounded-2xl border p-4 shadow-md backdrop-blur-xl sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-muted-foreground text-xs uppercase tracking-wide">Keep exploring</p>
-            <h2 id="recently-viewed-rail-heading" className="font-semibold text-2xl">
+            <p className="text-muted-foreground text-xs tracking-wide uppercase">Keep exploring</p>
+            <h2 id="recently-viewed-rail-heading" className="text-2xl font-semibold">
               Recently viewed
             </h2>
           </div>
@@ -153,7 +152,7 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
               onClick={handleClearHistory}
               aria-label="Clear recently viewed history"
             >
-              <Trash className="h-4 w-4 text-destructive" aria-hidden="true" />
+              <Trash className="text-destructive h-4 w-4" aria-hidden="true" />
               Clear history
             </Button>
           </div>
@@ -170,10 +169,10 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
             <ConfigCard
               key={`${item.category}-${item.slug}`}
               item={item}
-              showCategory={true}
-              showActions={true}
+              showCategory
+              showActions
               enableSwipeGestures={false}
-              useViewTransitions={true}
+              useViewTransitions
             />
           ))}
         </div>

@@ -5,7 +5,7 @@
  */
 
 import Cal, { getCalApi } from '@calcom/embed-react';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -21,10 +21,15 @@ export function ConsultingClient() {
         layout: 'month_view',
       });
     })().catch((error: unknown) => {
-      logger.error(
+      logClientError(
         'Failed to initialize Cal.com',
         normalizeError(error, 'Failed to initialize Cal.com'),
-        { namespace: 'consulting-call' }
+        'ConsultingClient.initCal',
+        {
+          component: 'ConsultingClient',
+          action: 'init-cal',
+          namespace: 'consulting-call',
+        }
       );
     });
   }, []);
@@ -38,19 +43,19 @@ export function ConsultingClient() {
         transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         className="mx-auto mb-8 max-w-2xl sm:mb-16"
       >
-        <div className="overflow-hidden rounded-lg border border-border bg-card/50 p-6 shadow-sm backdrop-blur-sm sm:p-8">
+        <div className="border-border bg-card/50 overflow-hidden rounded-lg border p-6 shadow-sm backdrop-blur-sm sm:p-8">
           <div className="mb-8 space-y-4 text-center sm:mb-12 sm:space-y-6">
-            <h1 className="font-bold text-3xl tracking-tight sm:text-4xl md:text-5xl">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
               Let's Build Something Together
             </h1>
-            <p className="mx-auto max-w-xl text-base text-muted-foreground leading-relaxed sm:text-lg">
+            <p className="text-muted-foreground mx-auto max-w-xl text-base leading-relaxed sm:text-lg">
               I'm <strong className="text-foreground">ghost (JSONbored)</strong> — a
               multi-disciplined engineer who's spent years building infrastructure, applications,
               and systems that actually work.
             </p>
           </div>
 
-          <div className="space-y-6 text-muted-foreground text-sm leading-relaxed sm:space-y-8 sm:text-base">
+          <div className="text-muted-foreground space-y-6 text-sm leading-relaxed sm:space-y-8 sm:text-base">
             <p>
               <strong className="text-foreground">What I do:</strong> Full-stack development,
               blockchain infrastructure, network engineering, systems administration, DevOps, AI/LLM
@@ -120,10 +125,10 @@ export function ConsultingClient() {
         transition={{ duration: 0.6, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
         className="mx-auto max-w-4xl"
       >
-        <h2 className="mb-6 text-center font-bold text-2xl sm:mb-8 sm:text-3xl">
+        <h2 className="mb-6 text-center text-2xl font-bold sm:mb-8 sm:text-3xl">
           Book Your Free Discovery Call
         </h2>
-        <div className="overflow-hidden rounded-lg border border-border bg-card/50 p-4 shadow-sm backdrop-blur-sm sm:p-6">
+        <div className="border-border bg-card/50 overflow-hidden rounded-lg border p-4 shadow-sm backdrop-blur-sm sm:p-6">
           <Cal
             calLink="jsonbored/heyclaude-consult"
             config={{

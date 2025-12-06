@@ -34,6 +34,16 @@ import dynamicImport from 'next/dynamic';
 
 import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 
+export const revalidate = 86_400;
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+
 const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
@@ -45,15 +55,6 @@ const NewsletterCTAVariant = dynamicImport(
     loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
-
-/**
- * Dynamic Rendering Required
- *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const revalidate = 86_400;
 
 /**
  * Generate the page metadata for the Config Recommender route.

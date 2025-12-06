@@ -15,15 +15,17 @@
 
 'use client';
 
-import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import {
+  DIMENSIONS,
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from '@heyclaude/web-runtime/ui';
+
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
+
 import { NotificationList } from './notification-list';
 
 export function NotificationSheet() {

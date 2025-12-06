@@ -4,9 +4,10 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
-import { logger } from '@heyclaude/web-runtime/core';
-import { useEffect, useState } from 'react';
+import { type Database } from '@heyclaude/database-types';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import React, { useEffect, useState } from 'react';
+
 import { Checklist } from '@/src/components/content/checklist';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { UnifiedContentBlock } from '@/src/components/content/markdown-content-block';
@@ -19,64 +20,64 @@ type GuideSections = ContentRow['metadata'];
 interface JSONSectionRendererProps {
   // Note: The permissive type is kept for backward compatibility with legacy data formats.
   // Runtime validation is performed in the component body to ensure type safety.
-  sections: GuideSections | Section[] | Array<Record<string, unknown> & { html?: string }>;
+  sections: Array<Record<string, unknown> & { html?: string }> | GuideSections | Section[];
 }
 
 interface CodeTab {
-  label: string;
   code: string;
-  language: string;
   filename?: string;
   html?: string;
+  label: string;
+  language: string;
 }
 
 interface TabItem {
-  value: string;
-  label: string;
   content: string;
+  label: string;
+  value: string;
 }
 
 interface AccordionItem {
-  title: string;
   content: string;
   defaultOpen?: boolean;
+  title: string;
 }
 
 interface FaqQuestion {
-  question: string;
   answer: string;
   category?: string;
+  question: string;
 }
 
 interface FeatureItem {
-  title: string;
-  description: string;
   badge?: string;
+  description: string;
+  title: string;
 }
 
 interface StepItem {
-  number: number;
-  title: string;
-  description: string;
-  timeEstimate?: string;
   code?: string;
-  language?: string;
+  description: string;
   html?: string;
+  language?: string;
   notes?: string;
+  number: number;
+  timeEstimate?: string;
+  title: string;
 }
 
 interface ChecklistItem {
-  task: string;
   description?: string;
   required?: boolean;
+  task: string;
 }
 
 interface ResourceItem {
-  url: string;
-  title: string;
   description: string;
-  type: string;
   external?: boolean;
+  title: string;
+  type: string;
+  url: string;
 }
 
 /**
@@ -99,7 +100,7 @@ function isValidInternalPath(path: string): boolean {
  * Validate and sanitize external URL for safe use in href
  * Only allows HTTPS for external URLs, HTTP only for localhost/development
  */
-function getSafeExternalUrl(url: string): string | null {
+function getSafeExternalUrl(url: string): null | string {
   if (!url || typeof url !== 'string') return null;
 
   try {
@@ -136,137 +137,137 @@ function getSafeExternalUrl(url: string): string | null {
   }
 }
 
-type SectionBase = {
-  id?: string;
+interface SectionBase {
   className?: string;
-};
+  id?: string;
+}
 
 type TextSection = SectionBase & {
-  type: 'text';
   content: string;
+  type: 'text';
 };
 
 type HeadingSection = SectionBase & {
-  type: 'heading';
-  level: 2 | 3 | 4 | 5 | 6;
   content: string;
+  level: 2 | 3 | 4 | 5 | 6;
+  type: 'heading';
 };
 
 type CodeSection = SectionBase & {
-  type: 'code';
   code: string;
-  language: string;
   filename?: string;
-  showLineNumbers?: boolean;
   html?: string;
+  language: string;
+  showLineNumbers?: boolean;
+  type: 'code';
 };
 
 type CodeGroupSection = SectionBase & {
-  type: 'code_group';
-  title?: string;
   tabs: CodeTab[];
+  title?: string;
+  type: 'code_group';
 };
 
 type CalloutSection = SectionBase & {
-  type: 'callout';
-  variant: 'info' | 'warning' | 'success' | 'error' | 'tip' | 'primary' | 'important';
-  title?: string;
   content: string;
+  title?: string;
+  type: 'callout';
+  variant: 'error' | 'important' | 'info' | 'primary' | 'success' | 'tip' | 'warning';
 };
 
 type TldrSection = SectionBase & {
-  type: 'tldr';
   content: string;
   keyPoints?: string[];
+  type: 'tldr';
 };
 
 type FeatureGridSection = SectionBase & {
-  type: 'feature_grid';
-  title?: string;
+  columns?: number | string;
   description?: string;
   features: FeatureItem[];
-  columns?: number | string;
+  title?: string;
+  type: 'feature_grid';
 };
 
 type ExpertQuoteSection = SectionBase & {
-  type: 'expert_quote';
-  quote: string;
   author: string;
-  title?: string;
-  company?: string;
   avatarUrl?: string;
+  company?: string;
+  quote: string;
+  title?: string;
+  type: 'expert_quote';
 };
 
 type ComparisonTableSection = SectionBase & {
-  type: 'comparison_table';
-  title?: string;
+  data: (Record<string, string> | string[])[];
   description?: string;
   headers: string[];
-  data: (string[] | Record<string, string>)[];
+  title?: string;
+  type: 'comparison_table';
 };
 
 type TabsSection = SectionBase & {
-  type: 'tabs';
-  title?: string;
   description?: string;
   items: TabItem[];
+  title?: string;
+  type: 'tabs';
 };
 
 type AccordionSection = SectionBase & {
-  type: 'accordion';
-  title?: string;
   description?: string;
   items: AccordionItem[];
+  title?: string;
+  type: 'accordion';
 };
 
 type FaqSection = SectionBase & {
-  type: 'faq';
-  title?: string;
   description?: string;
   questions: FaqQuestion[];
+  title?: string;
+  type: 'faq';
 };
 
 type StepsSection = SectionBase & {
-  type: 'steps';
-  title?: string;
   steps: StepItem[];
+  title?: string;
+  type: 'steps';
 };
 
 type ChecklistSection = SectionBase & {
-  type: 'checklist';
-  title?: string;
   items: ChecklistItem[];
+  title?: string;
+  type: 'checklist';
 };
 
 type RelatedContentSection = SectionBase & {
-  type: 'related_content';
-  title?: string;
   description?: string;
   resources?: ResourceItem[];
+  title?: string;
+  type: 'related_content';
 };
 
 type Section =
-  | TextSection
-  | HeadingSection
-  | CodeSection
-  | CodeGroupSection
-  | CalloutSection
-  | TldrSection
-  | FeatureGridSection
-  | ExpertQuoteSection
-  | ComparisonTableSection
-  | TabsSection
   | AccordionSection
-  | FaqSection
-  | StepsSection
+  | CalloutSection
   | ChecklistSection
-  | RelatedContentSection;
+  | CodeGroupSection
+  | CodeSection
+  | ComparisonTableSection
+  | ExpertQuoteSection
+  | FaqSection
+  | FeatureGridSection
+  | HeadingSection
+  | RelatedContentSection
+  | StepsSection
+  | TabsSection
+  | TextSection
+  | TldrSection;
 
 /**
  * TrustedHTML - Safely renders HTML content with XSS protection
  * Sanitizes HTML using DOMPurify before rendering
  */
-function TrustedHTML({ html, className, id }: { html: string; className?: string; id?: string }) {
+function TrustedHTML({ html, className, id }: { className?: string; html: string; id?: string }) {
   if (!html || typeof html !== 'string') {
     return <div id={id} className={className} />;
   }
@@ -276,75 +277,83 @@ function TrustedHTML({ html, className, id }: { html: string; className?: string
   // DOMPurify only works in browser - dynamically import and use
   // During SSR, render unsanitized (will be sanitized on client)
   const [safeHtml, setSafeHtml] = useState<string>(
-    typeof window === 'undefined' ? html : '' // Start empty on client, will be set in useEffect
+    globalThis.window === undefined ? html : '' // Start empty on client, will be set in useEffect
   );
   const [isClient, setIsClient] = useState(false);
-  
+
   useEffect(() => {
     setIsClient(true);
-    if (typeof window !== 'undefined' && html && typeof html === 'string') {
-      import('dompurify').then((DOMPurify) => {
-        const sanitized = DOMPurify.default.sanitize(html, {
-          ALLOWED_TAGS: [
-            'p',
-            'br',
-            'strong',
-            'em',
-            'b',
-            'i',
-            'u',
-            'a',
-            'ul',
-            'ol',
-            'li',
-            'h1',
-            'h2',
-            'h3',
-            'h4',
-            'h5',
-            'h6',
-            'code',
-            'pre',
-            'blockquote',
-            'span',
-            'div',
-            'table',
-            'thead',
-            'tbody',
-            'tr',
-            'th',
-            'td',
-            'img',
-          ],
-          ALLOWED_ATTR: [
-            'href',
-            'title',
-            'target',
-            'rel',
-            'class',
-            'id',
-            'src',
-            'alt',
-            'width',
-            'height',
-          ],
-          ALLOWED_URI_REGEXP:
-            /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+    if (globalThis.window !== undefined && html && typeof html === 'string') {
+      import('dompurify')
+        .then((DOMPurify) => {
+          const sanitized = DOMPurify.default.sanitize(html, {
+            ALLOWED_TAGS: [
+              'p',
+              'br',
+              'strong',
+              'em',
+              'b',
+              'i',
+              'u',
+              'a',
+              'ul',
+              'ol',
+              'li',
+              'h1',
+              'h2',
+              'h3',
+              'h4',
+              'h5',
+              'h6',
+              'code',
+              'pre',
+              'blockquote',
+              'span',
+              'div',
+              'table',
+              'thead',
+              'tbody',
+              'tr',
+              'th',
+              'td',
+              'img',
+            ],
+            ALLOWED_ATTR: [
+              'href',
+              'title',
+              'target',
+              'rel',
+              'class',
+              'id',
+              'src',
+              'alt',
+              'width',
+              'height',
+            ],
+            ALLOWED_URI_REGEXP:
+              /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+          });
+          setSafeHtml(sanitized);
+        })
+        .catch((error) => {
+          const normalized = normalizeError(error, 'Failed to load DOMPurify');
+          logClientWarn(
+            '[Sanitize] Failed to load DOMPurify',
+            normalized,
+            'TrustedHTML.loadDOMPurify',
+            {
+              component: 'TrustedHTML',
+              action: 'load-dompurify',
+              category: 'sanitize',
+              recoverable: true,
+            }
+          );
+          // Fallback to original HTML if DOMPurify fails to load
+          setSafeHtml(html);
         });
-        setSafeHtml(sanitized);
-      }).catch((error) => {
-        logger.warn('[Sanitize] Failed to load DOMPurify', {
-          err: error,
-          category: 'sanitize',
-          component: 'TrustedHTML',
-          recoverable: true,
-        });
-        // Fallback to original HTML if DOMPurify fails to load
-        setSafeHtml(html);
-      });
     }
   }, [html]);
-  
+
   // During SSR, render the HTML directly (will be sanitized on client)
   const displayHtml = isClient ? safeHtml : html;
 
@@ -354,7 +363,7 @@ function TrustedHTML({ html, className, id }: { html: string; className?: string
       className={className}
       // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist (client-side)
       // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized client-side with DOMPurify
-            dangerouslySetInnerHTML={{ __html: displayHtml }}
+      dangerouslySetInnerHTML={{ __html: displayHtml }}
     />
   );
 }
@@ -366,7 +375,7 @@ function render_section(section: Section, index: number): React.ReactNode {
     // ============================================================================
     // TEXT & HEADING SECTIONS
     // ============================================================================
-    case 'text':
+    case 'text': {
       return (
         <TrustedHTML
           key={key}
@@ -375,20 +384,22 @@ function render_section(section: Section, index: number): React.ReactNode {
           html={section.content}
         />
       );
+    }
 
     case 'heading': {
-      const HeadingTag = `h${section.level}` as 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+      const HeadingTag = `h${section.level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+      const HeadingComponent = HeadingTag;
       return (
-        <HeadingTag key={key} id={section.id} className={section.className}>
+        <HeadingComponent key={key} id={section.id} className={section.className}>
           {section.content}
-        </HeadingTag>
+        </HeadingComponent>
       );
     }
 
     // ============================================================================
     // CODE SECTIONS
     // ============================================================================
-    case 'code':
+    case 'code': {
       return (
         <div key={key} id={section.id} className={section.className}>
           <ProductionCodeBlock
@@ -400,16 +411,17 @@ function render_section(section: Section, index: number): React.ReactNode {
           />
         </div>
       );
+    }
 
-    case 'code_group':
+    case 'code_group': {
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
+          {section.title ? <h3 className="mb-4 text-lg font-semibold">{section.title}</h3> : null}
           <div className="overflow-hidden rounded-lg border">
             {section.tabs.map((tab: CodeTab, idx: number) => (
               <details key={`${tab.label}-${idx}`} className="border-b last:border-0">
-                <summary className="cursor-pointer px-4 py-3 font-medium hover:bg-muted/50">
-                  {tab.label} {tab.filename && `• ${tab.filename}`}
+                <summary className="hover:bg-muted/50 cursor-pointer px-4 py-3 font-medium">
+                  {tab.label} {tab.filename ? `• ${tab.filename}` : null}
                 </summary>
                 <div className="p-4">
                   <ProductionCodeBlock
@@ -424,13 +436,14 @@ function render_section(section: Section, index: number): React.ReactNode {
           </div>
         </div>
       );
+    }
 
     // ============================================================================
     // CALLOUT SECTIONS
     // ============================================================================
     case 'callout': {
       // Map guide schema variants to UnifiedContentBox supported types
-      const calloutType: 'info' | 'warning' | 'success' | 'error' | 'tip' =
+      const calloutType: 'error' | 'info' | 'success' | 'tip' | 'warning' =
         section.variant === 'primary' || section.variant === 'important'
           ? 'info' // Map unsupported variants to 'info'
           : section.variant;
@@ -447,7 +460,7 @@ function render_section(section: Section, index: number): React.ReactNode {
     // ============================================================================
     // TLDR & FEATURE SECTIONS
     // ============================================================================
-    case 'tldr':
+    case 'tldr': {
       return (
         <div key={key} id={section.id} className={section.className}>
           <UnifiedContentBlock
@@ -458,6 +471,7 @@ function render_section(section: Section, index: number): React.ReactNode {
           />
         </div>
       );
+    }
 
     case 'feature_grid': {
       const columnsValue =
@@ -484,7 +498,7 @@ function render_section(section: Section, index: number): React.ReactNode {
       );
     }
 
-    case 'expert_quote':
+    case 'expert_quote': {
       return (
         <div key={key} id={section.id} className={section.className}>
           <UnifiedContentBlock
@@ -497,6 +511,7 @@ function render_section(section: Section, index: number): React.ReactNode {
           />
         </div>
       );
+    }
 
     // ============================================================================
     // COMPARISON & TABLE SECTIONS
@@ -504,7 +519,7 @@ function render_section(section: Section, index: number): React.ReactNode {
     case 'comparison_table': {
       const headers = section.headers || [];
 
-      const items = section.data.map((row: string[] | Record<string, string>) => {
+      const items = section.data.map((row: Record<string, string> | string[]) => {
         if (Array.isArray(row)) {
           return {
             feature: row[0] || '',
@@ -537,17 +552,17 @@ function render_section(section: Section, index: number): React.ReactNode {
     // ============================================================================
     // INTERACTIVE SECTIONS (TABS, ACCORDION, FAQ)
     // ============================================================================
-    case 'tabs':
+    case 'tabs': {
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
-          {section.description && (
-            <p className="mb-4 text-muted-foreground">{section.description}</p>
-          )}
+          {section.title ? <h3 className="mb-4 text-lg font-semibold">{section.title}</h3> : null}
+          {section.description ? (
+            <p className="text-muted-foreground mb-4">{section.description}</p>
+          ) : null}
           <div className="overflow-hidden rounded-lg border">
             {section.items.map((item: TabItem, idx: number) => (
               <details key={`${item.value}-${idx}`} className="border-b last:border-0">
-                <summary className="cursor-pointer px-4 py-3 font-medium hover:bg-muted/50">
+                <summary className="hover:bg-muted/50 cursor-pointer px-4 py-3 font-medium">
                   {item.label}
                 </summary>
                 <TrustedHTML html={item.content} className="p-4" />
@@ -556,8 +571,9 @@ function render_section(section: Section, index: number): React.ReactNode {
           </div>
         </div>
       );
+    }
 
-    case 'accordion':
+    case 'accordion': {
       return (
         <div key={key} id={section.id} className={section.className}>
           <UnifiedContentBox
@@ -573,8 +589,9 @@ function render_section(section: Section, index: number): React.ReactNode {
           />
         </div>
       );
+    }
 
-    case 'faq':
+    case 'faq': {
       return (
         <div key={key} id={section.id} className={section.className}>
           <UnifiedContentBox
@@ -589,41 +606,43 @@ function render_section(section: Section, index: number): React.ReactNode {
           />
         </div>
       );
+    }
 
     // ============================================================================
     // STEP-BY-STEP & CHECKLIST SECTIONS
     // ============================================================================
-    case 'steps':
+    case 'steps': {
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
+          {section.title ? <h3 className="mb-4 text-lg font-semibold">{section.title}</h3> : null}
           <div className="space-y-6">
             {section.steps.map((step: StepItem) => (
               <div key={step.number} className="border-primary border-l-4 pl-6">
-                <h4 className="mb-2 font-semibold text-lg">
+                <h4 className="mb-2 text-lg font-semibold">
                   Step {step.number}: {step.title}
                 </h4>
-                <p className="mb-4 text-muted-foreground">{step.description}</p>
-                {step.timeEstimate && (
-                  <p className="mb-2 text-muted-foreground text-sm">⏱️ {step.timeEstimate}</p>
-                )}
-                {step.code && (
+                <p className="text-muted-foreground mb-4">{step.description}</p>
+                {step.timeEstimate ? (
+                  <p className="text-muted-foreground mb-2 text-sm">⏱️ {step.timeEstimate}</p>
+                ) : null}
+                {step.code ? (
                   <ProductionCodeBlock
                     html={step.html || ''}
                     code={step.code}
                     language={step.language || 'bash'}
                   />
-                )}
-                {step.notes && (
-                  <p className="mt-2 text-muted-foreground text-sm italic">{step.notes}</p>
-                )}
+                ) : null}
+                {step.notes ? (
+                  <p className="text-muted-foreground mt-2 text-sm italic">{step.notes}</p>
+                ) : null}
               </div>
             ))}
           </div>
         </div>
       );
+    }
 
-    case 'checklist':
+    case 'checklist': {
       return (
         <div key={key} id={section.id} className={section.className}>
           <Checklist
@@ -633,31 +652,32 @@ function render_section(section: Section, index: number): React.ReactNode {
               task: item.task,
               description: item.description,
               completed: false,
-              priority: (item.required ? 'high' : 'low') as 'high' | 'low',
+              priority: item.required ? 'high' : 'low',
             }))}
           />
         </div>
       );
+    }
 
     // ============================================================================
     // RELATED CONTENT SECTION
     // ============================================================================
-    case 'related_content':
+    case 'related_content': {
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
-          {section.description && (
-            <p className="mb-4 text-muted-foreground">{section.description}</p>
-          )}
-          {section.resources && section.resources.length > 0 && (
+          {section.title ? <h3 className="mb-4 text-lg font-semibold">{section.title}</h3> : null}
+          {section.description ? (
+            <p className="text-muted-foreground mb-4">{section.description}</p>
+          ) : null}
+          {section.resources && section.resources.length > 0 ? (
             <div className="grid gap-4">
               {section.resources.map((r: ResourceItem) => {
                 // Defensive defaulting: infer external flag from URL pattern if not provided
                 // Prevents silent link disabling when external flag is undefined but URL is clearly external
                 const isExternal =
-                  r.external !== undefined
-                    ? r.external
-                    : r.url.trim().startsWith('http://') || r.url.trim().startsWith('https://');
+                  r.external === undefined
+                    ? r.url.trim().startsWith('http://') || r.url.trim().startsWith('https://')
+                    : r.external;
 
                 // Validate and sanitize URL based on whether it's external or internal
                 const safeUrl = isExternal
@@ -668,10 +688,17 @@ function render_section(section: Section, index: number): React.ReactNode {
 
                 // Don't render if URL is invalid or unsafe
                 if (!safeUrl) {
-                  logger.warn('Invalid or unsafe URL detected in resource', {
-                    url: r.url,
-                    title: r.title,
-                  });
+                  logClientWarn(
+                    'Invalid or unsafe URL detected in resource',
+                    undefined,
+                    'JSONSectionRenderer.renderResource',
+                    {
+                      component: 'JSONSectionRenderer',
+                      action: 'render-resource',
+                      url: r.url,
+                      title: r.title,
+                    }
+                  );
                   // Use a stable key based on resource properties instead of array index
                   const resourceKey = `invalid-resource-${r.title}-${r.url.slice(0, 50)}`;
                   return (
@@ -681,7 +708,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                       title="Invalid or unsafe URL - cannot display link"
                     >
                       <h4 className="mb-1 font-semibold">{r.title}</h4>
-                      <p className="mb-2 text-muted-foreground text-sm">{r.description}</p>
+                      <p className="text-muted-foreground mb-2 text-sm">{r.description}</p>
                       <span className="text-destructive text-xs uppercase">
                         {r.type} • Invalid URL
                       </span>
@@ -697,21 +724,23 @@ function render_section(section: Section, index: number): React.ReactNode {
                     href={safeUrl}
                     target={isExternal ? '_blank' : undefined}
                     rel={isExternal ? 'noopener noreferrer' : undefined}
-                    className="rounded-lg border p-4 transition-colors hover:bg-muted/50"
+                    className="hover:bg-muted/50 rounded-lg border p-4 transition-colors"
                   >
                     <h4 className="mb-1 font-semibold">{r.title}</h4>
-                    <p className="mb-2 text-muted-foreground text-sm">{r.description}</p>
+                    <p className="text-muted-foreground mb-2 text-sm">{r.description}</p>
                     <span className="text-primary text-xs uppercase">{r.type}</span>
                   </a>
                 );
               })}
             </div>
-          )}
+          ) : null}
         </div>
       );
+    }
 
-    default:
+    default: {
       return null;
+    }
   }
 }
 
@@ -724,7 +753,14 @@ export function JSONSectionRenderer({ sections }: JSONSectionRendererProps) {
 
   return (
     <div className="space-y-8">
-      {sections_array.map((section, index) => render_section(section, index))}
+      {sections_array.map((section, index) => {
+        const key = section.id || `section-${index}`;
+        return (
+          <React.Fragment key={key}>
+            {render_section(section, index)}
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 }

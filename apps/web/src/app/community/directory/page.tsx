@@ -8,11 +8,16 @@ import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community/directory');
 }
 
-export const revalidate = false;
+/**
+ * Static Generation: Community directory is statically generated at build time
+ * No automatic revalidation - page is fully static
+ */
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
 

@@ -10,8 +10,12 @@
  * - Guards against SSR/localStorage absence to avoid hydration issues.
  */
 
-import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
-import type { FilterState, SavedSearchPreset } from '@heyclaude/web-runtime/types/component.types';
+import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import {
+  type FilterState,
+  type SavedSearchPreset,
+} from '@heyclaude/web-runtime/types/component.types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const STORAGE_PREFIX = 'saved-search-presets:v1:';
@@ -19,27 +23,27 @@ const PRESET_LIMIT = 5;
 const WRITE_DEBOUNCE_MS = 200;
 
 export interface SavePresetPayload {
+  filters: FilterState;
   label: string;
   query: string;
-  filters: FilterState;
 }
 
 export interface UseSavedSearchPresetsOptions {
-  pathname?: string | null;
   /**
    * Optional flag to skip initial localStorage read (mainly for tests).
    */
   disableStorage?: boolean;
+  pathname?: null | string;
 }
 
 export interface UseSavedSearchPresetsReturn {
-  presets: SavedSearchPreset[];
-  isLoaded: boolean;
-  isAtLimit: boolean;
-  savePreset: (payload: SavePresetPayload) => SavedSearchPreset | null;
-  applyPreset: (presetId: string) => SavedSearchPreset | null;
-  removePreset: (presetId: string) => void;
+  applyPreset: (presetId: string) => null | SavedSearchPreset;
   clearPresets: () => void;
+  isAtLimit: boolean;
+  isLoaded: boolean;
+  presets: SavedSearchPreset[];
+  removePreset: (presetId: string) => void;
+  savePreset: (payload: SavePresetPayload) => null | SavedSearchPreset;
 }
 
 type PresetFingerprint = string;
@@ -54,7 +58,7 @@ export function useSavedSearchPresets({
   );
 
   const canUseStorage = useMemo(() => !disableStorage && isStorageAvailable(), [disableStorage]);
-  const writeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const writeTimeoutRef = useRef<null | ReturnType<typeof setTimeout>>(null);
 
   const [presets, setPresets] = useState<SavedSearchPreset[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -88,7 +92,7 @@ export function useSavedSearchPresets({
       }
       writeTimeoutRef.current = setTimeout(() => {
         try {
-          window.localStorage.setItem(storageKey, JSON.stringify(nextPresets));
+          globalThis.localStorage.setItem(storageKey, JSON.stringify(nextPresets));
         } catch (error) {
           logClientWarning('useSavedSearchPresets: failed to persist presets', error);
         }
@@ -110,7 +114,7 @@ export function useSavedSearchPresets({
   );
 
   const savePreset = useCallback(
-    (payload: SavePresetPayload): SavedSearchPreset | null => {
+    (payload: SavePresetPayload): null | SavedSearchPreset => {
       const label = payload.label?.trim();
       const sanitizedQuery = (payload.query ?? '').trim().slice(0, 200);
       const sanitizedFilters = sanitizeFilters(payload.filters);
@@ -123,7 +127,7 @@ export function useSavedSearchPresets({
       const fingerprint = buildPresetFingerprint(sanitizedQuery, sanitizedFilters);
       const createdAt = Date.now();
 
-      let savedPreset: SavedSearchPreset | null = null;
+      let savedPreset: null | SavedSearchPreset = null;
       updatePresets((current) => {
         const existingIndex = current.findIndex(
           (preset) => buildPresetFingerprint(preset.query, preset.filters) === fingerprint
@@ -131,7 +135,7 @@ export function useSavedSearchPresets({
 
         const normalizedList = [...current];
 
-        if (existingIndex >= 0) {
+        if (existingIndex !== -1) {
           const existing = normalizedList[existingIndex];
           if (!existing) {
             // Should never happen, but TypeScript safety check
@@ -171,7 +175,7 @@ export function useSavedSearchPresets({
   );
 
   const applyPreset = useCallback(
-    (presetId: string): SavedSearchPreset | null => {
+    (presetId: string): null | SavedSearchPreset => {
       const target = presets.find((preset) => preset.id === presetId);
       if (!target) {
         return null;
@@ -179,7 +183,7 @@ export function useSavedSearchPresets({
 
       updatePresets((current) => {
         const index = current.findIndex((preset) => preset.id === presetId);
-        if (index < 0) {
+        if (index === -1) {
           return current;
         }
         const reordered = [...current];
@@ -206,7 +210,7 @@ export function useSavedSearchPresets({
     setPresets([]);
     if (canUseStorage) {
       try {
-        window.localStorage.removeItem(storageKey);
+        globalThis.localStorage.removeItem(storageKey);
       } catch (error) {
         logClientWarning('useSavedSearchPresets: failed to clear presets', error);
       }
@@ -229,14 +233,14 @@ export function useSavedSearchPresets({
 // =============================================================================
 
 function isStorageAvailable(): boolean {
-  if (typeof window === 'undefined' || !window.localStorage) {
+  if (globalThis.window === undefined || !globalThis.localStorage) {
     return false;
   }
 
   try {
     const testKey = '__preset_test__';
-    window.localStorage.setItem(testKey, testKey);
-    window.localStorage.removeItem(testKey);
+    globalThis.localStorage.setItem(testKey, testKey);
+    globalThis.localStorage.removeItem(testKey);
     return true;
   } catch {
     return false;
@@ -247,12 +251,20 @@ function loadFromStorage(key: string): SavedSearchPreset[] {
   if (!isStorageAvailable()) return [];
 
   try {
-    const raw = window.localStorage.getItem(key);
+    const raw = globalThis.localStorage.getItem(key);
     if (!raw) return [];
 
     const parsed = JSON.parse(raw) as SavedSearchPreset[];
     if (!Array.isArray(parsed)) {
-      logger.warn('useSavedSearchPresets: invalid preset payload');
+      logClientWarn(
+        'useSavedSearchPresets: invalid preset payload',
+        undefined,
+        'useSavedSearchPresets.readPresets',
+        {
+          component: 'useSavedSearchPresets',
+          action: 'read-presets',
+        }
+      );
       return [];
     }
 
@@ -262,17 +274,22 @@ function loadFromStorage(key: string): SavedSearchPreset[] {
         .filter((preset): preset is SavedSearchPreset => preset !== null)
     );
   } catch (error) {
-    logger.error(
+    logClientError(
       'useSavedSearchPresets: failed to parse stored presets',
-      normalizeError(error, 'Failed to parse stored presets')
+      normalizeError(error, 'Failed to parse stored presets'),
+      'useSavedSearchPresets.readPresets',
+      {
+        component: 'useSavedSearchPresets',
+        action: 'read-presets',
+      }
     );
     return [];
   }
 }
 
 function sanitizePresetFromStorage(
-  entry: SavedSearchPreset | Record<string, unknown>
-): SavedSearchPreset | null {
+  entry: Record<string, unknown> | SavedSearchPreset
+): null | SavedSearchPreset {
   if (!entry || typeof entry !== 'object') return null;
 
   const label = typeof entry.label === 'string' ? entry.label.trim() : '';
@@ -310,13 +327,13 @@ function sanitizeFilters(filters: FilterState = {}): FilterState {
   if (filters.dateRange) sanitized.dateRange = filters.dateRange;
   if (filters.popularity) sanitized.popularity = [...filters.popularity];
   if (Array.isArray(filters.tags) && filters.tags.length > 0) {
-    const normalizedTags = Array.from(
-      new Set(
+    const normalizedTags = [
+      ...new Set(
         filters.tags
           .map((tag: string) => (typeof tag === 'string' ? tag.trim() : ''))
           .filter((tag: string): tag is string => tag.length > 0)
-      )
-    ).sort((a: string, b: string) => a.localeCompare(b));
+      ),
+    ].sort((a: string, b: string) => a.localeCompare(b));
     if (normalizedTags.length > 0) {
       sanitized.tags = normalizedTags;
     }
@@ -346,10 +363,10 @@ function buildPresetFingerprint(query: string, filters: FilterState): PresetFing
 function hasPresetFilters(filters: FilterState = {}): boolean {
   return Boolean(
     filters.category ||
-      filters.author ||
-      filters.dateRange ||
-      (filters.tags && filters.tags.length > 0) ||
-      filters.popularity ||
-      (filters.sort && filters.sort !== ('trending' as FilterState['sort']))
+    filters.author ||
+    filters.dateRange ||
+    (filters.tags && filters.tags.length > 0) ||
+    filters.popularity ||
+    (filters.sort && filters.sort !== ('trending' as FilterState['sort']))
   );
 }

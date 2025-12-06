@@ -8,10 +8,9 @@
 import { getSocialLinks, logClientWarning, logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Github } from '@heyclaude/web-runtime/icons';
-import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { cn, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 export interface GitHubStarsButtonProps extends ButtonStyleProps {
   repoUrl?: string;
@@ -27,7 +26,7 @@ export function GitHubStarsButton({
   disabled = false,
 }: GitHubStarsButtonProps) {
   const pulse = usePulse();
-  const [stars, setStars] = useState<number | null>(null);
+  const [stars, setStars] = useState<null | number>(null);
 
   useEffect(() => {
     const apiUrl = (() => {

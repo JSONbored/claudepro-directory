@@ -9,6 +9,14 @@ import { AuthMobileHeader } from '@/src/components/core/auth/auth-mobile-header'
 
 import { LoginPanelClient } from './login-panel-client';
 
+export const dynamic = 'force-dynamic';
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This page is dynamic because searchParams is async (Next.js 15+) and requires runtime resolution.
+ */
+
 /**
  * Provide the page metadata for the login route.
  *
@@ -19,13 +27,6 @@ import { LoginPanelClient } from './login-panel-client';
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/login');
 }
-
-/**
- * Dynamic Rendering Required
- *
- * This page is dynamic because searchParams is async (Next.js 15+) and requires runtime resolution.
- */
-export const dynamic = 'force-dynamic';
 
 /**
  * Render the login page layout and provide an optional redirect target to the client-side login panel.
@@ -49,14 +50,14 @@ export default async function LoginPage({
   const requestId = generateRequestId();
   const operation = 'LoginPage';
   const route = '/login';
-  const module = 'apps/web/src/app/(auth)/login/page';
+  const modulePath = 'apps/web/src/app/(auth)/login/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
     route,
-    module,
+    module: modulePath,
   });
 
   let redirectTo: string | undefined;

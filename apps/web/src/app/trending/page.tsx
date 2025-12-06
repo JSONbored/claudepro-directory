@@ -21,6 +21,12 @@ import { Suspense } from 'react';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
 
+export const revalidate = 900;
+
+/**
+ * ISR: 15 minutes (900s) - Trending content updates frequently
+ */
+
 const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
@@ -34,13 +40,6 @@ const NewsletterCTAVariant = dynamicImport(
 );
 
 /**
- * Dynamic Rendering Required
- *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const revalidate = 900; /**
  * Provide metadata for the Trending page.
  *
  * @returns Page metadata for the '/trending' route.

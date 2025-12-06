@@ -5,7 +5,7 @@
  * Database-first: displays data from get_user_identities() RPC
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { unlinkOAuthProvider } from '@heyclaude/web-runtime';
 import {
   AlertTriangle,
@@ -14,11 +14,12 @@ import {
   GithubBrandIcon,
   GoogleBrandIcon,
 } from '@heyclaude/web-runtime/icons';
-import { errorToasts, successToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { type ComponentType, useState, useTransition } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
 import {
+  errorToasts,
+  successToasts,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -26,6 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@heyclaude/web-runtime/ui';
+import { type ComponentType, useState, useTransition } from 'react';
 
 type Identity = NonNullable<
   Database['public']['Functions']['get_user_identities']['Returns']['identities']
@@ -38,8 +40,8 @@ interface ConnectedAccountsClientProps {
 const PROVIDER_CONFIG: Record<
   Database['public']['Enums']['oauth_provider'],
   {
-    label: string;
     icon: ComponentType<{ className?: string }>;
+    label: string;
     linkUrl: string;
     unlinkable: boolean;
   }
@@ -103,7 +105,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
   const handleLinkProvider = (provider: Database['public']['Enums']['oauth_provider']) => {
     const config = PROVIDER_CONFIG[provider];
     if (!config) return;
-    window.location.href = config.linkUrl;
+    globalThis.location.href = config.linkUrl;
   };
 
   const openUnlinkDialog = (provider: Database['public']['Enums']['oauth_provider']) => {
@@ -146,7 +148,9 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         const normalizedProvider = provider.toLowerCase().trim();
         const identity = identities.find(
           (i): i is NonNullable<typeof i> & { provider: string } =>
-            i !== null && i.provider !== null && i.provider.toLowerCase().trim() === normalizedProvider
+            i !== null &&
+            i.provider !== null &&
+            i.provider.toLowerCase().trim() === normalizedProvider
         );
         const isConnected = connectedProviders.has(normalizedProvider);
         const IconComponent = config.icon;
@@ -154,24 +158,24 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         return (
           <div
             key={provider}
-            className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-accent/5"
+            className="hover:bg-accent/5 flex items-center justify-between rounded-lg border p-4 transition-colors"
           >
             <div className="flex items-center gap-4">
-              <div className="rounded-full border bg-accent/5 p-3">
+              <div className="bg-accent/5 rounded-full border p-3">
                 <IconComponent className={UI_CLASSES.ICON_LG} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium">{config.label}</h3>
-                  {isConnected && (
+                  {isConnected ? (
                     <UnifiedBadge variant="base" style="default" className="gap-1">
                       <CheckCircle className={UI_CLASSES.ICON_XS} />
                       Connected
                     </UnifiedBadge>
-                  )}
+                  ) : null}
                 </div>
-                {identity && (
-                  <div className="mt-1 text-muted-foreground text-sm">
+                {identity ? (
+                  <div className="text-muted-foreground mt-1 text-sm">
                     <p>{identity.email ?? 'No email'}</p>
                     <p className="text-xs">
                       {identity.last_sign_in_at
@@ -179,7 +183,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
                         : 'Never signed in'}
                     </p>
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
 
@@ -210,9 +214,9 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         );
       })}
 
-      <div className="mt-6 rounded-lg border bg-muted/30 p-4">
-        <h4 className="mb-2 font-medium text-sm">How it works</h4>
-        <ul className="space-y-1 text-muted-foreground text-sm">
+      <div className="bg-muted/30 mt-6 rounded-lg border p-4">
+        <h4 className="mb-2 text-sm font-medium">How it works</h4>
+        <ul className="text-muted-foreground space-y-1 text-sm">
           <li>• Link multiple OAuth providers to your account</li>
           <li>• Sign in with any connected provider to access the same account</li>
           <li>• Your data stays unified across all login methods</li>
@@ -226,12 +230,12 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="text-destructive" />
-              Unlink {providerToUnlink && PROVIDER_CONFIG[providerToUnlink]?.label} Account?
+              Unlink {providerToUnlink ? PROVIDER_CONFIG[providerToUnlink]?.label : null} Account?
             </DialogTitle>
             <DialogDescription>
               Are you sure you want to unlink your{' '}
-              {providerToUnlink && PROVIDER_CONFIG[providerToUnlink]?.label} account? You will no
-              longer be able to sign in using this provider.
+              {providerToUnlink ? PROVIDER_CONFIG[providerToUnlink]?.label : null} account? You will
+              no longer be able to sign in using this provider.
               <br />
               <br />
               You can re-link it later if needed.

@@ -18,10 +18,16 @@
  * - No MDX dependencies
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { parseChangelogChanges } from '@heyclaude/web-runtime/data';
-import { memo } from 'react';
-import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
+import {
+  Plus,
+  GitCompare,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Shield,
+} from '@heyclaude/web-runtime/icons';
 import {
   UnifiedBadge,
   UI_CLASSES,
@@ -30,16 +36,21 @@ import {
   ANIMATION_CONSTANTS,
   CHANGELOG_CATEGORIES,
 } from '@heyclaude/web-runtime/ui';
-import { Plus, GitCompare, CheckCircle, XCircle, AlertTriangle, Shield } from '@heyclaude/web-runtime/icons';
+import { memo } from 'react';
+
+import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
+import { markdownToHtml } from '@/src/lib/utils/markdown-to-html';
+
+import { ChangelogAccordionSections } from './changelog-accordion-sections';
+import {
+  removeAccordionSectionsFromContent,
+  removeCategorySectionsFromContent,
+} from './changelog-content-utils';
+import { SanitizedHTML } from './sanitized-html';
 
 type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSection = ContentRow['metadata'];
-
-import { SanitizedHTML } from './sanitized-html';
-import { ChangelogAccordionSections } from './changelog-accordion-sections';
-import { removeAccordionSectionsFromContent, removeCategorySectionsFromContent } from './changelog-content-utils';
-import { markdownToHtml } from '@/src/lib/utils/markdown-to-html';
 
 /**
  * Render sanitized HTML content while optionally forwarding `className` and `id`.
@@ -53,7 +64,7 @@ import { markdownToHtml } from '@/src/lib/utils/markdown-to-html';
  *
  * @see SanitizedHTML
  */
-function TrustedHTML({ html, className, id }: { html: string; className?: string; id?: string }) {
+function TrustedHTML({ html, className, id }: { className?: string; html: string; id?: string }) {
   return (
     <SanitizedHTML
       html={html}
@@ -98,16 +109,17 @@ function CategorySection({
   icon: Icon,
 }: {
   category: Database['public']['Enums']['changelog_category'];
-  items: Array<{ content: string }>;
   icon: React.ComponentType<{ className?: string }>;
+  items: Array<{ content: string }>;
 }) {
   if (!items || items.length === 0) return null;
 
-  const badgeColor =
-    BADGE_COLORS.changelogCategory[category as keyof typeof BADGE_COLORS.changelogCategory];
+  const badgeColor = BADGE_COLORS.changelogCategory[category];
 
   return (
-    <section className={`${UI_CLASSES.MARGIN_COMFORTABLE} ${UI_CLASSES.PADDING_Y_DEFAULT} border-b border-border/50 last:border-b-0`}>
+    <section
+      className={`${UI_CLASSES.MARGIN_COMFORTABLE} ${UI_CLASSES.PADDING_Y_DEFAULT} border-border/50 border-b last:border-b-0`}
+    >
       {/* Category Header */}
       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.MARGIN_DEFAULT}`}>
         <Icon className={UI_CLASSES.ICON_MD} />
@@ -129,13 +141,13 @@ function CategorySection({
             className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} ${UI_CLASSES.PADDING_Y_TIGHT} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} ${STATE_PATTERNS.HOVER_BG_SUBTLE} rounded-md ${UI_CLASSES.PADDING_X_COMPACT}`}
           >
             <span
-              className={`${badgeColor} flex-shrink-0 mt-0.5 rounded-full p-1 flex items-center justify-center`}
+              className={`${badgeColor} mt-0.5 flex flex-shrink-0 items-center justify-center rounded-full p-1`}
               aria-hidden="true"
             >
               <Icon className={UI_CLASSES.ICON_SM} />
             </span>
             <div className={`${UI_CLASSES.TEXT_BODY_DEFAULT} flex-1`}>
-              <div className="prose prose-slate dark:prose-invert max-w-none prose-sm prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-headings:my-3 prose-headings:text-base prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-foreground">
+              <div className="prose prose-slate dark:prose-invert prose-sm prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-headings:my-3 prose-headings:text-base prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-foreground max-w-none">
                 <TrustedHTML html={markdownToHtml(item.content)} />
               </div>
             </div>
@@ -190,32 +202,34 @@ function renderAdditionalContent(
 
   return (
     <>
-      {hasStructuredChanges && (hasMetadataSections || hasAdditionalContent) && (
-        <div className={`${UI_CLASSES.MARGIN_TOP_RELAXED} ${UI_CLASSES.PADDING_Y_RELAXED} border-t border-border/50`}>
+      {hasStructuredChanges && (hasMetadataSections || hasAdditionalContent) ? (
+        <div
+          className={`${UI_CLASSES.MARGIN_TOP_RELAXED} ${UI_CLASSES.PADDING_Y_RELAXED} border-border/50 border-t`}
+        >
           {hasMetadataSections ? (
             <div className="prose prose-slate dark:prose-invert max-w-none">
               <JSONSectionRenderer sections={metadataSections} />
             </div>
           ) : hasAdditionalContent ? (
-            <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic">
+            <div className="prose prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic max-w-none">
               <TrustedHTML html={displayContent} />
             </div>
           ) : null}
         </div>
-      )}
-      {!hasStructuredChanges && hasMetadataSections && (
+      ) : null}
+      {!hasStructuredChanges && hasMetadataSections ? (
         <div className="prose prose-slate dark:prose-invert max-w-none">
           <JSONSectionRenderer sections={metadataSections} />
         </div>
-      )}
-      {!hasStructuredChanges && !hasMetadataSections && hasAdditionalContent && (
-        <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic">
+      ) : null}
+      {!hasStructuredChanges && !hasMetadataSections && hasAdditionalContent ? (
+        <div className="prose prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic max-w-none">
           <TrustedHTML html={displayContent} />
         </div>
-      )}
+      ) : null}
 
       {/* Accordion Sections - Technical Details and Deployment (Client Component) */}
-      {entry.content && <ChangelogAccordionSections content={entry.content} />}
+      {entry.content ? <ChangelogAccordionSections content={entry.content} /> : null}
     </>
   );
 }
@@ -226,10 +240,10 @@ function renderAdditionalContent(
 export interface ChangelogContentProps {
   /** Changelog entry to render */
   entry: ChangelogEntry;
-  /** Optional JSON sections (from generated content) */
-  sections?: GuideSection[];
   /** Hide header (title/date) - used in timeline view where title is in timeline marker */
   hideHeader?: boolean;
+  /** Optional JSON sections (from generated content) */
+  sections?: GuideSection[];
 }
 
 /**
@@ -240,88 +254,88 @@ export interface ChangelogContentProps {
  * <ChangelogContent entry={changelogEntry} sections={sections} />
  * ```
  */
-export const ChangelogContent = memo(({ entry, sections, hideHeader = false }: ChangelogContentProps) => {
-  // Parse changes JSONB field with type safety
-  const changes = parseChangelogChanges(entry.changes);
+export const ChangelogContent = memo(
+  ({ entry, sections, hideHeader = false }: ChangelogContentProps) => {
+    // Parse changes JSONB field with type safety
+    const changes = parseChangelogChanges(entry.changes);
 
-  const metadataSections =
-    sections ??
-    (Array.isArray((entry.metadata as { sections?: GuideSection[] } | null)?.sections)
-      ? ((entry.metadata as { sections?: GuideSection[] }).sections as GuideSection[])
-      : undefined);
+    const metadataSections =
+      sections ??
+      (Array.isArray((entry.metadata as null | { sections?: GuideSection[] })?.sections)
+        ? ((entry.metadata as { sections?: GuideSection[] }).sections as GuideSection[])
+        : undefined);
 
-  // Get non-empty categories for badge display
-  const nonEmptyCategories = CHANGELOG_CATEGORIES.filter(
-    (category): category is Database['public']['Enums']['changelog_category'] => {
-      const items = changes[category];
-      return items !== undefined && Array.isArray(items) && items.length > 0;
-    }
-  );
+    // Get non-empty categories for badge display
+    const nonEmptyCategories = CHANGELOG_CATEGORIES.filter(
+      (category): category is Database['public']['Enums']['changelog_category'] => {
+        const items = changes[category];
+        return items !== undefined && Array.isArray(items) && items.length > 0;
+      }
+    );
 
-  // Check if we have structured changes to display
-  const hasStructuredChanges = Object.values(changes).some(
-    (categoryItems) => Array.isArray(categoryItems) && categoryItems.length > 0
-  );
+    // Check if we have structured changes to display
+    const hasStructuredChanges = Object.values(changes).some(
+      (categoryItems) => Array.isArray(categoryItems) && categoryItems.length > 0
+    );
 
-  return (
-    <article className={`max-w-none ${UI_CLASSES.FORM_SECTION_SPACING}`}>
-      {/* Entry Header - Title and Date (hidden in timeline view) */}
-      {!hideHeader && (
-        <header className={`mb-6 pb-4 border-b border-border/30`}>
-          <h2 className={`${UI_CLASSES.HEADING_H2} mb-3`}>
-            {entry.title}
-          </h2>
-          <time
-            dateTime={entry.release_date}
-            className={`${UI_CLASSES.TEXT_BODY_SM} ${UI_CLASSES.TEXT_HELPER}`}
-          >
-            {new Date(entry.release_date).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </time>
-        </header>
-      )}
-
-      {/* Category Badges - Subtle, below header */}
-      {nonEmptyCategories.length > 0 && (
-        <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} ${UI_CLASSES.PADDING_Y_COMPACT} mb-6`}>
-          {nonEmptyCategories.map((category) => (
-            <UnifiedBadge
-              key={category}
-              variant="base"
-              style="outline"
-              className={`${BADGE_COLORS.changelogCategory[category as keyof typeof BADGE_COLORS.changelogCategory]} ${UI_CLASSES.TEXT_LABEL}`}
+    return (
+      <article className={`max-w-none ${UI_CLASSES.FORM_SECTION_SPACING}`}>
+        {/* Entry Header - Title and Date (hidden in timeline view) */}
+        {!hideHeader && (
+          <header className="border-border/30 mb-6 border-b pb-4">
+            <h2 className={`${UI_CLASSES.HEADING_H2} mb-3`}>{entry.title}</h2>
+            <time
+              dateTime={entry.release_date}
+              className={`${UI_CLASSES.TEXT_BODY_SM} ${UI_CLASSES.TEXT_HELPER}`}
             >
-              {category}
-            </UnifiedBadge>
-          ))}
-        </div>
-      )}
+              {new Date(entry.release_date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </time>
+          </header>
+        )}
 
-      {/* Structured Changes Display - Beautiful categorized sections */}
-      {hasStructuredChanges && (
-        <div className={`${UI_CLASSES.MARGIN_COMFORTABLE}`}>
-          {CHANGELOG_CATEGORIES.map((category) => {
-            const items = changes[category];
-            if (!items || items.length === 0) return null;
-            return (
-              <CategorySection
+        {/* Category Badges - Subtle, below header */}
+        {nonEmptyCategories.length > 0 && (
+          <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} ${UI_CLASSES.PADDING_Y_COMPACT} mb-6`}>
+            {nonEmptyCategories.map((category) => (
+              <UnifiedBadge
                 key={category}
-                category={category}
-                items={items}
-                icon={CATEGORY_ICONS[category]}
-              />
-            );
-          })}
-        </div>
-      )}
+                variant="base"
+                style="outline"
+                className={`${BADGE_COLORS.changelogCategory[category]} ${UI_CLASSES.TEXT_LABEL}`}
+              >
+                {category}
+              </UnifiedBadge>
+            ))}
+          </div>
+        )}
 
-      {/* Additional Content - Rendered as JSON Sections or HTML */}
-      {renderAdditionalContent(entry, metadataSections, hasStructuredChanges)}
-    </article>
-  );
-});
+        {/* Structured Changes Display - Beautiful categorized sections */}
+        {hasStructuredChanges ? (
+          <div className={`${UI_CLASSES.MARGIN_COMFORTABLE}`}>
+            {CHANGELOG_CATEGORIES.map((category) => {
+              const items = changes[category];
+              if (!items || items.length === 0) return null;
+              return (
+                <CategorySection
+                  key={category}
+                  category={category}
+                  items={items}
+                  icon={CATEGORY_ICONS[category]}
+                />
+              );
+            })}
+          </div>
+        ) : null}
+
+        {/* Additional Content - Rendered as JSON Sections or HTML */}
+        {renderAdditionalContent(entry, metadataSections, hasStructuredChanges)}
+      </article>
+    );
+  }
+);
 
 ChangelogContent.displayName = 'ChangelogContent';

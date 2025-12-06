@@ -4758,6 +4758,8 @@ export default {
       },
       create(context) {
         const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
 
         // Only check page.tsx files in app directory
         if (!filename.includes('/app/') || !filename.endsWith('page.tsx')) {
@@ -4766,6 +4768,14 @@ export default {
 
         // Skip test files
         if (filename.includes('.test.') || filename.includes('.spec.')) {
+          return {};
+        }
+
+        // Skip client component pages - they cannot export segment config
+        // Client components inherit segment config from parent layouts
+        const isClientComponent =
+          fileText.includes("'use client'") || fileText.includes('"use client"');
+        if (isClientComponent) {
           return {};
         }
 

@@ -4,34 +4,32 @@
  * Related Content - Client-side fetching with UnifiedCardGrid
  */
 
-import type { Database } from '@heyclaude/database-types';
-import { getContentItemUrl, isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { type Database } from '@heyclaude/database-types';
+import { getContentItemUrl, isValidCategory } from '@heyclaude/web-runtime/core';
 import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, BaseCard } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
-import { BaseCard } from '@heyclaude/web-runtime/ui';
 
 // Use the generated composite type directly
 type RelatedContentItemWithUI = Database['public']['CompositeTypes']['related_content_item'] & {
-  matchType?: string;
   matchDetails?: {
-    matchedTags: string[];
     matchedKeywords: string[];
+    matchedTags: string[];
   };
+  matchType?: string;
 };
 
 export interface SmartRelatedContentProps {
-  pathname?: string;
-  currentTags?: string[];
   currentKeywords?: string[];
-  featured?: boolean;
+  currentTags?: string[];
   exclude?: string[];
+  featured?: boolean;
   limit?: number;
-  title?: string;
+  pathname?: string;
   showTitle?: boolean;
+  title?: string;
 }
 
 function getCategoryBadgeClass(category: string): string {
@@ -48,14 +46,14 @@ function getCategoryBadgeClass(category: string): string {
     troubleshooting: 'badge-category-troubleshooting',
   };
 
-  return classes[category as keyof typeof classes] || 'bg-muted/20 text-muted border-muted/30';
+  return classes[category] || 'bg-muted/20 text-muted border-muted/30';
 }
 
 function getMatchTypeBadge(matchType: string): {
   label: string;
-  variant: 'default' | 'secondary' | 'outline';
+  variant: 'default' | 'outline' | 'secondary';
 } {
-  const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
+  const badges: Record<string, { label: string; variant: 'default' | 'outline' | 'secondary' }> = {
     same_category: { label: 'Related', variant: 'default' },
     tag_match: { label: 'Similar Topics', variant: 'secondary' },
     keyword_match: { label: 'Keyword', variant: 'secondary' },
@@ -69,8 +67,8 @@ function getMatchTypeBadge(matchType: string): {
 
 function getCategoryFromPath(pathname: string | undefined): string {
   if (!pathname) return 'unknown';
-  const pathParts = pathname.split('/').filter(Boolean);
-  return pathParts[0] || 'unknown';
+  const pathPart = pathname.split('/').find(Boolean);
+  return pathPart || 'unknown';
 }
 
 export function RelatedContentClient({
@@ -86,7 +84,7 @@ export function RelatedContentClient({
   const [items, setItems] = useState<RelatedContentItemWithUI[]>([]);
   const [loading, setLoading] = useState(true);
   const pathname: string =
-    providedPathname ?? (typeof window !== 'undefined' ? window.location.pathname : '/');
+    providedPathname ?? (globalThis.window === undefined ? '/' : globalThis.location.pathname);
 
   useEffect(() => {
     const fetchRelatedContent = async () => {
@@ -129,10 +127,15 @@ export function RelatedContentClient({
 
         setItems(convertedItems);
       } catch (error) {
-        logger.error(
+        logClientError(
           'Failed to fetch related content',
           normalizeError(error, 'Failed to fetch related content'),
-          { source: 'RelatedContentClient' }
+          'RelatedContentClient.fetchRelatedContent',
+          {
+            component: 'RelatedContentClient',
+            action: 'fetch-related-content',
+            source: 'RelatedContentClient',
+          }
         );
         setItems([]);
       } finally {
@@ -141,30 +144,35 @@ export function RelatedContentClient({
     };
 
     fetchRelatedContent().catch((error) => {
-      logger.error(
+      logClientError(
         'Related content fetch promise rejected',
         normalizeError(error, 'Related content fetch promise rejected'),
-        { source: 'RelatedContentClient' }
+        'RelatedContentClient.fetchRelatedContent',
+        {
+          component: 'RelatedContentClient',
+          action: 'fetch-related-content',
+          source: 'RelatedContentClient',
+        }
       );
     });
   }, [pathname, currentTags, currentKeywords, featured, exclude, limit]);
 
   return (
     <section
-      itemScope={true}
+      itemScope
       itemType="https://schema.org/ItemList"
       className="my-12"
       aria-label="Related content"
     >
-      {showTitle && (
-        <div className="mb-8 rounded-xl border border-primary/20 bg-linear-to-r from-primary/5 to-primary/10 p-4 sm:p-6">
+      {showTitle ? (
+        <div className="border-primary/20 from-primary/5 to-primary/10 mb-8 rounded-xl border bg-linear-to-r p-4 sm:p-6">
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="shrink-0 rounded-lg bg-primary/10 p-2">
+              <div className="bg-primary/10 shrink-0 rounded-lg p-2">
                 <Sparkles className={`${UI_CLASSES.ICON_MD} text-primary sm:h-6 sm:w-6`} />
               </div>
               <div className="min-w-0">
-                <h2 className="mb-1 font-bold text-foreground text-xl sm:text-2xl" itemProp="name">
+                <h2 className="text-foreground mb-1 text-xl font-bold sm:text-2xl" itemProp="name">
                   {title}
                 </h2>
                 <p className="text-muted-foreground text-xs sm:text-sm">
@@ -175,13 +183,13 @@ export function RelatedContentClient({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="shrink-0imary/30 bg-primary/10 px-2 py-1 font-medium text-primary text-xs sm:px-3 sm:text-sm"
+              className="shrink-0imary/30 bg-primary/10 text-primary px-2 py-1 text-xs font-medium sm:px-3 sm:text-sm"
             >
               AI Powered
             </UnifiedBadge>
           </div>
         </div>
-      )}
+      ) : null}
 
       <UnifiedCardGrid
         items={items}
@@ -206,13 +214,13 @@ export function RelatedContentClient({
               displayTitle={relatedItem.title ?? relatedItem.slug ?? ''}
               description={relatedItem.description ?? undefined}
               tags={relatedItem.matchDetails?.matchedTags?.slice(0, 2) ?? []}
-              topAccent={true}
-              compactMode={true}
+              topAccent
+              compactMode
               ariaLabel={`Related: ${relatedItem.title}`}
               renderTopBadges={() => (
                 <div className="flex w-full items-center justify-between gap-2">
                   <UnifiedBadge
-                    className={`${categoryBadge} shrink-0 border px-2 py-1 font-medium text-xs sm:px-3 sm:text-sm`}
+                    className={`${categoryBadge} shrink-0 border px-2 py-1 text-xs font-medium sm:px-3 sm:text-sm`}
                     variant="base"
                     style="secondary"
                   >
@@ -222,7 +230,7 @@ export function RelatedContentClient({
                     <UnifiedBadge
                       variant="base"
                       style={matchBadge.variant}
-                      className="shrink-0 border px-1.5 py-1 font-medium text-2xs sm:px-2 sm:text-xs"
+                      className="text-2xs shrink-0 border px-1.5 py-1 font-medium sm:px-2 sm:text-xs"
                     >
                       {matchBadge.label}
                     </UnifiedBadge>

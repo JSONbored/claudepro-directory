@@ -25,13 +25,6 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 
-/**
- * Dynamic Rendering Required
- *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
 export const revalidate = 86_400;
 
 /**

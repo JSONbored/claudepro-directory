@@ -19,9 +19,8 @@ import {
   Search,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
-import { EmptyState } from '@heyclaude/web-runtime/ui';
+import { EmptyState, Button } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 /**
  * Empty search results variant
@@ -31,9 +30,9 @@ export function EmptySearchResults({
   category,
   className,
 }: {
-  searchQuery: string;
   category?: string;
   className?: string;
+  searchQuery: string;
 }) {
   return (
     <EmptyState
@@ -189,9 +188,9 @@ export function ErrorEmpty({
   description = 'An unexpected error occurred. Please try again or contact support if the problem persists.',
   className,
 }: {
-  title?: string;
-  description?: string;
   className?: string;
+  description?: string;
+  title?: string;
 }) {
   return (
     <EmptyState

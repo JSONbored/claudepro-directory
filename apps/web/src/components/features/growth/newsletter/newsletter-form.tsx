@@ -1,20 +1,23 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
+import { useConfetti, useNewsletter } from '@heyclaude/web-runtime/hooks';
 import { Mail } from '@heyclaude/web-runtime/icons';
-import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  cn,
+  DIMENSIONS,
+  UI_CLASSES,
+  InlineSpinner,
+  Button,
+  Input,
+} from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
-import { InlineSpinner } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
-import { useConfetti } from '@heyclaude/web-runtime/hooks';
-import { useNewsletter } from '@heyclaude/web-runtime/hooks';
 
 export interface NewsletterFormProps {
-  source: Database['public']['Enums']['newsletter_source'];
   className?: string;
+  source: Database['public']['Enums']['newsletter_source'];
 }
 
 export function NewsletterForm({ source, className }: NewsletterFormProps) {
@@ -49,13 +52,13 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              required={true}
+              required
               disabled={isSubmitting}
               className={cn(
                 `${DIMENSIONS.BUTTON_LG} min-w-0 px-5 text-base`,
                 'border-border/40 bg-background/95 backdrop-blur-sm',
                 'transition-all duration-200 ease-out',
-                'focus:border-accent/50 focus:ring-2 focus:ring-accent/20',
+                'focus:border-accent/50 focus:ring-accent/20 focus:ring-2',
                 error && 'border-destructive/50 focus:border-destructive focus:ring-destructive/20',
                 isSubmitting && 'cursor-not-allowed opacity-60'
               )}
@@ -65,7 +68,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             />
             <div
               className={cn(
-                'absolute bottom-0 left-0 h-0.5 bg-linear-to-r from-accent to-primary transition-all duration-300 ease-out',
+                'from-accent to-primary absolute bottom-0 left-0 h-0.5 bg-linear-to-r transition-all duration-300 ease-out',
                 isFocused && !error ? 'w-full opacity-100' : 'w-0 opacity-0'
               )}
             />
@@ -75,12 +78,12 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             disabled={isSubmitting || !email.trim()}
             size="lg"
             className={cn(
-              `${DIMENSIONS.BUTTON_LG} shrink-0 whitespace-nowrap px-8`,
-              'bg-linear-to-rrom-accent via-accent to-primary font-semibold text-accent-foreground',
+              `${DIMENSIONS.BUTTON_LG} shrink-0 px-8 whitespace-nowrap`,
+              'bg-linear-to-rrom-accent via-accent to-primary text-accent-foreground font-semibold',
               'shadow-md transition-all duration-200 ease-out',
-              'hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:shadow-lg',
+              'hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:scale-[1.02] hover:shadow-lg',
               'active:scale-[0.98]',
-              'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
+              'focus-visible:ring-accent focus-visible:ring-2 focus-visible:ring-offset-2',
               'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100',
               `w-full sm:w-auto sm:${DIMENSIONS.MIN_W_NEWSLETTER_BUTTON}`
             )}
@@ -95,7 +98,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             )}
           </Button>
         </div>
-        {error && (
+        {error ? (
           <p
             id={errorId}
             className="slide-in-from-top-1 fade-in animate-in text-destructive text-sm"
@@ -103,7 +106,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
           >
             {error}
           </p>
-        )}
+        ) : null}
       </div>
     </form>
   );

@@ -9,11 +9,10 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 import { deleteJob } from '@heyclaude/web-runtime/actions';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Trash } from '@heyclaude/web-runtime/icons';
-import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { cn, toasts, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 export interface JobDeleteButtonProps extends ButtonStyleProps {
   jobId: string;

@@ -29,10 +29,6 @@ import {
   RefreshProfileButton,
 } from '@/src/components/core/forms/profile-edit-form';
 
-/**
- * Dynamic Rendering Required
- * Authenticated user settings
- */
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 

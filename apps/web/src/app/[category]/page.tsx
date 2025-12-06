@@ -38,10 +38,14 @@ import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { ICON_NAME_MAP } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { ContentListServer } from '@/src/components/content/content-grid-list';
+
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true; // Allow unknown categories to be rendered on demand (will 404 if invalid)
 
 /**
  * Dynamic Rendering Required
@@ -50,8 +54,6 @@ import { ContentListServer } from '@/src/components/content/content-grid-list';
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const dynamic = 'force-dynamic';
-export const dynamicParams = true; // Allow unknown categories to be rendered on demand (will 404 if invalid)
 
 /**
  * Generate metadata for category list pages
@@ -129,14 +131,14 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const requestId = generateRequestId();
   const operation = 'CategoryPage';
   const route = `/${category}`;
-  const module = 'apps/web/src/app/[category]/page';
+  const modulePath = 'apps/web/src/app/[category]/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
     route,
-    module,
+    module: modulePath,
   });
 
   if (!isValidCategory(category)) {
@@ -196,11 +198,18 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     return processed;
   });
 
+  // Get icon name from component by finding it in ICON_NAME_MAP
+  // Reverse lookup: find the key in ICON_NAME_MAP that has the same component reference
+  const iconEntry = Object.entries(ICON_NAME_MAP).find(
+    ([, IconComponent]) => IconComponent === config.icon
+  );
+  const iconName = iconEntry?.[0] ?? 'sparkles';
+
   return (
     <ContentListServer
       title={config.pluralTitle}
       description={config.description}
-      icon={config.icon.displayName?.toLowerCase() ?? 'sparkles'}
+      icon={iconName}
       items={items}
       type={category}
       searchPlaceholder={config.listPage.searchPlaceholder}

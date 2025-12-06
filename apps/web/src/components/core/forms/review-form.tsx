@@ -6,13 +6,11 @@ import {
   MAX_REVIEW_LENGTH,
   type ReviewFormProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { toasts, UI_CLASSES, Button, Label, Textarea } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
+
 import { ReviewRatingInteractive } from '@/src/components/core/domain/reviews/review-rating-interactive';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
-import { Textarea } from '@heyclaude/web-runtime/ui';
 
 /**
  * Form for creating and editing reviews
@@ -107,7 +105,7 @@ export function ReviewForm({
           toasts.raw.error('Please sign in to write a review', {
             action: {
               label: 'Sign In',
-              onClick: () => router.push(`/login?redirect=${window.location.pathname}`),
+              onClick: () => router.push(`/login?redirect=${globalThis.location.pathname}`),
             },
           });
         } else if (error instanceof Error && error.message.includes('already reviewed')) {
@@ -131,25 +129,25 @@ export function ReviewForm({
             value={rating}
             onChange={setRating}
             size="md"
-            showValue={true}
+            showValue
             {...(showRatingError ? { 'aria-describedby': ratingErrorId } : {})}
             {...(showRatingError ? { 'aria-invalid': 'true' as const } : {})}
           />
         </div>
         {rating === 0 && !showRatingError && (
-          <p className="mt-1 text-muted-foreground text-xs">Click a star to rate</p>
+          <p className="text-muted-foreground mt-1 text-xs">Click a star to rate</p>
         )}
-        {showRatingError && (
-          <p id={ratingErrorId} className="mt-1 text-destructive text-sm" role="alert">
+        {showRatingError ? (
+          <p id={ratingErrorId} className="text-destructive mt-1 text-sm" role="alert">
             Please select a star rating before submitting
           </p>
-        )}
+        ) : null}
       </div>
 
       {/* Review Text */}
       <div>
         <Label htmlFor={textareaId} className="mb-2 block">
-          Your Review <span className="font-normal text-muted-foreground text-xs">(optional)</span>
+          Your Review <span className="text-muted-foreground text-xs font-normal">(optional)</span>
         </Label>
         <Textarea
           id={textareaId}
@@ -162,11 +160,11 @@ export function ReviewForm({
           error={hasTextError}
           {...(hasTextError ? { errorId: textareaErrorId } : {})}
         />
-        {hasTextError && (
-          <p id={textareaErrorId} className="mt-1 text-destructive text-sm" role="alert">
+        {hasTextError ? (
+          <p id={textareaErrorId} className="text-destructive mt-1 text-sm" role="alert">
             Review text cannot exceed {MAX_REVIEW_LENGTH} characters
           </p>
-        )}
+        ) : null}
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-1`}>
           <p className="text-muted-foreground text-xs">
             Help others by sharing details about your experience
@@ -184,11 +182,11 @@ export function ReviewForm({
         <Button type="submit" disabled={!isValid || isPending}>
           {isPending ? 'Submitting...' : isEditing ? 'Update Review' : 'Submit Review'}
         </Button>
-        {onCancel && (
+        {onCancel ? (
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
             Cancel
           </Button>
-        )}
+        ) : null}
       </div>
     </form>
   );

@@ -1,19 +1,23 @@
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink, HelpCircle } from '@heyclaude/web-runtime/icons';
-import type {
-  ContentListServerProps,
-  DisplayableContent,
+import {
+  type ContentListServerProps,
+  type DisplayableContent,
 } from '@heyclaude/web-runtime/types/component.types';
-import { ICON_NAME_MAP, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  ICON_NAME_MAP,
+  UI_CLASSES,
+  UnifiedBadge,
+  Skeleton,
+  Button,
+} from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
+
 import { ContentSearchClient } from '@/src/components/content/content-search';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
-import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 function ContentHeroSection<T extends DisplayableContent>({
   title,
@@ -21,7 +25,7 @@ function ContentHeroSection<T extends DisplayableContent>({
   icon,
   items,
   badges = [],
-}: Pick<ContentListServerProps<T>, 'title' | 'description' | 'icon' | 'items' | 'badges'>) {
+}: Pick<ContentListServerProps<T>, 'badges' | 'description' | 'icon' | 'items' | 'title'>) {
   const pageTitleId = useId();
   const displayBadges =
     badges.length > 0
@@ -34,13 +38,12 @@ function ContentHeroSection<T extends DisplayableContent>({
 
   return (
     <section className={UI_CLASSES.CONTAINER_OVERFLOW_BORDER} aria-labelledby={pageTitleId}>
-      <div className={'container mx-auto px-4 py-20'}>
-        <div className={'mx-auto max-w-3xl text-center'}>
-          <div className={'mb-6 flex justify-center'}>
-            <div className={'rounded-full bg-accent/10 p-3'} aria-hidden="true">
+      <div className="container mx-auto px-4 py-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="mb-6 flex justify-center">
+            <div className="bg-accent/10 rounded-full p-3" aria-hidden="true">
               {(() => {
-                const IconComponent =
-                  ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
+                const IconComponent = ICON_NAME_MAP[icon] || HelpCircle;
                 return <IconComponent className={`${UI_CLASSES.ICON_XL} text-primary`} />;
               })()}
             </div>
@@ -52,31 +55,31 @@ function ContentHeroSection<T extends DisplayableContent>({
 
           <p className={UI_CLASSES.TEXT_HEADING_MEDIUM}>{description}</p>
 
-          <ul className={'mb-8 flex list-none flex-wrap justify-center gap-2'}>
+          <ul className="mb-8 flex list-none flex-wrap justify-center gap-2">
             {displayBadges.map((badge, idx) => (
               <li key={badge.text || `badge-${idx}`}>
                 <UnifiedBadge variant="base" style={idx === 0 ? 'secondary' : 'outline'}>
-                  {badge.icon &&
-                    (() => {
-                      if (typeof badge.icon === 'string') {
-                        const BadgeIconComponent =
-                          ICON_NAME_MAP[badge.icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
-                        return (
-                          <BadgeIconComponent
-                            className={UI_CLASSES.ICON_XS_LEADING}
-                            aria-hidden="true"
-                          />
-                        );
-                      }
-                      return null;
-                    })()}
+                  {badge.icon
+                    ? (() => {
+                        if (typeof badge.icon === 'string') {
+                          const BadgeIconComponent = ICON_NAME_MAP[badge.icon] || HelpCircle;
+                          return (
+                            <BadgeIconComponent
+                              className={UI_CLASSES.ICON_XS_LEADING}
+                              aria-hidden="true"
+                            />
+                          );
+                        }
+                        return null;
+                      })()
+                    : null}
                   {badge.text}
                 </UnifiedBadge>
               </li>
             ))}
           </ul>
 
-          <Button variant="outline" size="sm" asChild={true}>
+          <Button variant="outline" size="sm" asChild>
             <Link
               href={ROUTES.SUBMIT}
               className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
@@ -94,9 +97,9 @@ function ContentHeroSection<T extends DisplayableContent>({
 
 function ContentSearchSkeleton() {
   return (
-    <div className={'w-full space-y-4'}>
+    <div className="w-full space-y-4">
       <Skeleton size="xl" width="3xl" />
-      <div className={'flex justify-end gap-2'}>
+      <div className="flex justify-end gap-2">
         <Skeleton size="lg" width="sm" />
         <Skeleton size="lg" width="xs" />
       </div>
@@ -115,7 +118,7 @@ export function ContentListServer<T extends DisplayableContent>({
   category,
 }: ContentListServerProps<T>) {
   return (
-    <div className={'min-h-screen bg-background'}>
+    <div className="bg-background min-h-screen">
       {/* Hero Section - Rendered immediately on server */}
       <ContentHeroSection
         title={title}
@@ -148,7 +151,7 @@ export function ContentListServer<T extends DisplayableContent>({
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) with fade-in animation */}
-      <section className={'container mx-auto px-4 py-12'}>
+      <section className="container mx-auto px-4 py-12">
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
             <NewsletterCTAVariant source="content_page" variant="hero" category={type} />

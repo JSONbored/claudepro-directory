@@ -1,0 +1,82 @@
+# Logging Pattern Rules
+# Enforces logging standards from .cursor/rules/logging-instrumentation.mdc
+
+---
+# Rule: Detect console.* usage (should use logger instead)
+id: no-console-usage
+language: TypeScript
+rule:
+  pattern: console.$METHOD($$$)
+  kind: call_expression
+  has:
+    kind: member_expression
+    pattern: console.$METHOD
+message: "Use structured logging (logger.*) instead of console.*. Import logger from @heyclaude/web-runtime/logging/server or @heyclaude/web-runtime/logging/client"
+severity: error
+fix: |
+  // Replace console.$METHOD with appropriate logger method
+  // Server: logger.info/warn/error from @heyclaude/web-runtime/logging/server
+  // Client: logClientInfo/logClientWarn/logClientError from @heyclaude/web-runtime/logging/client
+
+---
+# Rule: Detect missing normalizeError in catch blocks
+id: missing-normalize-error
+language: TypeScript
+rule:
+  all:
+    - pattern: catch ($ERROR) { $$$ }
+      kind: catch_clause
+    - not:
+        has:
+          pattern: normalizeError($$$)
+message: "Catch blocks must use normalizeError() before logging or throwing. Import normalizeError from @heyclaude/web-runtime/core or @heyclaude/web-runtime/logging/server"
+severity: error
+
+---
+# Rule: Detect missing requestId in server components
+id: missing-request-id-server
+language: TypeScript
+rule:
+  all:
+    - pattern: export default async function $NAME($$$) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: 'use server'
+    - not:
+        has:
+          pattern: generateRequestId()
+message: "Server components/pages must generate requestId at the start. Import generateRequestId from @heyclaude/web-runtime/core"
+severity: error
+
+---
+# Rule: Detect missing withDuration in server page logs
+id: missing-duration-tracking
+language: TypeScript
+rule:
+  all:
+    - pattern: logger.$METHOD($$$)
+      kind: call_expression
+    - inside:
+        pattern: export default async function $NAME($$$) { $$$ }
+        kind: function_declaration
+    - not:
+        has:
+          pattern: withDuration($$$)
+message: "Server pages must track duration using withDuration() in all log statements. Import withDuration from @heyclaude/web-runtime/core"
+severity: error
+
+---
+# Rule: Detect missing useLoggedAsync in client async operations
+id: missing-use-logged-async
+language: TypeScript
+rule:
+  all:
+    - pattern: const $HANDLER = async () => { $$$ }
+      kind: variable_declarator
+    - inside:
+        pattern: 'use client'
+    - not:
+        has:
+          pattern: useLoggedAsync($$$)
+message: "Client components with async operations must use useLoggedAsync hook. Import useLoggedAsync from @heyclaude/web-runtime/hooks"
+severity: warning

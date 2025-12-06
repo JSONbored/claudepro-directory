@@ -9,9 +9,7 @@ import { type Metadata } from 'next';
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
 
-export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/contact');
-}
+export const revalidate = 86_400;
 
 /**
  * Dynamic Rendering Required
@@ -20,7 +18,10 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 86_400;
+
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/contact');
+}
 
 /**
  * Renders the Contact page with available contact channels and supplemental information.

@@ -18,6 +18,16 @@ import { Suspense } from 'react';
 import { ContentSearchClient } from '@/src/components/content/content-search';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 
+export const dynamic = 'force-dynamic';
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+
 const VALID_SORT_OPTIONS = new Set<SearchFilters['sort']>([
   'relevance',
   'popularity',
@@ -46,15 +56,6 @@ type ContentCategory = Database['public']['Enums']['content_category'];
 function isValidSort(value: string | undefined): value is SearchFilters['sort'] {
   return value !== undefined && VALID_SORT_OPTIONS.has(value as SearchFilters['sort']);
 }
-
-/**
- * Dynamic Rendering Required
- *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const dynamic = 'force-dynamic';
 
 interface SearchPageProperties {
   searchParams: Promise<{

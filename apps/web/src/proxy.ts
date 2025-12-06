@@ -1,8 +1,8 @@
 import { env, isDevelopment } from '@heyclaude/shared-runtime';
 import { sanitizePathForLogging } from '@heyclaude/shared-runtime/proxy/guards';
-import { logger } from '@heyclaude/web-runtime/core';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { applyNextProxyGuards, updateSupabaseSession } from '@heyclaude/web-runtime/server';
-import type { NextRequest } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 const PROXY_RATE_LIMIT = {

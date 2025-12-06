@@ -22,27 +22,27 @@
  * @see src/components/features/content/config-card.tsx - Embedded item cards
  */
 
-import type { Database } from '@heyclaude/database-types';
-import {
-  ensureStringArray,
-  getMetadata,
-  isValidCategory,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
+import { type Database } from '@heyclaude/database-types';
+import { ensureStringArray, getMetadata, isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfigs, getContentBySlug } from '@heyclaude/web-runtime/data';
 import { AlertTriangle, CheckCircle } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import {
+  UI_CLASSES,
+  ConfigCard,
+  Skeleton,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import { Suspense } from 'react';
-import { ConfigCard } from '@heyclaude/web-runtime/ui';
-import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 interface ItemWithData {
   category: string;
-  slug: string;
-  reason?: string;
   data: Database['public']['CompositeTypes']['enriched_content_item'];
+  reason?: string;
+  slug: string;
 }
 
 /**
@@ -68,7 +68,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
 
   const metadata = getMetadata(collection);
   const items = Array.isArray(metadata['items'])
-    ? (metadata['items'] as Array<{ category: string; slug: string; reason?: string }>)
+    ? (metadata['items'] as Array<{ category: string; reason?: string; slug: string }>)
     : [];
 
   const itemsWithContent = await Promise.all(
@@ -140,13 +140,13 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
     typeof metadata['compatibility'] === 'object' &&
     metadata['compatibility'] !== null &&
     !Array.isArray(metadata['compatibility'])
-      ? (metadata['compatibility'] as { claudeDesktop?: boolean; claudeCode?: boolean })
+      ? (metadata['compatibility'] as { claudeCode?: boolean; claudeDesktop?: boolean })
       : undefined;
 
   return (
     <>
       {/* Prerequisites Section */}
-      {prerequisites && prerequisites.length > 0 && (
+      {prerequisites && prerequisites.length > 0 ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
@@ -162,7 +162,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
               {prerequisites.map((prereq: string) => (
                 <li key={prereq} className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
                   <CheckCircle
-                    className={`h-4 w-4 text-muted-foreground ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                    className={`text-muted-foreground h-4 w-4 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                     aria-hidden="true"
                   />
                   <span className="text-muted-foreground text-sm">{prereq}</span>
@@ -171,11 +171,11 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             </ul>
           </CardContent>
         </Card>
-      )}
+      ) : null}
 
       {/* What's Included Section - Embedded ConfigCards */}
       <div>
-        <h2 className="mb-6 font-bold text-2xl text-foreground">
+        <h2 className="text-foreground mb-6 text-2xl font-bold">
           What's Included ({validItems.length} {validItems.length === 1 ? 'item' : 'items'})
         </h2>
 
@@ -189,35 +189,33 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
           }
         >
           <div className="space-y-8">
-            {(Object.entries(itemsByCategory) as [string, ItemWithData[]][]).map(
-              ([category, items]) => (
-                <div key={category}>
-                  <h3 className="mb-4 font-semibold text-foreground text-lg">
-                    {categoryConfigs[category as keyof typeof categoryConfigs]?.pluralTitle ||
-                      category}{' '}
-                    ({items.length})
-                  </h3>
-                  <div className="grid gap-4 sm:grid-cols-1">
-                    {items.map((item: ItemWithData) =>
-                      item?.data ? (
-                        <ConfigCard
-                          key={item.slug}
-                          item={item.data}
-                          showCategory={false}
-                          variant="default"
-                        />
-                      ) : null
-                    )}
-                  </div>
+            {Object.entries(itemsByCategory).map(([category, items]) => (
+              <div key={category}>
+                <h3 className="text-foreground mb-4 text-lg font-semibold">
+                  {categoryConfigs[category as keyof typeof categoryConfigs]?.pluralTitle ||
+                    category}{' '}
+                  ({items.length})
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-1">
+                  {items.map((item: ItemWithData) =>
+                    item?.data ? (
+                      <ConfigCard
+                        key={item.slug}
+                        item={item.data}
+                        showCategory={false}
+                        variant="default"
+                      />
+                    ) : null
+                  )}
                 </div>
-              )
-            )}
+              </div>
+            ))}
           </div>
         </Suspense>
       </div>
 
       {/* Installation Order Section */}
-      {installationOrder && installationOrder.length > 0 && (
+      {installationOrder && installationOrder.length > 0 ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">Recommended Installation Order</CardTitle>
@@ -229,12 +227,12 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                 return (
                   <li key={slug} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                     <span
-                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm"
+                      className="bg-primary/10 text-primary flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
                       aria-hidden="true"
                     >
                       {index + 1}
                     </span>
-                    <span className="mt-0.5 text-foreground text-sm">
+                    <span className="text-foreground mt-0.5 text-sm">
                       {item?.data?.title || slug}
                     </span>
                   </li>
@@ -243,10 +241,10 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             </ol>
           </CardContent>
         </Card>
-      )}
+      ) : null}
 
       {/* Compatibility Section */}
-      {compatibility && (
+      {compatibility ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">Compatibility</CardTitle>
@@ -288,7 +286,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             </div>
           </CardContent>
         </Card>
-      )}
+      ) : null}
     </>
   );
 }

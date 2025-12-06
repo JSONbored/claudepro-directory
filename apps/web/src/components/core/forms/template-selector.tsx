@@ -4,11 +4,12 @@
  * Template Selector - Uses server-provided template data
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { ChevronDown, FileText } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
 import {
+  DIMENSIONS,
+  UI_CLASSES,
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -20,15 +21,16 @@ type ContentTemplatesResult = Database['public']['Functions']['get_content_templ
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
 // Type representing the merged structure (matches what getContentTemplates returns)
-type MergedTemplateItem = ContentTemplateItem & {
-  templateData: ContentTemplateItem['template_data'];
-} & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+type MergedTemplateItem = ContentTemplateItem &
+  (ContentTemplateItem['template_data'] extends Record<string, unknown>
     ? ContentTemplateItem['template_data']
-    : Record<string, unknown>);
+    : Record<string, unknown>) & {
+    templateData: ContentTemplateItem['template_data'];
+  };
 
 interface TemplateSelectorProps {
-  templates: MergedTemplateItem[];
   onSelect: (template: MergedTemplateItem) => void;
+  templates: MergedTemplateItem[];
 }
 
 export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps) {
@@ -38,7 +40,7 @@ export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps)
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild={true}>
+      <DropdownMenuTrigger asChild>
         <Button variant="outline" className="w-full justify-between" type="button">
           <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <FileText className={UI_CLASSES.ICON_SM} />
@@ -58,7 +60,7 @@ export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps)
             className="cursor-pointer flex-col items-start py-3"
           >
             <div className="font-medium">{template.name}</div>
-            <div className={'mt-0.5 text-muted-foreground text-xs'}>{template.description}</div>
+            <div className="text-muted-foreground mt-0.5 text-xs">{template.description}</div>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

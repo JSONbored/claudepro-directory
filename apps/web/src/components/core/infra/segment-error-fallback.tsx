@@ -19,19 +19,19 @@ import Link from 'next/link';
 // eslint-disable-next-line architectural-rules/require-env-validation-schema -- NODE_ENV is inlined by Next.js at build time, not a runtime lookup
 const isDevelopment = process.env.NODE_ENV === 'development';
 
-type FallbackLink = {
+interface FallbackLink {
   href: string;
   label: string;
-  variant?: 'default' | 'outline' | 'ghost';
-};
+  variant?: 'default' | 'ghost' | 'outline';
+}
 
 interface SegmentErrorFallbackProps {
-  title: string;
   description: string;
-  resetText?: string;
-  onReset?: () => void;
-  links?: FallbackLink[];
   error?: Error & { digest?: string };
+  links?: FallbackLink[];
+  onReset?: () => void;
+  resetText?: string;
+  title: string;
 }
 
 export function SegmentErrorFallback({
@@ -50,17 +50,17 @@ export function SegmentErrorFallback({
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {onReset && (
+          {onReset ? (
             <Button onClick={onReset} className="w-full sm:w-auto">
               {resetText}
             </Button>
-          )}
+          ) : null}
           {links.length > 0 && (
             <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}`}>
               {links.map((link) => (
                 <Button
                   key={`${link.href}-${link.label}`}
-                  asChild={true}
+                  asChild
                   variant={link.variant ?? 'outline'}
                   className="w-full sm:w-auto"
                 >
@@ -69,19 +69,19 @@ export function SegmentErrorFallback({
               ))}
             </div>
           )}
-          {isDevelopment && error && (
-            <div className="rounded-lg border border-muted-foreground/30 border-dashed bg-muted/30 p-4">
-              <p className="mb-2 font-semibold text-muted-foreground text-sm">Error details</p>
-              <pre className="wrap-break-word whitespace-pre-wrap text-destructive text-xs">
+          {isDevelopment && error ? (
+            <div className="border-muted-foreground/30 bg-muted/30 rounded-lg border border-dashed p-4">
+              <p className="text-muted-foreground mb-2 text-sm font-semibold">Error details</p>
+              <pre className="text-destructive text-xs wrap-break-word whitespace-pre-wrap">
                 {error.message}
               </pre>
-              {error.digest && (
-                <p className="mt-2 font-mono text-muted-foreground text-xs">
+              {error.digest ? (
+                <p className="text-muted-foreground mt-2 font-mono text-xs">
                   Digest: {error.digest}
                 </p>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </CardContent>
       </Card>
     </div>

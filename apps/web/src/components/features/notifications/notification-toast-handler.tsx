@@ -8,6 +8,7 @@ import { Bell } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 
 const SHOWN_KEY = 'notification-toasts-shown';
@@ -37,7 +38,7 @@ export function NotificationToastHandler() {
 
   useEffect(() => {
     if (!flags.enableToasts) return;
-    if (!window.matchMedia('(min-width: 768px)').matches) return;
+    if (!globalThis.matchMedia('(min-width: 768px)').matches) return;
 
     const persistedShown = getShownIds();
     const toShow = notifications.find(
@@ -54,7 +55,7 @@ export function NotificationToastHandler() {
               label: toShow.action_label,
               onClick: () => {
                 if (toShow.action_href) {
-                  window.location.href = toShow.action_href;
+                  globalThis.location.href = toShow.action_href;
                 }
               },
             }

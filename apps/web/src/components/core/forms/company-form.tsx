@@ -13,31 +13,32 @@
  * ```
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import {
   createCompany,
   updateCompany,
   uploadCompanyLogoAction,
 } from '@heyclaude/web-runtime/actions';
-import { logClientError } from '@heyclaude/web-runtime/logging/client';
+import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useFormSubmit, useLoggedAsync, useSafeAction } from '@heyclaude/web-runtime/hooks';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import Image from 'next/image';
-import { useEffect, useId, useState } from 'react';
-import { FormField } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
+import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import {
+  toasts,
+  UI_CLASSES,
+  FormField,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  SelectItem,
 } from '@heyclaude/web-runtime/ui';
-import { SelectItem } from '@heyclaude/web-runtime/ui';
+import Image from 'next/image';
+import { useEffect, useId, useState } from 'react';
 
 // Use the generated composite type from the RPC return
 type CompanyCompositeType = Database['public']['CompositeTypes']['user_companies_company'];
@@ -68,7 +69,7 @@ async function fileToBase64(file: File) {
   const buffer = await file.arrayBuffer();
   let binary = '';
   const bytes = new Uint8Array(buffer);
-  const chunkSize = 0x8000;
+  const chunkSize = 0x80_00;
   for (let i = 0; i < bytes.length; i += chunkSize) {
     const chunk = bytes.subarray(i, i + chunkSize);
     binary += String.fromCharCode(...chunk);
@@ -94,8 +95,8 @@ async function fileToBase64(file: File) {
 export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const logoUploadId = useId();
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-  const [logoUrl, setLogoUrl] = useState<string | null>(initialData?.logo || null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo || null);
+  const [logoUrl, setLogoUrl] = useState<null | string>(initialData?.logo || null);
+  const [logoPreview, setLogoPreview] = useState<null | string>(initialData?.logo || null);
   const [useCursorDate, setUseCursorDate] = useState<boolean>(!!initialData?.using_cursor_since);
   const [maxFileSize, setMaxFileSize] = useState(DEFAULT_MAX_FILE_SIZE);
   const [maxDimension, setMaxDimension] = useState(DEFAULT_MAX_DIMENSION);
@@ -299,7 +300,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
             label="Company Name"
             name="name"
             defaultValue={initialData?.name || ''}
-            required={true}
+            required
             placeholder="e.g., Acme Corporation"
           />
 
@@ -314,9 +315,9 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
           />
 
           <div className="space-y-2">
-            <label htmlFor={logoUploadId} className="font-medium text-sm">
+            <label htmlFor={logoUploadId} className="text-sm font-medium">
               Company Logo
-              <span className="ml-1 font-normal text-muted-foreground text-xs">
+              <span className="text-muted-foreground ml-1 text-xs font-normal">
                 (max 200KB, 512x512px, WebP/PNG/JPG)
               </span>
             </label>
@@ -327,7 +328,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                   <Image
                     src={logoPreview}
                     alt="Company logo preview"
-                    fill={true}
+                    fill
                     className="object-cover"
                   />
                 </div>
@@ -362,9 +363,9 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
             ) : (
               <label htmlFor={logoUploadId} className={UI_CLASSES.UPLOAD_ZONE}>
                 <div className={`${UI_CLASSES.FLEX_COL_GAP_2} items-center text-center`}>
-                  <FileText className="h-8 w-8 text-muted-foreground" />
+                  <FileText className="text-muted-foreground h-8 w-8" />
                   <div>
-                    <p className="font-medium text-sm">
+                    <p className="text-sm font-medium">
                       {isUploadingLogo ? 'Uploading...' : 'Click to upload logo'}
                     </p>
                     <p className={UI_CLASSES.TEXT_SM_MUTED}>Max 200KB, 512x512px</p>
@@ -443,7 +444,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
           />
 
           <div className="space-y-2">
-            <label className="flex items-center gap-2 font-medium text-sm">
+            <label className="flex items-center gap-2 text-sm font-medium">
               <input
                 type="checkbox"
                 checked={useCursorDate}
@@ -452,14 +453,14 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
               />
               Using Claude since specific date
             </label>
-            {useCursorDate && (
+            {useCursorDate ? (
               <input
                 type="date"
                 name="using_cursor_since"
                 defaultValue={initialData?.using_cursor_since || ''}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               />
-            )}
+            ) : null}
           </div>
         </CardContent>
       </Card>

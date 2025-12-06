@@ -4,11 +4,13 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
+import { Button } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
+
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
+
 import { NotificationItem } from './notification-item';
 
 type NotificationRecord = Database['public']['Tables']['notifications']['Row'];
@@ -36,7 +38,7 @@ function NotificationListComponent() {
 
       <AnimatePresence mode="popLayout">
         {notifications.map((notification: NotificationRecord) => (
-          <motion.div key={notification.id} layout={true}>
+          <motion.div key={notification.id} layout>
             <NotificationItem notification={notification} />
           </motion.div>
         ))}

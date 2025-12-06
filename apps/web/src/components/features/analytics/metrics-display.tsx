@@ -4,7 +4,7 @@
  */
 
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@heyclaude/web-runtime/icons';
-import type { MetricsDisplayProps } from '@heyclaude/web-runtime/types/component.types';
+import { type MetricsDisplayProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 
 // Lightweight Badge component for delta display
@@ -12,8 +12,8 @@ function BadgeDelta({
   deltaType,
   className,
 }: {
-  deltaType: 'increase' | 'decrease' | 'unchanged';
   className?: string;
+  deltaType: 'decrease' | 'increase' | 'unchanged';
 }) {
   const icon =
     deltaType === 'increase' ? (
@@ -51,21 +51,21 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
   const validMetrics = metrics;
 
   return (
-    <section itemScope={true} itemType="https://schema.org/Dataset" className="my-12">
-      {(title || description) && (
+    <section itemScope itemType="https://schema.org/Dataset" className="my-12">
+      {title || description ? (
         <div className="mb-8 text-center">
-          {title && (
-            <h3 className={'mb-3 font-semibold text-foreground text-xl'} itemProp="name">
+          {title ? (
+            <h3 className="text-foreground mb-3 text-xl font-semibold" itemProp="name">
               {title}
             </h3>
-          )}
-          {description && (
-            <p className={'mx-auto max-w-3xl text-lg text-muted-foreground'} itemProp="description">
+          ) : null}
+          {description ? (
+            <p className="text-muted-foreground mx-auto max-w-3xl text-lg" itemProp="description">
               {description}
             </p>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
 
       {/* Grid layout - responsive columns */}
       <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
@@ -93,26 +93,22 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
               )}
             >
               {/* Metric Label */}
-              <p className="font-medium text-muted-foreground text-sm uppercase tracking-wide">
+              <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
                 {metricLabel}
               </p>
 
               {/* Metric Value */}
-              <p
-                className={
-                  'mt-2 bg-linear-to-r from-foreground to-muted-foreground bg-clip-text font-bold text-3xl text-transparent'
-                }
-              >
+              <p className="from-foreground to-muted-foreground mt-2 bg-linear-to-r bg-clip-text text-3xl font-bold text-transparent">
                 {metricValue}
               </p>
 
               {/* Change indicator */}
-              {metricChange && (
+              {metricChange ? (
                 <div className={`mt-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}>
                   <BadgeDelta deltaType={deltaType} className="font-semibold" />
-                  <span className="font-medium text-muted-foreground text-sm">{metricChange}</span>
+                  <span className="text-muted-foreground text-sm font-medium">{metricChange}</span>
                 </div>
-              )}
+              ) : null}
             </div>
           );
         })}

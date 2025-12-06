@@ -12,17 +12,17 @@ import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/cl
 import { useEffect, useRef, useState } from 'react';
 
 export interface UseNewsletterCountReturn {
-  count: number | null;
-  isLoading: boolean;
+  count: null | number;
   error: Error | null;
+  isLoading: boolean;
 }
 
 const CACHE_KEY = 'newsletter_count';
 const CACHE_TIMESTAMP_KEY = 'newsletter_count_ts';
 
 // Default values (will be overridden by static config)
-const DEFAULT_CACHE_TTL_MS = 300000; // 5 minutes (300 seconds)
-const DEFAULT_POLL_INTERVAL_MS = 300000; // 5 minutes
+const DEFAULT_CACHE_TTL_MS = 300_000; // 5 minutes (300 seconds)
+const DEFAULT_POLL_INTERVAL_MS = 300_000; // 5 minutes
 
 /**
  * Hook to fetch and poll newsletter subscriber count
@@ -30,7 +30,7 @@ const DEFAULT_POLL_INTERVAL_MS = 300000; // 5 minutes
  * Loads config from static defaults client-side (avoids build-time server calls)
  */
 export function useNewsletterCount(): UseNewsletterCountReturn {
-  const [count, setCount] = useState<number | null>(null);
+  const [count, setCount] = useState<null | number>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [cacheTtlMs, setCacheTtlMs] = useState(DEFAULT_CACHE_TTL_MS);
@@ -47,14 +47,14 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
     const cacheTtlSeconds = CACHE_TTL.newsletter_count ?? 300;
     setCacheTtlMs(cacheTtlSeconds * 1000);
 
-    const pollInterval = POLLING_CONFIG.newsletter_count_ms ?? 300000;
+    const pollInterval = POLLING_CONFIG.newsletter_count_ms ?? 300_000;
     setPollIntervalMs(pollInterval);
   }, []);
 
   useEffect(() => {
     const fetchCount = async () => {
       // Check cache first
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         const cachedCount = localStorage.getItem(CACHE_KEY);
         const cacheTs = localStorage.getItem(CACHE_TIMESTAMP_KEY);
         const cacheAge = Date.now() - (cacheTs ? Number.parseInt(cacheTs, 10) : 0);
@@ -76,37 +76,42 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
 
         const newCount = result?.data ?? null;
 
-        if (newCount !== null) {
+        if (newCount === null) {
+          throw new Error('Failed to fetch newsletter count');
+        } else {
           setCount(newCount);
           setIsLoading(false);
           setError(null);
 
           // Update cache
-          if (typeof window !== 'undefined') {
+          if (globalThis.window !== undefined) {
             localStorage.setItem(CACHE_KEY, newCount.toString());
             localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
           }
-        } else {
-          throw new Error('Failed to fetch newsletter count');
         }
-      } catch (err) {
-        logClientError('Failed to fetch newsletter count', err, 'useNewsletterCount.fetch');
-        setError(err as Error);
+      } catch (error_) {
+        logClientError('Failed to fetch newsletter count', error_, 'useNewsletterCount.fetch');
+        setError(error_ as Error);
         setIsLoading(false);
       }
     };
 
     // Initial fetch
-    fetchCount().catch((err) => {
-      logClientWarn('useNewsletterCount: initial fetch failed', err, 'useNewsletterCount.fetch');
+    fetchCount().catch((error_) => {
+      logClientWarn('useNewsletterCount: initial fetch failed', error_, 'useNewsletterCount.fetch');
     });
 
     // Start polling with current interval
     intervalRef.current = setInterval(() => {
-      fetchCount().catch((err) => {
-        logClientWarn('useNewsletterCount: polling fetch failed', err, 'useNewsletterCount.poll', {
-          component: 'useNewsletterCount',
-        });
+      fetchCount().catch((error_) => {
+        logClientWarn(
+          'useNewsletterCount: polling fetch failed',
+          error_,
+          'useNewsletterCount.poll',
+          {
+            component: 'useNewsletterCount',
+          }
+        );
       });
     }, pollIntervalMs);
 
@@ -119,13 +124,21 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
         }
       } else {
         // Resume polling when tab becomes visible
-        fetchCount().catch((err) => {
-          logClientWarn('useNewsletterCount: resume fetch failed', err, 'useNewsletterCount.resume');
+        fetchCount().catch((error_) => {
+          logClientWarn(
+            'useNewsletterCount: resume fetch failed',
+            error_,
+            'useNewsletterCount.resume'
+          );
         });
         if (!intervalRef.current) {
           intervalRef.current = setInterval(() => {
-            fetchCount().catch((err) => {
-              logClientWarn('useNewsletterCount: polling fetch failed', err, 'useNewsletterCount.poll');
+            fetchCount().catch((error_) => {
+              logClientWarn(
+                'useNewsletterCount: polling fetch failed',
+                error_,
+                'useNewsletterCount.poll'
+              );
             });
           }, pollIntervalMs);
         }

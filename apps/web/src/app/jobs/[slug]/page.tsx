@@ -35,11 +35,12 @@ import { notFound } from 'next/navigation';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
+export const revalidate = 7200;
+export const dynamicParams = true; // Allow jobs not pre-rendered to be rendered on-demand
+
 /**
  * ISR: 2 hours (7200s) - Job postings are relatively stable
  */
-export const revalidate = 7200;
-export const dynamicParams = true; // Allow jobs not pre-rendered to be rendered on-demand
 
 /**
  * Builds page metadata for a job detail page from the provided route params and the job record.

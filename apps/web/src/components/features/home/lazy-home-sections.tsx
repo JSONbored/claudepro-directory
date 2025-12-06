@@ -1,5 +1,5 @@
-import dynamic from 'next/dynamic';
 import { FeaturedSectionSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
+import dynamic from 'next/dynamic';
 
 // Re-export section prop types so consumers can name the inferred component types without TS4023 issues.
 export type { FeaturedSectionsProps } from '@/src/components/features/home/featured-sections';
@@ -21,7 +21,7 @@ export const LazyFeaturedSections = dynamic(
     loading: () => (
       <div className="mb-16 space-y-16">
         {/* 5 featured categories + 1 jobs section */}
-        {[...Array(6)].map((_, i) => (
+        {Array.from({ length: 6 }).map((_, i) => (
           <FeaturedSectionSkeleton key={`featured-loading-${i + 1}`} />
         ))}
       </div>
@@ -45,8 +45,8 @@ export const LazyTabsSection = dynamic(
     loading: () => (
       <div className="space-y-8">
         {/* Tabs skeleton */}
-        <div className="flex gap-2 rounded-lg bg-muted p-1">
-          {[...Array(7)].map((_, i) => (
+        <div className="bg-muted flex gap-2 rounded-lg p-1">
+          {Array.from({ length: 7 }).map((_, i) => (
             <Skeleton key={`tab-skeleton-${i + 1}`} size="lg" width="3xl" className="flex-1" />
           ))}
         </div>

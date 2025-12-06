@@ -12,11 +12,12 @@ import { notFound } from 'next/navigation';
 
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Dynamic Rendering Required
  * Results depend on search params (answers)
  */
-export const dynamic = 'force-dynamic';
 
 type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
   answers: DecodedQuizAnswers;

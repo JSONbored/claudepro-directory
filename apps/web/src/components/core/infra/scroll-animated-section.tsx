@@ -31,16 +31,16 @@
  */
 
 import { motion } from 'motion/react';
-import type { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { memo } from 'react';
 
 export type AnimationVariant =
   | 'fade-in'
-  | 'slide-up'
-  | 'slide-down'
   | 'scale'
+  | 'slide-down'
   | 'slide-left'
-  | 'slide-right';
+  | 'slide-right'
+  | 'slide-up';
 
 export interface LazySectionProps {
   /**
@@ -49,10 +49,15 @@ export interface LazySectionProps {
   children: ReactNode;
 
   /**
-   * Animation variant to use when content enters viewport
-   * @default 'fade-in'
+   * Optional className for wrapper
    */
-  variant?: AnimationVariant;
+  className?: string;
+
+  /**
+   * Delay before animation starts (in seconds)
+   * @default 0
+   */
+  delay?: number;
 
   /**
    * Animation duration in seconds (for non-spring animations)
@@ -61,18 +66,30 @@ export interface LazySectionProps {
   duration?: number;
 
   /**
-   * Use spring physics for natural motion
-   * @default true
+   * Whether to render immediately without animation (useful for above-fold)
+   * @default false
    */
-  useSpring?: boolean;
+  eager?: boolean;
+
+  /**
+   * Whether to animate only once or every time element enters viewport
+   * @default true (animate once)
+   */
+  once?: boolean;
+
+  /**
+   * Root margin for viewport detection
+   * @default '0px 0px -100px 0px' (start 100px before entering)
+   */
+  rootMargin?: string;
 
   /**
    * Spring configuration (only used if useSpring=true)
    */
   spring?: {
-    stiffness?: number;
     damping?: number;
     mass?: number;
+    stiffness?: number;
   };
 
   /**
@@ -82,33 +99,16 @@ export interface LazySectionProps {
   threshold?: number;
 
   /**
-   * Root margin for viewport detection
-   * @default '0px 0px -100px 0px' (start 100px before entering)
+   * Use spring physics for natural motion
+   * @default true
    */
-  rootMargin?: string;
+  useSpring?: boolean;
 
   /**
-   * Whether to animate only once or every time element enters viewport
-   * @default true (animate once)
+   * Animation variant to use when content enters viewport
+   * @default 'fade-in'
    */
-  once?: boolean;
-
-  /**
-   * Delay before animation starts (in seconds)
-   * @default 0
-   */
-  delay?: number;
-
-  /**
-   * Optional className for wrapper
-   */
-  className?: string;
-
-  /**
-   * Whether to render immediately without animation (useful for above-fold)
-   * @default false
-   */
-  eager?: boolean;
+  variant?: AnimationVariant;
 }
 
 /**
@@ -118,8 +118,8 @@ export interface LazySectionProps {
 const ANIMATION_VARIANTS: Record<
   AnimationVariant,
   {
-    initial: Record<string, number>;
     animate: Record<string, number>;
+    initial: Record<string, number>;
   }
 > = {
   'fade-in': {

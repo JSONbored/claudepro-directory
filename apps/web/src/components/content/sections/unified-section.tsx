@@ -1,8 +1,7 @@
 'use client';
 
-import * as React from 'react';
-import type { Database } from '@heyclaude/database-types';
-import { isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { type Database } from '@heyclaude/database-types';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   Bookmark,
@@ -20,19 +19,23 @@ import {
   Terminal,
   Zap,
 } from '@heyclaude/web-runtime/icons';
-import type { UnifiedSectionProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { motion } from 'motion/react';
-import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { type UnifiedSectionProps } from '@heyclaude/web-runtime/types/component.types';
 import {
+  cn,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { motion } from 'motion/react';
+import * as React from 'react';
+
+import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 
 const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon> = {
   agents: Sparkles,
@@ -56,12 +59,12 @@ function Wrapper({
   className,
   children,
 }: {
-  title: string;
+  category?: Database['public']['Enums']['content_category'];
+  children: React.ReactNode;
+  className?: string;
   description?: string;
   icon?: LucideIcon;
-  category?: Database['public']['Enums']['content_category'];
-  className?: string;
-  children: React.ReactNode;
+  title: string;
 }) {
   const Icon = category ? ICONS[category] : icon;
 
@@ -78,7 +81,7 @@ function Wrapper({
             <Icon className={UI_CLASSES.ICON_MD} />
             {title}
           </CardTitle>
-          {description && <CardDescription>{description}</CardDescription>}
+          {description ? <CardDescription>{description}</CardDescription> : null}
         </CardHeader>
         <CardContent>{children}</CardContent>
       </Card>
@@ -92,9 +95,9 @@ function downloadTextFile(filename: string, content: string) {
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = filename;
-  document.body.appendChild(anchor);
+  document.body.append(anchor);
   anchor.click();
-  document.body.removeChild(anchor);
+  anchor.remove();
   URL.revokeObjectURL(url);
 }
 
@@ -106,11 +109,11 @@ function CodeGroupTabs({
   onDownload,
 }: {
   blocks: Array<{
-    html: string;
     code: string;
-    language: string;
     filename?: string;
+    html: string;
     label: string;
+    language: string;
   }>;
   onDownload?: () => void;
 }) {
@@ -122,14 +125,14 @@ function CodeGroupTabs({
   return (
     <div className="space-y-3">
       {/* Tab buttons */}
-      <div className="flex flex-wrap gap-1 border-border border-b pb-2">
+      <div className="border-border flex flex-wrap gap-1 border-b pb-2">
         {blocks.map((block, index) => (
           <button
             key={`${block.label}-${index}`}
             type="button"
             onClick={() => setActiveIndex(index)}
             className={cn(
-              'rounded-t-md px-3 py-1.5 font-medium text-xs transition-colors',
+              'rounded-t-md px-3 py-1.5 text-xs font-medium transition-colors',
               activeIndex === index
                 ? 'bg-accent/20 text-accent-foreground'
                 : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
@@ -150,7 +153,7 @@ function CodeGroupTabs({
       />
 
       {/* Download button */}
-      {activeBlock.filename && (
+      {activeBlock.filename ? (
         <div className="mt-3">
           <Button
             variant="outline"
@@ -164,7 +167,7 @@ function CodeGroupTabs({
             Download {activeBlock.filename}
           </Button>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -177,7 +180,7 @@ function CodeGroupTabs({
  *
  * @see UI_CLASSES
  */
-function List({ items, color }: { items: string[]; color: string }) {
+function List({ items, color }: { color: string; items: string[] }) {
   return (
     <ul className="space-y-2">
       {items.map((item) => (
@@ -192,8 +195,8 @@ function List({ items, color }: { items: string[]; color: string }) {
 
 type EnhancedListItem =
   | string
-  | { issue: string; solution: string }
-  | { question: string; answer: string };
+  | { answer: string; question: string }
+  | { issue: string; solution: string };
 
 const getEnhancedListKey = (item: EnhancedListItem, index: number) => {
   if (typeof item === 'string') {
@@ -216,7 +219,7 @@ const getEnhancedListKey = (item: EnhancedListItem, index: number) => {
  *
  * @see getEnhancedListKey
  */
-function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: string }) {
+function EnhancedList({ items, color }: { color: string; items: EnhancedListItem[] }) {
   return (
     <ul className="space-y-4">
       {items.map((item, index) => {
@@ -238,7 +241,7 @@ function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: stri
             <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
               <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
               <div className="space-y-1">
-                <p className="font-medium text-foreground text-sm">{title}</p>
+                <p className="text-foreground text-sm font-medium">{title}</p>
                 <p className="text-muted-foreground text-sm leading-relaxed">{content}</p>
               </div>
             </div>
@@ -250,8 +253,8 @@ function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: stri
 }
 
 type PlatformStep =
-  | { type: 'command'; html: string; code: string }
-  | { type: 'text'; text: string };
+  | { code: string; html: string; type: 'command' }
+  | { text: string; type: 'text' };
 
 function Platform({
   name,
@@ -259,8 +262,8 @@ function Platform({
   paths,
 }: {
   name: string;
-  steps: PlatformStep[];
   paths?: Record<string, string>;
+  steps: PlatformStep[];
 }) {
   const getStepKey = (step: PlatformStep, index: number) =>
     step.type === 'command'
@@ -285,27 +288,27 @@ function Platform({
             </div>
           ) : (
             <div key={getStepKey(step, index)} className="flex items-start gap-3">
-              <div className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+              <div className="bg-primary mt-2 h-1.5 w-1.5 shrink-0 rounded-full" />
               <span className="text-sm leading-relaxed">{step.text}</span>
             </div>
           )
         )}
       </div>
-      {paths && (
+      {paths ? (
         <div>
-          <h5 className="mb-2 font-medium text-sm">Configuration Paths</h5>
+          <h5 className="mb-2 text-sm font-medium">Configuration Paths</h5>
           <div className="space-y-1 text-sm">
             {Object.entries(paths).map(([k, p]) => (
               <div key={k} className={UI_CLASSES.FLEX_GAP_2}>
                 <UnifiedBadge variant="base" style="outline" className="capitalize">
                   {k}
                 </UnifiedBadge>
-                <code className="rounded bg-muted px-1 py-0.5 text-xs">{String(p)}</code>
+                <code className="bg-muted rounded px-1 py-0.5 text-xs">{String(p)}</code>
               </div>
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -318,7 +321,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
     'category' in baseItem &&
     typeof baseItem.category === 'string' &&
     isValidCategory(baseItem.category)
-      ? (baseItem.category as Database['public']['Enums']['content_category'])
+      ? baseItem.category
       : null;
   const itemSlug =
     baseItem && 'slug' in baseItem && typeof baseItem.slug === 'string' ? baseItem.slug : null;
@@ -333,12 +336,16 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
       .catch((error) => {
         // Log but don't throw - tracking failures shouldn't break user experience
         const normalized = normalizeError(error, 'Failed to track download');
-        logger.warn('[Share] Failed to track download', {
-          err: normalized,
-          category: 'share',
-          component: 'UnifiedSection',
-          nonCritical: true,
-          context: 'unified_section_download',
+        logClientWarn(
+          '[Share] Failed to track download',
+          normalized,
+          'UnifiedSection.trackDownload',
+          {
+            component: 'UnifiedSection',
+            action: 'track-download',
+            category: 'share',
+            nonCritical: true,
+            context: 'unified_section_download',
           itemCategory,
           itemSlug,
         });
@@ -377,7 +384,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
       );
     }
 
-    case 'code':
+    case 'code': {
       return (
         <Wrapper
           title={props.title}
@@ -393,7 +400,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             maxLines={20}
           />
           {/* Download button below code block for better UX */}
-          {props.filename && (
+          {props.filename ? (
             <div className="mt-3">
               <Button
                 variant="outline"
@@ -407,9 +414,10 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                 Download {props.filename}
               </Button>
             </div>
-          )}
+          ) : null}
         </Wrapper>
       );
+    }
 
     case 'code-group': {
       if (props.codeBlocks.length === 0) return null;
@@ -432,7 +440,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
               filename={block.filename}
               maxLines={20}
             />
-            {block.filename && (
+            {block.filename ? (
               <div className="mt-3">
                 <Button
                   variant="outline"
@@ -446,7 +454,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   Download {block.filename}
                 </Button>
               </div>
-            )}
+            ) : null}
           </Wrapper>
         );
       }
@@ -482,21 +490,21 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
               <article
                 key={`${ex.title}-${i}`}
                 className="space-y-3"
-                itemScope={true}
+                itemScope
                 itemType="https://schema.org/SoftwareSourceCode"
               >
                 <div className="space-y-1">
-                  <h4 className="font-semibold text-base text-foreground" itemProp="name">
+                  <h4 className="text-foreground text-base font-semibold" itemProp="name">
                     {ex.title}
                   </h4>
-                  {ex.description && (
+                  {ex.description ? (
                     <p
                       className="text-muted-foreground text-sm leading-relaxed"
                       itemProp="description"
                     >
                       {ex.description}
                     </p>
-                  )}
+                  ) : null}
                 </div>
                 <div className="not-prose" itemProp="text">
                   <meta itemProp="programmingLanguage" content={ex.language} />
@@ -510,7 +518,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     className="shadow-sm"
                   />
                   {/* Download button for example code */}
-                  {ex.filename && (
+                  {ex.filename ? (
                     <div className="mt-3">
                       <Button
                         variant="outline"
@@ -524,7 +532,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                         Download {ex.filename}
                       </Button>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </article>
             ))}
@@ -552,7 +560,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     maxLines={25}
                   />
                   {/* Download button for config */}
-                  {c.filename && (
+                  {c.filename ? (
                     <div className="mt-3">
                       <Button
                         variant="outline"
@@ -566,7 +574,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                         Download {c.filename}
                       </Button>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -582,7 +590,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             {...(props.className && { className: props.className })}
           >
             <div className="space-y-4">
-              {props.hookConfig && (
+              {props.hookConfig ? (
                 <div className="space-y-2">
                   <ProductionCodeBlock
                     html={props.hookConfig.html}
@@ -605,8 +613,8 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     Download hook config
                   </Button>
                 </div>
-              )}
-              {props.scriptContent && (
+              ) : null}
+              {props.scriptContent ? (
                 <div className="space-y-2">
                   <ProductionCodeBlock
                     html={props.scriptContent.html}
@@ -629,7 +637,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     Download script
                   </Button>
                 </div>
-              )}
+              ) : null}
             </div>
           </Wrapper>
         );
@@ -649,7 +657,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             maxLines={25}
           />
           {/* Download button for configuration */}
-          {props.filename && (
+          {props.filename ? (
             <div className="mt-3">
               <Button
                 variant="outline"
@@ -663,7 +671,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                 Download {props.filename}
               </Button>
             </div>
-          )}
+          ) : null}
         </Wrapper>
       );
     }
@@ -678,34 +686,35 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           {...(props.className && { className: props.className })}
         >
           <div className="space-y-6">
-            {d.claudeCode && (
+            {d.claudeCode ? (
               <Platform
                 name="Claude Code Setup"
                 steps={d.claudeCode.steps}
                 {...(d.claudeCode.configPath && { paths: d.claudeCode.configPath })}
               />
-            )}
-            {d.claudeDesktop && (
+            ) : null}
+            {d.claudeDesktop ? (
               <Platform
                 name="Claude Desktop Setup"
                 steps={d.claudeDesktop.steps}
                 {...(d.claudeDesktop.configPath && { paths: d.claudeDesktop.configPath })}
               />
-            )}
-            {d.sdk && <Platform name="SDK Setup" steps={d.sdk.steps} />}
-            {d.mcpb && <Platform name="One-Click Install (.mcpb)" steps={d.mcpb.steps} />}
-            {d.requirements && d.requirements.length > 0 && (
+            ) : null}
+            {d.sdk ? <Platform name="SDK Setup" steps={d.sdk.steps} /> : null}
+            {d.mcpb ? <Platform name="One-Click Install (.mcpb)" steps={d.mcpb.steps} /> : null}
+            {d.requirements && d.requirements.length > 0 ? (
               <div>
                 <h4 className="mb-2 font-medium">Requirements</h4>
                 <List items={d.requirements} color="bg-orange-500" />
               </div>
-            )}
+            ) : null}
           </div>
         </Wrapper>
       );
     }
 
-    default:
+    default: {
       return null;
+    }
   }
 }

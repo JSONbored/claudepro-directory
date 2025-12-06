@@ -28,6 +28,18 @@ import { SubmitFormClient } from '@/src/components/core/forms/content-submission
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 
+export const dynamic = 'force-dynamic';
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This page uses dynamic rendering (inherited from parent layout).
+ * The parent layout (submit/layout.tsx) has `dynamic = 'force-dynamic'`,
+ * which forces all child pages to be dynamic as well.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+
 const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
@@ -42,15 +54,6 @@ const NewsletterCTAVariant = dynamicImport(
 
 // Use enum values from Constants
 const DEFAULT_CONTENT_CATEGORY = Constants.public.Enums.content_category[0]; // 'agents'
-
-/**
- * Dynamic Rendering Required
- *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const revalidate = 86_400;
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',

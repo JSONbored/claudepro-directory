@@ -1,15 +1,16 @@
 import { Constants, type Database } from '@heyclaude/database-types';
-import { logger } from '@heyclaude/web-runtime/core';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { ReactElement } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
+  UI_CLASSES,
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { type ReactElement } from 'react';
+
 import { ContentLinkButton, PrLinkButton } from './submission-link-buttons';
 
 type UserSubmission = NonNullable<
@@ -17,21 +18,21 @@ type UserSubmission = NonNullable<
 >[number];
 
 interface SubmissionCardProps {
-  submission: UserSubmission;
-  index: number;
-  getStatusBadge: (status: Database['public']['Enums']['submission_status']) => ReactElement;
-  getTypeLabel: (type: Database['public']['Enums']['submission_type']) => string;
   formatSubmissionDate: (dateString: string) => string;
-  getPrLinkProps: (submission: UserSubmission) => { href: string } | null;
   getContentLinkProps: (
     type: Database['public']['Enums']['submission_type'],
     slug: string,
     status: Database['public']['Enums']['submission_status']
-  ) => { href: string } | null;
+  ) => null | { href: string };
+  getPrLinkProps: (submission: UserSubmission) => null | { href: string };
+  getStatusBadge: (status: Database['public']['Enums']['submission_status']) => ReactElement;
+  getTypeLabel: (type: Database['public']['Enums']['submission_type']) => string;
+  index: number;
   isValidSubmissionStatus: (
     status: unknown
   ) => status is Database['public']['Enums']['submission_status'];
   isValidSubmissionType: (type: unknown) => type is Database['public']['Enums']['submission_type'];
+  submission: UserSubmission;
   VALID_SUBMISSION_STATUSES: Database['public']['Enums']['submission_status'][];
   VALID_SUBMISSION_TYPES: Database['public']['Enums']['submission_type'][];
 }
@@ -142,42 +143,42 @@ export function SubmissionCard({
       </CardHeader>
 
       <CardContent>
-        <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
+        <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
           <div>
             Submitted {submission.created_at ? formatSubmissionDate(submission.created_at) : 'N/A'}
           </div>
-          {submission.merged_at && (
+          {submission.merged_at ? (
             <>
               <span>•</span>
               <div>Merged {formatSubmissionDate(submission.merged_at)}</div>
             </>
-          )}
-          {submission.pr_number && (
+          ) : null}
+          {submission.pr_number ? (
             <>
               <span>•</span>
               <div>PR #{submission.pr_number}</div>
             </>
-          )}
+          ) : null}
         </div>
 
-        {status === Constants.public.Enums.submission_status[2] && submission.rejection_reason && ( // 'rejected'
+        {status === Constants.public.Enums.submission_status[2] && submission.rejection_reason ? (
           <div className="mb-4 rounded border border-red-500/20 bg-red-500/10 p-3">
-            <p className={'mb-1 font-medium text-red-400 text-sm'}>Rejection Reason:</p>
-            <p className={'text-muted-foreground text-sm'}>{submission.rejection_reason}</p>
+            <p className="mb-1 text-sm font-medium text-red-400">Rejection Reason:</p>
+            <p className="text-muted-foreground text-sm">{submission.rejection_reason}</p>
           </div>
-        )}
+        ) : null}
 
         {status === Constants.public.Enums.submission_status[4] && ( // 'merged'
           <div className="mb-4 rounded border border-green-500/20 bg-green-500/10 p-3">
-            <p className={'font-medium text-green-400 text-sm'}>
+            <p className="text-sm font-medium text-green-400">
               🎉 Your contribution is now live on ClaudePro Directory!
             </p>
           </div>
         )}
 
         <div className={UI_CLASSES.FLEX_GAP_2}>
-          {prLinkProps && <PrLinkButton href={prLinkProps.href} />}
-          {contentLinkProps && <ContentLinkButton href={contentLinkProps.href} />}
+          {prLinkProps ? <PrLinkButton href={prLinkProps.href} /> : null}
+          {contentLinkProps ? <ContentLinkButton href={contentLinkProps.href} /> : null}
         </div>
       </CardContent>
     </Card>

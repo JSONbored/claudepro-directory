@@ -18,12 +18,13 @@ import Link from 'next/link';
 
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Dynamic Rendering Required
  * Authenticated user connections
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 const ROUTE = '/account/connected-accounts';
 
@@ -55,14 +56,14 @@ export default async function ConnectedAccountsPage() {
   const requestId = generateRequestId();
   const operation = 'ConnectedAccountsPage';
   const route = ROUTE;
-  const module = 'apps/web/src/app/account/connected-accounts/page';
+  const modulePath = 'apps/web/src/app/account/connected-accounts/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
     route,
-    module,
+    module: modulePath,
   });
 
   // Section: Authentication

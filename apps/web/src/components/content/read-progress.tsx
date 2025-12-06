@@ -27,16 +27,10 @@ import { useEffect, useState } from 'react';
 
 export interface ReadProgressProps {
   /**
-   * Position of the progress bar
-   * @default 'below-nav' (positions below sticky navigation)
-   */
-  position?: 'top' | 'bottom' | 'below-nav';
-
-  /**
    * Color variant (maps to CSS variables)
    * @default 'accent'
    */
-  color?: 'accent' | 'primary' | 'foreground';
+  color?: 'accent' | 'foreground' | 'primary';
 
   /**
    * Height of the progress bar in pixels
@@ -45,20 +39,26 @@ export interface ReadProgressProps {
   height?: number;
 
   /**
-   * Z-index for stacking context
-   * @default 51 (above navigation at z-50)
+   * Position of the progress bar
+   * @default 'below-nav' (positions below sticky navigation)
    */
-  zIndex?: number;
+  position?: 'below-nav' | 'bottom' | 'top';
 
   /**
    * Spring physics configuration
    * @default { stiffness: 100, damping: 30, restDelta: 0.001 }
    */
   springConfig?: {
-    stiffness?: number;
     damping?: number;
     restDelta?: number;
+    stiffness?: number;
   };
+
+  /**
+   * Z-index for stacking context
+   * @default 51 (above navigation at z-50)
+   */
+  zIndex?: number;
 }
 
 export function ReadProgress({
@@ -149,7 +149,7 @@ export function ReadProgress({
 
   return (
     <motion.div
-      className="pointer-events-none fixed origin-left bg-accent"
+      className="bg-accent pointer-events-none fixed origin-left"
       style={{
         ...getPositionStyle(),
         height: `${height}px`,
@@ -162,7 +162,7 @@ export function ReadProgress({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(scrollYProgress.get() * 100)}
-      suppressHydrationWarning={true}
+      suppressHydrationWarning
     />
   );
 }

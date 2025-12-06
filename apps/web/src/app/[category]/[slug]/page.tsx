@@ -44,10 +44,10 @@ export const dynamicParams = true; // Allow unknown slugs to be rendered on dema
  */
 export async function generateStaticParams() {
   // Dynamic imports only for data modules (category/content)
+  // Note: Server logging utilities are statically imported at the top of the file
+  // since this is a server component and can safely import server-only code
   const { getHomepageCategoryIds } = await import('@heyclaude/web-runtime/data/config/category');
   const { getContentByCategory } = await import('@heyclaude/web-runtime/data/content');
-  const { logger, generateRequestId, normalizeError } =
-    await import('@heyclaude/web-runtime/logging/server');
 
   const categories = getHomepageCategoryIds;
   const parameters: Array<{ category: string; slug: string }> = [];
@@ -78,12 +78,12 @@ export async function generateStaticParams() {
         const requestId = generateRequestId();
         const operation = 'generateStaticParams';
         const route = `/${category}`;
-        const module = 'apps/web/src/app/[category]/[slug]/page';
+        const modulePath = 'apps/web/src/app/[category]/[slug]/page';
         const reqLogger = logger.child({
           requestId,
           operation,
           route,
-          module,
+          module: modulePath,
         });
         const normalized = normalizeError(
           error,
@@ -199,14 +199,14 @@ export default async function DetailPage({
   const requestId = generateRequestId();
   const operation = 'DetailPage';
   const route = `/${category}/${slug}`;
-  const module = 'apps/web/src/app/[category]/[slug]/page';
+  const modulePath = 'apps/web/src/app/[category]/[slug]/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     requestId,
     operation,
     route,
-    module,
+    module: modulePath,
   });
 
   // Section: Category Validation
@@ -310,7 +310,6 @@ export default async function DetailPage({
       <ReadProgress />
 
       <Pulse variant="view" category={category} slug={slug} />
-      <Pulse variant="page-view" category={category} slug={slug} />
       <StructuredData route={`/${category}/${slug}`} />
 
       {/* Recently Viewed Tracking - only for supported categories */}

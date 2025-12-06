@@ -21,6 +21,13 @@ import { HomepageHeroServer } from '@/src/components/features/home/homepage-hero
 import { HomepageSearchFacetsServer } from '@/src/components/features/home/homepage-search-facets-server';
 import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
 
+export const revalidate = 1800;
+
+/**
+ * Dynamic Rendering Required
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+
 const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
@@ -32,12 +39,6 @@ const NewsletterCTAVariant = dynamicImport(
     loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
   }
 );
-
-/**
- * Dynamic Rendering Required
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const revalidate = 1800;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/');

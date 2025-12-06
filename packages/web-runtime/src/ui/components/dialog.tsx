@@ -36,18 +36,15 @@ const DialogOverlay = ({
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay> & {
   ref?: React.RefObject<React.ElementRef<typeof DialogPrimitive.Overlay> | null>;
 }) => (
-  <DialogPrimitive.Overlay ref={ref} asChild={true} {...props}>
-    <motion.div
-      className={cn(
-        `${POSITION_PATTERNS.FIXED_INSET} z-50 bg-black/80 backdrop-blur-sm`,
-        className
-      )}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
-    />
-  </DialogPrimitive.Overlay>
+  <DialogPrimitive.Overlay
+    ref={ref}
+    className={cn(
+      `${POSITION_PATTERNS.FIXED_INSET} z-[60] bg-black/80 backdrop-blur-sm`,
+      'data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      className
+    )}
+    {...props}
+  />
 );
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
@@ -69,15 +66,20 @@ const DialogContent = ({
   return (
     <DialogPortal>
       <DialogOverlay />
-      <DialogPrimitive.Content ref={ref} asChild={true} {...props}>
+      <DialogPrimitive.Content
+        ref={ref}
+        className={cn(
+          `${POSITION_PATTERNS.FIXED_CENTER} z-[61] grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg sm:rounded-lg`,
+          // Use data-state for visibility and animations (Radix sets this on Content)
+          'data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+          className
+        )}
+        {...props}
+      >
         <motion.div
-          className={cn(
-            `${POSITION_PATTERNS.FIXED_CENTER} z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg`,
-            className
-          )}
-          initial={{ opacity: 0, scale: 0.95, y: '-48%' }}
-          animate={{ opacity: 1, scale: 1, y: '-50%' }}
-          exit={{ opacity: 0, scale: 0.95, y: '-48%' }}
+          className="contents"
+          initial={false}
+          animate={{ opacity: 1, scale: 1 }}
           transition={springSmooth}
         >
           {children}

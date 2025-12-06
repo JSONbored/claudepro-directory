@@ -16,31 +16,30 @@
  */
 
 import { AlertCircle, AlertTriangle, CheckCircle, Info } from '@heyclaude/web-runtime/icons';
-import { cn } from '@heyclaude/web-runtime/ui';
+import { cn, Label } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import { type FocusEvent, type ReactNode, useCallback, useState } from 'react';
-import { Label } from '@heyclaude/web-runtime/ui';
 
-export type ValidationState = 'idle' | 'valid' | 'invalid' | 'warning';
+export type ValidationState = 'idle' | 'invalid' | 'valid' | 'warning';
 
 interface AnimatedFormFieldProps {
   children: ReactNode;
-  label: string;
-  id: string;
-  required?: boolean;
-  helpText?: string;
+  className?: string;
+  currentLength?: number;
   errorMessage?: string;
-  warningMessage?: string;
+  fieldClassName?: string;
+  helpText?: string;
+  id: string;
+  label: string;
+  maxLength?: number;
+  onBlur?: (e: FocusEvent<HTMLElement>) => void;
+  onFocus?: (e: FocusEvent<HTMLElement>) => void;
+  required?: boolean;
+  showCharCount?: boolean;
   successMessage?: string;
   validationState?: ValidationState;
-  showCharCount?: boolean;
-  currentLength?: number;
-  maxLength?: number;
-  className?: string;
-  fieldClassName?: string;
-  onFocus?: (e: FocusEvent<HTMLElement>) => void;
-  onBlur?: (e: FocusEvent<HTMLElement>) => void;
+  warningMessage?: string;
 }
 
 export function AnimatedFormField({
@@ -96,7 +95,7 @@ export function AnimatedFormField({
     if (!hasInteracted && validationState === 'idle') return null;
 
     switch (validationState) {
-      case 'valid':
+      case 'valid': {
         return (
           <motion.div
             initial={{ scale: 0, rotate: -180 }}
@@ -107,7 +106,8 @@ export function AnimatedFormField({
             <CheckCircle className="h-5 w-5" style={{ color: TOKENS.colors.success.text }} />
           </motion.div>
         );
-      case 'invalid':
+      }
+      case 'invalid': {
         return (
           <motion.div
             initial={{ scale: 0 }}
@@ -118,7 +118,8 @@ export function AnimatedFormField({
             <AlertCircle className="h-5 w-5" style={{ color: TOKENS.colors.error.text }} />
           </motion.div>
         );
-      case 'warning':
+      }
+      case 'warning': {
         return (
           <motion.div
             initial={{ scale: 0 }}
@@ -129,8 +130,10 @@ export function AnimatedFormField({
             <AlertTriangle className="h-5 w-5" style={{ color: TOKENS.colors.warning.text }} />
           </motion.div>
         );
-      default:
+      }
+      default: {
         return null;
+      }
     }
   };
 
@@ -140,14 +143,18 @@ export function AnimatedFormField({
     if (!hasInteracted) return TOKENS.colors.border.default;
 
     switch (validationState) {
-      case 'valid':
+      case 'valid': {
         return TOKENS.colors.success.border;
-      case 'invalid':
+      }
+      case 'invalid': {
         return TOKENS.colors.error.border;
-      case 'warning':
+      }
+      case 'warning': {
         return TOKENS.colors.warning.border;
-      default:
+      }
+      default: {
         return TOKENS.colors.border.default;
+      }
     }
   };
 
@@ -158,12 +165,15 @@ export function AnimatedFormField({
     if (isFocused) return TOKENS.shadows.glow.orange;
 
     switch (validationState) {
-      case 'valid':
+      case 'valid': {
         return TOKENS.shadows.glow.green;
-      case 'invalid':
+      }
+      case 'invalid': {
         return TOKENS.shadows.glow.red;
-      default:
+      }
+      default: {
         return 'none';
+      }
     }
   };
 
@@ -178,15 +188,15 @@ export function AnimatedFormField({
       <div className="flex items-center justify-between">
         <Label htmlFor={id} className="flex items-center gap-1.5">
           <span>{label}</span>
-          {required && (
+          {required ? (
             <span className="text-accent-primary" style={{ color: TOKENS.colors.accent.primary }}>
               *
             </span>
-          )}
+          ) : null}
         </Label>
 
         {/* Character Count */}
-        {showCharCount && maxLength && (
+        {showCharCount && maxLength ? (
           <motion.span
             className={cn(
               'text-xs transition-colors',
@@ -202,7 +212,7 @@ export function AnimatedFormField({
           >
             {currentLength} / {maxLength}
           </motion.span>
-        )}
+        ) : null}
       </div>
 
       {/* Field Container with Validation Icon */}
@@ -225,7 +235,7 @@ export function AnimatedFormField({
         {/* Validation Icon (positioned absolute right) */}
         <AnimatePresence mode="wait">
           {getValidationIcon() && (
-            <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-3">
+            <div className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
               {getValidationIcon()}
             </div>
           )}
@@ -234,7 +244,7 @@ export function AnimatedFormField({
 
       {/* Message Row (Help Text / Error / Warning / Success) */}
       <AnimatePresence mode="wait">
-        {message && (
+        {message ? (
           <motion.div
             key={`${messageType}-${message}`}
             initial={{ opacity: 0, y: -5 }}
@@ -263,7 +273,7 @@ export function AnimatedFormField({
               />
             )}
             {messageType === 'help' && (
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+              <Info className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
             )}
 
             {/* Message Text */}
@@ -289,7 +299,7 @@ export function AnimatedFormField({
               {message}
             </span>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
 
       {/* Focus Indicator (bottom border animation) */}
