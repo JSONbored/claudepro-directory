@@ -145,11 +145,14 @@ function getStatusColor(status: JobStatus): string {
 }
 
 /**
- * Produce metadata for the My Jobs account page.
+ * Generate metadata for the My Jobs account page.
+ *
+ * Awaits a server connection to defer non-deterministic work to request time (required for Cache Components),
+ * then returns the page metadata for the "/account/jobs" route.
  *
  * @returns Page metadata for the "/account/jobs" route.
- *
  * @see generatePageMetadata
+ * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
@@ -259,8 +262,21 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
 }
 
 /**
- * Server component that fetches payment job data and renders success alert.
- * Wrapped in Suspense to allow streaming.
+ * Render a success alert for a completed job payment.
+ *
+ * Fetches the user's dashboard to locate the paid job and loads billing summaries to display plan, tier,
+ * price, and renewal/expiration information. If the dashboard cannot be loaded the component returns `null`.
+ * Designed to be used as a server component and wrapped in a Suspense boundary for streaming.
+ *
+ * @param props.paymentJobId - The ID of the job associated with the successful payment
+ * @param props.userId - The authenticated user's ID used to scope dashboard data
+ * @param props.userLogger - A request-scoped logger (child) used to record fetch or normalization errors
+ *
+ * @see getUserDashboard
+ * @see getJobBillingSummaries
+ * @see resolvePlanLabel
+ * @see resolveTierLabel
+ * @see formatPriceLabel
  */
 async function PaymentSuccessAlert({
   paymentJobId,
@@ -355,8 +371,22 @@ async function PaymentSuccessAlert({
 }
 
 /**
- * Server component that fetches dashboard data and renders jobs list with header.
- * Wrapped in Suspense to allow streaming.
+ * Renders the jobs listing header and user dashboard jobs; loads dashboard data on the server
+ * and displays either an empty-state card or a jobs list (billing details are loaded inside a
+ * Suspense boundary).
+ *
+ * Fetch behavior:
+ * - Calls getUserDashboard(userId) on the server and logs fetch results via the provided logger.
+ * - If the dashboard fetch fails or returns no data, renders a "Job listings unavailable" card.
+ * - Validates runtime shape of returned `jobs` JSON before rendering.
+ *
+ * @param props.userId - The authenticated user's ID whose dashboard and jobs should be loaded.
+ * @param props.userLogger - A request-scoped logger (child logger) used for recording fetch and validation events.
+ * @returns A React element containing the page header and either an empty-state card or the jobs list; billing details are streamed inside a Suspense boundary.
+ *
+ * @see JobsListWithBilling
+ * @see PaymentSuccessAlert
+ * @see getUserDashboard
  */
 async function JobsListWithHeader({
   userId,
@@ -496,8 +526,20 @@ async function JobsListWithHeader({
 }
 
 /**
- * Server component that fetches billing summaries and renders jobs list.
- * Wrapped in Suspense to allow streaming billing data separately.
+ * Render a list of job cards augmented with billing summaries for each job.
+ *
+ * Fetches billing summaries for the provided `jobIds` and uses them to display per-job
+ * billing details (plan, tier, price, renewal/expiration, and recent payment info).
+ * This server component is intended to be wrapped in a Suspense boundary so billing
+ * data can stream independently from other page data.
+ *
+ * @param props.jobs - Array of job rows to render as cards (from the `jobs` table).
+ * @param props.jobIds - List of job IDs to fetch billing summaries for.
+ * @param props.userLogger - Request-scoped child logger used to record billing fetch errors.
+ * @returns The rendered jobs list element containing job cards and associated billing sections.
+ *
+ * @see JobsListWithHeader
+ * @see PaymentSuccessAlert
  */
 async function JobsListWithBilling({
   jobs,

@@ -14,6 +14,23 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Renders a responsive feature comparison table for two or three columns with an optional title and description.
+ *
+ * The table displays a "Feature" column plus one header cell for each entry in `headers`. Each item in `items`
+ * becomes a row; boolean option values render a green check icon for `true` and a muted em dash (`—`) for `false`,
+ * while non-boolean values are rendered as-is. If `headers` is empty or `items` is empty/undefined, the component renders `null`.
+ *
+ * @param props - Component props
+ * @param props.title - Optional title shown above the table
+ * @param props.description - Optional descriptive text shown below the title
+ * @param props.headers - Array of column headers (excluding the leading "Feature" column)
+ * @param props.items - Array of rows where each row must include `feature`, `option1`, `option2`, and optionally `option3`
+ * @returns A JSX element containing the comparison table, or `null` when there are no headers or no items.
+ *
+ * @see ComparisonTableProps
+ * @see Card
+ */
 export function ComparisonTable(props: ComparisonTableProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, description, headers, items } = props;

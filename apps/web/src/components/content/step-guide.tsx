@@ -18,6 +18,25 @@ import {
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { UnifiedContentBox } from '@/src/components/core/domain/content/featured-content-box';
 
+/**
+ * Render a server-side, step-by-step HowTo guide with optional code highlighting, timings, and tips.
+ *
+ * This component parallelizes syntax highlighting for any step that includes `code` and attaches
+ * the resulting highlighted HTML to each step as `highlightedHtml` before rendering. It emits
+ * schema.org markup for a HowTo and HowToStep for improved SEO.
+ *
+ * @param props - Component props
+ * @param props.steps - Ordered list of steps. Each step may include: `title`, `content`, `description`, `code` (string), `time`, and `tip`. When `code` is present, highlighted HTML is produced and attached as `highlightedHtml`.
+ * @param props.title - Guide title displayed as the main heading.
+ * @param props.description - Optional guide description rendered under the title.
+ * @param props.totalTime - Optional human-readable total duration displayed in the header.
+ *
+ * @returns A JSX element representing the fully rendered HowTo guide.
+ *
+ * @see highlightCodeEdge - used to produce highlighted HTML for step code
+ * @see ProductionCodeBlock - renders highlighted code blocks for steps that include `code`
+ * @see StepByStepGuideProps - expected props shape
+ */
 export async function StepByStepGuide(props: StepByStepGuideProps) {
   const { steps, title, description, totalTime } = props;
 

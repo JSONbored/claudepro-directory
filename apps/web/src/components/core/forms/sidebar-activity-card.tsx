@@ -48,6 +48,28 @@ const tabContentVariants = {
   },
 } as const;
 
+/**
+ * Sidebar card displaying recent merged submissions and tips in two tabs.
+ *
+ * Renders a "Recent" tab that lists submissions with name, type label, optional author link, and timestamp,
+ * and a "Tips" tab that shows a vertical list of tip strings.
+ *
+ * @param recentMerged - Array of recent submission objects. Each item should include:
+ *   - id: number | string
+ *   - content_name: string
+ *   - content_type: string
+ *   - merged_at: string
+ *   - merged_at_formatted?: string
+ *   - user?: null | { name: string; slug: string }
+ * @param tips - Array of tip strings to display under the "Tips" tab.
+ * @param typeLabels - Mapping from content type keys to human-readable label strings used for the submission badges.
+ *
+ * @returns A React element rendering the activity card with tabbed "Recent" and "Tips" content.
+ *
+ * @see UnifiedBadge
+ * @see NavLink
+ * @see UI_CLASSES
+ */
 export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarActivityCardProps) {
   return (
     <Card>

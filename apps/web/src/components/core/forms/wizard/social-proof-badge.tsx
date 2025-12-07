@@ -23,6 +23,20 @@ interface SocialProofBadgeProps {
   variant: 'contributors' | 'join' | 'submissions' | 'success';
 }
 
+/**
+ * Render an animated social-proof badge for a specified variant.
+ *
+ * @param variant - One of `'contributors' | 'join' | 'submissions' | 'success'` indicating which badge layout and content to render.
+ * @param count - Numeric value used by the `submissions` and `join` variants (number of submissions or total users); defaults to 0.
+ * @param names - Array of contributor names shown by the `contributors` variant; only the first two are displayed and additional names are summarized.
+ * @param percentage - Percent value shown by the `success` variant (displayed as `{percentage}% approved`).
+ * @param className - Optional additional CSS classes applied to the badge container.
+ *
+ * @returns A JSX element representing the requested social-proof badge.
+ *
+ * @see SocialProofBar
+ * @see InlineSocialProof
+ */
 export function SocialProofBadge({
   variant,
   count = 0,
@@ -128,6 +142,23 @@ interface SocialProofBarProps {
   };
 }
 
+/**
+ * Render a horizontal bar of social proof badges based on provided stats.
+ *
+ * Renders zero or more SocialProofBadge components (contributors, submissions, success, join)
+ * according to which fields in `stats` are present and positive.
+ *
+ * @param stats - Object controlling which badges are shown:
+ *   - `contributors?: { count: number; names?: string[] }` — shows the contributors badge when `count > 0`.
+ *   - `submissions?: number` — shows the submissions badge when > 0.
+ *   - `successRate?: null | number` — shows the success badge when non-null.
+ *   - `totalUsers?: number` — shows the join badge when > 0.
+ * @param className - Optional additional className applied to the outer container.
+ * @returns A React element containing the animated, horizontally arranged social-proof badges.
+ *
+ * @see SocialProofBadge
+ * @see InlineSocialProof
+ */
 export function SocialProofBar({ stats, className }: SocialProofBarProps) {
   return (
     <motion.div
@@ -169,6 +200,19 @@ interface InlineSocialProofProps {
   text: string;
 }
 
+/**
+ * Renders a compact inline social proof element with an icon, primary text, and optional subdued subtext.
+ *
+ * @param icon - Which icon to display: `'sparkles'`, `'trending'`, or `'users'`. Defaults to `'users'`.
+ * @param text - Primary text to display next to the icon.
+ * @param subtext - Optional secondary text rendered in a subdued style after the primary text.
+ * @param className - Optional additional CSS class names applied to the container.
+ * @returns The JSX element for the inline social proof.
+ *
+ * @see InlineSocialProofProps
+ * @see SocialProofBadge
+ * @see StepSocialProof
+ */
 export function InlineSocialProof({
   icon = 'users',
   text,
@@ -212,6 +256,19 @@ interface StepSocialProofProps {
   step: 1 | 2 | 3 | 4 | 5;
 }
 
+/**
+ * Render contextual social proof for a specific wizard step.
+ *
+ * Chooses a message from `stats` or a sensible default for the given `step` and renders
+ * an InlineSocialProof with an icon selected for that step.
+ *
+ * @param step - The current step number (1–5) to determine message and icon
+ * @param stats - Optional step-specific override messages keyed by step (step1–step5)
+ * @param className - Optional additional CSS class names applied to the rendered component
+ * @returns The configured InlineSocialProof element for the provided step
+ *
+ * @see InlineSocialProof
+ */
 export function StepSocialProof({ step, stats, className }: StepSocialProofProps) {
   const proofMessages = {
     1: stats?.step1 || '234 users started this week',

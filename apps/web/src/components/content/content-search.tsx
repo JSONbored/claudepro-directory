@@ -42,6 +42,12 @@ const UnifiedSearch = dynamic(
 
 type ExtractableValue = null | string | string[] | undefined;
 
+/**
+ * Normalize a list of strings by trimming whitespace, removing non-string or empty entries, deduplicating, and sorting.
+ *
+ * @param values - Optional array of values to sanitize; non-string entries are ignored.
+ * @returns A sorted array of unique, trimmed, non-empty strings. Returns an empty array if `values` is not an array or contains no valid strings.
+ */
 function sanitizeStringList(values?: string[]): string[] {
   if (!Array.isArray(values)) return [];
   const set = new Set<string>();
@@ -55,6 +61,17 @@ function sanitizeStringList(values?: string[]): string[] {
   return [...set].sort((a, b) => a.localeCompare(b));
 }
 
+/**
+ * Extracts distinct, trimmed strings from a list of items using the provided extractor.
+ *
+ * The extractor may return a string, an array of strings, undefined, or null; only non-empty trimmed string values are included.
+ *
+ * @param items - The source array of items to scan for string values.
+ * @param extractor - A function that extracts a string, string array, null, or undefined from an item.
+ * @returns A sorted array of unique, trimmed strings collected from all items.
+ *
+ * @see sanitizeStringList
+ */
 function collectStringsFromItems<T>(
   items: T[],
   extractor: (item: T) => ExtractableValue
@@ -88,6 +105,17 @@ const FALLBACK_SUGGESTION_CHUNK_SIZE = 6;
 
 type QuickFilterType = 'author' | 'category' | 'tag';
 
+/**
+ * Remove duplicate content items by their `slug`, preserving the original order and enforcing an optional maximum.
+ *
+ * Items with a missing or empty `slug` are treated as distinct and are not considered duplicates.
+ *
+ * @param items - Array of displayable content items to deduplicate
+ * @param limit - Maximum number of unique items to return; if greater than zero the result will contain at most `limit` items. Defaults to `FALLBACK_SUGGESTION_LIMIT`.
+ * @returns An array of the first unique items (by `slug`) from `items`, subject to the `limit` constraint
+ *
+ * @see FALLBACK_SUGGESTION_LIMIT
+ */
 function dedupeContentItems<T extends DisplayableContent>(
   items: T[],
   limit = FALLBACK_SUGGESTION_LIMIT
@@ -120,6 +148,13 @@ function chunkItems<T>(items: T[], size: number): T[][] {
   return chunks;
 }
 
+/**
+ * Determine whether the provided filter state contains any active filtering criteria.
+ *
+ * @param filters - The filter state to inspect; may be null or undefined.
+ * @returns `true` if any of `category`, `author`, a non-empty `tags` array, `sort`, `dateRange`, or `popularity` is present; `false` otherwise.
+ * @see FilterState
+ */
 function hasFilterCriteria(filters?: FilterState | null): boolean {
   if (!filters) return false;
   return Boolean(
@@ -132,6 +167,34 @@ function hasFilterCriteria(filters?: FilterState | null): boolean {
   );
 }
 
+/**
+ * Renders a searchable, filterable content list with quick filters, saved-search presets, and fallback suggestions.
+ *
+ * Renders a unified search bar with filter controls, displays search results in a card grid, and when no results
+ * are found shows quick filter buttons and paginated fallback suggestions.
+ *
+ * @template T - Type of content items, must extend DisplayableContent
+ * @param props.items - Initial list of content items to display and search over
+ * @param props.searchPlaceholder - Placeholder text for the search input
+ * @param props.title - Human-readable title used in empty/fallback messages
+ * @param props.icon - Icon name used in the empty-state illustration
+ * @param props.category - Optional fixed category to constrain searches
+ * @param props.availableTags - Optional list of tags to show in filter controls (overrides derived tags)
+ * @param props.availableAuthors - Optional list of authors to show in filter controls (overrides derived authors)
+ * @param props.availableCategories - Optional list of categories to show in filter controls (overrides derived categories)
+ * @param props.zeroStateSuggestions - Optional suggestions shown when there is no query or filters
+ * @param props.quickTags - Optional list of tag strings to render as quick-filter buttons
+ * @param props.quickAuthors - Optional list of author strings to render as quick-filter buttons
+ * @param props.quickCategories - Optional list of category strings to render as quick-filter buttons
+ * @param props.fallbackSuggestions - Optional prioritized pool of fallback suggestion items
+ * @returns The component's JSX element tree
+ *
+ * @see UnifiedSearch
+ * @see UnifiedCardGrid
+ * @see ConfigCard
+ * @see useSavedSearchPresets
+ * @see searchUnifiedClient
+ */
 function ContentSearchClientComponent<T extends DisplayableContent>({
   items,
   searchPlaceholder,

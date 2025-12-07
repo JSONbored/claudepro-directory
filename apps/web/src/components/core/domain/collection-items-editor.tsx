@@ -41,8 +41,14 @@ function isValidSlug(slug: string): boolean {
 }
 
 /**
- * Get safe content URL from type and slug
- * Returns null if either is invalid
+ * Build a safe URL path for a content item from its category and slug.
+ *
+ * @param type - Content category name; must be a recognized category
+ * @param slug - Content slug to be sanitized and validated
+ * @returns The URL path in the form `/type/sanitized-slug` if both inputs are valid, `null` otherwise.
+ *
+ * @see isValidCategory
+ * @see sanitizeSlug
  */
 function getSafeContentUrl(type: string, slug: string): null | string {
   if (!(isValidCategory(type) && isValidSlug(slug))) return null;
@@ -60,6 +66,25 @@ interface CollectionItemManagerProps {
   items: CollectionItem[];
 }
 
+/**
+ * UI for managing items within a collection (add, remove, and reorder).
+ *
+ * Renders controls to add bookmarks to the collection, remove existing items, and reorder items
+ * using up/down buttons. Performs optimistic updates for reordering, synchronizes changes with
+ * server actions, shows user-facing toasts for validation/success/errors, and refreshes route data
+ * after successful operations.
+ *
+ * @param collectionId - The ID of the collection to manage.
+ * @param items - Initial list of collection items to display and manage.
+ * @param availableBookmarks - All bookmarks that may be added to the collection; bookmarks already
+ *   present in the collection are filtered out from the add picker.
+ * @returns The JSX element for the collection item manager.
+ *
+ * @see getSafeContentUrl
+ * @see addItemToCollection
+ * @see removeItemFromCollection
+ * @see reorderCollectionItems
+ */
 export function CollectionItemManager({
   collectionId,
   items: initialItems,

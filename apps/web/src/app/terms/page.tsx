@@ -16,8 +16,15 @@ import { Suspense } from 'react';
  * @see {@link import('next').Metadata}
  */
 /**
- * Static Generation: Legal pages are fully static and never change
- * No automatic revalidation - pages are statically generated at build time
+ * Produce the Next.js page metadata for the Terms page.
+ *
+ * Defers to request time by awaiting a server connection so non-deterministic operations
+ * (e.g., current time used by cache components) are valid before metadata is generated.
+ *
+ * @returns The Metadata object for the '/terms' route.
+ *
+ * @see generatePageMetadata
+ * @see connection
  */
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -28,12 +35,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Renders the Terms of Service page showing the current "Last updated" date and contact links.
+ * Render the Terms of Service page inside a Suspense boundary and supply a per-request logger.
  *
- * Fetches the last-updated timestamp and contact channels at render time; the page is statically
- * generated and does not revalidate (see `revalidate`).
+ * Awaits connection() to defer non-deterministic operations (e.g., current time) to request time,
+ * generates a single requestId, and creates a request-scoped logger which is passed to the
+ * page content before rendering.
  *
- * @returns The React element for the Terms of Service page.
+ * @returns The React element for the Terms of Service page wrapped in a Suspense fallback.
  *
  * @see getLastUpdatedDate
  * @see getContactChannels
@@ -65,6 +73,22 @@ export default async function TermsPage() {
   );
 }
 
+/**
+ * Renders the Terms of Service content, including dynamic last-updated date and contact channels.
+ *
+ * Retrieves the site's last updated date and contact channels, logs a page-render event with the
+ * provided request-scoped logger, and returns the Terms of Service JSX tree populated with
+ * APP_CONFIG values and NavLink components.
+ *
+ * @param reqLogger - A request-scoped logger created via `logger.child` used to record render events.
+ * @returns The Terms of Service React element.
+ *
+ * @see getLastUpdatedDate
+ * @see getContactChannels
+ * @see NavLink
+ * @see APP_CONFIG
+ * @see logger
+ */
 function TermsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
   const channels = getContactChannels();

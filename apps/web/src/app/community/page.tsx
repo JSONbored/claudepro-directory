@@ -38,9 +38,9 @@ import { Suspense } from 'react';
  */
 
 /**
- * Create the Next.js page metadata for the /community route.
+ * Generate metadata for the /community route, deferring to request time to allow non-deterministic operations.
  *
- * Used by Next.js to supply route-specific metadata (title, description, open graph, etc.).
+ * Awaits connection() so metadata generation may use request-time values (for example Date-based or other non-deterministic data).
  *
  * @returns The metadata object for the community page.
  * @see {@link generatePageMetadata}
@@ -71,17 +71,20 @@ function formatStatValue(value: null | number | undefined): string {
 }
 
 /**
- * Render the Community page including hero content, aggregated stats, contribution guidance, and an email CTA.
+ * Render the Community page with hero content, aggregated stats, contribution guidance, and contact CTAs.
  *
- * Fetches community directory, configuration count, and homepage metrics and uses safe defaults when those data sources are unavailable.
+ * This server component awaits `connection()` to allow non-deterministic operations (e.g., Date.now()),
+ * creates a request-scoped logger for the request, and renders `CommunityPageContent` inside a `Suspense`
+ * boundary with a loading fallback. Data used by the page (community directory, configuration counts,
+ * homepage metrics) are fetched by the child component and safe defaults are used when those sources are unavailable.
  *
  * @returns The React element tree for the Community page
  *
  * @see getCommunityDirectory
  * @see getConfigurationCount
  * @see getHomepageData
- * @see NewsletterCTAVariant
  * @see generateRequestId
+ * @see CommunityPageContent
  */
 export default async function CommunityPage() {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
@@ -106,6 +109,18 @@ export default async function CommunityPage() {
   );
 }
 
+/**
+ * Renders the community page content: hero, channel links, community stats, and contribution instructions.
+ *
+ * This server component performs necessary data fetching (community directory, configuration count, and homepage metrics),
+ * logs configuration warnings for missing contact channels, and gracefully falls back when fetches fail.
+ *
+ * @param reqLogger - A request-scoped logger (child logger) used for warnings and error reporting during configuration checks and data fetches.
+ * @returns The JSX element for the community page content.
+ *
+ * @see generateMetadata
+ * @see CommunityPage
+ */
 async function CommunityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Configuration Check
   const channels = getContactChannels();

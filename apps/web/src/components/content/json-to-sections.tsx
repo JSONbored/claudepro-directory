@@ -97,8 +97,14 @@ function isValidInternalPath(path: string): boolean {
 }
 
 /**
- * Validate and sanitize external URL for safe use in href
- * Only allows HTTPS for external URLs, HTTP only for localhost/development
+ * Validate and canonicalize an external URL for safe use in href attributes.
+ *
+ * Only allows `https:` URLs; allows `http:` only for localhost addresses (`localhost`, `127.0.0.1`, `::1`). Rejects URLs containing username or password credentials and normalizes hostname and default ports.
+ *
+ * @param url - The input URL string to validate and sanitize.
+ * @returns The canonicalized absolute href string if the URL is allowed, `null` otherwise.
+ *
+ * @see isValidInternalPath
  */
 function getSafeExternalUrl(url: string): null | string {
   if (!url || typeof url !== 'string') return null;
@@ -264,8 +270,19 @@ type Section =
   | TldrSection;
 
 /**
- * TrustedHTML - Safely renders HTML content with XSS protection
- * Sanitizes HTML using DOMPurify before rendering
+ * Render sanitized HTML content, sanitizing on the client and preserving raw HTML during SSR.
+ *
+ * Sanitizes the provided `html` string using DOMPurify on the client and renders the sanitized result.
+ * During server-side rendering the original `html` is rendered (client will replace it with the sanitized version).
+ * If DOMPurify fails to load, the original `html` is used as a fallback and a client warning is logged.
+ *
+ * @param html - The HTML string to render; required.
+ * @param className - Optional CSS class names to apply to the container element.
+ * @param id - Optional id attribute for the container element.
+ *
+ * @see https://github.com/cure53/DOMPurify
+ * @see normalizeError
+ * @see logClientWarn
  */
 function TrustedHTML({ html, className, id }: { className?: string; html: string; id?: string }) {
   // Hooks must be called unconditionally before any early returns
@@ -366,6 +383,20 @@ function TrustedHTML({ html, className, id }: { className?: string; html: string
   );
 }
 
+/**
+ * Renders a single content section into the appropriate React node based on its `type`.
+ *
+ * For `related_content` resources this function validates and sanitizes URLs and logs a client warning when a URL is invalid or unsafe.
+ *
+ * @param section - Section data object with a discriminant `type` that determines the rendering path and additional fields required by that type.
+ * @param index - Index used to derive a stable fallback key when `section.id` is not provided.
+ * @returns The React node that represents the rendered section, or `null` if the section type is unrecognized.
+ *
+ * @see TrustedHTML
+ * @see getSafeExternalUrl
+ * @see isValidInternalPath
+ * @see UnifiedContentBox
+ */
 function render_section(section: Section, index: number): React.ReactNode {
   const key = section.id || `section-${index}`;
 
@@ -743,6 +774,16 @@ function render_section(section: Section, index: number): React.ReactNode {
   }
 }
 
+/**
+ * Render an array of content sections into their corresponding React UI blocks.
+ *
+ * @param sections - Sections to render. Accepts a typed Section[] or legacy/guide section shapes (array of record objects, possibly containing `html`). The prop will be normalized to an array of Section objects before rendering.
+ * @returns A React element containing the rendered sections, or `null` when no sections are provided.
+ *
+ * @see JSONSectionRendererProps
+ * @see render_section
+ * @see TrustedHTML
+ */
 export function JSONSectionRenderer({ sections }: JSONSectionRendererProps) {
   const sections_array = Array.isArray(sections) ? (sections as Section[]) : [];
 

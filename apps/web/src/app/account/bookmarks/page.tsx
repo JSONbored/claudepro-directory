@@ -12,6 +12,17 @@ import { connection } from 'next/server';
 const SOURCE_ROUTE = '/account/bookmarks';
 const TARGET_ROUTE = '/account/library';
 
+/**
+ * Defers non-deterministic work to request time and provides the metadata for the target route.
+ *
+ * This function ensures request-time evaluation required by Cache Components before producing metadata,
+ * then returns metadata for the route that this page redirects to.
+ *
+ * @returns Metadata for the target route (`TARGET_ROUTE`)
+ *
+ * @see generatePageMetadata
+ * @see connection
+ */
 export async function generateMetadata(): Promise<Metadata> {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
   // This is required by Cache Components for non-deterministic operations
@@ -21,8 +32,18 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Redirect legacy /account/bookmarks to /account/library
- * Keeping this for backward compatibility
+ * Redirects the legacy /account/bookmarks route to /account/library for backward compatibility.
+ *
+ * This server-side page runs at request time, awaiting a server connection before performing
+ * non-deterministic operations. It generates a single request-scoped identifier and logger,
+ * logs an informational redirect event, and issues a hard redirect to the target route.
+ *
+ * @see SOURCE_ROUTE
+ * @see TARGET_ROUTE
+ * @see generateRequestId
+ * @see logger
+ * @see connection
+ * @see redirect
  */
 export default async function BookmarksPage() {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())

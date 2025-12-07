@@ -61,6 +61,21 @@ const iconVariants = {
   },
 };
 
+/**
+ * Renders the animated hero section for the /submit page showing contribution messaging, feature badges, and a decorative illustration.
+ *
+ * @param stats - Aggregated contribution statistics
+ * @param stats.merged_this_week - Number of configurations merged this week
+ * @param stats.pending - Number of pending contributions
+ * @param stats.total - Total number of contributed configurations (displayed in the UI)
+ * @param className - Optional additional className applied to the root container
+ *
+ * @returns A React element representing the Submit page hero section
+ *
+ * @see BorderBeam
+ * @see UI_CLASSES
+ * @see cn
+ */
 export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
   return (
     <motion.div

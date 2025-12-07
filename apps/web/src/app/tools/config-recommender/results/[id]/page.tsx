@@ -258,13 +258,12 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
 }
 
 /**
- * Render the Configuration Recommender results page for a given result ID.
+ * Renders the Configuration Recommender results page for a given result ID.
  *
  * Decodes and validates the base64url-encoded `answers` query parameter, fetches
  * personalized configuration recommendations, normalizes returned items, and
- * renders the results UI with a shareable URL. If `answers` is missing,
- * fails validation/decoding, or backend recommendations are absent, the page
- * responds with a 404.
+ * renders the results UI with a shareable URL; responds with a 404 if `answers`
+ * is missing, invalid, or backend recommendations are absent.
  *
  * @param props.params - Route parameters containing the `id` of the results set
  * @param props.searchParams - Query parameters; must include `answers` (base64url-encoded JSON)
@@ -299,6 +298,24 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
   );
 }
 
+/**
+ * Renders the configuration recommender results page for a given result ID.
+ *
+ * Decodes base64url-encoded quiz answers from the `answers` search parameter, fetches and normalizes
+ * recommendations based on those answers, and returns the ResultsDisplay UI populated with the
+ * recommendations and a shareable URL. If the `answers` parameter is missing, cannot be decoded,
+ * or the recommendations RPC returns no results, this function calls `notFound()` (renders a 404).
+ *
+ * @param params - Promise resolving to route parameters containing `id`
+ * @param searchParams - Promise resolving to search parameters containing `answers` (base64url-encoded)
+ * @param reqLogger - Request-scoped logger; a route-scoped child logger is derived for internal logging
+ * @returns A JSX element rendering the results page with recommendations and share URL
+ *
+ * @see decodeQuizAnswers
+ * @see getConfigRecommendations
+ * @see normalizeRecommendationResults
+ * @see ResultsDisplay
+ */
 async function ResultsPageContent({
   params,
   searchParams,

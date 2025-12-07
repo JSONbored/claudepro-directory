@@ -21,7 +21,11 @@ import { CollectionForm } from '@/src/components/core/forms/collection-form';
  */
 
 /**
- * Provide page metadata for the account library "create collection" route.
+ * Generate metadata for the account library "Create Collection" page.
+ *
+ * This function ensures the request-scoped server connection is established before
+ * creating non-deterministic metadata (e.g., timestamps) and then builds metadata
+ * for the '/account/library/new' route.
  *
  * @returns Metadata for the '/account/library/new' page
  * @see generatePageMetadata
@@ -70,6 +74,19 @@ export default async function NewCollectionPage() {
   );
 }
 
+/**
+ * Renders the "Create Collection" page content after ensuring the request is authenticated and user bookmarks are loaded.
+ *
+ * This server component enforces authentication (redirecting to /login for unauthenticated requests), loads the current user's bookmarks for use by the collection form, and returns the page UI including back navigation, page title, and a CollectionForm prepopulated with the user's bookmarks.
+ *
+ * @param reqLogger - A request-scoped logger instance used to emit structured logs for authentication, data loading, and page render events.
+ * @returns The page React element for creating a new collection.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserBookmarksForCollections
+ * @see CollectionForm
+ * @see ROUTES.ACCOUNT_LIBRARY
+ */
 async function NewCollectionPageContent({
   reqLogger,
 }: {

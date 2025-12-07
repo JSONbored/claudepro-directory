@@ -27,8 +27,15 @@ import { ReviewForm } from '@/src/components/core/forms/review-form';
 import { ReviewRatingHistogram } from './review-rating-histogram';
 
 /**
- * Complete review section with list, pagination, and sorting
- * Displays all reviews for a piece of content with aggregate statistics
+ * Render a reviews section with aggregate statistics, sorting controls, pagination, and per-review actions.
+ *
+ * @param contentType - Content category used to fetch reviews (e.g., article, product)
+ * @param contentSlug - Content identifier (slug) used to scope fetched reviews
+ * @param currentUserId - Optional ID of the current user to enable edit/delete actions for their reviews
+ * @returns A React element containing the reviews UI, including histogram, sort controls, review list, and load-more controls.
+ *
+ * @see ReviewCardItem
+ * @see ReviewRatingHistogram
  */
 export function ReviewListSection({
   contentType,
@@ -252,8 +259,26 @@ export function ReviewListSection({
 }
 
 /**
- * Review Card Item Component
- * Displays an individual review with actions
+ * Renders a single review card with rating, text, and contextual actions.
+ *
+ * Displays the reviewer's name, star rating, relative creation time, review text (with truncation and "Read more"/"Show less" toggle),
+ * a "Helpful" action for other users, and Edit/Delete actions for the review owner. When `isEditing` is true for the owner's review,
+ * renders an inline ReviewForm to edit the review.
+ *
+ * @param props.review - The review object with stats and user information to display.
+ * @param props.currentUserId - ID of the currently authenticated user; used to determine ownership for edit/delete actions.
+ * @param props.contentType - Content category for the review (used when rendering or editing the review).
+ * @param props.contentSlug - Content identifier slug for the review (used when rendering or editing the review).
+ * @param props.onEdit - Callback invoked when the owner clicks the Edit button.
+ * @param props.onDelete - Callback invoked when the owner clicks the Delete button.
+ * @param props.isEditing - When true and the current user owns the review, the component renders the inline edit form.
+ * @param props.onCancelEdit - Callback invoked when the inline edit form is cancelled or successfully saved.
+ *
+ * @returns A JSX element rendering the review card, or `null` when required review fields are missing.
+ *
+ * @see ReviewForm
+ * @see ReviewListSection
+ * @see BaseCard
  */
 function ReviewCardItem({
   review,

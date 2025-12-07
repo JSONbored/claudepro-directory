@@ -66,6 +66,19 @@ export interface UnifiedDetailPageProps {
   viewCountPromise?: Promise<number>;
 }
 
+/**
+ * Log a standardized warning when processing of a detail page section fails.
+ *
+ * Normalizes the provided error and emits a warning with the section name, the item's category and slug, and the normalized error message.
+ *
+ * @param section - Human-readable name of the section that failed (e.g., "configuration", "examples")
+ * @param error - The original error thrown or received during processing
+ * @param item - Content item being processed; used to include `category` and `slug` in the log context
+ *
+ * @see normalizeError
+ * @see logger
+ * @see UnifiedDetailPage
+ */
 function logDetailProcessingWarning(
   section: string,
   error: unknown,
@@ -83,7 +96,15 @@ function logDetailProcessingWarning(
 }
 
 /**
- * Safely extracts configuration from item or metadata as a string
+ * Retrieve the configuration value from a content item or its metadata as a string.
+ *
+ * Checks the top-level `configuration` field on the provided `item` first; if present and not a string,
+ * it JSON-stringifies the value with 2-space indentation. If not found on the item, it attempts the same
+ * extraction from `metadata.configuration`. Returns `null` when no configuration is present.
+ *
+ * @param item - Content row (either a fully-joined content result or a plain content table row) to read `configuration` from
+ * @param metadata - Associated metadata object which may contain a `configuration` entry
+ * @returns The configuration serialized as a string, or `null` if no configuration is available
  */
 function getConfigurationAsString(
   item:
@@ -112,6 +133,19 @@ function getConfigurationAsString(
   return null;
 }
 
+/**
+ * Renders DetailMetadata after resolving the view count and optional copy count.
+ *
+ * Awaits `viewCountPromise` and either `copyCountPromise` or the provided `copyCount`, then returns a DetailMetadata element with those resolved counts.
+ *
+ * @param item - Content row data used to render metadata (can be the expanded content return type or a raw content table row).
+ * @param viewCountPromise - Promise resolving to the number of views for the content item.
+ * @param copyCount - Optional pre-resolved number of times the content was copied; used if `copyCountPromise` is not provided.
+ * @param copyCountPromise - Optional promise resolving to the copy count; takes precedence over `copyCount` when provided.
+ * @returns The DetailMetadata React element populated with `viewCount` and `copyCount`.
+ *
+ * @see DetailMetadata
+ */
 async function ViewCountMetadata({
   item,
   viewCountPromise,
@@ -173,19 +207,17 @@ async function SidebarWithRelated({
 }
 
 /**
- * Render the detail page for a content item, composing the header, metadata, main content sections, and sidebars.
+ * Render the detail page for a content item, composing header, metadata, main content sections, and sidebars.
  *
- * Renders configuration, installation, examples, content/code sections, and optional tabbed layouts; supports streaming of view and copy counts via promise props and accepts pre-fetched or eagerly provided related items for the sidebar.
- *
- * @param props.item - Content row or expanded content detail used to build the page.
- * @param props.relatedItems - Eagerly provided related items for the sidebar.
- * @param props.viewCount - Pre-fetched view count to render immediately.
- * @param props.copyCount - Pre-fetched copy count to render immediately.
- * @param props.relatedItemsPromise - Promise that resolves to related items for streaming into the sidebar.
- * @param props.viewCountPromise - Promise that resolves to the view count for streaming into metadata.
- * @param props.copyCountPromise - Promise that resolves to the copy count for streaming into metadata.
- * @param props.collectionSections - React node with collection-specific sections to include in the main content.
- * @param props.tabsEnabled - When true and the category configuration defines tabs, render the tabbed layout.
+ * @param props.item - Content row or expanded content detail used to build the page; used to derive title, metadata, content, and configuration.
+ * @param props.relatedItems - Eagerly provided related items to display in the sidebar.
+ * @param props.viewCount - Optional pre-fetched view count to render immediately in metadata.
+ * @param props.copyCount - Optional pre-fetched copy count to render immediately in metadata.
+ * @param props.relatedItemsPromise - Optional promise resolving to related items for streaming into the sidebar.
+ * @param props.viewCountPromise - Optional promise resolving to the view count for streaming into metadata.
+ * @param props.copyCountPromise - Optional promise resolving to the copy count for streaming into metadata.
+ * @param props.collectionSections - Optional React node containing collection-specific sections to include in the main content.
+ * @param props.tabsEnabled - When true and the category configuration defines tabs, render the tabbed layout instead of the default linear layout.
  * @returns The JSX element for the rendered detail page for the provided content item.
  *
  * @see getCategoryConfig

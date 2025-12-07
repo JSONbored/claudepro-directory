@@ -30,6 +30,19 @@ const isValidEmail = (email: string): boolean => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 };
 
+/**
+ * Promotional card for hiring Claude developers with an integrated newsletter signup.
+ *
+ * Renders a styled promo card that presents community metrics, value propositions, a CTA to post jobs,
+ * and an optional collapsible email signup for job alerts that validates input, displays submission state
+ * and errors, and triggers a success handler (including subtle confetti) on successful subscription.
+ *
+ * @returns The rendered JobsPromo JSX element.
+ *
+ * @see useNewsletter
+ * @see useConfetti
+ * @see isValidEmail
+ */
 export function JobsPromo() {
   const { fireConfetti } = useConfetti();
   const [showNewsletterForm, setShowNewsletterForm] = useState(false);

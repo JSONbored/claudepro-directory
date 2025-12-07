@@ -65,10 +65,16 @@ const geistMono = localFont({
 });
 
 /**
- * Get cached homepage metadata
+ * Retrieve the homepage metadata and cache it with server-side revalidation.
  *
- * Uses 'use cache' to cache homepage metadata for 24 hours.
- * This data is public and same for all users, so it can be cached at build time.
+ * Uses server cache controls to keep a shared, public copy of the homepage metadata
+ * and to revalidate on the schedule configured by the cache utilities.
+ *
+ * @returns The generated `Metadata` for the homepage.
+ *
+ * @see generatePageMetadata
+ * @see cacheLife
+ * @see cacheTag
  */
 async function getCachedHomeMetadata(): Promise<Metadata> {
   'use cache';
@@ -78,11 +84,36 @@ async function getCachedHomeMetadata(): Promise<Metadata> {
   return generatePageMetadata('/');
 }
 
+/**
+ * Retrieve the site's homepage metadata.
+ *
+ * Delegates to a cached server helper that returns the generated Metadata for the root path.
+ * The cached helper applies cache lifetimes and tags for ISR (stale-while-revalidate and revalidation).
+ *
+ * @returns The generated Metadata object for the homepage.
+ *
+ * @see getCachedHomeMetadata
+ * @see generatePageMetadata
+ * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata
+ */
 async function getHomeMetadata() {
   return getCachedHomeMetadata();
 }
 
-// Generate homepage metadata from centralized registry
+/**
+ * Provide site-wide Metadata for Next.js by merging cached homepage metadata with app-specific defaults.
+ *
+ * Fetches cached homepage metadata (used across pages for SEO) and augments it with the application's
+ * base URL, author info, Open Graph and Twitter defaults, alternates, icons, and manifest.
+ *
+ * @returns A `Metadata` object combining the cached homepage metadata with app-level defaults:
+ *          base URL, authors, Open Graph (including locale), Twitter creator handle, alternates (including `text/plain`),
+ *          favicons/icons, and the web manifest.
+ *
+ * @see getHomeMetadata
+ * @see APP_CONFIG
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   // Note: This metadata fetch is intentional in layout for site-wide SEO
   // The data is cached and shared across all pages
@@ -146,8 +177,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Simple server component fallback for Suspense
- * Does not use any client-side hooks to avoid blocking during prerendering
+ * Server-safe Suspense fallback that renders children inside a full-height column layout.
+ *
+ * @param children - Content to render inside the main content area while the parent Suspense is pending
+ * @returns A wrapper element with a background and a full-height main region containing `children`
+ *
+ * @see LayoutDataWrapper
+ * @see LayoutContent
  */
 function LayoutFallback({ children }: { children: React.ReactNode }) {
   return (
@@ -160,8 +196,17 @@ function LayoutFallback({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Server component wrapper that fetches layout data and passes it to LayoutContent
- * Wrapped in Suspense to avoid blocking the layout render
+ * Fetches layout data non-blockingly and renders LayoutContent around the provided children.
+ *
+ * This async server component attempts to retrieve layout data (announcements and navigation)
+ * and passes that data to LayoutContent. If the fetch fails, it falls back to DEFAULT_LAYOUT_DATA
+ * and logs the failure with a generated requestId; it does not throw or block rendering.
+ *
+ * @param children - The content to render inside LayoutContent
+ *
+ * @see getLayoutData
+ * @see DEFAULT_LAYOUT_DATA
+ * @see LayoutContent
  */
 async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
   const [layoutDataResult] = await Promise.allSettled([getLayoutData()]);
@@ -203,12 +248,12 @@ async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Application root layout that renders the global HTML scaffold and top-level providers.
+ * Application root layout that provides the global HTML scaffold, fonts, meta tags, theme and notification providers, and top-level UI plumbing.
  *
- * Renders HTML/head/body with global meta, font variables, theme and notification providers, and layout content. Layout data (announcements and navigation) is fetched non-blockingly; on failure the component falls back to DEFAULT_LAYOUT_DATA and logs the error. The layout is statically rendered (no server actions or headers) and uses static component configuration.
+ * Layout data (announcements and navigation) is fetched non-blockingly; on failure the component falls back to DEFAULT_LAYOUT_DATA and logs the error. Fonts are self-hosted and manifest/icons are configured for PWA support.
  *
  * @param children - Page content to be rendered inside the layout
- * @returns The root HTML element for the application layout
+ * @returns The root HTML element representing the application's top-level layout
  *
  * @see getLayoutData
  * @see DEFAULT_LAYOUT_DATA

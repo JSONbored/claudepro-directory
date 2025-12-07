@@ -31,8 +31,20 @@ import {
 import { memo } from 'react';
 
 /**
- * Validate and sanitize external URL for safe use in window.open
- * Only allows HTTPS/HTTP URLs, returns canonicalized URL or null if invalid
+ * Produce a canonical, safe external URL suitable for opening in a new tab.
+ *
+ * Accepts a string URL (or null/undefined) and returns a sanitized href only if the URL is a valid HTTP or HTTPS URL and does not contain embedded credentials.
+ *
+ * Observed behavior:
+ * - Allows `http:` and `https:` schemes only.
+ * - Rejects URLs that include a username or password.
+ * - Normalizes the hostname to lowercase and removes a trailing dot.
+ * - Removes default ports `80` and `443`.
+ *
+ * @param url - The input URL to validate and sanitize; may be `null` or `undefined`.
+ * @returns `null` if the input is not a valid or allowed external URL, otherwise the canonicalized URL string.
+ *
+ * @see URL
  */
 function getSafeExternalUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
@@ -130,6 +142,21 @@ const getMemberBadge = (user: UserProfile) => {
   };
 };
 
+/**
+ * Render a profile card for a user with avatar, badges, metadata, and optional action buttons.
+ *
+ * Renders an avatar (image or fallback initials), display name and work title, top badges (member type and up to two interests),
+ * metadata badges (contributions and followers), and optional action buttons for website, social link, and viewing the full profile.
+ *
+ * @param user - The user profile data to display; may include optional fields such as `image`, `slug`, `name`, `work`, `interests`, `website`, `social_x_link`, `total_contributions`, and `followers_count`.
+ * @param variant - Layout variant; `'compact'` reduces visual spacing, `'default'` uses the normal layout.
+ * @param showActions - When true, renders action buttons (website, social link, view profile) when corresponding data is available.
+ * @returns A React element representing the profile card for the given user.
+ *
+ * @see BaseCard
+ * @see getSafeExternalUrl
+ * @see getMemberBadge
+ */
 function ProfileCardComponent({ user, variant = 'default', showActions = true }: ProfileCardProps) {
   const pulse = usePulse();
   const memberBadge = getMemberBadge(user);

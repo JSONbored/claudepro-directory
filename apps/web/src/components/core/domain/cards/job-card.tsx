@@ -26,6 +26,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
 
+/**
+ * Produce a sanitized, safe href for a job link or a fallback when the input is missing or invalid.
+ *
+ * Removes credentials, trims trailing dots from hostnames, lowercases the hostname, and omits default HTTPS port 443; only HTTPS URLs are accepted.
+ *
+ * @param link - The raw job URL (may be null or undefined) sourced from external data
+ * @returns The normalized `href` for a valid HTTPS URL, or `'#'` when the input is absent, invalid, or not HTTPS
+ *
+ * @see JobCard
+ */
 function getSafeJobLink(link?: null | string): string {
   if (!link || typeof link !== 'string') return '#';
   try {
@@ -47,6 +57,23 @@ function getSafeJobLink(link?: null | string): string {
   }
 }
 
+/**
+ * Renders a job listing card with metadata, badges, tags, description, and action buttons.
+ *
+ * Displays company logo, highlighted title and description when available, location, posted date,
+ * salary, job type and remote badges, up to four tags (with a "+N more" indicator), and two actions:
+ * "Apply Now" (opens the job link in a new tab) and "View Details" (navigates to the job details page).
+ *
+ * The component records click telemetry for the action buttons.
+ *
+ * @param job - The job data used to populate the card (title, company, logo, location, posted_at, salary, type, remote, tags, link, slug, tier, and optional highlighted fields).
+ * @returns The rendered JSX element for the job card.
+ *
+ * @see getSafeJobLink - used to produce a validated external URL for the "Apply Now" action.
+ * @see formatRelativeDate - used to render relative posted dates.
+ * @see HighlightedText - used to render pre-highlighted title/description HTML.
+ * @see UnifiedBadge - used for job type, remote, tag, and featured badges.
+ */
 export function JobCard({ job }: JobCardProps) {
   const pulse = usePulse();
   const isFeatured = job.tier === 'featured';

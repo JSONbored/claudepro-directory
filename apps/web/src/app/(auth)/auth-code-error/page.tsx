@@ -71,6 +71,14 @@ export default function AuthCodeError(properties: PagePropsWithSearchParams) {
   );
 }
 
+/**
+ * Renders an authentication error card based on URL query parameters.
+ *
+ * @param searchParams - A Promise that resolves to a record of query parameters where values may be strings or string arrays. The component extracts optional `code`, `provider`, and `message` keys; `code` and `provider` default to `"unknown"` when absent and `message` may be `undefined`.
+ * @returns A JSX element containing an authentication error card with actions to retry login or return home.
+ *
+ * @see AUTH_CODE_ERROR_PATH
+ */
 async function AuthCodeErrorContent({
   searchParams,
 }: {

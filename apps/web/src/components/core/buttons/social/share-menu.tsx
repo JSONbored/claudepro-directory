@@ -45,7 +45,16 @@ interface ShareMenuProps {
 }
 
 /**
- * Build URL with UTM parameters
+ * Constructs a URL augmented with UTM tracking parameters.
+ *
+ * Adds `utm_source`, `utm_medium=share`, and `utm_campaign` to the provided base URL.
+ *
+ * @param baseUrl - The base URL to augment; existing query parameters are preserved.
+ * @param source - Value to set for `utm_source`.
+ * @param campaign - Value to set for `utm_campaign`. Defaults to `'content'`.
+ * @returns The resulting URL string with the UTM parameters applied.
+ *
+ * @see ShareMenu
  */
 function buildShareUrl(baseUrl: string, source: string, campaign = 'content'): string {
   const url = new URL(baseUrl);
@@ -55,6 +64,21 @@ function buildShareUrl(baseUrl: string, source: string, campaign = 'content'): s
   return url.toString();
 }
 
+/**
+ * Renders a share menu button that opens a dropdown with options to share the provided URL via X (Twitter), LinkedIn, Email, copy-to-clipboard, or the native share sheet when available.
+ *
+ * @param props.url - The destination URL to share.
+ * @param props.title - The title used for share payloads (social text, email subject, native share title).
+ * @param props.description - Optional description used in social text, email body, and native share text.
+ * @param props.utmCampaign - Optional UTM campaign name appended to the shared URL; defaults to `"content"`.
+ * @param props.onShare - Optional callback invoked after a successful share action with a string identifying the platform (e.g., `"twitter"`, `"linkedin"`, `"copy_link"`, `"native"`).
+ * @param props.variant - Button visual variant (`"default" | "ghost" | "outline"`); defaults to `"outline"`.
+ * @param props.showChevron - Whether to display a chevron icon in the trigger button; defaults to `true`.
+ * @param props.label - Trigger button label text; defaults to `"Share"`.
+ * @returns The ShareMenu React element.
+ *
+ * @see buildShareUrl - Utility used to construct UTM-augmented share URLs.
+ */
 export function ShareMenu({
   url,
   title,

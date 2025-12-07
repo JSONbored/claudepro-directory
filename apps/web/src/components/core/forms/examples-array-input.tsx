@@ -92,8 +92,15 @@ interface ExamplesArrayInputProps {
 }
 
 /**
- * Validate a single example
- * Replaces Zod validation for bundle size optimization
+ * Validates a UsageExample object against the component's content and length constraints.
+ *
+ * Ensures the title is present and at most 100 characters, the code is present and at most 10,000 characters, the language is one of SUPPORTED_LANGUAGES, and the optional description is at most 500 characters.
+ *
+ * @param example - The UsageExample to validate
+ * @returns An object with `valid: true` when all checks pass; otherwise `valid: false` and `error` containing a short message describing the first failing rule.
+ *
+ * @see ExamplesArrayInput
+ * @see SUPPORTED_LANGUAGES
  */
 function validateExample(example: UsageExample): { error?: string; valid: boolean } {
   // Validate title
@@ -127,10 +134,18 @@ function validateExample(example: UsageExample): { error?: string; valid: boolea
 }
 
 /**
- * ExamplesArrayInput Component
+ * Renders a UI for managing a dynamic list of usage examples and serializes them to a hidden JSON input for form submission.
  *
- * Manages a dynamic array of usage examples with validation.
- * Serializes to JSON and stores in hidden input for form submission.
+ * Each example contains title, code, language, and optional description; the component strips internal IDs before serializing.
+ *
+ * @param name - The HTML form field name to use for the hidden JSON input (required).
+ * @param defaultValue - Initial array of examples to populate the UI. Missing `id` values are auto-generated.
+ * @param maxExamples - Maximum number of examples allowed (defaults to 10).
+ *
+ * @returns The ExamplesArrayInput React element.
+ *
+ * @see validateExample
+ * @see SUPPORTED_LANGUAGES
  */
 export function ExamplesArrayInput({
   name,

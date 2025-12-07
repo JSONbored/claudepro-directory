@@ -42,6 +42,31 @@ interface AnimatedFormFieldProps {
   warningMessage?: string;
 }
 
+/**
+ * Renders a form field wrapper that provides animated focus/validation visuals, optional character count, and contextual messages.
+ *
+ * Displays a label, required indicator, animated border and glow based on focus and validation state, an optional validation icon, a help/error/warning/success message with icon, and a focus indicator bar. Character count is shown when enabled and `maxLength` is provided.
+ *
+ * @param children - The input element(s) to render inside the field wrapper (e.g., input, textarea, select).
+ * @param label - The visible label text associated with the field.
+ * @param id - The id used by the label's htmlFor to associate the label with the field.
+ * @param required - Whether the field is required; renders a required indicator when true.
+ * @param helpText - Informational text shown when no error, warning, or success message is present.
+ * @param errorMessage - Error message text; takes priority over warning, success, and help text.
+ * @param warningMessage - Warning message text; shown if no errorMessage is present.
+ * @param successMessage - Success message text; shown if no errorMessage or warningMessage is present.
+ * @param validationState - Visual validation state; one of `'idle' | 'invalid' | 'valid' | 'warning'`.
+ * @param showCharCount - When true and `maxLength` is provided, displays the current / max character count.
+ * @param currentLength - Current number of characters in the field; used for the character count display.
+ * @param maxLength - Maximum allowed characters; used for the character count display and styling when near/over limit.
+ * @param className - Additional class names applied to the outer container.
+ * @param fieldClassName - Additional class names applied to the field wrapper that surrounds `children`.
+ * @param onFocus - Optional focus event handler forwarded from the inner field(s); called when the wrapper receives focus.
+ * @param onBlur - Optional blur event handler forwarded from the inner field(s); called when the wrapper loses focus.
+ * @returns The rendered AnimatedFormField component tree.
+ *
+ * @see FormFieldVariants for preconfigured field variants (text, textarea, select).
+ */
 export function AnimatedFormField({
   children,
   label,

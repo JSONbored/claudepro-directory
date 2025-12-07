@@ -31,6 +31,21 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+/**
+ * Display a suggestion when a provided name appears too generic.
+ *
+ * Evaluates the `name` (debounced by a configurable timeout) and renders:
+ * - a transient "Checking for duplicates..." indicator while evaluating,
+ * - an Alert suggesting a more specific name when the evaluated name is considered generic,
+ * - nothing when no suggestion is needed.
+ *
+ * @param contentType - The content category of the item being named (currently unused by this component)
+ * @param name - The name to evaluate for genericness and duplicate suggestions
+ * @returns A React node containing a suggestion Alert when applicable, a checking indicator while evaluating, or `null`
+ *
+ * @see getTimeoutConfig
+ * @see useDebounce
+ */
 export function DuplicateWarning({ contentType: _contentType, name }: DuplicateWarningProps) {
   const [checking, setChecking] = useState(false);
   const [warning, setWarning] = useState<null | string>(null);

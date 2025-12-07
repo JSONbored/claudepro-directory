@@ -15,8 +15,13 @@ import { Suspense } from 'react';
  * @see {@link Metadata}
  */
 /**
- * Static Generation: Legal pages are fully static and never change
- * No automatic revalidation - pages are statically generated at build time
+ * Provide Next.js metadata for the Privacy page, deferring non-deterministic operations to request time.
+ *
+ * Awaits a server connection to allow safe use of non-deterministic values (e.g., current date) in Cache Components, then returns generated metadata for the '/privacy' route.
+ *
+ * @returns The page metadata for the privacy route.
+ * @see generatePageMetadata
+ * @see connection
  */
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -27,12 +32,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the Privacy Policy page displaying the site's last-updated date and policy sections.
+ * Render the Privacy Policy page with its last-updated date and policy sections.
  *
- * The component obtains the site's last-updated date, displays it, and presents policy sections
- * covering information collection, use, sharing, cookies, security, user rights, children's
- * privacy, changes, and contact information. Internal navigation links point to the Cookies and
- * Contact pages.
+ * This server component defers non-deterministic operations by awaiting the runtime
+ * connection, creates a request-scoped logger for the page request, and renders the
+ * Privacy Policy content within a Suspense boundary (fallback shown while loading).
  *
  * @returns The Privacy Policy page as a JSX element.
  *
@@ -65,6 +69,16 @@ export default async function PrivacyPage() {
   );
 }
 
+/**
+ * Renders the Privacy Policy page content and emits a request-scoped render log.
+ *
+ * @param reqLogger - Request-scoped logger (created via `logger.child`) used to record structured log entries for this render.
+ * @returns The JSX element containing the privacy policy content, including the last-updated date and sectioned policy text.
+ *
+ * @see getLastUpdatedDate
+ * @see NavLink
+ * @see APP_CONFIG
+ */
 function PrivacyPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
 

@@ -136,12 +136,9 @@ const DEFAULT_FORM_DATA: FormData = {
 };
 
 /**
- * Renders and orchestrates a multi-step client-side submission wizard for creating and submitting content.
+ * Multi-step submission wizard that collects content details, manages drafts, loads and applies templates, validates and uploads thumbnails, computes a quality score, and submits content for review.
  *
- * The component manages wizard state, form data, draft persistence, template loading and application,
- * thumbnail validation/upload, social-proof fetching, quality scoring, and the final submission flow.
- *
- * @returns The wizard UI as a React element, including step content, navigation controls, inline preview, and social proof.
+ * @returns The wizard UI as a React element.
  *
  * @see WizardLayout
  * @see DraftManager

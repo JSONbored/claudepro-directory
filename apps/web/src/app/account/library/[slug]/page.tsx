@@ -35,9 +35,11 @@ interface CollectionPageProperties {
 }
 
 /**
- * Generate metadata for the collection page at the '/account/library/:slug' route.
+ * Generates page metadata for the collection route /account/library/:slug.
  *
- * @param params - Object providing route parameters; the resolved value includes `slug`
+ * Awaits a request-scoped server connection so non-deterministic operations (e.g., dates) are evaluated at request time.
+ *
+ * @param params - Promise-resolved route parameters containing `slug`
  * @returns Metadata for the collection page
  *
  * @see generatePageMetadata
@@ -88,6 +90,18 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   );
 }
 
+/**
+ * Renders the collection detail content for the slug provided in route params and attaches a route-scoped logger.
+ *
+ * Awaits route params to obtain the collection slug, creates a logger scoped to the route, and renders CollectionDetailContent with those values.
+ *
+ * @param params - A promise resolving to an object containing the route `slug`
+ * @param reqLogger - The request-scoped logger to derive a route-scoped child logger from
+ * @returns The CollectionDetailContent React element for the requested collection
+ *
+ * @see CollectionDetailContent
+ * @see logger
+ */
 async function CollectionDetailPageContent({
   params,
   reqLogger,
@@ -104,6 +118,22 @@ async function CollectionDetailPageContent({
   return <CollectionDetailContent slug={slug} reqLogger={routeLogger} />;
 }
 
+/**
+ * Render the collection detail page for a given collection slug after ensuring an authenticated user.
+ *
+ * Authenticates the request, redirects to the login page for unauthenticated requests, loads the collection
+ * detail for the authenticated user, displays an error card when loading fails, calls `notFound()` when the
+ * collection is not found or inaccessible, and otherwise renders the collection header, item manager, and stats.
+ *
+ * @param props.slug - The collection slug from the route.
+ * @param props.reqLogger - Request-scoped logger used to record authentication, data-fetch, and render events.
+ * @returns The rendered collection detail JSX for the authenticated user or an error UI when loading fails.
+ *
+ * @see getAuthenticatedUser
+ * @see getCollectionDetail
+ * @see CollectionItemManager
+ * @see ROUTES.ACCOUNT_LIBRARY
+ */
 async function CollectionDetailContent({
   slug,
   reqLogger,

@@ -45,10 +45,12 @@ import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 
 /**
- * Sanitizes path segment to prevent SSRF/path traversal.
- * Allows a-z, A-Z, 0-9, dash, underscore, dot, NO slash or backslash.
- * Returns null if invalid to allow graceful fallback instead of crashing.
- * Used to construct safe URLs.
+ * Validate and return a safe path segment for use in URLs.
+ *
+ * Allows only ASCII letters, digits, dot (.), underscore (_), and hyphen (-) and enforces a length between 1 and 64 characters.
+ *
+ * @param segment - The raw path segment to validate
+ * @returns The original `segment` if it meets the safety rules, `null` otherwise
  */
 function sanitizePathSegment(segment: string): null | string {
   // Only allow a-z, A-Z, 0-9, dash, underscore, dot.
@@ -62,7 +64,10 @@ function sanitizePathSegment(segment: string): null | string {
 }
 
 /**
- * Determine copy type based on content item structure
+ * Infer whether an item's copyable content should be treated as `code` or `link`.
+ *
+ * @param item - A content item which may include `content` or `configuration` fields.
+ * @returns `'code'` if the item contains `content` or `configuration`, `'link'` otherwise.
  */
 function determineCopyType(
   item:
@@ -81,8 +86,12 @@ function determineCopyType(
 }
 
 /**
- * Safely extracts content or configuration from item as a string for copying
- * Returns null if no usable content exists (prevents copying empty strings)
+ * Extracts a non-empty string suitable for copying from a content item or its configuration.
+ *
+ * @param item - The content item or the detailed content payload returned by `get_content_detail_complete`
+ * @returns A non-empty string from `item.content` or `item.configuration`, or `null` if no usable content exists.
+ *
+ * @see determineCopyType
  */
 function getContentForCopy(
   item:

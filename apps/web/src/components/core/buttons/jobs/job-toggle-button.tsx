@@ -20,6 +20,26 @@ export interface JobToggleButtonProps extends ButtonStyleProps {
   jobId: string;
 }
 
+/**
+ * Renders a button that toggles a job's status between `active` and `draft`.
+ *
+ * The button shows "Pause" when `currentStatus` is `active` and "Resume" otherwise;
+ * clicking it triggers a server action to update the job status, displays a success or error toast,
+ * and refreshes the page data.
+ *
+ * @param jobId - The identifier of the job to toggle
+ * @param currentStatus - Current job status used to determine button label and next state
+ * @param size - Button size variant (defaults to `'sm'`)
+ * @param variant - Button visual variant (defaults to `'ghost'`)
+ * @param className - Optional CSS class names applied to the button
+ * @param disabled - If true, the button is non-interactive (defaults to `false`)
+ *
+ * @returns A React element for a status-toggle button
+ *
+ * @see toggleJobStatus
+ * @see useLoggedAsync
+ * @see toasts
+ */
 export function JobToggleButton({
   jobId,
   currentStatus,

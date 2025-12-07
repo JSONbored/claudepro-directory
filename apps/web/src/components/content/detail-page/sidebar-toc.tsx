@@ -31,6 +31,15 @@ interface NormalizedHeading {
   title: string;
 }
 
+/**
+ * Normalize and sanitize an array of heading metadata for rendering in the table of contents.
+ *
+ * Processes the input list by trimming title/id strings, skipping invalid entries, deduplicating by `id`,
+ * clamping heading `level` to the range 2–6 (default 2), ensuring each heading has an `anchor` that begins with `#`
+ * (falling back to `#id`), and limiting the result to the first 50 unique headings.
+ *
+ * @param headings - Array of heading metadata objects to normalize; may be `null` or `undefined`.
+ * @returns An array of `NormalizedHeading` objects ready for use in the sidebar TOC.
 function normalizeHeadings(
   headings: ContentHeadingMetadata[] | null | undefined
 ): NormalizedHeading[] {
@@ -74,6 +83,20 @@ function normalizeHeadings(
   return [...deduped.values()];
 }
 
+/**
+ * Renders a right-side, scroll-synced table of contents for a page with heading links.
+ *
+ * Renders nothing when the provided headings are fewer than `minHeadings`. Displays a hierarchical list of headings, highlights the active item based on scroll position or URL hash, and updates the URL hash when an item becomes active or is clicked. Clicking a heading scrolls to its section with smooth behavior unless the user prefers reduced motion.
+ *
+ * @param headings - Array of heading metadata to show in the TOC; may be null or undefined. Headings are normalized, deduplicated, and capped before rendering.
+ * @param className - Optional additional CSS class names applied to the root nav element.
+ * @param minHeadings - Minimum number of headings required to render the TOC; defaults to 2.
+ * @returns The rendered navigation element containing the table of contents, or `null` when not rendered.
+ *
+ * @see normalizeHeadings
+ * @see STATE_PATTERNS
+ * @see cn
+ */
 export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
   const [activeId, setActiveId] = useState<null | string>(null);

@@ -44,9 +44,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Renders the Connected Accounts page for the current user, showing linked OAuth identities or a sign-in prompt when unauthenticated.
+ * Render the Connected Accounts page that displays the user's linked OAuth identities or a sign-in prompt when unauthenticated.
  *
- * @returns The page's React element containing the header and an OAuth providers card populated with the user's identities, or a sign-in prompt if no user is authenticated.
+ * This server component defers non-deterministic operations to request time (calls `connection()`), generates a request-scoped identifier and logger, and mounts the client/content renderer inside a Suspense boundary.
+ *
+ * @returns The page React element containing the header and an "OAuth Providers" card populated with the authenticated user's identities, or a sign-in prompt if no user is authenticated.
  *
  * @see getAuthenticatedUser
  * @see getUserIdentitiesData
@@ -79,6 +81,23 @@ export default async function ConnectedAccountsPage() {
   );
 }
 
+/**
+ * Renders the Connected Accounts page content, enforcing authentication, fetching the user's
+ * OAuth identities, and presenting either a sign-in prompt or the connected accounts UI.
+ *
+ * Performs server-side authentication via getAuthenticatedUser and retrieves identity data with
+ * getUserIdentitiesData; on fetch failure it falls back to an empty identities list so the page
+ * can still render.
+ *
+ * @param reqLogger - A request-scoped logger (created with `logger.child`) used for structured,
+ *   redacted logging throughout authentication, data fetching, and render phases.
+ * @returns A React element containing either a sign-in prompt when no user is authenticated or
+ *   the Connected Accounts UI populated with the user's OAuth identities.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserIdentitiesData
+ * @see ConnectedAccountsClient
+ */
 async function ConnectedAccountsPageContent({
   reqLogger,
 }: {

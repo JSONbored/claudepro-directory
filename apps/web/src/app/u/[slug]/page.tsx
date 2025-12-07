@@ -201,6 +201,25 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
   );
 }
 
+/**
+ * Renders the user profile page content for a given route slug, including profile header, activity stats, public collections, and contributions.
+ *
+ * @param params - Promise resolving to an object containing the route `slug`
+ * @param reqLogger - Request-scoped logger used for route and fetch logging
+ *
+ * @returns The server-rendered React element for the user profile page content
+ *
+ * @remarks
+ * - Performs server-side data fetching: authenticates the viewer (optional) and loads the public user profile.
+ * - Will invoke Next.js `notFound()` for invalid slugs or when the profile cannot be found.
+ * - Logs fetch results and errors; rethrows fetch errors after logging.
+ *
+ * @see getPublicUserProfile
+ * @see getAuthenticatedUser
+ * @see sanitizeDisplayText
+ * @see getSafeCollectionUrl
+ * @see getSafeContentUrl
+ */
 async function UserProfilePageContent({
   params,
   reqLogger,

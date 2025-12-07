@@ -61,6 +61,20 @@ export interface ReadProgressProps {
   zIndex?: number;
 }
 
+/**
+ * Render a smooth, configurable reading progress bar fixed to the top, bottom, or immediately below the site navigation.
+ *
+ * The bar animates its horizontal scale using a spring tied to the page scroll position and respects reduced-motion preferences via the provided spring configuration.
+ *
+ * @param position - Where to place the bar. 'below-nav' positions it directly under the site's <header> > <nav>, 'top' pins to the page top, 'bottom' pins to the page bottom. @default 'below-nav'
+ * @param height - Height of the progress bar in pixels. @default 5
+ * @param color - Visual color token to apply: 'accent', 'foreground', or 'primary'. Maps to corresponding background utility classes. @default 'accent'
+ * @param zIndex - CSS z-index value applied to the bar. @default 51
+ * @param springConfig - Spring physics controlling the smoothness of the scale animation. Provide `stiffness`, `damping`, and `restDelta` to tune responsiveness. Defaults to `{ stiffness: 400, damping: 40, restDelta: 0.0001 }`
+ * @returns The progress bar React element that visually represents reading progress as a percentage (0–100) via its horizontal scale.
+ *
+ * @see ReadProgressPresets
+ */
 export function ReadProgress({
   position = 'below-nav',
   height = 5,

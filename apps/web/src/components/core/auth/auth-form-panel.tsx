@@ -14,6 +14,17 @@ interface AuthFormPanelProps {
   title?: string;
 }
 
+/**
+ * Render an animated authentication panel with a heading, descriptive text, an icon grid for sign-in options, and optional trailing content.
+ *
+ * @param title - Heading text displayed above the sign-in options; defaults to `'Sign in'`.
+ * @param description - Supporting text shown under the heading; defaults to `'Choose your preferred sign-in method'`.
+ * @param children - Elements rendered within the centered icon grid (sign-in option buttons or icons).
+ * @param afterContent - Optional content rendered below the icon grid (e.g., links or secondary actions).
+ * @returns A JSX element containing the fully composed, animated auth panel.
+ *
+ * @see AuthFormPanelProps
+ */
 export function AuthFormPanel({
   title = 'Sign in',
   description = 'Choose your preferred sign-in method',

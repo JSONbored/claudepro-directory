@@ -55,6 +55,20 @@ interface JobAlertsCardProps {
   defaultRemote?: 'any' | 'remote';
 }
 
+/**
+ * Card UI that lets users create email job alerts filtered by category, experience, and remote preference.
+ *
+ * Renders a form with an email input and selects for preferred category, experience level, and location; submits preferences via the newsletter subscription hook.
+ *
+ * @param defaultCategory - Initial selected job category (defaults to "all")
+ * @param defaultExperience - Initial selected experience level (defaults to "any")
+ * @param defaultRemote - Initial selected remote preference, either "any" or "remote" (defaults to "any")
+ *
+ * @see useNewsletter - hook used to manage subscription state and send the subscription request
+ * @see CATEGORY_OPTIONS - available category choices shown in the category select
+ * @see EXPERIENCE_OPTIONS - available experience choices shown in the experience select
+ * @see REMOTE_OPTIONS - available location choices shown in the location select
+ */
 export function JobAlertsCard({
   defaultCategory = 'all',
   defaultExperience = 'any',

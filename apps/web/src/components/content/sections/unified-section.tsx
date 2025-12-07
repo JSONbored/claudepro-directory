@@ -52,6 +52,20 @@ const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon>
   changelog: Bot,
 };
 
+/**
+ * Renders a motion-animated card with a header (icon and title), optional description, and content.
+ *
+ * @param title - Heading text displayed in the card header.
+ * @param description - Optional secondary text shown under the title.
+ * @param icon - Fallback icon component used when `category` is not provided.
+ * @param category - Optional content category key used to select a category-specific icon from `ICONS`.
+ * @param className - Additional CSS classes applied to the outer Card container.
+ * @param children - Content rendered inside the card body.
+ * @returns A JSX element representing the animated card with header and content.
+ *
+ * @see ICONS - mapping of content categories to icon components
+ * @see Card, CardHeader, CardTitle, CardDescription, CardContent - Card primitives used to build the layout
+ */
 function Wrapper({
   title,
   description,
@@ -90,6 +104,14 @@ function Wrapper({
   );
 }
 
+/**
+ * Initiates a browser download of a plain text file using the given filename and content.
+ *
+ * @param filename - The desired name of the downloaded file (including extension).
+ * @param content - The text content to write into the file.
+ *
+ * @see URL.createObjectURL
+ */
 function downloadTextFile(filename: string, content: string) {
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -103,8 +125,20 @@ function downloadTextFile(filename: string, content: string) {
 }
 
 /**
- * TrustedHTML - Safely renders HTML content with XSS protection
- * Sanitizes HTML using DOMPurify before rendering
+ * Render HTML content safely by sanitizing it on the client while preserving server-rendered markup.
+ *
+ * Sanitizes `html` using DOMPurify after hydration to mitigate XSS risks. During server-side rendering
+ * the original `html` is rendered so markup is present for initial render; on the client the component
+ * dynamically imports DOMPurify, replaces the content with a sanitized version, and falls back to the
+ * original `html` if sanitization fails (a client warning is logged).
+ *
+ * @param html - The HTML string to render inside the wrapper element.
+ * @param className - Optional CSS class(es) applied to the wrapper element.
+ * @returns A div element containing the provided HTML (sanitized on the client when possible).
+ *
+ * @see https://github.com/cure53/DOMPurify
+ * @see logClientWarn
+ * @see normalizeError
  */
 function TrustedHTML({ html, className }: { className?: string; html: string }) {
   if (!html || typeof html !== 'string') {
@@ -176,7 +210,16 @@ function TrustedHTML({ html, className }: { className?: string; html: string }) 
 }
 
 /**
- * Tabbed code group component for displaying multiple code blocks in tabs
+ * Renders a tabbed interface for selecting and viewing multiple code blocks.
+ *
+ * Each tab displays a labeled code block and, when the active block includes a filename,
+ * exposes a Download button that saves the block's code and invokes an optional download callback.
+ *
+ * @param props.blocks - Array of code block objects. Each block must include `code`, `html`, `label`, and `language`. `filename` is optional; when present a Download button is shown for that block.
+ * @param props.onDownload - Optional callback invoked after a block is downloaded.
+ *
+ * @see ProductionCodeBlock
+ * @see downloadTextFile
  */
 function CodeGroupTabs({
   blocks,
@@ -247,10 +290,11 @@ function CodeGroupTabs({
 }
 
 /**
- * Render a vertical list of strings with a leading colored dot for each item.
+ * Renders a vertical list of strings with a leading colored dot for each item.
  *
- * @param items - Strings to render as list rows; each string becomes one list item.
+ * @param items - Strings to display as list rows; each string becomes one list item.
  * @param color - CSS class(es) applied to the dot indicator (typically Tailwind color classes).
+ * @returns The rendered list element.
  *
  * @see UI_CLASSES
  */
@@ -330,6 +374,20 @@ type PlatformStep =
   | { code: string; html: string; type: 'command' }
   | { text: string; type: 'text' };
 
+/**
+ * Renders a titled platform block showing a sequence of setup steps and optional configuration paths.
+ *
+ * Each step of type `"command"` is shown as a bash code block with a generated filename based on `name` and step index.
+ * Each step of type `"text"` is shown as a compact text row with a leading colored dot.
+ *
+ * @param props.name - Display name for the platform section (used as the heading and in generated filenames)
+ * @param props.steps - Ordered list of platform steps; command steps render a ProductionCodeBlock, text steps render inline text
+ * @param props.paths - Optional mapping of configuration keys to filesystem or config paths displayed under "Configuration Paths"
+ * @returns A JSX element containing the platform heading, rendered steps, and an optional configuration paths list
+ *
+ * @see ProductionCodeBlock
+ * @see UnifiedBadge
+ */
 function Platform({
   name,
   steps,
@@ -387,6 +445,28 @@ function Platform({
   );
 }
 
+/**
+ * Renders a unified, variant-driven documentation section (lists, code blocks, examples, installation, text, etc.) based on the provided props.
+ *
+ * This component switches on `props.variant` to render one of several section types:
+ * - 'list' and 'enhanced-list': compact item lists
+ * - 'code' and 'code-group': single or tabbed code blocks with optional download buttons
+ * - 'examples': multiple titled examples each with code and optional download
+ * - 'configuration': single, multi, or hook configuration code blocks with optional downloads
+ * - 'installation': platform-specific installation steps and optional requirement list
+ * - 'text': rich HTML content sanitized client-side via TrustedHTML
+ *
+ * When download buttons are used, a telemetry download event is attempted via the pulse hook; telemetry failures are logged but do not interrupt rendering or downloads.
+ *
+ * @param props - Props controlling the variant, content, presentation, and optional telemetry context for the section
+ * @returns The rendered React element for the requested section, or `null` when there is no content to display for the selected variant
+ *
+ * @see Wrapper
+ * @see ProductionCodeBlock
+ * @see TrustedHTML
+ * @see downloadTextFile
+ * @see usePulse
+ */
 export default function UnifiedSection(props: UnifiedSectionProps) {
   const pulse = usePulse();
   const baseItem = 'item' in props ? props.item : undefined;

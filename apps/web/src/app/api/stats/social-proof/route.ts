@@ -21,32 +21,27 @@ import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
 import { connection, NextResponse } from 'next/server';
 
 /**
- * Provide live social proof metrics: top contributors this week, recent submission count,
- * success rate for the last 30 days, and total user count.
+ * Provide live social proof metrics for the submission wizard.
  *
- * Uses an admin Supabase client to query submissions and content, computes:
- * - top contributors (up to 5 usernames derived from `author`),
- * - `submissions` (count over the past 7 days),
- * - `successRate` (percentage of submissions with status 'merged' over the past 30 days, or `null` if no data),
- * - `totalUsers` (content count, or `null` if unavailable),
- * and returns the results with caching headers and an ETag for conditional requests.
+ * Returns aggregated, derived values: top contributors this week (up to 5 usernames),
+ * `submissions` — count of submissions in the past 7 days, `successRate` — percentage of
+ * submissions with status 'merged' over the past 30 days (or `null` if there are no submissions),
+ * and `totalUsers` — total content/user count (or `null` if unavailable). The response also
+ * includes an ISO 8601 `timestamp` and is served with cache headers (`Cache-Control`, `ETag`,
+ * `Last-Modified`) to support conditional requests and short-term caching.
  *
- * Response headers:
- * - Cache-Control: public, s-maxage=300, stale-while-revalidate=600
- * - ETag: generated from timestamp and a compact stats hash
- * - Last-Modified: derived from the response timestamp
- *
- * ISR / revalidation: cache TTL and revalidate value set to 300 seconds (s-maxage=300).
- *
- * @returns A NextResponse containing a JSON body with:
- *  - `success`: `true`
- *  - `stats`:
- *    - `contributors`: `{ count: number, names: string[] }`
- *    - `submissions`: number
- *    - `successRate`: number | null
- *    - `totalUsers`: number | null
- *  - `timestamp`: ISO 8601 string
- * The response status is 200 on success. In case of an internal error, the route returns a standardized error response produced by `createErrorResponse`.
+ * @returns A NextResponse with status 200 and JSON body:
+ *  {
+ *    success: true,
+ *    stats: {
+ *      contributors: { count: number, names: string[] },
+ *      submissions: number,
+ *      successRate: number | null,
+ *      totalUsers: number | null
+ *    },
+ *    timestamp: string
+ *  }
+ *  On failure, returns a standardized error response produced by `createErrorResponse`.
  *
  * @see createSupabaseAdminClient
  * @see generateRequestId

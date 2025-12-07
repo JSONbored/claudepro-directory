@@ -77,11 +77,13 @@ interface CompanyPageProperties {
 const MAX_STATIC_COMPANIES = 10;
 
 /**
- * Produce route params for build-time pre-rendering of a subset of company pages.
+ * Generate route params for build-time pre-rendering of a subset of company pages.
  *
- * Generates up to MAX_STATIC_COMPANIES `{ slug }` objects for static pre-rendering; remaining company pages are rendered on demand via dynamic routing with ISR. If fetching companies fails or no slugs are available, returns an empty array.
+ * Produces up to `MAX_STATIC_COMPANIES` objects of the form `{ slug }` for static pre-rendering.
+ * If no valid slugs are found or fetching companies fails, returns a placeholder array containing `{ slug: '__placeholder__' }`
+ * to satisfy Cache Components build-time requirements so remaining pages can be rendered dynamically.
  *
- * @returns An array of objects each containing a `slug` string for a company page; empty if no slugs are available or fetching fails.
+ * @returns An array of `{ slug: string }` objects for build-time pre-rendering, or `[{ slug: '__placeholder__' }]` when no valid slugs are available or an error occurs.
  *
  * @see {@link /apps/web/src/app/companies/[slug]/page.tsx | CompanyPage}
  * @see {@link getCompaniesList} from @heyclaude/web-runtime/data
@@ -130,10 +132,12 @@ export async function generateStaticParams() {
 }
 
 /**
- * Create metadata for the company detail page using the route slug.
+ * Generate page metadata for a company detail route identified by `slug`.
+ *
+ * Defers non-deterministic work to request time before producing metadata for `/companies/:slug`.
  *
  * @param params - Route parameters containing the `slug` of the company
- * @returns The `Metadata` object for the /companies/:slug page
+ * @returns The Metadata for the `/companies/:slug` page
  *
  * @see generatePageMetadata
  */
@@ -150,15 +154,10 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
 }
 
 /**
- * PPR Optimization: Static shell renders immediately
- * - Static page structure (container, grid layout)
- * Dynamic content streams in Suspense:
- * - Company header (cached company data via getCompanyProfile)
- * - Job listings (active_jobs from cached profile)
- * - Stats sidebar (stats from cached profile)
+ * Render the company profile page shell and stream the header, job listings, and stats into their Suspense boundaries.
  *
- * Note: getCompanyProfile uses 'use cache' with cacheLife('half'), so multiple
- * Suspense boundaries calling it will hit the cache efficiently.
+ * The component emits a static page structure immediately (for partial page rendering) while CompanyHeader,
+ * CompanyJobsList, and CompanyStats load their cached data and stream into the UI.
  *
  * @param params - Route params object containing the `slug` of the company
  * @returns The React element tree for the company profile page (header, listings, and stats)
@@ -220,8 +219,19 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 }
 
 /**
- * Company header component - streams in Suspense
- * Fetches company profile (cached) and renders header
+ * Renders the company profile header for a company page.
+ *
+ * Fetches the company's cached profile and renders the logo, name, badges,
+ * description, and metadata links (website, industry, size, "using since" date).
+ * If the company cannot be found, logs a warning and calls `notFound()` to
+ * trigger a 404 response.
+ *
+ * @param props.slug - The company slug used to fetch the profile.
+ * @param props.reqLogger - Request-scoped logger used for route-scoped logging.
+ * @returns The header JSX for the company's profile page.
+ *
+ * @see getCompanyProfile
+ * @see SafeWebsiteLink
  */
 async function CompanyHeader({
   slug,
@@ -319,8 +329,19 @@ async function CompanyHeader({
 }
 
 /**
- * Company jobs list component - streams in Suspense
- * Fetches company profile (cached) and renders job listings
+ * Renders the company's active job listings section by fetching the company profile and displaying either a "No Active Positions" card or a grid of validated JobCard entries.
+ *
+ * Fetches the profile for `slug`, filters active jobs to required fields, and renders a count header plus the appropriate content.
+ *
+ * If the company is not found, logs a warning and calls `notFound()` to render a 404 response.
+ *
+ * @param props.slug - The company slug to load job listings for.
+ * @param props.reqLogger - A request-scoped logger; used to create a route-scoped child logger for this component.
+ * @returns A JSX element containing the section header and either a "No Active Positions" card or a grid of `JobCard` components.
+ *
+ * @see getCompanyProfile
+ * @see JobCard
+ * @see notFound
  */
 async function CompanyJobsList({
   slug,
@@ -437,8 +458,19 @@ async function CompanyJobsList({
 }
 
 /**
- * Company stats component - streams in Suspense
- * Fetches company profile (cached) and renders stats sidebar
+ * Renders a company statistics sidebar by fetching the company's profile and streaming the data into Suspense.
+ *
+ * Fetches the cached company profile for the given slug and renders summary stats (total jobs, active openings,
+ * remote positions, average salary, total views, latest posting) plus a CTA with a link to the company website when available.
+ * If the profile is missing or lacks a company, logs a warning and triggers a notFound response.
+ *
+ * @param props.slug - The company slug used to fetch the profile
+ * @param props.reqLogger - A request-scoped logger instance for structured logging
+ * @returns The sidebar JSX containing company stats and a CTA
+ *
+ * @see getCompanyProfile
+ * @see SafeWebsiteLink
+ * @see notFound
  */
 async function CompanyStats({
   slug,
@@ -546,7 +578,16 @@ async function CompanyStats({
 }
 
 /**
- * Skeleton components for PPR loading states
+ * Render a skeleton placeholder for the company header used during progressive rendering.
+ *
+ * Shows animated blocks that match the company header layout (logo, title, description, and metadata)
+ * to indicate loading state while the real CompanyHeader streams in.
+ *
+ * @returns A JSX element containing the skeleton header layout with animated placeholders.
+ *
+ * @see CompanyHeader - the real header component that replaces this skeleton
+ * @see CompanyJobsList - main content that loads alongside the header
+ * @see StatsSkeleton - related sidebar skeleton used during loading
  */
 function CompanyHeaderSkeleton() {
   return (
@@ -567,6 +608,17 @@ function CompanyHeaderSkeleton() {
   );
 }
 
+/**
+ * Renders a skeleton placeholder for the jobs list while job data is loading.
+ *
+ * Displays a pulsing heading block and four placeholder job cards to match the
+ * final list layout and preserve page structure during suspense-driven loading.
+ *
+ * @returns A JSX element containing the jobs list loading skeleton.
+ *
+ * @see JobsList
+ * @see JobCard
+ */
 function JobsListSkeleton() {
   return (
     <div className="space-y-6">
@@ -584,6 +636,15 @@ function JobsListSkeleton() {
   );
 }
 
+/**
+ * Render a skeleton placeholder for the Company Stats card while data is loading.
+ *
+ * Displays an animated header and five placeholder stat rows to match the final layout.
+ *
+ * @returns A JSX element containing a Card with an animated header and five stat-row placeholders.
+ *
+ * @see CompanyStats
+ */
 function StatsSkeleton() {
   return (
     <Card>

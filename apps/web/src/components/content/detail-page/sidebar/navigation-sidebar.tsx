@@ -63,8 +63,16 @@ function isValidInternalPath(path: string): boolean {
 }
 
 /**
- * Get safe content URL with validation
- * Returns null if category or slug is invalid
+ * Build a safe internal content-item URL from a category and slug, or return null if it cannot be validated.
+ *
+ * @param category - Content category (e.g., "agents", "integrations")
+ * @param slug - Content item slug (user-facing identifier)
+ * @returns The validated internal path for the content item, or `null` if the inputs or resulting path are invalid
+ *
+ * @see getContentItemUrl
+ * @see isValidCategory
+ * @see isValidSlug
+ * @see isValidInternalPath
  */
 function getSafeContentItemUrl(category: string, slug: string): null | string {
   if (!(isValidCategory(category) && isValidSlug(slug))) return null;
@@ -81,6 +89,19 @@ function getSafeContentItemUrl(category: string, slug: string): null | string {
   return url;
 }
 
+/**
+ * Normalize and validate a documentation URL, returning a safe absolute HTTPS URL or `null`.
+ *
+ * Attempts to parse `url`, requires the `https:` protocol, removes any embedded credentials,
+ * lowercases the hostname and removes a trailing dot, and clears port `443`. Returns the
+ * normalized URL string if valid, or `null` for empty, invalid, or non-HTTPS inputs.
+ *
+ * @param url - The input documentation URL to validate and normalize; may be `null` or `undefined`.
+ * @returns The normalized absolute HTTPS URL as a string, or `null` if the input is invalid or unsafe.
+ *
+ * @see getSafeContentItemUrl
+ * @see isValidInternalPath
+ */
 function getSafeDocumentationUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
 

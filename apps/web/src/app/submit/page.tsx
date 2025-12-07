@@ -176,9 +176,9 @@ export async function generateMetadata(): Promise<Metadata> {
  * Edge-cached data: Dashboard data fetched from edge-cached data layer
  */
 /**
- * Render the community submission page including the submission form, metrics dashboard, content templates, and a sidebar with recent activity and tips.
+ * Render the community submission page with the submission form, dashboard metrics, content templates, and a sidebar of recent activity and tips.
  *
- * This server component fetches data per-request: submission dashboard stats & recent submissions, submission form configuration, and content templates for supported categories. It performs runtime validation on category mappings and logs failures; template fetch failures for individual categories fall back to empty arrays so the page can still render. The page is edge-cached and uses the file-level `revalidate` for ISR.
+ * This server component performs per-request data fetching for submission dashboard stats, recent submissions, submission form configuration, and content templates for supported categories. It validates category mappings at runtime, logs invalid mappings, and tolerates per-category template fetch failures by falling back to empty template sets so the page can still render. The component is edge-cached and participates in the file-level ISR (revalidate) semantics, and it ensures request-time (non-deterministic) operations are allowed before proceeding.
  *
  * @returns The page's JSX element containing the hero, submission form, community stats, recent activity, and newsletter CTA.
  *
@@ -236,8 +236,16 @@ export default async function SubmitPage() {
 }
 
 /**
- * Server component that fetches dashboard stats and renders the hero.
- * Wrapped in Suspense to allow streaming.
+ * Fetches submission dashboard statistics and renders the SubmitPageHero with computed stats.
+ *
+ * Fetches recent dashboard data and derives `total`, `pending`, and `merged_this_week` values,
+ * falling back to `0` for any missing stats so the hero always receives complete numeric values.
+ *
+ * @param reqLogger - A scoped request logger created via `logger.child` used to record fetch outcomes.
+ * @returns The SubmitPageHero React element populated with the derived `stats` object.
+ *
+ * @see getSubmissionDashboard
+ * @see SubmitPageHero
  */
 async function SubmitPageHeroWithStats({
   reqLogger,
@@ -273,8 +281,19 @@ async function SubmitPageHeroWithStats({
 }
 
 /**
- * Server component that fetches form configuration and templates, then renders the form.
- * Wrapped in Suspense to allow streaming.
+ * Fetches submission form configuration and content templates, then renders the SubmitFormClient component.
+ *
+ * Fetches the form configuration via getSubmissionFormFields and, for each supported submission type,
+ * loads content templates via getContentTemplates. If template fetches fail for a category they are
+ * logged and an empty array is used for that category; if the overall templates list is empty a warning
+ * is emitted. Form configuration loading failures are propagated.
+ *
+ * @param reqLogger - A per-request scoped logger (result of logger.child) used for contextual logging.
+ * @returns The SubmitFormClient component configured with the fetched `formConfig` and `templates`.
+ * @throws The normalized error produced when loading the submission form configuration fails.
+ * @see getSubmissionFormFields
+ * @see getContentTemplates
+ * @see SubmitFormClient
  */
 async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Form Configuration
@@ -352,8 +371,16 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
 }
 
 /**
- * Server component that fetches dashboard data and renders the sidebar.
- * Wrapped in Suspense to allow streaming.
+ * Server component that fetches submission dashboard data and renders the submit page sidebar (community stats and recent activity).
+ *
+ * This component requests the submission dashboard, builds three summary stats (total, pending, merged this week), and prepares a list of recently merged submissions for display. If the dashboard fetch fails or data is missing, the component renders with default empty values so the page can show graceful fallbacks.
+ *
+ * @param reqLogger - A scoped request logger used for contextual logging of fetch outcomes.
+ * @returns A React fragment containing the community stats card and the activity/tips sidebar.
+ *
+ * @see getSubmissionDashboard
+ * @see SidebarActivityCard
+ * @see formatTimeAgo
  */
 async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   let dashboardData: Awaited<ReturnType<typeof getSubmissionDashboard>> = null;

@@ -32,7 +32,10 @@ import { Suspense } from 'react';
  */
 
 /**
- * Produce page metadata for the Companies page.
+ * Produce metadata for the /companies page.
+ *
+ * This defers non-deterministic work to request time to satisfy Cache Component requirements
+ * before delegating to the shared page metadata generator.
  *
  * @returns The metadata object for the `/companies` route.
  * @see generatePageMetadata
@@ -45,17 +48,19 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the Companies directory page including a hero, a responsive grid of company cards, and a newsletter CTA.
+ * Render the Companies directory page and initialize request-scoped logging for the request.
  *
- * Fetches the companies list (requesting up to 50 entries) and renders each company's card with optional logo, industry, description, stats, featured badge, and a validated external website link. The page uses incremental static regeneration with revalidate = 86400 (24 hours).
+ * This server component awaits `connection()` to ensure non-deterministic operations occur at request time,
+ * generates a single `requestId`, creates a request-scoped child logger, and renders the page content inside
+ * a React `Suspense` boundary which mounts `CompaniesPageContent`.
  *
- * @throws A normalized error when loading the companies list fails.
  * @returns The React element tree for the /companies route.
  *
- * @see getCompaniesList
- * @see getSafeWebsiteUrl from @heyclaude/web-runtime/core
+ * @see CompaniesPageContent
+ * @see connection from next/server
+ * @see generateRequestId
+ * @see logger
  * @see generatePageMetadata
- * @see revalidate (defined on line 49 in this file)
  */
 export default async function CompaniesPage() {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
@@ -80,6 +85,21 @@ export default async function CompaniesPage() {
   );
 }
 
+/**
+ * Render the companies directory content by fetching and displaying a list of companies.
+ *
+ * Fetches up to 50 companies, logs load and render events with the provided request-scoped logger,
+ * and throws a normalized error if the companies list cannot be loaded.
+ *
+ * @param reqLogger - A request-scoped logger (result of `logger.child`) used to record load, warning, error, and render events.
+ * @returns A React element containing the hero section and a responsive grid of company cards (or an empty-state card when no companies exist).
+ *
+ * @see getCompaniesList
+ * @see normalizeError
+ * @see getSafeWebsiteUrl
+ * @see logger.child
+ * @see ROUTES.ACCOUNT_COMPANIES
+ */
 async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Companies List
   let companiesResponse: Awaited<ReturnType<typeof getCompaniesList>> | null = null;

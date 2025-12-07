@@ -17,6 +17,15 @@ interface NormalizedHeading {
   title: string;
 }
 
+/**
+ * Convert raw heading metadata into a deduplicated, normalized list suitable for rendering a table of contents.
+ *
+ * @param headings - Array of raw heading objects (or null/undefined). Each item is expected to contain `id`, `title`, and optionally `level` and `anchor`. Non-array inputs return an empty array.
+ * @returns An array of NormalizedHeading objects: `id` and `title` are trimmed strings, `level` is rounded and clamped to the range 2–6 (default 2), `anchor` always begins with `#` (uses `#<id>` if missing), entries are unique by `id`, and the result contains at most 50 headings.
+ *
+ * @see NormalizedHeading
+ * @see DetailToc
+ */
 function normalizeHeadings(
   headings: ContentHeadingMetadata[] | null | undefined
 ): NormalizedHeading[] {
@@ -60,6 +69,18 @@ function normalizeHeadings(
   return [...deduped.values()];
 }
 
+/**
+ * Renders a table-of-contents navigation that highlights the currently visible section and lets users jump to headings.
+ *
+ * The component normalizes the provided headings, observes document headings to keep the active entry in sync with scroll position,
+ * updates the URL hash without adding history entries, and scrolls smoothly to targets when items are clicked (honoring reduced-motion).
+ *
+ * @param props.headings - Array of heading metadata to build the TOC from (may be null or undefined). If fewer than 3 normalized headings are available, nothing is rendered.
+ * @param props.className - Optional additional CSS classes applied to the root nav element.
+ * @returns A nav element containing the table of contents, or `null` when there are fewer than three headings.
+ *
+ * @see normalizeHeadings
+ */
 export function DetailToc({ headings, className }: DetailTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
   const [activeId, setActiveId] = useState<null | string>(null);

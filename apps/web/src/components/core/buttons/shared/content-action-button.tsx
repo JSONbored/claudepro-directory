@@ -20,8 +20,14 @@ interface ContentActionButtonProps extends ButtonStyleProps {
 }
 
 /**
- * Validate URL is safe for fetch (prevents SSRF)
- * Only allows relative URLs or absolute URLs from same origin
+ * Determine whether a URL is safe to fetch to prevent server-side request forgery.
+ *
+ * Allows relative URLs (starting with "/") or absolute URLs that share the current origin.
+ * When running server-side, only relative URLs are permitted. Returns `false` for invalid
+ * or unparsable URLs.
+ *
+ * @param url - The URL to validate
+ * @returns `true` if the URL is safe to fetch, `false` otherwise
  */
 function isSafeFetchUrl(url: string): boolean {
   try {
@@ -39,6 +45,28 @@ function isSafeFetchUrl(url: string): boolean {
   }
 }
 
+/**
+ * Renders a button that fetches content from a URL, runs an async action with that content, and surfaces success or error state to the user.
+ *
+ * The button validates the URL for safe fetching, prevents duplicate runs while loading or after success, executes the provided `action` with the fetched text, triggers a success state and toast on completion, and optionally fires analytics tracking without affecting the main action's outcome.
+ *
+ * @param url - The URL to fetch content from; must pass the internal safety check.
+ * @param action - Async callback invoked with the fetched content string.
+ * @param label - Text label displayed inside the button.
+ * @param successMessage - Message shown in a success toast after `action` completes.
+ * @param icon - Icon component to display when not in the success state.
+ * @param showIcon - Whether to render the icon; defaults to `true`.
+ * @param trackAnalytics - Optional async callback for analytics; failures are logged as warnings and do not change the primary success flow.
+ * @param variant - Button variant style.
+ * @param size - Button size.
+ * @param className - Additional CSS classes applied to the button.
+ * @param disabled - If true, disables the button.
+ * @returns The rendered button element.
+ *
+ * @see isSafeFetchUrl
+ * @see useLoggedAsync
+ * @see toasts
+ */
 export function ContentActionButton({
   url,
   action,

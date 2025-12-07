@@ -42,8 +42,20 @@ interface CollectionFormProps {
 }
 
 /**
- * Form component for creating and editing user collections.
- * Handles validation, submission, and navigation automatically.
+ * Render a form for creating or editing a user collection.
+ *
+ * The form manages fields for name, slug, description, and public visibility, performs
+ * client-side validation, and submits create or update requests. In create mode the form
+ * can optionally include a selectable list of bookmarks to add to the new collection.
+ *
+ * @param bookmarks - Optional list of bookmarks available to add when creating a collection.
+ * @param mode - Operation mode: `'create'` to create a new collection, `'edit'` to update an existing one.
+ * @param collection - Existing collection data used to initialize fields in edit mode.
+ * @returns The form element for creating or editing a collection.
+ *
+ * @see createCollection
+ * @see updateCollection
+ * @see useFormSubmit
  */
 export function CollectionForm({ bookmarks, mode, collection }: CollectionFormProps) {
   const [selectedBookmarks, setSelectedBookmarks] = useState<string[]>([]);

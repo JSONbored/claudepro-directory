@@ -12,9 +12,11 @@ import { type ReactNode } from 'react';
  */
 
 /**
- * Generate metadata for the "/submit" page.
+ * Generate metadata for the "/submit" page at request time.
  *
- * @returns The metadata object for the "/submit" page.
+ * Awaits a server connection to ensure non-deterministic operations (for example, `Date.now()`) occur at request time before producing metadata.
+ *
+ * @returns The `Metadata` object for the "/submit" page
  * @see {@link @heyclaude/web-runtime/data.generatePageMetadata}
  */
 export async function generateMetadata(): Promise<Metadata> {

@@ -9,6 +9,16 @@ import { motion } from 'motion/react';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 
+/**
+ * Compact mobile header that displays the HeyClaude brand logo and a subtitle with simple entrance animations.
+ *
+ * Renders a card-styled container containing the HeyClaudeLogo and a small caption ("Claude Pro Directory"); the container and caption animate into view on mount.
+ *
+ * @returns The JSX element for the mobile authentication header.
+ *
+ * @see HeyClaudeLogo
+ * @see UI_CLASSES.CARD_BODY_SPACING
+ */
 export function AuthMobileHeader() {
   return (
     <motion.div

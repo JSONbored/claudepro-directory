@@ -17,8 +17,13 @@ import { Suspense } from 'react';
  * @see {@link https://nextjs.org/docs/app/api-reference/functions/generate-metadata Next.js generate metadata}
  */
 /**
- * Static Generation: Legal pages are fully static and never change
- * No automatic revalidation - pages are statically generated at build time
+ * Produce page metadata for the Cookies page for static generation.
+ *
+ * Awaits a runtime connection to allow non-deterministic operations during metadata generation and returns the metadata for the '/cookies' route. The metadata is generated at build time and the page is not automatically revalidated.
+ *
+ * @returns The Next.js Metadata object for the Cookies page.
+ * @see generatePageMetadata
+ * @see connection
  */
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -29,14 +34,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Renders the Cookie Policy page and displays the current "Last updated" date.
+ * Server component that renders the Cookie Policy page, showing the current "Last updated" date.
+ *
+ * This async component defers non-deterministic operations to request time, establishes a
+ * request-scoped logger, and renders the page content inside a Suspense boundary.
  *
  * @returns The React element for the Cookie Policy page.
  *
  * @see getLastUpdatedDate
  * @see NavLink
  * @see generatePageMetadata
- * @see revalidate
  */
 export default async function CookiesPage() {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
@@ -63,6 +70,15 @@ export default async function CookiesPage() {
   );
 }
 
+/**
+ * Renders the Cookie Policy page content and logs a page-render event.
+ *
+ * @param reqLogger - Request-scoped logger (result of `logger.child`) used to record rendering telemetry.
+ * @returns The JSX element containing the Cookie Policy content, including the last-updated date and internal navigation links.
+ *
+ * @see getLastUpdatedDate
+ * @see CookiesPage
+ */
 function CookiesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
 

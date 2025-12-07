@@ -24,10 +24,14 @@ import { Suspense } from 'react';
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 
 /**
- * Generates page metadata for the account Activity page.
+ * Produce the Metadata for the account Activity route.
  *
- * @returns The Next.js `Metadata` object for the "/account/activity" route.
+ * Waits for a Next.js server connection to satisfy cache-component nondeterminism requirements,
+ * then delegates to `generatePageMetadata('/account/activity')` to build the route metadata.
+ *
+ * @returns The `Metadata` for the "/account/activity" route
  * @see generatePageMetadata
+ * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
@@ -37,11 +41,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the Account Activity page for the authenticated user.
+ * Renders the Account Activity page for the authenticated user.
  *
- * Requires authentication and displays the user's activity summary and timeline.
- * If one data source fails the page shows available data and a localized fallback for the failed section;
- * if both sources fail, a global "Activity unavailable" fallback is rendered.
+ * Awaits a server connection to defer non-deterministic operations, creates a request-scoped logger,
+ * and renders ActivityPageContent inside a Suspense boundary. Displays the user's activity summary
+ * and timeline when available; if one data source fails the page shows available data with a localized
+ * fallback for the failed section, and if both fail a global "Activity unavailable" fallback is shown.
  *
  * @returns The React element tree for the Account Activity page.
  *
@@ -76,6 +81,19 @@ export default async function ActivityPage() {
   );
 }
 
+/**
+ * Renders the authenticated user's Account Activity page content, including a stats overview and activity timeline, and provides appropriate fallbacks for unauthenticated access or unavailable activity data.
+ *
+ * This server component fetches the user's activity summary and timeline concurrently and tolerates partial failures: it will render available data when one source succeeds, show a global fallback when both fail, or prompt for sign-in when no user is authenticated.
+ *
+ * @param reqLogger - A request-scoped logger (created via `logger.child`) used for structured, request-scoped logging and error reporting. The logger should already include request identifiers.
+ * @returns The JSX content for the Account Activity page.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserActivitySummary
+ * @see getUserActivityTimeline
+ * @see ActivityTimeline
+ */
 async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'ActivityPage' });

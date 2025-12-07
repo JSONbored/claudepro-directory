@@ -24,10 +24,10 @@ interface EditCollectionPageProperties {
 }
 
 /**
- * Generate page metadata for the Edit Collection route using the route slug.
+ * Generates page metadata for the Edit Collection route using the route `slug`.
  *
- * @param params - Promise resolving to route parameters containing `slug`
- * @returns The Next.js `Metadata` for the `/account/library/:slug/edit` route with the provided `slug`
+ * @param params - Route parameters containing `slug`
+ * @returns Metadata for the `/account/library/:slug/edit` route populated with the provided `slug`
  *
  * @see generatePageMetadata
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata
@@ -79,6 +79,27 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
   );
 }
 
+/**
+ * Server component that renders the edit-collection UI for a specific collection slug.
+ *
+ * This component authenticates the current user, loads the collection and its bookmarks,
+ * and returns the pre-populated edit form and surrounding layout. If the user is not
+ * authenticated the request is redirected to `/login`. If the collection is missing or
+ * inaccessible, Next.js `notFound()` is invoked to render a 404. Errors thrown by the
+ * data layer while fetching collection details are logged and rethrown.
+ *
+ * @param params - A promise that resolves to an object containing the route `slug`.
+ * @param reqLogger - A request-scoped logger; this function creates route- and user-scoped children for structured logs.
+ * @returns The JSX element tree for the edit-collection page content.
+ * @throws Rethrows any error thrown by `getCollectionDetail`.
+ *
+ * @see getAuthenticatedUser
+ * @see getCollectionDetail
+ * @see CollectionForm
+ * @see notFound
+ * @see redirect
+ * @see logger
+ */
 async function EditCollectionPageContent({
   params,
   reqLogger,

@@ -27,8 +27,17 @@ import { AccountSidebar } from '@/src/components/features/account/account-sideba
 import { AccountSidebarSkeleton } from '@/src/components/features/account/account-sidebar-skeleton';
 
 /**
- * Authentication and session management component
- * Wrapped in Suspense to avoid blocking layout render
+ * Authenticates the current user, ensures a valid session, prepares per-user sidebar metadata, and renders the account layout.
+ *
+ * If the user is unauthenticated, the component redirects to `/login`. When a session is present and expires within one hour, it attempts a session refresh but continues rendering if refresh fails. Extracted user metadata (display name and image) is passed to the sidebar; the main content is protected by the MFA guard.
+ *
+ * @param children - Content to render inside the account layout's protected main area
+ * @returns The account layout element containing top navigation, a sidebar (loaded via Suspense), and an MFA-protected content region
+ *
+ * @see AccountSidebar
+ * @see AccountMFAGuard
+ * @see AccountSidebarSkeleton
+ * @see getAuthenticatedUser
  */
 async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
   // Authentication check - required in layout for route protection

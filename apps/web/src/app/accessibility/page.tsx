@@ -13,13 +13,14 @@ import { Suspense } from 'react';
  */
 
 /**
- * Provide metadata for the /accessibility page.
+ * Produce page metadata for the /accessibility route.
  *
- * Used by Next.js to populate the document head (title, description, Open Graph, etc.)
- * for the accessibility page.
+ * Awaits a Next.js server connection to defer non-deterministic operations (e.g., Date.now())
+ * to request time, then returns the metadata created by generatePageMetadata('/accessibility').
  *
  * @returns The Metadata object for the /accessibility route.
  * @see generatePageMetadata
+ * @see connection
  * @see revalidate
  */
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,15 +31,22 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Renders the site's Accessibility Statement page.
+ * Render the site's Accessibility Statement page as a Next.js server component.
  *
- * This server component reads the site's last-updated timestamp and public contact channels at render time and is intended to be statically generated and revalidated according to the module's ISR configuration.
+ * This component awaits `connection()` at render time to defer non-deterministic operations
+ * (e.g., `Date.now()`) so cache-component semantics remain deterministic. It generates a
+ * single request-scoped logger and renders the full accessibility content inside a
+ * React Suspense boundary.
  *
- * @returns A React element containing the complete Accessibility Statement page.
+ * @returns A React element that renders the Accessibility Statement page.
+ *
  * @see getLastUpdatedDate
  * @see getContactChannels
  * @see APP_CONFIG
- * @see revalidate
+ * @see AccessibilityPageContent
+ * @see generateRequestId
+ * @see logger
+ * @see connection
  */
 export default async function AccessibilityPage() {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
@@ -65,6 +73,20 @@ export default async function AccessibilityPage() {
   );
 }
 
+/**
+ * Render the Accessibility Statement content for the accessibility page.
+ *
+ * Uses the current last-updated date and configured contact channels to populate page content
+ * and logs a page-render event using the provided request-scoped logger.
+ *
+ * @param params.reqLogger - A request-scoped logger created via `logger.child` used to record page render events.
+ * @returns A React element containing the full Accessibility Statement content.
+ *
+ * @see getLastUpdatedDate
+ * @see getContactChannels
+ * @see NavLink
+ * @see APP_CONFIG
+ */
 function AccessibilityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
   const channels = getContactChannels();

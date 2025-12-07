@@ -28,20 +28,14 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 /**
- * Renders the Partner marketing page that presents pricing, benefits, and CTAs for advertising.
+ * Render the Partner marketing page showing pricing, benefits, real-time stats, and CTAs.
  *
- * Fetches partner pricing, hero statistics, contact channels, and CTA links on the server,
- * and renders a multi-section page with a hero banner, real-time stats, launch pricing banner,
- * pricing options (job and sponsored listings), benefits, FAQ, and a final CTA.
+ * Fetches partner pricing, hero statistics, contact channels, and CTA links on the server.
+ * If pricing or hero-stat fetches fail, built-in default values are used to ensure the page renders.
+ * A request-scoped logger is created for telemetry and error reporting. The component is wrapped
+ * in a Suspense boundary to allow streaming of async content.
  *
- * If loading the pricing configuration fails, the component falls back to built-in default pricing
- * values to avoid a page error. A request-scoped logger and single requestId are created for the
- * page request to scope telemetry and error reporting.
- *
- * This is a server component that uses server-side data and participates in ISR; the module
- * exports the revalidation interval.
- *
- * @returns The rendered React element for the partner page.
+ * @returns The React element for the partner marketing page.
  *
  * @see getPartnerPricing
  * @see getPartnerHeroStats
@@ -73,6 +67,25 @@ export default async function PartnerPage() {
   );
 }
 
+/**
+ * Renders the partner landing page content — loads pricing, hero statistics, contact channels,
+ * and CTAs, falling back to safe defaults on fetch failures and emitting request-scoped logs.
+ *
+ * Fetch behavior:
+ * - Attempts to load partner pricing and hero stats; on failure each falls back to built-in defaults
+ *   and logs the error via `reqLogger`.
+ * - Retrieves contact channels and CTA links for page CTAs.
+ *
+ * @param props.reqLogger - A request-scoped logger created via `logger.child` used for telemetry
+ *                          and error reporting during data fetches.
+ * @returns The JSX element tree for the Partner page content.
+ *
+ * @see getPartnerPricing
+ * @see getPartnerHeroStats
+ * @see getPartnerContactChannels
+ * @see getPartnerCtas
+ * @see logger
+ */
 async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   let pricing: ReturnType<typeof getPartnerPricing>;
   try {

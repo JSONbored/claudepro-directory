@@ -17,10 +17,13 @@ import { CompanyForm } from '@/src/components/core/forms/company-form';
  */
 
 /**
- * Provide page metadata for the '/account/companies/new' route.
+ * Generate metadata for the /account/companies/new route.
+ *
+ * Awaits a server connection to ensure non-deterministic operations (e.g., Date.now()) are evaluated at request time for cache components, then returns the page metadata.
  *
  * @returns The Metadata object for the Create Company page.
  * @see generatePageMetadata
+ * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
@@ -62,6 +65,18 @@ export default async function NewCompanyPage() {
   );
 }
 
+/**
+ * Server component that enforces authentication and renders the "Create Company" page content.
+ *
+ * If no authenticated user is found, logs a warning to `reqLogger` and redirects the request to `/login`.
+ *
+ * @param reqLogger - Request-scoped logger created for the current request; used for warning on unauthenticated access.
+ * @returns The JSX for the page section containing the header, description, and the `CompanyForm` in create mode.
+ *
+ * @see CompanyForm
+ * @see getAuthenticatedUser
+ * @see redirect
+ */
 async function NewCompanyPageContent({
   reqLogger,
 }: {

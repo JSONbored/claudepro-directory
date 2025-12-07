@@ -19,6 +19,22 @@ export interface GitHubStarsButtonProps extends ButtonStyleProps {
 
 const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 
+/**
+ * Renders a GitHub-styled button that opens the given repository URL, tracks click events, and optionally displays the repository's star count.
+ *
+ * The component fetches the repository's stargazer count from the GitHub API and shows it next to the GitHub icon when available. If the repo URL cannot be parsed or the fetch fails, the star count is omitted and a client warning is logged.
+ *
+ * @param repoUrl - Repository URL to open (defaults to project's configured GitHub link)
+ * @param size - Button size variant (e.g., 'sm', 'md')
+ * @param variant - Button visual variant (e.g., 'ghost', 'solid')
+ * @param className - Additional CSS class names applied to the button
+ * @param disabled - Whether the button is disabled
+ *
+ * @returns The rendered button element with GitHub icon and optional star count.
+ *
+ * @see usePulse
+ * @see getSocialLinks
+ */
 export function GitHubStarsButton({
   repoUrl = SOCIAL_LINK_SNAPSHOT.github,
   size = 'sm',

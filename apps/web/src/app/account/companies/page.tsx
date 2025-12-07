@@ -114,6 +114,22 @@ export default async function CompaniesPage() {
   );
 }
 
+/**
+ * Render the authenticated user's "My Companies" page content, handling auth, data loading, error, empty, and list states.
+ *
+ * This server component:
+ * - Requires an authenticated user and returns a sign-in prompt if none is present.
+ * - Fetches the user's companies, logs outcomes to the provided request-scoped logger, and shows an error card on fetch failure.
+ * - Renders an empty-state card when the user has no companies.
+ * - Renders a responsive list of company cards when companies exist, including logo handling, sanitized external website links, stats, and action buttons.
+ *
+ * @param reqLogger - A request-scoped logger created via logger.child used for contextual logging and redaction of user identifiers.
+ * @returns A JSX element representing the companies page content.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserCompanies
+ * @see isAllowedHttpUrl
+ */
 async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'CompaniesPage' });

@@ -19,17 +19,12 @@ import { type NextRequest, NextResponse } from 'next/server';
  */
 
 /**
- * Handle the OAuth callback: exchange the authorization code, refresh the user profile, optionally subscribe the user to the newsletter, and redirect the user to the validated next URL.
+ * Handle the OAuth callback: exchange the authorization code, refresh the user profile, optionally subscribe the user to the newsletter, and redirect the client to a validated `next` URL.
  *
- * This handler:
- * - Reads `code`, `newsletter`, `link`, and `next` from the request's query string and computes a validated redirect target.
- * - Exchanges the `code` for a Supabase session; on success it refreshes the user's profile.
- * - When newsletter opt-in is requested and the user has an email, attempts subscription and, on success, sets a short-lived `newsletter_opt_in` cookie.
- * - Validates the forwarded host against `SECURITY_CONFIG.allowedOrigins` to prevent open redirects and chooses the final redirect URL based on environment and host validation.
- * - Returns a redirect `NextResponse` and sets cache-control headers to prevent caching.
+ * Exchanges the `code` for a Supabase session, refreshes the user's profile on success, attempts newsletter subscription when requested (setting a short-lived `newsletter_opt_in` cookie on success), and computes a safe redirect target based on environment and the `x-forwarded-host` header. Sets cache-control headers to prevent caching.
  *
- * @param request - The incoming NextRequest containing query parameters and headers used to perform the callback flow.
- * @returns A NextResponse that redirects the client to the computed `next` URL (or to `/auth/auth-code-error` on failure). The response may include a `newsletter_opt_in` cookie and cache-control headers.
+ * @param {NextRequest} request - Incoming NextRequest containing query parameters (`code`, `newsletter`, `link`, `next`) and headers used to perform the callback flow.
+ * @returns {NextResponse} A redirect response to the computed `next` URL, or to `/auth/auth-code-error` on failure. May include a `newsletter_opt_in` cookie and cache-control headers.
  *
  * @see createSupabaseServerClient
  * @see refreshProfileFromOAuthServer

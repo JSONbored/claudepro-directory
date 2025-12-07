@@ -18,6 +18,16 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import React from 'react';
 
+/**
+ * Render an interactive checklist UI that displays tasks, a progress indicator, optional description, and toggleable completion state.
+ *
+ * @param props - Component props (see ChecklistProps) containing `title`, `items`, `description`, and `type`.
+ * @returns The rendered Checklist React element showing progress and item controls.
+ *
+ * @see ChecklistProps
+ * @see UnifiedBadge
+ * @see Card
+ */
 export function Checklist(props: ChecklistProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, items, description, type } = props;

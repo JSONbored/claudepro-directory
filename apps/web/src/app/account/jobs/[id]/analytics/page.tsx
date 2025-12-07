@@ -107,6 +107,22 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
   );
 }
 
+/**
+ * Renders the authenticated Job Analytics page content for a specific job id.
+ *
+ * This server component verifies the current user, loads the requested job owned by that user,
+ * and renders listing details, performance metrics, and contextual insights. If the request is
+ * unauthenticated it redirects to the login route. If the job cannot be loaded or is not owned
+ * by the authenticated user, it renders a “Job analytics unavailable” message with a back link.
+ *
+ * @param params - A promise that resolves to an object containing the route parameter `id`.
+ * @param reqLogger - A request-scoped logger; a route- and user-scoped child logger is created internally for structured logging.
+ * @returns The React element tree for the job analytics page content.
+ *
+ * @see MetricsDisplay
+ * @see getAuthenticatedUser
+ * @see getUserJobById
+ */
 async function JobAnalyticsPageContent({
   params,
   reqLogger,
