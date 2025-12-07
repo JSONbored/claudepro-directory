@@ -91,6 +91,26 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
   );
 }
 
+/**
+ * Render the Edit Job page content for a given job id, handling authentication, job and plan data loading, enum validation, and the server action that updates the job.
+ *
+ * This server component:
+ * - Ensures the request is authenticated and redirects to /login if not.
+ * - Loads the specified job for the authenticated user and returns a 404 if not found.
+ * - Attempts to load the payment plan catalog; failures do not block rendering.
+ * - Exposes a server action (`handleSubmit`) that calls `updateJob`, normalizes errors, logs action-scoped context, and redirects to /account/jobs on success.
+ * - Validates `job.type` and `job.category` against public enums, logs warnings for invalid values, and shows a UI warning banner when applicable.
+ *
+ * @param params - A promise resolving to an object with the route `id` for the job to edit.
+ * @param reqLogger - A request-scoped logger child used to derive route- and user-scoped loggers; sensitive identifiers are redacted by the logger configuration.
+ * @returns The rendered React node for the Edit Job page content.
+ *
+ * @see JobForm
+ * @see updateJob
+ * @see getAuthenticatedUser
+ * @see getUserJobById
+ * @see getPaymentPlanCatalog
+ */
 async function EditJobPageContent({
   params,
   reqLogger,

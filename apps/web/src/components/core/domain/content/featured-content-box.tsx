@@ -51,6 +51,17 @@ export type UnifiedContentBoxProps =
   | FAQVariant
   | InfoBoxVariant;
 
+/**
+ * Renders a unified content box and delegates rendering to a specific box component based on `props.contentType`.
+ *
+ * @param props - Variant props determining which content box to render (accordion, faq, infobox, or callout).
+ * @returns A React element: an AccordionBox, FAQBox, InfoBoxComponent, or CalloutComponent corresponding to `props.contentType`.
+ *
+ * @see AccordionBox
+ * @see FAQBox
+ * @see InfoBoxComponent
+ * @see CalloutComponent
+ */
 export function UnifiedContentBox(props: UnifiedContentBoxProps) {
   switch (props.contentType) {
     case 'accordion': {
@@ -73,6 +84,20 @@ export function UnifiedContentBox(props: UnifiedContentBoxProps) {
   }
 }
 
+/**
+ * Renders an accessible accordion list of titled items with expandable answers.
+ *
+ * Renders each item as a collapsible card; items marked `defaultOpen` are initially expanded. Tapping an item's header toggles its open state; when `allowMultiple` is false, opening one item closes others.
+ *
+ * @param props.items - Array of accordion items; each item should include `title`, `content`, and optional `defaultOpen`.
+ * @param props.title - Optional section title displayed above the accordion.
+ * @param props.description - Optional descriptive text shown under the section title.
+ * @param props.allowMultiple - If true, multiple items may be open simultaneously; otherwise only one item is open at a time.
+ * @returns The rendered accordion section as a React element.
+ *
+ * @see UnifiedContentBox
+ * @see AccordionVariant
+ */
 function AccordionBox(props: AccordionVariant) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { items, title, description, allowMultiple } = props;
@@ -155,6 +180,22 @@ function AccordionBox(props: AccordionVariant) {
   );
 }
 
+/**
+ * Renders an FAQ section composed of question/answer cards.
+ *
+ * Renders a titled section with an optional description and a Card per question.
+ *
+ * @param props - Component props
+ * @param props.questions - Array of FAQ entries; each entry should have `question` and `answer`. If empty or undefined, nothing is rendered.
+ * @param props.title - Optional section title displayed above the questions.
+ * @param props.description - Optional section description displayed under the title.
+ * @returns A React element containing the FAQ section, or `null` when there are no questions.
+ *
+ * @see UnifiedContentBox
+ * @see AccordionBox
+ * @see InfoBoxComponent
+ * @see CalloutComponent
+ */
 function FAQBox(props: FAQVariant) {
   const { questions, title, description } = props;
   const validQuestions = questions || [];
@@ -193,6 +234,16 @@ function FAQBox(props: FAQVariant) {
   );
 }
 
+/**
+ * Renders a styled informational note box with an optional title, icon, and body content.
+ *
+ * @param props.title - Optional heading text shown to the left of a variant-specific icon.
+ * @param props.children - Body content rendered inside the note and exposed as the schema.org `text`.
+ * @param props.variant - Variant of the info box; one of `"info"`, `"warning"`, `"success"`, or `"error"`. Defaults to `"info"`.
+ * @returns A JSX element containing a schema.org `Note` with variant-specific styling, icon, optional title, and the provided content.
+ *
+ * @see INFOBOX_COLORS
+ */
 function InfoBoxComponent(props: InfoBoxVariant) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, children, variant } = props;
@@ -228,6 +279,19 @@ function InfoBoxComponent(props: InfoBoxVariant) {
   );
 }
 
+/**
+ * Renders a contextual callout alert with an icon, optional title, and descriptive content.
+ *
+ * @param props.type - The callout style, which determines the icon shown (`info`, `warning`, `error`, `success`, or `tip`).
+ * @param props.title - Optional heading text displayed above the callout content.
+ * @param props.children - The content displayed as the callout description.
+ * @returns A React element representing an Alert containing the chosen icon, optional title, and the provided children as the description.
+ *
+ * @see Alert
+ * @see AlertTitle
+ * @see AlertDescription
+ * @see InfoBoxComponent
+ */
 function CalloutComponent(props: CalloutVariant) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { type, title, children } = props;

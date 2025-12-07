@@ -41,9 +41,13 @@ import { LinkedinShareButton, TwitterShareButton } from 'react-share';
 const CLIPBOARD_RESET_DEFAULT_MS = 2000;
 
 /**
- * Sanitize Shiki-generated HTML for safe use in dangerouslySetInnerHTML
- * Only allows tags and attributes that Shiki uses for syntax highlighting
- * Prevents XSS while preserving syntax highlighting
+ * Sanitizes Shiki-generated HTML for safe insertion via dangerouslySetInnerHTML.
+ *
+ * Only a minimal set of tags and attributes used by Shiki are preserved:
+ * allowed tags: `pre`, `code`, `span`, `div`; allowed attributes: `class`, `style`; `data-*` attributes are allowed.
+ *
+ * @param html - HTML string produced by Shiki highlighting
+ * @returns The sanitized HTML string. If `html` is falsy or not a string, returns an empty string. If running outside a browser (server-side) or if sanitization fails, returns the original `html` unmodified.
  */
 async function sanitizeShikiHtml(html: string): Promise<string> {
   if (!html || typeof html !== 'string') return '';
@@ -110,6 +114,19 @@ interface ShareDropdownProps {
   slug: string;
 }
 
+/**
+ * Renders an animated share dropdown with Twitter, LinkedIn, and copy-link actions.
+ *
+ * @param currentUrl - The full URL to share.
+ * @param category - The content category used to build share metadata.
+ * @param slug - The content slug used to build share metadata and URLs.
+ * @param onShare - Callback invoked with the chosen share platform: `'twitter' | 'linkedin' | 'copy_link'`.
+ * @param onMouseLeave - Optional mouse leave handler for closing the dropdown.
+ * @returns The share dropdown React element.
+ *
+ * @see generateShareUrl
+ * @see generateShareText
+ */
 function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: ShareDropdownProps) {
   return (
     <motion.div
@@ -190,6 +207,24 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
   );
 }
 
+/**
+ * Renders a sanitized, interactive code block with copy, download, screenshot and share controls.
+ *
+ * Displays optional filename and language badge, automatically collapses long blocks to `maxLines`
+ * with an expand/collapse control, and uses sanitized server-rendered Shiki HTML when available.
+ *
+ * @param html - Pre-rendered HTML produced by Shiki (will be sanitized on the client before insertion)
+ * @param code - Raw source text shown/copyable/downloadable
+ * @param language - Programming language label used for the language badge and filename extension inference
+ * @param filename - Optional display filename; when absent a filename is generated for downloads
+ * @param maxLines - Maximum visible lines before the block collapses (default: 20)
+ * @param showLineNumbers - Whether to render line numbers styling when using server HTML (default: true)
+ * @param className - Optional additional CSS classes applied to the top-level wrapper
+ * @returns The rendered code block element with interactive controls and sanitized content
+ *
+ * @see sanitizeShikiHtml
+ * @see ShareDropdown
+ */
 export function ProductionCodeBlock({
   html,
   code,

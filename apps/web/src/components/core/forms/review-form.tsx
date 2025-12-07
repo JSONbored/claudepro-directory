@@ -13,8 +13,22 @@ import { useId, useState, useTransition } from 'react';
 import { ReviewRatingInteractive } from '@/src/components/core/domain/reviews/review-rating-interactive';
 
 /**
- * Form for creating and editing reviews
- * Extracted from unified review component for better tree-shaking
+ * Renders a form for creating a new review or editing an existing review.
+ *
+ * The form manages rating and review text state, validates input, and calls the
+ * appropriate API action (create or update). On success it refreshes the router
+ * and invokes `onSuccess` if provided. On failure it displays contextual toasts.
+ *
+ * @param contentType - The content type identifier for the reviewed item
+ * @param contentSlug - The slug identifying the reviewed item
+ * @param existingReview - Optional existing review to edit; when provided the form initializes in edit mode
+ * @param onSuccess - Optional callback invoked after a successful create or update
+ * @param onCancel - Optional callback invoked when the user cancels the action
+ *
+ * @see ReviewRatingInteractive
+ * @see createReview
+ * @see updateReview
+ * @see useLoggedAsync
  */
 export function ReviewForm({
   contentType,

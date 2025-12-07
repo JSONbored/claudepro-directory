@@ -32,6 +32,14 @@ export interface SmartRelatedContentProps {
   title?: string;
 }
 
+/**
+ * Choose the CSS class string to use for a category badge.
+ *
+ * @param category - The category key (e.g., "agents", "tutorials") to map to a badge class
+ * @returns The CSS class string for the given category; a muted/default class is returned when the category is unrecognized
+ *
+ * @see getCategoryFromPath
+ */
 function getCategoryBadgeClass(category: string): string {
   const classes: Record<string, string> = {
     agents: 'badge-category-agents',
@@ -49,6 +57,12 @@ function getCategoryBadgeClass(category: string): string {
   return classes[category] || 'bg-muted/20 text-muted border-muted/30';
 }
 
+/**
+ * Map a match-type identifier to a badge label and visual variant.
+ *
+ * @param matchType - Identifier describing how the item matched (e.g. "same_category", "tag_match", "keyword_match", "trending", "popular", "cross_category")
+ * @returns An object with `label` for display and `variant` which is one of `'default' | 'outline' | 'secondary'`. Returns `{ label: 'Related', variant: 'outline' }` when `matchType` is unrecognized.
+ */
 function getMatchTypeBadge(matchType: string): {
   label: string;
   variant: 'default' | 'outline' | 'secondary';
@@ -65,12 +79,37 @@ function getMatchTypeBadge(matchType: string): {
   return badges[matchType] || { label: 'Related', variant: 'outline' };
 }
 
+/**
+ * Extracts the first non-empty path segment from a URL pathname as the category.
+ *
+ * @param pathname - The URL pathname (for example "/agents/list" or "agents/list"); may be undefined.
+ * @returns The first non-empty path segment if present, otherwise "unknown".
+ */
 function getCategoryFromPath(pathname: string | undefined): string {
   if (!pathname) return 'unknown';
   const pathPart = pathname.split('/').find(Boolean);
   return pathPart || 'unknown';
 }
 
+/**
+ * Renders a client-side related content list with UI badges and compact cards.
+ *
+ * Fetches related content for the current path (or a provided pathname), converts API items into a UI-ready shape, logs fetch errors, and displays results using UnifiedCardGrid and BaseCard with category and match-type badges.
+ *
+ * @param props.featured - When true, restricts results to featured content.
+ * @param props.exclude - Slugs or identifiers to exclude from results.
+ * @param props.limit - Maximum number of related items to fetch and render.
+ * @param props.currentTags - Tags from the current context used to compute relatedness.
+ * @param props.currentKeywords - Keywords from the current context used to compute relatedness.
+ * @param props.pathname - Optional explicit pathname to use instead of the current window location.
+ * @param props.title - Heading text to show above the related items; defaults to "Related Content".
+ * @param props.showTitle - When true, renders the title block and AI badge.
+ * @returns A React element containing the related content section with cards and badges.
+ *
+ * @see getRelatedContent
+ * @see UnifiedCardGrid
+ * @see BaseCard
+ */
 export function RelatedContentClient({
   featured = false,
   exclude = [],

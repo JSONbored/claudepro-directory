@@ -16,9 +16,11 @@ import { JobForm } from '@/src/components/core/forms/job-form';
  */
 
 /**
- * Generate metadata for the /account/jobs/new page.
+ * Produce the Metadata for the /account/jobs/new page.
  *
- * @returns Metadata for the new job creation page.
+ * Awaits a server connection to defer non-deterministic work to request time before generating page metadata.
+ *
+ * @returns The metadata object used by Next.js for the new job creation page.
  *
  * @see generatePageMetadata
  */

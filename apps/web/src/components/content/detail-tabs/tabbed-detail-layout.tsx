@@ -14,6 +14,19 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { TabSectionRenderer } from './tab-section-renderer';
 
+/**
+ * Render a tabbed detail layout that keeps all tab contents in the DOM for SEO, synchronizes the active tab with the URL hash, supports mobile swipe navigation, and records tab-switch analytics.
+ *
+ * Renders a sticky tab bar with triggers and a content area where each tab's sections remain mounted but are hidden when not active.
+ *
+ * @param item - The content item displayed within the layout (provides category and slug used for analytics).
+ * @param config - Layout configuration containing typeName and sections mapping used by section renderers.
+ * @param tabs - Array of tabs to render; each tab supplies an `id`, `label`, optional `mobileLabel`, and `sections` to render.
+ * @param sectionData - Lookup data used by TabSectionRenderer to render individual sections.
+ * @returns The JSX element for the tabbed detail layout.
+ *
+ * @see TabSectionRenderer
+ */
 export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDetailLayoutProps) {
   const pulse = usePulse();
   // Get initial tab from URL hash or default to first tab

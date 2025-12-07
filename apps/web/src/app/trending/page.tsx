@@ -26,11 +26,13 @@ import { TrendingContent } from '@/src/components/core/shared/trending-content';
  */
 
 /**
- * Provide metadata for the Trending page.
+ * Generate metadata for the Trending page route.
  *
- * @returns Page metadata for the '/trending' route.
+ * Ensures a server connection is established so non-deterministic operations (e.g., Date.now())
+ * run at request time to satisfy Cache Component requirements, then delegates metadata creation.
+ *
+ * @returns Metadata for the "/trending" route.
  * @see generatePageMetadata
- * @see revalidate
  */
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -86,6 +88,23 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   );
 }
 
+/**
+ * Renders the Trending page content: validates query params, fetches server-side trending data,
+ * maps it into displayable structures, and returns the page UI (header, badges, and content sections).
+ *
+ * This component resolves and validates `searchParams` on the server, fetches data via the
+ * trending data API, and renders `TrendingContent` with mapped display items.
+ *
+ * @param props.searchParams - Promise that resolves to the route's search parameters (may include `category` and `limit`).
+ * @param props.reqLogger - A request-scoped logger used for structured warnings and info about parameter validation and data fetching.
+ * @returns A React element that displays the trending configurations page (header, badges, and content sections).
+ *
+ * @see getTrendingPageData
+ * @see TrendingContent
+ * @see mapTrendingMetrics
+ * @see mapPopularContent
+ * @see mapRecentContent
+ */
 async function TrendingPageContent({
   searchParams,
   reqLogger,

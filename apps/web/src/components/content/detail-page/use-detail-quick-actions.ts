@@ -22,6 +22,17 @@ interface UseDetailQuickActionsParams {
   packageName?: null | string;
 }
 
+/**
+ * Builds an array of quick-action descriptors for a content detail view based on the provided item and metadata.
+ *
+ * @param {UseDetailQuickActionsParams} params - Parameters object
+ * @param {ContentItem} params.item - The content item used to derive category and slug for telemetry and to decide available actions
+ * @param {Record<string, unknown>} params.metadata - Metadata associated with the item; may contain keys `package`, `mcpServers`, and `configuration` used to generate actions
+ * @param {string | null | undefined} params.packageName - Optional explicit package name to use for an install command; overrides `metadata['package']` when provided
+ * @param {Record<string, unknown> | null | undefined} params.configurationObject - Optional explicit configuration object to copy; used when `mcpServers` is not provided and overrides `metadata.configuration`
+ * @param {Record<string, unknown> | null | undefined} params.mcpServers - Optional explicit MCP servers object to copy; overrides `metadata.mcpServers` when provided
+ * @returns {DetailQuickAction[]} An array of DetailQuickAction objects representing available copy actions (e.g., pnpm install command, Claude Desktop MCP config, or configuration JSON)
+ */
 export function useDetailQuickActions({
   item,
   metadata,

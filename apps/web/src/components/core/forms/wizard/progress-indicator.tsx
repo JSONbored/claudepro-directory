@@ -38,6 +38,21 @@ interface ProgressIndicatorProps {
   steps: WizardStep[];
 }
 
+/**
+ * Renders a responsive wizard progress indicator with optional quality score and interactive step controls.
+ *
+ * Renders a horizontal progress bar, desktop step indicators with labels and connectors, compact mobile step buttons, and an optional "Form Completion" quality badge. Step buttons are interactive only when the step's `isAccessible` is true; completed steps show a checkmark and the current step is visually emphasized.
+ *
+ * @param steps - Array of wizard steps to display; each step controls its label, number, completion, current state, accessibility, and optional description tooltip.
+ * @param currentStep - The 1-based index or number of the current step for display in the mobile summary.
+ * @param onStepClick - Optional callback invoked with a step's `number` when an accessible step is clicked.
+ * @param qualityScore - Optional numeric score (0–100) shown in the quality badge and its progress bar.
+ * @param className - Optional additional CSS classes applied to the root container.
+ * @returns The rendered progress indicator React element.
+ *
+ * @see WizardStep
+ * @see ProgressIndicatorProps
+ */
 export function ProgressIndicator({
   steps,
   currentStep,

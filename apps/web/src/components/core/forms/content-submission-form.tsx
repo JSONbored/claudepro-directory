@@ -136,38 +136,17 @@ interface SubmitFormClientProps {
 }
 
 /**
- * Submit Form - Uncontrolled Form Pattern with Minimal State
+ * Renders a multi-section submission form for creating content review PRs with dynamic fields and template pre-fill.
  *
- * **Architecture Decision: Uncontrolled Fields + Minimal React State**
+ * The form uses an uncontrolled input pattern and minimal React state to drive only reactive pieces (content type selection, name for duplicate checking, description preview, submission status, and loading). It validates required fields from the active section, parses an optional JSON "examples" field, and submits a consolidated payload to the server action that creates a review submission.
  *
- * This form uses an **uncontrolled pattern** where form fields manage their own state
- * via native HTML DOM, and we extract values via FormData on submit. We only use
- * React state for values that REQUIRE reactivity:
+ * @param props.formConfig - Configuration object describing the form sections, fields, and validation metadata for each submission type
+ * @param props.templates - List of templates used to pre-fill form fields for quick-starts
+ * @returns The rendered submission form React element
  *
- * 1. `contentType` - Dynamic field rendering (entire form structure changes)
- * 2. `name` - Real-time duplicate checking (API calls on every keystroke)
- * 3. `submissionResult` - Success message display after submission
- * 4. `isPending` - Loading state during form submission
- *
- * **Why Uncontrolled?**
- * - Performance: No re-renders on every keystroke
- * - Simplicity: No controlled value/onChange boilerplate for 20+ fields
- * - Native validation: Browser-native required/pattern validation
- * - FormData API: Clean extraction of all fields on submit
- *
- * **Why These 4 State Variables?**
- * - contentType: Must trigger re-render to show/hide type-specific fields
- * - name: Must be reactive for <DuplicateWarning> real-time API checks
- * - submissionResult: Must persist after async submission completes
- * - isPending: Must disable submit button and show loading state
- *
- * **Template Pre-fill Strategy:**
- * Template selection directly mutates DOM via querySelector('[name="..."]')
- * This is intentional - we want instant field updates without triggering
- * React re-renders for all 20+ fields.
- *
- * @see https://react.dev/reference/react-dom/components/input#controlling-an-input-with-a-state-variable
- * @see https://developer.mozilla.org/en-US/docs/Web/API/FormData
+ * @see TemplateSelector
+ * @see ExamplesArrayInput
+ * @see ContentTypeFieldRenderer
  */
 export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProps) {
   /**

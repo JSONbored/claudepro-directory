@@ -17,6 +17,22 @@ import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content/content-search';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 
+/**
+ * Renders the hero section for a content list page, showing an icon, title, description, badges, and a submit CTA.
+ *
+ * When `badges` is empty, a default badge set is shown: a count badge using `items.length` and `title`, plus
+ * "Community Driven" and "Production Ready" badges.
+ *
+ * @param title - The title displayed as the hero heading.
+ * @param description - The descriptive text shown under the title.
+ * @param icon - The key of the icon to render in the hero; falls back to a generic icon if not found.
+ * @param items - The content items used to derive the default badge count when `badges` is not provided.
+ * @param badges - Optional list of badges to display; each badge may include `icon` and `text`.
+ * @returns The hero section JSX element.
+ *
+ * @see ContentListServer
+ * @see UnifiedBadge
+ */
 function ContentHeroSection<T extends DisplayableContent>({
   title,
   description,
@@ -93,6 +109,16 @@ function ContentHeroSection<T extends DisplayableContent>({
   );
 }
 
+/**
+ * Skeleton layout shown while the content search results are loading.
+ *
+ * Renders a vertical skeleton with a large placeholder and two smaller skeletons aligned to the end.
+ *
+ * @returns A JSX element representing the loading skeleton for the content search area.
+ *
+ * @see Skeleton
+ * @see ContentListServer
+ */
 export function ContentSearchSkeleton() {
   return (
     <div className="w-full space-y-4">
@@ -105,6 +131,26 @@ export function ContentSearchSkeleton() {
   );
 }
 
+/**
+ * Render a content list page with an optional hero, a searchable content list, and a recently viewed sidebar.
+ *
+ * Renders the hero on the server by default; pass `skipHero` to omit the hero (useful for partial page rendering or progressive hydration). The central area contains a search client with zero-state suggestions derived from `items` and a right-hand recently viewed sidebar rendered inside a Suspense boundary.
+ *
+ * @param title - Page title displayed in the hero and used to form a default search placeholder
+ * @param description - Short description shown under the title in the hero
+ * @param icon - Icon name used by the hero and search client; falls back to a default if unresolved
+ * @param items - Array of displayable content items presented to the search client and used for zero-state suggestions
+ * @param type - Content type identifier passed to the search client
+ * @param searchPlaceholder - Placeholder text for the search input; defaults to `Search ${title.toLowerCase()}...`
+ * @param badges - Optional badge definitions shown in the hero; if empty, the hero will construct default badges
+ * @param category - Optional category filter passed to the search client
+ * @param skipHero - When true, the hero section is not rendered on the server (enables PPR/partial rendering scenarios)
+ * @returns A JSX element representing the full content list page (hero, searchable list, and recently viewed sidebar)
+ *
+ * @see ContentHeroSection
+ * @see ContentSearchClient
+ * @see RecentlyViewedSidebar
+ */
 export function ContentListServer<T extends DisplayableContent>({
   title,
   description,

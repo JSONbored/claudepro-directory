@@ -55,18 +55,19 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the Config Recommender page containing the hero, 7-question quiz, benefits,
- * features, and newsletter call-to-action.
+ * Render the Config Recommender page that presents a hero, a 7-question quiz, benefits,
+ * and feature list to produce rule-based Claude configuration recommendations.
  *
- * Renders a full-page React tree for the rule-based configuration recommender UI.
- * The page generates a per-request identifier and creates a request-scoped logger for
- * render-time telemetry, normalizes and rethrows render errors so they are handled by
- * the application's error boundary.
+ * This async server component awaits Next.js' server connection before performing
+ * request-scoped non-deterministic work, generates a per-request identifier, and
+ * creates a request-scoped logger for render-time telemetry. Rendering relies on
+ * framework error boundaries for error handling.
  *
- * @returns The page's React element tree for the Config Recommender UI.
+ * @returns The React element tree for the Config Recommender landing page.
  *
  * @see QuizForm
- * @see NewsletterCTAVariant
+ * @see connection
+ * @see generateRequestId
  */
 export default async function ConfigRecommenderPage() {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())

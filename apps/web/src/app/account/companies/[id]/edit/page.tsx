@@ -27,8 +27,14 @@ import { Suspense } from 'react';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
 
 /**
- * Dynamic Rendering Required
- * Authenticated route
+ * Provide metadata for the edit-company route and ensure a server-side connection before performing non-deterministic operations.
+ *
+ * Awaits a server connection to satisfy Cache Components requirements for non-deterministic operations (e.g., date/time) and then returns metadata for the '/account/companies/:id/edit' page.
+ *
+ * @returns Page metadata for '/account/companies/:id/edit'
+ *
+ * @see generatePageMetadata
+ * @see connection
  */
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -83,6 +89,18 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
   );
 }
 
+/**
+ * Render the edit-company UI for the specified company id, handling authentication, data loading errors, and access control.
+ *
+ * @param params - Route parameters as a promise resolving to an object with an `id` property for the company to edit.
+ * @param reqLogger - Request-scoped logger used for structured, redacted logging within the request lifecycle.
+ * @returns A React element: the populated CompanyForm when the company is loaded, an error card when data loading fails; this function may redirect unauthenticated users to `/login` or call `notFound()` when the company is not found or access is denied.
+ *
+ * @see CompanyForm
+ * @see getUserCompanyById
+ * @see getAuthenticatedUser
+ * @see ROUTES.ACCOUNT_COMPANIES
+ */
 async function EditCompanyPageContent({
   params,
   reqLogger,

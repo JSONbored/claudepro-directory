@@ -90,15 +90,17 @@ export async function generateMetadata({
 }
 
 /**
- * Produce static route parameters (slugs) for pre-rendering a subset of job pages at build time.
+ * Produce a bounded set of static route parameters (job slugs) for build-time pre-rendering.
  *
- * Generates an array of parameter objects used by Next.js to statically pre-render job pages.
- * Only a limited number of jobs are returned to bound build-time work; remaining jobs are handled on demand.
+ * Returns up to 10 `{ slug: string }` objects to limit build-time work; if no jobs are available or an error occurs,
+ * returns a placeholder `[{ slug: '__placeholder__' }]` so Next.js' Cache Components build validation succeeds and remaining
+ * job pages can be handled on-demand via ISR/dynamic routing.
  *
- * @returns An array of parameter objects `{ slug: string }` for up to 10 jobs; returns an empty array if no jobs are available or if an error occurs.
+ * @returns An array of parameter objects where each item is `{ slug: string }`; returns a placeholder array when no jobs
+ * are available or when fetching jobs fails.
  *
  * @see getFilteredJobs - source of job listings used to derive slugs
- * @see export const dynamicParams - remaining job pages are rendered on-demand when not pre-rendered
+ * @see dynamic routing / ISR - remaining job pages are rendered on demand when not pre-rendered
  */
 export async function generateStaticParams() {
   // Limit to top 10 jobs to optimize build time
@@ -138,14 +140,14 @@ export async function generateStaticParams() {
 }
 
 /**
- * Render the job detail page for a given route slug.
+ * Render the job detail page for the given route slug.
  *
- * Validates the incoming `slug`, loads the corresponding job record, and returns the server-rendered UI
- * containing header, metadata, description, requirements, benefits, apply actions, and job details.
- * Triggers next/navigation.notFound() when slug validation fails or the job cannot be found.
+ * Validates the incoming `slug`, loads the matching job record, and renders the server-side UI
+ * including metadata, structured data, header, description, requirements, benefits, apply actions,
+ * and job details. Calls `notFound()` when slug validation fails or no job is found.
  *
  * @param props.params - Route parameters containing the `slug` for the job to display.
- * @returns The React element representing the server-rendered job detail page.
+ * @returns The server-rendered React element for the job detail page.
  *
  * @see getJobBySlug
  * @see getSafeWebsiteUrl

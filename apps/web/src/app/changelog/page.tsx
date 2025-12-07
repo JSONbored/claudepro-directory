@@ -99,23 +99,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the Changelog page using Suspense boundaries for streaming content.
+ * Render the Changelog page with a static header and a Suspense-wrapped timeline that streams changelog content.
  *
- * Architecture:
- * - Header and breadcrumbs render immediately (static)
- * - Changelog content streams in via Suspense boundary
- * - Background container styling matches consulting page pattern
- * - Uses Suspense instead of loading.tsx for better granular control
+ * This server component awaits a server connection to establish a request-scoped logger, then renders page
+ * structured data, a header matching the site template, and a Suspense boundary that loads changelog entries
+ * via the server-side ChangelogContentWithData component so the timeline can stream progressively.
  *
- * Server-side behavior:
- * - Fetches changelog overview via getChangelogOverview with publishedOnly=true.
- * - Uses server-side data to populate the client list and category counts.
- * - Page is intended to be served with ISR (revalidation configured at the file level).
- *
- * @returns A React element representing the changelog page with Suspense boundaries.
+ * @returns A React element containing the page layout, header, and a Suspense-wrapped changelog timeline.
  *
  * @see getChangelogOverview
- * @see ChangelogListClient
+ * @see ChangelogContentWithData
  * @see ChangelogContentSkeleton
  * @see StructuredData
  */
@@ -160,13 +153,15 @@ export default async function ChangelogPage() {
 }
 
 /**
- * Server component that fetches changelog data and renders the content.
+ * Fetches published changelog entries server-side, normalizes fields, sorts them by release date (newest first), and renders the changelog timeline or an error card.
  *
- * Wrapped in Suspense to allow streaming. Renders stats and changelog list
- * inside a background container matching the consulting page pattern.
+ * Performs server-side data loading intended to be used inside a Suspense boundary; normalizes `keywords` and `contributors` to never be null and transforms overview entries to match the frontend changelog row schema before rendering.
  *
- * @param reqLogger - Request-scoped logger for error tracking
- * @returns The changelog content with stats and list
+ * @param reqLogger - Request-scoped logger used to record errors during data fetching
+ * @returns JSX element containing the changelog timeline populated with sorted entries, or an error card if loading fails
+ *
+ * @see getChangelogOverview
+ * @see ChangelogTimelineView
  */
 async function ChangelogContentWithData({
   reqLogger,

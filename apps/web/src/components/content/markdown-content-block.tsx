@@ -84,7 +84,26 @@ export type UnifiedContentBlockProps =
 
 // ============================================================================
 // MAIN COMPONENT - Router
-// ============================================================================
+/**
+ * Render a variant-driven content block that selects and returns the appropriate UI variant based on `props.variant`.
+ *
+ * @param props - Discriminated union props determining which variant to render. Supported variants:
+ *   - `'case-study'` renders CaseStudyVariant
+ *   - `'feature-grid'` renders FeatureGridVariant
+ *   - `'tldr'` renders TLDRVariant
+ *   - `'expert-quote'` renders ExpertQuoteVariant
+ *   - `'quick-reference'` renders QuickReferenceVariant
+ *   - `'content-tabs'` renders ContentTabsVariant
+ *
+ * @returns The React element for the selected variant.
+ *
+ * @see CaseStudyVariant
+ * @see FeatureGridVariant
+ * @see TLDRVariant
+ * @see ExpertQuoteVariant
+ * @see QuickReferenceVariant
+ * @see ContentTabsVariant
+ */
 
 export function UnifiedContentBlock(props: UnifiedContentBlockProps) {
   switch (props.variant) {
@@ -111,7 +130,22 @@ export function UnifiedContentBlock(props: UnifiedContentBlockProps) {
 
 // ============================================================================
 // VARIANT 1: CASE STUDY
-// ============================================================================
+/**
+ * Render a case study card presenting a company's challenge, solution, results, optional metrics, testimonial, and logo.
+ *
+ * @param props.company - Company name shown in the title (rendered as "<company> Case Study")
+ * @param props.industry - Optional industry badge displayed under the title
+ * @param props.challenge - Description of the challenge the company faced
+ * @param props.solution - Description of the solution applied
+ * @param props.results - Narrative summary of the results achieved
+ * @param props.metrics - Optional array of metric objects to display values, labels, and optional trend indicators
+ * @param props.testimonial - Optional testimonial object containing `quote`, `author`, and optional `role`
+ * @param props.logo - Optional logo data; when present a logo area is rendered
+ * @returns A Card (Article schema) JSX element representing the case study content
+ *
+ * @see UnifiedContentBlock
+ * @see UnifiedBadge
+ */
 
 function CaseStudyVariant(props: CaseStudyProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -202,7 +236,22 @@ function CaseStudyVariant(props: CaseStudyProps) {
 
 // ============================================================================
 // VARIANT 2: FEATURE GRID
-// ============================================================================
+/**
+ * Renders a responsive feature grid section with each feature displayed as a card.
+ *
+ * Renders nothing when `features` is an empty array.
+ *
+ * @param props - Component props
+ * @param props.features - Array of feature items; each item should include `title`, `description`, and optionally `badge`
+ * @param props.title - Section heading shown above the grid
+ * @param props.description - Optional section description shown beneath the title
+ * @param props.columns - Number of columns for medium screens (2, 3, or 4). Defaults to 3 when not provided
+ *
+ * @returns A section element containing a responsive grid of feature cards, or `null` if `features` is empty.
+ *
+ * @see UnifiedBadge
+ * @see Card
+ */
 
 function FeatureGridVariant(props: FeatureGridProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -275,7 +324,19 @@ function FeatureGridVariant(props: FeatureGridProps) {
 
 // ============================================================================
 // VARIANT 3: TLDR SUMMARY
-// ============================================================================
+/**
+ * Render a TL;DR styled card showing a title, abstract content, and optional key takeaways.
+ *
+ * Renders schema.org Article markup and displays an iconed header, an abstract paragraph, and a
+ * "Key Takeaways" list when `keyPoints` is provided and non-empty.
+ *
+ * @param props.title - The title displayed in the card header
+ * @param props.content - The abstract/content paragraph shown under the header
+ * @param props.keyPoints - Optional array of concise takeaway strings to render as a list
+ * @returns The TLDR card JSX element
+ *
+ * @see UnifiedContentBlock
+ */
 
 function TLDRVariant(props: TLDRSummaryProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -318,7 +379,17 @@ function TLDRVariant(props: TLDRSummaryProps) {
 
 // ============================================================================
 // VARIANT 4: EXPERT QUOTE
-// ============================================================================
+/**
+ * Renders a styled expert quote block with optional avatar, role, and company.
+ *
+ * Renders a blockquote using schema.org Quotation markup containing the quote text,
+ * an optional avatar image, and author attribution including optional job title and employer.
+ *
+ * @param props - Props for the expert quote; expects `quote`, `author`, and optional `role`, `company`, and `imageUrl`
+ * @returns The JSX element for the expert quote block
+ *
+ * @see UnifiedContentBlock
+ */
 
 function ExpertQuoteVariant(props: ExpertQuoteProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -365,7 +436,19 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
 
 // ============================================================================
 // VARIANT 5: QUICK REFERENCE
-// ============================================================================
+/**
+ * Renders a quick-reference card containing labeled property/value pairs in a responsive grid.
+ *
+ * Renders nothing when `items` is empty.
+ *
+ * @param props.title - Title displayed in the card header
+ * @param props.description - Optional header description shown below the title
+ * @param props.items - Array of quick-reference entries; each entry should have `label`, `value`, and optional `description`
+ * @param props.columns - If `2`, lays out entries in two columns on medium screens and up; otherwise uses a single column
+ * @returns A Card element containing the quick-reference items, or `null` when there are no items
+ *
+ * @see Card
+ */
 
 function QuickReferenceVariant(props: QuickReferenceProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -423,7 +506,24 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
 
 // ============================================================================
 // VARIANT 6: CONTENT TABS
-// ============================================================================
+/**
+ * Render a tabbed content section driven by an array of items.
+ *
+ * Renders a heading and optional description, then a Tabs control where each item
+ * produces a tab trigger and a corresponding tab panel containing `item.content`.
+ *
+ * @param props - Component props
+ * @param props.items - Array of tab items; each item must have `value`, `label`, and `content`.
+ * @param props.title - Optional section title rendered above the tabs.
+ * @param props.description - Optional section description rendered below the title.
+ * @param props.defaultValue - Optional default active tab value; falls back to the first item's `value`.
+ * @returns The rendered section element, or `null` when `items` is empty.
+ *
+ * @see Tabs
+ * @see TabsList
+ * @see TabsTrigger
+ * @see TabsContent
+ */
 
 function ContentTabsVariant(props: ContentTabsProps) {
   // Database CHECK constraint validates structure - no runtime validation needed

@@ -58,6 +58,19 @@ interface ProfileEditFormProps {
   profile: ProfileData;
 }
 
+/**
+ * Renders an editable profile form populated from `profile`, validates input, and submits updates to the server.
+ *
+ * The component manages form state, displays field-level validation errors, shows success/error toasts on submission,
+ * and resets the form to submitted values on successful update.
+ *
+ * @param props.profile - Initial profile values used to populate the form (bio, work, website, social_x_link, interests, profile_public, follow_email).
+ * @returns The profile edit form element.
+ *
+ * @see profileFormSchema
+ * @see updateProfile
+ * @see toasts
+ */
 export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [isPending, startTransition] = useTransition();
   const runLoggedAsync = useLoggedAsync({

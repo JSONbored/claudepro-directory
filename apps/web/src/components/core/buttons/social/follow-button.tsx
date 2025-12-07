@@ -28,6 +28,23 @@ export interface FollowButtonProps {
   variant?: 'default' | 'ghost' | 'outline';
 }
 
+/**
+ * Render a follow/unfollow button that performs an optimistic toggle, synchronizes the change with the server, and rolls back on error while showing toast notifications.
+ *
+ * @param userId - The target user's unique identifier sent to the server action.
+ * @param userSlug - The target user's slug sent to the server action.
+ * @param initialIsFollowing - Initial follow state used for optimistic updates.
+ * @param variant - Visual variant of the Button ('default' | 'ghost' | 'outline').
+ * @param size - Size of the Button ('default' | 'icon' | 'lg' | 'sm'), defaults to 'sm'.
+ * @param className - Optional additional CSS class names applied to the Button.
+ * @returns A Button element that displays the optimistic follow state and initiates the follow/unfollow flow when clicked.
+ *
+ * @see toggleFollow
+ * @see useOptimistic
+ * @see useLoggedAsync
+ * @see normalizeError
+ * @see toast
+ */
 export function FollowButton({
   userId,
   userSlug,

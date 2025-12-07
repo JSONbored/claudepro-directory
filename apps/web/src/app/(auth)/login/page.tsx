@@ -31,11 +31,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the login page layout and provide an optional redirect target to the client-side login panel.
+ * Render the login page layout and initialize request-scoped context for the login flow.
  *
- * Resolves the incoming `searchParams` promise to obtain an optional `redirect` value; if resolution fails or no `redirect` is present, the login panel receives no redirect target.
+ * Awaits request-time connection setup, creates a request-scoped logger, and returns the page wrapped
+ * in a Suspense boundary that renders the login content component with the provided `searchParams`
+ * and `reqLogger`.
  *
- * @param props.searchParams - Promise that resolves to an object that may contain a `redirect` string (e.g., `{ redirect?: string }`)
+ * @param searchParams - Promise resolving to an object that may contain a `redirect` string (e.g., `{ redirect?: string }`)
  * @returns The React element for the login page layout
  *
  * @see {@link LoginPanelClient}
@@ -73,6 +75,21 @@ export default async function LoginPage({
   );
 }
 
+/**
+ * Resolve the optional `redirect` search parameter and render the login layout.
+ *
+ * Attempts to read `redirect` from `searchParams`; on failure logs the normalized error
+ * with `reqLogger` and proceeds without a redirect. Renders a SplitAuthLayout where
+ * LoginPanelClient receives `redirectTo` only when a redirect value was successfully resolved.
+ *
+ * @param searchParams - A promise that should resolve to an object that may contain `redirect`.
+ * @param reqLogger - Request-scoped logger used to record resolution errors and contextual logs.
+ * @returns A React element containing the composed login layout.
+ *
+ * @see LoginPanelClient
+ * @see SplitAuthLayout
+ * @see normalizeError
+ */
 async function LoginPageContent({
   searchParams,
   reqLogger,

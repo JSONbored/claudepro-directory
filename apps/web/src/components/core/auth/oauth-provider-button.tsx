@@ -32,6 +32,21 @@ const PROVIDER_CONFIG = {
   },
 } as const;
 
+/**
+ * Renders a circular OAuth sign-in button for a given provider and initiates the Supabase OAuth flow when clicked.
+ *
+ * Clicking the button constructs a callback URL including `newsletter` and optional `next` query parameters,
+ * triggers Supabase OAuth sign-in for the selected provider, shows a loading state while redirecting, and displays
+ * a toast error if sign-in fails.
+ *
+ * @param provider - OAuth provider to use (`'discord' | 'github' | 'google'`)
+ * @param redirectTo - Optional path to navigate to after authentication (added as the `next` query parameter on the callback URL)
+ * @param className - Optional additional className applied to the outer button
+ * @param newsletterOptIn - When `true`, appends `newsletter=true` to the callback URL; otherwise `newsletter=false`
+ *
+ * @see createSupabaseBrowserClient
+ * @see PROVIDER_CONFIG
+ */
 export function OAuthProviderButton({
   provider,
   redirectTo,

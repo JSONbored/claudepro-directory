@@ -54,13 +54,16 @@ export interface CollectionDetailViewProps {
 }
 
 /**
- * Collection Detail View Component
+ * Render a collection's detail view with prerequisites, embedded items, installation order, and compatibility sections.
  *
- * Renders collection-specific sections in a consistent, accessible layout.
- * Uses Suspense for lazy loading of embedded item content.
+ * Fetches category configurations and embedded item content server-side to populate and group items for display.
  *
- * @param props - Component props with collection data
- * @returns Collection detail view JSX
+ * @param collection - Content row for the collection (category fixed to `'collections'`) used to derive metadata and embedded item references
+ * @returns A JSX element representing the collection detail view
+ *
+ * @see ConfigCard
+ * @see getCategoryConfigs
+ * @see getContentBySlug
  */
 export async function CollectionDetailView({ collection }: CollectionDetailViewProps) {
   // Load category configs once (single RPC call)

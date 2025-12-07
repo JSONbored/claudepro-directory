@@ -32,9 +32,11 @@ import {
 } from '@/src/components/core/forms/profile-edit-form';
 
 /**
- * Generates metadata for the account settings page.
+ * Produce page metadata for the account settings route.
  *
- * @returns The Next.js page metadata for '/account/settings'.
+ * Awaits a server-side connection to ensure non-deterministic operations (e.g., timestamps) run at request time before delegating to generatePageMetadata.
+ *
+ * @returns The Next.js page metadata for "/account/settings".
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
@@ -83,6 +85,26 @@ export default async function SettingsPage() {
   );
 }
 
+/**
+ * Renders the server-side Settings page content for the authenticated user, handling
+ * authentication, settings retrieval, and optional user initialization.
+ *
+ * This server component:
+ * - Checks authentication and renders a sign-in prompt if no user is present.
+ * - Loads user settings and renders a fallback card if settings cannot be loaded.
+ * - Attempts to initialize a missing user record and re-fetch settings when necessary.
+ * - Renders the full settings UI (profile edit form, account details, and profile picture)
+ *   when profile data is available.
+ *
+ * @param reqLogger - A request-scoped logger instance (created via `logger.child`) used for structured logging.
+ * @returns A React element containing the settings UI or an appropriate fallback card based on authentication and data availability.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserSettings
+ * @see ensureUserRecord
+ * @see ProfileEditForm
+ * @see RefreshProfileButton
+ */
 async function SettingsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });

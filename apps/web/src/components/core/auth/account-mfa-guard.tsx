@@ -16,6 +16,20 @@ interface AccountMFAGuardProps {
   children: React.ReactNode;
 }
 
+/**
+ * Ensures the current session meets MFA requirements and conditionally prompts for verification.
+ *
+ * On mount, checks whether MFA is required. While checking, renders a loading state.
+ * If MFA is required, opens an MFAChallengeDialog; when verification succeeds, closes the dialog,
+ * clears the requirement, and refreshes the router to obtain the updated session. If the check fails,
+ * the component falls back to rendering the provided children.
+ *
+ * @param props.children - Content to render when MFA is not required.
+ * @returns The loading UI while checking, the MFAChallengeDialog when verification is required, or the wrapped children otherwise.
+ *
+ * @see MFAChallengeDialog
+ * @see requiresMFAChallenge
+ */
 export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
   const [checking, setChecking] = useState(true);
   const [requiresMFA, setRequiresMFA] = useState(false);

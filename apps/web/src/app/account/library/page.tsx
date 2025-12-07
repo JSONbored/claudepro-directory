@@ -46,11 +46,16 @@ import { Suspense } from 'react';
  */
 
 /**
- * Produce page metadata for the account Library route.
+ * Generate metadata for the account Library page and establish a request-time boundary for non-deterministic operations.
  *
- * @returns The Next.js `Metadata` object configured for the "/account/library" page.
+ * This function awaits a request-scoped connection to ensure non-deterministic operations (for example, `Date.now()` used
+ * by downstream metadata generation) occur at request time as required by Next.js Cache Components, then returns the
+ * metadata produced for the "/account/library" route.
+ *
+ * @returns The Next.js `Metadata` object for the "/account/library" route.
  *
  * @see generatePageMetadata
+ * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
@@ -94,6 +99,25 @@ export default async function LibraryPage() {
   );
 }
 
+/**
+ * Renders the user-scoped Library page content: verifies authentication, loads the user's
+ * library (bookmarks, collections, and stats), and returns the UI for bookmarks and collections
+ * with counts, creation actions, and appropriate empty/error states.
+ *
+ * Attempts to retrieve the authenticated user; if no user is present, renders a sign-in prompt.
+ * Loads library data for the authenticated user, logs fetch results, and renders:
+ * - Header with "My Library" and numeric counts
+ * - Tabs for Bookmarks and Collections with list and empty-state cards
+ * - Actions to create a new collection and links to items/collections
+ *
+ * @param reqLogger - Request-scoped logger (a child of the incoming request logger). A child
+ *   logger with user context is created for user-scoped log entries; userId fields are redacted.
+ * @returns The React element tree for the library page content (cards, tabs, lists, and actions).
+ *
+ * @see getAuthenticatedUser
+ * @see getUserLibrary
+ * @see ROUTES
+ */
 async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });

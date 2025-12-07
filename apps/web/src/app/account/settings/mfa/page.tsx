@@ -61,6 +61,21 @@ export default async function MFASettingsPage() {
   );
 }
 
+/**
+ * Render the server-side MFA settings content for an authenticated user.
+ *
+ * Fetches the authenticated user (requires authentication) and redirects to /login if no user is present.
+ * Logs request-scoped telemetry via `reqLogger` and returns the JSX for the MFA settings page, including
+ * the MFA factors list and explanatory guidance.
+ *
+ * @param reqLogger - A request-scoped logger (result of `logger.child`) used for access and audit logging.
+ * @returns The JSX element representing the MFA settings page content.
+ *
+ * @see getAuthenticatedUser
+ * @see MFAFactorsListClient
+ * @see redirect
+ * @see logger.child
+ */
 async function MFASettingsPageContent({
   reqLogger,
 }: {

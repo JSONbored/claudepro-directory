@@ -132,6 +132,22 @@ interface JobFormProps {
   submitLabel?: string;
 }
 
+/**
+ * Render a job creation/edit form and handle building, validation, and submission of job data.
+ *
+ * Accepts optional initial form values, renders plan selection (from an optional plan catalog or legacy defaults),
+ * manages derived UI state (selected plan, featured flag, tags/requirements/benefits), and invokes the provided
+ * `onSubmit` callback with a constructed `CreateJobInput`.
+ *
+ * @param initialData - Optional partial `CreateJobInput` used to prefill form fields for editing
+ * @param onSubmit - Callback invoked with the constructed `CreateJobInput`. Should return an object with `success: boolean`, optional `requiresPayment`, and optional `job` fields
+ * @param submitLabel - Label shown on the primary submit button (default: `"Create Job"`)
+ * @param planCatalog - Optional array of payment plan catalog entries used to derive available plan options; falls back to legacy plan options when absent
+ * @returns A React element representing the job form UI
+ *
+ * @see CompanySelector
+ * @see ListItemManager
+ */
 export function JobForm({
   initialData,
   onSubmit,

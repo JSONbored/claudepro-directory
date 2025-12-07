@@ -9,6 +9,15 @@ import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
 
+/**
+ * Provide metadata for the Community Directory page.
+ *
+ * This is invoked by Next.js to supply page-level metadata for the `/community/directory` route.
+ *
+ * @returns The `Metadata` object describing title, description, and other SEO/social fields for the community directory page.
+ *
+ * @see generatePageMetadata
+ */
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community/directory');
 }
@@ -171,6 +180,17 @@ interface CommunityDirectoryPageProperties {
   searchParams: Promise<{ q?: string }>;
 }
 
+/**
+ * Render the Community Directory page wrapped in a Suspense boundary that displays a full-screen Skeleton while the page content resolves.
+ *
+ * The component delegates resolution of `searchParams` to CommunityDirectoryPageContent and keeps the UI responsive with a fallback.
+ *
+ * @param props.searchParams - A promise that resolves to an object containing optional query parameters (e.g., `{ q?: string }`); forwarded to CommunityDirectoryPageContent.
+ *
+ * @see CommunityDirectoryPageContent
+ * @see generateMetadata
+ * @see Skeleton
+ */
 export default function CommunityDirectoryPage({ searchParams }: CommunityDirectoryPageProperties) {
   return (
     <Suspense fallback={<Skeleton size="xl" className="h-screen w-full" />}>
@@ -179,6 +199,15 @@ export default function CommunityDirectoryPage({ searchParams }: CommunityDirect
   );
 }
 
+/**
+ * Resolves incoming route search parameters and renders the CommunityDirectoryContent for the extracted query.
+ *
+ * @param props.searchParams - A promise resolving to an object possibly containing `q` (the search query).
+ * @returns A React element rendering CommunityDirectoryContent for the resolved `q` (defaults to an empty string when absent).
+ *
+ * @see CommunityDirectoryContent
+ * @see CommunityDirectoryPage
+ */
 async function CommunityDirectoryPageContent({
   searchParams,
 }: {

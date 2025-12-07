@@ -26,8 +26,14 @@ import { Suspense } from 'react';
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
 
 /**
- * Dynamic Rendering Required
- * Authenticated user submissions
+ * Produce metadata for the account submissions page while ensuring request-time evaluation.
+ *
+ * Awaits a request-time deferral before generating and returning the page metadata for "/account/submissions".
+ *
+ * @returns The Metadata object for the "/account/submissions" page.
+ *
+ * @see generatePageMetadata
+ * @see connection
  */
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -259,6 +265,19 @@ export default async function SubmissionsPage() {
   );
 }
 
+/**
+ * Render the authenticated user's submissions page content, including list, empty state, and error or sign-in prompts.
+ *
+ * @param reqLogger - Request-scoped logger used for telemetry and data-integrity warnings; a child logger is created with user context when available.
+ * @returns A React element containing the submissions UI: sign-in prompt when unauthenticated, an error message on fetch failure, an empty-state call-to-action when no submissions exist, or a grid of submission cards when submissions are available.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserDashboard
+ * @see SubmissionCard
+ * @see extractPrComponents
+ * @see buildSafePrUrl
+ * @see getSafeContentUrl
+ */
 async function SubmissionsPageContent({
   reqLogger,
 }: {

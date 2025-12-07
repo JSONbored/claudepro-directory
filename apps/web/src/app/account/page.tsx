@@ -29,10 +29,15 @@ import { Suspense } from 'react';
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
 
 /**
- * Dynamic Rendering Required
+ * Generate metadata for the account page at request time.
  *
- * This page is dynamic because it displays user-specific account data.
- * Runtime: Node.js (required for authenticated user data and Supabase server client)
+ * Awaits a server connection to ensure non-deterministic operations run at request time,
+ * then delegates to generatePageMetadata('/account') to produce the final Metadata.
+ *
+ * @returns Metadata for the account page.
+ *
+ * @see generatePageMetadata
+ * @see connection
  */
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -43,18 +48,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the account dashboard page for the authenticated user.
+ * Render the account dashboard for the authenticated user.
  *
- * This server component verifies authentication, loads the user's dashboard bundle
- * (dashboard, library, homepage), computes metrics and recent bookmarks, resolves
- * content details for recent bookmarks, and builds personalized recommendations
- * before returning the dashboard UI.
+ * Verifies authentication, loads the user's dashboard bundle (dashboard, library, homepage),
+ * computes metrics and recent bookmarks, resolves content details for recently saved items,
+ * and builds personalized recommendations before rendering the dashboard UI. Renders an
+ * authentication prompt when no user is signed in and a dashboard-unavailable fallback if
+ * required dashboard data cannot be loaded.
  *
- * The component returns a complete JSX page that includes stats, quick actions,
- * a recently saved grid, and recommended items. If the user is not authenticated
- * or required dashboard data cannot be loaded, it renders an appropriate fallback UI.
- *
- * @returns A JSX element representing the account dashboard page.
+ * @returns A JSX element representing the account dashboard page or an authentication/fallback UI.
  *
  * @see getAuthenticatedUser
  * @see getAccountDashboardBundle
@@ -126,8 +128,25 @@ export default async function AccountDashboard() {
 }
 
 /**
- * Server component that fetches dashboard bundle and renders header with stats.
- * Wrapped in Suspense to allow streaming.
+ * Render the dashboard header, account statistics, and quick actions for a user.
+ *
+ * This server component fetches the account dashboard bundle for the given user and renders
+ * a header with a welcome message, stats cards (bookmarks, tier, member-since), and a quick
+ * actions card (resume latest bookmark, view all bookmarks, manage profile). When the dashboard
+ * data is missing it renders a fallback Card indicating the dashboard is unavailable.
+ *
+ * Data fetching is performed server-side via getAccountDashboardBundle and errors from that call
+ * are normalized and rethrown so calling code or error boundaries can handle them.
+ *
+ * @param props.userId - The ID of the authenticated user whose dashboard to load.
+ * @param props.userLogger - A request-scoped logger child used for structured logging.
+ * @returns The dashboard UI as JSX to be streamed to the client.
+ *
+ * @throws If getAccountDashboardBundle fails, throws the normalized error object.
+ *
+ * @see getAccountDashboardBundle
+ * @see normalizeError
+ * @see QuickActionRow
  */
 async function DashboardHeaderAndStats({
   userId,
@@ -283,8 +302,20 @@ async function DashboardHeaderAndStats({
 }
 
 /**
- * Server component that fetches dashboard content (recent bookmarks, recommendations).
- * Wrapped in Suspense to allow streaming.
+ * Render the account dashboard content area with recent bookmarks and personalized recommendations.
+ *
+ * Fetches the account dashboard bundle for the given user and renders two Suspense-wrapped sections:
+ * a recently saved/bookmarks section and a recommendations section.
+ *
+ * @param userId - The authenticated user's ID used to load dashboard data
+ * @param userLogger - Request-scoped logger preconfigured for the current user/session
+ * @returns The dashboard content element containing recent bookmarks and recommendations
+ * @throws {Error} When loading the account dashboard bundle fails; the error is normalized and rethrown
+ *
+ * @see RecentlySavedSection
+ * @see RecommendationsSection
+ * @see getAccountDashboardBundle
+ * @see normalizeError
  */
 async function DashboardContent({
   userId,
@@ -356,8 +387,17 @@ async function DashboardContent({
 }
 
 /**
- * Server component that fetches recent bookmark content details and renders the grid.
- * Wrapped in Suspense to allow streaming.
+ * Renders a "Recently Saved" card by loading content details for the provided recent bookmarks.
+ *
+ * Loads content details for each bookmark, logs load results, and displays a RecentlySavedGrid when
+ * items are available or an empty-state when none could be resolved.
+ *
+ * @param recentBookmarks - Array of bookmark descriptors; each item should contain `content_slug` and `content_type` identifying the bookmarked content.
+ * @param userLogger - Request-scoped logger already configured for the current user; used to record load successes and per-bookmark warnings.
+ * @returns A card element containing either a grid of resolved content items or an empty state message.
+ *
+ * @see getContentDetailCore
+ * @see RecentlySavedGrid
  */
 async function RecentlySavedSection({
   recentBookmarks,
@@ -417,8 +457,19 @@ async function RecentlySavedSection({
 }
 
 /**
- * Server component that computes and renders recommendations.
- * Wrapped in Suspense to allow streaming.
+ * Render a recommendations section suggesting next items based on the user's saved tags and homepage content.
+ *
+ * This server component selects up to three homepage items that match tags extracted from the user's recent saved content,
+ * excludes items that are already bookmarked, and renders a Card with links to explore each recommendation or explore similar items.
+ *
+ * @param homepageData - The `homepage` payload from the account dashboard bundle; used to derive candidate recommendation items.
+ * @param bookmarkedSlugs - A set of strings in the form `"{category}/{slug}"` representing the user's already-bookmarked items to exclude.
+ * @param recentBookmarks - Recent bookmark records (objects with `content_slug` and `content_type`) used to resolve saved content and extract tags.
+ * @param userLogger - A request-scoped logger used to record recommendation-generation metrics.
+ * @returns A Card element containing up to three recommended items (each with "Explore" and optional "Explore similar" links), or a fallback prompt encouraging the user to bookmark content.
+ *
+ * @see getAccountDashboardBundle
+ * @see getContentDetailCore
  */
 async function RecommendationsSection({
   homepageData,
@@ -463,7 +514,12 @@ async function RecommendationsSection({
   }
 
   /**
-   * Safely extracts the `categoryData` map from account dashboard homepage data, returning an empty object if the structure is missing or invalid.
+   * Extracts the `categoryData` map from dashboard homepage data, returning an empty map when the homepage structure is missing or invalid.
+   *
+   * @param homepageData - The `homepage` slice returned by `getAccountDashboardBundle`
+   * @returns The `categoryData` map keyed by category name, or an empty object if none is present
+   *
+   * @see getAccountDashboardBundle
    */
   function extractHomepageCategoryData(
     homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage']

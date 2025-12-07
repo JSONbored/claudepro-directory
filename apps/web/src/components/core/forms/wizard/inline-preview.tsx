@@ -35,6 +35,16 @@ interface InlinePreviewProps {
   qualityScore: number;
 }
 
+/**
+ * Renders a live preview card for a submission with desktop sidebar and mobile modal behaviors.
+ *
+ * @param formData - Submission data (name, description, examples, submission_type, tags, and type_specific) used to populate the preview.
+ * @param qualityScore - Quality score between 0 and 100 displayed as a horizontal progress indicator when greater than 0.
+ * @param className - Optional CSS class names applied to the desktop preview wrapper.
+ * @returns A responsive preview UI: a sidebar card on large screens with a show/hide toggle and a floating button that opens a modal on small screens.
+ *
+ * @see PreviewToggle
+ */
 export function InlinePreview({ formData, qualityScore, className }: InlinePreviewProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
@@ -214,6 +224,18 @@ interface PreviewToggleProps {
   onClick: () => void;
 }
 
+/**
+ * Render a small outline button that toggles the visibility of the live preview.
+ *
+ * The button shows an Eye icon and the text "Show Preview" or "Hide Preview" depending on `isVisible`.
+ *
+ * @param onClick - Callback invoked when the button is clicked.
+ * @param isVisible - Current visibility state of the preview; controls the button label.
+ * @param className - Optional additional CSS classes applied to the button.
+ * @returns A button element that toggles preview visibility.
+ *
+ * @see InlinePreview
+ */
 export function PreviewToggle({ onClick, isVisible, className }: PreviewToggleProps) {
   return (
     <Button variant="outline" size="sm" onClick={onClick} className={cn('gap-2', className)}>

@@ -81,11 +81,11 @@ interface PublicCollectionPageProperties {
 }
 
 /**
- * Generate page metadata for a public collection detail and warm the data cache for the subsequent render.
+ * Produce page metadata for the public collection detail route.
  *
- * Attempts a non-blocking fetch of the collection detail to pre-populate caches; fetch errors are logged but do not prevent metadata from being produced.
+ * Calls connection() to allow non-deterministic operations at request time, emits a metadata-generation log entry, and does not fetch collection details (data is fetched during page render).
  *
- * @param params - Route parameters containing `slug` (user slug) and `collectionSlug`
+ * @param params - Promise resolving to route parameters containing `slug` (user slug) and `collectionSlug`
  * @returns Page metadata for the route `/u/:slug/collections/:collectionSlug`
  *
  * @see getPublicCollectionDetail
@@ -125,14 +125,9 @@ export async function generateMetadata({
 }
 
 /**
- * Renders the public collection detail page for a user's collection, including header, items list, and stats.
+ * Render the public collection detail page for a user's collection.
  *
- * Fetches the collection data for the given user and collection slugs, triggers a 404 when the collection is missing,
- * and conditionally shows owner controls and safe item links. Also emits a non-blocking view tracking pulse.
- *
- * @param params - Route parameters for the page.
- * @param params.slug - The user slug (profile owner) from the route.
- * @param params.collectionSlug - The collection slug from the route.
+ * @param params - A promise that resolves to route parameters containing `slug` (profile owner) and `collectionSlug` (collection identifier).
  * @returns The React element tree for the public collection page.
  *
  * @see getPublicCollectionDetail
@@ -162,6 +157,24 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   );
 }
 
+/**
+ * Renders the public collection detail view for a given user and collection.
+ *
+ * Awaits route params and the current authenticated user (if any), fetches the collection detail,
+ * and returns the server-rendered JSX for the public collection page including items, stats, and
+ * view tracking. If no collection is found, calls `notFound()` to trigger a 404 response.
+ *
+ * @param params - A Promise that resolves to an object containing `collectionSlug` and `slug` (user slug).
+ * @param reqLogger - A request-scoped logger; a child logger is created for the route and viewer.
+ * @returns The React element for the public collection detail page.
+ * @throws When `getPublicCollectionDetail` throws an error during fetch; the error is logged and rethrown.
+ *
+ * @see getPublicCollectionDetail
+ * @see getAuthenticatedUser
+ * @see Pulse
+ * @see getSafeContentLink
+ * @see notFound
+ */
 async function PublicCollectionPageContent({
   params,
   reqLogger,

@@ -15,6 +15,19 @@ interface DetailQuickActionsBarProps {
   packageName?: null | string;
 }
 
+/**
+ * Renders a sticky "Quick actions" bar for a content detail page when quick actions are available.
+ *
+ * @param item - The content item used to derive quick actions.
+ * @param metadata - Metadata associated with the content item.
+ * @param packageName - Optional package name to scope action resolution; pass `null` to disable.
+ * @param configurationObject - Optional configuration object used by action resolution; pass `null` to disable.
+ * @param mcpServers - Optional MCP server configuration used by action resolution; pass `null` to disable.
+ * @param className - Optional additional class names applied to the top-level section.
+ * @returns The quick actions bar element, or `null` if there are no quick actions.
+ *
+ * @see useDetailQuickActions
+ */
 export function DetailQuickActionsBar({
   item,
   metadata,

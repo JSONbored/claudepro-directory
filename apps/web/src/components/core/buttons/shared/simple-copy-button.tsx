@@ -18,6 +18,27 @@ interface SimpleCopyButtonProps extends ButtonStyleProps {
   successMessage?: string;
 }
 
+/**
+ * Renders a button that copies the provided text to the clipboard and shows visual success or error feedback.
+ *
+ * @param props.content - The text content to copy to the clipboard.
+ * @param props.label - Visible button label; when omitted the component renders no label text.
+ * @param props.successMessage - Message shown on successful copy (default: "Copied to clipboard!").
+ * @param props.errorMessage - Message shown when copy fails (default: "Failed to copy").
+ * @param props.showIcon - Whether to render the copy/check icon (default: true).
+ * @param props.onCopySuccess - Optional callback invoked after a successful copy.
+ * @param props.ariaLabel - Accessible label for the button; if omitted a contextual label is derived from `label` and copy state.
+ * @param props.iconClassName - CSS class(es) applied to the icon (default: "h-4 w-4").
+ * @param props.variant - Button visual variant.
+ * @param props.size - Button size.
+ * @param props.className - Additional CSS class(es) applied to the button.
+ * @param props.disabled - Disables the button when true.
+ * @returns A button element that initiates the copy-to-clipboard action and displays transient feedback.
+ *
+ * @see getTimeoutConfig
+ * @see normalizeError
+ * @see logClientWarn
+ */
 export function SimpleCopyButton({
   content,
   label,

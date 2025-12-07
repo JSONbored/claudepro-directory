@@ -88,13 +88,14 @@ async function JobsCountBadge() {
 }
 
 /**
- * Build metadata for the jobs listing page using URL query parameters.
+ * Produce page metadata for /jobs that reflects the current category and remote filters.
  *
- * Reads `category` and `remote` from the provided `searchParams` and returns
- * metadata scoped to the `/jobs` route that reflects those filter values.
+ * Awaits a request-time connection for determinism, resolves `searchParams`, and captures
+ * `category` (string) and `remote` (true when the value equals `"true"`) into the metadata's
+ * filter context.
  *
- * @param searchParams - A (potentially thenable) object containing URL query parameters; `category` is used as a string and `remote` is interpreted as `true` only when its value equals the string `"true"`.
- * @returns Metadata for the `/jobs` page with filter context for `category` and `remote`.
+ * @param searchParams - An object (or thenable resolving to an object) of URL query parameters; `category` is read as a string and `remote` is interpreted as `true` only when equal to `"true"`.
+ * @returns Metadata for the `/jobs` page including a `filters` context with `category` and `remote`.
  *
  * @see generatePageMetadata
  */
@@ -114,19 +115,16 @@ export async function generateMetadata({
 }
 
 /**
- * Render the jobs listing section for a given filter and pagination state.
+ * Render the jobs listing section for the current filter and pagination state.
  *
- * Fetches matching jobs and renders one of: a "no jobs available" total-empty state, a
- * "no jobs found" filtered-empty state, or a grid of JobCard entries. When any filter is
- * active (searchQuery, category, employment, experience, or remote) the server fetch is
- * performed without caching (uncached SSR). When no filters are active the page-level ISR
- * revalidation applies. Retrieved results are sorted client-side according to `sort`.
+ * Fetches matching jobs (uncached when any filter is active; ISR applies when no filters)
+ * and renders either a total-empty state, a filtered-empty state, or a grid of JobCard entries.
  *
  * @param props.searchQuery - Full-text search string to filter job titles and descriptions.
  * @param props.category - Category filter (omit or `undefined` to ignore).
  * @param props.employment - Employment type filter (e.g., "full-time", "part-time"; omit or `undefined` to ignore).
  * @param props.experience - Experience level filter (e.g., "junior", "senior"; omit or `undefined` to ignore).
- * @param props.remote - Remote-only filter; `true` restricts to remote roles, `false` restricts to non-remote, `undefined` ignores this filter.
+ * @param props.remote - If `true`, restrict to remote roles; if `false`, restrict to non-remote; omit to ignore.
  * @param props.sort - Sort option applied after fetching (`'newest' | 'oldest' | 'salary'`).
  * @param props.limit - Maximum number of jobs requested for this page.
  * @param props.offset - Offset for pagination.
@@ -273,30 +271,23 @@ async function JobsListSection({
 }
 
 /**
- * PPR Optimization: Static shell renders immediately
- * - Hero section (title, description, badges, CTA button) - static
- * - Filter section (search, category, employment, experience, remote, sort) - static form
- * - Layout structure (grid, containers) - static
- * Dynamic content streams in Suspense:
- * - JobsCountBadge - streams total count (cached when no filters)
- * - JobsListSection - streams job listings (cached when no filters, uncached when filtered)
- * - Sidebar components (JobsPromo with integrated job alerts form) - static client components
- * - NewsletterCTA - streams at bottom
+ * Renders the Jobs listing page shell with static hero and filter UI while streaming dynamic counts and job results.
  *
- * Note: getFilteredJobs uses caching when no filters are active, enabling efficient
- * streaming of the jobs list. When filters are active, results are uncached for freshness.
+ * The component defers to request time (calls connection()) before parsing query parameters and generating a request-scoped ID.
+ * Filters, pagination, and sort are read from `props.searchParams`. When no filters are active, the job list and total count
+ * use cached responses to enable efficient streaming; when filters are active, job queries are uncached for freshness.
  *
- * @param props.searchParams - Query parameters to control filtering and pagination. Recognized keys:
- *   - q, query, search: full-text search string
- *   - category: job category (use "all" or omit for no category filter)
- *   - employment: employment type (use "any" or omit for no employment filter)
- *   - experience: experience level (use "any" or omit for no experience filter)
- *   - remote: "true" to filter remote-only
- *   - sort: "newest" | "oldest" | "salary" (defaults to "newest")
- *   - page: 1-based page number (clamped to 1–10000)
- *   - limit: items per page (defaults to 20, max 100)
+ * @param props.searchParams - Query parameters controlling filtering and pagination. Recognized keys:
+ *   - `q`, `query`, `search`: full-text search string
+ *   - `category`: job category (omit or use `all` for none)
+ *   - `employment`: employment type (omit or use `any` for none)
+ *   - `experience`: experience level (omit or use `any` for none)
+ *   - `remote`: `"true"` to filter remote-only
+ *   - `sort`: `"newest" | "oldest" | "salary"` (defaults to `"newest"`)
+ *   - `page`: 1-based page number (clamped to 1–10000)
+ *   - `limit`: items per page (defaults to 20, max 100)
  *
- * @returns The page JSX containing the hero header, streaming JobsCountBadge, filter form with active-filter chips and Clear All action, the JobsListSection (server fetch + client sorting), sidebar components, and Newsletter CTA.
+ * @returns The page JSX containing the hero header, streaming JobsCountBadge, filter form with active-filter chips and Clear All action, the JobsListSection (server fetch + client sorting), sidebar content, and Newsletter CTA.
  *
  * @see JobsCountBadge
  * @see JobsListSection

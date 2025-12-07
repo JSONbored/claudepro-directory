@@ -52,14 +52,13 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
 
 /**
- * Build the list of static route params for the most recent changelog entries.
+ * Build static route params for the most recent changelog entries to seed Next.js static generation.
  *
- * Pre-renders up to STATIC_GENERATION_LIMITS.changelog of the latest entries to reduce build time;
- * older entries are rendered on-demand via ISR (revalidate = 7200 seconds).
+ * Returns up to the configured STATIC_GENERATION_LIMITS.changelog newest entries; if no entries are available
+ * or an error occurs while loading entries, returns a placeholder `{ slug: '__placeholder__' }` entry so
+ * Next.js build-time validation for Cache Components has at least one result.
  *
- * @returns An array of param objects of the form `{ slug: string }` for Next.js static generation
- *
- * @throws {Error} When loading changelog entries fails — the error is normalized and re-thrown.
+ * @returns An array of param objects `{ slug: string }` used by Next.js to statically generate routes
  *
  * @see getAllChangelogEntries
  * @see STATIC_GENERATION_LIMITS
@@ -154,14 +153,14 @@ export async function generateMetadata({
 }
 
 /**
- * Render the changelog detail page for the entry identified by `slug`.
+ * Renders the changelog detail page for the entry identified by `slug`.
  *
- * Fetches the changelog entry, triggers a 404 when the entry is not found, and renders
- * page chrome (read progress, view tracking, structured data) and the entry content.
+ * Loads the changelog entry, triggers a 404 when the entry is not found, and renders
+ * page chrome (read progress, view tracking, structured data) alongside the entry content.
  *
- * @param params - Promise that resolves to an object containing the `slug` of the changelog entry to render.
- * @returns The server-rendered React element for the changelog entry page.
- * @throws A normalized error when loading the changelog entry fails.
+ * @param params - Promise resolving to an object containing the `slug` of the changelog entry to render
+ * @returns The server-rendered React element for the changelog entry page
+ * @throws A normalized error when loading the changelog entry fails
  *
  * @see getChangelogEntryBySlug
  * @see getChangelogUrl
@@ -198,6 +197,25 @@ export default async function ChangelogEntryPage({
   );
 }
 
+/**
+ * Renders the changelog entry page for a given slug by loading the entry and composing the page UI.
+ *
+ * Loads the changelog entry for `params.slug`; if the entry cannot be loaded a normalized error is thrown,
+ * and if the entry is not found the Next.js `notFound()` helper is invoked to render a 404.
+ *
+ * @param params - A promise resolving to an object with the `slug` of the changelog entry to render.
+ * @param reqLogger - Route-scoped logger used for request-scoped logging.
+ * @returns The rendered changelog entry page JSX including read progress, view tracking, structured data, header, and content.
+ *
+ * @throws A normalized error when fetching the changelog entry fails.
+ *
+ * @see getChangelogEntryBySlug
+ * @see getChangelogUrl
+ * @see ChangelogContent
+ * @see ReadProgress
+ * @see Pulse
+ * @see StructuredData
+ */
 async function ChangelogEntryPageContent({
   params,
   reqLogger,

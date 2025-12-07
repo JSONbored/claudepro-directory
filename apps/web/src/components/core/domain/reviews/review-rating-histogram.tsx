@@ -13,6 +13,18 @@ import {
   Card,
 } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Server component that renders an average rating and a horizontal bar chart showing the rating distribution.
+ *
+ * @param distribution - Object with counts for each rating key (e.g., `rating_5`, `rating_4`, ..., `rating_1`); may be undefined or partial.
+ * @param totalReviews - Total number of reviews used to compute percentages and pluralization.
+ * @param averageRating - Average rating value shown numerically and via the star display.
+ * @returns A React element showing the average rating and a rating-distribution chart, or a muted placeholder when `totalReviews` is 0.
+ *
+ * @see StarDisplay
+ * @see HorizontalBarChart
+ * @see Card
+ */
 export function ReviewRatingHistogram({
   distribution,
   totalReviews,

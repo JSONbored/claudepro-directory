@@ -106,6 +106,22 @@ export default async function SponsorshipsPage() {
   );
 }
 
+/**
+ * Renders the account sponsorships UI for the current authenticated user.
+ *
+ * Fetches the authenticated user and that user's sponsorships, then renders one of:
+ * - a sign-in prompt when there is no authenticated user,
+ * - an error message when loading sponsorships fails,
+ * - an empty-state UI when the user has no sponsorships,
+ * - or a list of sponsorship cards (with status, metrics, progress, and analytics links) when sponsorships exist.
+ *
+ * @param reqLogger - A request-scoped logger (used to create a user-scoped child logger for per-request telemetry).
+ * @returns The server-rendered React element for the sponsorships page content.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserSponsorships
+ * @see isSponsorshipActive
+ */
 async function SponsorshipsPageContent({
   reqLogger,
 }: {

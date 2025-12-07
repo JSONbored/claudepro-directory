@@ -33,6 +33,18 @@ interface TemplateSelectorProps {
   templates: MergedTemplateItem[];
 }
 
+/**
+ * Render a dropdown menu allowing the user to choose a content template.
+ *
+ * Renders nothing when the `templates` array is empty.
+ *
+ * @param templates - Array of template items to display in the menu; each item is shown with its name and description.
+ * @param onSelect - Called with the selected template item when a menu entry is clicked.
+ * @returns The dropdown menu element or `null` when no templates are available.
+ *
+ * @see DropdownMenu
+ * @see MergedTemplateItem
+ */
 export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps) {
   if (templates.length === 0) {
     return null;

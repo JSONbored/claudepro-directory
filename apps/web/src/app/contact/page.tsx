@@ -12,11 +12,15 @@ import { ContactTerminal } from '@/src/components/features/contact/contact-termi
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
 
 /**
- * Dynamic Rendering Required
+ * Generate metadata for the Contact page while ensuring evaluation happens at request time.
  *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ * Awaits a server connection to defer non-deterministic operations (e.g., current date/time)
+ * to request time before delegating to the page metadata generator for the '/contact' route.
  *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * @returns The Next.js Metadata object for the contact page.
+ *
+ * @see generatePageMetadata
+ * @see https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -67,6 +71,19 @@ export default async function ContactPage() {
   );
 }
 
+/**
+ * Render the contact page content: available contact channels, an optional interactive terminal, and supplemental information (FAQ, response time, contributing).
+ *
+ * Logs warnings via the provided request-scoped logger when expected contact channels (email, GitHub, Discord) are not configured.
+ *
+ * @param reqLogger - A request-scoped logger used to emit warnings and contextual log entries for this render.
+ * @returns A React element containing the contact options UI and additional informational sections.
+ *
+ * @see ContactTerminal
+ * @see ContactTerminalErrorBoundary
+ * @see getContactChannels
+ * @see APP_CONFIG
+ */
 function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const channels = getContactChannels();
   if (!channels.email) {

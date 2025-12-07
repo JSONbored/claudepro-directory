@@ -61,25 +61,15 @@ import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
  */
 
 /**
- * Generate metadata for category list pages
+ * Produce page Metadata for a category list, using the route category or error metadata when invalid.
  *
- * @description
- * Generates SEO metadata including title, description, OpenGraph, and Twitter Card
- * data for each category list page. Falls back to error metadata if category is invalid.
+ * Generates SEO metadata (title, description, Open Graph, and Twitter Card) for the requested category.
+ * This function awaits a server connection to permit request-time non-deterministic operations (e.g., Date.now()).
  *
- * @param {object} props - Component props
- * @param {Promise<{category: string}>} props.params - Route parameters containing category slug
- *
- * @returns {Promise<Metadata>} Next.js metadata object for the page
- *
- * @example
- * // For /agents route, generates metadata:
- * // {
- * //   title: "AI Agents - Claude Pro Directory",
- * //   description: "Browse specialized AI agents...",
- * //   openGraph: { ... },
- * //   twitter: { ... }
- * // }
+ * @param props.params - Promise resolving to route params containing the `category` slug
+ * @returns The Next.js Metadata object for the page
+ * @see getCategoryConfig
+ * @see generatePageMetadata
  */
 export async function generateMetadata({
   params,
@@ -112,25 +102,22 @@ export async function generateMetadata({
 }
 
 /**
- * Dynamic category list page component
+ * Render the category list page for a given content category.
  *
- * @description
- * Server component that renders a list of content items for a given category.
- * Handles validation, config loading, content fetching from database, and rendering.
- * Returns 404 if category is invalid.
+ * Renders a static hero shell from the generated category config and streams in dynamic badges
+ * and the main content list. Validates the category slug and resolves runtime resources
+ * (e.g., request-scoped logger, DB connection) before rendering.
  *
- * @param {object} props - Component props
- * @param {{ category: string }} props.params - Route parameters containing category slug
+ * @param props - Component props
+ * @param props.params - Route parameters promise containing the category slug (`{ category: string }`)
+ * @returns The rendered page element for the category
+ * @throws Triggers Next.js `notFound()` to render a 404 page if the category slug is invalid or the category config is missing
  *
- * @returns {Promise<JSX.Element>} Rendered category list page
- *
- * @throws {notFound} Returns 404 page if category is invalid or config not found
- *
- * @example
- * // Handles routes like:
- * // /agents → Lists all AI agents with search/filter
- * // /mcp → Lists all MCP servers with search/filter
- * // /statuslines → Lists all statuslines with search/filter
+ * @see CategoryHeroShell
+ * @see CategoryBadges
+ * @see CategoryPageContent
+ * @see getCategoryConfig
+ * @see isValidCategory
  */
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   // Params is runtime data - must call connection() first per Cache Components rules
@@ -202,9 +189,20 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 }
 
 /**
- * Static hero shell component - Renders immediately for PPR
- * Contains only static content from category config (title, description, icon, submit button)
- * Badges and content stream in via children (single Suspense boundary)
+ * Renders the static hero section for a category list page and streams dynamic parts as children.
+ *
+ * The hero is rendered immediately (suitable for PPR) and displays the category icon, title,
+ * description, and a Submit button. Badges and other dynamic content are provided via the
+ * `children` slot and are expected to stream in (e.g., wrapped in a Suspense boundary).
+ *
+ * @param props.title - The plural title of the category (displayed as the main heading)
+ * @param props.description - A short description or subtitle for the category
+ * @param props.icon - The icon key used to look up a component in ICON_NAME_MAP; falls back to a help icon
+ * @param props.children - Child nodes (typically streamed badges or content) that render beneath the description
+ * @returns The hero section JSX element for the category page
+ *
+ * @see CategoryBadges
+ * @see CategoryPageContent
  */
 function CategoryHeroShell({
   title,
@@ -261,7 +259,11 @@ function CategoryHeroShell({
 }
 
 /**
- * Badges skeleton - shown while badges are loading
+ * Renders a lightweight animated skeleton placeholder for category badges while real badges load.
+ *
+ * Displays three pill-shaped pulsing placeholders sized to approximate typical badges.
+ *
+ * @see CategoryBadges
  */
 function CategoryBadgesSkeleton() {
   return (
@@ -274,8 +276,19 @@ function CategoryBadgesSkeleton() {
 }
 
 /**
- * Badges component - Streams in Suspense within hero shell
- * Loads items to compute badge counts
+ * Renders the category badges shown in the hero area, computing dynamic counts from the category's items.
+ *
+ * Loads items for the given `category` to produce badge text (some badges may be functions of the item count).
+ * If loading fails or no configured badges exist, renders a sensible fallback set that includes a dynamic count badge.
+ *
+ * @param category - The content category for which to load items and compute badges
+ * @param config - Unified category configuration that may include `listPage.badges` and `pluralTitle`
+ * @param reqLogger - Request-scoped logger used to record load warnings or errors
+ * @returns A list (<ul>) of rendered UnifiedBadge elements for the category
+ *
+ * @see getContentByCategory
+ * @see UnifiedBadge
+ * @see ICON_NAME_MAP
  */
 async function CategoryBadges({
   category,
@@ -357,8 +370,19 @@ async function CategoryBadges({
 }
 
 /**
- * Dynamic content component - Streams in Suspense
- * Loads items and renders content list
+ * Render the main content list and sidebar for a given category using runtime-loaded items.
+ *
+ * Loads items for `category` via `getContentByCategory` (this call uses cache) and renders
+ * a ContentSearchClient populated with those items alongside the ContentSidebar.
+ *
+ * @param params.category - The content category to load and render
+ * @param params.config - Unified category configuration used for titles, placeholders, and icon resolution
+ * @param params.reqLogger - Request-scoped logger used for route-level logging
+ *
+ * @see getContentByCategory
+ * @see ContentSearchClient
+ * @see ContentSidebar
+ * @see ICON_NAME_MAP
  */
 async function CategoryPageContent({
   category,

@@ -21,6 +21,16 @@ import { HomepageHeroServer } from '@/src/components/features/home/homepage-hero
 import { HomepageSearchFacetsServer } from '@/src/components/features/home/homepage-search-facets-server';
 import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
 
+/**
+ * Generate metadata for the root page, deferring execution until request time.
+ *
+ * Awaits the request-scoped connection to satisfy Cache Component requirements for non-deterministic operations, then produces page metadata for '/'.
+ *
+ * @returns Page metadata for the root path (`'/'`) as a `Metadata` object.
+ *
+ * @see generatePageMetadata
+ * @see connection
+ */
 export async function generateMetadata(): Promise<Metadata> {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
   // This is required by Cache Components for non-deterministic operations
@@ -35,16 +45,16 @@ interface HomePageProperties {
 }
 
 /**
- * Server component that renders the homepage top contributors.
+ * Render the homepage TopContributors component with normalized contributor data.
  *
- * Fetches homepage data for the homepage categories, filters out entries missing
- * required identity fields, and normalizes each contributor by ensuring `id`,
- * `slug`, and `name` are present, defaulting `tier` to `"free"` when absent,
- * and adding a `created_at` ISO timestamp. If fetching homepage data fails,
- * the failure is tracked with scope `top-contributors` and the component
- * renders with an empty contributor list.
+ * Fetches homepage data for the homepage categories; if the fetch fails the failure
+ * is tracked (scope `get_homepage_optimized`, section `top-contributors`) and an
+ * empty contributor list is used. Filters out entries missing `id`, `slug`, or
+ * `name`, ensures each contributor has `id`, `slug`, `name`, `image`, `bio`, and
+ * `work`, defaults `tier` to `"free"` when absent, and sets `created_at` to the
+ * database-provided value or the current ISO timestamp as a fallback.
  *
- * This component runs during server rendering and does not declare its own ISR.
+ * This component runs during server rendering and does not declare ISR/revalidation.
  *
  * @returns A React element rendering TopContributors populated with the processed contributors.
  *
@@ -94,23 +104,18 @@ async function TopContributorsServer() {
 }
 
 /**
- * Server component that renders the homepage using streaming Suspense boundaries to reduce time-to-first-byte.
+ * Render the homepage using streaming Suspense boundaries to enable progressive rendering.
  *
- * Renders the page as a set of streaming sections so the hero can appear immediately while other data loads:
- * - Hero: renders immediately and receives a best-effort member count fetched from `getHomepageData` (falls back to 0 on failure).
- * - Search facets: fetched in parallel and streamed independently.
- * - Homepage content: rendered within a Suspense boundary and streamed when its data is ready.
- * - Top contributors and newsletter CTA: lazy-loaded below the fold.
+ * Awaits connection() to establish request-time dynamic context before resolving non-deterministic data and the provided `searchParams`. Streams the hero, search facets, and main content independently and lazy-loads below-the-fold sections (e.g., top contributors).
  *
- * @param searchParams - A promise resolving to the page's query parameters (awaited so search params are available before render).
- * @returns The homepage React element composed of streaming Suspense boundaries and lazy sections.
+ * @param searchParams - A promise that resolves to the page's query parameters (object with optional `q` string)
+ * @returns The homepage React element composed of streaming Suspense boundaries and lazy-loaded sections
  *
  * @see HomepageHeroServer
  * @see HomepageContentServerWrapper
  * @see TopContributorsServer
  * @see getHomepageData
  * @see trackRPCFailure
- * @see revalidate
  */
 export default async function HomePage({ searchParams }: HomePageProperties) {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
@@ -168,12 +173,11 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
 }
 
 /**
- * Server component that fetches member count and renders the homepage hero.
+ * Fetches the homepage member count and renders the hero with that value.
  *
- * This component is wrapped in a Suspense boundary to allow the hero to stream
- * immediately with a fallback value, then update when the actual member count loads.
+ * If fetching fails, records an RPC failure for the hero member-count purpose and falls back to 0.
  *
- * @returns The HomepageHeroServer component with the fetched member count
+ * @returns A HomepageHeroServer element rendered with the resolved `memberCount`
  *
  * @see HomepageHeroServer
  * @see getHomepageData

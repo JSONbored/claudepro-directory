@@ -38,7 +38,21 @@ const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 
 // Helper to get a safe, sanitized href for the author profile.
 // Only allows strictly mapped profile URLs for allowed domains or fallback to default.
-// Never uses arbitrary user-supplied URLs to prevent client-side URL redirect attacks.
+/**
+ * Produce a sanitized, canonical author profile href derived from a content item's `author_profile_url`.
+ *
+ * Valid outputs are:
+ * - a canonical https URL for GitHub, Twitter/X, or LinkedIn when the input maps to those domains,
+ * - an encoded safe local path when the input is a validated relative URL,
+ * - otherwise the safe fallback author profile URL from `SOCIAL_LINK_SNAPSHOT`.
+ *
+ * This function rejects protocol-relative URLs and any input that could enable open-redirects or unsafe navigation.
+ *
+ * @param item - Content item object (may include RPC-composed fields); `author_profile_url` is read from this item when present.
+ * @returns The sanitized author profile URL string; if the input is invalid or not allowed, returns the default author profile URL.
+ *
+ * @see SOCIAL_LINK_SNAPSHOT
+ */
 function getSafeAuthorProfileHref(
   item:
     | ContentItem
@@ -133,6 +147,22 @@ function getSafeAuthorProfileHref(
   return SOCIAL_LINK_SNAPSHOT.authorProfile;
 }
 
+/**
+ * Render author, date, view/copy counts, and tags for a content item as a metadata block.
+ *
+ * Renders an author link (sanitized), the formatted date_added, formatted view and copy counts, and a set of tag badges; returns null when there is no metadata or tags to display.
+ *
+ * @param props.item - Content item object containing fields like `author`, `author_profile_url`, `date_added`, and `tags`. Author profile links are validated and normalized before being rendered.
+ * @param props.viewCount - Optional number of views; shown when greater than zero.
+ * @param props.copyCount - Optional number of times the content was copied; shown when greater than zero.
+ * @returns A JSX element with the metadata and tag badges, or `null` when nothing should be rendered.
+ *
+ * @see getSafeAuthorProfileHref
+ * @see formatDate
+ * @see formatViewCount
+ * @see formatCopyCount
+ * @see UnifiedBadge
+ */
 export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataProps) {
   const hasViewCount = typeof viewCount === 'number' && viewCount > 0;
   const hasCopyCount = typeof copyCount === 'number' && copyCount > 0;

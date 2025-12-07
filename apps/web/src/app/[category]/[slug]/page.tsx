@@ -30,16 +30,14 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 
 /**
- * Produce a list of static route params ({ category, slug }) for a subset of popular content to pre-render at build time.
+ * Produce static route parameters ({ category, slug }) for a subset of homepage categories to pre-render at build time.
  *
- * This selects up to MAX_ITEMS_PER_CATEGORY items per homepage category and returns their { category, slug } pairs. Pages not included in the returned list are served on-demand via Next.js dynamic params and ISR (revalidate = 7200).
+ * Selects up to MAX_ITEMS_PER_CATEGORY items per homepage category and returns their `{ category, slug }` pairs. If no valid parameters are found, returns a single placeholder entry to satisfy build-time requirements.
  *
  * @returns An array of objects each containing `category` and `slug` for use as static params
  *
  * @see getHomepageCategoryIds
  * @see getContentByCategory
- * @see dynamicParams
- * @see revalidate
  */
 export async function generateStaticParams() {
   // Dynamic imports only for data modules (category/content)
@@ -142,10 +140,10 @@ function mapCategoryToRecentlyViewed(category: string): null | RecentlyViewedCat
 }
 
 /**
- * Produce page metadata for a detail route based on the route params and category configuration.
+ * Generate page metadata for a detail route from route params and category configuration.
  *
- * @param params - Promise resolving to an object with `category` and `slug` route parameters.
- * @returns A Metadata object for the detail page. If `category` is invalid, returns the default metadata for `/:category/:slug`.
+ * @param params - An object containing `category` and `slug` route parameters.
+ * @returns The Metadata for the detail page. If `category` is invalid, returns the default metadata for `/:category/:slug`.
  *
  * @see generatePageMetadata
  * @see getCategoryConfig
@@ -201,19 +199,15 @@ export async function generateMetadata({
 }
 
 /**
- * PPR Optimization: Core content fetched blocking (for LCP), analytics/related stream in Suspense
+ * Render the detail page for a content item identified by `category` and `slug`.
  *
- * Structure:
- * - Core content (getContentDetailCore) - Blocking fetch for optimal LCP (cached via 'use cache')
- * - Analytics (getContentAnalytics) - Streams in Suspense via ViewCountMetadata component
- * - Related content (getRelatedContent) - Streams in Suspense via SidebarWithRelated component
- *
- * All data functions use 'use cache' with cacheLife('hours') for efficient caching.
- * Core content is critical for LCP, so it's fetched blocking. Analytics and related
- * content are non-critical and stream independently in Suspense boundaries.
+ * Fetches core detail data synchronously to prioritize LCP, while analytics and related
+ * content are loaded asynchronously inside Suspense boundaries. Awaits a request-time
+ * initialization before performing non-deterministic operations and creates a
+ * request-scoped logger for the page request.
  *
  * @param params - A promise that resolves to an object with `category` and `slug` route parameters
- * @returns A React element representing the content detail page for the requested category and slug
+ * @returns A React element representing the detail page for the specified `category` and `slug`
  *
  * @see getContentDetailCore
  * @see getContentAnalytics
@@ -250,6 +244,19 @@ export default async function DetailPage({
   );
 }
 
+/**
+ * Render the detail page content for a given category and slug, fetching core content immediately and deferring analytics and related items for Suspense.
+ *
+ * This component validates the category and category configuration, fetches core content necessary for LCP (404s if missing), starts non-blocking fetches for analytics and related items, and renders the unified detail UI including optional RecentlyViewed tracking and collection-specific sections.
+ *
+ * @param params - A promise that resolves to an object with `category` and `slug` identifying the requested detail route.
+ * @param reqLogger - A request-scoped logger; a route-scoped child logger will be created for logging within this component.
+ * @returns A React fragment containing progress UI, structured data, optional recently-viewed tracking, and the unified detail page with deferred data promises.
+ *
+ * @see UnifiedDetailPage
+ * @see getContentDetailCore
+ * @see RecentlyViewedTracker
+ */
 async function DetailPageContent({
   params,
   reqLogger,

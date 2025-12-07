@@ -37,10 +37,13 @@ interface AnalyticsPageProperties {
 }
 
 /**
- * Generates metadata for the sponsorship analytics page for the given route `id`.
+ * Generate page metadata for the sponsorship analytics route identified by `id`.
  *
- * @param params - A promise resolving to route parameters; must resolve to an object containing `id`
- * @returns Metadata for the sponsorship analytics page corresponding to `id`
+ * This metadata generation defers non-deterministic operations to request time by awaiting the database
+ * `connection()`, ensuring compatibility with Next.js Cache Components.
+ *
+ * @param params - A promise that resolves to route parameters; must resolve to an object containing `id`
+ * @returns The Metadata object for the sponsorship analytics page for `id`
  *
  * @see generatePageMetadata
  * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata
@@ -56,13 +59,12 @@ export async function generateMetadata({ params }: AnalyticsPageProperties): Pro
 /**
  * Render the sponsorship analytics page for a given sponsorship id.
  *
- * Renders campaign overview metrics, campaign details, a 30-day daily performance chart,
- * and optimization tips. Enforces authentication (prompts sign-in if unauthenticated)
- * and fetches analytics data for the current user; if analytics are missing or invalid,
- * the page resolves to a not-found response.
+ * Displays campaign overview metrics, campaign details, a 30-day daily performance chart,
+ * and optimization tips. Enforces authentication and resolves to a not-found response when
+ * analytics data is missing or invalid.
  *
  * @param params - Route parameters object containing the `id` of the sponsorship to display.
- * @returns A React element displaying campaign metrics, daily performance visualization, and tips.
+ * @returns A React element showing campaign metrics, daily performance visualization, and optimization tips.
  *
  * @see getSponsorshipAnalytics
  * @see getAuthenticatedUser
@@ -91,6 +93,19 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   );
 }
 
+/**
+ * Render the sponsorship analytics page content for a given sponsorship id by fetching analytics, enforcing authentication, and displaying overview, campaign details, and a 30-day performance chart.
+ *
+ * Renders a sign-in prompt when no authenticated user is present and triggers Next.js `notFound()` when analytics or required fields are missing.
+ *
+ * @param params - Promise resolving to route parameters with an `id` property
+ * @param reqLogger - Request-scoped logger (used to create route- and user-scoped child loggers)
+ * @returns The React elements comprising the sponsorship analytics UI
+ * @throws Normalized error when fetching sponsorship analytics fails
+ * @see getSponsorshipAnalytics
+ * @see getAuthenticatedUser
+ * @see notFound
+ */
 async function SponsorshipAnalyticsPageContent({
   params,
   reqLogger,
