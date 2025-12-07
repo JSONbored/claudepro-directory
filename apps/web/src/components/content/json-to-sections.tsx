@@ -287,7 +287,7 @@ type Section =
 function TrustedHTML({ html, className, id }: { className?: string; html: string; id?: string }) {
   // Hooks must be called unconditionally before any early returns
   const [safeHtml, setSafeHtml] = useState<string>(
-    globalThis.window === undefined ? html : '' // Start empty on client, will be set in useEffect
+    html // Initialize with raw HTML; useEffect will sanitize on client
   );
   const [isClient, setIsClient] = useState(false);
 

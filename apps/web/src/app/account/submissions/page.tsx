@@ -1,8 +1,10 @@
 import { Constants, type Database } from '@heyclaude/database-types';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserDashboard,
+  getCategoryConfig,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
@@ -400,17 +402,37 @@ async function SubmissionsPageContent({
   };
 
   const getTypeLabel = (type: Database['public']['Enums']['submission_type']): string => {
-    // Use Constants for enum values in Record keys
-    const labels: Record<Database['public']['Enums']['submission_type'], string> = {
-      [Constants.public.Enums.submission_type[0]]: 'Claude Agent', // 'agents'
-      [Constants.public.Enums.submission_type[1]]: 'MCP Server', // 'mcp'
-      [Constants.public.Enums.submission_type[2]]: 'Claude Rule', // 'rules'
-      [Constants.public.Enums.submission_type[3]]: 'Command', // 'commands'
-      [Constants.public.Enums.submission_type[4]]: 'Hook', // 'hooks'
-      [Constants.public.Enums.submission_type[5]]: 'Statusline', // 'statuslines'
-      [Constants.public.Enums.submission_type[6]]: 'Skill', // 'skills'
+    // Map submission_type to content_category for config lookup
+    const categoryMap: Record<
+      Database['public']['Enums']['submission_type'],
+      Database['public']['Enums']['content_category']
+    > = {
+      [Constants.public.Enums.submission_type[0]]: 'agents',
+      [Constants.public.Enums.submission_type[1]]: 'mcp',
+      [Constants.public.Enums.submission_type[2]]: 'rules',
+      [Constants.public.Enums.submission_type[3]]: 'commands',
+      [Constants.public.Enums.submission_type[4]]: 'hooks',
+      [Constants.public.Enums.submission_type[5]]: 'statuslines',
+      [Constants.public.Enums.submission_type[6]]: 'skills',
     };
-    return labels[type];
+
+    const category = categoryMap[type];
+    if (category && isValidCategory(category)) {
+      const config = getCategoryConfig(category);
+      return config?.typeName ?? type;
+    }
+
+    // Fallback to hardcoded labels if category mapping fails
+    const fallbackLabels: Record<Database['public']['Enums']['submission_type'], string> = {
+      [Constants.public.Enums.submission_type[0]]: 'Claude Agent',
+      [Constants.public.Enums.submission_type[1]]: 'MCP Server',
+      [Constants.public.Enums.submission_type[2]]: 'CLAUDE.md',
+      [Constants.public.Enums.submission_type[3]]: 'Command',
+      [Constants.public.Enums.submission_type[4]]: 'Hook',
+      [Constants.public.Enums.submission_type[5]]: 'Statusline',
+      [Constants.public.Enums.submission_type[6]]: 'Skill',
+    };
+    return fallbackLabels[type] ?? type;
   };
 
   /**
@@ -515,9 +537,7 @@ async function SubmissionsPageContent({
               getContentLinkProps={getContentLinkProperties}
               isValidSubmissionStatus={isValidSubmissionStatus}
               isValidSubmissionType={isValidSubmissionType}
-              VALID_SUBMISSION_STATUSES={
-                VALID_SUBMISSION_STATUSES as unknown as Database['public']['Enums']['submission_status'][]
-              }
+              VALID_SUBMISSION_STATUSES={[...VALID_SUBMISSION_STATUSES]}
               VALID_SUBMISSION_TYPES={ALLOWED_TYPES_ARRAY}
             />
           ))}

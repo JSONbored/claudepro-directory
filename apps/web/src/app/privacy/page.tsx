@@ -8,13 +8,6 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 /**
- * Provide page metadata used by Next.js for the site's Privacy page.
- *
- * @returns The Next.js Metadata object for the "/privacy" page.
- * @see generatePageMetadata
- * @see {@link Metadata}
- */
-/**
  * Provide Next.js metadata for the Privacy page, deferring non-deterministic operations to request time.
  *
  * Awaits a server connection to allow safe use of non-deterministic values (e.g., current date) in Cache Components, then returns generated metadata for the '/privacy' route.

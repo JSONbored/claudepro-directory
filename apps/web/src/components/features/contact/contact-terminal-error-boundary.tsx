@@ -56,7 +56,7 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
                 <p className="text-muted-foreground text-sm">
                   Something went wrong with the interactive terminal.
                   {this.state.error?.message ? (
-                    <span className="text-destructive mt-2 block font-mono text-xs">
+                    <span className="text-destructive mt-2 block max-w-full break-all font-mono text-xs">
                       {this.state.error.message}
                     </span>
                   ) : null}

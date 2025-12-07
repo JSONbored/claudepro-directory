@@ -14,19 +14,22 @@
 
 import { Constants } from '@heyclaude/database-types';
 import { type Database } from '@heyclaude/database-types';
-import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logUnhandledPromise, isValidCategory } from '@heyclaude/web-runtime/core';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { useCopyToClipboard, usePulse, usePinboard } from '@heyclaude/web-runtime/hooks';
+import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import {
   ArrowLeft,
   Bookmark,
   BookmarkPlus,
-  Check,
   Copy,
   Download,
   FileText,
+  Linkedin,
+  Menu,
   Sparkles,
+  Twitter,
 } from '@heyclaude/web-runtime/icons';
-import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { type ContentItem, type CopyType } from '@heyclaude/web-runtime/types/component.types';
 import {
   STATE_PATTERNS,
@@ -34,15 +37,18 @@ import {
   UI_CLASSES,
   UnifiedBadge,
   Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 
-import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
-import { ShareMenu } from '@/src/components/core/buttons/social/share-menu';
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
-import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
+import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
 
 /**
  * Validate and return a safe path segment for use in URLs.
@@ -197,7 +203,6 @@ export interface DetailHeaderActionsProps {
  * @see sanitizePathSegment
  * @see getContentForCopy
  * @see useCopyWithEmailCapture
- * @see ShareMenu
  */
 export function DetailHeaderActions({
   item,
@@ -217,7 +222,7 @@ export function DetailHeaderActions({
   const contentItem = item as ContentItem;
 
   const pulse = usePulse();
-  const { copied, copy } = useCopyWithEmailCapture({
+  const { copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: determineCopyType(contentItem),
       category,
@@ -431,7 +436,7 @@ export function DetailHeaderActions({
               {typeName}
             </UnifiedBadge>
             <UnifiedBadge variant="base" style="outline" className={UI_CLASSES.TEXT_BADGE}>
-              {category}
+              {isValidCategory(category) ? getCategoryConfig(category)?.typeName ?? category : category}
             </UnifiedBadge>
           </div>
 
@@ -480,19 +485,23 @@ export function DetailHeaderActions({
             </motion.div>
           ) : null}
 
-          {/* Secondary actions row */}
-          <div className="flex flex-wrap gap-2">
-            <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
-              <Button
-                variant={pinned ? 'secondary' : 'outline'}
-                onClick={handleTogglePin}
-                className="w-full"
-                size="sm"
-              >
+          {/* Actions Dropdown - Consolidated all actions */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <motion.div whileTap={{ scale: 0.97 }}>
+                <Button variant="outline" size="sm" className="w-full">
+                  <Menu className={UI_CLASSES.ICON_SM_LEADING} />
+                  Actions
+                </Button>
+              </motion.div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {/* Pin */}
+              <DropdownMenuItem onClick={handleTogglePin}>
                 {pinned ? (
                   <>
                     <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
-                    Pinned
+                    Unpin
                   </>
                 ) : (
                   <>
@@ -500,23 +509,198 @@ export function DetailHeaderActions({
                     Pin
                   </>
                 )}
-              </Button>
-            </motion.div>
+              </DropdownMenuItem>
 
-            <ShareMenu
-              url={shareUrl}
-              title={displayTitle}
-              description={contentItem.description ?? undefined}
-              utmCampaign={category}
-              onShare={(platform) => {
-                pulse
-                  .share({ platform, category, slug: contentItem.slug, url: shareUrl })
-                  .catch(() => {
-                    // Silent fail for analytics
+              {/* Share - inline menu items */}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={async () => {
+                  const shareUrlWithUtm = `${shareUrl}?utm_source=share&utm_medium=share&utm_campaign=${category}`;
+                  const tweetText = encodeURIComponent(
+                    `Check out ${displayTitle} on ClaudePro Directory!`
+                  );
+                  const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(shareUrlWithUtm)}`;
+                  window.open(twitterUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
+                  await pulse
+                    .share({ platform: 'twitter', category, slug: contentItem.slug, url: shareUrl })
+                    .catch(() => {});
+                }}
+              >
+                <Twitter className={UI_CLASSES.ICON_SM_LEADING} />
+                Share on X
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={async () => {
+                  const shareUrlWithUtm = `${shareUrl}?utm_source=share&utm_medium=share&utm_campaign=${category}`;
+                  const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrlWithUtm)}`;
+                  window.open(linkedInUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
+                  await pulse
+                    .share({ platform: 'linkedin', category, slug: contentItem.slug, url: shareUrl })
+                    .catch(() => {});
+                }}
+              >
+                <Linkedin className={UI_CLASSES.ICON_SM_LEADING} />
+                Share on LinkedIn
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={async () => {
+                  const shareUrlWithUtm = `${shareUrl}?utm_source=share&utm_medium=share&utm_campaign=${category}`;
+                  await copyToClipboard(shareUrlWithUtm);
+                  toasts.raw.success('Link copied!', {
+                    description: 'Paste anywhere to share.',
                   });
-              }}
-            />
-          </div>
+                  await pulse
+                    .share({ platform: 'copy_link', category, slug: contentItem.slug, url: shareUrl })
+                    .catch(() => {});
+                }}
+              >
+                <Copy className={UI_CLASSES.ICON_SM_LEADING} />
+                Copy Link
+              </DropdownMenuItem>
+
+              {/* Copy Actions */}
+              {hasContent && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleCopyContent}>
+                    <Copy className={UI_CLASSES.ICON_SM_LEADING} />
+                    Copy Content
+                  </DropdownMenuItem>
+
+                  {(() => {
+                    const safeCategory = sanitizePathSegment(category);
+                    const safeSlug = sanitizePathSegment(contentItem.slug);
+                    if (!(safeCategory && safeSlug)) return null;
+
+                    const handleCopyForAI = async () => {
+                      try {
+                        const response = await fetch(`/${safeCategory}/${safeSlug}/llms.txt`);
+                        const content = await response.text();
+                        await copyToClipboard(content);
+                        toasts.raw.success('Copied llms.txt to clipboard!');
+                        await pulse.copy({
+                          category,
+                          slug: contentItem.slug,
+                          metadata: { action_type: 'llmstxt' },
+                        });
+                      } catch (error) {
+                        logUnhandledPromise('Failed to copy for AI', error, {
+                          category,
+                          slug: contentItem.slug,
+                        });
+                      }
+                    };
+
+                    const handleCopyMarkdown = async () => {
+                      try {
+                        const response = await fetch(
+                          `/${safeCategory}/${safeSlug}.md?include_metadata=true&include_footer=false`
+                        );
+                        const content = await response.text();
+                        await copyToClipboard(content);
+                        showModal({
+                          copyType: 'markdown',
+                          category,
+                          slug: contentItem.slug,
+                          ...(referrer && { referrer }),
+                        });
+                        toasts.raw.success('Copied markdown to clipboard!');
+                        await pulse.copy({
+                          category,
+                          slug: contentItem.slug,
+                          metadata: { action_type: 'copy' },
+                        });
+                      } catch (error) {
+                        logUnhandledPromise('Failed to copy markdown', error, {
+                          category,
+                          slug: contentItem.slug,
+                        });
+                      }
+                    };
+
+                    return (
+                      <>
+                        <DropdownMenuItem onClick={handleCopyForAI}>
+                          <Sparkles className={UI_CLASSES.ICON_SM_LEADING} />
+                          Copy for AI
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleCopyMarkdown}>
+                          <FileText className={UI_CLASSES.ICON_SM_LEADING} />
+                          Copy Markdown
+                        </DropdownMenuItem>
+                      </>
+                    );
+                  })()}
+                </>
+              )}
+
+              {/* Download/Export */}
+              {hasDownloadAvailable && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      if (hasMcpbDownload) {
+                        handleDownload('mcpb', contentItem, category, pulse);
+                      } else if (hasStorageDownload) {
+                        handleDownload('zip', contentItem, category, pulse);
+                      }
+                    }}
+                  >
+                    <Download className={UI_CLASSES.ICON_SM_LEADING} />
+                    {category === Constants.public.Enums.content_category[1]
+                      ? 'Download .mcpb'
+                      : 'Download'}
+                  </DropdownMenuItem>
+
+                  {(() => {
+                    const safeCategory = sanitizePathSegment(category);
+                    const safeSlug = sanitizePathSegment(contentItem.slug);
+                    if (!(safeCategory && safeSlug)) return null;
+
+                    const handleDownloadMarkdown = async () => {
+                      try {
+                        const response = await fetch(`/${safeCategory}/${safeSlug}.md`);
+                        const content = await response.text();
+                        const blob = new Blob([content], { type: 'text/markdown' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${contentItem.slug}.md`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        toasts.raw.success('Downloaded markdown file!');
+                        await pulse.download({
+                          category,
+                          slug: contentItem.slug,
+                          action_type: 'download_markdown',
+                        });
+                      } catch (error) {
+                        logUnhandledPromise('Failed to download markdown', error, {
+                          category,
+                          slug: contentItem.slug,
+                        });
+                      }
+                    };
+
+                    return (
+                      <DropdownMenuItem onClick={handleDownloadMarkdown}>
+                        <Download className={UI_CLASSES.ICON_SM_LEADING} />
+                        Download Markdown
+                      </DropdownMenuItem>
+                    );
+                  })()}
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Explore Dropdown - Separate hover dropdown */}
+          <ExploreDropdown
+            category={category}
+            slug={contentItem.slug}
+            pageType="detail"
+          />
 
           {/* View Pinboard link */}
           <Button
@@ -529,146 +713,6 @@ export function DetailHeaderActions({
             View pinboard ({pinnedItems.length})
           </Button>
 
-          {/* Content actions divider */}
-          {hasContent ? (
-            <>
-              <div className="border-border/50 border-t" />
-              <div className="flex flex-wrap gap-2">
-                <motion.div
-                  whileTap={{ scale: 0.97 }}
-                  animate={copied ? { scale: [1, 1.05, 1] } : {}}
-                  transition={{ duration: 0.3 }}
-                  className="flex-1"
-                >
-                  <Button
-                    variant="outline"
-                    onClick={handleCopyContent}
-                    size="sm"
-                    className="w-full"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="mr-2 h-4 w-4 text-green-500" />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className={UI_CLASSES.ICON_SM_LEADING} />
-                        Copy Content
-                      </>
-                    )}
-                  </Button>
-                </motion.div>
-
-                {/* Copy for AI button */}
-                {(() => {
-                  const safeCategory = sanitizePathSegment(category);
-                  const safeSlug = sanitizePathSegment(contentItem.slug);
-                  if (!(safeCategory && safeSlug)) {
-                    logClientWarn(
-                      '[Content] Invalid category or slug for AI copy button',
-                      undefined,
-                      'DetailHeaderActions.render',
-                      {
-                        component: 'DetailHeaderActions',
-                        action: 'render-ai-copy-button',
-                        category: 'content',
-                        itemCategory: category,
-                        slug: contentItem.slug,
-                      }
-                    );
-                    return null;
-                  }
-                  return (
-                    <ContentActionButton
-                      url={`/${safeCategory}/${safeSlug}/llms.txt`}
-                      action={async (content) => {
-                        await copyToClipboard(content);
-                      }}
-                      label="Copy for AI"
-                      successMessage="Copied llms.txt to clipboard!"
-                      icon={Sparkles}
-                      trackAnalytics={async () => {
-                        await pulse.copy({
-                          category,
-                          slug: contentItem.slug,
-                          metadata: { action_type: 'llmstxt' },
-                        });
-                      }}
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                    />
-                  );
-                })()}
-              </div>
-
-              {/* Download/Export row */}
-              <div className="flex flex-wrap gap-2">
-                {(() => {
-                  const safeCategory = sanitizePathSegment(category);
-                  const safeSlug = sanitizePathSegment(contentItem.slug);
-                  if (!(safeCategory && safeSlug)) {
-                    return null;
-                  }
-                  return (
-                    <>
-                      <ContentActionButton
-                        url={`/${safeCategory}/${safeSlug}.md?include_metadata=true&include_footer=false`}
-                        action={async (content) => {
-                          await copyToClipboard(content);
-                          showModal({
-                            copyType: 'markdown',
-                            category,
-                            slug: contentItem.slug,
-                            ...(referrer && { referrer }),
-                          });
-                        }}
-                        label="Copy Markdown"
-                        successMessage="Copied markdown to clipboard!"
-                        icon={FileText}
-                        trackAnalytics={async () => {
-                          await pulse.copy({
-                            category,
-                            slug: contentItem.slug,
-                            metadata: { action_type: 'copy' },
-                          });
-                        }}
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                      />
-                      <ContentActionButton
-                        url={`/${safeCategory}/${safeSlug}.md`}
-                        action={async (content) => {
-                          const blob = new Blob([content], { type: 'text/markdown' });
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = `${contentItem.slug}.md`;
-                          a.click();
-                          URL.revokeObjectURL(url);
-                        }}
-                        label="Download"
-                        successMessage="Downloaded markdown file!"
-                        icon={Download}
-                        trackAnalytics={async () => {
-                          await pulse.download({
-                            category,
-                            slug: contentItem.slug,
-                            action_type: 'download_markdown',
-                          });
-                        }}
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                      />
-                    </>
-                  );
-                })()}
-              </div>
-            </>
-          ) : null}
 
           {/* Secondary actions */}
           {secondaryActions && secondaryActions.length > 0 ? (

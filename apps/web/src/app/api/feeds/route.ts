@@ -66,18 +66,17 @@ async function executeRpcWithLogging<T>(
   const { data, error } = await rpcCall();
   if ((error !== null && error !== undefined) || data == null) {
     if (error !== null && error !== undefined) {
-      reqLogger.error('RPC call failed', normalizeError(error), {
+      const normalized = normalizeError(error, `${rpcName} failed`);
+      reqLogger.error('RPC call failed', normalized, {
         rpcName,
       });
+      throw normalized;
     } else {
       reqLogger.error('RPC returned null data without error', undefined, {
         rpcName,
       });
+      throw new Error(`${rpcName} failed or returned null`);
     }
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error(`${rpcName} failed or returned null`);
   }
   return data;
 }
@@ -225,8 +224,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    reqLogger.error('Feeds API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Feeds API error');
+    reqLogger.error('Feeds API error', normalized);
+    return createErrorResponse(normalized, {
       route: '/api/feeds',
       operation: 'FeedsAPI',
       method: 'GET',

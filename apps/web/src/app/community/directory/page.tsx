@@ -17,14 +17,18 @@ import { ProfileSearchClient } from '@/src/components/features/community/profile
  * @returns The `Metadata` object describing title, description, and other SEO/social fields for the community directory page.
  *
  * @see generatePageMetadata
+ * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/community/directory');
 }
 
 /**
- * Static Generation: Community directory is statically generated at build time
- * No automatic revalidation - page is fully static
+ * Dynamic Rendering: Community directory is rendered dynamically to support search query parameters.
+ * Wrapped in Suspense for streaming and Cache Components compatibility.
  */
 
 const DEFAULT_DIRECTORY_LIMIT = 100;

@@ -3,7 +3,7 @@
  * Uses getUserLibrary data function for fetching bookmarks and collections
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -37,6 +37,9 @@ import { type Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
+
+// Extract collections category value to avoid fragile enum index access
+const COLLECTIONS_TAB_VALUE = 'collections' as Database['public']['Enums']['content_category'];
 
 // MIGRATED: Added Suspense boundary for dynamic getAuthenticatedUser access (Cache Components requirement)
 
@@ -241,10 +244,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
             <BookmarkIcon className="h-4 w-4" />
             Bookmarks ({bookmarkCount})
           </TabsTrigger>
-          <TabsTrigger
-            value={Constants.public.Enums.content_category[8]} // 'collections'
-            className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
-          >
+          <TabsTrigger value={COLLECTIONS_TAB_VALUE} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <FolderOpen className="h-4 w-4" />
             Collections ({collectionCount})
           </TabsTrigger>
@@ -304,10 +304,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
           )}
         </TabsContent>
 
-        <TabsContent
-          value={Constants.public.Enums.content_category[8]} // 'collections'
-          className="space-y-4"
-        >
+        <TabsContent value={COLLECTIONS_TAB_VALUE} className="space-y-4">
           {collections.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center py-12">

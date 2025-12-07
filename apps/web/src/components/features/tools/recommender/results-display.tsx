@@ -8,6 +8,7 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { addBookmarkBatch } from '@heyclaude/web-runtime/actions';
 import { getContentItemUrl, isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   ArrowRight,
@@ -161,7 +162,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             {(summary?.diversity_score ?? 0).toFixed(0)}% Diversity
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="outline" className="text-sm">
-            Top Category: {summary?.top_category ?? 'General'}
+            Top Category:{' '}
+            {summary?.top_category && isValidCategory(summary.top_category)
+              ? getCategoryConfig(summary.top_category)?.typeName ?? summary.top_category
+              : summary?.top_category ?? 'General'}
           </UnifiedBadge>
         </div>
 
@@ -329,9 +333,15 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               category === 'all'
                 ? (results?.length ?? 0)
                 : (results ?? []).filter((r) => r.category === category).length;
+            const displayName =
+              category === 'all'
+                ? 'All Results'
+                : category && isValidCategory(category)
+                  ? getCategoryConfig(category)?.typeName ?? category
+                  : category ?? 'all';
             return (
-              <TabsTrigger key={category ?? 'all'} value={category ?? 'all'} className="capitalize">
-                {category === 'all' ? 'All Results' : (category ?? 'all')} ({count})
+              <TabsTrigger key={category ?? 'all'} value={category ?? 'all'}>
+                {displayName} ({count})
               </TabsTrigger>
             );
           })}

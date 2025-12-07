@@ -24,7 +24,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
-import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { APP_CONFIG, QUERY_LIMITS } from '@heyclaude/web-runtime/data/config/constants';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
 import { connection } from 'next/server';
@@ -33,11 +33,6 @@ import { Suspense } from 'react';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogContentSkeleton } from '@/src/components/features/changelog/changelog-content-skeleton';
 import { ChangelogTimelineView } from '@/src/components/features/changelog/changelog-timeline-view';
-
-/**
- * ISR: 1 hour (3600s) - Changelog list updates periodically
- * Uses ISR for better performance while keeping content fresh
- */
 
 /**
  * Generate page metadata for the /changelog route, including RSS and Atom feed alternates.
@@ -177,7 +172,7 @@ async function ChangelogContentWithData({
     // This replaces getAllChangelogEntries() + client-side category counting
     const overview = await getChangelogOverview({
       publishedOnly: true, // Only get published entries
-      limit: 10_000,
+      limit: QUERY_LIMITS.changelog.max,
       offset: 0,
     });
 

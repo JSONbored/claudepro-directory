@@ -14,7 +14,7 @@ This Edge Function uses existing HeyClaude infrastructure:
 ## Structure
 
 ```
-mcp-directory/
+heyclaude-mcp/
 ├── index.ts              # Main entry point with Hono routing
 ├── routes/               # Tool handler implementations
 │   ├── categories.ts     # listCategories tool
@@ -40,27 +40,26 @@ mcp-directory/
 
 ## Endpoints
 
-- **Primary:** `https://mcp.heyclau.de/mcp`
-- **Legacy:** `https://mcp.claudepro.directory/mcp`
-- **Direct:** `https://hgtjdifxfapoltfflowc.supabase.co/functions/v1/mcp-directory/mcp`
-- **Health:** `https://mcp.heyclau.de/`
+- **Primary:** `https://mcp.claudepro.directory/mcp`
+- **Direct:** `https://hgtjdifxfapoltfflowc.supabase.co/functions/v1/heyclaude-mcp/mcp`
+- **Health:** `https://mcp.claudepro.directory/`
 
 ## Development
 
 ```bash
 # Start local development
-supabase functions serve --no-verify-jwt mcp-directory
+supabase functions serve --no-verify-jwt heyclaude-mcp
 
 # Test with MCP Inspector
 npx @modelcontextprotocol/inspector
-# Add endpoint: http://localhost:54321/functions/v1/mcp-directory/mcp
+# Add endpoint: http://localhost:54321/functions/v1/heyclaude-mcp/mcp
 
 # Test with Claude Desktop
 # Add to ~/.claude_desktop_config.json:
 {
   "mcpServers": {
     "heyclaude-mcp-dev": {
-      "url": "http://localhost:54321/functions/v1/mcp-directory/mcp"
+      "url": "http://localhost:54321/functions/v1/heyclaude-mcp/mcp"
     }
   }
 }
@@ -70,7 +69,7 @@ npx @modelcontextprotocol/inspector
 
 ```bash
 # Deploy to production
-supabase functions deploy --no-verify-jwt mcp-directory
+supabase functions deploy --no-verify-jwt heyclaude-mcp
 ```
 
 ## Version
@@ -81,6 +80,6 @@ supabase functions deploy --no-verify-jwt mcp-directory
 
 ## Links
 
-- **Documentation:** https://heyclau.de/mcp/heyclaude-mcp
+- **Documentation:** https://claudepro.directory/mcp/heyclaude-mcp
 - **MCP Spec:** https://spec.modelcontextprotocol.io/
 - **mcp-lite:** https://github.com/wong2/mcp-lite

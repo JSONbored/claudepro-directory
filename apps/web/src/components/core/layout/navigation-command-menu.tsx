@@ -1,7 +1,7 @@
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
 import * as Icons from '@heyclaude/web-runtime/icons';
+import { getCommandMenuNavigationData } from '@heyclaude/web-runtime/config/navigation';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
   UI_CLASSES,
@@ -14,15 +14,20 @@ import {
   CommandSeparator,
 } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
-import { useEffect, useId, useState } from 'react';
+import { useMemo, useEffect, useId, useState } from 'react';
+
+type NavigationMenuItem = {
+  path: string;
+  title: string;
+  description: string | null;
+  icon_name: string | null;
+};
 
 /**
- * Command palette navigation - Uses server-provided data from getNavigationMenu()
+ * Command palette navigation - Uses static navigation config
  */
 
 interface NavigationCommandMenuProps {
-  /** Navigation data from server (required) */
-  navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
 }
@@ -30,7 +35,6 @@ interface NavigationCommandMenuProps {
 export function NavigationCommandMenu({
   open: controlledOpen,
   onOpenChange,
-  navigationData,
 }: NavigationCommandMenuProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const router = useRouter();
@@ -38,6 +42,9 @@ export function NavigationCommandMenu({
 
   const open = controlledOpen === undefined ? internalOpen : controlledOpen;
   const setOpen = onOpenChange || setInternalOpen;
+
+  // Get navigation data from static config (no RPC needed)
+  const navigationData = useMemo(() => getCommandMenuNavigationData(), []);
 
   // Log when dialog should be open but controlledOpen is undefined (indicates provider issue)
   useEffect(() => {
@@ -94,8 +101,6 @@ export function NavigationCommandMenu({
     }
     return null;
   };
-
-  type NavigationMenuItem = Database['public']['CompositeTypes']['navigation_menu_item'];
 
   const renderItem = (item: NavigationMenuItem) => {
     if (!item.path) return null;

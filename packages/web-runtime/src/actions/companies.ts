@@ -3,15 +3,19 @@
 /**
  * Companies Actions - Database-First Architecture
  * Thin orchestration layer calling PostgreSQL RPC functions (manage_company, delete_company)
+ * 
+ * IMPORTANT: Storage imports are lazy-loaded to prevent Turbopack from bundling
+ * iceberg-js (nested dependency of @supabase/storage-js) in client bundles.
  */
 
 import { createSupabaseAdminClient } from '../supabase/admin.ts';
 import { logActionFailure } from '../errors.ts';
 import { authedAction, rateLimitedAction } from './safe-action.ts';
-import {
-  uploadImageToStorage,
-  deleteImageFromStorage,
-} from '../storage/image-storage.ts';
+// Storage imports are lazy-loaded to prevent client bundling of iceberg-js
+// import {
+//   uploadImageToStorage,
+//   deleteImageFromStorage,
+// } from '../storage/image-storage.ts';
 import {
   validateImageBuffer,
   extractPathFromUrl,
@@ -131,6 +135,9 @@ export const uploadCompanyLogoAction = authedAction
     }
 
     try {
+      // Lazy-load storage functions to prevent Turbopack from bundling iceberg-js client-side
+      const { uploadImageToStorage, deleteImageFromStorage } = await import('../storage/image-storage.ts');
+      
       const supabaseAdmin = await createSupabaseAdminClient();
       const uploadResult = await uploadImageToStorage({
         bucket: 'company-logos',

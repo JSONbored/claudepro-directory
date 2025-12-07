@@ -1,8 +1,47 @@
 'use client';
 
+import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
+import { Copy, Check } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
 import { useEffect } from 'react';
+
+/**
+ * CRITICAL: Direct reference to process.env.NODE_ENV
+ * Next.js inlines this at build time. Do NOT use dynamic env lookups here!
+ */
+// eslint-disable-next-line architectural-rules/require-env-validation-schema
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+/**
+ * ErrorCodeBlock component with copy-to-clipboard functionality
+ */
+function ErrorCodeBlock({ content }: { content: string }) {
+  const { copied, copy } = useCopyToClipboard({
+    context: { component: 'GlobalError', action: 'copy-error' },
+  });
+
+  return (
+    <div className="relative">
+      <pre className="text-destructive bg-background/50 border-border max-w-full rounded border p-3 pr-10 font-mono text-xs break-all whitespace-pre-wrap">
+        {content}
+      </pre>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute top-2 right-2 h-6 w-6 p-0"
+        onClick={() => copy(content)}
+        aria-label={copied ? 'Copied!' : 'Copy error message'}
+      >
+        {copied ? (
+          <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
+        ) : (
+          <Copy className="h-3 w-3" aria-hidden="true" />
+        )}
+      </Button>
+    </div>
+  );
+}
 
 /**
  * Top-level error boundary component that logs unhandled errors and renders a critical fallback UI.
@@ -44,6 +83,24 @@ export default function GlobalError({
             <p className="text-muted-foreground mb-6">
               A critical error occurred. Please refresh the page or try again later.
             </p>
+            {isDevelopment && error.message ? (
+              <div className="bg-muted mb-6 rounded-md p-4 text-left">
+                <ErrorCodeBlock content={error.message} />
+                {error.stack ? (
+                  <details className="mt-2 text-xs">
+                    <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
+                    <div className="mt-2">
+                      <ErrorCodeBlock content={error.stack} />
+                    </div>
+                  </details>
+                ) : null}
+                {error.digest ? (
+                  <p className="text-muted-foreground mt-2 font-mono text-xs break-words">
+                    Digest: {error.digest}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
             <button
               type="button"
               onClick={reset}

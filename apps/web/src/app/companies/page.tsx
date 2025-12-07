@@ -27,8 +27,8 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 /**
- * ISR: 24 hours (86400s) - Companies list updates infrequently
- * Uses ISR instead of force-dynamic for better performance and SEO
+ * Companies list page - uses request-time rendering via connection()
+ * Caching is handled by the data layer (getCompaniesList)
  */
 
 /**
@@ -60,7 +60,6 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see connection from next/server
  * @see generateRequestId
  * @see logger
- * @see generatePageMetadata
  */
 export default async function CompaniesPage() {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())

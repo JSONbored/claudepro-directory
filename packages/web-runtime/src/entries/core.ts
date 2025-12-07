@@ -34,15 +34,12 @@ export {
   SITEMAP_CONFIG,
   LOCAL_STORAGE_PROHIBITED,
   POLLING_CONFIG,
-  GENERATED_CONFIG,
-  type GeneratedConfig,
 } from '../config/unified-config.ts';
 export { APP_CONFIG, type AppConfig, SECURITY_CONFIG, type SecurityConfig, ROUTES, EXTERNAL_SERVICES, TIME_CONSTANTS } from '@heyclaude/shared-runtime';
 export * from '../logger.ts';
 export * from '../errors.ts';
 export * from '../build-time.ts';
 export * from '../data.ts';
-export * from '../privacy.ts';
 export * from '../trace.ts';
 export * from '../error-utils.ts';
 export * from '../content.ts';

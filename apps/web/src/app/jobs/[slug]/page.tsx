@@ -3,7 +3,8 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import { getSafeWebsiteUrl, getSafeMailtoUrl } from '@heyclaude/web-runtime/core';
+import { getSafeWebsiteUrl, getSafeMailtoUrl, isValidCategory } from '@heyclaude/web-runtime/core';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   ArrowLeft,
@@ -32,12 +33,16 @@ import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
 /**
- * ISR: 2 hours (7200s) - Job postings are relatively stable
+ * Dynamic Rendering: Job detail pages are rendered at request time
+ * Uses connection() to defer non-deterministic operations (e.g., Date.now()) to request time
+ * Caching behavior is handled by the data layer (getJobBySlug)
+ * Remaining job pages are handled via dynamic routing on-demand
  */
 
 /**
@@ -92,19 +97,16 @@ export async function generateMetadata({
 /**
  * Produce a bounded set of static route parameters (job slugs) for build-time pre-rendering.
  *
- * Returns up to 10 `{ slug: string }` objects to limit build-time work; if no jobs are available or an error occurs,
- * returns a placeholder `[{ slug: '__placeholder__' }]` so Next.js' Cache Components build validation succeeds and remaining
- * job pages can be handled on-demand via ISR/dynamic routing.
+ * Returns up to 10 `{ slug: string }` objects to limit build-time work. If no jobs are available or an error occurs,
+ * returns an empty array. Suspense boundaries will handle dynamic rendering for remaining job pages on-demand.
  *
- * @returns An array of parameter objects where each item is `{ slug: string }`; returns a placeholder array when no jobs
- * are available or when fetching jobs fails.
+ * @returns An array of parameter objects where each item is `{ slug: string }`; returns an empty array when no jobs are available or when fetching jobs fails.
  *
  * @see getFilteredJobs - source of job listings used to derive slugs
- * @see dynamic routing / ISR - remaining job pages are rendered on demand when not pre-rendered
  */
 export async function generateStaticParams() {
   // Limit to top 10 jobs to optimize build time
-  // ISR with dynamicParams=true handles remaining jobs on-demand
+  // Remaining jobs are handled via dynamic routing on-demand
   const MAX_STATIC_JOBS = 10;
 
   // Generate requestId for static params generation (build-time)
@@ -123,19 +125,14 @@ export async function generateStaticParams() {
     const jobsResult = await getFilteredJobs({ limit: MAX_STATIC_JOBS });
     const jobs = jobsResult?.jobs ?? [];
 
-    if (jobs.length === 0) {
-      reqLogger.warn('generateStaticParams: no jobs available, returning placeholder');
-      // Cache Components requires at least one result for build-time validation
-      // Return a placeholder that will be handled dynamically (404 in page component)
-      return [{ slug: '__placeholder__' }];
-    }
-
+    // Return empty array if no jobs found - Suspense boundaries will handle dynamic rendering
+    // This follows Next.js best practices by avoiding placeholder patterns
     return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
     reqLogger.error('JobPage: getFilteredJobs threw in generateStaticParams', normalized);
-    // Cache Components requires at least one result - return placeholder on error
-    return [{ slug: '__placeholder__' }];
+    // Return empty array on error - Suspense boundaries will handle dynamic rendering
+    return [];
   }
 }
 
@@ -179,6 +176,15 @@ export default async function JobPage({ params }: PageProps) {
     module: 'apps/web/src/app/jobs/[slug]',
   });
 
+  // Handle placeholder slugs (if any remain from old generateStaticParams)
+  if (slug === '__placeholder__') {
+    reqLogger.warn('JobPage: placeholder slug detected, returning 404', {
+      section: 'placeholder-handling',
+      slug,
+    });
+    notFound();
+  }
+
   // Section: Parameter Validation
   if (!validationResult.success) {
     reqLogger.error(
@@ -194,10 +200,38 @@ export default async function JobPage({ params }: PageProps) {
 
   const validatedSlug = validationResult.data.slug;
 
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading job...</div>}>
+      <JobPageContent slug={validatedSlug} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the job detail page content for a given slug.
+ *
+ * Fetches the job data in a Suspense boundary to enable progressive rendering.
+ * If the job is not found, calls `notFound()` to trigger a 404 response.
+ *
+ * @param slug - The validated job slug
+ * @param reqLogger - Request-scoped logger for structured logging
+ * @returns The server-rendered React element for the job detail page
+ *
+ * @see getJobBySlug
+ * @see getSafeWebsiteUrl
+ * @see getSafeMailtoUrl
+ */
+async function JobPageContent({
+  slug,
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+  slug: string;
+}) {
   // Section: Job Data Fetch
   let job: Awaited<ReturnType<typeof getJobBySlug>>;
   try {
-    job = await getJobBySlug(validatedSlug);
+    job = await getJobBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job detail');
     reqLogger.error('JobPage: getJobBySlug threw', normalized, {
@@ -387,8 +421,9 @@ export default async function JobPage({ params }: PageProps) {
                   <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
                     <Users className="text-muted-foreground h-4 w-4" />
                     <span>
-                      {(job.category ?? 'General').charAt(0).toUpperCase() +
-                        (job.category ?? 'General').slice(1)}
+                      {job.category && isValidCategory(job.category)
+                        ? (getCategoryConfig(job.category)?.typeName ?? job.category)
+                        : (job.category ?? 'General')}
                     </span>
                   </div>
                 </CardContent>

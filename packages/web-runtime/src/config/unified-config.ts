@@ -523,23 +523,3 @@ export const POLLING_CONFIG = {
   newsletter_count_ms: 300000,
 } as const;
 
-// =============================================================================
-// BACKWARD COMPATIBILITY EXPORTS
-// =============================================================================
-
-/**
- * Legacy GENERATED_CONFIG export for backward compatibility.
- * New code should import specific config objects above.
- * @deprecated Use specific config exports instead
- */
-export const GENERATED_CONFIG = {
-  ui_config: {
-    animation: { easing: UI_ANIMATION.easing, duration: UI_ANIMATION.duration },
-    pagination: PAGINATION_CONFIG,
-  },
-  app_config: APP_CONFIG,
-  date_config: DATE_CONFIG,
-  social_links: SOCIAL_LINKS,
-} as const;
-
-export type GeneratedConfig = typeof GENERATED_CONFIG;

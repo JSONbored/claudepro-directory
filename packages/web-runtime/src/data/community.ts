@@ -79,21 +79,8 @@ export async function getCommunityDirectory(options: {
   });
 
   if (searchQuery?.trim()) {
-    const { trackPerformance } = await import('../utils/performance-metrics');
-
     try {
-      const { result: unifiedResults } = await trackPerformance(
-        async () => {
-          return await searchUsersUnified(searchQuery.trim(), limit);
-        },
-        {
-          operation: 'getCommunityDirectory-search',
-          logger: reqLogger, // Use child logger to avoid passing requestId/operation repeatedly
-          requestId, // Pass requestId for return value
-          logMeta: { query: searchQuery.trim(), limit },
-          logLevel: 'info',
-        }
-      );
+      const unifiedResults = await searchUsersUnified(searchQuery.trim(), limit);
 
       const allUsers: Database['public']['CompositeTypes']['community_directory_user'][] =
         unifiedResults.map((result) => ({
@@ -136,7 +123,6 @@ export async function getCommunityDirectory(options: {
         new_members: [],
       };
     } catch (error) {
-      // trackPerformance already logs the error, but we log again with context about fallback behavior
       // logger.error() normalizes errors internally, so pass raw error
       const errorForLogging: Error | string = error instanceof Error ? error : String(error);
       reqLogger.warn('Community directory search failed, using RPC fallback', {

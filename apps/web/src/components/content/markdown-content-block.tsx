@@ -185,7 +185,11 @@ function CaseStudyVariant(props: CaseStudyProps) {
 
         <div>
           <h4 className="mb-2 font-semibold text-green-600 dark:text-green-400">Results</h4>
-          <p className="text-muted-foreground">{results}</p>
+          <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+            {results.map((result) => (
+              <li key={result}>{result}</li>
+            ))}
+          </ul>
         </div>
 
         {metrics && Array.isArray(metrics) && metrics.length > 0 ? (

@@ -1,105 +1,70 @@
-import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/core';
+import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { connection } from 'next/server';
-import { Suspense } from 'react';
 
 /**
- * Static Generation: Accessibility page is fully static and never changes
- * No automatic revalidation - page is statically generated at build time
+ * Static Generation: Accessibility page is fully static and rarely changes.
+ * Page content is generated at build time with no dynamic operations.
+ * Metadata generation still uses connection() because generatePageMetadata internally uses Date.now().
  */
 
 /**
  * Produce page metadata for the /accessibility route.
  *
- * Awaits a Next.js server connection to defer non-deterministic operations (e.g., Date.now())
- * to request time, then returns the metadata created by generatePageMetadata('/accessibility').
+ * Note: generatePageMetadata internally uses Date.now() via getSEOMetadata, so connection() is required.
+ * However, the page content itself is fully static.
  *
  * @returns The Metadata object for the /accessibility route.
  * @see generatePageMetadata
  * @see connection
- * @see revalidate
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
+  // generatePageMetadata internally uses Date.now() via getSEOMetadata -> generateRequestId
+  // So we need connection() here, but the page content itself is static
   await connection();
   return await generatePageMetadata('/accessibility');
 }
 
 /**
- * Render the site's Accessibility Statement page as a Next.js server component.
+ * Render the site's Accessibility Statement page as a static Next.js server component.
  *
- * This component awaits `connection()` at render time to defer non-deterministic operations
- * (e.g., `Date.now()`) so cache-component semantics remain deterministic. It generates a
- * single request-scoped logger and renders the full accessibility content inside a
- * React Suspense boundary.
+ * This page is fully static - no dynamic operations, no logging, no request-time data fetching.
+ * The content is generated at build time and cached indefinitely.
  *
  * @returns A React element that renders the Accessibility Statement page.
  *
- * @see getLastUpdatedDate
  * @see getContactChannels
  * @see APP_CONFIG
- * @see AccessibilityPageContent
- * @see generateRequestId
- * @see logger
- * @see connection
  */
-export default async function AccessibilityPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'AccessibilityPage',
-    route: '/accessibility',
-    module: 'apps/web/src/app/accessibility',
-  });
-
-  return (
-    <Suspense
-      fallback={<div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">Loading...</div>}
-    >
-      <AccessibilityPageContent reqLogger={reqLogger} />
-    </Suspense>
-  );
+export default function AccessibilityPage() {
+  return <AccessibilityPageContent />;
 }
 
 /**
  * Render the Accessibility Statement content for the accessibility page.
  *
- * Uses the current last-updated date and configured contact channels to populate page content
- * and logs a page-render event using the provided request-scoped logger.
+ * Uses static contact channels to populate page content. The "last reviewed" date is static.
  *
- * @param params.reqLogger - A request-scoped logger created via `logger.child` used to record page render events.
  * @returns A React element containing the full Accessibility Statement content.
  *
- * @see getLastUpdatedDate
  * @see getContactChannels
  * @see NavLink
  * @see APP_CONFIG
  */
-function AccessibilityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
-  const lastUpdated = getLastUpdatedDate();
+function AccessibilityPageContent() {
   const channels = getContactChannels();
 
-  reqLogger.info('AccessibilityPage: rendering page', {
-    section: 'page-render',
-  });
+  // Static date - update this manually when the accessibility statement is reviewed/updated
+  const lastReviewed = 'December 15, 2024';
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
       <div className="prose prose-invert max-w-none">
         <h1 className="mb-6 text-3xl font-bold sm:text-4xl">Accessibility Statement</h1>
-        <p className="text-muted-foreground mb-8">Page generated: {lastUpdated}</p>
+        <p className="text-muted-foreground mb-8">Last reviewed: {lastReviewed}</p>
 
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold">Our Commitment</h2>

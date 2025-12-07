@@ -22,7 +22,8 @@ import { LazySection } from '@/src/components/core/infra/scroll-animated-section
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
 
 /**
- * ISR: 15 minutes (900s) - Trending content updates frequently
+ * Trending page uses connection() deferral with Suspense streaming to run non-deterministic operations at request time.
+ * Content is fetched server-side and cached at the data layer level.
  */
 
 /**

@@ -19,6 +19,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  Skeleton,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { connection } from 'next/server';
@@ -30,11 +31,10 @@ import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
 /**
- * Dynamic Rendering Required
+ * Dynamic Rendering
  *
- * This page uses dynamic rendering (inherited from parent layout).
- * The parent layout (submit/layout.tsx) has `dynamic = 'force-dynamic'`,
- * which forces all child pages to be dynamic as well.
+ * This page uses dynamic rendering to ensure fresh data for submission forms and dashboard stats.
+ * Uses connection() deferral with Suspense streaming to run non-deterministic operations at request time.
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
@@ -208,8 +208,8 @@ export default async function SubmitPage() {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">
-      {/* Hero Header - Dashboard stats in Suspense for streaming */}
-      <Suspense fallback={<SubmitPageHero stats={{ total: 0, pending: 0, merged_this_week: 0 }} />}>
+      {/* Hero Header - Dashboard stats streams in Suspense */}
+      <Suspense fallback={<SubmitPageHeroSkeleton />}>
         <SubmitPageHeroWithStats reqLogger={reqLogger} />
       </Suspense>
 
@@ -221,15 +221,15 @@ export default async function SubmitPage() {
           </Suspense>
         </div>
 
-        <aside className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
+        <div className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
           {/* Unified ContentSidebar with JobsPromo + RecentlyViewed */}
           <ContentSidebar />
 
-          {/* Submit page-specific dashboard stats and recent activity */}
-          <Suspense fallback={<div className="bg-muted/20 h-48 animate-pulse rounded-lg" />}>
+          {/* Submit page-specific dashboard stats and recent activity streams in Suspense */}
+          <Suspense fallback={<SubmitPageSidebarSkeleton />}>
             <SubmitPageSidebar reqLogger={reqLogger} />
           </Suspense>
-        </aside>
+        </div>
       </div>
     </div>
   );
@@ -309,7 +309,9 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
     reqLogger.error('SubmitPage: getSubmissionFormFields failed', normalized, {
       section: 'form-config',
     });
-    throw normalized;
+    // Continue with null config - form will render with defaults
+    // This provides better UX than breaking the entire page
+    formConfig = null;
   }
 
   // Fetch templates for all supported submission types
@@ -367,6 +369,20 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
     });
   }
 
+  if (!formConfig) {
+    reqLogger.error('SubmitPage: formConfig is null', new Error('Form config is null'), {
+      section: 'form-config',
+    });
+    // Render form with empty config - better UX than crashing
+    // SubmissionFormConfig is a Record, so use empty object
+    return (
+      <SubmitFormClient
+        formConfig={{} as Awaited<ReturnType<typeof getSubmissionFormFields>>}
+        templates={templates}
+      />
+    );
+  }
+
   return <SubmitFormClient formConfig={formConfig} templates={templates} />;
 }
 
@@ -387,21 +403,20 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
   try {
     dashboardData = await getSubmissionDashboard(5, 5);
     reqLogger.info('SubmitPage: submission dashboard loaded for sidebar', {
-      section: 'submission-dashboard',
+      section: 'submission-dashboard-sidebar',
       recentCount: 5,
       statsCount: 5,
       hasData: !!dashboardData,
     });
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load submission dashboard');
+    const normalized = normalizeError(error, 'Failed to load submission dashboard for sidebar');
     reqLogger.error('SubmitPage: getSubmissionDashboard failed for sidebar', normalized, {
-      section: 'submission-dashboard',
+      section: 'submission-dashboard-sidebar',
       recentCount: 5,
       statsCount: 5,
     });
     // Continue with null dashboardData - page will render with fallback empty data
   }
-
   const stats = {
     total: dashboardData?.stats?.total ?? 0,
     pending: dashboardData?.stats?.pending ?? 0,
@@ -476,5 +491,68 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
         )}
       />
     </>
+  );
+}
+
+/**
+ * Skeleton component for SubmitPageHero while dashboard data loads.
+ *
+ * Matches the layout of SubmitPageHero with animated placeholders.
+ *
+ * @returns A skeleton UI matching the hero section layout
+ */
+function SubmitPageHeroSkeleton() {
+  return (
+    <div
+      className={cn(
+        'border-border/50 bg-card relative overflow-hidden rounded-2xl border',
+        UI_CLASSES.PADDING_RELAXED,
+        UI_CLASSES.MARGIN_RELAXED
+      )}
+    >
+      <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_auto]">
+        <div className={UI_CLASSES.SPACE_Y_4}>
+          <Skeleton className="h-6 w-48 rounded-full" />
+          <Skeleton className="h-12 w-96" />
+          <Skeleton className="h-6 w-3/4" />
+          <div className={cn(UI_CLASSES.FLEX_WRAP_ITEMS_CENTER_GAP_3)}>
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-5 w-28" />
+          </div>
+        </div>
+        <div className="hidden lg:flex lg:items-center lg:justify-center">
+          <Skeleton className="h-32 w-32 rounded-2xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Skeleton component for SubmitPageSidebar while dashboard data loads.
+ *
+ * Matches the layout of SidebarActivityCard with animated placeholders.
+ *
+ * @returns A skeleton UI matching the sidebar layout
+ */
+function SubmitPageSidebarSkeleton() {
+  return (
+    <Card>
+      <CardHeader className={UI_CLASSES.CARD_HEADER_TIGHT}>
+        <div className="grid w-full grid-cols-2 gap-2">
+          <Skeleton className="h-9 w-full rounded-md" />
+          <Skeleton className="h-9 w-full rounded-md" />
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 }

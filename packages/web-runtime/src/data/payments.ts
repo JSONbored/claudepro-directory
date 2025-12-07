@@ -70,43 +70,30 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
     module: 'data/payments',
   });
 
-  const { trackPerformance } = await import('../utils/performance-metrics');
   const supabase = await createSupabaseServerClient();
 
   try {
-    const { result: data } = await trackPerformance(
-      async () => {
-        const { data, error } = await supabase
-          .from('payment_plan_catalog')
-          .select(
-            [
-              'plan',
-              'tier',
-              'price_cents',
-              'is_subscription',
-              'billing_cycle_days',
-              'job_expiry_days',
-              'description',
-              'benefits',
-              'product_type',
-            ].join(',')
-          )
-          .order('plan')
-          .order('tier');
+    const { data, error } = await supabase
+      .from('payment_plan_catalog')
+      .select(
+        [
+          'plan',
+          'tier',
+          'price_cents',
+          'is_subscription',
+          'billing_cycle_days',
+          'job_expiry_days',
+          'description',
+          'benefits',
+          'product_type',
+        ].join(',')
+      )
+      .order('plan')
+      .order('tier');
 
-        if (error) {
-          throw error;
-        }
-
-        return data;
-      },
-      {
-        operation: 'getPaymentPlanCatalog',
-        logger: reqLogger, // Use child logger to avoid passing requestId/operation repeatedly
-        requestId, // Pass requestId for return value
-        logLevel: 'info',
-      }
-    );
+    if (error) {
+      throw error;
+    }
 
     // Type guard: Validate that data is an array and has expected structure
     if (!Array.isArray(data)) {
@@ -147,7 +134,6 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
 
     return result;
   } catch (error) {
-    // trackPerformance logs performance metrics, but we need explicit error logging
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
       error instanceof Error ? error : typeof error === 'string' ? error : String(error);
@@ -189,47 +175,33 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
     module: 'data/payments',
   });
 
-  const { trackPerformance } = await import('../utils/performance-metrics');
   const { createSupabaseServerClient } = await import('../supabase/server.ts');
   const supabase = await createSupabaseServerClient();
 
   try {
-    const { result: data } = await trackPerformance(
-      async () => {
-        const { data, error } = await supabase
-          .from('job_billing_summary')
-          .select(
-            [
-              'job_id',
-              'plan',
-              'tier',
-              'price_cents',
-              'is_subscription',
-              'billing_cycle_days',
-              'job_expiry_days',
-              'last_payment_amount',
-              'last_payment_at',
-              'last_payment_status',
-              'subscription_status',
-              'subscription_renews_at',
-            ].join(',')
-          )
-          .in('job_id', jobIds);
+    const { data, error } = await supabase
+      .from('job_billing_summary')
+      .select(
+        [
+          'job_id',
+          'plan',
+          'tier',
+          'price_cents',
+          'is_subscription',
+          'billing_cycle_days',
+          'job_expiry_days',
+          'last_payment_amount',
+          'last_payment_at',
+          'last_payment_status',
+          'subscription_status',
+          'subscription_renews_at',
+        ].join(',')
+      )
+      .in('job_id', jobIds);
 
-        if (error) {
-          throw error;
-        }
-
-        return data;
-      },
-      {
-        operation: 'getJobBillingSummaries',
-        logger: reqLogger, // Use child logger to avoid passing requestId/operation repeatedly
-        requestId, // Pass requestId for return value
-        logMeta: { jobCount: jobIds.length },
-        logLevel: 'info',
-      }
-    );
+    if (error) {
+      throw error;
+    }
 
     // Type guard: Validate that data is an array
     if (!Array.isArray(data)) {
@@ -250,7 +222,6 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
 
     return entries;
   } catch (error) {
-    // trackPerformance logs performance metrics, but we need explicit error logging
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
       error instanceof Error ? error : typeof error === 'string' ? error : String(error);

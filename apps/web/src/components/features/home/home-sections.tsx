@@ -27,13 +27,14 @@ import {
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   LazyFeaturedSections,
   LazySearchSection,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-home-sections';
+import { searchCache } from '@/src/utils/search-cache';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
@@ -66,9 +67,10 @@ function HomePageClientComponent({
   const [hasMoreAllConfigs, setHasMoreAllConfigs] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [searchResults, setSearchResults] = useState<DisplayableContent[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [filters, setFilters] = useState({});
+  const [isSearching, setIsSearching] = useState(false); // Loading state only
+  const [filters, setFilters] = useState<FilterState>({});
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const runLoggedAsync = useLoggedAsync({
     scope: 'HomePageClient',
@@ -410,62 +412,145 @@ function HomePageClientComponent({
   }, [activeTab, allConfigs.length, fetchAllConfigs, isLoadingAllConfigs]);
 
   const handleSearch = useCallback(
-    async (query: string, categoryOverride?: string) => {
-      if (!query.trim()) {
-        setSearchResults(allConfigs);
+    async (query: string, categoryOverride?: string, signal?: AbortSignal) => {
+      const trimmedQuery = query.trim();
+
+      // Cancel previous request if still pending
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Clear search if query is empty
+      if (!trimmedQuery) {
+        setSearchResults([]);
         setIsSearching(false);
         setCurrentSearchQuery('');
         return;
       }
 
-      setCurrentSearchQuery(query.trim());
+      // Set query immediately (for UI feedback)
+      setCurrentSearchQuery(trimmedQuery);
       setIsSearching(true);
+
+      // Check cache first
+      const effectiveTab = categoryOverride ?? activeTab;
+      const categories =
+        effectiveTab !== 'all' && effectiveTab !== 'community' ? [effectiveTab] : undefined;
+
+      const cacheKey = {
+        categories: categories || [],
+        tags: filters.tags || [],
+        authors: filters.author ? [filters.author] : [],
+        sort: filters.sort || 'relevance',
+      };
+
+      const cachedResults = searchCache.get(trimmedQuery, cacheKey);
+      if (cachedResults) {
+        // Use cached results immediately
+        setSearchResults(cachedResults as DisplayableContent[]);
+        setIsSearching(false);
+        return;
+      }
 
       try {
         await runLoggedAsync(
           async () => {
+            // Check if request was aborted
+            if (signal?.aborted) {
+              return;
+            }
+
             const { searchUnifiedClient } =
               await import('@heyclaude/web-runtime/edge/search-client');
 
-            const effectiveTab = categoryOverride ?? activeTab;
-            const categories =
-              effectiveTab !== 'all' && effectiveTab !== 'community' ? [effectiveTab] : undefined;
+            // Build filters object - only include defined properties
+            const searchFilters: {
+              limit: number;
+              categories?: string[];
+              tags?: string[];
+              authors?: string[];
+              sort?: 'relevance' | 'popularity' | 'newest' | 'alphabetical';
+            } = {
+              limit: 50,
+            };
+
+            if (categories) {
+              searchFilters.categories = categories;
+            }
+
+            if (filters.tags && filters.tags.length > 0) {
+              searchFilters.tags = filters.tags;
+            }
+
+            if (filters.author) {
+              searchFilters.authors = [filters.author];
+            }
+
+            // Map FilterState sort to UnifiedSearchFilters sort
+            if (filters.sort) {
+              const sortMap: Record<string, 'relevance' | 'popularity' | 'newest' | 'alphabetical'> =
+                {
+                  relevance: 'relevance',
+                  popularity: 'popularity',
+                  newest: 'newest',
+                  alphabetical: 'alphabetical',
+                };
+              const mappedSort = sortMap[filters.sort];
+              if (mappedSort) {
+                searchFilters.sort = mappedSort;
+              }
+            }
 
             const result = await searchUnifiedClient({
-              query: query.trim(),
+              query: trimmedQuery,
               entities: ['content'],
-              filters: {
-                limit: 50,
-                ...(categories ? { categories } : {}),
-              },
+              filters: searchFilters,
             });
 
-            setSearchResults(result.results as DisplayableContent[]);
+            // Check if request was aborted before setting results
+            if (signal?.aborted) {
+              return;
+            }
+
+            const results = (result.results as DisplayableContent[]) || [];
+
+            // Cache the results
+            searchCache.set(trimmedQuery, cacheKey, results);
+
+            // Update state
+            setSearchResults(results);
           },
           {
             message: 'Search operation failed',
             context: {
-              query: query.trim(),
-              category: categoryOverride ?? activeTab,
+              query: trimmedQuery,
+              category: effectiveTab,
               section: 'search',
             },
             level: 'warn',
           }
         );
       } catch (error) {
+        // Ignore abort errors (expected when canceling)
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+
         // Error already logged by useLoggedAsync
-        // trackHomepageSectionError is called by the error handler if needed
         const effectiveTab = categoryOverride ?? activeTab;
         trackHomepageSectionError('search', 'search-unified', error, {
-          query: query.trim(),
+          query: trimmedQuery,
           category: effectiveTab,
         });
-        setSearchResults(allConfigs);
+        setSearchResults([]);
       } finally {
-        setIsSearching(false);
+        // Only set isSearching to false if request wasn't aborted
+        if (!signal?.aborted) {
+          setIsSearching(false);
+        }
       }
     },
-    [allConfigs, activeTab, runLoggedAsync]
+    [allConfigs, activeTab, runLoggedAsync, filters]
   );
 
   const handleFiltersChange = useCallback((newFilters: FilterState) => {
@@ -505,8 +590,8 @@ function HomePageClientComponent({
   // Performance: When searching, DB filters by category (no client-side filtering needed)
   // When not searching, use Set lookups for O(1) filtering
   const filteredResults = useMemo((): DisplayableContent[] => {
-    if (isSearching) {
-      // DB already filtered by category - return as-is
+    // Show search results if there's an active search query
+    if (currentSearchQuery.length > 0) {
       return searchResults || [];
     }
 
@@ -521,15 +606,23 @@ function HomePageClientComponent({
     return lookupSet
       ? (dataSource || []).filter((item) => item.slug && lookupSet.has(item.slug))
       : dataSource || [];
-  }, [searchResults, allConfigs, activeTab, slugLookupMaps, isSearching]);
+  }, [searchResults, allConfigs, activeTab, slugLookupMaps, currentSearchQuery]);
 
   // Handle tab change - re-trigger search if currently searching
   const handleTabChange = useCallback(
     (value: string) => {
       setActiveTab(value);
-      // If currently searching, re-run search with new category filter (DB-side)
-      if (isSearching && currentSearchQuery) {
-        handleSearch(currentSearchQuery, value).catch((error) => {
+      // If there's an active search query, re-run search with new category filter (DB-side)
+      if (currentSearchQuery.length > 0) {
+        // Create new AbortController for this search
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
+        handleSearch(currentSearchQuery, value, controller.signal).catch((error) => {
+          // Ignore abort errors
+          if (error instanceof Error && error.name === 'AbortError') {
+            return;
+          }
           trackHomepageSectionError('search', 'search-retry', error, {
             query: currentSearchQuery,
             tab: value,
@@ -540,16 +633,30 @@ function HomePageClientComponent({
         });
       }
     },
-    [isSearching, currentSearchQuery, handleSearch]
+    [currentSearchQuery, handleSearch]
   );
 
   // Handle clear search
   const handleClearSearch = useCallback(() => {
-    handleSearch('').catch((error) => {
-      trackHomepageSectionError('search', 'clear-search', error);
-      logUnhandledPromise('HomePageClient: clear search failed', error);
-    });
-  }, [handleSearch]);
+    // Cancel any pending search
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    setCurrentSearchQuery('');
+    setSearchResults([]);
+    setIsSearching(false);
+  }, []);
+
+  // Cleanup: Cancel pending requests on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -558,7 +665,12 @@ function HomePageClientComponent({
         <div className="mx-auto max-w-4xl">
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
-            onSearch={handleSearch}
+            onSearch={(query) => {
+              // Create new AbortController for this search
+              const controller = new AbortController();
+              abortControllerRef.current = controller;
+              handleSearch(query, undefined, controller.signal);
+            }}
             onFiltersChange={handleFiltersChange}
             filters={filters}
             availableTags={filterOptions.tags}
@@ -629,8 +741,8 @@ function HomePageClientComponent({
                         whileHover={{
                           scale: 1.05,
                           y: -2,
-                          borderColor: 'hsl(var(--accent) / 0.3)',
-                          backgroundColor: 'hsl(var(--accent) / 0.05)',
+                          borderColor: 'rgba(249, 115, 22, 0.3)', // Claude orange with 30% opacity (was hsl(var(--accent) / 0.3))
+                          backgroundColor: 'rgba(249, 115, 22, 0.05)', // Claude orange with 5% opacity (was hsl(var(--accent) / 0.05))
                           transition: springDefault,
                         }}
                         whileTap={{
@@ -666,16 +778,18 @@ function HomePageClientComponent({
       </section>
 
       <section className="container mx-auto px-4 pb-16">
-        {/* Search Results Section - TanStack Virtual */}
-        <LazySearchSection
-          isSearching={isSearching}
-          filteredResults={filteredResults}
-          onClearSearch={handleClearSearch}
-          searchQuery={currentSearchQuery}
-        />
+        {/* Search Results Section - Show when there's an active search query */}
+        {currentSearchQuery.length > 0 && (
+          <LazySearchSection
+            isSearching={isSearching}
+            filteredResults={filteredResults}
+            onClearSearch={handleClearSearch}
+            searchQuery={currentSearchQuery}
+          />
+        )}
 
-        {/* Featured Content Sections - Render immediately (above the fold) */}
-        {!isSearching && (
+        {/* Featured Content Sections - Hide when searching */}
+        {currentSearchQuery.length === 0 && (
           <LazyFeaturedSections
             categories={
               (featuredByCategory || initialData) as Record<string, readonly DisplayableContent[]>
@@ -689,8 +803,8 @@ function HomePageClientComponent({
           />
         )}
 
-        {/* Tabs Section - Render immediately (above the fold) */}
-        {!isSearching && (
+        {/* Tabs Section - Hide when searching */}
+        {currentSearchQuery.length === 0 && (
           <LazyTabsSection
             activeTab={activeTab}
             filteredResults={filteredResults}

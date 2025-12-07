@@ -15,7 +15,7 @@ import { type FC, memo } from 'react';
 
 export interface SearchSectionProps {
   filteredResults: readonly DisplayableContent[];
-  isSearching: boolean;
+  isSearching: boolean; // Loading state indicator
   onClearSearch: () => void;
   searchQuery?: string;
 }
@@ -26,21 +26,33 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
   onClearSearch,
   searchQuery,
 }) => {
-  if (!isSearching) return null;
+  // Show search section if there's a search query (not just when loading)
+  // isSearching is used for loading state indicator
+  if (!searchQuery || searchQuery.length === 0) return null;
 
   return (
     <div className="mb-16">
       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
         <h2 className="text-2xl font-bold">
           Search Results
-          <span className="text-muted-foreground ml-2">({filteredResults.length} found)</span>
+          {isSearching ? (
+            <span className="text-muted-foreground ml-2">(Searching...)</span>
+          ) : (
+            <span className="text-muted-foreground ml-2">({filteredResults.length} found)</span>
+          )}
         </h2>
         <Button variant="outline" onClick={onClearSearch} className="text-sm">
           Clear Search
         </Button>
       </div>
 
-      {filteredResults.length > 0 ? (
+      {isSearching && filteredResults.length === 0 ? (
+        <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>
+          <Search className="text-muted-foreground/50 mx-auto mb-4 h-12 w-12 animate-pulse" />
+          <h3 className="mb-2 text-lg font-semibold">Searching...</h3>
+          <p className="text-muted-foreground">Finding results for &quot;{searchQuery}&quot;</p>
+        </div>
+      ) : filteredResults.length > 0 ? (
         <UnifiedCardGrid
           items={filteredResults}
           variant="normal"

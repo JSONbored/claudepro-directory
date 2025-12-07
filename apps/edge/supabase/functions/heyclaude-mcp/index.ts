@@ -8,9 +8,8 @@
  * @version 1.0.0
  * @transport Streamable HTTP (MCP Protocol 2025-06-18)
  * @endpoints
- *   - Primary: https://mcp.heyclau.de/mcp
- *   - Legacy: https://mcp.claudepro.directory/mcp
- *   - Direct: https://hgtjdifxfapoltfflowc.supabase.co/functions/v1/mcp-directory/mcp
+ *   - Primary: https://mcp.claudepro.directory/mcp
+ *   - Direct: https://hgtjdifxfapoltfflowc.supabase.co/functions/v1/heyclaude-mcp/mcp
  */
 
 import { zodToJsonSchema } from 'zod-to-json-schema';
@@ -69,14 +68,14 @@ import { handleGetTemplates } from './routes/templates.ts';
 import { handleGetTrending } from './routes/trending.ts';
 
 /**
- * Outer Hono app - matches function name (/mcp-directory)
+ * Outer Hono app - matches function name (/heyclaude-mcp)
  * Required by Supabase routing: all requests go to /<function-name>/*
  */
 const app = new Hono();
 
 /**
  * Inner MCP app - handles actual MCP protocol endpoints
- * Mounted at /mcp-directory, serves /mcp endpoint
+ * Mounted at /heyclaude-mcp, serves /mcp endpoint
  */
 const mcpApp = new Hono();
 
@@ -249,12 +248,12 @@ mcpApp.get('/', (c) => {
     protocol: MCP_PROTOCOL_VERSION,
     description: 'HeyClaude MCP Server - Access the Claude Pro Directory via MCP',
     endpoints: {
-      mcp: '/mcp-directory/mcp',
-      health: '/mcp-directory/',
-      protectedResourceMetadata: '/mcp-directory/.well-known/oauth-protected-resource',
-      authorizationServerMetadata: '/mcp-directory/.well-known/oauth-authorization-server',
+      mcp: '/heyclaude-mcp/mcp',
+      health: '/heyclaude-mcp/',
+      protectedResourceMetadata: '/heyclaude-mcp/.well-known/oauth-protected-resource',
+      authorizationServerMetadata: '/heyclaude-mcp/.well-known/oauth-authorization-server',
     },
-    documentation: 'https://heyclau.de/mcp/heyclaude-mcp',
+      documentation: 'https://claudepro.directory/mcp/heyclaude-mcp',
     status: 'operational',
     tools: {
       core: 6, // Phase 2 complete
@@ -292,11 +291,11 @@ mcpApp.get('/oauth/authorize', handleOAuthAuthorize);
 /**
  * Gets the MCP server resource URL used to validate token audience.
  *
- * @returns The MCP server resource URL — the value of the `MCP_SERVER_URL` environment variable if set, otherwise `https://mcp.heyclau.de/mcp`.
+ * @returns The MCP server resource URL — the value of the `MCP_SERVER_URL` environment variable if set, otherwise `https://mcp.claudepro.directory/mcp`.
  */
 function getMcpServerResourceUrl(): string {
   // Use environment variable if set, otherwise default to production URL
-  return Deno.env.get('MCP_SERVER_URL') || 'https://mcp.heyclau.de/mcp';
+  return Deno.env.get('MCP_SERVER_URL') || 'https://mcp.claudepro.directory/mcp';
 }
 
 /**
@@ -370,7 +369,7 @@ function validateTokenAudience(token: string, expectedAudience: string): boolean
     // Log for debugging but don't expose error details
     // Fire-and-forget error logging (non-blocking)
     const logContext = createDataApiContext('validate-token-audience', {
-      app: 'mcp-directory',
+      app: 'heyclaude-mcp',
     });
     logError('Failed to decode JWT token for audience validation', logContext, error).catch(() => {
       // Swallow errors from logging itself - best effort
@@ -408,7 +407,7 @@ function createWwwAuthenticateHeader(resourceMetadataUrl: string, scope?: string
  */
 mcpApp.all('/mcp', async (c) => {
   const logContext = createDataApiContext('mcp-protocol', {
-    app: 'mcp-directory',
+    app: 'heyclaude-mcp',
     method: c.req.method,
   });
 
@@ -549,8 +548,8 @@ mcpApp.all('/mcp', async (c) => {
   }
 });
 
-// Mount mcpApp at /mcp-directory path
-app.route('/mcp-directory', mcpApp);
+// Mount mcpApp at /heyclaude-mcp path
+app.route('/heyclaude-mcp', mcpApp);
 
 // Export the Deno serve handler
 // This is the required export for Supabase Edge Functions

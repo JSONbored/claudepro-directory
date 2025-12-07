@@ -26,7 +26,6 @@ import {
   BookOpen,
   LogOut,
   Settings,
-  User as UserIcon,
 } from '@heyclaude/web-runtime/icons';
 import {
   DIMENSIONS,
@@ -113,13 +112,13 @@ export function UserMenu({ className }: UserMenuProps) {
       <div className={className}>
         <Button
           asChild
-          variant="ghost"
+          variant="default"
           size="sm"
-          className="border-accent/20 bg-accent/10 text-accent hover:bg-accent text-xs font-medium hover:text-white"
+          className="font-semibold shadow-sm hover:shadow-md transition-all hover:opacity-90"
+          style={{ backgroundColor: '#F6F8F4', color: '#141816' }}
         >
           <Link href="/login" aria-label="Get started - Sign in with GitHub">
-            <UserIcon className={UI_CLASSES.ICON_XS_LEADING} />
-            <span className="hidden lg:inline">Get Started</span>
+            <span>Get Started</span>
           </Link>
         </Button>
       </div>

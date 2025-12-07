@@ -30,6 +30,8 @@ import {
   useRecentlyViewed,
   getCategoryRoute,
 } from '@heyclaude/web-runtime/hooks';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { ChevronDown, ChevronUp, Clock, Trash, X } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
@@ -97,8 +99,16 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
       >
         {/* Header: Badge + Time */}
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-          <UnifiedBadge variant="base" style="outline" className="text-[10px] capitalize">
-            {item.category}
+          <UnifiedBadge variant="base" style="outline" className="text-[10px]">
+            {(() => {
+              // Convert RecentlyViewedCategory (singular) to content_category (plural) for config lookup
+              const routeCategory = getCategoryRoute(item.category);
+              if (isValidCategory(routeCategory)) {
+                const config = getCategoryConfig(routeCategory);
+                return config?.typeName ?? routeCategory;
+              }
+              return routeCategory;
+            })()}
           </UnifiedBadge>
           <span className="text-muted-foreground text-[10px]">{timeAgo}</span>
         </div>

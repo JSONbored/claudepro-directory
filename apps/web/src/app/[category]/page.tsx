@@ -50,6 +50,7 @@ import { Suspense } from 'react';
 
 import { ContentSearchSkeleton } from '@/src/components/content/content-grid-list';
 import { ContentSearchClient } from '@/src/components/content/content-search';
+import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
 /**
@@ -173,6 +174,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         title={config.pluralTitle}
         description={config.description}
         icon={iconName}
+        category={category}
       >
         {/* Badges stream in Suspense */}
         <Suspense fallback={<CategoryBadgesSkeleton />}>
@@ -208,8 +210,10 @@ function CategoryHeroShell({
   title,
   description,
   icon,
+  category,
   children,
 }: {
+  category: Database['public']['Enums']['content_category'];
   children: React.ReactNode;
   description: string;
   icon: string;
@@ -230,28 +234,38 @@ function CategoryHeroShell({
             </div>
           </div>
 
-          <h1
-            id="category-title"
-            className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
-          >
-            {title}
-          </h1>
+          <div className="flex items-center justify-center gap-4">
+            <h1
+              id="category-title"
+              className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
+            >
+              {title}
+            </h1>
+            <div className="hidden sm:block">
+              <ExploreDropdown category={category} pageType="category" />
+            </div>
+          </div>
 
           <p className="text-muted-foreground mt-4 text-lg sm:text-xl">{description}</p>
 
           {/* Badges and content stream in via children */}
           <div className="mb-8">{children}</div>
 
-          <Button variant="outline" size="sm" asChild>
-            <Link
-              href={ROUTES.SUBMIT}
-              className="flex items-center gap-2"
-              aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
-            >
-              <ExternalLink className="h-4 w-4" aria-hidden="true" />
-              Submit {title.slice(0, -1)}
-            </Link>
-          </Button>
+          <div className="flex items-center justify-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link
+                href={ROUTES.SUBMIT}
+                className="flex items-center gap-2"
+                aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
+              >
+                <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                Submit {title.slice(0, -1)}
+              </Link>
+            </Button>
+            <div className="sm:hidden">
+              <ExploreDropdown category={category} pageType="category" />
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -61,7 +61,7 @@ export function FollowButton({
   const runLoggedAsync = useLoggedAsync({
     scope: 'FollowButton',
     defaultMessage: 'Follow operation failed',
-    defaultRethrow: false,
+    defaultRethrow: true, // Re-throw so outer catch can handle rollback
   });
 
   const handleToggleFollow = () => {

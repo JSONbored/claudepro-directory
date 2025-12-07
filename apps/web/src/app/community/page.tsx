@@ -31,10 +31,10 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 /**
- * Incremental Static Regeneration (ISR)
+ * Dynamic Rendering
  *
- * This page uses ISR with a 24-hour revalidation period for better performance and SEO.
- * Data is fetched at build time and periodically refreshed.
+ * This page uses connection() to defer non-deterministic operations to request time.
+ * Caching is handled by the data layer (getCommunityDirectory, getConfigurationCount, getHomepageData).
  */
 
 /**

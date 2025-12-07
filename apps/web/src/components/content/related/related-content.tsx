@@ -10,7 +10,7 @@ import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, BaseCard } from '@heyclaude/web-runtime/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 // Use the generated composite type directly
 type RelatedContentItemWithUI = Database['public']['CompositeTypes']['related_content_item'] & {
@@ -125,6 +125,11 @@ export function RelatedContentClient({
   const pathname: string =
     providedPathname ?? (globalThis.window === undefined ? '/' : globalThis.location.pathname);
 
+  // Create stable string keys for array dependencies to prevent infinite re-renders
+  const excludeKey = useMemo(() => JSON.stringify(exclude), [exclude]);
+  const currentTagsKey = useMemo(() => JSON.stringify(currentTags), [currentTags]);
+  const currentKeywordsKey = useMemo(() => JSON.stringify(currentKeywords), [currentKeywords]);
+
   useEffect(() => {
     const fetchRelatedContent = async () => {
       try {
@@ -194,7 +199,7 @@ export function RelatedContentClient({
         }
       );
     });
-  }, [pathname, currentTags, currentKeywords, featured, exclude, limit]);
+  }, [pathname, currentTagsKey, currentKeywordsKey, featured, excludeKey, limit]);
 
   return (
     <section

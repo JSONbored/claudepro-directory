@@ -143,7 +143,7 @@ async function ConnectedAccountsPageContent({
   });
 
   // Section: Identities Data Fetch
-  // CRITICAL: Call data function directly instead of action to avoid cookies() access issues in Cache Components
+  // Call the data function directly to leverage its built-in caching ('use cache: private')
   let identitiesData: Awaited<ReturnType<typeof getUserIdentitiesData>>;
   try {
     identitiesData = await getUserIdentitiesData(user.id);

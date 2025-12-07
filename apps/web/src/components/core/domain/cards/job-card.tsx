@@ -243,9 +243,9 @@ export function JobCard({ job }: JobCardProps) {
           >
             {(() => {
               const safeJobLink = getSafeJobLink(job.link);
-              // Explicit validation: getSafeJobLink guarantees the URL is safe
-              // It validates protocol (HTTPS only), hostname (whitelisted job board domains only),
-              // and returns '#' for any invalid URLs. At this point, safeJobLink is validated
+              // Explicit validation: getSafeJobLink normalizes the URL and enforces HTTPS-only links.
+              // It strips credentials, normalizes the hostname, removes default port 443,
+              // and returns '#' for any invalid or non-HTTPS URLs. At this point, safeJobLink is sanitized.
               const validatedUrl: string = safeJobLink;
               return (
                 <a href={validatedUrl} target="_blank" rel="noopener noreferrer">

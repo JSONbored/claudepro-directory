@@ -42,7 +42,7 @@ export async function GET(request: NextRequest, context: unknown) {
   } catch (error) {
     const normalized = normalizeError(error, 'Inngest GET handler failed');
     reqLogger.error('Inngest GET handler failed', normalized);
-    throw error;
+    throw normalized;
   }
 }
 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest, context: unknown) {
   } catch (error) {
     const normalized = normalizeError(error, 'Inngest POST handler failed');
     reqLogger.error('Inngest POST handler failed', normalized);
-    throw error;
+    throw normalized;
   }
 }
 
@@ -101,6 +101,6 @@ export async function PUT(request: NextRequest, context: unknown) {
   } catch (error) {
     const normalized = normalizeError(error, 'Inngest PUT handler failed');
     reqLogger.error('Inngest PUT handler failed', normalized);
-    throw error;
+    throw normalized;
   }
 }

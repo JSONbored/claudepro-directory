@@ -47,7 +47,7 @@ const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
  * Print token information and usage instructions.
  */
 function printTokenInfo(
-  session: { access_token: string; expires_at: number | null | undefined },
+  session: { access_token: string; expires_at?: number | null | undefined },
   user: { id: string; email?: string | null }
 ): void {
   cliLog.log('\n✅ Success!');
@@ -65,7 +65,7 @@ function printTokenInfo(
   cliLog.log('─'.repeat(60));
   cliLog.log('\n💡 Usage:');
   cliLog.log(`  export MCP_TEST_TOKEN="${session.access_token}"`);
-  cliLog.log(`  curl -X POST http://localhost:54321/functions/v1/mcp-directory/mcp \\`);
+  cliLog.log(`  curl -X POST http://localhost:54321/functions/v1/heyclaude-mcp/mcp \\`);
   cliLog.log(`    -H "Authorization: Bearer $MCP_TEST_TOKEN" \\`);
   cliLog.log(`    -H "Content-Type: application/json" \\`);
   cliLog.log(`    -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'`);

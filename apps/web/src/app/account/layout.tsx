@@ -53,7 +53,7 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
     // AuthSessionMissingError is expected for unauthenticated users
     // Redirect to login instead of letting error bubble up
     const normalized = normalizeError(error, 'Authentication required');
-    if (normalized.name === 'AuthSessionMissingError' || normalized.message?.includes('session')) {
+    if (normalized.name === 'AuthSessionMissingError') {
       // Expected: user is not authenticated, redirect to login
       redirect('/login');
     }

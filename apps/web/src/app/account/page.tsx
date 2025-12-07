@@ -351,6 +351,31 @@ async function DashboardContent({
     bookmarks.map((bookmark) => `${bookmark.content_type ?? ''}/${bookmark.content_slug ?? ''}`)
   );
 
+  // Fetch content details once for both sections to avoid duplicate API calls
+  const recentlySavedContentResults = await Promise.all(
+    recentBookmarks.map(async (bookmark) => {
+      try {
+        const category = bookmark.content_type as Database['public']['Enums']['content_category'];
+        const slug = bookmark.content_slug as string;
+        const detail = await getContentDetailCore({ category, slug });
+        return detail?.content ?? null;
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to load bookmark content');
+        userLogger.warn('AccountDashboard: getContentDetailCore failed for bookmark', {
+          err: normalized,
+          section: 'dashboard-content',
+          slug: bookmark.content_slug,
+          category: bookmark.content_type,
+        });
+        return null;
+      }
+    })
+  );
+  const recentlySavedContent = recentlySavedContentResults.filter(
+    (item): item is Database['public']['Tables']['content']['Row'] =>
+      item !== null && typeof item === 'object'
+  );
+
   // Section: Recent Bookmarks - in separate Suspense for streaming
   return (
     <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
@@ -363,7 +388,7 @@ async function DashboardContent({
           </Card>
         }
       >
-        <RecentlySavedSection recentBookmarks={recentBookmarks} userLogger={userLogger} />
+        <RecentlySavedSection recentlySavedContent={recentlySavedContent} userLogger={userLogger} />
       </Suspense>
 
       <Suspense
@@ -378,7 +403,7 @@ async function DashboardContent({
         <RecommendationsSection
           homepageData={homepageData}
           bookmarkedSlugs={bookmarkedSlugs}
-          recentBookmarks={recentBookmarks}
+          recentlySavedContent={recentlySavedContent}
           userLogger={userLogger}
         />
       </Suspense>
@@ -387,57 +412,27 @@ async function DashboardContent({
 }
 
 /**
- * Renders a "Recently Saved" card by loading content details for the provided recent bookmarks.
+ * Renders a "Recently Saved" card by displaying the provided resolved content items.
  *
- * Loads content details for each bookmark, logs load results, and displays a RecentlySavedGrid when
- * items are available or an empty-state when none could be resolved.
+ * Displays a RecentlySavedGrid when items are available or an empty-state when none are provided.
  *
- * @param recentBookmarks - Array of bookmark descriptors; each item should contain `content_slug` and `content_type` identifying the bookmarked content.
- * @param userLogger - Request-scoped logger already configured for the current user; used to record load successes and per-bookmark warnings.
+ * @param recentlySavedContent - Array of resolved content items to display.
+ * @param userLogger - Request-scoped logger already configured for the current user; used to record display metrics.
  * @returns A card element containing either a grid of resolved content items or an empty state message.
  *
- * @see getContentDetailCore
  * @see RecentlySavedGrid
  */
 async function RecentlySavedSection({
-  recentBookmarks,
+  recentlySavedContent,
   userLogger,
 }: {
-  recentBookmarks: Array<{
-    content_slug: null | string;
-    content_type: null | string;
-  }>;
+  recentlySavedContent: Database['public']['Tables']['content']['Row'][];
   userLogger: ReturnType<typeof logger.child>;
 }) {
-  // Section: Recent Bookmarks
-  const recentlySavedContentResults = await Promise.all(
-    recentBookmarks.map(async (bookmark) => {
-      try {
-        const category = bookmark.content_type as Database['public']['Enums']['content_category'];
-        const slug = bookmark.content_slug as string;
-        const detail = await getContentDetailCore({ category, slug });
-        return detail?.content ?? null;
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to load bookmark content');
-        userLogger.warn('AccountDashboard: getContentDetailCore failed for bookmark', {
-          err: normalized,
-          section: 'recent-bookmarks',
-          slug: bookmark.content_slug,
-          category: bookmark.content_type,
-        });
-        return null;
-      }
-    })
-  );
-  userLogger.info('AccountDashboard: recent bookmarks loaded', {
+  userLogger.info('AccountDashboard: recent bookmarks displayed', {
     section: 'recent-bookmarks',
-    bookmarkCount: recentBookmarks.length,
-    loadedCount: recentlySavedContentResults.filter(Boolean).length,
+    itemCount: recentlySavedContent.length,
   });
-  const recentlySavedContent = recentlySavedContentResults.filter(
-    (item): item is Database['public']['Tables']['content']['Row'] =>
-      item !== null && typeof item === 'object'
-  );
 
   return (
     <Card>
@@ -464,45 +459,23 @@ async function RecentlySavedSection({
  *
  * @param homepageData - The `homepage` payload from the account dashboard bundle; used to derive candidate recommendation items.
  * @param bookmarkedSlugs - A set of strings in the form `"{category}/{slug}"` representing the user's already-bookmarked items to exclude.
- * @param recentBookmarks - Recent bookmark records (objects with `content_slug` and `content_type`) used to resolve saved content and extract tags.
+ * @param recentlySavedContent - Resolved content items from recent bookmarks used to extract tags for recommendations.
  * @param userLogger - A request-scoped logger used to record recommendation-generation metrics.
  * @returns A Card element containing up to three recommended items (each with "Explore" and optional "Explore similar" links), or a fallback prompt encouraging the user to bookmark content.
  *
  * @see getAccountDashboardBundle
- * @see getContentDetailCore
  */
 async function RecommendationsSection({
   homepageData,
   bookmarkedSlugs,
-  recentBookmarks,
+  recentlySavedContent,
   userLogger,
 }: {
   bookmarkedSlugs: Set<string>;
   homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage'];
-  recentBookmarks: Array<{
-    content_slug: null | string;
-    content_type: null | string;
-  }>;
+  recentlySavedContent: Database['public']['Tables']['content']['Row'][];
   userLogger: ReturnType<typeof logger.child>;
 }) {
-  // Fetch recent bookmark content to extract saved tags
-  const recentlySavedContentResults = await Promise.all(
-    recentBookmarks.map(async (bookmark) => {
-      try {
-        const category = bookmark.content_type as Database['public']['Enums']['content_category'];
-        const slug = bookmark.content_slug as string;
-        const detail = await getContentDetailCore({ category, slug });
-        return detail?.content ?? null;
-      } catch {
-        return null;
-      }
-    })
-  );
-  const recentlySavedContent = recentlySavedContentResults.filter(
-    (item): item is Database['public']['Tables']['content']['Row'] =>
-      item !== null && typeof item === 'object'
-  );
-
   const savedTags = new Set<string>();
   for (const contentItem of recentlySavedContent) {
     const tagList = ensureStringArray((contentItem as { tags?: string[] }).tags);

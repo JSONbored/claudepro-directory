@@ -11,7 +11,7 @@ import {
   getPublicCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   NavLink,
@@ -212,12 +212,11 @@ async function PublicCollectionPageContent({
       hasData: !!collectionData,
     });
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    viewerLogger.error('PublicCollectionPage: getPublicCollectionDetail threw', errorForLogging, {
+    const normalized = normalizeError(error, 'Failed to load collection detail');
+    viewerLogger.error('PublicCollectionPage: getPublicCollectionDetail threw', normalized, {
       section: 'collection-detail-fetch',
     });
-    throw error;
+    throw normalized;
   }
 
   if (!collectionData) {
@@ -234,7 +233,7 @@ async function PublicCollectionPageContent({
       {/* Track view - non-blocking */}
       <Pulse
         variant="view"
-        category={Constants.public.Enums.content_category[8]} // 'collections'
+        category="collections"
         slug={collectionSlug}
         metadata={{
           user_slug: slug,

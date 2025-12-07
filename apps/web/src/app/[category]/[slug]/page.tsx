@@ -58,9 +58,12 @@ export async function generateStaticParams() {
   // OPTIMIZATION: Skip validation - rely on dynamicParams=true for on-demand rendering
   // This saves ~8-10s on every build. Invalid slugs will be handled on-demand via ISR.
   const categoryResults = await Promise.allSettled(
-    categories.map(async (category) => {
+    categories.map(async (category: string) => {
       try {
-        const items = await getContentByCategory(category);
+        // Type assertion: categories from getHomepageCategoryIds are valid category enum values
+        const items = await getContentByCategory(
+          category as Database['public']['Enums']['content_category']
+        );
         const topItems = items.slice(0, MAX_ITEMS_PER_CATEGORY);
 
         // Return all items with slugs - no validation needed
@@ -99,12 +102,8 @@ export async function generateStaticParams() {
     }
   }
 
-  if (parameters.length === 0) {
-    // Cache Components requires at least one result for build-time validation
-    // Return a placeholder that will be handled dynamically (404 in page component)
-    return [{ category: 'agents', slug: '__placeholder__' }];
-  }
-
+  // Return empty array if no parameters found - Suspense boundaries will handle dynamic rendering
+  // This follows Next.js best practices by avoiding placeholder patterns
   return parameters;
 }
 
@@ -201,10 +200,10 @@ export async function generateMetadata({
 /**
  * Render the detail page for a content item identified by `category` and `slug`.
  *
- * Fetches core detail data synchronously to prioritize LCP, while analytics and related
- * content are loaded asynchronously inside Suspense boundaries. Awaits a request-time
- * initialization before performing non-deterministic operations and creates a
- * request-scoped logger for the page request.
+ * Uses Suspense boundaries to defer non-deterministic operations to request time.
+ * Core content fetching is wrapped in Suspense to enable progressive rendering and
+ * avoid placeholder patterns. Analytics and related content are loaded in separate
+ * Suspense boundaries for optimal streaming.
  *
  * @param params - A promise that resolves to an object with `category` and `slug` route parameters
  * @returns A React element representing the detail page for the specified `category` and `slug`
@@ -237,19 +236,44 @@ export default async function DetailPage({
     module: modulePath,
   });
 
+  // Resolve params early for validation, but defer content fetching to Suspense
+  const { category, slug } = await params;
+
+  // Handle placeholder slugs (if any remain from old generateStaticParams)
+  if (slug === '__placeholder__') {
+    reqLogger.warn('DetailPage: placeholder slug detected, returning 404', {
+      section: 'placeholder-handling',
+      category,
+      slug,
+    });
+    notFound();
+  }
+
+  // Validate category early (before Suspense boundary)
+  if (!isValidCategory(category)) {
+    reqLogger.warn('Invalid category in detail page', {
+      section: 'category-validation',
+      category,
+    });
+    notFound();
+  }
+
   return (
     <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading content...</div>}>
-      <DetailPageContent params={params} reqLogger={reqLogger} />
+      <DetailPageContent category={category} slug={slug} reqLogger={reqLogger} />
     </Suspense>
   );
 }
 
 /**
- * Render the detail page content for a given category and slug, fetching core content immediately and deferring analytics and related items for Suspense.
+ * Render the detail page content for a given category and slug, fetching core content in a Suspense boundary.
  *
- * This component validates the category and category configuration, fetches core content necessary for LCP (404s if missing), starts non-blocking fetches for analytics and related items, and renders the unified detail UI including optional RecentlyViewed tracking and collection-specific sections.
+ * This component validates the category configuration, fetches core content necessary for LCP (404s if missing),
+ * starts non-blocking fetches for analytics and related items, and renders the unified detail UI including
+ * optional RecentlyViewed tracking and collection-specific sections.
  *
- * @param params - A promise that resolves to an object with `category` and `slug` identifying the requested detail route.
+ * @param category - The content category identifying the type of content to display
+ * @param slug - The content slug identifying the specific item to display
  * @param reqLogger - A request-scoped logger; a route-scoped child logger will be created for logging within this component.
  * @returns A React fragment containing progress UI, structured data, optional recently-viewed tracking, and the unified detail page with deferred data promises.
  *
@@ -258,13 +282,14 @@ export default async function DetailPage({
  * @see RecentlyViewedTracker
  */
 async function DetailPageContent({
-  params,
+  category,
+  slug,
   reqLogger,
 }: {
-  params: Promise<{ category: string; slug: string }>;
+  category: string;
   reqLogger: ReturnType<typeof logger.child>;
+  slug: string;
 }) {
-  const { category, slug } = await params;
   const route = `/${category}/${slug}`;
 
   // Create route-specific logger
@@ -278,7 +303,9 @@ async function DetailPageContent({
     notFound();
   }
 
-  const config = getCategoryConfig(category);
+  // Type narrowing: category is now a valid category enum
+  const validCategory = category;
+  const config = getCategoryConfig(validCategory);
   if (!config) {
     // logger.error() normalizes errors internally, so pass raw error
     routeLogger.error('DetailPage: missing category config', new Error('Category config is null'), {
@@ -288,8 +315,8 @@ async function DetailPageContent({
   }
 
   // Section: Core Content Fetch
-  // Optimized for PPR: Split core content (critical) from analytics/related (deferred)
-  // 1. Fetch Core Content (Blocking - for LCP)
+  // Fetch core content in Suspense boundary to enable progressive rendering
+  // This allows the page shell to render while content loads
   const coreData = await getContentDetailCore({ category, slug });
 
   if (!coreData) {
@@ -370,7 +397,7 @@ async function DetailPageContent({
       {/* Read Progress Bar - Shows reading progress at top of page */}
       <ReadProgress />
 
-      <Pulse variant="view" category={category} slug={slug} />
+      <Pulse variant="view" category={validCategory} slug={slug} />
       <StructuredData route={`/${category}/${slug}`} />
 
       {/* Recently Viewed Tracking - only for supported categories */}

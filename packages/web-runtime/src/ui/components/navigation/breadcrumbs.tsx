@@ -39,10 +39,12 @@
  * using the database's build_breadcrumb_json_ld RPC function
  */
 
+import { type Database } from '@heyclaude/database-types';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
-import { ChevronRight, Home } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
 import { STATE_PATTERNS } from '../../constants.ts';
 
@@ -107,9 +109,12 @@ function generateBreadcrumbs(
     else if (isLast && currentTitle) {
       items.push({ label: currentTitle, href: currentPath });
     }
-    // Default: format the segment
+    // Default: use category config if segment is a valid category, otherwise format the segment
     else {
-      items.push({ label: formatSegmentLabel(segment), href: currentPath });
+      const label = isValidCategory(segment)
+        ? getCategoryConfig(segment as Database['public']['Enums']['content_category'])?.typeName ?? formatSegmentLabel(segment)
+        : formatSegmentLabel(segment);
+      items.push({ label, href: currentPath });
     }
   });
 
@@ -126,7 +131,6 @@ export function Breadcrumbs({
   items: customItems,
   categoryLabel,
   currentTitle,
-  showHomeIcon = true,
   className,
   maxItems = 4,
 }: BreadcrumbsProps) {
@@ -163,31 +167,30 @@ export function Breadcrumbs({
 
   return (
     <nav aria-label="Breadcrumb" className={cn('mb-4', className)}>
-      <ol className="flex flex-wrap items-center gap-1 text-sm">
+      <ol className="flex flex-wrap items-center gap-1.5 text-[11px]">
         {displayItems.map((item, index) => {
           const isFirst = index === 0;
           const isLast = index === displayItems.length - 1;
           const isEllipsis = item.label === '...';
 
           return (
-            <li key={`${item.href}-${index}`} className="flex items-center gap-1">
-              {/* Separator (not before first item) */}
+            <li key={`${item.href}-${index}`} className="flex items-center gap-1.5">
+              {/* Separator (not before first item) - text separator instead of icon */}
               {!isFirst && (
-                <ChevronRight
-                  className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50"
-                  aria-hidden="true"
-                />
+                <span className="text-muted-foreground/30" aria-hidden="true">
+                  /
+                </span>
               )}
 
               {/* Ellipsis (non-interactive) */}
               {isEllipsis ? (
-                <span className="px-1 text-muted-foreground" aria-hidden="true">
+                <span className="px-1 text-muted-foreground/30" aria-hidden="true">
                   …
                 </span>
               ) : isLast ? (
                 /* Current page (non-interactive) */
                 <span
-                  className="max-w-[200px] truncate font-medium text-foreground"
+                  className="max-w-[200px] truncate font-medium text-foreground/70"
                   aria-current="page"
                 >
                   {item.label}
@@ -198,18 +201,10 @@ export function Breadcrumbs({
                   href={item.href}
                   className={cn(
                     STATE_PATTERNS.FOCUS_RING,
-                    'flex items-center gap-1 rounded-sm text-muted-foreground transition-colors',
-                    'hover:text-foreground'
+                    'rounded-sm text-muted-foreground/50 transition-colors hover:text-foreground/80'
                   )}
                 >
-                  {isFirst && showHomeIcon ? (
-                    <>
-                      <Home className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span className="sr-only">{item.label}</span>
-                    </>
-                  ) : (
-                    <span className="max-w-[150px] truncate">{item.label}</span>
-                  )}
+                  {item.label}
                 </Link>
               )}
             </li>

@@ -37,6 +37,9 @@ const nextConfig = {
     '@heyclaude/database-types',
   ],
   // Exclude packages that shouldn't be bundled (pino has test files that break Turbopack)
+  // Note: @supabase/storage-js and iceberg-js are nested dependencies of @supabase/supabase-js
+  // We can't externalize nested dependencies directly, but webpack IgnorePlugin handles client bundles
+  // Server code uses the real storage-js, client bundles ignore it (storage is server-only)
   serverExternalPackages: ['@imagemagick/magick-wasm', 'pino', 'pino-pretty', 'thread-stream', 'sonic-boom'],
   /**
    * Cache Life Profiles
@@ -314,11 +317,19 @@ const nextConfig = {
       '@heyclaude/shared-runtime/src/image/manipulation': resolve(__dirname, './src/lib/stubs/image-manipulation-stub.ts'),
     };
 
-    // Ignore edge function dependencies
+    // Ignore edge function dependencies and server-only storage for client bundles
     if (!isServer) {
       config.plugins.push(
         new webpack.IgnorePlugin({
           resourceRegExp: /^@imagemagick\/magick-wasm$/,
+        }),
+        // Ignore @supabase/storage-js and iceberg-js for client bundles
+        // These are server-only - client components should use server actions for storage
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^@supabase\/storage-js$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^iceberg-js$/,
         })
       );
     }

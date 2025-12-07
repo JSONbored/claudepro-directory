@@ -70,20 +70,33 @@ export function useDetailQuickActions({
     [contentSlug, pulse, pulseCategory, item.category]
   );
 
+  // Treat undefined as "use metadata", null as "force-disable"
   const resolvedPackageName =
-    packageName ?? (typeof metadata['package'] === 'string' ? metadata['package'] : undefined);
+    packageName === null
+      ? null
+      : packageName !== undefined
+        ? packageName
+        : typeof metadata['package'] === 'string'
+          ? metadata['package']
+          : undefined;
 
   const resolvedMcpServers =
-    mcpServers ??
-    (metadata['mcpServers'] && typeof metadata['mcpServers'] === 'object'
-      ? (metadata['mcpServers'] as Record<string, unknown>)
-      : null);
+    mcpServers === null
+      ? null
+      : mcpServers !== undefined
+        ? mcpServers
+        : metadata['mcpServers'] && typeof metadata['mcpServers'] === 'object'
+          ? (metadata['mcpServers'] as Record<string, unknown>)
+          : null;
 
   const resolvedConfigurationObject =
-    configurationObject ??
-    (metadata['configuration'] && typeof metadata['configuration'] === 'object'
-      ? (metadata['configuration'] as Record<string, unknown>)
-      : null);
+    configurationObject === null
+      ? null
+      : configurationObject !== undefined
+        ? configurationObject
+        : metadata['configuration'] && typeof metadata['configuration'] === 'object'
+          ? (metadata['configuration'] as Record<string, unknown>)
+          : null;
 
   return useMemo<DetailQuickAction[]>(() => {
     const actions: DetailQuickAction[] = [];

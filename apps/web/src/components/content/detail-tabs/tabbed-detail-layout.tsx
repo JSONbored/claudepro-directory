@@ -32,8 +32,8 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
   // Get initial tab from URL hash or default to first tab
   const getInitialTab = useCallback(() => {
     if (tabs.length === 0) return '';
-    if (globalThis.window === undefined) return tabs[0]?.id || '';
-    const hash = globalThis.location.hash.slice(1);
+    if (typeof window === 'undefined') return tabs[0]?.id || '';
+    const hash = window.location.hash.slice(1);
     const matchingTab = tabs.find((tab) => tab.id === hash);
     return matchingTab ? matchingTab.id : tabs[0]?.id || '';
   }, [tabs]);
@@ -44,16 +44,18 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
 
   // Sync tab state with URL hash
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleHashChange = () => {
-      const hash = globalThis.location.hash.slice(1);
+      const hash = window.location.hash.slice(1);
       const matchingTab = tabs.find((tab) => tab.id === hash);
       if (matchingTab) {
         setActiveTab(matchingTab.id);
       }
     };
 
-    globalThis.addEventListener('hashchange', handleHashChange);
-    return () => globalThis.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, [tabs]);
 
   // Handle tab change with analytics tracking
@@ -62,9 +64,9 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
       setActiveTab(value);
 
       // Update URL hash without scrolling
-      if (globalThis.window !== undefined) {
-        const newUrl = `${globalThis.location.pathname}${globalThis.location.search}#${value}`;
-        globalThis.history.replaceState(null, '', newUrl);
+      if (typeof window !== 'undefined' && window.location && window.history) {
+        const newUrl = `${window.location.pathname}${window.location.search}#${value}`;
+        window.history.replaceState(null, '', newUrl);
       }
 
       // Track tab switch
@@ -141,7 +143,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
         <div className="container mx-auto">
           <TabsList className="h-auto w-full justify-start rounded-none border-0 bg-transparent p-0">
             {tabs.map((tab) => {
-              const isMobile = globalThis.window !== undefined && window.innerWidth < 768;
+              const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
               const label = isMobile && tab.mobileLabel ? tab.mobileLabel : tab.label;
 
               return (

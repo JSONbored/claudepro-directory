@@ -237,14 +237,7 @@ async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
     });
   }
 
-  return (
-    <LayoutContent
-      announcement={layoutData.announcement}
-      navigationData={layoutData.navigationData}
-    >
-      {children}
-    </LayoutContent>
-  );
+  return <LayoutContent announcement={layoutData.announcement}>{children}</LayoutContent>;
 }
 
 /**

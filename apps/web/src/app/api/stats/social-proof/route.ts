@@ -8,9 +8,9 @@
  * - Total user count
  *
  * Runtime: Node.js (required for Supabase client)
- * ISR: 5 minutes (300s) - Social proof updates frequently
+ * Caching: 5 minutes via Cache-Control headers (s-maxage=300)
  */
-import { Constants } from '@heyclaude/database-types';
+// Constants import removed - not used
 import {
   generateRequestId,
   logger,
@@ -160,10 +160,7 @@ export async function GET() {
 
     const submissionCount = recentSubmissions?.length ?? 0;
     const total = monthSubmissions?.length ?? 0;
-    const approved =
-      monthSubmissions?.filter(
-        (s) => s.status === Constants.public.Enums.submission_status[4] // 'merged'
-      ).length ?? 0;
+    const approved = monthSubmissions?.filter((s) => s.status === 'merged').length ?? 0;
     const successRate = total > 0 ? Math.round((approved / total) * 100) : null;
 
     // Get top contributors this week (unique authors with most submissions)

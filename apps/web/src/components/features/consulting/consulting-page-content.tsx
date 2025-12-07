@@ -16,7 +16,7 @@ export function ConsultingClient() {
       const cal = await getCalApi({ namespace: 'consulting-call' });
       cal('ui', {
         theme: 'dark',
-        styles: { branding: { brandColor: 'hsl(var(--accent))' } },
+        styles: { branding: { brandColor: 'rgb(249, 115, 22)' } }, // Claude orange (was hsl(var(--accent)))
         hideEventTypeDetails: false,
         layout: 'month_view',
       });

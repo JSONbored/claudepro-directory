@@ -15,13 +15,9 @@ import {
   UI_CLASSES,
   UnifiedBadge,
   PrefetchLink,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  NavigationHoverCard,
+  NavigationHoverCardTrigger,
+  NavigationHoverCardContent,
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -103,11 +99,11 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
       aria-label="Primary navigation"
     >
       {PRIMARY_NAVIGATION.map((link) => {
-        // Render dropdown for links with children (e.g., Configs)
-        if (link.children && link.children.length > 0) {
+        // Render hover dropdown for links with sections or children (e.g., Configs)
+        if ((link.sections && link.sections.length > 0) || (link.children && link.children.length > 0)) {
           return (
-            <DropdownMenu key={link.label}>
-              <DropdownMenuTrigger asChild>
+            <NavigationHoverCard key={link.label} openDelay={150} closeDelay={300}>
+              <NavigationHoverCardTrigger asChild>
                 <button
                   type="button"
                   className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
@@ -120,53 +116,76 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                       aria-hidden="true"
                     />
                   </span>
-                  <ChevronDown className="ml-1 h-2.5 w-2.5" />
+                  <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
                 </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className={`${DIMENSIONS.DROPDOWN_LG} p-3`}>
-                <div className={UI_CLASSES.GRID_COLS_2_GAP_2}>
-                  {link.children.map((child) => {
-                    const ChildIcon = child.icon;
-                    return (
-                      <DropdownMenuItem key={child.href} asChild>
+              </NavigationHoverCardTrigger>
+              <NavigationHoverCardContent align="start" className="w-56 p-3" sideOffset={8}>
+                {link.sections ? (
+                  // Organized sections with headers (matching reference design)
+                  <div className="space-y-4">
+                    {link.sections.map((section, sectionIndex) => (
+                      <div key={section.heading}>
+                        {/* Section header - subtle grey text like reference */}
+                        <div className="px-2 py-1 mb-1.5">
+                          <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                            {section.heading}
+                          </p>
+                        </div>
+                        {/* Section items */}
+                        <div className="space-y-0.5">
+                          {section.links.map((child) => {
+                            const ChildIcon = child.icon;
+                            return (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                prefetch
+                                className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-accent/5 transition-colors group/item text-foreground"
+                              >
+                                {ChildIcon && (
+                                  <ChildIcon className="h-4 w-4 text-muted-foreground group-hover/item:text-foreground transition-colors" />
+                                )}
+                                <span className="flex-1">{child.label}</span>
+                                {child.isNew && (
+                                  <UnifiedBadge variant="new-indicator" label={`New: ${child.label}`} />
+                                )}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                        {/* Separator between sections (except last) - subtle border */}
+                        {link.sections && sectionIndex < link.sections.length - 1 && (
+                          <div className="mt-4 mb-0 h-px bg-border/50" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : link.children ? (
+                  // Fallback: flat list for links without sections
+                  <div className="space-y-0.5">
+                    {link.children.map((child) => {
+                      const ChildIcon = child.icon;
+                      return (
                         <Link
+                          key={child.href}
                           href={child.href}
                           prefetch
-                          className={UI_CLASSES.FLEX_INTERACTIVE_MENU_ITEM}
+                          className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-accent/5 transition-colors group/item"
                         >
-                          {ChildIcon ? (
-                            <div className={`${UI_CLASSES.FLEX_ICON_WRAPPER_SM} bg-muted/50`}>
-                              <ChildIcon
-                                className={`${UI_CLASSES.ICON_XS} text-muted-foreground`}
-                                aria-hidden="true"
-                              />
-                            </div>
-                          ) : null}
-                          <div className={UI_CLASSES.FLEX_MIN_W_0_FLEX_1_COL_ITEMS_START_GAP_0_5}>
-                            <div
-                              className={`${UI_CLASSES.FLEX_W_FULL_ITEMS_CENTER_GAP_1_5} truncate text-sm font-medium`}
-                            >
-                              {child.label}
-                              {child.isNew ? (
-                                <UnifiedBadge
-                                  variant="new-indicator"
-                                  label={`New: ${child.label}`}
-                                />
-                              ) : null}
-                            </div>
-                            {child.description ? (
-                              <div className="text-muted-foreground line-clamp-1 text-[11px]">
-                                {child.description}
-                              </div>
-                            ) : null}
-                          </div>
+                          {ChildIcon && (
+                            <ChildIcon className="h-4 w-4 text-muted-foreground group-hover/item:text-foreground transition-colors" />
+                          )}
+                          <span className="flex-1">{child.label}</span>
+                          {child.isNew && (
+                            <UnifiedBadge variant="new-indicator" label={`New: ${child.label}`} />
+                          )}
                         </Link>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </NavigationHoverCardContent>
+            </NavigationHoverCard>
           );
         }
 
@@ -185,8 +204,8 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
         );
       })}
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <NavigationHoverCard openDelay={150} closeDelay={300}>
+        <NavigationHoverCardTrigger asChild>
           <button
             type="button"
             className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
@@ -199,85 +218,79 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                 aria-hidden="true"
               />
             </span>
-            <ChevronDown className="ml-1 h-2.5 w-2.5" />
+            <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
           </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className={`${DIMENSIONS.DROPDOWN_XL} p-4`}>
-          {/* 2-column grid for quick links */}
-          <div className={`${UI_CLASSES.MB_2} ${UI_CLASSES.GRID_COLS_2_GAP_4}`}>
+        </NavigationHoverCardTrigger>
+        <NavigationHoverCardContent align="end" className="w-64 p-3" sideOffset={8}>
+          {/* Simplified single column layout */}
+          <div className="space-y-2">
             {SECONDARY_NAVIGATION.map((group) => (
-              <div key={group.heading} className="space-y-2">
-                <DropdownMenuLabel className="text-muted-foreground px-2 py-1 text-[10px] font-semibold tracking-wider uppercase">
+              <div key={group.heading}>
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1">
                   {group.heading}
-                </DropdownMenuLabel>
-                <DropdownMenuGroup className="space-y-0.5">
-                  {group.links.map((link) => {
-                    const IconComponent = link.icon;
-                    return (
-                      <DropdownMenuItem key={link.href} asChild>
-                        <Link
-                          href={link.href}
-                          prefetch
-                          className={UI_CLASSES.FLEX_INTERACTIVE_MENU_ITEM}
-                        >
-                          {IconComponent ? (
-                            <div className={`${UI_CLASSES.FLEX_ICON_WRAPPER_SM} bg-muted/50`}>
-                              <IconComponent
-                                className={`${UI_CLASSES.ICON_XS} text-muted-foreground`}
-                                aria-hidden="true"
-                              />
-                            </div>
-                          ) : null}
-                          <div className={UI_CLASSES.FLEX_MIN_W_0_FLEX_1_COL_ITEMS_START_GAP_0_5}>
-                            <div className="w-full truncate text-sm font-medium">{link.label}</div>
-                            {link.description ? (
-                              <div className="text-muted-foreground line-clamp-1 text-[11px]">
-                                {link.description}
-                              </div>
-                            ) : null}
-                          </div>
-                        </Link>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuGroup>
+                </div>
+                <div className="space-y-0.5">
+                  {group.links.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      prefetch
+                      className="block px-2 py-1.5 text-sm rounded-md hover:bg-accent/5 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
 
           {/* Footer Links - Community, Partner Program, Consulting */}
-          <DropdownMenuSeparator className="my-2.5" />
-          <div className={UI_CLASSES.GRID_COLS_3_GAP_2}>
-            <Link href="/community" prefetch className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}>
-              <Users
-                className={`${UI_CLASSES.ICON_SM} text-muted-foreground group-hover:text-accent transition-colors`}
-                aria-hidden="true"
-              />
-              <div className="text-foreground group-hover:text-accent text-sm font-medium transition-colors">
-                Community
-              </div>
-            </Link>
-            <Link href="/partner" prefetch className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}>
-              <Handshake
-                className={`${UI_CLASSES.ICON_SM} text-muted-foreground group-hover:text-accent transition-colors`}
-                aria-hidden="true"
-              />
-              <div className="text-foreground group-hover:text-accent text-sm font-medium transition-colors">
-                Partner Program
-              </div>
-            </Link>
-            <Link href="/consulting" prefetch className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}>
-              <Briefcase
-                className={`${UI_CLASSES.ICON_SM} text-muted-foreground group-hover:text-accent transition-colors`}
-                aria-hidden="true"
-              />
-              <div className="text-foreground group-hover:text-accent text-sm font-medium transition-colors">
-                Consulting
-              </div>
-            </Link>
+          <div className="mt-2.5 pt-2.5 border-t border-border">
+            <div className="grid grid-cols-3 gap-2">
+              <Link
+                href="/community"
+                prefetch
+                className="flex flex-col items-center gap-1 rounded-md p-2 hover:bg-accent/5 transition-colors group/item"
+              >
+                <Users
+                  className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors"
+                  aria-hidden="true"
+                />
+                <div className="text-foreground group-hover/item:text-accent text-xs font-medium transition-colors">
+                  Community
+                </div>
+              </Link>
+              <Link
+                href="/partner"
+                prefetch
+                className="flex flex-col items-center gap-1 rounded-md p-2 hover:bg-accent/5 transition-colors group/item"
+              >
+                <Handshake
+                  className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors"
+                  aria-hidden="true"
+                />
+                <div className="text-foreground group-hover/item:text-accent text-xs font-medium transition-colors">
+                  Partner
+                </div>
+              </Link>
+              <Link
+                href="/consulting"
+                prefetch
+                className="flex flex-col items-center gap-1 rounded-md p-2 hover:bg-accent/5 transition-colors group/item"
+              >
+                <Briefcase
+                  className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors"
+                  aria-hidden="true"
+                />
+                <div className="text-foreground group-hover/item:text-accent text-xs font-medium transition-colors">
+                  Consulting
+                </div>
+              </Link>
+            </div>
           </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </NavigationHoverCardContent>
+      </NavigationHoverCard>
 
       {/* Search Icon - Right of More */}
       <SearchTrigger

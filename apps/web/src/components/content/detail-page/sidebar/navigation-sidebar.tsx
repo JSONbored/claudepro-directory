@@ -341,9 +341,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                     BADGE_COLORS.category.default
                   }`}
                 >
-                  {contentItem.category === Constants.public.Enums.content_category[1] // 'mcp'
-                    ? 'MCP Server'
-                    : contentItem.category.charAt(0).toUpperCase() + contentItem.category.slice(1)}
+                  {config.typeName}
                 </UnifiedBadge>
               </div>
             ) : null}

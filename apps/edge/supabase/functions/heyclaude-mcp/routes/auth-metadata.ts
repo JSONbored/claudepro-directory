@@ -12,7 +12,7 @@ import { createDataApiContext, logError, logger } from '@heyclaude/shared-runtim
 import { getEnvVar } from '@heyclaude/shared-runtime/env.ts';
 import type { Context } from 'hono';
 
-const MCP_SERVER_URL = getEnvVar('MCP_SERVER_URL') ?? 'https://mcp.heyclau.de';
+const MCP_SERVER_URL = getEnvVar('MCP_SERVER_URL') ?? 'https://mcp.claudepro.directory';
 const MCP_RESOURCE_URL = `${MCP_SERVER_URL}/mcp`;
 const SUPABASE_URL = edgeEnv.supabase.url;
 const SUPABASE_AUTH_URL = `${SUPABASE_URL}/auth/v1`;
@@ -26,7 +26,7 @@ const SUPABASE_AUTH_URL = `${SUPABASE_URL}/auth/v1`;
  */
 function setupMetadataLogging(action: string, method: string = 'GET') {
   const logContext = createDataApiContext(action, {
-    app: 'mcp-directory',
+    app: 'heyclaude-mcp',
     method,
   });
 
@@ -64,7 +64,7 @@ export async function handleProtectedResourceMetadata(_c: Context): Promise<Resp
         'mcp:resources', // Access to MCP resources (if we add them)
       ],
       bearer_methods_supported: ['header'],
-      resource_documentation: 'https://heyclau.de/mcp/heyclaude-mcp',
+      resource_documentation: 'https://claudepro.directory/mcp/heyclaude-mcp',
       // Indicate that resource parameter (RFC 8707) is supported
       resource_parameter_supported: true,
     };

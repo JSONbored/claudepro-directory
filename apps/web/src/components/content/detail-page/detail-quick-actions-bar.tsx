@@ -8,7 +8,7 @@ import { useDetailQuickActions } from './use-detail-quick-actions';
 
 interface DetailQuickActionsBarProps {
   className?: string;
-  configurationObject?: null | Record<string, unknown>;
+  configurationObject?: Record<string, unknown> | null;
   item: ContentItem;
   mcpServers?: null | Record<string, unknown>;
   metadata: Record<string, unknown>;
@@ -36,12 +36,17 @@ export function DetailQuickActionsBar({
   mcpServers,
   className,
 }: DetailQuickActionsBarProps) {
+  // Handle exactOptionalPropertyTypes: all optional props must be explicitly null or their type, not undefined
+  const configObject: Record<string, unknown> | null = configurationObject ?? null;
+  const mcpServersValue: Record<string, unknown> | null = mcpServers ?? null;
+  const packageNameValue: string | null = packageName ?? null;
+  
   const quickActions = useDetailQuickActions({
     item,
     metadata,
-    packageName: packageName ?? null,
-    configurationObject: configurationObject ?? null,
-    mcpServers: mcpServers ?? null,
+    packageName: packageNameValue,
+    configurationObject: configObject,
+    mcpServers: mcpServersValue,
   });
 
   if (quickActions.length === 0) {

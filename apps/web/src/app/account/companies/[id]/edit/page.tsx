@@ -37,11 +37,12 @@ import { CompanyForm } from '@/src/components/core/forms/company-form';
  * @see connection
  */
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: EditCompanyPageProperties): Promise<Metadata> {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
   // This is required by Cache Components for non-deterministic operations
   await connection();
-  return generatePageMetadata('/account/companies/:id/edit');
+  const { id } = await params;
+  return generatePageMetadata('/account/companies/:id/edit', { params: { id } });
 }
 
 interface EditCompanyPageProperties {

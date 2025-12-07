@@ -252,8 +252,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         tokensInput.value = template['maxTokens'].toString();
     }
 
-    if (template.type === Constants.public.Enums.submission_type[2]) {
-      // 'rules'
+    if (template.type === 'rules') {
       const rulesInput = form.querySelector('[name="rulesContent"]') as HTMLTextAreaElement;
       if (rulesInput && typeof template['rulesContent'] === 'string')
         rulesInput.value = template['rulesContent'];
@@ -267,8 +266,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         tokensInput.value = template['maxTokens'].toString();
     }
 
-    if (template.type === Constants.public.Enums.submission_type[1]) {
-      // 'mcp'
+    if (template.type === 'mcp') {
       const npmInput = form.querySelector('[name="npmPackage"]') as HTMLInputElement;
       if (npmInput && typeof template['npmPackage'] === 'string')
         npmInput.value = template['npmPackage'];

@@ -32,8 +32,8 @@ import { Suspense } from 'react';
  *
  * Fetches partner pricing, hero statistics, contact channels, and CTA links on the server.
  * If pricing or hero-stat fetches fail, built-in default values are used to ensure the page renders.
- * A request-scoped logger is created for telemetry and error reporting. The component is wrapped
- * in a Suspense boundary to allow streaming of async content.
+ * A request-scoped logger is created for telemetry and error reporting. The component leverages
+ * Cache Components for efficient, streaming-friendly data loading with Suspense boundaries.
  *
  * @returns The React element for the partner marketing page.
  *
@@ -134,8 +134,32 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   }
   const configCount = heroStats.configurationCount;
 
-  const partnerContacts = getPartnerContactChannels();
-  const partnerCtas = getPartnerCtas();
+  let partnerContacts;
+  try {
+    partnerContacts = getPartnerContactChannels();
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load partner contact channels');
+    reqLogger.error('PartnerPage: getPartnerContactChannels failed', normalized, {
+      section: 'partner-contacts',
+    });
+    // Use empty defaults instead of throwing to prevent page crash
+    partnerContacts = {
+      email: '',
+      social: {},
+    };
+  }
+
+  let partnerCtas: ReturnType<typeof getPartnerCtas>;
+  try {
+    partnerCtas = getPartnerCtas();
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load partner CTAs');
+    reqLogger.error('PartnerPage: getPartnerCtas failed', normalized, {
+      section: 'partner-ctas',
+    });
+    // Use empty defaults instead of throwing to prevent page crash
+    partnerCtas = {} as ReturnType<typeof getPartnerCtas>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">

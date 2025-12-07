@@ -247,7 +247,9 @@ export async function GET(request: NextRequest) {
 
     const highlightedResults = highlightResults(results, query);
 
-    await trackSearchAnalytics(
+    // Track analytics non-blocking (fire and forget)
+    // Don't await - this prevents blocking the response
+    trackSearchAnalytics(
       query,
       {
         ...filtersPayload,
@@ -255,7 +257,12 @@ export async function GET(request: NextRequest) {
       },
       highlightedResults.length,
       reqLogger
-    );
+    ).catch((error) => {
+      // Errors already logged inside trackSearchAnalytics
+      // Just prevent unhandled promise rejection
+      const normalized = normalizeError(error, 'Search analytics failed silently');
+      reqLogger.warn('Search analytics failed (non-blocking)', { err: normalized });
+    });
 
     const responseBody = {
       results: highlightedResults,
@@ -300,7 +307,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const normalized = normalizeError(error, 'Search request failed');
     reqLogger.error('Search request failed', normalized);
-    return createErrorResponse(error, {
+    return createErrorResponse(normalized, {
       route: '/api/search',
       operation: 'SearchAPI',
       method: 'GET',

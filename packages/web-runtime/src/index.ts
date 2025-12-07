@@ -63,7 +63,6 @@ export * from './logger.ts';
 export * from './errors.ts';
 export * from './build-time.ts';
 export * from './data.ts';
-export * from './privacy.ts';
 export * from './pulse.ts';
 export * from './skeleton-keys.ts';
 export * from './error-utils.ts';

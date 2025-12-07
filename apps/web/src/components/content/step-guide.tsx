@@ -107,7 +107,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                 <CardContent className="pl-14">
                   {step.content || step.description ? (
                     <div itemProp="text" className="mb-6 text-base leading-relaxed">
-                      {(step.content as React.ReactNode) || (step.description as React.ReactNode)}
+                      {step.content || step.description}
                     </div>
                   ) : null}
 

@@ -141,12 +141,7 @@ function downloadTextFile(filename: string, content: string) {
  * @see normalizeError
  */
 function TrustedHTML({ html, className }: { className?: string; html: string }) {
-  if (!html || typeof html !== 'string') {
-    return <div className={className} />;
-  }
-
-  // Sanitize HTML to prevent XSS
-  // During SSR, render unsanitized (will be sanitized on client)
+  // Hooks must be called unconditionally (Rules of Hooks)
   const [safeHtml, setSafeHtml] = useState<string>(
     globalThis.window === undefined ? html : '' // Start empty on client, will be set in useEffect
   );
@@ -202,6 +197,11 @@ function TrustedHTML({ html, className }: { className?: string; html: string }) 
         });
     }
   }, [html]);
+
+  // Early return check after hooks (Rules of Hooks compliance)
+  if (!html || typeof html !== 'string') {
+    return <div className={className} />;
+  }
 
   // During SSR, render unsanitized (will be sanitized on client hydration)
   const htmlToRender = isClient ? safeHtml : html;

@@ -147,7 +147,7 @@ async function EditCollectionPageContent({
     userLogger.error('EditCollectionPage: getCollectionDetail threw', normalized, {
       section: 'collection-data-fetch',
     });
-    throw error;
+    throw normalized;
   }
 
   if (!collectionData) {

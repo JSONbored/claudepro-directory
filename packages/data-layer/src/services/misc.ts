@@ -55,26 +55,6 @@ export class MiscService {
   }
 
   /**
-   * Calls the database RPC: get_navigation_menu
-   */
-  async getNavigationMenu() {
-    try {
-      const { data, error } = await this.supabase.rpc('get_navigation_menu');
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_navigation_menu',
-          operation: 'MiscService.getNavigationMenu',
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
-  }
-
-  /**
    * Calls the database RPC: get_contact_commands
    */
   async getContactCommands() {

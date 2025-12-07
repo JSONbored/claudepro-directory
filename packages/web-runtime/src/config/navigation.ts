@@ -39,7 +39,6 @@ import {
   type LucideIcon,
   MessageSquare,
   Plug,
-  PlusCircle,
   Terminal,
   TrendingUp,
   Users,
@@ -62,6 +61,16 @@ export interface NavigationLink {
   external?: boolean;
   /** Nested navigation links (for dropdowns) */
   children?: NavigationLink[];
+  /** Optional section grouping for organized dropdowns */
+  sections?: NavigationSection[];
+}
+
+/** A section within a navigation dropdown */
+export interface NavigationSection {
+  /** Section heading label */
+  heading: string;
+  /** Links in this section */
+  links: NavigationLink[];
 }
 
 /** A group of navigation links with a heading */
@@ -79,55 +88,75 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
     href: '#',
     icon: Layers,
     description: 'Browse all configuration types',
-    children: [
+    sections: [
       {
-        label: 'Agents',
-        href: '/agents',
-        icon: Terminal,
-        description: 'AI-powered task automation agents',
+        heading: 'Configure',
+        links: [
+          {
+            label: 'CLAUDE.md',
+            href: '/rules',
+            icon: FileText,
+            description: 'Project rules and guidelines',
+          },
+          {
+            label: 'Agents',
+            href: '/agents',
+            icon: Terminal,
+            description: 'AI-powered task automation agents',
+          },
+          {
+            label: 'Statuslines',
+            href: '/statuslines',
+            icon: Terminal,
+            description: 'Customizable editor status bars',
+          },
+        ],
       },
       {
-        label: 'Commands',
-        href: '/commands',
-        icon: Zap,
-        description: 'Slash commands for Claude Code',
+        heading: 'Extend',
+        links: [
+          {
+            label: 'Skills',
+            href: '/skills',
+            icon: BookOpen,
+            description: 'Task-focused capability guides (PDF/DOCX/PPTX/XLSX)',
+            isNew: true,
+          },
+          {
+            label: 'Commands',
+            href: '/commands',
+            icon: Zap,
+            description: 'Slash commands for Claude Code',
+          },
+        ],
       },
       {
-        label: 'Hooks',
-        href: '/hooks',
-        icon: Layers,
-        description: 'Event-driven automation workflows',
+        heading: 'Integrate',
+        links: [
+          {
+            label: 'Hooks',
+            href: '/hooks',
+            icon: Layers,
+            description: 'Event-driven automation workflows',
+          },
+          {
+            label: 'MCP',
+            href: '/mcp',
+            icon: Plug,
+            description: 'Model Context Protocol servers',
+          },
+        ],
       },
       {
-        label: 'MCP',
-        href: '/mcp',
-        icon: Plug,
-        description: 'Model Context Protocol servers',
-      },
-      {
-        label: 'Rules',
-        href: '/rules',
-        icon: FileText,
-        description: 'Project rules and guidelines',
-      },
-      {
-        label: 'Skills',
-        href: '/skills',
-        icon: BookOpen,
-        description: 'Task-focused capability guides (PDF/DOCX/PPTX/XLSX)',
-        isNew: true,
-      },
-      {
-        label: 'Statuslines',
-        href: '/statuslines',
-        icon: Terminal,
-        description: 'Customizable editor status bars',
-      },
-      {
-        label: 'Collections',
-        href: '/collections',
-        icon: Layers,
-        description: 'Curated content bundles',
+        heading: 'Discover',
+        links: [
+          {
+            label: 'Collections',
+            href: '/collections',
+            icon: Layers,
+            description: 'Curated content bundles',
+          },
+        ],
       },
     ],
   },
@@ -202,12 +231,8 @@ export const SECONDARY_NAVIGATION: NavigationGroup[] = [
 
 /** Action links (CTAs) */
 export const ACTION_LINKS: NavigationLink[] = [
-  {
-    label: 'Create',
-    href: '/submit',
-    icon: PlusCircle,
-    description: 'Share your configuration',
-  },
+  // Removed Create+ button - unused and minimal design
+  // Users can still access /submit directly if needed
 ];
 
 /**
@@ -267,4 +292,160 @@ export function getBreadcrumbTrail(pathname: string): NavigationLink[] {
   }
 
   return breadcrumbs;
+}
+
+/**
+ * Get icon name from LucideIcon component
+ * Creates a reverse mapping from icon component to its name string
+ */
+function getIconName(icon?: LucideIcon): string | null {
+  if (!icon) return null;
+  
+  // Create reverse mapping from icon component to name
+  const iconNameMap: Map<LucideIcon, string> = new Map([
+    [BookOpen, 'BookOpen'],
+    [Briefcase, 'Briefcase'],
+    [Building, 'Building'],
+    [Calendar, 'Calendar'],
+    [FileText, 'FileText'],
+    [Handshake, 'Handshake'],
+    [Layers, 'Layers'],
+    [MessageSquare, 'MessageSquare'],
+    [Plug, 'Plug'],
+    [Terminal, 'Terminal'],
+    [TrendingUp, 'TrendingUp'],
+    [Users, 'Users'],
+    [Zap, 'Zap'],
+  ]);
+  
+  return iconNameMap.get(icon) ?? null;
+}
+
+/**
+ * Convert NavigationLink to command menu item format
+ * Flattens sections and children into a single array of items
+ */
+function convertLinkToCommandItems(link: NavigationLink): Array<{
+  path: string;
+  title: string;
+  description: string | null;
+  icon_name: string | null;
+}> {
+  const items: Array<{
+    path: string;
+    title: string;
+    description: string | null;
+    icon_name: string | null;
+  }> = [];
+
+  // Skip links with href='#' (parent items with children)
+  if (link.href !== '#') {
+    items.push({
+      path: link.href,
+      title: link.label,
+      description: link.description ?? null,
+      icon_name: getIconName(link.icon),
+    });
+  }
+
+  // Flatten sections (for Configs dropdown)
+  if (link.sections) {
+    for (const section of link.sections) {
+      for (const childLink of section.links) {
+        items.push({
+          path: childLink.href,
+          title: childLink.label,
+          description: childLink.description ?? null,
+          icon_name: getIconName(childLink.icon),
+        });
+      }
+    }
+  }
+
+  // Flatten children (legacy format)
+  if (link.children) {
+    for (const childLink of link.children) {
+      items.push({
+        path: childLink.href,
+        title: childLink.label,
+        description: childLink.description ?? null,
+        icon_name: getIconName(childLink.icon),
+      });
+    }
+  }
+
+  return items;
+}
+
+/**
+ * Get navigation data for command palette
+ * Converts static config to command menu format
+ * @returns Navigation data in command menu format
+ */
+export function getCommandMenuNavigationData(): {
+  primary: Array<{
+    path: string;
+    title: string;
+    description: string | null;
+    icon_name: string | null;
+  }> | null;
+  secondary: Array<{
+    path: string;
+    title: string;
+    description: string | null;
+    icon_name: string | null;
+  }> | null;
+  actions: Array<{
+    path: string;
+    title: string;
+    description: string | null;
+    icon_name: string | null;
+  }> | null;
+} {
+  // Convert primary navigation (flatten sections/children)
+  const primary: Array<{
+    path: string;
+    title: string;
+    description: string | null;
+    icon_name: string | null;
+  }> = [];
+
+  for (const link of PRIMARY_NAVIGATION) {
+    const items = convertLinkToCommandItems(link);
+    primary.push(...items);
+  }
+
+  // Convert secondary navigation (from groups)
+  const secondary: Array<{
+    path: string;
+    title: string;
+    description: string | null;
+    icon_name: string | null;
+  }> = [];
+
+  for (const group of SECONDARY_NAVIGATION) {
+    for (const link of group.links) {
+      const items = convertLinkToCommandItems(link);
+      secondary.push(...items);
+    }
+  }
+
+  // Convert action links
+  const actions: Array<{
+    path: string;
+    title: string;
+    description: string | null;
+    icon_name: string | null;
+  }> = [];
+
+  for (const link of ACTION_LINKS) {
+    const items = convertLinkToCommandItems(link);
+    actions.push(...items);
+  }
+
+  return {
+    primary: primary.length > 0 ? primary : null,
+    secondary: secondary.length > 0 ? secondary : null,
+    actions: actions.length > 0 ? actions : null,
+  };
 }

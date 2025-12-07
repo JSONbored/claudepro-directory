@@ -5,7 +5,12 @@ import { type Database } from '@heyclaude/database-types';
  */
 export interface LayoutData {
   announcement: Database['public']['Tables']['announcements']['Row'] | null;
-  navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
+  /** Navigation data - kept for backward compatibility, always returns empty structure */
+  navigationData: {
+    actions: null;
+    primary: null;
+    secondary: null;
+  };
 }
 
 /**

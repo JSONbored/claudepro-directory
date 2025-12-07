@@ -2,6 +2,7 @@ import {
   generatePageMetadata,
   getAuthenticatedUser,
   getCollectionDetail,
+  getUserCompleteData,
 } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
@@ -218,9 +219,32 @@ async function CollectionDetailContent({
     section: 'page-render',
   });
 
-  const shareUrl = collection.is_public
-    ? `${APP_CONFIG.url}/u/${user.id}/collections/${collection.slug}`
-    : null;
+  // Fetch user profile to get slug for share URL
+  let userSlug: null | string = null;
+  if (collection.is_public) {
+    try {
+      const userData = await getUserCompleteData(user.id);
+      // User slug is stored in user_settings.user_data.slug
+      if (userData?.user_settings?.user_data?.slug) {
+        userSlug = userData.user_settings.user_data.slug;
+      } else {
+        userLogger.warn('CollectionDetailPage: user profile slug not found', {
+          section: 'share-url-generation',
+        });
+      }
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to fetch user profile for share URL');
+      userLogger.warn('CollectionDetailPage: failed to fetch user profile slug', {
+        section: 'share-url-generation',
+        error: normalized instanceof Error ? normalized.message : String(normalized),
+      });
+    }
+  }
+
+  const shareUrl =
+    collection.is_public && userSlug
+      ? `${APP_CONFIG.url}/u/${userSlug}/collections/${collection.slug}`
+      : null;
 
   return (
     <div className="space-y-6">

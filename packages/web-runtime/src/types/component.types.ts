@@ -551,7 +551,7 @@ export type TLDRSummaryProps = {
 export type GuideStep = {
   title: string;
   description?: string;
-  content?: unknown;
+  content?: React.ReactNode;
   code?: string;
   tip?: string;
   time: string;

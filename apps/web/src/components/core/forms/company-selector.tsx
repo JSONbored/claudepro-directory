@@ -21,7 +21,7 @@ import {
   PopoverTrigger,
 } from '@heyclaude/web-runtime/ui';
 import { Building2, Plus, Search } from 'lucide-react';
-import { useCallback, useEffect, useId, useState, useTransition } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, useTransition } from 'react';
 
 type Company = Pick<
   Database['public']['Tables']['companies']['Row'],
@@ -81,7 +81,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
         }
         if (result?.serverError) {
           // Error already logged by safe-action middleware
-          const normalized = normalizeError(new Error(result.serverError), 'Failed to load selected company');
+          const normalized = normalizeError(result.serverError, 'Failed to load selected company');
           logClientError(
             '[Form] Failed to load selected company',
             normalized,
@@ -114,6 +114,9 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
     };
   }, [value]);
 
+  // Track latest query to prevent stale results
+  const latestQueryRef = useRef<string>('');
+
   // Debounced search
   const searchCompanies = useCallback(async (query: string) => {
     const trimmed = query.trim();
@@ -123,9 +126,18 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
       return;
     }
 
+    // Update latest query before making request
+    latestQueryRef.current = trimmed;
+
     setIsSearching(true);
     try {
       const result = await searchCompaniesAction({ query: trimmed, limit: 10 });
+      
+      // Only apply results if this request's query still matches the latest query
+      if (latestQueryRef.current !== trimmed) {
+        return; // Stale request - ignore results
+      }
+      
       const payload = result?.data as undefined | { companies?: Company[]; debounceMs?: number };
       const companies = payload?.companies ?? [];
       setCompanies(

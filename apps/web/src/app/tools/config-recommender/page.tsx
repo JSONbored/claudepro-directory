@@ -19,7 +19,6 @@
 
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   UnifiedBadge,
@@ -30,14 +29,15 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import { connection } from 'next/server';
 
 import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 
 /**
- * Dynamic Rendering Required
+ * Caching Strategy
  *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ * This page is ~95% static (hero, benefits, features cards) with only the QuizForm being interactive client-side.
+ * Uses connection() to defer non-deterministic operations to request time for Cache Components compatibility.
+ * The static content can be cached at the edge/CDN level for optimal performance.
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
@@ -58,37 +58,20 @@ export async function generateMetadata(): Promise<Metadata> {
  * Render the Config Recommender page that presents a hero, a 7-question quiz, benefits,
  * and feature list to produce rule-based Claude configuration recommendations.
  *
- * This async server component awaits Next.js' server connection before performing
- * request-scoped non-deterministic work, generates a per-request identifier, and
- * creates a request-scoped logger for render-time telemetry. Rendering relies on
- * framework error boundaries for error handling.
+ * This is a cached static page component. The page content is ~95% static with only
+ * the QuizForm being interactive client-side. Uses Cache Components for optimal
+ * performance with edge/CDN caching.
  *
  * @returns The React element tree for the Config Recommender landing page.
  *
  * @see QuizForm
- * @see connection
- * @see generateRequestId
  */
 export default async function ConfigRecommenderPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'ConfigRecommenderPage',
-    route: '/tools/config-recommender',
-    module: 'app/tools/config-recommender',
-  });
-
-  // Log page render (static content, no data fetching)
-  reqLogger.info('ConfigRecommenderPage: rendering static page', {
-    section: 'page-render',
-  });
+  // Configure cache for static landing page content
+  const { cacheLife } = await import('next/cache');
+  cacheLife('days'); // 1 day stale, 6hr revalidate, 7 days expire
 
   // Return JSX - no try/catch needed for static content
   // Rendering errors will be caught by error boundaries

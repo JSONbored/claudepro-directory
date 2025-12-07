@@ -3,6 +3,7 @@
  * Allows users to manage their multi-factor authentication settings
  */
 
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Shield } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
@@ -81,14 +82,22 @@ async function MFASettingsPageContent({
 }: {
   reqLogger: ReturnType<typeof logger.child>;
 }) {
+  // getAuthenticatedUser with requireUser: true throws when no user is present,
+  // so the null check below is unreachable
   const { user } = await getAuthenticatedUser({
     requireUser: true,
     context: 'MFASettingsPage',
   });
 
   if (!user) {
-    reqLogger.info('MFASettingsPage: user not authenticated, redirecting to login');
-    redirect('/login');
+    reqLogger.error(
+      'MFASettingsPage: user is null despite requireUser: true',
+      new Error('User is null'),
+      {
+        section: 'authentication',
+      }
+    );
+    redirect(ROUTES.LOGIN);
   }
 
   reqLogger.info('MFASettingsPage: rendered for authenticated user', {

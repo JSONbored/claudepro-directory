@@ -1,7 +1,7 @@
 // Update entry point
 // REMOVED: export * from '../actions/safe-action.ts'; - Actions should ONLY be exported from @heyclaude/web-runtime/actions to prevent Turbopack from creating 'actions/data' module IDs
 // REMOVED: export * from '../actions/feature-flags.ts'; - Server-only, use lazy imports or import from @heyclaude/web-runtime/actions
-export * from '../storage/image-storage.ts';
+// REMOVED: export * from '../storage/image-storage.ts'; - Server-only, use @heyclaude/web-runtime/server or @heyclaude/web-runtime/data-server
 export * from '../storage/image-utils.ts';
 export * from '../edge/call-edge-function.ts';
 export * from '../edge/transform.ts';

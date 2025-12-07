@@ -32,6 +32,12 @@ export * from './ui/components/collapsible.tsx';
 export * from './ui/components/command.tsx';
 export * from './ui/components/sheet.tsx';
 export * from './ui/components/dropdown-menu.tsx';
+// Navigation HoverCard (Radix UI) - exported with different names to avoid conflict with animation HoverCard
+export {
+  NavigationHoverCard,
+  NavigationHoverCardTrigger,
+  NavigationHoverCardContent,
+} from './ui/components/hover-card.tsx';
 export * from './ui/components/popover.tsx';
 export * from './ui/components/tooltip.tsx';
 export * from './ui/components/checkbox.tsx';

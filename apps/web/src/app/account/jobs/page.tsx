@@ -445,36 +445,34 @@ async function JobsListWithHeader({
       return [];
     }
 
-    return jobsData
-      .filter((item): item is Database['public']['Tables']['jobs']['Row'] => {
-        // Validate required fields for jobs table row
-        // Use bracket notation for index signature properties
-        return (
-          item !== null &&
-          typeof item === 'object' &&
-          'id' in item &&
-          typeof item['id'] === 'string' &&
-          'company' in item &&
-          typeof item['company'] === 'string' &&
-          'description' in item &&
-          typeof item['description'] === 'string' &&
-          'link' in item &&
-          typeof item['link'] === 'string' &&
-          'title' in item &&
-          typeof item['title'] === 'string' &&
-          'created_at' in item &&
-          typeof item['created_at'] === 'string' &&
-          'is_placeholder' in item &&
-          typeof item['is_placeholder'] === 'boolean' &&
-          'category' in item &&
-          typeof item['category'] === 'string' &&
-          'plan' in item &&
-          (typeof item['plan'] === 'string' || item['plan'] === null) &&
-          'type' in item &&
-          typeof item['type'] === 'string'
-        );
-      })
-      .map((item) => item);
+    return jobsData.filter((item): item is Database['public']['Tables']['jobs']['Row'] => {
+      // Validate required fields for jobs table row
+      // Use bracket notation for index signature properties
+      return (
+        item !== null &&
+        typeof item === 'object' &&
+        'id' in item &&
+        typeof item['id'] === 'string' &&
+        'company' in item &&
+        typeof item['company'] === 'string' &&
+        'description' in item &&
+        typeof item['description'] === 'string' &&
+        'link' in item &&
+        typeof item['link'] === 'string' &&
+        'title' in item &&
+        typeof item['title'] === 'string' &&
+        'created_at' in item &&
+        typeof item['created_at'] === 'string' &&
+        'is_placeholder' in item &&
+        typeof item['is_placeholder'] === 'boolean' &&
+        'category' in item &&
+        typeof item['category'] === 'string' &&
+        'plan' in item &&
+        (typeof item['plan'] === 'string' || item['plan'] === null) &&
+        'type' in item &&
+        typeof item['type'] === 'string'
+      );
+    });
   })();
 
   if (jobs.length === 0) {

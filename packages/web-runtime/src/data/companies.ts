@@ -211,31 +211,17 @@ async function fetchCompanySearchResults(
     module: 'data/companies',
   });
 
-  const { trackPerformance } = await import('../utils/performance-metrics');
-
   try {
-    const { result } = await trackPerformance(
-      async () => {
-        const results = await searchCompaniesUnified(query, limit);
-        return results.map((entity) => ({
-          id: entity.id,
-          name: entity.title || entity.slug || '',
-          slug: entity.slug,
-          description: entity.description,
-        }));
-      },
-      {
-        operation: 'fetchCompanySearchResults',
-        logger: requestLogger, // Use child logger to avoid passing requestId/operation repeatedly
-        requestId, // Pass requestId for return value
-        logMeta: { query, limit },
-        logLevel: 'info', // Log all operations for observability
-      }
-    );
+    const results = await searchCompaniesUnified(query, limit);
+    const result = results.map((entity) => ({
+      id: entity.id,
+      name: entity.title || entity.slug || '',
+      slug: entity.slug,
+      description: entity.description,
+    }));
 
     return result;
   } catch (error) {
-    // trackPerformance already logs the error, but we log again with context about fallback behavior
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
       error instanceof Error ? error : typeof error === 'string' ? error : String(error);

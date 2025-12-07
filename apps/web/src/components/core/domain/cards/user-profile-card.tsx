@@ -15,9 +15,7 @@
  */
 
 import { type Database } from '@heyclaude/database-types';
-import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
-import { Award, ExternalLink, Users } from '@heyclaude/web-runtime/icons';
+import { Award, Users } from '@heyclaude/web-runtime/icons';
 import {
   BADGE_COLORS,
   UI_CLASSES,
@@ -29,6 +27,8 @@ import {
   Button,
 } from '@heyclaude/web-runtime/ui';
 import { memo } from 'react';
+
+import { ExternalLinkButton } from './external-link-button';
 
 /**
  * Produce a canonical, safe external URL suitable for opening in a new tab.
@@ -46,7 +46,7 @@ import { memo } from 'react';
  *
  * @see URL
  */
-function getSafeExternalUrl(url: null | string | undefined): null | string {
+export function getSafeExternalUrl(url: null | string | undefined): null | string {
   if (!url || typeof url !== 'string') return null;
 
   try {
@@ -158,7 +158,6 @@ const getMemberBadge = (user: UserProfile) => {
  * @see getMemberBadge
  */
 function ProfileCardComponent({ user, variant = 'default', showActions = true }: ProfileCardProps) {
-  const pulse = usePulse();
   const memberBadge = getMemberBadge(user);
   const slug = user.slug;
   const username = slug ? `@${slug}` : 'User';
@@ -257,88 +256,24 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
       renderActions={() => (
         <>
           {/* Website link */}
-          {user.website
-            ? (() => {
-                const safeWebsiteUrl = getSafeExternalUrl(user.website);
-                if (!safeWebsiteUrl) return null;
-                return (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      pulse
-                        .click({
-                          category: null,
-                          slug: null,
-                          metadata: {
-                            action: 'external_link',
-                            link_type: 'website',
-                            target_url: safeWebsiteUrl,
-                            user_slug: slug,
-                          },
-                        })
-                        .catch((error) => {
-                          logUnhandledPromise(
-                            'UserProfileCard: website link click pulse failed',
-                            error,
-                            {
-                              user_slug: slug,
-                            }
-                          );
-                        });
-                      window.open(safeWebsiteUrl, '_blank');
-                    }}
-                    aria-label={`Visit ${displayName}'s website`}
-                  >
-                    <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
-                  </Button>
-                );
-              })()
-            : null}
+          {user.website && slug ? (
+            <ExternalLinkButton
+              url={user.website}
+              linkType="website"
+              ariaLabel={`Visit ${displayName}'s website`}
+              userSlug={slug}
+            />
+          ) : null}
 
           {/* Twitter/X link */}
-          {user.social_x_link
-            ? (() => {
-                const safeSocialUrl = getSafeExternalUrl(user.social_x_link);
-                if (!safeSocialUrl) return null;
-                return (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      pulse
-                        .click({
-                          category: null,
-                          slug: null,
-                          metadata: {
-                            action: 'external_link',
-                            link_type: 'social',
-                            target_url: safeSocialUrl,
-                            user_slug: slug,
-                          },
-                        })
-                        .catch((error) => {
-                          logUnhandledPromise(
-                            'UserProfileCard: social link click pulse failed',
-                            error,
-                            {
-                              user_slug: slug,
-                            }
-                          );
-                        });
-                      window.open(safeSocialUrl, '_blank');
-                    }}
-                    aria-label={`Visit ${displayName} on X/Twitter`}
-                  >
-                    <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
-                  </Button>
-                );
-              })()
-            : null}
+          {user.social_x_link && slug ? (
+            <ExternalLinkButton
+              url={user.social_x_link}
+              linkType="social"
+              ariaLabel={`Visit ${displayName} on ${user.social_x_link.includes('twitter') ? 'Twitter' : 'X'}`}
+              userSlug={slug}
+            />
+          ) : null}
 
           {/* View profile button - only show if slug exists */}
           {(() => {

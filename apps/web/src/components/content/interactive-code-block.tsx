@@ -4,7 +4,7 @@
  * Code block with syntax highlighting, screenshot, share, and copy functionality
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { isValidCategory, logUnhandledPromise, type SharePlatform } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
@@ -41,19 +41,33 @@ import { LinkedinShareButton, TwitterShareButton } from 'react-share';
 const CLIPBOARD_RESET_DEFAULT_MS = 2000;
 
 /**
+ * Escapes HTML to plain text for safe rendering.
+ *
+ * @param html - HTML string to escape
+ * @returns Escaped plain text string
+ */
+function escapeHtml(html: string): string {
+  if (typeof html !== 'string') return '';
+  const div = document.createElement('div');
+  div.textContent = html;
+  return div.innerHTML;
+}
+
+/**
  * Sanitizes Shiki-generated HTML for safe insertion via dangerouslySetInnerHTML.
  *
  * Only a minimal set of tags and attributes used by Shiki are preserved:
  * allowed tags: `pre`, `code`, `span`, `div`; allowed attributes: `class`, `style`; `data-*` attributes are allowed.
  *
  * @param html - HTML string produced by Shiki highlighting
- * @returns The sanitized HTML string. If `html` is falsy or not a string, returns an empty string. If running outside a browser (server-side) or if sanitization fails, returns the original `html` unmodified.
+ * @returns The sanitized HTML string. If `html` is falsy or not a string, returns an empty string. If running outside a browser (server-side) or if sanitization fails, returns escaped plain text representation.
  */
 async function sanitizeShikiHtml(html: string): Promise<string> {
   if (!html || typeof html !== 'string') return '';
   // DOMPurify only works in browser - dynamically import
-  if (globalThis.window === undefined) {
-    return html; // During SSR, return unsanitized (will be sanitized on client)
+  if (typeof window === 'undefined') {
+    // During SSR, return empty string (will be sanitized on client)
+    return '';
   }
   try {
     const DOMPurify = await import('dompurify');
@@ -81,7 +95,8 @@ async function sanitizeShikiHtml(html: string): Promise<string> {
         recoverable: true,
       }
     );
-    return html; // Fallback to original HTML
+    // Fallback to escaped plain text instead of raw HTML
+    return escapeHtml(html);
   }
 }
 
@@ -241,14 +256,15 @@ export function ProductionCodeBlock({
   const [needsCollapse, setNeedsCollapse] = useState(false);
   const [clipboardResetDelay, setClipboardResetDelay] = useState(CLIPBOARD_RESET_DEFAULT_MS);
   const [safeHtml, setSafeHtml] = useState<string>(html);
-  const preRef = useRef<HTMLDivElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
+  const divRef = useRef<HTMLDivElement>(null);
   const pulse = usePulse();
   const codeBlockRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   // Sanitize HTML on client side
   useEffect(() => {
-    if (globalThis.window !== undefined && html) {
+    if (typeof window !== 'undefined' && html) {
       sanitizeShikiHtml(html)
         .then((sanitized) => {
           setSafeHtml(sanitized);
@@ -266,7 +282,14 @@ export function ProductionCodeBlock({
               recoverable: true,
             }
           );
-          setSafeHtml(html); // Fallback to original
+          // Fallback to escaped plain text instead of raw HTML
+          if (typeof window !== 'undefined') {
+            const div = document.createElement('div');
+            div.textContent = html;
+            setSafeHtml(div.innerHTML);
+          } else {
+            setSafeHtml('');
+          }
         });
     }
   }, [html]);
@@ -280,6 +303,8 @@ export function ProductionCodeBlock({
 
     // Warn and use explicit sentinel for invalid categories to avoid misleading analytics
     if (!isValidCategory(rawCategory)) {
+      // Defensive fallback: use explicit string literal 'agents' as guaranteed valid enum member
+      const fallbackCategory = 'agents' as Database['public']['Enums']['content_category'];
       logClientWarn(
         'Invalid category in pathname, using fallback',
         undefined,
@@ -289,12 +314,11 @@ export function ProductionCodeBlock({
           action: 'parse-pathname',
           rawCategory,
           pathname,
-          fallback: Constants.public.Enums.content_category[0], // 'agents'
+          fallback: fallbackCategory,
         }
       );
       return {
-        category: Constants.public.Enums
-          .content_category[0] as Database['public']['Enums']['content_category'],
+        category: fallbackCategory,
         slug,
       };
     }
@@ -738,13 +762,19 @@ export function ProductionCodeBlock({
         ) : null}
 
         {/* Server-rendered Shiki HTML */}
-        <div
-          ref={preRef}
-          className={showLineNumbers ? 'code-with-line-numbers' : ''}
-          // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist for Shiki
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify using strict allowlist for Shiki syntax highlighting
-          dangerouslySetInnerHTML={{ __html: safeHtml }}
-        />
+        {safeHtml ? (
+          <div
+            ref={divRef}
+            className={showLineNumbers ? 'code-with-line-numbers' : ''}
+            // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist for Shiki
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify using strict allowlist for Shiki syntax highlighting
+            dangerouslySetInnerHTML={{ __html: safeHtml }}
+          />
+        ) : (
+          <pre ref={preRef} className={showLineNumbers ? 'code-with-line-numbers' : ''}>
+            <code>{code}</code>
+          </pre>
+        )}
       </div>
 
       {/* Expand/collapse button - Polar-style minimal */}

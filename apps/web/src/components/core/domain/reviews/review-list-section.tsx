@@ -105,7 +105,7 @@ export function ReviewListSection({
         setIsLoading(false);
       }
     },
-    [contentType, contentSlug]
+    [contentType, contentSlug, sortBy]
   );
 
   // Initial load - useEffect for async operations (fire-and-forget pattern)
@@ -240,7 +240,26 @@ export function ReviewListSection({
               onEdit={() => setEditingReviewId(review.id ?? null)}
               onDelete={() => handleDelete(review.id ?? '')}
               {...(editingReviewId === review.id && { isEditing: true })}
-              onCancelEdit={() => setEditingReviewId(null)}
+              onCancelEdit={() => {
+                setEditingReviewId(null);
+                // Refresh reviews after successful edit to show updated content
+                loadReviewsWithStats(1, sortBy).catch((error) => {
+                  logUnhandledPromise('ReviewListSection refresh after edit', error, {
+                    contentType,
+                    contentSlug,
+                  });
+                });
+              }}
+              onMarkHelpful={() => {
+                // Refresh reviews after marking helpful
+                setPage(1);
+                loadReviewsWithStats(1, sortBy).catch((error: unknown) => {
+                  logUnhandledPromise('ReviewListSection refresh after mark helpful', error, {
+                    contentType,
+                    contentSlug,
+                  });
+                });
+              }}
             />
           ))}
         </div>
@@ -289,6 +308,7 @@ function ReviewCardItem({
   onDelete,
   isEditing,
   onCancelEdit,
+  onMarkHelpful,
 }: {
   contentSlug: string;
   contentType: Database['public']['Enums']['content_category'];
@@ -297,6 +317,7 @@ function ReviewCardItem({
   onCancelEdit?: () => void;
   onDelete?: () => void;
   onEdit?: () => void;
+  onMarkHelpful?: () => void;
   review: Database['public']['CompositeTypes']['review_with_stats_item'];
 }) {
   const [showFullText, setShowFullText] = useState(false);
@@ -379,6 +400,8 @@ function ReviewCardItem({
                   try {
                     await markReviewHelpful({ review_id: review.id ?? '', helpful: true });
                     toasts.success.actionCompleted('mark as helpful');
+                    // Call parent callback to refresh reviews
+                    onMarkHelpful?.();
                   } catch (error) {
                     const normalized = normalizeError(error, 'Failed to mark review as helpful');
                     logClientWarn(

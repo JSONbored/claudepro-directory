@@ -29,13 +29,12 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Layout component that renders its child content unchanged for the "/submit" route.
  *
- * This server layout is used with dynamic server rendering (see the exported `dynamic` flag).
+ * This server layout uses dynamic rendering inherited from its configuration.
  *
  * @param children - The React nodes to render inside the layout
  * @returns The provided `children` rendered as-is
  *
  * @see generatePageMetadata
- * @see {@link dynamic}
  */
 export default function SubmitLayout({ children }: { children: ReactNode }) {
   return children;

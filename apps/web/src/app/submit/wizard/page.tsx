@@ -21,7 +21,7 @@
  * 5. Review & Submit - Celebration with confetti-style effects
  *
  * Note: This is a client component ('use client'), so segment config exports are not allowed.
- * Dynamic rendering is inherited from the parent layout (submit/layout.tsx has dynamic = 'force-dynamic').
+ * Dynamic rendering behavior is determined by the parent layout and page configuration.
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';

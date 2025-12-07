@@ -56,8 +56,6 @@ async function getVisitorStats(): Promise<VisitorStats> {
     module: 'data/marketing/site',
   });
 
-  const { trackPerformance } = await import('../../utils/performance-metrics.ts');
-
   if (!(VERCEL_ANALYTICS_TOKEN && VERCEL_PROJECT_ID)) {
     return HERO_DEFAULTS;
   }
@@ -71,36 +69,24 @@ async function getVisitorStats(): Promise<VisitorStats> {
   url.searchParams.set('to', to.toISOString());
 
   try {
-    const { result } = await trackPerformance(
-      async () => {
-        const response = await fetch(url.toString(), {
-          headers: {
-            Authorization: `Bearer ${VERCEL_ANALYTICS_TOKEN}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`Vercel analytics error: ${response.status} ${response.statusText}`);
-        }
-
-        const data = (await response.json()) as VercelAnalyticsResponse;
-        return {
-          monthlyVisitors: Number(data.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
-          monthlyPageViews: Number(data.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
-        };
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${VERCEL_ANALYTICS_TOKEN}`,
       },
-      {
-        operation: 'getVisitorStats',
-        logger: requestLogger, // Use child logger to avoid passing requestId/operation repeatedly
-        requestId, // Pass requestId for return value
-        logMeta: { source: 'vercel-analytics-api' },
-        logLevel: 'info',
-      }
-    );
+    });
+
+    if (!response.ok) {
+      throw new Error(`Vercel analytics error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = (await response.json()) as VercelAnalyticsResponse;
+    const result = {
+      monthlyVisitors: Number(data.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
+      monthlyPageViews: Number(data.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
+    };
 
     return result;
   } catch (error) {
-    // trackPerformance logs performance metrics, but we need explicit error logging
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     requestLogger.warn('Visitor stats fetch failed, using defaults', {

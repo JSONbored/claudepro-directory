@@ -77,7 +77,7 @@ Available `cacheLife` profiles (configured in `next.config.mjs`):
 - Marketing visitor stats (`getVisitorStats`)
 
 **`'stable'`** - Use for data that changes infrequently (daily or weekly):
-- Navigation menus (`getNavigationMenu`)
+- Navigation menus (now uses static config from `@heyclaude/web-runtime/config/navigation`)
 - Site-wide configuration
 - Data that's expensive to compute but rarely changes
 

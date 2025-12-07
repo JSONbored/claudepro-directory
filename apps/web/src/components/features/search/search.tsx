@@ -8,7 +8,6 @@
 import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { usePulse, useUnifiedSearch } from '@heyclaude/web-runtime/hooks';
 import {
   Bookmark,
@@ -88,7 +87,13 @@ function UnifiedSearchComponent({
   const pulse = usePulse();
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [announcement, setAnnouncement] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
+
+  // Wait for client-side mount to prevent Radix UI ID hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const {
     filters,
@@ -170,8 +175,9 @@ function UnifiedSearchComponent({
   );
 
   useEffect(() => {
-    const config = getTimeoutConfig();
-    setDebounceMs(config['timeout.ui.debounce_ms']);
+    // Increase debounce from 150ms to 400ms for better performance
+    // This reduces API calls while still feeling responsive
+    setDebounceMs(400); // Override config with optimized value
   }, []);
 
   useEffect(() => {
@@ -288,6 +294,36 @@ function UnifiedSearchComponent({
     },
     [filters, handleFiltersChange, pathname, pulse]
   );
+
+  // Don't render Radix UI components until mounted to prevent ID hydration mismatch
+  if (!isMounted) {
+    return (
+      <ErrorBoundary fallback={SearchErrorFallback}>
+        <search className={cn('w-full space-y-4', className)}>
+          <div className="space-y-3">
+            <div className="relative">
+              <div
+                className={`pointer-events-none -translate-y-1/2 ${POSITION_PATTERNS.ABSOLUTE_TOP_HALF} left-4 z-10`}
+              >
+                <Search className={`${UI_CLASSES.ICON_MD} text-accent`} aria-hidden="true" />
+              </div>
+              <input
+                type="search"
+                name="search"
+                value={localSearchQuery}
+                onChange={(e) => setLocalSearchQuery(e.target.value)}
+                placeholder={placeholder}
+                className="border-border/50 bg-card/50 transition-smooth focus:border-accent/50 focus:bg-card h-14 w-full rounded-md border px-3 py-2 pr-4 pl-12 text-base backdrop-blur-sm"
+                aria-label="Search configurations"
+                autoComplete="off"
+                disabled
+              />
+            </div>
+          </div>
+        </search>
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary fallback={SearchErrorFallback}>

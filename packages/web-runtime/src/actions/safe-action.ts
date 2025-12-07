@@ -44,10 +44,10 @@ const loggedAction = actionClient.use(async ({ next, metadata }) => {
     return await next();
   } catch (error) {
     const actionName = metadata?.actionName ?? 'unknown';
-    logActionFailure(actionName, error, {
+    const normalized = logActionFailure(actionName, error, {
       category: metadata?.category ?? 'uncategorized',
     });
-    throw error;
+    throw normalized;
   }
 });
 

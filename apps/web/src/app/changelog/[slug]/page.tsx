@@ -54,11 +54,10 @@ import { ChangelogContent } from '@/src/components/features/changelog/changelog-
 /**
  * Build static route params for the most recent changelog entries to seed Next.js static generation.
  *
- * Returns up to the configured STATIC_GENERATION_LIMITS.changelog newest entries; if no entries are available
- * or an error occurs while loading entries, returns a placeholder `{ slug: '__placeholder__' }` entry so
- * Next.js build-time validation for Cache Components has at least one result.
+ * Returns up to the configured STATIC_GENERATION_LIMITS.changelog newest entries. If no entries are available
+ * or an error occurs while loading entries, returns an empty array. Suspense boundaries will handle dynamic rendering.
  *
- * @returns An array of param objects `{ slug: string }` used by Next.js to statically generate routes
+ * @returns An array of param objects `{ slug: string }` used by Next.js to statically generate routes, or an empty array when no entries are available or an error occurs.
  *
  * @see getAllChangelogEntries
  * @see STATIC_GENERATION_LIMITS
@@ -87,19 +86,14 @@ export async function generateStaticParams() {
       slug: entry.slug,
     }));
 
-    if (params.length === 0) {
-      reqLogger.warn('generateStaticParams: no changelog entries available, returning placeholder');
-      // Cache Components requires at least one result for build-time validation
-      // Return a placeholder that will be handled dynamically (404 in page component)
-      return [{ slug: '__placeholder__' }];
-    }
-
+    // Return empty array if no entries found - Suspense boundaries will handle dynamic rendering
+    // This follows Next.js best practices by avoiding placeholder patterns
     return params;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog static params');
     reqLogger.error('ChangelogEntryPage: generateStaticParams threw', normalized);
-    // Cache Components requires at least one result - return placeholder on error
-    return [{ slug: '__placeholder__' }];
+    // Return empty array on error - Suspense boundaries will handle dynamic rendering
+    return [];
   }
 }
 
@@ -228,6 +222,15 @@ async function ChangelogEntryPageContent({
 
   // Create route-specific logger
   const routeLogger = reqLogger.child({ route });
+
+  // Handle placeholder slugs (if any remain from old generateStaticParams)
+  if (slug === '__placeholder__') {
+    routeLogger.warn('ChangelogEntryPage: placeholder slug detected, returning 404', {
+      section: 'placeholder-handling',
+      slug,
+    });
+    notFound();
+  }
 
   let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>>;
   try {

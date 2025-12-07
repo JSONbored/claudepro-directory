@@ -8,15 +8,12 @@
  * - NavigationMobile: Sheet drawer (<md)
  */
 
-import { type Database } from '@heyclaude/database-types';
-import { ACTION_LINKS } from '@heyclaude/web-runtime/config/navigation';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { usePinboard } from '@heyclaude/web-runtime/hooks';
 import { Bookmark, DiscordIcon } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   POSITION_PATTERNS,
-  RESPONSIVE_PATTERNS,
   UI_CLASSES,
   Button,
 } from '@heyclaude/web-runtime/ui';
@@ -31,16 +28,14 @@ import { NavigationCommandMenu } from '@/src/components/core/layout/navigation-c
 import { NavigationDesktop } from '@/src/components/core/layout/navigation-desktop';
 import { NavigationMobile } from '@/src/components/core/layout/navigation-mobile';
 import { NavigationTablet } from '@/src/components/core/layout/navigation-tablet';
+import { SubMenuBar } from '@/src/components/core/layout/sub-menu-bar';
 import { UserMenu } from '@/src/components/core/layout/user-menu';
 import { useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 
-interface NavigationProps {
-  /** Navigation data from server (required) */
-  navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
-}
+// NavigationProps removed - component accepts no props
 
-const NavigationComponent = ({ navigationData }: NavigationProps) => {
+const NavigationComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { isOpen: commandPaletteOpen, openPalette, closePalette } = useCommandPalette();
@@ -53,8 +48,6 @@ const NavigationComponent = ({ navigationData }: NavigationProps) => {
   const { scrollY } = useScroll();
   const backdropBlur = useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(12px)']);
   const navOpacity = useTransform(scrollY, [0, 50], [0.95, 1]);
-  // Adjusted logo scale to compensate for removed size prop (scales slightly more to match h-11/h-12 sizing)
-  const logoScale = useTransform(scrollY, [0, 100], [1, 0.78]);
 
   // SHA-2088: Optimized scroll handler with threshold check and rAF debouncing
   // Only updates state when crossing 20px threshold (prevents 98% of unnecessary re-renders)
@@ -111,35 +104,32 @@ const NavigationComponent = ({ navigationData }: NavigationProps) => {
             closePalette();
           }
         }}
-        navigationData={navigationData}
       />
 
       <motion.header
-        className={`${POSITION_PATTERNS.STICKY_TOP} z-50 w-full px-3 pt-1 pb-3 will-change-transform contain-layout`}
+        className={`${POSITION_PATTERNS.STICKY_TOP} z-50 w-full will-change-transform contain-layout`}
         style={{ opacity: navOpacity }}
       >
         <div className="container mx-auto">
           <motion.nav
-            className={`border-border/50 bg-background/95 rounded-2xl border shadow-2xl backdrop-blur-xl ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW}`}
+            className={`bg-background/95 border-b border-border/50 backdrop-blur-xl ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW}`}
             style={{ backdropFilter: backdropBlur }}
             aria-label="Main navigation container"
           >
-            <div className={RESPONSIVE_PATTERNS.PADDING_RESPONSIVE_SM}>
+            <div className="px-4 py-3">
               <div
                 className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-[height] ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} will-change-auto ${
                   isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
-                {/* Logo with Motion.dev scale animation - no size prop to avoid double animation */}
+                {/* Logo */}
                 <Link
                   href={ROUTES.HOME}
                   prefetch
                   className={`${UI_CLASSES.FLEX_ITEMS_CENTER_FLEX_SHRINK_0} no-underline`}
                   aria-label="heyclaude - Go to homepage"
                 >
-                  <motion.div style={{ scale: logoScale }}>
-                    <HeyClaudeLogo size="md" duration={0} />
-                  </motion.div>
+                  <HeyClaudeLogo size="md" duration={0} />
                 </Link>
 
                 {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
@@ -171,38 +161,24 @@ const NavigationComponent = ({ navigationData }: NavigationProps) => {
                       </span>
                     )}
                   </Button>
-                  {/* Action Links - Create Button */}
-                  {ACTION_LINKS.map((link) => {
-                    const ActionIcon = link.icon;
-                    return (
-                      <Button
-                        key={link.href}
-                        asChild
-                        variant="outline"
-                        size="sm"
-                        className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}
-                      >
-                        <Link href={link.href} prefetch>
-                          {ActionIcon ? (
-                            <ActionIcon className={UI_CLASSES.ICON_XS_LEADING} />
-                          ) : null}
-                          {link.label}
-                        </Link>
-                      </Button>
-                    );
-                  })}
-
+                  {/* Discord Button - Icon only, normal opacity */}
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                    className={`hidden md:flex ${UI_CLASSES.TEXT_NAV} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                    className="hidden md:flex transition-colors"
+                    style={{ color: '#F6F8F4' }}
                     aria-label="Join our Discord community"
                   >
                     <DiscordIcon className={UI_CLASSES.ICON_XS} />
                   </Button>
 
-                  <GitHubStarsButton className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`} />
+                  {/* GitHub Stars Button - Icon + star count, normal opacity */}
+                  <GitHubStarsButton
+                    variant="ghost"
+                    size="sm"
+                    className="hidden md:flex transition-colors [&_span]:text-xs [&_span]:font-normal [color:#F6F8F4] [&_svg]:[color:#F6F8F4] [&_span]:[color:#F6F8F4]"
+                  />
 
                   <UserMenu className="hidden md:flex" />
 
@@ -212,6 +188,8 @@ const NavigationComponent = ({ navigationData }: NavigationProps) => {
               </div>
             </div>
           </motion.nav>
+          {/* Sub-menu bar - breadcrumbs and explore dropdown */}
+          <SubMenuBar />
         </div>
       </motion.header>
     </>

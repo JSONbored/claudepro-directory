@@ -83,8 +83,8 @@ export const getReviewsWithStats = optionalAuthAction
       // If error is already normalized/logged by getReviewsWithStatsData, still log with action context
       const normalized = normalizeError(error, 'Failed to fetch reviews');
       logger.error('getReviewsWithStats: action failed', normalized, logContext);
-      // Re-throw to let safe-action wrapper handle it
-      throw error;
+      // Re-throw normalized error to let safe-action wrapper handle it
+      throw normalized;
     }
   });
 

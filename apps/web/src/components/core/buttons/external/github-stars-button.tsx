@@ -25,8 +25,8 @@ const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
  * The component fetches the repository's stargazer count from the GitHub API and shows it next to the GitHub icon when available. If the repo URL cannot be parsed or the fetch fails, the star count is omitted and a client warning is logged.
  *
  * @param repoUrl - Repository URL to open (defaults to project's configured GitHub link)
- * @param size - Button size variant (e.g., 'sm', 'md')
- * @param variant - Button visual variant (e.g., 'ghost', 'solid')
+ * @param size - Button size variant: 'default' | 'sm' | 'lg' | 'icon'
+ * @param variant - Button visual variant: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
  * @param className - Additional CSS class names applied to the button
  * @param disabled - Whether the button is disabled
  *
@@ -109,7 +109,7 @@ export function GitHubStarsButton({
       onClick={handleClick}
       disabled={disabled}
       className={cn('gap-2', className)}
-      aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}`}
+      aria-label={`Star us on GitHub${stars !== null ? ` - ${stars} stars` : ''}`}
     >
       <Github className={UI_CLASSES.ICON_SM} aria-hidden="true" />
       {typeof stars === 'number' && (

@@ -79,11 +79,13 @@ const MAX_STATIC_COMPANIES = 10;
 /**
  * Generate route params for build-time pre-rendering of a subset of company pages.
  *
- * Produces up to `MAX_STATIC_COMPANIES` objects of the form `{ slug }` for static pre-rendering.
- * If no valid slugs are found or fetching companies fails, returns a placeholder array containing `{ slug: '__placeholder__' }`
- * to satisfy Cache Components build-time requirements so remaining pages can be rendered dynamically.
+ * Generates up to MAX_STATIC_COMPANIES `{ slug }` objects for static pre-rendering; remaining
+ * company pages are rendered on demand via dynamic routing.
+ * If fetching companies fails or no slugs are available, returns a single `__placeholder__` slug
+ * to satisfy Cache Components build-time validation.
  *
- * @returns An array of `{ slug: string }` objects for build-time pre-rendering, or `[{ slug: '__placeholder__' }]` when no valid slugs are available or an error occurs.
+ * @returns An array of objects each containing a `slug` string for a company page; may contain a
+ * single placeholder slug when no real slugs are available or on error.
  *
  * @see {@link /apps/web/src/app/companies/[slug]/page.tsx | CompanyPage}
  * @see {@link getCompaniesList} from @heyclaude/web-runtime/data
@@ -115,19 +117,14 @@ export async function generateStaticParams() {
         slug: company.slug,
       }));
 
-    if (validCompanies.length === 0) {
-      reqLogger.warn('generateStaticParams: no companies available, returning placeholder');
-      // Cache Components requires at least one result for build-time validation
-      // Return a placeholder that will be handled dynamically (404 in page component)
-      return [{ slug: '__placeholder__' }];
-    }
-
-    return validCompanies;
+    // Return valid companies for static pre-rendering
+    // If no companies found, return empty array - Suspense boundaries will handle dynamic rendering
+    return validCompanies.length > 0 ? validCompanies : [];
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load companies for generateStaticParams');
     reqLogger.error('generateStaticParams: failed to load companies', normalized);
-    // Cache Components requires at least one result - return placeholder on error
-    return [{ slug: '__placeholder__' }];
+    // Return empty array on error - Suspense boundaries will handle dynamic rendering
+    return [];
   }
 }
 
@@ -182,6 +179,15 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
   });
 
   const { slug } = await params;
+
+  // Handle placeholder slugs (if any remain from old generateStaticParams)
+  if (slug === '__placeholder__') {
+    reqLogger.warn('CompanyPage: placeholder slug detected, returning 404', {
+      section: 'placeholder-handling',
+      slug,
+    });
+    notFound();
+  }
 
   // Static shell - renders immediately for PPR
   return (

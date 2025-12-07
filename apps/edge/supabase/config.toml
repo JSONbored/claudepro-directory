@@ -17,6 +17,6 @@ import_map = "./functions/public-api/deno.json"
 verify_jwt = false
 import_map = "./functions/flux-station/deno.json"
 
-[functions.mcp-directory]
+[functions.heyclaude-mcp]
 verify_jwt = true
-import_map = "./functions/mcp-directory/deno.json"
+import_map = "./functions/heyclaude-mcp/deno.json"

@@ -361,17 +361,10 @@ logger.info('Operation completed', withDuration(logContext, startTime));
 
 ### Performance-Critical Operations
 ```typescript
-import { trackPerformance } from '@heyclaude/web-runtime/utils/performance-metrics';
-
-const { result, duration, requestId } = await trackPerformance(
-  async () => {
-    // Your operation
-  },
-  {
-    operation: 'myOperation',
-    logMeta: { additional: 'context' },
-  }
-);
+// Use withDuration() for performance tracking in logs
+const startTime = Date.now();
+// ... operations ...
+logger.info('Operation completed', withDuration(logContext, startTime));
 ```
 
 ---

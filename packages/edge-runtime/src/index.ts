@@ -5,7 +5,7 @@
  * running on Deno. For general-purpose utilities, see @heyclaude/shared-runtime.
  *
  * ## Active Edge Functions
- * - mcp-directory: MCP protocol implementation, OAuth2
+ * - heyclaude-mcp: MCP protocol implementation, OAuth2
  * - public-api: OG images, transforms, embedding/image queues, content generation
  *
  * ## What Belongs Here

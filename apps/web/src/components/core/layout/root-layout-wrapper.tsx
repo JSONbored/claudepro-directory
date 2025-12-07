@@ -87,10 +87,9 @@ async function clearNewsletterOptInCookie() {
 interface LayoutContentProps {
   announcement: Database['public']['Tables']['announcements']['Row'] | null;
   children: React.ReactNode;
-  navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
 }
 
-export function LayoutContent({ children, announcement, navigationData }: LayoutContentProps) {
+export function LayoutContent({ children, announcement }: LayoutContentProps) {
   const pathname = usePathname();
   const { fireConfetti } = useConfetti();
 
@@ -206,7 +205,7 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
         <PinboardDrawerProvider>
           <div className="bg-background flex min-h-screen flex-col">
             {announcement ? <AnnouncementBannerClient announcement={announcement} /> : null}
-            <Navigation navigationData={navigationData} />
+            <Navigation />
           <main id="main-content" className="flex-1">
             {children}
           </main>

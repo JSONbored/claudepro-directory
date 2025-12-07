@@ -86,8 +86,10 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
     stiffness: 400,
     damping: 17,
   });
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const config = getAnimationConfig();
     setSpringDefault({
       type: 'spring' as const,
@@ -95,6 +97,15 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
       damping: config['animation.spring.default.damping'],
     });
   }, []);
+
+  // Don't render Sheet until mounted to prevent Radix UI ID hydration mismatch
+  if (!isMounted) {
+    return (
+      <Button variant="ghost" size="sm" className="md:hidden" aria-label="Open mobile menu" disabled>
+        <Menu className={UI_CLASSES.ICON_LG} />
+      </Button>
+    );
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -118,7 +129,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
           ) => {
             if (info.offset.y > 100) onOpenChange(false);
           }}
-          whileDrag={{ scale: 1.2, backgroundColor: 'hsl(var(--accent))' }}
+          whileDrag={{ scale: 1.2, backgroundColor: 'rgb(249, 115, 22)' }} // Claude orange (was hsl(var(--accent)))
           transition={springDefault}
         />
 

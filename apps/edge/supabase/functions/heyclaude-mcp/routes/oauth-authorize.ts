@@ -20,7 +20,7 @@ import type { Context } from 'hono';
 const SUPABASE_URL = edgeEnv.supabase.url;
 const SUPABASE_AUTH_URL = `${SUPABASE_URL}/auth/v1`;
 // Use getEnvVar for consistency with edgeEnv pattern (could be moved to edgeEnv config in future)
-const MCP_SERVER_URL = getEnvVar('MCP_SERVER_URL') ?? 'https://mcp.heyclau.de';
+const MCP_SERVER_URL = getEnvVar('MCP_SERVER_URL') ?? 'https://mcp.claudepro.directory';
 const MCP_RESOURCE_URL = `${MCP_SERVER_URL}/mcp`;
 
 /**
@@ -53,7 +53,7 @@ function jsonError(
  */
 export async function handleOAuthAuthorize(c: Context): Promise<Response> {
   const logContext = createDataApiContext('oauth-authorize', {
-    app: 'mcp-directory',
+    app: 'heyclaude-mcp',
     method: 'GET',
   });
 

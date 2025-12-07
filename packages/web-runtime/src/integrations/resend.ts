@@ -152,12 +152,14 @@ export async function callResendApi<T>({
         status: error.status ?? 0,
         responseBody: error.rawBody ?? '',
       });
-      throw error;
+      // normalizeError returns the error as-is if it's already an Error instance
+      // So errorObj is the same as error here, but we throw errorObj for consistency
+      throw errorObj;
     }
 
     // Log unexpected errors
     logger.error('Resend API request error', errorObj, toLogContext(logContext));
-    throw new ResendApiError(normalizeError(error, 'Unknown Resend request error').message, null);
+    throw new ResendApiError(errorObj.message, null);
   }
 }
 

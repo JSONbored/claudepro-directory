@@ -32,7 +32,7 @@
 
 import { motion } from 'motion/react';
 import { type ReactNode } from 'react';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 
 export type AnimationVariant =
   | 'fade-in'
@@ -171,7 +171,13 @@ function LazySectionComponent({
   className = '',
   eager = false,
 }: LazySectionProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const variantConfig = ANIMATION_VARIANTS[variant];
+
+  // Wait for client-side mount to prevent hydration mismatch with Motion.dev attributes
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Build transition configuration
   const transition = useSpring
@@ -189,6 +195,20 @@ function LazySectionComponent({
   // Eager rendering (no animation)
   if (eager) {
     return <div className={className}>{children}</div>;
+  }
+
+  // During SSR, render a div that matches Motion.dev's initial structure
+  // Motion.dev does NOT add data-aria-hidden or aria-hidden attributes
+  // We match the client structure exactly to prevent hydration mismatch
+  if (!isMounted) {
+    return (
+      <div
+        className={className}
+        style={{ opacity: variantConfig.initial['opacity'] ?? 1 }}
+      >
+        {children}
+      </div>
+    );
   }
 
   return (

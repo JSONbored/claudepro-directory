@@ -393,7 +393,7 @@ async function SearchFacetsAndResults({
     });
   }
 
-  // Load zero-state suggestions in parallel with facets (if no query/filters)
+  // Load zero-state suggestions after facets (if no query/filters)
   let zeroStateSuggestions: Awaited<ReturnType<typeof searchContent>> = [];
   if (!hasQueryOrFilters) {
     try {

@@ -3,7 +3,7 @@
 import { ListTree } from '@heyclaude/web-runtime/icons';
 import { type ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
 import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface DetailTocProps {
   className?: string;
@@ -119,6 +119,12 @@ export function DetailToc({ headings, className }: DetailTocProps) {
     updateHash(activeId);
   }, [activeId, updateHash]);
 
+  const activeIdRef = useRef<null | string>(activeId);
+
+  useEffect(() => {
+    activeIdRef.current = activeId;
+  }, [activeId]);
+
   useEffect(() => {
     if (globalThis.window === undefined || normalizedHeadings.length === 0) {
       return;
@@ -138,7 +144,7 @@ export function DetailToc({ headings, className }: DetailTocProps) {
           const firstEntry = visibleEntries[0];
           if (firstEntry) {
             const nextActiveId = firstEntry.target.id;
-            if (nextActiveId && nextActiveId !== activeId) {
+            if (nextActiveId && nextActiveId !== activeIdRef.current) {
               setActiveId(nextActiveId);
             }
           }
@@ -159,7 +165,7 @@ export function DetailToc({ headings, className }: DetailTocProps) {
     }
 
     return () => observer.disconnect();
-  }, [normalizedHeadings, activeId]);
+  }, [normalizedHeadings]);
 
   const handleHeadingClick = useCallback(
     (heading: NormalizedHeading) => {

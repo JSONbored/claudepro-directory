@@ -42,7 +42,6 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
     module: 'data/jobs',
   });
 
-  const { trackPerformance } = await import('../utils/performance-metrics');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
   const { searchQuery, category, employment, experience, remote, limit, offset, sort } = options;
 
@@ -58,57 +57,45 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
   };
 
   try {
-    const { result } = await trackPerformance(
-      async () => {
-        const client = createSupabaseAnonClient();
+    const client = createSupabaseAnonClient();
 
-        // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
-        // Build RPC args with proper type narrowing
-        const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
+    // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
+    // Build RPC args with proper type narrowing
+    const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
 
-        if (searchQuery) {
-          rpcArguments.p_search_query = searchQuery;
-        }
-        if (category && category !== 'all' && isValidJobCategory(category)) {
-          // Type guard ensures category is valid job_category enum
-          rpcArguments.p_category = category;
-        }
-        if (employment && employment !== 'any' && isValidJobType(employment)) {
-          // Type guard ensures employment is valid job_type enum
-          rpcArguments.p_employment_type = employment;
-        }
-        if (experience && experience !== 'any' && isValidExperienceLevel(experience)) {
-          // Type guard ensures experience is valid experience_level enum
-          rpcArguments.p_experience_level = experience;
-        }
-        if (remote !== undefined) {
-          rpcArguments.p_remote_only = remote;
-        }
-        if (limit !== undefined) {
-          rpcArguments.p_limit = limit;
-        }
-        if (offset !== undefined) {
-          rpcArguments.p_offset = offset;
-        }
+    if (searchQuery) {
+      rpcArguments.p_search_query = searchQuery;
+    }
+    if (category && category !== 'all' && isValidJobCategory(category)) {
+      // Type guard ensures category is valid job_category enum
+      rpcArguments.p_category = category;
+    }
+    if (employment && employment !== 'any' && isValidJobType(employment)) {
+      // Type guard ensures employment is valid job_type enum
+      rpcArguments.p_employment_type = employment;
+    }
+    if (experience && experience !== 'any' && isValidExperienceLevel(experience)) {
+      // Type guard ensures experience is valid experience_level enum
+      rpcArguments.p_experience_level = experience;
+    }
+    if (remote !== undefined) {
+      rpcArguments.p_remote_only = remote;
+    }
+    if (limit !== undefined) {
+      rpcArguments.p_limit = limit;
+    }
+    if (offset !== undefined) {
+      rpcArguments.p_offset = offset;
+    }
 
-        // Type compatibility: SupabaseAnonClient is compatible with SupabaseClient<Database>
-        // Both are created from the same underlying Supabase client factory with Database type
-        // This is safe because createSupabaseAnonClient returns ReturnType<typeof createSupabaseClient<Database>>
-        // We use a type assertion here because TypeScript doesn't recognize the structural compatibility
-        return await new SearchService(client).filterJobs(rpcArguments);
-      },
-      {
-        operation: 'getFilteredJobsDirect',
-        logger: reqLogger, // Use child logger to avoid passing requestId/operation repeatedly
-        requestId, // Pass requestId for return value
-        logMeta: filtersLog,
-        logLevel: 'info',
-      }
-    );
+    // Type compatibility: SupabaseAnonClient is compatible with SupabaseClient<Database>
+    // Both are created from the same underlying Supabase client factory with Database type
+    // This is safe because createSupabaseAnonClient returns ReturnType<typeof createSupabaseClient<Database>>
+    // We use a type assertion here because TypeScript doesn't recognize the structural compatibility
+    const result = await new SearchService(client).filterJobs(rpcArguments);
 
     return result;
   } catch (error) {
-    // trackPerformance already logs the error, but we log again with context about fallback behavior
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.warn('Job filtering failed, returning null', {

@@ -40,6 +40,7 @@ interface NormalizedHeading {
  *
  * @param headings - Array of heading metadata objects to normalize; may be `null` or `undefined`.
  * @returns An array of `NormalizedHeading` objects ready for use in the sidebar TOC.
+ */
 function normalizeHeadings(
   headings: ContentHeadingMetadata[] | null | undefined
 ): NormalizedHeading[] {
@@ -109,27 +110,27 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
 
   const baseLevel = useMemo(() => {
     if (normalizedHeadings.length === 0) return 2;
-    return normalizedHeadings.reduce((min, heading) => Math.min(min, heading.level), 6);
+    return normalizedHeadings.reduce((min: number, heading: NormalizedHeading) => Math.min(min, heading.level), 6);
   }, [normalizedHeadings]);
 
   const updateHash = useCallback((id: string) => {
-    if (globalThis.window === undefined || !id) return;
-    const { pathname, search } = globalThis.location;
-    const currentHash = globalThis.location.hash.replace('#', '');
+    if (typeof window === 'undefined' || !id) return;
+    const { pathname, search } = window.location;
+    const currentHash = window.location.hash.replace('#', '');
     if (currentHash === id) return;
     const nextUrl = `${pathname}${search ? search : ''}#${id}`;
-    globalThis.history.replaceState(null, '', nextUrl);
+    window.history.replaceState(null, '', nextUrl);
   }, []);
 
   // Initialize active heading from URL hash or first heading
   useEffect(() => {
-    if (globalThis.window === undefined || normalizedHeadings.length === 0) {
+    if (typeof window === 'undefined' || normalizedHeadings.length === 0) {
       setActiveId(null);
       return;
     }
 
-    const hash = globalThis.location.hash.replace('#', '');
-    if (hash && normalizedHeadings.some((heading) => heading.id === hash)) {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && normalizedHeadings.some((heading: NormalizedHeading) => heading.id === hash)) {
       setActiveId(hash);
       return;
     }
@@ -145,7 +146,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
 
   // IntersectionObserver for scroll-linked highlighting
   useEffect(() => {
-    if (globalThis.window === undefined || normalizedHeadings.length === 0) {
+    if (typeof window === 'undefined' || normalizedHeadings.length === 0) {
       return;
     }
 
@@ -177,8 +178,8 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
     );
 
     const elements = normalizedHeadings
-      .map((heading) => document.getElementById(heading.id))
-      .filter((el): el is HTMLElement => el !== null);
+      .map((heading: NormalizedHeading) => document.getElementById(heading.id))
+      .filter((el: HTMLElement | null): el is HTMLElement => el !== null);
 
     for (const el of elements) {
       observer.observe(el);
@@ -189,14 +190,14 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
 
   const handleHeadingClick = useCallback(
     (heading: NormalizedHeading) => {
-      if (globalThis.window === undefined) return;
+      if (typeof window === 'undefined') return;
       const element = document.getElementById(heading.id);
       if (!element) {
         updateHash(heading.id);
         return;
       }
 
-      const prefersReducedMotion = globalThis.matchMedia(
+      const prefersReducedMotion = window.matchMedia(
         '(prefers-reduced-motion: reduce)'
       ).matches;
       const offset = 96; // Account for sticky header
@@ -227,7 +228,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
 
       {/* Heading list with left border indicator */}
       <ul className="space-y-0.5">
-        {normalizedHeadings.map((heading) => {
+        {normalizedHeadings.map((heading: NormalizedHeading) => {
           const depthOffset = Math.max(heading.level - baseLevel, 0);
           const isActive = activeId === heading.id;
 

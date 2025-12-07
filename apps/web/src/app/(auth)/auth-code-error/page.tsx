@@ -28,6 +28,9 @@ const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
  * @see {@link https://nextjs.org/docs/app/building-your-application/metadata Metadata (Next.js)}
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata(AUTH_CODE_ERROR_PATH);
 }
 

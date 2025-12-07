@@ -1,7 +1,8 @@
 'use client';
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
+import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
+import { AlertCircle, Home, RefreshCw, Search, Copy, Check } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
@@ -14,6 +15,36 @@ import { useEffect } from 'react';
  */
 // eslint-disable-next-line architectural-rules/require-env-validation-schema -- NODE_ENV is inlined by Next.js at build time, not a runtime lookup
 const isDevelopment = process.env.NODE_ENV === 'development';
+
+/**
+ * ErrorCodeBlock component with copy-to-clipboard functionality
+ */
+function ErrorCodeBlock({ content }: { content: string }) {
+  const { copied, copy } = useCopyToClipboard({
+    context: { component: 'ErrorBoundary', action: 'copy-error' },
+  });
+
+  return (
+    <div className="relative">
+      <pre className="text-destructive bg-background/50 border-border max-w-full rounded border p-3 pr-10 font-mono text-xs break-all whitespace-pre-wrap">
+        {content}
+      </pre>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute top-2 right-2 h-6 w-6 p-0"
+        onClick={() => copy(content)}
+        aria-label={copied ? 'Copied!' : 'Copy error message'}
+      >
+        {copied ? (
+          <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
+        ) : (
+          <Copy className="h-3 w-3" aria-hidden="true" />
+        )}
+      </Button>
+    </div>
+  );
+}
 
 /**
  * Render a full-screen error UI for uncaught client-side errors and log the error to the monitoring backend.
@@ -67,9 +98,19 @@ export default function ErrorBoundary({
 
         {isDevelopment && error.message ? (
           <div className="bg-muted mb-6 rounded-md p-4 text-left">
-            <p className="text-destructive font-mono text-xs">{error.message}</p>
+            <ErrorCodeBlock content={error.message} />
+            {error.stack ? (
+              <details className="mt-2 text-xs">
+                <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
+                <div className="mt-2">
+                  <ErrorCodeBlock content={error.stack} />
+                </div>
+              </details>
+            ) : null}
             {error.digest ? (
-              <p className="text-muted-foreground mt-2 font-mono text-xs">Digest: {error.digest}</p>
+              <p className="text-muted-foreground mt-2 font-mono text-xs break-words">
+                Digest: {error.digest}
+              </p>
             ) : null}
           </div>
         ) : null}

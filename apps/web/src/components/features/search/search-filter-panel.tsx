@@ -13,6 +13,9 @@
  * - Apply/Clear actions
  */
 
+import { type Database } from '@heyclaude/database-types';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { type FilterState } from '@heyclaude/web-runtime/types/component.types';
 import {
   UI_CLASSES,
@@ -87,11 +90,17 @@ function SearchFilterPanelComponent({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {availableCategories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
+                {availableCategories.map((cat) => {
+                  // Get display name from category config
+                  const displayName = isValidCategory(cat)
+                    ? getCategoryConfig(cat as Database['public']['Enums']['content_category'])?.typeName ?? cat
+                    : cat;
+                  return (
+                    <SelectItem key={cat} value={cat}>
+                      {displayName}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>

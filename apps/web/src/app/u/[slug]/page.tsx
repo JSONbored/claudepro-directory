@@ -12,7 +12,7 @@ import {
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   NavLink,
@@ -263,12 +263,11 @@ async function UserProfilePageContent({
       hasProfile: !!profileData,
     });
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    viewerLogger.error('UserProfilePage: get_user_profile threw', errorForLogging, {
+    const normalized = normalizeError(error, 'Failed to load user profile');
+    viewerLogger.error('UserProfilePage: get_user_profile threw', normalized, {
       section: 'user-profile-fetch',
     });
-    throw error;
+    throw normalized;
   }
 
   if (!profileData) {

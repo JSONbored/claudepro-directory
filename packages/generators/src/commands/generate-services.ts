@@ -98,7 +98,6 @@ const SERVICE_DEFINITIONS: Record<string, ServiceConfig> = {
     methods: {
       getActiveNotifications: 'get_active_notifications',
       getActiveAnnouncement: 'get_active_announcement',
-      getNavigationMenu: 'get_navigation_menu',
       getContactCommands: 'get_contact_commands',
       getFormFieldConfig: 'get_form_field_config',
     },

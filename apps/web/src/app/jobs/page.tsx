@@ -4,8 +4,12 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import { type JobsFilterResult } from '@heyclaude/web-runtime/core';
-import { generatePageMetadata, getFilteredJobs } from '@heyclaude/web-runtime/data';
+import { type JobsFilterResult, isValidCategory } from '@heyclaude/web-runtime/core';
+import {
+  generatePageMetadata,
+  getFilteredJobs,
+  getCategoryConfig,
+} from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   Briefcase,
@@ -287,7 +291,7 @@ async function JobsListSection({
  *   - `page`: 1-based page number (clamped to 1–10000)
  *   - `limit`: items per page (defaults to 20, max 100)
  *
- * @returns The page JSX containing the hero header, streaming JobsCountBadge, filter form with active-filter chips and Clear All action, the JobsListSection (server fetch + client sorting), sidebar content, and Newsletter CTA.
+ * @returns The page JSX containing the hero header, streaming JobsCountBadge, filter form with active-filter chips and Clear All action, the JobsListSection (server fetch + client sorting), and ContentSidebar (JobsPromo + RecentlyViewed).
  *
  * @see JobsCountBadge
  * @see JobsListSection
@@ -571,7 +575,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   ) : null}
                   {category && category !== 'all' ? (
                     <UnifiedBadge variant="base" style="secondary">
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                      {isValidCategory(category)
+                        ? (getCategoryConfig(category)?.typeName ?? category)
+                        : category}
                       <Link
                         href={buildFilterUrl({ category: undefined })}
                         className="hover:text-destructive ml-1"
@@ -677,10 +683,8 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </Suspense>
           </div>
 
-          <aside className="w-full lg:sticky lg:top-24 lg:h-fit">
-            {/* Unified ContentSidebar with JobsPromo (now includes job alerts form) + RecentlyViewed */}
-            <ContentSidebar />
-          </aside>
+          {/* Unified ContentSidebar with JobsPromo (now includes job alerts form) + RecentlyViewed */}
+          <ContentSidebar />
         </div>
       </section>
     </div>
