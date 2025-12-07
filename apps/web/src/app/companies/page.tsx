@@ -21,31 +21,15 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-// MIGRATED: Removed export const revalidate = 86_400 (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
 /**
  * ISR: 24 hours (86400s) - Companies list updates infrequently
  * Uses ISR instead of force-dynamic for better performance and SEO
  */
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
-      (module_) => ({
-        default: module_.NewsletterCTAVariant,
-      })
-    ),
-  {
-    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
-  }
-);
 
 /**
  * Produce page metadata for the Companies page.
@@ -285,11 +269,6 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
             ))}
           </div>
         )}
-      </section>
-
-      {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className="container mx-auto px-4 py-12">
-        <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>
   );

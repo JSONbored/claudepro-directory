@@ -58,8 +58,7 @@ async function getCommunityDirectoryRpc(
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getCommunityDirectoryRpc failed', errorForLogging, {
       limit,
     });
@@ -139,8 +138,7 @@ export async function getCommunityDirectory(options: {
     } catch (error) {
       // trackPerformance already logs the error, but we log again with context about fallback behavior
       // logger.error() normalizes errors internally, so pass raw error
-      const errorForLogging: Error | string =
-        error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+      const errorForLogging: Error | string = error instanceof Error ? error : String(error);
       reqLogger.warn('Community directory search failed, using RPC fallback', {
         err: errorForLogging,
         searchQuery: searchQuery.trim(),
@@ -210,8 +208,7 @@ export async function getPublicUserProfile(input: {
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getPublicUserProfile failed', errorForLogging, {
       slug,
       ...(viewerId ? { viewerId } : {}),
@@ -277,8 +274,7 @@ export async function getPublicCollectionDetail(input: {
     return data;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getPublicCollectionDetail failed', errorForLogging, {
       slug: userSlug,
       collectionSlug,

@@ -1,10 +1,9 @@
 /**
- * Layout Feature Flags - Static Defaults
+ * Layout Feature Flags - Client-Safe Export
  *
- * Returns static default flag values.
- * All flags are version-controlled in code.
- *
- * This file is safe to use in both server and client components since it only returns static values.
+ * This is a client-only standalone implementation to avoid HMR issues with module resolution.
+ * We duplicate the code here instead of re-exporting to prevent Turbopack from creating
+ * internal module IDs that conflict with server-only code.
  */
 
 /**
@@ -15,15 +14,10 @@ export interface LayoutFlags {
   ctaVariant: 'aggressive' | 'social_proof' | 'value_focused';
   fabNotifications: boolean;
   fabNotificationsEnabled: boolean;
-  // Newsletter experiment variants
   footerDelayVariant: '10s' | '30s' | '60s';
-  // Computed/derived flags
   notificationsEnabled: boolean;
-
-  // Notification flags
   notificationsProvider: boolean;
   notificationsSheet: boolean;
-
   notificationsSheetEnabled: boolean;
   notificationsToasts: boolean;
   notificationsToastsEnabled: boolean;
@@ -33,16 +27,16 @@ export interface LayoutFlags {
  * Default flag values (primary source of truth - no external service dependency)
  */
 const DEFAULT_FLAGS: LayoutFlags = {
-  fabNotifications: false, // ❌ Disabled: Show notifications (mobile)
-  notificationsProvider: false, // ❌ Disabled: Notification provider
-  notificationsSheet: false, // ❌ Disabled: Notification sheet
-  notificationsToasts: false, // ❌ Disabled: Notification toasts
+  fabNotifications: false,
+  notificationsProvider: false,
+  notificationsSheet: false,
+  notificationsToasts: false,
   footerDelayVariant: '30s' as const,
   ctaVariant: 'value_focused' as const,
-  notificationsEnabled: false, // ❌ Disabled: All notifications
-  notificationsSheetEnabled: false, // ❌ Disabled: Notification sheet
-  notificationsToastsEnabled: false, // ❌ Disabled: Notification toasts
-  fabNotificationsEnabled: false, // ❌ Disabled: FAB notifications
+  notificationsEnabled: false,
+  notificationsSheetEnabled: false,
+  notificationsToastsEnabled: false,
+  fabNotificationsEnabled: false,
 };
 
 /**

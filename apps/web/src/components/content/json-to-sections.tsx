@@ -268,14 +268,7 @@ type Section =
  * Sanitizes HTML using DOMPurify before rendering
  */
 function TrustedHTML({ html, className, id }: { className?: string; html: string; id?: string }) {
-  if (!html || typeof html !== 'string') {
-    return <div id={id} className={className} />;
-  }
-
-  // Sanitize HTML to prevent XSS
-  // Allow common markdown-generated HTML tags for content sections
-  // DOMPurify only works in browser - dynamically import and use
-  // During SSR, render unsanitized (will be sanitized on client)
+  // Hooks must be called unconditionally before any early returns
   const [safeHtml, setSafeHtml] = useState<string>(
     globalThis.window === undefined ? html : '' // Start empty on client, will be set in useEffect
   );
@@ -353,6 +346,11 @@ function TrustedHTML({ html, className, id }: { className?: string; html: string
         });
     }
   }, [html]);
+
+  // Early return AFTER all hooks
+  if (!html || typeof html !== 'string') {
+    return <div id={id} className={className} />;
+  }
 
   // During SSR, render the HTML directly (will be sanitized on client)
   const displayHtml = isClient ? safeHtml : html;
@@ -689,12 +687,13 @@ function render_section(section: Section, index: number): React.ReactNode {
                 // Don't render if URL is invalid or unsafe
                 if (!safeUrl) {
                   logClientWarn(
-                    'Invalid or unsafe URL detected in resource',
+                    '[Content] Invalid or unsafe URL detected in resource',
                     undefined,
                     'JSONSectionRenderer.renderResource',
                     {
                       component: 'JSONSectionRenderer',
                       action: 'render-resource',
+                      category: 'content',
                       url: r.url,
                       title: r.title,
                     }

@@ -26,13 +26,9 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
-
-// MIGRATED: Removed export const revalidate = 86_400 (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
 
 /**
  * Incremental Static Regeneration (ISR)
@@ -40,18 +36,6 @@ import { Suspense } from 'react';
  * This page uses ISR with a 24-hour revalidation period for better performance and SEO.
  * Data is fetched at build time and periodically refreshed.
  */
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
-      (module_) => ({
-        default: module_.NewsletterCTAVariant,
-      })
-    ),
-  {
-    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
-  }
-);
 
 /**
  * Create the Next.js page metadata for the /community route.
@@ -297,11 +281,6 @@ async function CommunityPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
             </CardContent>
           </Card>
         </div>
-      </section>
-
-      {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className="container mx-auto px-4 py-12">
-        <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>
   );

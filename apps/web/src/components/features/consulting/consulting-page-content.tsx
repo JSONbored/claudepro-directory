@@ -22,12 +22,13 @@ export function ConsultingClient() {
       });
     })().catch((error: unknown) => {
       logClientError(
-        'Failed to initialize Cal.com',
+        '[Consulting] Failed to initialize Cal.com',
         normalizeError(error, 'Failed to initialize Cal.com'),
         'ConsultingClient.initCal',
         {
           component: 'ConsultingClient',
           action: 'init-cal',
+          category: 'consulting',
           namespace: 'consulting-call',
         }
       );

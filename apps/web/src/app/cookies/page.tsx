@@ -6,9 +6,6 @@ import { type Metadata } from 'next';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-// MIGRATED: Removed export const revalidate = false (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
 /**
  * Provides page metadata for the Cookies page used by Next.js.
  *
@@ -66,7 +63,7 @@ export default async function CookiesPage() {
   );
 }
 
-async function CookiesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
+function CookiesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
 
   reqLogger.info('CookiesPage: rendering page', {

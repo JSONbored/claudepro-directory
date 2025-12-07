@@ -164,12 +164,13 @@ export function WizardLayout({
             'WizardLayout: handleSave failed in keyboard shortcut'
           );
           logClientError(
-            'WizardLayout: handleSave failed in keyboard shortcut',
+            '[Form] HandleSave failed in keyboard shortcut',
             normalized,
             'WizardLayout.handleKeyDown',
             {
               component: 'WizardLayout',
               action: 'keyboard-shortcut-save',
+              category: 'form',
             }
           );
         });

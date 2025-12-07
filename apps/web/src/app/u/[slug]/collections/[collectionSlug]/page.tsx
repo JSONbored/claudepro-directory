@@ -32,9 +32,6 @@ import { Suspense } from 'react';
 
 import { Pulse } from '@/src/components/core/infra/pulse';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
-
 // Whitelisted content types for outgoing links - use Constants from database types
 const ALLOWED_CONTENT_TYPES = Constants.public.Enums.content_category;
 
@@ -203,8 +200,7 @@ async function PublicCollectionPageContent({
     });
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     viewerLogger.error('PublicCollectionPage: getPublicCollectionDetail threw', errorForLogging, {
       section: 'collection-detail-fetch',
     });

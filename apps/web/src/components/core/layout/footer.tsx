@@ -30,6 +30,8 @@ import { useTheme } from 'next-themes';
 import { memo, useEffect, useMemo, useState } from 'react';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
+import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 
 // Type for resource links with optional icon
 interface ResourceLink {
@@ -125,6 +127,11 @@ function FooterComponent() {
 
   return (
     <footer className="border-border/50 bg-background border-t">
+      {/* Newsletter CTA - Full width above footer links, same as homepage */}
+      <LazySection rootMargin="0px 0px -500px 0px">
+        <NewsletterCTAVariant variant="hero" source="footer" />
+      </LazySection>
+
       <div className="container mx-auto px-4 py-10 lg:py-12">
         {/* Main footer content - Two section layout */}
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_2.5fr] lg:gap-16">

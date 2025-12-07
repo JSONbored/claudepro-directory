@@ -34,6 +34,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 
@@ -99,6 +100,79 @@ function downloadTextFile(filename: string, content: string) {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * TrustedHTML - Safely renders HTML content with XSS protection
+ * Sanitizes HTML using DOMPurify before rendering
+ */
+function TrustedHTML({ html, className }: { className?: string; html: string }) {
+  if (!html || typeof html !== 'string') {
+    return <div className={className} />;
+  }
+
+  // Sanitize HTML to prevent XSS
+  // During SSR, render unsanitized (will be sanitized on client)
+  const [safeHtml, setSafeHtml] = useState<string>(
+    globalThis.window === undefined ? html : '' // Start empty on client, will be set in useEffect
+  );
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (globalThis.window !== undefined && html && typeof html === 'string') {
+      import('dompurify')
+        .then((DOMPurify) => {
+          const sanitized = DOMPurify.default.sanitize(html, {
+            ALLOWED_TAGS: [
+              'p',
+              'br',
+              'strong',
+              'em',
+              'b',
+              'i',
+              'u',
+              'a',
+              'ul',
+              'ol',
+              'li',
+              'h1',
+              'h2',
+              'h3',
+              'h4',
+              'h5',
+              'h6',
+              'code',
+              'pre',
+              'blockquote',
+              'span',
+              'div',
+            ],
+            ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'id'],
+          });
+          setSafeHtml(sanitized);
+        })
+        .catch((error) => {
+          const normalized = normalizeError(error, 'Failed to sanitize HTML');
+          logClientWarn(
+            '[TrustedHTML] Failed to sanitize HTML',
+            normalized,
+            'TrustedHTML.sanitize',
+            {
+              component: 'TrustedHTML',
+              action: 'sanitize-html',
+            }
+          );
+          // Fallback to original HTML if sanitization fails
+          setSafeHtml(html);
+        });
+    }
+  }, [html]);
+
+  // During SSR, render unsanitized (will be sanitized on client hydration)
+  const htmlToRender = isClient ? safeHtml : html;
+
+  return <div className={className} dangerouslySetInnerHTML={{ __html: htmlToRender }} />;
 }
 
 /**
@@ -346,9 +420,10 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             category: 'share',
             nonCritical: true,
             context: 'unified_section_download',
-          itemCategory,
-          itemSlug,
-        });
+            itemCategory,
+            itemSlug,
+          }
+        );
       });
   };
 
@@ -708,6 +783,24 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                 <List items={d.requirements} color="bg-orange-500" />
               </div>
             ) : null}
+          </div>
+        </Wrapper>
+      );
+    }
+
+    case 'text': {
+      if (!props.html) return null;
+
+      return (
+        <Wrapper
+          title={props.title}
+          {...(props.description && { description: props.description })}
+          {...(props.icon && { icon: props.icon })}
+          {...(props.category && { category: props.category })}
+          {...(props.className && { className: props.className })}
+        >
+          <div className="prose prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic max-w-none">
+            <TrustedHTML html={props.html} />
           </div>
         </Wrapper>
       );

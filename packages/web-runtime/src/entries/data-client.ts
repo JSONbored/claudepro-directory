@@ -55,7 +55,8 @@ export * from '../data/changelog.shared.ts';
 export * from '../data/forms/submission-form-fields.ts';
 
 // Layout Flags - Static defaults (client-safe)
-export { getLayoutFlags, type LayoutFlags } from '../data/layout/flags.ts';
+// Use flags-client.ts to avoid HMR issues with module resolution
+export { getLayoutFlags, type LayoutFlags } from '../data/layout/flags-client.ts';
 
 // Static Category Config - RAW CONSTANTS ONLY
 // These are pure functions with no caching - safe to export
@@ -74,14 +75,6 @@ export {
   getTotalResourceCount
 } from '../data/config/category/index.ts';
 
-// Server Actions (Safe to import in client - they're RPC endpoints)
-// These are treated as RPC calls by Next.js, safe for client import
-export * from '../actions/pulse.ts';
-export * from '../actions/newsletter.ts';
-export * from '../actions/companies.ts';
-export * from '../actions/contact.ts';
-export * from '../actions/submit-contact-form.generated.ts';
-export * from '../actions/content.ts';
-export * from '../actions/jobs.ts';
-export * from '../actions/notifications.ts';
-export * from '../actions/user.ts';
+// Server Actions are exported from @heyclaude/web-runtime/actions, not from data entry point
+// This prevents Next.js from creating internal 'actions/data' module IDs that cause bundler errors
+// Import actions from '@heyclaude/web-runtime/actions' instead

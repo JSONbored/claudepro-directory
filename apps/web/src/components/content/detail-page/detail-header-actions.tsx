@@ -429,10 +429,12 @@ export function DetailHeaderActions({
           {/* Title - larger and more prominent */}
           <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">{displayTitle}</h1>
 
-          {/* Description - larger line height for readability */}
+          {/* Description - shortened preview (full description in content section) */}
           {contentItem.description ? (
             <p className="text-muted-foreground max-w-2xl text-lg leading-relaxed lg:text-xl">
-              {contentItem.description}
+              {contentItem.description.length > 150
+                ? `${contentItem.description.slice(0, 150).trim()}...`
+                : contentItem.description}
             </p>
           ) : null}
         </div>
@@ -555,13 +557,14 @@ export function DetailHeaderActions({
                   const safeSlug = sanitizePathSegment(contentItem.slug);
                   if (!(safeCategory && safeSlug)) {
                     logClientWarn(
-                      'DetailHeaderActions: Invalid category or slug for AI copy button',
+                      '[Content] Invalid category or slug for AI copy button',
                       undefined,
                       'DetailHeaderActions.render',
                       {
                         component: 'DetailHeaderActions',
                         action: 'render-ai-copy-button',
-                        category,
+                        category: 'content',
+                        itemCategory: category,
                         slug: contentItem.slug,
                       }
                     );

@@ -14,9 +14,6 @@ import { Suspense } from 'react';
 
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
-
 /**
  * Dynamic Rendering Required
  * Results depend on search params (answers)
@@ -341,8 +338,7 @@ async function ResultsPageContent({
     });
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     routeLogger.error('ConfigRecommenderResults: failed to decode quiz answers', errorForLogging, {
       section: 'answers-decoding',
     });

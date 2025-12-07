@@ -133,14 +133,14 @@ const getMemberBadge = (user: UserProfile) => {
 function ProfileCardComponent({ user, variant = 'default', showActions = true }: ProfileCardProps) {
   const pulse = usePulse();
   const memberBadge = getMemberBadge(user);
-  const slug = user.slug || 'unknown';
-  const username = `@${slug}`;
+  const slug = user.slug;
+  const username = slug ? `@${slug}` : 'User';
   const displayName = user.name || username;
-  const profileUrl = `/u/${slug}`;
+  const profileUrl = slug ? `/u/${slug}` : null;
 
   // Generate initials for avatar fallback
   const initials =
-    (user.name || slug)
+    (user.name || slug || 'User')
       .split(' ')
       .map((n: string) => n[0])
       .join('')
@@ -149,7 +149,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
 
   return (
     <BaseCard
-      targetPath={profileUrl}
+      {...(profileUrl ? { targetPath: profileUrl } : {})}
       displayTitle=""
       showActions={showActions}
       ariaLabel={`${username} - ${user.work || 'Community member'}`}
@@ -313,9 +313,10 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               })()
             : null}
 
-          {/* View profile button */}
+          {/* View profile button - only show if slug exists */}
           {(() => {
             // Validate profile URL is safe (should be /u/{slug})
+            if (!profileUrl) return null;
             const safeProfileUrl =
               profileUrl.startsWith('/u/') && /^\/u\/[a-zA-Z0-9-_]+$/.test(profileUrl)
                 ? profileUrl

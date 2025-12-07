@@ -9,7 +9,7 @@ import { Constants, type Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
 import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getCategoryConfig,
@@ -28,9 +28,6 @@ import { ReadProgress } from '@/src/components/content/read-progress';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
-
-// Note: revalidate and dynamicParams removed - Cache Components uses cacheLife instead
-// dynamicParams behavior is default with Cache Components (unknown slugs render on demand)
 
 /**
  * Produce a list of static route params ({ category, slug }) for a subset of popular content to pre-render at build time.
@@ -87,22 +84,11 @@ export async function generateStaticParams() {
           route,
           module: modulePath,
         });
-        // logger.error() normalizes errors internally, so pass raw error
-        // Convert unknown error to Error | string for TypeScript
-        const errorForLogging: Error | string =
-          error instanceof Error
-            ? error
-            : error instanceof String
-              ? error.toString()
-              : String(error);
-        reqLogger.error(
-          'generateStaticParams: failed to load content for category',
-          errorForLogging,
-          {
-            category,
-            section: 'static-params-generation',
-          }
-        );
+        const normalized = normalizeError(error, 'Failed to load content for category');
+        reqLogger.error('generateStaticParams: failed to load content for category', normalized, {
+          category,
+          section: 'static-params-generation',
+        });
         return { category, params: [] };
       }
     })
@@ -215,9 +201,16 @@ export async function generateMetadata({
 }
 
 /**
- * Render the content detail page for a given category and slug.
+ * PPR Optimization: Core content fetched blocking (for LCP), analytics/related stream in Suspense
  *
- * Validates the category and category configuration, fetches the core content (blocking for LCP), initiates analytics and related-item fetches for Suspense, and conditionally includes recently-viewed tracking and a collection-specific section. Triggers a 404 via `notFound()` when the category, category config, or core content is missing.
+ * Structure:
+ * - Core content (getContentDetailCore) - Blocking fetch for optimal LCP (cached via 'use cache')
+ * - Analytics (getContentAnalytics) - Streams in Suspense via ViewCountMetadata component
+ * - Related content (getRelatedContent) - Streams in Suspense via SidebarWithRelated component
+ *
+ * All data functions use 'use cache' with cacheLife('hours') for efficient caching.
+ * Core content is critical for LCP, so it's fetched blocking. Analytics and related
+ * content are non-critical and stream independently in Suspense boundaries.
  *
  * @param params - A promise that resolves to an object with `category` and `slug` route parameters
  * @returns A React element representing the content detail page for the requested category and slug

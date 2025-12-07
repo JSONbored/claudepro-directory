@@ -82,11 +82,13 @@ export function useOnboardingToasts({
           : null;
         if (!fluxStationUrl) {
           logClientWarn(
-            'NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification fetch',
+            '[Onboarding] NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification fetch',
             undefined,
-            'fetchNotifications',
+            'useOnboardingToasts.fetchNotifications',
             {
-              module: 'useOnboardingToasts',
+              component: 'useOnboardingToasts',
+              action: 'fetch-notifications',
+              category: 'onboarding',
             }
           );
           return;
@@ -121,9 +123,16 @@ export function useOnboardingToasts({
 
     fetchNotifications().catch((error: unknown) => {
       const normalized = normalizeError(error, 'Failed to fetch notifications');
-      logClientWarn('Failed to fetch notifications', normalized, 'fetchNotifications', {
-        module: 'useOnboardingToasts',
-      });
+      logClientWarn(
+        '[Onboarding] Failed to fetch notifications',
+        normalized,
+        'useOnboardingToasts.fetchNotifications',
+        {
+          component: 'useOnboardingToasts',
+          action: 'fetch-notifications',
+          category: 'onboarding',
+        }
+      );
     });
   }, [enabled, context, user]);
 
@@ -161,11 +170,13 @@ export function useOnboardingToasts({
           : null;
         if (!fluxStationUrl) {
           logClientWarn(
-            'NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification creation',
+            '[Onboarding] NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification creation',
             undefined,
-            'createNotifications',
+            'useOnboardingToasts.createNotifications',
             {
-              module: 'useOnboardingToasts',
+              component: 'useOnboardingToasts',
+              action: 'create-notifications',
+              category: 'onboarding',
             }
           );
           return;
@@ -206,9 +217,16 @@ export function useOnboardingToasts({
 
     createNotifications().catch((error: unknown) => {
       const normalized = normalizeError(error, 'Failed to create onboarding notifications');
-      logClientWarn('Failed to create onboarding notifications', normalized, 'createNotifications', {
-        module: 'useOnboardingToasts',
-      });
+      logClientWarn(
+        '[Onboarding] Failed to create notifications',
+        normalized,
+        'useOnboardingToasts.createNotifications',
+        {
+          component: 'useOnboardingToasts',
+          action: 'create-notifications',
+          category: 'onboarding',
+        }
+      );
     });
   }, [enabled, hasSeenToasts, customToasts, user, context, markToastsAsSeen]);
 

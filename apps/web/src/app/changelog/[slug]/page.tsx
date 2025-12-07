@@ -51,10 +51,6 @@ import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
 
-// MIGRATED: Removed export const revalidate = 7200 (incompatible with Cache Components)
-// MIGRATED: Removed export const dynamicParams = true (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
 /**
  * Build the list of static route params for the most recent changelog entries.
  *
@@ -287,7 +283,7 @@ async function ChangelogEntryPageContent({
         <Separator className={UI_CLASSES.MARGIN_Y_RELAXED} />
 
         {/* Content */}
-        <ChangelogContent entry={entry} />
+        <ChangelogContent entry={entry} hideHeader />
       </article>
     </>
   );

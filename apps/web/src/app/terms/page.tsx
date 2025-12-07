@@ -7,9 +7,6 @@ import { type Metadata } from 'next';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-// MIGRATED: Removed export const revalidate = false (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
 /**
  * Produce page metadata for the Terms page.
  *
@@ -68,7 +65,7 @@ export default async function TermsPage() {
   );
 }
 
-async function TermsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
+function TermsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
   const channels = getContactChannels();
 

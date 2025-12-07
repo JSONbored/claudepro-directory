@@ -102,8 +102,7 @@ async function getVisitorStats(): Promise<VisitorStats> {
   } catch (error) {
     // trackPerformance logs performance metrics, but we need explicit error logging
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     requestLogger.warn('Visitor stats fetch failed, using defaults', {
       err: errorForLogging,
       source: 'vercel-analytics-api',
@@ -141,8 +140,7 @@ export async function getContentDescriptionCopy(): Promise<string> {
     return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     requestLogger.error('MarketingSite: failed to build content description', errorForLogging);
     return DESCRIPTION_FALLBACK;
   }
@@ -186,8 +184,7 @@ export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
     };
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     requestLogger.error('MarketingSite: failed to load hero stats', errorForLogging);
     return {
       configurationCount: 0,

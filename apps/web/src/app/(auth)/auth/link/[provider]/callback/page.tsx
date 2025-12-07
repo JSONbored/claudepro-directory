@@ -121,7 +121,10 @@ export default function OAuthLinkCallbackPage({
           if (!mounted) return;
           setStatus('error');
           setErrorMessage('You must be signed in to link an account. Redirecting to login...');
-          logClientWarn('OAuth link callback: user not authenticated', undefined, operation, {
+          logClientWarn('[OAuth] User not authenticated', undefined, operation, {
+            component: 'OAuthLinkCallback',
+            action: 'check-auth',
+            category: 'auth',
             requestId,
             route,
             module: modulePath,
@@ -161,7 +164,11 @@ export default function OAuthLinkCallbackPage({
 
         if (error) {
           if (!mounted) return;
-          logClientError('OAuth link callback: linkIdentity failed', error, operation, {
+          const normalized = normalizeError(error, 'Failed to link identity');
+          logClientError('[OAuth] Link identity failed', normalized, operation, {
+            component: 'OAuthLinkCallback',
+            action: 'link-identity',
+            category: 'auth',
             requestId,
             route,
             module: modulePath,
@@ -186,7 +193,11 @@ export default function OAuthLinkCallbackPage({
         setErrorMessage('Unexpected response from OAuth provider. Please try again.');
       } catch (caughtError) {
         if (!mounted) return;
-        logClientError('OAuth link callback: unexpected error', caughtError, operation, {
+        const normalized = normalizeError(caughtError, 'Unexpected OAuth link callback error');
+        logClientError('[OAuth] Unexpected error', normalized, operation, {
+          component: 'OAuthLinkCallback',
+          action: 'oauth-callback',
+          category: 'auth',
           requestId,
           route,
           module: modulePath,

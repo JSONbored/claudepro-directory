@@ -229,12 +229,12 @@ export const QUERY_LIMITS = {
 export const STATIC_GENERATION_LIMITS = {
   /**
    * Maximum changelog entries to pre-render at build time
-   * Most recent entries are pre-rendered; older entries use ISR (revalidate = 7200s)
+   * Most recent entries are pre-rendered; older entries are rendered on-demand with Cache Components
    */
   changelog: 20,
   /**
    * Maximum jobs to pre-render at build time
-   * Most recent jobs are pre-rendered; older jobs use ISR
+   * Most recent jobs are pre-rendered; older jobs are rendered on-demand with Cache Components
    */
   jobs: 10,
 } as const;

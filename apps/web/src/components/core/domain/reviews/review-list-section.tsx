@@ -6,11 +6,8 @@ import {
   getReviewsWithStats,
   markReviewHelpful,
 } from '@heyclaude/web-runtime/actions';
-import {
-  formatDistanceToNow,
-  logClientWarning,
-  logUnhandledPromise,
-} from '@heyclaude/web-runtime/core';
+import { formatDistanceToNow, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';
 import { type ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';
 import {
@@ -81,12 +78,21 @@ export function ReviewListSection({
           }
         }
       } catch (error) {
-        logClientWarning('ReviewListSection: failed to load reviews', error, {
-          contentType,
-          contentSlug,
-          sortBy: sort,
-          page: pageNum,
-        });
+        const normalized = normalizeError(error, 'Failed to load reviews');
+        logClientWarn(
+          '[Reviews] Failed to load reviews',
+          normalized,
+          'ReviewListSection.loadReviewsWithStats',
+          {
+            component: 'ReviewListSection',
+            action: 'load-reviews',
+            category: 'reviews',
+            contentType,
+            contentSlug,
+            sortBy: sort,
+            page: pageNum,
+          }
+        );
         toasts.error.reviewActionFailed('load');
       } finally {
         setIsLoading(false);
@@ -149,11 +155,20 @@ export function ReviewListSection({
         router.refresh();
       }
     } catch (error) {
-      logClientWarning('ReviewListSection: delete failed', error, {
-        reviewId,
-        contentType,
-        contentSlug,
-      });
+      const normalized = normalizeError(error, 'Failed to delete review');
+      logClientWarn(
+        '[Reviews] Delete failed',
+        normalized,
+        'ReviewListSection.handleDelete',
+        {
+          component: 'ReviewListSection',
+          action: 'delete-review',
+          category: 'reviews',
+          reviewId,
+          contentType,
+          contentSlug,
+        }
+      );
       toasts.error.reviewActionFailed('delete');
     }
   };
@@ -340,9 +355,18 @@ function ReviewCardItem({
                     await markReviewHelpful({ review_id: review.id ?? '', helpful: true });
                     toasts.success.actionCompleted('mark as helpful');
                   } catch (error) {
-                    logClientWarning('ReviewListSection: markReviewHelpful failed', error, {
-                      reviewId: review.id ?? '',
-                    });
+                    const normalized = normalizeError(error, 'Failed to mark review as helpful');
+                    logClientWarn(
+                      '[Reviews] Mark helpful failed',
+                      normalized,
+                      'ReviewListSection.handleMarkHelpful',
+                      {
+                        component: 'ReviewListSection',
+                        action: 'mark-helpful',
+                        category: 'reviews',
+                        reviewId: review.id ?? '',
+                      }
+                    );
                     toasts.error.reviewActionFailed('vote');
                   }
                 }}

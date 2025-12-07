@@ -147,7 +147,7 @@ function CategorySection({
               <Icon className={UI_CLASSES.ICON_SM} />
             </span>
             <div className={`${UI_CLASSES.TEXT_BODY_DEFAULT} flex-1`}>
-              <div className="prose prose-slate dark:prose-invert prose-sm prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-headings:my-3 prose-headings:text-base prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-foreground max-w-none">
+              <div className="prose prose-slate dark:prose-invert prose-sm prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-4 prose-headings:mb-3 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-3 prose-ul:my-3 prose-ol:my-3 prose-li:my-1.5 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-3 prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:my-3 max-w-none">
                 <TrustedHTML html={markdownToHtml(item.content)} />
               </div>
             </div>
@@ -211,7 +211,7 @@ function renderAdditionalContent(
               <JSONSectionRenderer sections={metadataSections} />
             </div>
           ) : hasAdditionalContent ? (
-            <div className="prose prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic max-w-none">
+            <div className="prose prose-slate dark:prose-invert prose-sm md:prose-base prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-4 prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-4 prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-4 prose-hr:my-8 max-w-none">
               <TrustedHTML html={displayContent} />
             </div>
           ) : null}
@@ -223,7 +223,7 @@ function renderAdditionalContent(
         </div>
       ) : null}
       {!hasStructuredChanges && !hasMetadataSections && hasAdditionalContent ? (
-        <div className="prose prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic max-w-none">
+        <div className="prose prose-slate dark:prose-invert prose-sm md:prose-base prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-4 prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-4 prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-4 prose-hr:my-8 max-w-none">
           <TrustedHTML html={displayContent} />
         </div>
       ) : null}
@@ -244,6 +244,8 @@ export interface ChangelogContentProps {
   hideHeader?: boolean;
   /** Optional JSON sections (from generated content) */
   sections?: GuideSection[];
+  /** Callback to set header ref for timeline alignment */
+  onHeaderRef?: (element: HTMLElement | null) => void;
 }
 
 /**
@@ -255,7 +257,7 @@ export interface ChangelogContentProps {
  * ```
  */
 export const ChangelogContent = memo(
-  ({ entry, sections, hideHeader = false }: ChangelogContentProps) => {
+  ({ entry, sections, hideHeader = false, onHeaderRef }: ChangelogContentProps) => {
     // Parse changes JSONB field with type safety
     const changes = parseChangelogChanges(entry.changes);
 
@@ -280,22 +282,24 @@ export const ChangelogContent = memo(
 
     return (
       <article className={`max-w-none ${UI_CLASSES.FORM_SECTION_SPACING}`}>
-        {/* Entry Header - Title and Date (hidden in timeline view) */}
-        {!hideHeader && (
-          <header className="border-border/30 mb-6 border-b pb-4">
-            <h2 className={`${UI_CLASSES.HEADING_H2} mb-3`}>{entry.title}</h2>
-            <time
-              dateTime={entry.release_date}
-              className={`${UI_CLASSES.TEXT_BODY_SM} ${UI_CLASSES.TEXT_HELPER}`}
-            >
-              {new Date(entry.release_date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </time>
-          </header>
-        )}
+        {/* Entry Header - Title and Date (always rendered for timeline alignment, visually hidden if hideHeader=true) */}
+        <header
+          ref={onHeaderRef}
+          className={`border-border/30 mb-6 border-b pb-4 scroll-mt-24 ${hideHeader ? 'sr-only' : ''}`}
+          id={`changelog-entry-header-${entry.slug}`}
+        >
+          <h2 className={`${UI_CLASSES.HEADING_H2} mb-3`}>{entry.title}</h2>
+          <time
+            dateTime={entry.release_date}
+            className={`${UI_CLASSES.TEXT_BODY_SM} ${UI_CLASSES.TEXT_HELPER}`}
+          >
+            {new Date(entry.release_date).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+        </header>
 
         {/* Category Badges - Subtle, below header */}
         {nonEmptyCategories.length > 0 && (

@@ -37,8 +37,7 @@ export function revalidateNotificationCache(userId: string): void {
       revalidateTag(tag, 'default');
     } catch (error) {
       // logger.error() normalizes errors internally, so pass raw error
-      const errorForLogging: Error | string =
-        error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+      const errorForLogging: Error | string = error instanceof Error ? error : String(error);
       reqLogger.error('Failed to revalidate notification cache tag', errorForLogging, {
         tag,
         userId,
@@ -104,8 +103,7 @@ export async function getActiveNotifications({
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getActiveNotifications: unexpected error', errorForLogging, {
       userId,
       dismissedCount: dismissedIds.length,

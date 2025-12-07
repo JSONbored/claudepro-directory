@@ -23,10 +23,6 @@ import { Suspense } from 'react';
 
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
-
 /**
  * Generates page metadata for the account Activity page.
  *
@@ -120,7 +116,7 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
 
   // Section: Activity Data Fetch
   // Fetch activity data - use Promise.allSettled for partial success handling
-  // CRITICAL: Call data functions directly instead of actions to avoid cookies() in unstable_cache() error
+  // CRITICAL: Call data functions directly instead of actions to avoid cookies() access issues in Cache Components
   const [summaryResult, timelineResult] = await Promise.allSettled([
     getUserActivitySummary(user.id),
     getUserActivityTimeline({ userId: user.id, limit: 50, offset: 0 }),

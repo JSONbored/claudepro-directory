@@ -21,9 +21,6 @@ import { Suspense } from 'react';
 
 import { MFAFactorsListClient } from './mfa-factors-list-client';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
-
 export const metadata: Metadata = {
   title: 'Two-Factor Authentication | Account Settings',
   description: 'Manage your two-factor authentication settings',

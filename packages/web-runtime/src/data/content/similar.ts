@@ -62,8 +62,7 @@ export async function getSimilarContent(input: {
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getSimilarContent: failed', errorForLogging, {
       contentType,
       contentSlug,

@@ -62,6 +62,7 @@ export interface UnifiedCategoryConfig<TId extends string = string> {
     tabs?: ReadonlyArray<TabConfig>;
   };
   sections: {
+    description: boolean;
     features: boolean;
     installation: boolean;
     use_cases: boolean;

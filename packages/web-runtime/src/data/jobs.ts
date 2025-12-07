@@ -110,8 +110,7 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
   } catch (error) {
     // trackPerformance already logs the error, but we log again with context about fallback behavior
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.warn('Job filtering failed, returning null', {
       err: errorForLogging,
       ...filtersLog,
@@ -167,8 +166,7 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getJobsListCached: failed', errorForLogging, {
       limit,
       offset,
@@ -236,8 +234,7 @@ async function getFilteredJobsCached(
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getFilteredJobsCached: failed', errorForLogging, {
       searchQuery,
       category,
@@ -297,8 +294,7 @@ export async function getFilteredJobs(
       return await getJobsListCached(limit ?? 0, offset ?? 0);
     } catch (error) {
       // logger.error() normalizes errors internally, so pass raw error
-      const errorForLogging: Error | string =
-        error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+      const errorForLogging: Error | string = error instanceof Error ? error : String(error);
       reqLogger.error('getFilteredJobs: failed to fetch jobs list', errorForLogging, {
         ...filtersLog,
       });
@@ -394,8 +390,7 @@ export async function getFilteredJobs(
     );
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('Failed to fetch filtered jobs', errorForLogging, {
       ...filtersLog,
     });
@@ -447,8 +442,7 @@ export async function getJobBySlug(slug: string) {
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getJobBySlug: unexpected error', errorForLogging, {
       slug,
     });
@@ -503,8 +497,7 @@ export async function getFeaturedJobs(limit = 5) {
     return result ?? [];
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getFeaturedJobs: unexpected error', errorForLogging, {
       limit,
     });

@@ -127,12 +127,13 @@ function HomePageClientComponent({
       // Log error but don't crash - fall back to server-provided data
       const normalized = normalizeError(error, 'Failed to load homepage config bundle');
       logClientWarn(
-        'Failed to load homepage config bundle',
+        '[Home] Failed to load homepage config bundle',
         normalized,
         'HomePageClient.loadConfigBundle',
         {
           component: 'HomePageClient',
           action: 'load-config-bundle',
+          category: 'home',
         }
       );
       bundle = null;
@@ -170,20 +171,91 @@ function HomePageClientComponent({
 
   const fetchAllConfigs = useCallback(
     async (offset: number, limit = 30) => {
-      if (isLoadingAllConfigs || !hasMoreAllConfigs) return;
+      logClientWarn(
+        '[HomePageClient] fetchAllConfigs called',
+        null,
+        'HomePageClient.fetchAllConfigs.start',
+        {
+          component: 'HomePageClient',
+          action: 'fetch-all-configs-start',
+          category: 'home',
+          offset,
+          limit,
+          isLoadingAllConfigs,
+          hasMoreAllConfigs,
+          willSkip: isLoadingAllConfigs || !hasMoreAllConfigs,
+        }
+      );
+
+      if (isLoadingAllConfigs || !hasMoreAllConfigs) {
+        logClientWarn(
+          '[HomePageClient] fetchAllConfigs skipped (already loading or no more)',
+          null,
+          'HomePageClient.fetchAllConfigs.skipped',
+          {
+            component: 'HomePageClient',
+            action: 'fetch-all-configs-skipped',
+            category: 'home',
+            isLoadingAllConfigs,
+            hasMoreAllConfigs,
+          }
+        );
+        return;
+      }
 
       setIsLoadingAllConfigs(true);
 
       try {
         await runLoggedAsync(
           async () => {
-            const { fetchPaginatedContent } = await import('@heyclaude/web-runtime/data');
+            logClientWarn(
+              '[HomePageClient] Importing fetchPaginatedContent',
+              null,
+              'HomePageClient.fetchAllConfigs.import',
+              {
+                component: 'HomePageClient',
+                action: 'fetch-all-configs-import',
+                category: 'home',
+              }
+            );
+
+            const { fetchPaginatedContent } = await import('@heyclaude/web-runtime/actions');
+
+            logClientWarn(
+              '[HomePageClient] Calling fetchPaginatedContent action',
+              null,
+              'HomePageClient.fetchAllConfigs.call',
+              {
+                component: 'HomePageClient',
+                action: 'fetch-all-configs-call',
+                category: 'home',
+                offset,
+                limit,
+              }
+            );
 
             const result = await fetchPaginatedContent({
               offset,
               limit,
               category: null,
             });
+
+            logClientWarn(
+              '[HomePageClient] fetchPaginatedContent result received',
+              null,
+              'HomePageClient.fetchAllConfigs.result',
+              {
+                component: 'HomePageClient',
+                action: 'fetch-all-configs-result',
+                category: 'home',
+                hasResult: Boolean(result),
+                hasData: Boolean(result?.data),
+                hasServerError: Boolean(result?.serverError),
+                dataIsArray: Array.isArray(result?.data),
+                dataLength: Array.isArray(result?.data) ? result.data.length : 0,
+                serverError: result?.serverError,
+              }
+            );
 
             if (result?.serverError) {
               // Error already logged by safe-action middleware
@@ -205,11 +277,68 @@ function HomePageClientComponent({
             // Defensive: Ensure data is an array before using it
             const newItems: DisplayableContent[] = Array.isArray(result?.data) ? result.data : [];
 
+            logClientWarn(
+              '[HomePageClient] Processing fetchPaginatedContent result',
+              null,
+              'HomePageClient.fetchAllConfigs.process',
+              {
+                component: 'HomePageClient',
+                action: 'fetch-all-configs-process',
+                category: 'home',
+                newItemsLength: newItems.length,
+                limit,
+                willSetHasMoreFalse: newItems.length < limit,
+              }
+            );
+
             if (newItems.length < limit) {
               setHasMoreAllConfigs(false);
             }
 
-            setAllConfigs((prev) => [...prev, ...newItems]);
+            setAllConfigs((prev) => {
+              // Deduplicate items by slug to prevent duplicate keys
+              // Create a Set of existing slugs for O(1) lookup
+              const existingSlugs = new Set(prev.map((item) => item.slug).filter(Boolean));
+              
+              // Filter out items that already exist
+              const uniqueNewItems = newItems.filter((item) => {
+                if (!item.slug) return true; // Keep items without slugs (shouldn't happen, but defensive)
+                if (existingSlugs.has(item.slug)) {
+                  logClientWarn(
+                    '[HomePageClient] Duplicate item filtered out',
+                    null,
+                    'HomePageClient.fetchAllConfigs.deduplicate',
+                    {
+                      component: 'HomePageClient',
+                      action: 'fetch-all-configs-deduplicate',
+                      category: 'home',
+                      slug: item.slug,
+                    }
+                  );
+                  return false;
+                }
+                existingSlugs.add(item.slug);
+                return true;
+              });
+              
+              const updated = [...prev, ...uniqueNewItems];
+              logClientWarn(
+                '[HomePageClient] Updated allConfigs state',
+                null,
+                'HomePageClient.fetchAllConfigs.stateUpdate',
+                {
+                  component: 'HomePageClient',
+                  action: 'fetch-all-configs-state-update',
+                  category: 'home',
+                  previousLength: prev.length,
+                  newItemsLength: newItems.length,
+                  uniqueNewItemsLength: uniqueNewItems.length,
+                  filteredOutCount: newItems.length - uniqueNewItems.length,
+                  updatedLength: updated.length,
+                }
+              );
+              return updated;
+            });
           },
           {
             message: 'Failed to fetch paginated content',
@@ -217,9 +346,21 @@ function HomePageClientComponent({
             level: 'warn',
           }
         );
-      } catch {
+      } catch (error) {
         // Error already logged by useLoggedAsync, trackHomepageSectionError also called
-        // No need to do anything else - error is handled
+        const normalized = normalizeError(error, 'fetchAllConfigs failed');
+        logClientWarn(
+          '[HomePageClient] fetchAllConfigs error caught',
+          normalized,
+          'HomePageClient.fetchAllConfigs.error',
+          {
+            component: 'HomePageClient',
+            action: 'fetch-all-configs-error',
+            category: 'home',
+            offset,
+            limit,
+          }
+        );
       } finally {
         setIsLoadingAllConfigs(false);
       }
@@ -232,7 +373,33 @@ function HomePageClientComponent({
   }, [fetchAllConfigs, allConfigs.length]);
 
   useEffect(() => {
+    logClientWarn(
+      '[HomePageClient] useEffect triggered for All tab',
+      null,
+      'HomePageClient.useEffect.allTab',
+      {
+        component: 'HomePageClient',
+        action: 'useEffect-all-tab',
+        category: 'home',
+        activeTab,
+        allConfigsLength: allConfigs.length,
+        isLoadingAllConfigs,
+        shouldFetch: activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs,
+      }
+    );
+
     if (activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs) {
+      logClientWarn(
+        '[HomePageClient] Triggering fetchAllConfigs for All tab',
+        null,
+        'HomePageClient.fetchAllConfigs.trigger',
+        {
+          component: 'HomePageClient',
+          action: 'fetch-all-configs-trigger',
+          category: 'home',
+          offset: 0,
+        }
+      );
       fetchAllConfigs(0).catch((error) => {
         trackHomepageSectionError('all-content', 'initial-fetch', error, {
           activeTab,

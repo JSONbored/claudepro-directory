@@ -5010,6 +5010,21 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_user_complete_data: {
+        Args: {
+          p_activity_limit?: number
+          p_activity_offset?: number
+          p_activity_type?: string
+          p_user_id: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["user_complete_data_result"]
+        SetofOptions: {
+          from: "*"
+          to: "user_complete_data_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_user_content_vote: {
         Args: {
           p_content_slug: string
@@ -6354,6 +6369,7 @@ export type Database = {
         section_examples: boolean | null
         section_requirements: boolean | null
         metadata_show_github_link: boolean | null
+        section_description: boolean | null
       }
       category_config_with_features: {
         category: Database["public"]["Enums"]["content_category"] | null
@@ -7712,6 +7728,32 @@ export type Database = {
         total_views: number | null
         total_clicks: number | null
         latest_job_posted_at: string | null
+      }
+      user_complete_data_result: {
+        account_dashboard:
+          | Database["public"]["CompositeTypes"]["account_dashboard_result"]
+          | null
+        user_dashboard:
+          | Database["public"]["CompositeTypes"]["user_dashboard_result"]
+          | null
+        user_settings:
+          | Database["public"]["CompositeTypes"]["user_settings_result"]
+          | null
+        activity_summary:
+          | Database["public"]["CompositeTypes"]["user_activity_summary"]
+          | null
+        activity_timeline:
+          | Database["public"]["CompositeTypes"]["user_activity_timeline_result"]
+          | null
+        user_library:
+          | Database["public"]["CompositeTypes"]["user_library_result"]
+          | null
+        user_identities:
+          | Database["public"]["CompositeTypes"]["user_identities_result"]
+          | null
+        sponsorships:
+          | Database["public"]["Tables"]["sponsored_content"]["Row"][]
+          | null
       }
       user_dashboard_result: {
         submissions:

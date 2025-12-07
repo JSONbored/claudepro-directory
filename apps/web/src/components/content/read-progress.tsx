@@ -10,12 +10,12 @@
  * - Motion.dev powered (useScroll + useSpring for smooth physics)
  * - GPU-accelerated animations (60fps guaranteed)
  * - Respects prefers-reduced-motion
- * - Configurable position, color, height
+ * - Configurable position, color, height, zIndex
  * - Zero performance overhead
  *
  * Usage:
  * ```tsx
- * <ReadProgress /> // Default: top, accent color, 2px height
+ * <ReadProgress /> // Default: below navigation, accent color, 5px height
  * <ReadProgress position="bottom" color="primary" height={4} />
  * ```
  *
@@ -34,7 +34,7 @@ export interface ReadProgressProps {
 
   /**
    * Height of the progress bar in pixels
-   * @default 3
+   * @default 5
    */
   height?: number;
 
@@ -46,7 +46,7 @@ export interface ReadProgressProps {
 
   /**
    * Spring physics configuration
-   * @default { stiffness: 100, damping: 30, restDelta: 0.001 }
+   * @default { stiffness: 400, damping: 40, restDelta: 0.0001 }
    */
   springConfig?: {
     damping?: number;
@@ -64,6 +64,7 @@ export interface ReadProgressProps {
 export function ReadProgress({
   position = 'below-nav',
   height = 5,
+  color = 'accent',
   zIndex = 51,
   springConfig = {
     stiffness: 400,
@@ -147,9 +148,13 @@ export function ReadProgress({
     return { bottom: 0 };
   };
 
+  // Compute color class from color prop
+  const colorClass =
+    color === 'primary' ? 'bg-primary' : color === 'foreground' ? 'bg-foreground' : 'bg-accent';
+
   return (
     <motion.div
-      className="bg-accent pointer-events-none fixed origin-left"
+      className={`${colorClass} pointer-events-none fixed origin-left`}
       style={{
         ...getPositionStyle(),
         height: `${height}px`,
@@ -172,7 +177,7 @@ export function ReadProgress({
  */
 export const ReadProgressPresets = {
   /**
-   * Default: Top, accent color, thin line
+   * Default: Below navigation, accent color, 5px height
    */
   default: () => <ReadProgress />,
 

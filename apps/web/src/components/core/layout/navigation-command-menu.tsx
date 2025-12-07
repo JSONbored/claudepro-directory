@@ -2,7 +2,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import * as Icons from '@heyclaude/web-runtime/icons';
-import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
   UI_CLASSES,
   CommandDialog,
@@ -42,12 +42,18 @@ export function NavigationCommandMenu({
   // Log when dialog should be open but controlledOpen is undefined (indicates provider issue)
   useEffect(() => {
     if (open && controlledOpen === undefined && !internalOpen) {
-      logClientWarn(
-        '[NavigationCommandMenu] Dialog open state mismatch - controlledOpen is undefined',
+      const normalized = normalizeError(
         new Error('CommandPaletteProvider may not be available'),
+        'Dialog open state mismatch'
+      );
+      logClientWarn(
+        '[Navigation] Dialog open state mismatch',
+        normalized,
         'NavigationCommandMenu.stateMismatch',
         {
           component: 'NavigationCommandMenu',
+          action: 'state-mismatch',
+          category: 'navigation',
           open,
           controlledOpen: 'undefined',
           internalOpen,

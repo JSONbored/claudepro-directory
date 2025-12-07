@@ -11,9 +11,6 @@ import { Suspense } from 'react';
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
 
-// MIGRATED: Removed export const revalidate = 86_400 (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
 /**
  * Dynamic Rendering Required
  *
@@ -70,7 +67,7 @@ export default async function ContactPage() {
   );
 }
 
-async function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
+function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const channels = getContactChannels();
   if (!channels.email) {
     reqLogger.warn('ContactPage: email channel is not configured', {

@@ -8,7 +8,7 @@
 
 import { getNewsletterCountAction } from '@heyclaude/web-runtime/actions';
 import { POLLING_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
-import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
+import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useRef, useState } from 'react';
 
 export interface UseNewsletterCountReturn {
@@ -88,7 +88,17 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
           }
         }
       } catch (error_) {
-        logClientError('Failed to fetch newsletter count', error_, 'useNewsletterCount.fetch');
+        const normalized = normalizeError(error_, 'Failed to fetch newsletter count');
+        logClientError(
+          '[Newsletter] Failed to fetch newsletter count',
+          normalized,
+          'useNewsletterCount.fetch',
+          {
+            component: 'useNewsletterCount',
+            action: 'fetch-count',
+            category: 'newsletter',
+          }
+        );
         setError(error_ as Error);
         setIsLoading(false);
       }
@@ -96,18 +106,31 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
 
     // Initial fetch
     fetchCount().catch((error_) => {
-      logClientWarn('useNewsletterCount: initial fetch failed', error_, 'useNewsletterCount.fetch');
+      const normalized = normalizeError(error_, 'Initial newsletter count fetch failed');
+      logClientWarn(
+        '[Newsletter] Initial fetch failed',
+        normalized,
+        'useNewsletterCount.fetch',
+        {
+          component: 'useNewsletterCount',
+          action: 'initial-fetch',
+          category: 'newsletter',
+        }
+      );
     });
 
     // Start polling with current interval
     intervalRef.current = setInterval(() => {
       fetchCount().catch((error_) => {
+        const normalized = normalizeError(error_, 'Polling newsletter count fetch failed');
         logClientWarn(
-          'useNewsletterCount: polling fetch failed',
-          error_,
+          '[Newsletter] Polling fetch failed',
+          normalized,
           'useNewsletterCount.poll',
           {
             component: 'useNewsletterCount',
+            action: 'poll-fetch',
+            category: 'newsletter',
           }
         );
       });
@@ -123,19 +146,31 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
       } else {
         // Resume polling when tab becomes visible
         fetchCount().catch((error_) => {
+          const normalized = normalizeError(error_, 'Resume newsletter count fetch failed');
           logClientWarn(
-            'useNewsletterCount: resume fetch failed',
-            error_,
-            'useNewsletterCount.resume'
+            '[Newsletter] Resume fetch failed',
+            normalized,
+            'useNewsletterCount.resume',
+            {
+              component: 'useNewsletterCount',
+              action: 'resume-fetch',
+              category: 'newsletter',
+            }
           );
         });
         if (!intervalRef.current) {
           intervalRef.current = setInterval(() => {
             fetchCount().catch((error_) => {
+              const normalized = normalizeError(error_, 'Polling newsletter count fetch failed');
               logClientWarn(
-                'useNewsletterCount: polling fetch failed',
-                error_,
-                'useNewsletterCount.poll'
+                '[Newsletter] Polling fetch failed',
+                normalized,
+                'useNewsletterCount.poll',
+                {
+                  component: 'useNewsletterCount',
+                  action: 'poll-fetch',
+                  category: 'newsletter',
+                }
               );
             });
           }, pollIntervalMs);

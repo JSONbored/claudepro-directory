@@ -10,9 +10,6 @@ import { AuthMobileHeader } from '@/src/components/core/auth/auth-mobile-header'
 
 import { LoginPanelClient } from './login-panel-client';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
-
 /**
  * Dynamic Rendering Required
  *
@@ -27,6 +24,9 @@ import { LoginPanelClient } from './login-panel-client';
  * @see {@link Metadata}
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/login');
 }
 

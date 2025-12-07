@@ -2,10 +2,7 @@
  * Metadata Generator - Unified SEO API Architecture
  */
 
-import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
-
 import { getSEOMetadata } from '../data/seo/client.ts';
-import { logger } from '../logger.ts';
 import type { Metadata } from 'next';
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from './og.ts';
@@ -147,14 +144,17 @@ export async function generatePageMetadata(
     },
   };
 
-  // Only log during development, not during production builds
-  // This prevents 400+ JSON log lines cluttering the build output
-  if (isDevelopment) {
-    logger.info(`✅ Metadata generated for ${resolvedRoute}`, {
-      titleLength: metadata.title ? String(metadata.title).length : 0,
-      descLength: metadata.description?.length || 0,
-    });
-  }
+  // Removed development logging to avoid Date.now() violations in Cache Components
+  // Pino internally uses Date.now() for timestamps, which violates Next.js Cache Components rules
+  // when called before accessing request data (cookies(), headers(), connection(), etc.)
+  // Callers should call connection() before generatePageMetadata if they need logging,
+  // but we don't log here to keep generatePageMetadata compatible with cached contexts
+  // if (isDevelopment) {
+  //   logger.info(`✅ Metadata generated for ${resolvedRoute}`, {
+  //     titleLength: metadata.title ? String(metadata.title).length : 0,
+  //     descLength: metadata.description?.length || 0,
+  //   });
+  // }
 
   return metadata;
 }

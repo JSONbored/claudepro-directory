@@ -128,13 +128,13 @@ export function RelatedContentClient({
         setItems(convertedItems);
       } catch (error) {
         logClientError(
-          'Failed to fetch related content',
+          '[Content] Failed to fetch related content',
           normalizeError(error, 'Failed to fetch related content'),
           'RelatedContentClient.fetchRelatedContent',
           {
             component: 'RelatedContentClient',
             action: 'fetch-related-content',
-            source: 'RelatedContentClient',
+            category: 'content',
           }
         );
         setItems([]);
@@ -145,13 +145,13 @@ export function RelatedContentClient({
 
     fetchRelatedContent().catch((error) => {
       logClientError(
-        'Related content fetch promise rejected',
+        '[Content] Related content fetch promise rejected',
         normalizeError(error, 'Related content fetch promise rejected'),
         'RelatedContentClient.fetchRelatedContent',
         {
           component: 'RelatedContentClient',
           action: 'fetch-related-content',
-          source: 'RelatedContentClient',
+          category: 'content',
         }
       );
     });
@@ -183,7 +183,7 @@ export function RelatedContentClient({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="shrink-0imary/30 bg-primary/10 text-primary px-2 py-1 text-xs font-medium sm:px-3 sm:text-sm"
+              className="shrink-0 border-primary/30 bg-primary/10 text-primary px-2 py-1 text-xs font-medium sm:px-3 sm:text-sm"
             >
               AI Powered
             </UnifiedBadge>

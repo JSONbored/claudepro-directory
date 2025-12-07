@@ -115,7 +115,7 @@ export function NewsletterFooterBar({
       aria-label="Newsletter signup"
     >
       <div
-        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_FULL} h-px bg-linear-to-r from-transparent via-(--color-accent)/30 to-transparent`}
+        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_FULL} h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent`}
       />
       <div className="container mx-auto px-4 py-6 md:py-4">
         {/* Desktop layout */}

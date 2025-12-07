@@ -3,13 +3,11 @@ import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runt
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
-
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community/directory');
@@ -34,6 +32,10 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
  * @see ContributorsSidebar
  */
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
   // Generate single requestId for this component
   const requestId = generateRequestId();
 
@@ -169,9 +171,7 @@ interface CommunityDirectoryPageProperties {
   searchParams: Promise<{ q?: string }>;
 }
 
-export default async function CommunityDirectoryPage({
-  searchParams,
-}: CommunityDirectoryPageProperties) {
+export default function CommunityDirectoryPage({ searchParams }: CommunityDirectoryPageProperties) {
   return (
     <Suspense fallback={<Skeleton size="xl" className="h-screen w-full" />}>
       <CommunityDirectoryPageContent searchParams={searchParams} />

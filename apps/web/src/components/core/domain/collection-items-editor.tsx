@@ -14,7 +14,8 @@ import {
   removeItemFromCollection,
   reorderCollectionItems,
 } from '@heyclaude/web-runtime/actions';
-import { isValidCategory, logClientWarning, sanitizeSlug } from '@heyclaude/web-runtime/core';
+import { isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
 import {
   toasts,
@@ -103,10 +104,19 @@ export function CollectionItemManager({
           router.refresh();
         }
       } catch (error) {
-        logClientWarning('CollectionItemManager: add failed', error, {
-          collectionId,
-          bookmarkId: bookmark.id,
-        });
+        const normalized = normalizeError(error, 'Failed to add item to collection');
+        logClientWarn(
+          '[Collection] Add item failed',
+          normalized,
+          'CollectionItemManager.handleAdd',
+          {
+            component: 'CollectionItemManager',
+            action: 'add-item',
+            category: 'collection',
+            collectionId,
+            bookmarkId: bookmark.id,
+          }
+        );
         toasts.error.fromError(error, 'Failed to add item');
       }
     });
@@ -124,10 +134,19 @@ export function CollectionItemManager({
           router.refresh();
         }
       } catch (error) {
-        logClientWarning('CollectionItemManager: remove failed', error, {
-          collectionId,
-          itemId,
-        });
+        const normalized = normalizeError(error, 'Failed to remove item from collection');
+        logClientWarn(
+          '[Collection] Remove item failed',
+          normalized,
+          'CollectionItemManager.handleRemove',
+          {
+            component: 'CollectionItemManager',
+            action: 'remove-item',
+            category: 'collection',
+            collectionId,
+            itemId,
+          }
+        );
         toasts.error.fromError(error, 'Failed to remove item');
       }
     });
@@ -162,9 +181,18 @@ export function CollectionItemManager({
         router.refresh();
       } catch (error) {
         setItems(items); // Revert on error
-        logClientWarning('CollectionItemManager: reorder up failed', error, {
-          collectionId,
-        });
+        const normalized = normalizeError(error, 'Failed to reorder items up');
+        logClientWarn(
+          '[Collection] Reorder up failed',
+          normalized,
+          'CollectionItemManager.handleMoveUp',
+          {
+            component: 'CollectionItemManager',
+            action: 'reorder-up',
+            category: 'collection',
+            collectionId,
+          }
+        );
         toasts.error.actionFailed('reorder items');
       }
     });
@@ -199,9 +227,18 @@ export function CollectionItemManager({
         router.refresh();
       } catch (error) {
         setItems(items); // Revert on error
-        logClientWarning('CollectionItemManager: reorder down failed', error, {
-          collectionId,
-        });
+        const normalized = normalizeError(error, 'Failed to reorder items down');
+        logClientWarn(
+          '[Collection] Reorder down failed',
+          normalized,
+          'CollectionItemManager.handleMoveDown',
+          {
+            component: 'CollectionItemManager',
+            action: 'reorder-down',
+            category: 'collection',
+            collectionId,
+          }
+        );
         toasts.error.actionFailed('reorder items');
       }
     });

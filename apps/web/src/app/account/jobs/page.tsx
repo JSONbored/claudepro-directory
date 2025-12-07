@@ -41,10 +41,6 @@ import { Suspense } from 'react';
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
 import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-button';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
-
 /**
  * Dynamic Rendering Required
  * Authenticated user jobs

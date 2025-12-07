@@ -1,6 +1,7 @@
 'use client';
 
 import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import { PinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer';
@@ -68,7 +69,40 @@ export function PinboardDrawerProvider({ children }: { children: React.ReactNode
 export function usePinboardDrawer(): PinboardDrawerContextValue {
   const ctx = useContext(PinboardDrawerContext);
   if (!ctx) {
-    throw new Error('usePinboardDrawer must be used within a PinboardDrawerProvider');
+    // During SSR, the provider isn't available yet (it's in client-side LayoutContent)
+    // This is expected and handled gracefully with a no-op fallback
+    const isSSR = typeof window === 'undefined';
+    
+    if (!isSSR) {
+      // Only log warning on client-side (not during SSR)
+      // SSR warnings are expected and handled by fallback
+      const error = new Error('usePinboardDrawer called outside PinboardDrawerProvider');
+      logClientWarn(
+        '[Navigation] Hook used outside provider context',
+        normalizeError(error, 'PinboardDrawerProvider not available'),
+        'usePinboardDrawer.missingProvider',
+        {
+          component: 'PinboardDrawerProvider',
+          action: 'hook-call-outside-provider',
+          category: 'navigation',
+          stack: error.stack,
+        }
+      );
+    }
+
+    // Fallback for cases where provider might not be available yet (SSR, initial render)
+    // This prevents errors during hydration and allows graceful degradation
+    return {
+      openDrawer: () => {
+        // No-op if provider not available - already logged above (client-side only)
+      },
+      closeDrawer: () => {
+        // No-op if provider not available
+      },
+      toggleDrawer: () => {
+        // No-op if provider not available
+      },
+    };
   }
   return ctx;
 }

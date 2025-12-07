@@ -21,10 +21,6 @@ import { Suspense } from 'react';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
-
 /**
  * Dynamic Rendering Required
  * Authenticated route
@@ -219,21 +215,7 @@ async function EditJobPageContent({
   }
 
   function isValidJobCategory(value: string): value is Database['public']['Enums']['job_category'] {
-    return [
-      'engineering',
-      'design',
-      'product',
-      'marketing',
-      'sales',
-      'support',
-      'research',
-      'data',
-      'operations',
-      'leadership',
-      'consulting',
-      'education',
-      'other',
-    ].includes(value);
+    return (Constants.public.Enums.job_category as readonly string[]).includes(value);
   }
 
   // Log warnings for invalid enum values to help track data integrity issues

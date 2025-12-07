@@ -15,31 +15,15 @@ import {
 } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES, UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
 
-// MIGRATED: Removed export const revalidate = 900 (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
 /**
  * ISR: 15 minutes (900s) - Trending content updates frequently
  */
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
-      (module_) => ({
-        default: module_.NewsletterCTAVariant,
-      })
-    ),
-  {
-    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
-  }
-);
 
 /**
  * Provide metadata for the Trending page.
@@ -206,20 +190,6 @@ async function TrendingPageContent({
               trending={trendingDisplay}
               popular={popularDisplay}
               recent={recentDisplay}
-            />
-          </LazySection>
-        </Suspense>
-      </section>
-
-      <section className="container mx-auto px-4 py-12">
-        <Suspense fallback={null}>
-          <LazySection variant="fade-in" delay={0.15}>
-            <NewsletterCTAVariant
-              source="content_page"
-              variant="hero"
-              {...(normalizedCategory ? { category: normalizedCategory } : {})}
-              headline="Never Miss Trending Tools"
-              description="Get weekly updates on what's hot in the Claude community. No spam, unsubscribe anytime."
             />
           </LazySection>
         </Suspense>

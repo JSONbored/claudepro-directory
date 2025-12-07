@@ -17,10 +17,7 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { ContentSearchClient } from '@/src/components/content/content-search';
-import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
-
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
+import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
 /**
  * Dynamic Rendering Required
@@ -195,9 +192,14 @@ async function SearchResultsSection({
 }
 
 /**
- * Renders the search page by resolving route parameters into a query and filters, loading search facets and optional zero-state suggestions, and composing the results UI with facet controls and a recently viewed sidebar.
- *
- * If there is no query and no user filters, homepage data is queried to provide zero-state suggestions.
+ * PPR Optimization: Static shell renders immediately
+ * - Static header/title
+ * - Static layout grid
+ * Dynamic content streams in Suspense:
+ * - Search facets (cached, but still needs to load)
+ * - Search results (depends on query/filters)
+ * - Zero-state suggestions (if no query)
+ * - Recently viewed sidebar
  *
  * @param searchParams - Promise resolving to route query parameters (may include `q`, `category`, `tags`, `author`, `sort`) used to derive the search query and filters.
  * @returns The rendered React element for the search page containing the search input, results section, facet controls, zero-state/fallback suggestions, and the recently viewed sidebar.
@@ -224,19 +226,46 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
     module: 'apps/web/src/app/search',
   });
 
+  // Static shell - renders immediately for PPR
   return (
-    <Suspense
-      fallback={
-        <main className="container mx-auto px-4 py-8">
-          <h1 className="mb-8 text-4xl font-bold">Search Claude Code Directory</h1>
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
-            <div>Loading search...</div>
-          </div>
-        </main>
-      }
-    >
-      <SearchPageContent searchParams={searchParams} reqLogger={reqLogger} requestId={requestId} />
-    </Suspense>
+    <main className="container mx-auto px-4 py-8">
+      <h1 className="mb-8 text-4xl font-bold">Search Claude Code Directory</h1>
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
+        {/* Dynamic content streams in Suspense */}
+        <Suspense fallback={<SearchResultsSkeleton />}>
+          <SearchPageContent
+            searchParams={searchParams}
+            reqLogger={reqLogger}
+            requestId={requestId}
+          />
+        </Suspense>
+        {/* Sidebar - Unified ContentSidebar with JobsPromo + RecentlyViewed */}
+        <ContentSidebar />
+      </div>
+    </main>
+  );
+}
+
+/**
+ * Skeleton component for search results while loading
+ */
+function SearchResultsSkeleton() {
+  return (
+    <ContentSearchClient
+      items={[]}
+      type={Constants.public.Enums.content_category[0]}
+      searchPlaceholder="Search agents, MCP servers, rules, commands..."
+      title="Results"
+      icon="Search"
+      availableTags={[]}
+      availableAuthors={[]}
+      availableCategories={[]}
+      zeroStateSuggestions={[]}
+      fallbackSuggestions={[]}
+      quickTags={[]}
+      quickAuthors={[]}
+      quickCategories={[]}
+    />
   );
 }
 
@@ -280,7 +309,40 @@ async function SearchPageContent({
   // Gate zero-state data behind !query && !hasFilters (Phase 3 requirement)
   const hasQueryOrFilters = query.length > 0 || hasUserFilters;
 
-  // Section: Search Facets
+  // Load facets and results - facets are cached but still need to load
+  return (
+    <SearchFacetsAndResults
+      query={query}
+      filters={filters}
+      hasUserFilters={hasUserFilters}
+      hasQueryOrFilters={hasQueryOrFilters}
+      requestId={requestId}
+      reqLogger={reqLogger}
+    />
+  );
+}
+
+/**
+ * Loads search facets and results
+ * Facets are cached but still need to be fetched, so they stream in
+ * Results depend on facets, so they're loaded after facets
+ */
+async function SearchFacetsAndResults({
+  query,
+  filters,
+  hasUserFilters,
+  hasQueryOrFilters,
+  requestId,
+  reqLogger,
+}: {
+  filters: SearchFilters;
+  hasQueryOrFilters: boolean;
+  hasUserFilters: boolean;
+  query: string;
+  reqLogger: ReturnType<typeof logger.child>;
+  requestId: string;
+}) {
+  // Load facets (cached, but still needs to fetch)
   let facetAggregate: null | SearchFacetAggregate = null;
   let facetOptions = {
     tags: [] as string[],
@@ -307,7 +369,7 @@ async function SearchPageContent({
     });
   }
 
-  // Section: Zero-State Suggestions
+  // Load zero-state suggestions in parallel with facets (if no query/filters)
   let zeroStateSuggestions: Awaited<ReturnType<typeof searchContent>> = [];
   if (!hasQueryOrFilters) {
     try {
@@ -355,56 +417,29 @@ async function SearchPageContent({
   );
 
   // Final summary log
-  reqLogger.info('SearchPage: page render completed', {
-    section: 'page-render',
+  reqLogger.info('SearchPage: facets and suggestions loaded', {
+    section: 'facets-and-suggestions',
     hasQuery: query.length > 0,
     hasFilters: hasUserFilters,
     facetsLoaded: !!facetAggregate,
     suggestionsCount: zeroStateSuggestions.length,
   });
 
+  // Now load results (depends on facets for UI, but can load in parallel)
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-4xl font-bold">
-        {query ? `Search: "${query}"` : 'Search Claude Code Directory'}
-      </h1>
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
-        <Suspense
-          fallback={
-            <ContentSearchClient
-              items={[]}
-              type={Constants.public.Enums.content_category[0]}
-              searchPlaceholder="Search agents, MCP servers, rules, commands..."
-              title="Results"
-              icon="Search"
-              availableTags={facetOptions.tags}
-              availableAuthors={facetOptions.authors}
-              availableCategories={facetOptions.categories}
-              zeroStateSuggestions={fallbackSuggestions}
-              fallbackSuggestions={fallbackSuggestions}
-              quickTags={quickTags}
-              quickAuthors={quickAuthors}
-              quickCategories={quickCategories}
-            />
-          }
-        >
-          <SearchResultsSection
-            query={query}
-            filters={filters}
-            hasUserFilters={hasUserFilters}
-            facetOptions={facetOptions}
-            fallbackSuggestions={fallbackSuggestions}
-            quickTags={quickTags}
-            quickAuthors={quickAuthors}
-            quickCategories={quickCategories}
-            requestId={requestId}
-          />
-        </Suspense>
-        <Suspense fallback={null}>
-          <RecentlyViewedSidebar />
-        </Suspense>
-      </div>
-    </main>
+    <Suspense fallback={<SearchResultsSkeleton />}>
+      <SearchResultsSection
+        query={query}
+        filters={filters}
+        hasUserFilters={hasUserFilters}
+        facetOptions={facetOptions}
+        fallbackSuggestions={fallbackSuggestions}
+        quickTags={quickTags}
+        quickAuthors={quickAuthors}
+        quickCategories={quickCategories}
+        requestId={requestId}
+      />
+    </Suspense>
   );
 }
 

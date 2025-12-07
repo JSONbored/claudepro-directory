@@ -12,6 +12,8 @@ import { optionalAuthAction, rateLimitedAction } from './safe-action.ts';
 // import { getReviewsWithStatsData } from '../data/content/reviews.ts';
 import { z } from 'zod';
 import type { DisplayableContent } from '../types/component.types.ts';
+import { logger, generateRequestId, createWebAppContextWithId } from '../logging/server.ts';
+import { normalizeError } from '../errors.ts';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -44,6 +46,16 @@ export const getReviewsWithStats = optionalAuthAction
   .action(async ({ parsedInput, ctx }) => {
     const { content_type, content_slug, sort_by, limit, offset } = parsedInput;
 
+    const requestId = generateRequestId();
+    const logContext = createWebAppContextWithId(requestId, 'action', 'getReviewsWithStats', {
+      contentType: content_type,
+      contentSlug: content_slug,
+      sortBy: sort_by,
+      limit,
+      offset,
+      hasUser: Boolean(ctx.userId),
+    });
+
     try {
       const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
 
@@ -57,14 +69,21 @@ export const getReviewsWithStats = optionalAuthAction
       });
 
       if (!data) {
-        // Error is already logged by getReviewsWithStatsData, just throw user-friendly message
+        // Error is already logged by getReviewsWithStatsData, but log here too for action context
+        const normalized = normalizeError(
+          new Error('getReviewsWithStatsData returned null'),
+          'Failed to fetch reviews'
+        );
+        logger.error('getReviewsWithStats: data fetch returned null', normalized, logContext);
         throw new Error('Failed to fetch reviews. Please try again.');
       }
 
       return data;
     } catch (error) {
-      // Error is already logged by getReviewsWithStatsData or safe-action wrapper
-      // Re-throw to let safe-action handle it
+      // If error is already normalized/logged by getReviewsWithStatsData, still log with action context
+      const normalized = normalizeError(error, 'Failed to fetch reviews');
+      logger.error('getReviewsWithStats: action failed', normalized, logContext);
+      // Re-throw to let safe-action wrapper handle it
       throw error;
     }
   });
@@ -93,8 +112,25 @@ export const fetchPaginatedContent = rateLimitedAction
   .inputSchema(fetchPaginatedContentSchema)
   .metadata({ actionName: 'content.fetchPaginatedContent', category: 'content' })
   .action(async ({ parsedInput }) => {
+    const requestId = generateRequestId();
+    const logContext = createWebAppContextWithId(requestId, '/api/actions', 'fetchPaginatedContent');
+
     try {
+      logger.info('fetchPaginatedContent: action started', {
+        ...logContext,
+        category: parsedInput.category,
+        limit: parsedInput.limit,
+        offset: parsedInput.offset,
+      });
+
       const { getPaginatedContent: getPaginatedContentData } = await import('../data/content/paginated.ts');
+
+      logger.info('fetchPaginatedContent: calling getPaginatedContentData', {
+        ...logContext,
+        category: parsedInput.category,
+        limit: parsedInput.limit,
+        offset: parsedInput.offset,
+      });
 
       const data = await getPaginatedContentData({
         category: parsedInput.category,
@@ -102,13 +138,39 @@ export const fetchPaginatedContent = rateLimitedAction
         offset: parsedInput.offset,
       });
 
+      logger.info('fetchPaginatedContent: getPaginatedContentData result received', {
+        ...logContext,
+        hasData: Boolean(data),
+        hasItems: Boolean(data?.items),
+        itemsLength: Array.isArray(data?.items) ? data.items.length : 0,
+        hasPagination: Boolean(data?.pagination),
+        paginationTotal: data?.pagination?.total_count ?? null,
+      });
+
       // get_content_paginated_slim returns content_paginated_slim_result composite type
       if (!data?.items) {
+        logger.warn('fetchPaginatedContent: no items in result, returning empty array', {
+          ...logContext,
+          hasData: Boolean(data),
+          dataKeys: data ? Object.keys(data) : [],
+        });
         return [];
       }
       // Return items directly - they are already properly typed as content_paginated_slim_item[]
-      return data.items as DisplayableContent[];
-    } catch {
+      const items = data.items as DisplayableContent[];
+      logger.info('fetchPaginatedContent: returning items', {
+        ...logContext,
+        itemsCount: items.length,
+      });
+      return items;
+    } catch (error) {
+      const normalized = normalizeError(error, 'fetchPaginatedContent failed');
+      logger.error('fetchPaginatedContent: action failed', normalized, {
+        ...logContext,
+        category: parsedInput.category,
+        limit: parsedInput.limit,
+        offset: parsedInput.offset,
+      });
       // Fallback to empty array on error (safe-action middleware handles logging)
       return [];
     }

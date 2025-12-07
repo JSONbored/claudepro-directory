@@ -17,9 +17,6 @@ import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// MIGRATED: Added Suspense boundary for dynamic searchParams access (Cache Components requirement)
-
 const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
 
 /**
@@ -46,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see generateRequestId
  * @see logger
  */
-export default async function AuthCodeError(properties: PagePropsWithSearchParams) {
+export default function AuthCodeError(properties: PagePropsWithSearchParams) {
   return (
     <Suspense
       fallback={
@@ -99,9 +96,9 @@ async function AuthCodeErrorContent({
 
   const searchParameters = await searchParams;
 
-  const rawCode = searchParameters?.['code'];
-  const rawProvider = searchParameters?.['provider'];
-  const rawMessage = searchParameters?.['message'];
+  const rawCode = searchParameters['code'];
+  const rawProvider = searchParameters['provider'];
+  const rawMessage = searchParameters['message'];
 
   // Handle array or string, and ensure we get a string or default
   const code = (Array.isArray(rawCode) ? rawCode[0] : rawCode) ?? 'unknown';

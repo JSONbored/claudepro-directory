@@ -33,30 +33,10 @@ const Footer = dynamic(
   }
 );
 
-const NotificationSheet = dynamic(
-  () =>
-    import('@/src/components/features/notifications/notification-sheet').then((mod) => ({
-      default: mod.NotificationSheet,
-    })),
-  {
-    loading: () => null,
-  }
-);
-
 const NewsletterFooterBar = dynamic(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-footer-bar').then((mod) => ({
       default: mod.NewsletterFooterBar,
-    })),
-  {
-    loading: () => null,
-  }
-);
-
-const FloatingActionBar = dynamic(
-  () =>
-    import('@/src/components/features/fab/floating-action-bar').then((mod) => ({
-      default: mod.FloatingActionBar,
     })),
   {
     loading: () => null,
@@ -117,15 +97,6 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
   // Get static layout flags (no async operations)
   const layoutFlags = getLayoutFlags();
 
-  const useFloatingActionBar = layoutFlags.useFloatingActionBar;
-  const fabFlags = {
-    showSubmit: layoutFlags.fabSubmitAction,
-    showSearch: layoutFlags.fabSearchAction,
-    showScrollToTop: layoutFlags.fabScrollToTop,
-    showNotifications: layoutFlags.fabNotifications,
-    showPinboard: true,
-  };
-
   // Get newsletter experiment variants from static flags
   const footerDelayVariant = layoutFlags.footerDelayVariant;
   const ctaVariant = layoutFlags.ctaVariant;
@@ -147,11 +118,17 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
     try {
       hasSeenToast = sessionStorage.getItem(NEWSLETTER_OPT_IN_SEEN_FLAG) === 'true';
     } catch (error) {
+      const normalized = normalizeError(error, 'Unable to read newsletter toast flag from sessionStorage');
       logClientWarn(
-        'LayoutContent: unable to read newsletter toast flag from sessionStorage',
-        error,
+        '[Storage] Unable to read newsletter toast flag',
+        normalized,
         'LayoutContent.readToastFlag',
-        buildStorageErrorContext(error)
+        {
+          component: 'LayoutContent',
+          action: 'read-toast-flag',
+          category: 'storage',
+          ...buildStorageErrorContext(error),
+        }
       );
     }
 
@@ -166,11 +143,17 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
     try {
       sessionStorage.setItem(NEWSLETTER_OPT_IN_SEEN_FLAG, 'true');
     } catch (error) {
+      const normalized = normalizeError(error, 'Unable to set newsletter toast flag');
       logClientWarn(
-        'LayoutContent: unable to set newsletter toast flag',
-        error,
+        '[Storage] Unable to set newsletter toast flag',
+        normalized,
         'LayoutContent.setToastFlag',
-        buildStorageErrorContext(error)
+        {
+          component: 'LayoutContent',
+          action: 'set-toast-flag',
+          category: 'storage',
+          ...buildStorageErrorContext(error),
+        }
       );
     }
 
@@ -185,12 +168,15 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
     }
 
     clearNewsletterOptInCookie().catch((error) => {
+      const normalized = normalizeError(error, 'Failed to clear newsletter opt-in cookie');
       logClientError(
-        'LayoutContent: failed to clear newsletter opt-in cookie',
-        error,
+        '[Storage] Failed to clear newsletter opt-in cookie',
+        normalized,
         'LayoutContent.clearCookie',
         {
           component: 'LayoutContent',
+          action: 'clear-cookie',
+          category: 'storage',
           pathname,
           cookieName: NEWSLETTER_OPT_IN_COOKIE,
         }
@@ -220,15 +206,12 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
         <PinboardDrawerProvider>
           <div className="bg-background flex min-h-screen flex-col">
             {announcement ? <AnnouncementBannerClient announcement={announcement} /> : null}
-            <Navigation hideCreateButton={useFloatingActionBar} navigationData={navigationData} />
+            <Navigation navigationData={navigationData} />
           <main id="main-content" className="flex-1">
             {children}
           </main>
           <Footer />
-          {/* Floating Action Bar - controlled by static config */}
-          {useFloatingActionBar ? <FloatingActionBar fabFlags={fabFlags} /> : null}
           <RecentlyViewedMobileTray />
-          <NotificationSheet />
           <NewsletterFooterBar source="footer" showAfterDelay={delayMs} ctaVariant={ctaVariant} />
           </div>
         </PinboardDrawerProvider>

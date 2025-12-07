@@ -212,8 +212,7 @@ async function fetchFieldsForContentType(
     return section;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     requestLogger.error('fetchFieldsForContentType: failed', errorForLogging, {
       contentType,
       source: 'SubmissionFormConfig',

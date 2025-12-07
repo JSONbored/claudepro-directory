@@ -71,6 +71,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       configFormat: "json",
     },
     sections: {
+      description: true,
       features: true,
       installation: true,
       use_cases: true,
@@ -123,14 +124,15 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       configFormat: "hook",
     },
     sections: {
+      description: true,
       features: true,
       installation: true,
       use_cases: true,
       configuration: true,
-      security: false,
+      security: true,
       troubleshooting: true,
-      examples: false,
-      requirements: false,
+      examples: true,
+      requirements: true,
     },
     metadata: {
       showGitHubLink: true,
@@ -175,11 +177,12 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       configFormat: "json",
     },
     sections: {
+      description: true,
       features: true,
       installation: true,
       use_cases: true,
-      configuration: false,
-      security: false,
+      configuration: true,
+      security: true,
       troubleshooting: true,
       examples: true,
       requirements: true,
@@ -227,14 +230,15 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       configFormat: "json",
     },
     sections: {
+      description: true,
       features: true,
       installation: true,
       use_cases: true,
       configuration: false,
-      security: false,
+      security: true,
       troubleshooting: true,
-      examples: false,
-      requirements: false,
+      examples: true,
+      requirements: true,
     },
     metadata: {
       showGitHubLink: true,
@@ -279,6 +283,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       configFormat: "json",
     },
     sections: {
+      description: true,
       features: false,
       installation: false,
       use_cases: false,
@@ -331,6 +336,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       configFormat: "json",
     },
     sections: {
+      description: true,
       features: false,
       installation: false,
       use_cases: false,
@@ -383,6 +389,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       configFormat: "json",
     },
     sections: {
+      description: true,
       features: false,
       installation: false,
       use_cases: true,
@@ -435,6 +442,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       configFormat: "json",
     },
     sections: {
+      description: true,
       features: true,
       installation: true,
       use_cases: true,
@@ -487,6 +495,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       configFormat: "json",
     },
     sections: {
+      description: true,
       features: true,
       installation: true,
       use_cases: true,
@@ -539,14 +548,15 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       configFormat: "json",
     },
     sections: {
+      description: true,
       features: true,
       installation: true,
       use_cases: true,
       configuration: true,
-      security: false,
+      security: true,
       troubleshooting: true,
-      examples: false,
-      requirements: false,
+      examples: true,
+      requirements: true,
     },
     metadata: {
       showGitHubLink: true,
@@ -591,6 +601,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       configFormat: "json",
     },
     sections: {
+      description: true,
       features: false,
       installation: false,
       use_cases: true,

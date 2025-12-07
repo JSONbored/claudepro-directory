@@ -31,9 +31,6 @@ import { Suspense } from 'react';
 
 import { FollowButton } from '@/src/components/core/buttons/social/follow-button';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
-
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
@@ -248,8 +245,7 @@ async function UserProfilePageContent({
     });
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     viewerLogger.error('UserProfilePage: get_user_profile threw', errorForLogging, {
       section: 'user-profile-fetch',
     });

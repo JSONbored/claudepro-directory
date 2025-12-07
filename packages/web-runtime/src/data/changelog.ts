@@ -100,8 +100,7 @@ export async function getChangelogOverview(
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getChangelogOverview: failed', errorForLogging, {
       ...(category ? { category } : {}),
       publishedOnly,
@@ -199,8 +198,7 @@ export async function getChangelogEntryBySlug(
     return normalizedEntry;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getChangelogEntryBySlug: failed', errorForLogging, {
       slug,
     });

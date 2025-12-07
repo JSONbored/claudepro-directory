@@ -245,13 +245,14 @@ export const DetailSidebar = memo(function DetailSidebar({
                   const safeDocUrl = getSafeDocumentationUrl(contentItem.documentation_url);
                   if (!safeDocUrl) {
                     logClientWarn(
-                      'NavigationSidebar: Invalid documentation URL rejected',
+                      '[Content] Invalid documentation URL rejected',
                       undefined,
                       'NavigationSidebar.render',
                       {
                         component: 'NavigationSidebar',
                         action: 'render-documentation-link',
-                        category: contentItem.category ?? 'null',
+                        category: 'content',
+                        itemCategory: contentItem.category ?? 'null',
                         slug: contentItem.slug ?? 'null',
                         url: contentItem.documentation_url ?? 'null',
                       }
@@ -446,13 +447,14 @@ export const DetailSidebar = memo(function DetailSidebar({
               const safeRelatedUrl = getSafeContentItemUrl(relatedCategory, relatedSlug);
               if (!safeRelatedUrl) {
                 logClientWarn(
-                  'NavigationSidebar: Invalid related item URL rejected',
+                  '[Content] Invalid related item URL rejected',
                   undefined,
                   'NavigationSidebar.render',
                   {
                     component: 'NavigationSidebar',
                     action: 'render-related-item',
-                    category: relatedCategory,
+                    category: 'content',
+                    itemCategory: relatedCategory,
                     slug: relatedSlug,
                     relatedItemTitle: getDisplayTitle({
                       title:
@@ -471,13 +473,14 @@ export const DetailSidebar = memo(function DetailSidebar({
               // Type guard: after this check, safeRelatedUrl is guaranteed to be a valid internal path
               if (!isValidInternalPath(safeRelatedUrl)) {
                 logClientWarn(
-                  'NavigationSidebar: Invalid internal path rejected',
+                  '[Content] Invalid internal path rejected',
                   undefined,
                   'NavigationSidebar.render',
                   {
                     component: 'NavigationSidebar',
                     action: 'render-related-item',
-                    category: relatedCategory,
+                    category: 'content',
+                    itemCategory: relatedCategory,
                     slug: relatedSlug,
                     url: safeRelatedUrl,
                   }

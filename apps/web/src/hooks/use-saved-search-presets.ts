@@ -10,7 +10,6 @@
  * - Guards against SSR/localStorage absence to avoid hydration issues.
  */
 
-import { logClientWarning } from '@heyclaude/web-runtime/core';
 import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
   type FilterState,
@@ -94,7 +93,18 @@ export function useSavedSearchPresets({
         try {
           globalThis.localStorage.setItem(storageKey, JSON.stringify(nextPresets));
         } catch (error) {
-          logClientWarning('useSavedSearchPresets: failed to persist presets', error);
+          const normalized = normalizeError(error, 'Failed to persist presets');
+          logClientWarn(
+            '[Storage] Failed to persist presets',
+            normalized,
+            'useSavedSearchPresets.schedulePersist',
+            {
+              component: 'useSavedSearchPresets',
+              action: 'persist-presets',
+              category: 'storage',
+              storageKey,
+            }
+          );
         }
         writeTimeoutRef.current = null;
       }, WRITE_DEBOUNCE_MS);
@@ -212,7 +222,18 @@ export function useSavedSearchPresets({
       try {
         globalThis.localStorage.removeItem(storageKey);
       } catch (error) {
-        logClientWarning('useSavedSearchPresets: failed to clear presets', error);
+        const normalized = normalizeError(error, 'Failed to clear presets');
+        logClientWarn(
+          '[Storage] Failed to clear presets',
+          normalized,
+          'useSavedSearchPresets.clearPresets',
+          {
+            component: 'useSavedSearchPresets',
+            action: 'clear-presets',
+            category: 'storage',
+            storageKey,
+          }
+        );
       }
     }
   }, [canUseStorage, storageKey]);

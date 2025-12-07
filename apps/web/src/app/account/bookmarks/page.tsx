@@ -4,10 +4,6 @@ import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
-
 /**
  * Dynamic Rendering Required
  * Authenticated route (legacy redirect)

@@ -51,8 +51,7 @@ export async function fetchContactCommands(): Promise<ContactCommandsRow | null>
     return result?.[0] ?? null;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('fetchContactCommands: failed', errorForLogging);
     return null;
   }

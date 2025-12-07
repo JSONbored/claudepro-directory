@@ -4,21 +4,26 @@ import { type Database } from '@heyclaude/database-types';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { useConfetti, useNewsletter } from '@heyclaude/web-runtime/hooks';
-import { Mail } from '@heyclaude/web-runtime/icons';
+import { Loader2, Send } from '@heyclaude/web-runtime/icons';
 import {
   cn,
-  DIMENSIONS,
   UI_CLASSES,
-  InlineSpinner,
-  Button,
   Input,
 } from '@heyclaude/web-runtime/ui';
-import { useId, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useId, useMemo } from 'react';
 
 export interface NewsletterFormProps {
   className?: string;
   source: Database['public']['Enums']['newsletter_source'];
 }
+
+/**
+ * Email validation regex - simple but effective
+ */
+const isValidEmail = (email: string): boolean => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+};
 
 export function NewsletterForm({ source, className }: NewsletterFormProps) {
   const { fireConfetti } = useConfetti();
@@ -33,79 +38,115 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
     },
   });
   const errorId = useId();
-  const [isFocused, setIsFocused] = useState(false);
+
+  // Determine if email is valid and button should be visible
+  const isValid = useMemo(() => isValidEmail(email), [email]);
+  const showSubmitButton = isValid && !isSubmitting && email.trim().length > 0;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await subscribe();
+    if (isValid && !isSubmitting) {
+      await subscribe();
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className={cn('w-full', className)}>
       <div className={UI_CLASSES.FLEX_COL_GAP_3}>
-        <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
-          <div className="relative flex-1">
-            <Input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              required
-              disabled={isSubmitting}
-              className={cn(
-                `${DIMENSIONS.BUTTON_LG} min-w-0 px-5 text-base`,
-                'border-border/40 bg-background/95 backdrop-blur-sm',
-                'transition-all duration-200 ease-out',
-                'focus:border-accent/50 focus:ring-accent/20 focus:ring-2',
-                error && 'border-destructive/50 focus:border-destructive focus:ring-destructive/20',
-                isSubmitting && 'cursor-not-allowed opacity-60'
-              )}
-              aria-label="Email address"
-              aria-invalid={!!error}
-              aria-describedby={error ? errorId : undefined}
-            />
-            <div
-              className={cn(
-                'from-accent to-primary absolute bottom-0 left-0 h-0.5 bg-linear-to-r transition-all duration-300 ease-out',
-                isFocused && !error ? 'w-full opacity-100' : 'w-0 opacity-0'
-              )}
-            />
-          </div>
-          <Button
-            type="submit"
-            disabled={isSubmitting || !email.trim()}
-            size="lg"
+        {/* Integrated input with submit button inside */}
+        <div className="relative w-full">
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={isSubmitting}
             className={cn(
-              `${DIMENSIONS.BUTTON_LG} shrink-0 px-8 whitespace-nowrap`,
-              'bg-linear-to-rrom-accent via-accent to-primary text-accent-foreground font-semibold',
-              'shadow-md transition-all duration-200 ease-out',
-              'hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:scale-[1.02] hover:shadow-lg',
-              'active:scale-[0.98]',
-              'focus-visible:ring-accent focus-visible:ring-2 focus-visible:ring-offset-2',
-              'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100',
-              `w-full sm:w-auto sm:${DIMENSIONS.MIN_W_NEWSLETTER_BUTTON}`
+              'h-12 w-full pr-14 text-base',
+              'border-border bg-background',
+              'transition-all duration-200 ease-out',
+              'focus:border-accent focus:ring-accent/20 focus:ring-2',
+              error && 'border-destructive focus:border-destructive focus:ring-destructive/20',
+              isSubmitting && 'cursor-not-allowed opacity-60',
+              showSubmitButton && 'pr-14'
             )}
-          >
+            aria-label="Email address"
+            aria-invalid={!!error}
+            aria-describedby={error ? errorId : undefined}
+          />
+
+          {/* Integrated submit button - appears when email is valid */}
+          <AnimatePresence mode="wait">
             {isSubmitting ? (
-              <InlineSpinner size="sm" message="Subscribing..." />
-            ) : (
-              <span className="flex items-center gap-2">
-                {NEWSLETTER_CTA_CONFIG.buttonText}
-                <Mail className={UI_CLASSES.ICON_SM} aria-hidden="true" />
-              </span>
-            )}
-          </Button>
+              <motion.button
+                key="loading"
+                type="button"
+                disabled
+                className={cn(
+                  'absolute right-2 top-1/2 -translate-y-1/2',
+                  'flex h-8 w-8 items-center justify-center rounded-md',
+                  'bg-accent text-white',
+                  'cursor-not-allowed'
+                )}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
+                aria-label="Subscribing..."
+              >
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              </motion.button>
+            ) : showSubmitButton ? (
+              <motion.button
+                key="submit"
+                type="submit"
+                className={cn(
+                  'absolute right-2 top-1/2 -translate-y-1/2',
+                  'flex h-8 w-8 items-center justify-center rounded-md',
+                  'bg-accent text-white',
+                  'shadow-sm transition-all duration-200',
+                  'hover:bg-accent/90 hover:shadow-md',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
+                  'active:scale-95'
+                )}
+                initial={{ opacity: 0, x: -8, scale: 0.8 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -8, scale: 0.8 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 400,
+                  damping: 25,
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                aria-label={NEWSLETTER_CTA_CONFIG.buttonText}
+              >
+                <motion.div
+                  initial={{ rotate: 0 }}
+                  whileHover={{ rotate: 15 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                >
+                  <Send className="h-4 w-4" aria-hidden="true" />
+                </motion.div>
+              </motion.button>
+            ) : null}
+          </AnimatePresence>
         </div>
+
+        {/* Error message */}
         {error ? (
-          <p
+          <motion.p
             id={errorId}
-            className="slide-in-from-top-1 fade-in animate-in text-destructive text-sm"
+            className="text-destructive text-sm"
             role="alert"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2 }}
           >
             {error}
-          </p>
+          </motion.p>
         ) : null}
       </div>
     </form>

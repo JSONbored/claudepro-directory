@@ -25,8 +25,6 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
-
 // Zod schema for revalidate request
 const RevalidateRequestSchema = z.object({
   secret: z.string(),
@@ -119,9 +117,8 @@ export async function POST(request: NextRequest) {
     // Tag invalidation (new logic)
     if (tags && tags.length > 0) {
       // Invalidate each tag (already validated as strings by Zod)
-      // Using 'max' profile for stale-while-revalidate semantics (recommended in Next.js 16)
       for (const tag of tags) {
-        revalidateTag(tag, 'max');
+        revalidateTag(tag, 'default');
         invalidatedTags.push(tag);
       }
     }

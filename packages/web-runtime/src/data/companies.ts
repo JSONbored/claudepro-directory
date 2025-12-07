@@ -71,8 +71,7 @@ export async function getCompanyAdminProfile(
     return normalized as GetCompanyAdminProfileReturn[number] | null;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     requestLogger.error('getCompanyAdminProfile failed', errorForLogging, {
       companyId,
     });
@@ -126,8 +125,7 @@ export async function getCompanyProfile(
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     requestLogger.error('getCompanyProfile failed', errorForLogging, {
       slug,
     });
@@ -186,8 +184,7 @@ export async function getCompaniesList(
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     requestLogger.error('getCompaniesList failed', errorForLogging, {
       limit,
       offset,

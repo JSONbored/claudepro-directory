@@ -38,12 +38,54 @@ const nextConfig = {
   ],
   // Exclude packages that shouldn't be bundled (pino has test files that break Turbopack)
   serverExternalPackages: ['@imagemagick/magick-wasm', 'pino', 'pino-pretty', 'thread-stream', 'sonic-boom'],
+  /**
+   * Cache Life Profiles
+   *
+   * Named cache profiles for Next.js Cache Components. Use these profiles with `cacheLife('profile-name')`
+   * in data functions to ensure consistent caching behavior across the application.
+   *
+   * @see https://nextjs.org/docs/app/api-reference/functions/cache-life
+   *
+   * Profile Definitions:
+   * - `minutes`: 5min stale, 1min revalidate, 1hr expire - Very frequently changing data (real-time stats)
+   * - `quarter`: 15min stale, 5min revalidate, 2hr expire - Frequently changing data (newsletter counts, search)
+   * - `half`: 30min stale, 10min revalidate, 3hr expire - Moderately changing data (jobs, companies, content lists)
+   * - `hours`: 1hr stale, 15min revalidate, 1 day expire - Hourly updates (content detail, search facets, changelog)
+   * - `stable`: 6hr stale, 1hr revalidate, 7 days expire - Stable data (navigation menus, site config)
+   * - `static`: 1 day stale, 6hr revalidate, 30 days expire - Rarely changing data (SEO metadata, paginated content)
+   *
+   * Usage in data functions:
+   * ```ts
+   * export async function getData() {
+   *   'use cache';
+   *   cacheLife('hours'); // Use named profile
+   *   cacheTag('data');
+   *   return data;
+   * }
+   * ```
+   *
+   * For user-specific data, use custom values instead:
+   * ```ts
+   * export async function getUserData(userId: string) {
+   *   'use cache: private';
+   *   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+   *   cacheTag(`user-${userId}`);
+   *   return data;
+   * }
+   * ```
+   */
   cacheLife: {
+    /** Very frequently changing data (real-time stats, live counters) - 5min stale, 1min revalidate, 1hr expire */
     minutes: { stale: 300, revalidate: 60, expire: 3600 },
+    /** Frequently changing data (newsletter counts, search results) - 15min stale, 5min revalidate, 2hr expire */
     quarter: { stale: 900, revalidate: 300, expire: 7200 },
+    /** Moderately changing data (jobs, companies, content lists) - 30min stale, 10min revalidate, 3hr expire */
     half: { stale: 1800, revalidate: 600, expire: 10800 },
+    /** Hourly updates (content detail, search facets, changelog) - 1hr stale, 15min revalidate, 1 day expire */
     hours: { stale: 3600, revalidate: 900, expire: 86400 },
+    /** Stable data (navigation menus, site config) - 6hr stale, 1hr revalidate, 7 days expire */
     stable: { stale: 21600, revalidate: 3600, expire: 604800 },
+    /** Rarely changing data (SEO metadata, paginated content) - 1 day stale, 6hr revalidate, 30 days expire */
     static: { stale: 86400, revalidate: 21600, expire: 2592000 },
   },
 

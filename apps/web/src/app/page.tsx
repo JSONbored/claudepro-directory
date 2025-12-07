@@ -11,7 +11,6 @@ import {
 import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
 import { HomePageLoading } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
@@ -21,26 +20,6 @@ import { HomepageContentServer } from '@/src/components/features/home/homepage-c
 import { HomepageHeroServer } from '@/src/components/features/home/homepage-hero-server';
 import { HomepageSearchFacetsServer } from '@/src/components/features/home/homepage-search-facets-server';
 import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
-
-// MIGRATED: Removed export const revalidate = 1800 (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
-/**
- * Dynamic Rendering Required
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
-      (module_) => ({
-        default: module_.NewsletterCTAVariant,
-      })
-    ),
-  {
-    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
-  }
-);
 
 export async function generateMetadata(): Promise<Metadata> {
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
@@ -86,6 +65,7 @@ async function TopContributorsServer() {
 
   interface TopContributor {
     bio: null | string;
+    created_at?: null | string;
     id: string;
     image: null | string;
     name: string;
@@ -106,7 +86,8 @@ async function TopContributorsServer() {
       bio: contributor.bio,
       work: contributor.work,
       tier: contributor.tier ?? 'free',
-      created_at: new Date().toISOString(),
+      // Use actual created_at from database if available, otherwise use current timestamp as fallback
+      created_at: contributor.created_at ?? new Date().toISOString(),
     }));
 
   return <TopContributors contributors={topContributors} />;
@@ -180,10 +161,6 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
           <Suspense fallback={null}>
             <TopContributorsServer />
           </Suspense>
-        </LazySection>
-
-        <LazySection rootMargin="0px 0px -500px 0px">
-          <NewsletterCTAVariant variant="hero" source="homepage" />
         </LazySection>
       </div>
     </div>

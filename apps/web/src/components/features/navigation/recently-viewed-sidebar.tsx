@@ -159,11 +159,8 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
   const { recentlyViewed, isLoaded, removeItem, clearAll } = useRecentlyViewed();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Don't render until loaded (prevents flash of empty state)
-  if (!isLoaded) return null;
-
-  // Don't render if no items
-  if (recentlyViewed.length === 0) return null;
+  // Always render - show empty state if no items
+  // This ensures consistent sidebar layout across all pages
 
   return (
     <motion.aside
@@ -171,7 +168,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
       className={cn(
-        'border-border/50 bg-card/50 sticky top-20 hidden h-fit max-h-[calc(100vh-6rem)] w-72 flex-col gap-3 rounded-xl border p-4 backdrop-blur-sm xl:flex',
+        'border-border/50 bg-card/50 sticky top-20 hidden h-fit max-h-[calc(100vh-6rem)] w-full flex-col gap-3 rounded-xl border p-4 backdrop-blur-sm xl:flex',
         'overflow-hidden'
       )}
     >
@@ -207,7 +204,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
         </div>
       </div>
 
-      {/* List */}
+      {/* List or Empty State */}
       <AnimatePresence mode="popLayout">
         {!isCollapsed && (
           <motion.div
@@ -217,22 +214,46 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
             transition={{ duration: 0.2 }}
             className="flex flex-col gap-2 overflow-y-auto pr-1"
           >
-            <AnimatePresence mode="popLayout">
-              {recentlyViewed.map((item, index) => (
-                <RecentlyViewedItemComponent
-                  key={`${item.category}-${item.slug}`}
-                  item={item}
-                  index={index}
-                  onRemove={removeItem}
-                />
-              ))}
-            </AnimatePresence>
+            {!isLoaded ? (
+              // Loading state
+              <div className="text-muted-foreground py-8 text-center text-sm">
+                Loading...
+              </div>
+            ) : recentlyViewed.length === 0 ? (
+              // Empty state - always show to maintain consistent sidebar
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className="border-border/30 text-muted-foreground flex flex-col items-center gap-3 rounded-lg border border-dashed p-6 text-center"
+              >
+                <Clock className="h-8 w-8 opacity-50" />
+                <div className="space-y-1">
+                  <p className="text-foreground text-sm font-medium">No recent views</p>
+                  <p className="text-xs">
+                    Start browsing content to see your recently viewed items here
+                  </p>
+                </div>
+              </motion.div>
+            ) : (
+              // Items list
+              <AnimatePresence mode="popLayout">
+                {recentlyViewed.map((item, index) => (
+                  <RecentlyViewedItemComponent
+                    key={`${item.category}-${item.slug}`}
+                    item={item}
+                    index={index}
+                    onRemove={removeItem}
+                  />
+                ))}
+              </AnimatePresence>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Footer hint */}
-      {!isCollapsed && (
+      {/* Footer hint - only show when there are items */}
+      {!isCollapsed && isLoaded && recentlyViewed.length > 0 && (
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

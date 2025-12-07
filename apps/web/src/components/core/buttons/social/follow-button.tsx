@@ -82,8 +82,7 @@ export function FollowButton({
           }
         );
       } catch (error) {
-        // Rollback on exception (error already logged by useLoggedAsync)
-        setOptimisticIsFollowing(!newState);
+        // Error already logged by useLoggedAsync, rollback already done in error paths above
         toast.error(normalizeError(error, 'An unexpected error occurred').message);
       }
     });

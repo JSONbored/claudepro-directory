@@ -31,19 +31,15 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  cn,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
-import { JobAlertsCard } from '@/src/components/core/domain/jobs/job-alerts-card';
-import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
-
-// MIGRATED: Removed export const revalidate = 900 (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
+import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
 /**
  * ISR: 15 minutes (900s) - Jobs update frequently but don't need real-time freshness
@@ -55,18 +51,6 @@ import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
  * Note: Using ISR instead of force-dynamic to enable caching while still allowing
  * on-demand revalidation for filtered queries.
  */
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
-      (module_) => ({
-        default: module_.NewsletterCTAVariant,
-      })
-    ),
-  {
-    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
-  }
-);
 
 /**
  * Renders a badge that displays the total number of jobs by fetching the count separately.
@@ -289,9 +273,18 @@ async function JobsListSection({
 }
 
 /**
- * Render the server-side Jobs page with filters, active-filter chips, a streaming total-count badge, and a two-column jobs + sidebar layout.
+ * PPR Optimization: Static shell renders immediately
+ * - Hero section (title, description, badges, CTA button) - static
+ * - Filter section (search, category, employment, experience, remote, sort) - static form
+ * - Layout structure (grid, containers) - static
+ * Dynamic content streams in Suspense:
+ * - JobsCountBadge - streams total count (cached when no filters)
+ * - JobsListSection - streams job listings (cached when no filters, uncached when filtered)
+ * - Sidebar components (JobsPromo with integrated job alerts form) - static client components
+ * - NewsletterCTA - streams at bottom
  *
- * Renders a persistent filter form (search, category, employment, experience, remote, sort, pagination) and a job results section that uses server-side fetching plus client-side sorting; the total job count is streamed via JobsCountBadge while job results are rendered by JobsListSection.
+ * Note: getFilteredJobs uses caching when no filters are active, enabling efficient
+ * streaming of the jobs list. When filters are active, results are uncached for freshness.
  *
  * @param props.searchParams - Query parameters to control filtering and pagination. Recognized keys:
  *   - q, query, search: full-text search string
@@ -505,7 +498,10 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   <Button
                     type="button"
                     variant={remote ? 'default' : 'outline'}
-                    className="flex-1"
+                    className={cn(
+                      'flex-1',
+                      remote && 'text-background bg-[#F6F8F4] hover:bg-[#F6F8F4]/90'
+                    )}
                     asChild
                   >
                     <Link
@@ -517,7 +513,11 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                       Remote
                     </Link>
                   </Button>
-                  <Button type="submit" size="sm">
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="text-background bg-[#F6F8F4] hover:bg-[#F6F8F4]/90"
+                  >
                     Filter
                   </Button>
                 </div>
@@ -686,19 +686,11 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </Suspense>
           </div>
 
-          <aside className="w-full space-y-6 lg:sticky lg:top-24 lg:h-fit">
-            <JobsPromo />
-            <JobAlertsCard
-              defaultCategory={category ?? 'all'}
-              defaultExperience={experience ?? 'any'}
-              defaultRemote={remote ? 'remote' : 'any'}
-            />
+          <aside className="w-full lg:sticky lg:top-24 lg:h-fit">
+            {/* Unified ContentSidebar with JobsPromo (now includes job alerts form) + RecentlyViewed */}
+            <ContentSidebar />
           </aside>
         </div>
-      </section>
-
-      <section className="container mx-auto px-4 py-12">
-        <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>
   );

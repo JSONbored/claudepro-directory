@@ -20,10 +20,6 @@ import { Suspense } from 'react';
 
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
-
 /**
  * Dynamic Rendering Required
  * Authenticated user connections
@@ -128,7 +124,7 @@ async function ConnectedAccountsPageContent({
   });
 
   // Section: Identities Data Fetch
-  // CRITICAL: Call data function directly instead of action to avoid cookies() in unstable_cache() error
+  // CRITICAL: Call data function directly instead of action to avoid cookies() access issues in Cache Components
   let identitiesData: Awaited<ReturnType<typeof getUserIdentitiesData>>;
   try {
     identitiesData = await getUserIdentitiesData(user.id);

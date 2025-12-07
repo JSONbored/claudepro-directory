@@ -17,8 +17,6 @@ import {
 } from '@heyclaude/web-runtime/logging/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
-
 /**
  * Handle GET requests to fetch content templates for a specified category.
  *

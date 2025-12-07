@@ -36,13 +36,11 @@ import { useCommandPalette } from '@/src/components/features/navigation/command-
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 
 interface NavigationProps {
-  /** Hide Create button when FloatingActionBar is enabled */
-  hideCreateButton?: boolean;
   /** Navigation data from server (required) */
   navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
 }
 
-const NavigationComponent = ({ hideCreateButton = false, navigationData }: NavigationProps) => {
+const NavigationComponent = ({ navigationData }: NavigationProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { isOpen: commandPaletteOpen, openPalette, closePalette } = useCommandPalette();
@@ -173,27 +171,26 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                       </span>
                     )}
                   </Button>
-                  {/* Action Links - Create Button (hidden when FloatingActionBar is enabled) */}
-                  {!hideCreateButton &&
-                    ACTION_LINKS.map((link) => {
-                      const ActionIcon = link.icon;
-                      return (
-                        <Button
-                          key={link.href}
-                          asChild
-                          variant="outline"
-                          size="sm"
-                          className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}
-                        >
-                          <Link href={link.href} prefetch>
-                            {ActionIcon ? (
-                              <ActionIcon className={UI_CLASSES.ICON_XS_LEADING} />
-                            ) : null}
-                            {link.label}
-                          </Link>
-                        </Button>
-                      );
-                    })}
+                  {/* Action Links - Create Button */}
+                  {ACTION_LINKS.map((link) => {
+                    const ActionIcon = link.icon;
+                    return (
+                      <Button
+                        key={link.href}
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}
+                      >
+                        <Link href={link.href} prefetch>
+                          {ActionIcon ? (
+                            <ActionIcon className={UI_CLASSES.ICON_XS_LEADING} />
+                          ) : null}
+                          {link.label}
+                        </Link>
+                      </Button>
+                    );
+                  })}
 
                   <Button
                     variant="ghost"

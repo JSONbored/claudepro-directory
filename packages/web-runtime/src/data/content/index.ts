@@ -60,8 +60,7 @@ export async function getContentByCategory(
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getContentByCategory: failed', errorForLogging, {
       category,
     });
@@ -127,8 +126,7 @@ export async function getContentBySlug(
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getContentBySlug: failed', errorForLogging, {
       category,
       slug,
@@ -207,8 +205,7 @@ export async function getAllContent(
     return items;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getAllContent: failed', errorForLogging, {
       category: category ?? 'all',
       ...(filters ? { filters: toLogContextValue(filters as Record<string, unknown>) } : {}),
@@ -273,8 +270,7 @@ export async function getContentCount(
     return count;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getContentCount: failed', errorForLogging, {
       category: category ?? 'all',
     });
@@ -338,8 +334,7 @@ export async function getTrendingContent(
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getTrendingContent: failed', errorForLogging, {
       category: category ?? 'all',
       limit,
@@ -449,8 +444,7 @@ export async function getTrendingPageData(
     };
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getTrendingPageData: failed', errorForLogging, {
       category: category ?? 'all',
       limit: safeLimit,

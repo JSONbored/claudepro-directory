@@ -114,6 +114,14 @@
       "types": "./src/data/config/constants.ts",
       "default": "./src/data/config/constants.ts"
     },
+    "./data/layout/flags": {
+      "types": "./src/data/layout/flags.ts",
+      "default": "./src/data/layout/flags.ts"
+    },
+    "./data/layout/flags-client": {
+      "types": "./src/data/layout/flags-client.ts",
+      "default": "./src/data/layout/flags-client.ts"
+    },
     "./edge/search-client": {
       "types": "./src/edge/search-client.ts",
       "default": "./src/edge/search-client.ts"

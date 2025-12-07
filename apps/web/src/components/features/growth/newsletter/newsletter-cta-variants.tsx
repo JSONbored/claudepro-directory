@@ -141,8 +141,8 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
       <div
         className={cn(
           'w-full',
-          'border-border/50 rounded-xl border',
-          'bg-card/50',
+          'border-border rounded-xl border',
+          'bg-card',
           'px-6 py-10 md:px-10 md:py-12 lg:px-12 lg:py-14',
           'text-center',
           className
@@ -222,8 +222,8 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <Card
         className={cn(
-          'border-primary/20 from-primary/5 via-accent/5 to-background/95 bg-linear-to-br',
-          'shadow-lg backdrop-blur-sm',
+          'border-border bg-card',
+          'shadow-lg',
           className
         )}
       >
@@ -276,8 +276,8 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <Card
         className={cn(
-          'border-primary/20 from-primary/5 via-accent/5 to-background/95 flex h-full flex-col bg-linear-to-br',
-          'shadow-lg backdrop-blur-sm',
+          'border-border bg-card flex h-full flex-col',
+          'shadow-lg',
           className
         )}
       >

@@ -71,24 +71,37 @@ export async function getPaginatedContent({
       client = createSupabaseAnonClient();
     }
 
-    const result = await new ContentService(client).getContentPaginatedSlim({
+    const rpcArgs = {
       ...(normalizedCategory ? { p_category: normalizedCategory } : {}),
       p_limit: limit,
       p_offset: offset,
+    };
+
+    reqLogger.info('getPaginatedContent: calling RPC get_content_paginated_slim', {
+      category: normalizedCategory ?? category ?? 'all',
+      limit,
+      offset,
+      rpcArgs,
     });
 
-    reqLogger.info('getPaginatedContent: fetched successfully', {
+    const result = await new ContentService(client).getContentPaginatedSlim(rpcArgs);
+
+    reqLogger.info('getPaginatedContent: RPC call completed', {
       category: normalizedCategory ?? category ?? 'all',
       limit,
       offset,
       hasResult: Boolean(result),
+      hasItems: Boolean(result?.items),
+      itemsLength: Array.isArray(result?.items) ? result.items.length : 0,
+      hasPagination: Boolean(result?.pagination),
+      paginationTotal: result?.pagination?.total_count ?? null,
+      resultKeys: result ? Object.keys(result) : [],
     });
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getPaginatedContent: failed', errorForLogging, {
       category: normalizedCategory ?? category ?? 'all',
       limit,

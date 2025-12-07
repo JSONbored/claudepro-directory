@@ -20,8 +20,6 @@ import {
 import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
 import { connection, NextResponse } from 'next/server';
 
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
-
 /**
  * Provide live social proof metrics: top contributors this week, recent submission count,
  * success rate for the last 30 days, and total user count.

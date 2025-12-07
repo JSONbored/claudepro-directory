@@ -37,6 +37,9 @@ const accountDashboardSchema = z.object({
  * This allows cookies() to be used inside the cache scope while still providing
  * per-user caching with TTL and cache invalidation support.
  *
+ * NOTE: This function now uses the consolidated getUserCompleteData internally
+ * for better performance and to avoid "role 'user' does not exist" errors.
+ *
  * Cache behavior:
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
@@ -48,6 +51,8 @@ export async function getAccountDashboard(
   'use cache: private';
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-dashboard-${userId}`);
+  // Also tag with complete data cache to share cache entry
+  cacheTag(`user-complete-data-${userId}`);
 
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -57,22 +62,28 @@ export async function getAccountDashboard(
   });
 
   try {
-    // Can use cookies() inside 'use cache: private'
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    // Use consolidated function internally - single optimized database call
+    const completeData = await getUserCompleteData(userId);
 
-    const result = await service.getAccountDashboard({ p_user_id: userId });
+    if (!completeData?.account_dashboard) {
+      reqLogger.warn('getAccountDashboard: account_dashboard missing from complete data', {
+        userId,
+        hasCompleteData: Boolean(completeData),
+      });
+      return null;
+    }
+
+    const result = accountDashboardSchema.parse(completeData.account_dashboard);
 
     reqLogger.info('getAccountDashboard: fetched successfully', {
       userId,
       hasResult: Boolean(result),
     });
 
-    return accountDashboardSchema.parse(result);
+    return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getAccountDashboard: unexpected error', errorForLogging, {
       userId,
     });
@@ -87,6 +98,9 @@ export async function getAccountDashboard(
  * This allows cookies() to be used inside the cache scope while still providing
  * per-user caching with TTL and cache invalidation support.
  *
+ * NOTE: This function now uses the consolidated getUserCompleteData internally
+ * for better performance and to avoid "role 'user' does not exist" errors.
+ *
  * Cache behavior:
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
@@ -98,6 +112,8 @@ export async function getUserLibrary(
   'use cache: private';
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-library-${userId}`);
+  // Also tag with complete data cache to share cache entry
+  cacheTag(`user-complete-data-${userId}`);
 
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -107,21 +123,26 @@ export async function getUserLibrary(
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    // Use consolidated function internally - single optimized database call
+    const completeData = await getUserCompleteData(userId);
 
-    const result = await service.getUserLibrary({ p_user_id: userId });
+    if (!completeData?.user_library) {
+      reqLogger.warn('getUserLibrary: user_library missing from complete data', {
+        userId,
+        hasCompleteData: Boolean(completeData),
+      });
+      return null;
+    }
 
     reqLogger.info('getUserLibrary: fetched successfully', {
       userId,
-      hasResult: Boolean(result),
+      hasResult: Boolean(completeData.user_library),
     });
 
-    return result;
+    return completeData.user_library;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getUserLibrary: unexpected error', errorForLogging, {
       userId,
     });
@@ -171,6 +192,9 @@ export async function getUserBookmarksForCollections(
  * This allows cookies() to be used inside the cache scope while still providing
  * per-user caching with TTL and cache invalidation support.
  *
+ * NOTE: This function now uses the consolidated getUserCompleteData internally
+ * for better performance and to avoid "role 'user' does not exist" errors.
+ *
  * Cache behavior:
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
@@ -182,6 +206,8 @@ export async function getUserDashboard(
   'use cache: private';
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-dashboard-${userId}`);
+  // Also tag with complete data cache to share cache entry
+  cacheTag(`user-complete-data-${userId}`);
 
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -191,21 +217,26 @@ export async function getUserDashboard(
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    // Use consolidated function internally - single optimized database call
+    const completeData = await getUserCompleteData(userId);
 
-    const result = await service.getUserDashboard({ p_user_id: userId });
+    if (!completeData?.user_dashboard) {
+      reqLogger.warn('getUserDashboard: user_dashboard missing from complete data', {
+        userId,
+        hasCompleteData: Boolean(completeData),
+      });
+      return null;
+    }
 
     reqLogger.info('getUserDashboard: fetched successfully', {
       userId,
-      hasResult: Boolean(result),
+      hasResult: Boolean(completeData.user_dashboard),
     });
 
-    return result;
+    return completeData.user_dashboard;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getUserDashboard: unexpected error', errorForLogging, {
       userId,
     });
@@ -220,6 +251,155 @@ export async function getUserJobById(
   const data = await getUserDashboard(userId);
   const jobs = (data?.jobs as Array<Database['public']['Tables']['jobs']['Row']> | undefined) ?? [];
   return jobs.find((job) => job.id === jobId) ?? null;
+}
+
+/**
+ * Get user complete data (consolidated)
+ *
+ * Returns ALL user account data in a single optimized database call, including:
+ * - Account Dashboard (bookmark_count, profile)
+ * - User Dashboard (submissions, companies, jobs)
+ * - User Settings (profile, user_data)
+ * - Activity Summary (total_posts, total_comments, total_votes, total_submissions, merged_submissions, total_activity)
+ * - Activity Timeline (paginated activity items)
+ * - User Library (bookmarks, collections, stats)
+ * - User Identities (OAuth connections)
+ * - Sponsorships (sponsored content array)
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId in cache tag)
+ * - Not prerendered (runs at request time)
+ *
+ * @param userId - Authenticated user ID
+ * @param options - Optional parameters for activity timeline pagination
+ * @returns Consolidated user data or null if user not found
+ */
+export async function getUserCompleteData(
+  userId: string,
+  options?: {
+    activityLimit?: number;
+    activityOffset?: number;
+    activityType?: null | string;
+  }
+): Promise<Database['public']['Functions']['get_user_complete_data']['Returns'] | null> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-complete-data-${userId}`);
+
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'getUserCompleteData',
+    module: 'data/account',
+  });
+
+  try {
+    const client = await createSupabaseServerClient();
+
+    // Verify session is valid before making RPC call
+    // This ensures PostgREST receives a valid auth token
+    // Use getUser() instead of getSession() as it automatically refreshes expired tokens
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await client.auth.getUser();
+
+    if (authError || !authUser) {
+      reqLogger.warn('getUserCompleteData: authentication failed', {
+        userId,
+        authError: authError?.message,
+        hasUser: Boolean(authUser),
+      });
+      return null;
+    }
+
+    // Verify the authenticated user matches the requested userId (security check)
+    if (authUser.id !== userId) {
+      reqLogger.warn('getUserCompleteData: userId mismatch', {
+        requestedUserId: userId,
+        authenticatedUserId: authUser.id,
+      });
+      return null;
+    }
+
+    // Get the session after getUser() to ensure we have the latest token
+    const {
+      data: { session },
+      error: sessionError,
+    } = await client.auth.getSession();
+
+    if (sessionError || !session) {
+      reqLogger.warn('getUserCompleteData: no valid session after getUser', {
+        userId,
+        sessionError: sessionError?.message,
+        hasSession: Boolean(session),
+      });
+      return null;
+    }
+
+    // Verify the authenticated user matches the requested userId (security check)
+    if (session.user.id !== userId) {
+      reqLogger.warn('getUserCompleteData: userId mismatch', {
+        requestedUserId: userId,
+        authenticatedUserId: session.user.id,
+      });
+      return null;
+    }
+
+    // Call RPC directly since AccountService is auto-generated and doesn't include this yet
+    // Build RPC parameters - only include p_activity_type if it's provided (not null/undefined)
+    const rpcParams: {
+      p_activity_limit: number;
+      p_activity_offset: number;
+      p_activity_type?: string;
+      p_user_id: string;
+    } = {
+      p_user_id: userId,
+      p_activity_limit: options?.activityLimit ?? 20,
+      p_activity_offset: options?.activityOffset ?? 0,
+    };
+
+    // Only include p_activity_type if it's a non-empty string
+    if (options?.activityType) {
+      rpcParams.p_activity_type = options.activityType;
+    }
+
+    const { data, error } = await client.rpc('get_user_complete_data', rpcParams);
+
+    if (error) {
+      reqLogger.error('getUserCompleteData: RPC call failed', error, {
+        userId,
+        options,
+        errorCode: error.code,
+        errorMessage: error.message,
+        errorDetails: error.details,
+        errorHint: error.hint,
+        hasSession: Boolean(session),
+        sessionUserId: session?.user?.id,
+      });
+      throw error;
+    }
+
+    reqLogger.info('getUserCompleteData: fetched successfully', {
+      userId,
+      hasResult: Boolean(data),
+    });
+
+    return data;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    reqLogger.error('getUserCompleteData: unexpected error', errorForLogging, {
+      userId,
+      options,
+    });
+    return null;
+  }
 }
 
 /**
@@ -267,8 +447,7 @@ export async function getCollectionDetail(
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getCollectionDetail: unexpected error', errorForLogging, {
       userId,
       slug,
@@ -284,6 +463,9 @@ export async function getCollectionDetail(
  * This allows cookies() to be used inside the cache scope while still providing
  * per-user caching with TTL and cache invalidation support.
  *
+ * NOTE: This function now uses the consolidated getUserCompleteData internally
+ * for better performance and to avoid "role 'user' does not exist" errors.
+ *
  * Cache behavior:
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
@@ -295,6 +477,8 @@ export async function getUserSettings(
   'use cache: private';
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-settings-${userId}`);
+  // Also tag with complete data cache to share cache entry
+  cacheTag(`user-complete-data-${userId}`);
 
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -304,21 +488,26 @@ export async function getUserSettings(
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    // Use consolidated function internally - single optimized database call
+    const completeData = await getUserCompleteData(userId);
 
-    const result = await service.getUserSettings({ p_user_id: userId });
+    if (!completeData?.user_settings) {
+      reqLogger.warn('getUserSettings: user_settings missing from complete data', {
+        userId,
+        hasCompleteData: Boolean(completeData),
+      });
+      return null;
+    }
 
     reqLogger.info('getUserSettings: fetched successfully', {
       userId,
-      hasResult: Boolean(result),
+      hasResult: Boolean(completeData.user_settings),
     });
 
-    return result;
+    return completeData.user_settings;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getUserSettings: unexpected error', errorForLogging, {
       userId,
     });
@@ -371,8 +560,7 @@ export async function getSponsorshipAnalytics(
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getSponsorshipAnalytics: unexpected error', errorForLogging, {
       userId,
       sponsorshipId,
@@ -388,6 +576,9 @@ export async function getSponsorshipAnalytics(
  * This allows cookies() to be used inside the cache scope while still providing
  * per-user caching with TTL and cache invalidation support.
  *
+ * NOTE: This function now uses the consolidated getUserCompleteData internally
+ * and extracts companies from user_dashboard.companies (JSONB).
+ *
  * Cache behavior:
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
@@ -399,6 +590,8 @@ export async function getUserCompanies(
   'use cache: private';
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-companies-${userId}`);
+  // Also tag with complete data cache to share cache entry
+  cacheTag(`user-complete-data-${userId}`);
 
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -408,25 +601,39 @@ export async function getUserCompanies(
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    // Use consolidated function internally - single optimized database call
+    const completeData = await getUserCompleteData(userId);
 
-    const result = await service.getUserCompanies({ p_user_id: userId });
+    if (!completeData?.user_dashboard?.companies) {
+      reqLogger.warn('getUserCompanies: companies missing from complete data', {
+        userId,
+        hasCompleteData: Boolean(completeData),
+        hasUserDashboard: Boolean(completeData?.user_dashboard),
+      });
+      return { companies: [] };
+    }
+
+    // Extract companies from JSONB and convert to expected structure
+    // user_dashboard.companies is JSONB array, we need to convert to user_companies_company[]
+    const companiesJson = completeData.user_dashboard.companies;
+    const companiesArray = Array.isArray(companiesJson) ? companiesJson : [];
 
     reqLogger.info('getUserCompanies: fetched successfully', {
       userId,
-      hasResult: Boolean(result),
+      hasResult: Boolean(completeData.user_dashboard.companies),
+      count: companiesArray.length,
     });
 
-    return result;
+    return {
+      companies: companiesArray as Database['public']['CompositeTypes']['user_companies_company'][],
+    };
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getUserCompanies: unexpected error', errorForLogging, {
       userId,
     });
-    return null;
+    return { companies: [] };
   }
 }
 
@@ -436,6 +643,9 @@ export async function getUserCompanies(
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
  * This allows cookies() to be used inside the cache scope while still providing
  * per-user caching with TTL and cache invalidation support.
+ *
+ * NOTE: This function now uses the consolidated getUserCompleteData internally
+ * for better performance and to avoid "role 'user' does not exist" errors.
  *
  * Cache behavior:
  * - Minimum 30 seconds stale time (required for runtime prefetch)
@@ -448,6 +658,8 @@ export async function getUserSponsorships(
   'use cache: private';
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-sponsorships-${userId}`);
+  // Also tag with complete data cache to share cache entry
+  cacheTag(`user-complete-data-${userId}`);
 
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -457,21 +669,27 @@ export async function getUserSponsorships(
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    // Use consolidated function internally - single optimized database call
+    const completeData = await getUserCompleteData(userId);
 
-    const result = await service.getUserSponsorships({ p_user_id: userId });
+    if (!completeData?.sponsorships) {
+      reqLogger.warn('getUserSponsorships: sponsorships missing from complete data', {
+        userId,
+        hasCompleteData: Boolean(completeData),
+      });
+      return [];
+    }
 
     reqLogger.info('getUserSponsorships: fetched successfully', {
       userId,
-      hasResult: Boolean(result),
+      hasResult: Boolean(completeData.sponsorships),
+      count: completeData.sponsorships.length,
     });
 
-    return result;
+    return completeData.sponsorships;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getUserSponsorships: unexpected error', errorForLogging, {
       userId,
     });
@@ -535,8 +753,7 @@ export async function getSubmissionDashboard(
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getSubmissionDashboard: unexpected error', errorForLogging, {
       recentLimit,
       contributorsLimit,
@@ -569,6 +786,9 @@ export interface AccountDashboardBundle {
  * This allows cookies() to be used inside the cache scope while still providing
  * per-user caching with TTL and cache invalidation support.
  *
+ * NOTE: This function now uses the consolidated getUserCompleteData internally
+ * for better performance and to avoid "role 'user' does not exist" errors.
+ *
  * Cache behavior:
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
@@ -580,6 +800,8 @@ export async function getUserActivitySummary(
   'use cache: private';
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-activity-summary-${userId}`);
+  // Also tag with complete data cache to share cache entry
+  cacheTag(`user-complete-data-${userId}`);
 
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -589,21 +811,33 @@ export async function getUserActivitySummary(
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    // Use consolidated function internally - single optimized database call
+    const completeData = await getUserCompleteData(userId);
 
-    const result = await service.getUserActivitySummary({ p_user_id: userId });
+    if (!completeData?.activity_summary) {
+      reqLogger.warn('getUserActivitySummary: activity_summary missing from complete data', {
+        userId,
+        hasCompleteData: Boolean(completeData),
+      });
+      return {
+        total_posts: 0,
+        total_comments: 0,
+        total_votes: 0,
+        total_submissions: 0,
+        merged_submissions: 0,
+        total_activity: 0,
+      };
+    }
 
     reqLogger.info('getUserActivitySummary: fetched successfully', {
       userId,
-      hasResult: Boolean(result),
+      hasResult: Boolean(completeData.activity_summary),
     });
 
-    return result;
+    return completeData.activity_summary;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getUserActivitySummary: unexpected error', errorForLogging, {
       userId,
     });
@@ -625,6 +859,11 @@ export async function getUserActivitySummary(
  * This allows cookies() to be used inside the cache scope while still providing
  * per-user caching with TTL and cache invalidation support.
  *
+ * NOTE: This function now uses the consolidated getUserCompleteData internally
+ * for better performance and to avoid "role 'user' does not exist" errors.
+ * However, if custom pagination parameters are provided, it will make a separate
+ * call to get the correctly paginated timeline.
+ *
  * Cache behavior:
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId, type, limit, offset in cache tag)
@@ -640,6 +879,10 @@ export async function getUserActivityTimeline(input: {
   const { userId, type, limit = 20, offset = 0 } = input;
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-activity-timeline-${userId}-${type ?? 'all'}-${limit}-${offset}`);
+  // Also tag with complete data cache to share cache entry (if using default params)
+  if (limit === 20 && offset === 0 && !type) {
+    cacheTag(`user-complete-data-${userId}`);
+  }
 
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -649,29 +892,37 @@ export async function getUserActivityTimeline(input: {
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
-
-    const result = await service.getUserActivityTimeline({
-      p_user_id: userId,
-      ...(type && { p_type: type }),
-      p_limit: limit,
-      p_offset: offset,
+    // Always use consolidated function - it supports custom pagination via options
+    const completeData = await getUserCompleteData(userId, {
+      activityLimit: limit,
+      activityOffset: offset,
+      activityType: type ?? null,
     });
 
-    reqLogger.info('getUserActivityTimeline: fetched successfully', {
+    if (!completeData?.activity_timeline) {
+      reqLogger.warn('getUserActivityTimeline: activity_timeline missing from complete data', {
+        userId,
+        hasCompleteData: Boolean(completeData),
+      });
+      return {
+        activities: [],
+        has_more: false,
+        total: 0,
+      };
+    }
+
+    reqLogger.info('getUserActivityTimeline: fetched successfully from complete data', {
       userId,
       type: type ?? 'all',
       limit,
       offset,
-      hasResult: Boolean(result),
+      hasResult: Boolean(completeData.activity_timeline),
     });
 
-    return result;
+    return completeData.activity_timeline;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getUserActivityTimeline: unexpected error', errorForLogging, {
       userId,
       type: type ?? 'all',
@@ -693,6 +944,9 @@ export async function getUserActivityTimeline(input: {
  * This allows cookies() to be used inside the cache scope while still providing
  * per-user caching with TTL and cache invalidation support.
  *
+ * NOTE: This function now uses the consolidated getUserCompleteData internally
+ * for better performance and to avoid "role 'user' does not exist" errors.
+ *
  * Cache behavior:
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
@@ -704,6 +958,8 @@ export async function getUserIdentitiesData(
   'use cache: private';
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-identities-${userId}`);
+  // Also tag with complete data cache to share cache entry
+  cacheTag(`user-complete-data-${userId}`);
 
   const requestId = generateRequestId();
   const reqLogger = logger.child({
@@ -713,21 +969,26 @@ export async function getUserIdentitiesData(
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    // Use consolidated function internally - single optimized database call
+    const completeData = await getUserCompleteData(userId);
 
-    const result = await service.getUserIdentities({ p_user_id: userId });
+    if (!completeData?.user_identities) {
+      reqLogger.warn('getUserIdentitiesData: user_identities missing from complete data', {
+        userId,
+        hasCompleteData: Boolean(completeData),
+      });
+      return { identities: [] };
+    }
 
     reqLogger.info('getUserIdentitiesData: fetched successfully', {
       userId,
-      hasResult: Boolean(result),
+      hasResult: Boolean(completeData.user_identities),
     });
 
-    return result;
+    return completeData.user_identities;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('getUserIdentitiesData: unexpected error', errorForLogging, {
       userId,
     });
@@ -771,8 +1032,7 @@ export async function isBookmarked(input: {
 
     return result ?? false;
   } catch (error) {
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('isBookmarked: unexpected error', errorForLogging, {
       userId,
       content_type,
@@ -816,8 +1076,7 @@ export async function isFollowing(input: {
 
     return result ?? false;
   } catch (error) {
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('isFollowing: unexpected error', errorForLogging, {
       followerId,
       followingId,
@@ -868,8 +1127,7 @@ export async function isBookmarkedBatch(input: {
 
     return result ?? [];
   } catch (error) {
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('isBookmarkedBatch: unexpected error', errorForLogging, {
       userId,
       itemCount: items.length,
@@ -914,8 +1172,7 @@ export async function isFollowingBatch(input: {
 
     return result ?? [];
   } catch (error) {
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('isFollowingBatch: unexpected error', errorForLogging, {
       followerId,
       followedUserCount: followedUserIds.length,
@@ -924,10 +1181,29 @@ export async function isFollowingBatch(input: {
   }
 }
 
+/**
+ * Get account dashboard bundle
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This bundles dashboard, library, and homepage data together, with the first two
+ * being user-specific (cached per-user) and homepage being public (shared cache).
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId in cache tag)
+ * - Not prerendered (runs at request time)
+ */
 export async function getAccountDashboardBundle(
   userId: string,
   categoryIds?: readonly string[]
 ): Promise<AccountDashboardBundle> {
+  'use cache: private';
+  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-dashboard-bundle-${userId}`);
+  if (categoryIds) {
+    cacheTag(`dashboard-bundle-categories-${categoryIds.join(',')}`);
+  }
+
   // Lazy import to avoid circular dependencies
   const { getHomepageData } = await import('./content/homepage.ts');
   const { getHomepageCategoryIds } = await import('./config/category/index.ts');

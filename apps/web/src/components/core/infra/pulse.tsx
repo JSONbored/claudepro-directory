@@ -60,12 +60,13 @@ function useTrackingEffect(
           result.catch((error) => {
             const normalized = normalizeError(error, 'Analytics tracking failed');
             logClientWarn(
-              'Analytics tracking failed',
+              '[Analytics] Tracking failed',
               normalized,
               'Pulse.useTrackingEffect',
               {
                 component: 'Pulse',
                 action: 'track-immediate',
+                category: 'analytics',
                 source: 'Pulse',
                 error: normalized.message,
               }
@@ -75,12 +76,13 @@ function useTrackingEffect(
       } catch (error) {
         const normalized = normalizeError(error, 'Analytics tracking failed');
         logClientWarn(
-          'Analytics tracking failed',
+          '[Analytics] Tracking failed',
           normalized,
           'Pulse.useTrackingEffect',
           {
             component: 'Pulse',
             action: 'track-immediate',
+            category: 'analytics',
             source: 'Pulse',
             error: normalized.message,
           }
@@ -96,12 +98,13 @@ function useTrackingEffect(
           result.catch((error) => {
             const normalized = normalizeError(error, 'Analytics tracking failed');
             logClientWarn(
-              'Analytics tracking failed',
+              '[Analytics] Tracking failed',
               normalized,
               'Pulse.useTrackingEffect',
               {
                 component: 'Pulse',
                 action: 'track-delayed',
+                category: 'analytics',
                 source: 'Pulse',
                 error: normalized.message,
               }
@@ -111,12 +114,13 @@ function useTrackingEffect(
       } catch (error) {
         const normalized = normalizeError(error, 'Analytics tracking failed');
         logClientWarn(
-          'Analytics tracking failed',
+          '[Analytics] Tracking failed',
           normalized,
           'Pulse.useTrackingEffect',
           {
             component: 'Pulse',
             action: 'track-delayed',
+            category: 'analytics',
             source: 'Pulse',
             error: normalized.message,
           }

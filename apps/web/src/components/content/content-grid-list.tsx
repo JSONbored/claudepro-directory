@@ -15,8 +15,6 @@ import Link from 'next/link';
 import { Suspense, useId } from 'react';
 
 import { ContentSearchClient } from '@/src/components/content/content-search';
-import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
-import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 
 function ContentHeroSection<T extends DisplayableContent>({
@@ -95,7 +93,7 @@ function ContentHeroSection<T extends DisplayableContent>({
   );
 }
 
-function ContentSearchSkeleton() {
+export function ContentSearchSkeleton() {
   return (
     <div className="w-full space-y-4">
       <Skeleton size="xl" width="3xl" />
@@ -116,17 +114,20 @@ export function ContentListServer<T extends DisplayableContent>({
   searchPlaceholder = `Search ${title.toLowerCase()}...`,
   badges = [],
   category,
-}: ContentListServerProps<T>) {
+  skipHero = false,
+}: ContentListServerProps<T> & { skipHero?: boolean }) {
   return (
     <div className="bg-background min-h-screen">
-      {/* Hero Section - Rendered immediately on server */}
-      <ContentHeroSection
-        title={title}
-        description={description}
-        icon={icon}
-        items={items}
-        badges={badges}
-      />
+      {/* Hero Section - Rendered immediately on server (unless skipped for PPR) */}
+      {!skipHero && (
+        <ContentHeroSection
+          title={title}
+          description={description}
+          icon={icon}
+          items={items}
+          badges={badges}
+        />
+      )}
 
       <section className="container mx-auto px-4 py-12" aria-label={`${title} content and search`}>
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
@@ -150,14 +151,6 @@ export function ContentListServer<T extends DisplayableContent>({
         </div>
       </section>
 
-      {/* Email CTA - Footer section (matching homepage pattern) with fade-in animation */}
-      <section className="container mx-auto px-4 py-12">
-        <Suspense fallback={null}>
-          <LazySection variant="fade-in" delay={0.15}>
-            <NewsletterCTAVariant source="content_page" variant="hero" category={type} />
-          </LazySection>
-        </Suspense>
-      </section>
     </div>
   );
 }

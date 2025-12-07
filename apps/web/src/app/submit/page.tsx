@@ -21,17 +21,13 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
-
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
+import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
 /**
  * Dynamic Rendering Required
@@ -42,18 +38,6 @@ import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
-      (module_) => ({
-        default: module_.NewsletterCTAVariant,
-      })
-    ),
-  {
-    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
-  }
-);
 
 // Use enum values from Constants
 const DEFAULT_CONTENT_CATEGORY = Constants.public.Enums.content_category[0]; // 'agents'
@@ -238,20 +222,15 @@ export default async function SubmitPage() {
         </div>
 
         <aside className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
-          {/* Job Promo Card - Priority #1 */}
-          <JobsPromo />
+          {/* Unified ContentSidebar with JobsPromo + RecentlyViewed */}
+          <ContentSidebar />
 
-          {/* Dashboard Stats and Recent Activity in Suspense */}
+          {/* Submit page-specific dashboard stats and recent activity */}
           <Suspense fallback={<div className="bg-muted/20 h-48 animate-pulse rounded-lg" />}>
             <SubmitPageSidebar reqLogger={reqLogger} />
           </Suspense>
         </aside>
       </div>
-
-      {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className="px-4 py-12">
-        <NewsletterCTAVariant source="content_page" variant="hero" />
-      </section>
     </div>
   );
 }

@@ -197,6 +197,7 @@ export async function runGenerateCategoryConfig(): Promise<boolean> {
       configFormat: ${JSON.stringify(dbConfig.config_format ?? 'json')},
     },
     sections: {
+      description: ${features['section_description'] ?? true},
       features: ${features['section_features'] ?? false},
       installation: ${features['section_installation'] ?? false},
       use_cases: ${features['section_use_cases'] ?? false},

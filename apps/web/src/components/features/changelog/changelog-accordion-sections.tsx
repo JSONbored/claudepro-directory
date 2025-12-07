@@ -129,12 +129,13 @@ function AccordionSectionItem({ section }: AccordionSectionItemProps) {
             // Fallback to empty string on error
             const normalized = normalizeError(error, 'Failed to parse markdown');
             logClientError(
-              '[AccordionSectionItem] Failed to parse markdown',
+              '[Changelog] Failed to parse markdown',
               normalized,
               'AccordionSectionItem.parseMarkdown',
               {
                 component: 'AccordionSectionItem',
                 action: 'parse-markdown',
+                category: 'changelog',
               }
             );
             setHtmlContent('');
@@ -144,12 +145,13 @@ function AccordionSectionItem({ section }: AccordionSectionItemProps) {
           // Fallback if marked fails to load
           const normalized = normalizeError(error, 'Failed to load marked');
           logClientError(
-            '[AccordionSectionItem] Failed to load marked',
+            '[Changelog] Failed to load marked',
             normalized,
             'AccordionSectionItem.loadMarked',
             {
               component: 'AccordionSectionItem',
               action: 'load-marked',
+              category: 'changelog',
             }
           );
           setHtmlContent('');
@@ -174,7 +176,7 @@ function AccordionSectionItem({ section }: AccordionSectionItemProps) {
       <CollapsibleContent
         className={`${UI_CLASSES.PADDING_X_DEFAULT} ${UI_CLASSES.PADDING_Y_DEFAULT}`}
       >
-        <div className="prose prose-slate dark:prose-invert prose-sm prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 max-w-none">
+        <div className="prose prose-slate dark:prose-invert prose-sm prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-4 prose-headings:mb-3 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-3 prose-ul:my-3 prose-ol:my-3 prose-li:my-1.5 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-3 prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:my-3 max-w-none">
           <SanitizedHTML html={htmlContent} />
         </div>
       </CollapsibleContent>

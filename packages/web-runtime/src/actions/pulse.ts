@@ -514,13 +514,18 @@ export const generateConfigRecommendationsAction = rateLimitedAction
       );
 
       // Return error response instead of throwing (graceful degradation)
+      // Match the RecommendationsPayload type structure (snake_case)
       return {
         success: false,
         recommendations: {
-          results: [],
-          totalMatches: 0,
+          results: null,
+          total_matches: 0,
           algorithm: 'unknown',
-          summary: {},
+          summary: {
+            top_category: null,
+            avg_match_score: 0,
+            diversity_score: 0,
+          },
           answers: {
             useCase: parsedInput.useCase,
             experienceLevel: parsedInput.experienceLevel,

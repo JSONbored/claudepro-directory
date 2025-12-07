@@ -5,7 +5,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   UnifiedBadge,
@@ -24,10 +24,6 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
-
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
 
 /**
  * Dynamic Rendering Required
@@ -146,10 +142,8 @@ async function CollectionDetailContent({
       hasData: !!collectionData,
     });
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
-    userLogger.error('CollectionDetailPage: getCollectionDetail threw', errorForLogging, {
+    const normalized = normalizeError(error, 'Failed to load collection detail');
+    userLogger.error('CollectionDetailPage: getCollectionDetail threw', normalized, {
       section: 'collection-data-fetch',
     });
     hasError = true;

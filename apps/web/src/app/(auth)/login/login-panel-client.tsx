@@ -1,7 +1,8 @@
 'use client';
 
 import { VALID_PROVIDERS } from '@heyclaude/web-runtime';
-import { ensureString, logClientWarning } from '@heyclaude/web-runtime/core';
+import { ensureString } from '@heyclaude/web-runtime/core';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useMemo, useState } from 'react';
 
 import { AuthFormPanel } from '@/src/components/core/auth/auth-form-panel';
@@ -47,7 +48,17 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
       })
       .catch((error) => {
         if (!cancelled) {
-          logClientWarning('LoginPanelClient: failed to load newsletter config', error);
+          const normalized = normalizeError(error, 'Failed to load newsletter config');
+          logClientWarn(
+            '[Config] Failed to load newsletter config',
+            normalized,
+            'LoginPanelClient.loadNewsletterConfig',
+            {
+              component: 'LoginPanelClient',
+              action: 'load-newsletter-config',
+              category: 'config',
+            }
+          );
         }
       });
     return () => {

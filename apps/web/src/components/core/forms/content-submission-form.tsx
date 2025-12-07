@@ -360,12 +360,13 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   } catch (error) {
                     const normalized = normalizeError(error, 'Failed to parse examples JSON');
                     logClientWarn(
-                      'Failed to parse examples JSON, field will be omitted',
+                      '[Form] Failed to parse examples JSON',
                       normalized,
                       'SubmitFormClient.parseExamples',
                       {
                         component: 'SubmitFormClient',
                         action: 'parse-examples',
+                        category: 'form',
                         error: normalized.message,
                       }
                     );
@@ -450,12 +451,13 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
             if (result?.data?.success) {
               if (!result.data.submission_id) {
                 logClientWarn(
-                  'Success response missing submission ID',
+                  '[Form] Success response missing submission ID',
                   undefined,
                   'SubmitFormClient.handleSubmit',
                   {
                     component: 'SubmitFormClient',
                     action: 'handle-submit',
+                    category: 'form',
                     contentType,
                   }
                 );

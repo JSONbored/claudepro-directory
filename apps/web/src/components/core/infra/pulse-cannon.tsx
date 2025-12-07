@@ -24,12 +24,13 @@ const VercelPulse = dynamic(
       .catch((error) => {
         const normalized = normalizeError(error, 'Failed to load Vercel pulse');
         logClientWarn(
-          'PulseCannon: Vercel pulse import failed',
+          '[Analytics] Vercel pulse import failed',
           normalized,
           'PulseCannon.loadVercelPulse',
           {
             component: 'PulseCannon',
             action: 'load-vercel-pulse',
+            category: 'analytics',
             error: normalized.message,
           }
         );
@@ -47,12 +48,13 @@ const SpeedInsights = dynamic(
       .catch((error) => {
         const normalized = normalizeError(error, 'Failed to load Speed Insights');
         logClientWarn(
-          'PulseCannon: Speed Insights import failed',
+          '[Analytics] Speed Insights import failed',
           normalized,
           'PulseCannon.loadSpeedInsights',
           {
             component: 'PulseCannon',
             action: 'load-speed-insights',
+            category: 'analytics',
             error: normalized.message,
           }
         );
@@ -82,12 +84,13 @@ function loadUmamiPulse(): void {
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to inject Umami pulse script');
     logClientWarn(
-      'PulseCannon: Umami pulse injection failed',
+      '[Analytics] Umami pulse injection failed',
       normalized,
       'PulseCannon.loadUmamiPulse',
       {
         component: 'PulseCannon',
         action: 'load-umami-pulse',
+        category: 'analytics',
         error: normalized.message,
       }
     );
@@ -113,12 +116,13 @@ export function PulseCannon() {
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to load pulse services');
         logClientWarn(
-          'PulseCannon: Pulse loading failed',
+          '[Analytics] Pulse loading failed',
           normalized,
           'PulseCannon.loadAllPulse',
           {
             component: 'PulseCannon',
             action: 'load-all-pulse',
+            category: 'analytics',
             error: normalized.message,
           }
         );

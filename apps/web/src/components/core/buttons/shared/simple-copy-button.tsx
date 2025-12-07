@@ -1,6 +1,5 @@
 'use client';
 
-import { logClientWarning } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
@@ -51,7 +50,20 @@ export function SimpleCopyButton({
           resetDelay = result['timeout.ui.clipboard_reset_delay_ms'];
         }
       } catch (configError) {
-        logClientWarning('SimpleCopyButton: failed to load timeout config', configError);
+        const normalizedConfigError = normalizeError(configError, 'Failed to load timeout config');
+        logClientWarn(
+          '[Config] Failed to load timeout config',
+          normalizedConfigError,
+          'SimpleCopyButton.handleCopy',
+          {
+            component: 'SimpleCopyButton',
+            action: 'load-timeout-config',
+            category: 'config',
+            recoverable: true,
+            hasContent: Boolean(content),
+            label: label ?? 'unnamed',
+          }
+        );
       }
       setTimeout(() => setCopied(false), resetDelay);
     } catch (error) {

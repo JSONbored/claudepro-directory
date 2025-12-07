@@ -142,12 +142,13 @@ export function QuizForm() {
             'Failed to load quiz configuration'
           );
           logClientError(
-            'Failed to load quiz configuration',
+            '[Quiz] Failed to load quiz configuration',
             normalized,
             'QuizForm.loadConfig',
             {
               component: 'QuizForm',
               action: 'load-config',
+              category: 'quiz',
             }
           );
           toasts.error.actionFailed('load quiz');
@@ -156,12 +157,13 @@ export function QuizForm() {
       .catch((error) => {
         const normalized = normalizeError(error, 'Failed to load quiz configuration');
         logClientError(
-          'Failed to load quiz configuration',
+          '[Quiz] Failed to load quiz configuration',
           normalized,
           'QuizForm.loadConfig',
           {
             component: 'QuizForm',
             action: 'load-config',
+            category: 'quiz',
           }
         );
         toasts.error.actionFailed('load quiz');
@@ -288,12 +290,13 @@ export function QuizForm() {
       toasts.error.invalidInput();
       const normalized = normalizeError(error, 'Quiz validation failed');
       logClientError(
-        'Quiz validation failed',
+        '[Quiz] Validation failed',
         normalized,
         'QuizForm.validate',
         {
           component: 'QuizForm',
           action: 'validate',
+          category: 'quiz',
         }
       );
     }

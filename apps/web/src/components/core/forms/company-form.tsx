@@ -385,12 +385,13 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 if (file) {
                   handleLogoUpload(file).catch((error: unknown) => {
                     logClientError(
-                      'Logo upload failed',
+                      '[Form] Logo upload failed',
                       normalizeError(error, 'Logo upload failed'),
                       'CompanyForm.handleLogoUpload',
                       {
                         component: 'CompanyForm',
                         action: 'handleLogoUpload',
+                        category: 'form',
                       }
                     );
                     toasts.error.fromError(error, 'Failed to upload logo');

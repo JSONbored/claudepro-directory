@@ -28,6 +28,7 @@ import {
   generateScreenshotFilename,
   generateShareText,
   generateShareUrl,
+  POSITION_PATTERNS,
   toasts,
   UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
@@ -114,7 +115,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT} border-border bg-card/95 top-full z-50 mt-2 w-56 rounded-lg border p-2 shadow-xl backdrop-blur-md"
+      className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT} border-border bg-card/95 top-full z-50 mt-2 w-56 rounded-lg border p-2 shadow-xl backdrop-blur-md`}
       onMouseLeave={onMouseLeave}
     >
       {/* Twitter Share */}
@@ -626,7 +627,7 @@ export function ProductionCodeBlock({
       >
         {/* Top-right action buttons + badge (when no filename header) */}
         {!filename && (
-          <div className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_LG} z-20 flex items-center gap-1">
+          <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_LG} z-20 flex items-center gap-1`}>
             {/* Screenshot button */}
             <motion.button
               type="button"

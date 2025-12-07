@@ -9,7 +9,11 @@
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle, Home, RefreshCw } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logClientError } from '@heyclaude/web-runtime/logging/client';
+import {
+  generateRequestId,
+  logClientError,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/client';
 import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -30,12 +34,14 @@ export default function ServerError() {
     const requestId = generateRequestId();
     const route = globalThis.location.pathname;
     const operation = 'ServerErrorPage';
-    const modulePath = 'apps/web/src/app/500';
     const serverError = new Error('Server error (500)');
-    logClientError('Server error page displayed', serverError, operation, {
+    const normalized = normalizeError(serverError, 'Server error page displayed');
+    logClientError('[Error] Server error page displayed', normalized, operation, {
+      component: 'ServerError',
+      action: 'display-error-page',
+      category: 'error',
       requestId,
       route,
-      module: modulePath,
       userAgent: globalThis.navigator.userAgent,
       url: globalThis.location.href,
       segment: 'global',

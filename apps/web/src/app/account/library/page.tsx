@@ -38,8 +38,6 @@ import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
 // MIGRATED: Added Suspense boundary for dynamic getAuthenticatedUser access (Cache Components requirement)
 
 /**

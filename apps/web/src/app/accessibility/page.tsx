@@ -7,9 +7,6 @@ import { type Metadata } from 'next';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-// MIGRATED: Removed export const revalidate = false (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
 /**
  * Static Generation: Accessibility page is fully static and never changes
  * No automatic revalidation - page is statically generated at build time
@@ -68,11 +65,7 @@ export default async function AccessibilityPage() {
   );
 }
 
-async function AccessibilityPageContent({
-  reqLogger,
-}: {
-  reqLogger: ReturnType<typeof logger.child>;
-}) {
+function AccessibilityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
   const channels = getContactChannels();
 

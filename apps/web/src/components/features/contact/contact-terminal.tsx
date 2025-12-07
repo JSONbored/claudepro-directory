@@ -285,12 +285,13 @@ export function ContactTerminal() {
       );
       const normalized = normalizeError(error, 'Terminal command execution failed');
       logClientError(
-        'Terminal command execution failed',
+        '[Contact] Terminal command execution failed',
         normalized,
         'ContactTerminal.executeCommand',
         {
           component: 'ContactTerminal',
           action: 'execute-command',
+          category: 'contact',
           commandId: command.id ?? 'unknown',
         }
       );

@@ -65,20 +65,31 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
         }
         if (result?.serverError) {
           // Error already logged by safe-action middleware
+          const normalized = normalizeError(new Error(result.serverError), 'Failed to load selected company');
           logClientError(
-            'CompanySelector: failed to load selected company',
-            new Error(result.serverError),
+            '[Form] Failed to load selected company',
+            normalized,
             'CompanySelector.loadCompany',
-            { companyId: value }
+            {
+              component: 'CompanySelector',
+              action: 'load-company',
+              category: 'form',
+              companyId: value,
+            }
           );
         }
       })
       .catch((error) => {
         logClientError(
-          'CompanySelector: failed to load selected company',
+          '[Form] Failed to load selected company',
           normalizeError(error, 'Failed to load company'),
           'CompanySelector.loadCompany',
-          { companyId: value }
+          {
+            component: 'CompanySelector',
+            action: 'load-company',
+            category: 'form',
+            companyId: value,
+          }
         );
       });
 
@@ -119,10 +130,13 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
       }
     } catch (error) {
       logClientError(
-        'CompanySelector: unified search failed',
-        normalizeError(error),
+        '[Form] Unified search failed',
+        normalizeError(error, 'Unified search failed'),
         'CompanySelector.searchCompanies',
         {
+          component: 'CompanySelector',
+          action: 'search-companies',
+          category: 'form',
           query: trimmed,
         }
       );
@@ -145,10 +159,13 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
       if (cancelled) return;
       searchCompanies(searchQuery).catch((error) => {
         logClientError(
-          'CompanySelector: search execution failed',
-          normalizeError(error),
+          '[Form] Search execution failed',
+          normalizeError(error, 'Search execution failed'),
           'CompanySelector.searchEffect',
           {
+            component: 'CompanySelector',
+            action: 'search-effect',
+            category: 'form',
             query: searchQuery,
           }
         );
@@ -202,10 +219,15 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
         }
       } catch (error) {
         logClientError(
-          'CompanySelector: failed to create company',
+          '[Form] Failed to create company',
           normalizeError(error, 'Failed to create company'),
           'CompanySelector.createCompany',
-          { name }
+          {
+            component: 'CompanySelector',
+            action: 'create-company',
+            category: 'form',
+            name,
+          }
         );
       }
     });

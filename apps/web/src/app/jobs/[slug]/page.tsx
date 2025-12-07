@@ -36,10 +36,6 @@ import { connection } from 'next/server';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
-// MIGRATED: Removed export const revalidate = 7200 (incompatible with Cache Components)
-// MIGRATED: Removed export const dynamicParams = true (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
 /**
  * ISR: 2 hours (7200s) - Job postings are relatively stable
  */

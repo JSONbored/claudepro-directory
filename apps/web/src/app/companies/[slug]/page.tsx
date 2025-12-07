@@ -37,10 +37,6 @@ import type React from 'react';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
-// MIGRATED: Removed export const revalidate = 1800 (incompatible with Cache Components)
-// MIGRATED: Removed export const dynamicParams = true (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
 /**
  * Render an external anchor for a validated website URL or nothing when the URL is not safe.
  *
@@ -154,10 +150,15 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
 }
 
 /**
- * Render the company profile page for a given company slug, including the header, active job listings, and sidebar stats.
+ * PPR Optimization: Static shell renders immediately
+ * - Static page structure (container, grid layout)
+ * Dynamic content streams in Suspense:
+ * - Company header (cached company data via getCompanyProfile)
+ * - Job listings (active_jobs from cached profile)
+ * - Stats sidebar (stats from cached profile)
  *
- * The component fetches the company profile by `slug` and triggers a 404 when the company is not found.
- * Data is fetched server-side and participates in the file-level ISR configuration (revalidation applied at the route level).
+ * Note: getCompanyProfile uses 'use cache' with cacheLife('half'), so multiple
+ * Suspense boundaries calling it will hit the cache efficiently.
  *
  * @param params - Route params object containing the `slug` of the company
  * @returns The React element tree for the company profile page (header, listings, and stats)
@@ -181,27 +182,58 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
     module: 'apps/web/src/app/companies/[slug]',
   });
 
+  const { slug } = await params;
+
+  // Static shell - renders immediately for PPR
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading company...</div>}>
-      <CompanyPageContent params={params} reqLogger={reqLogger} />
-    </Suspense>
+    <>
+      <StructuredData route={`/companies/${slug}`} />
+      <div className="bg-background min-h-screen">
+        {/* Company Header - streams in Suspense */}
+        <section className="border-border relative border-b">
+          <Suspense fallback={<CompanyHeaderSkeleton />}>
+            <CompanyHeader slug={slug} reqLogger={reqLogger} />
+          </Suspense>
+        </section>
+
+        {/* Content - streams in Suspense */}
+        <section className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
+            {/* Main content - Active jobs */}
+            <div className="space-y-6">
+              <Suspense fallback={<JobsListSkeleton />}>
+                <CompanyJobsList slug={slug} reqLogger={reqLogger} />
+              </Suspense>
+            </div>
+
+            {/* Sidebar - Company stats */}
+            <aside className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
+              <Suspense fallback={<StatsSkeleton />}>
+                <CompanyStats slug={slug} reqLogger={reqLogger} />
+              </Suspense>
+            </aside>
+          </div>
+        </section>
+      </div>
+    </>
   );
 }
 
-async function CompanyPageContent({
-  params,
+/**
+ * Company header component - streams in Suspense
+ * Fetches company profile (cached) and renders header
+ */
+async function CompanyHeader({
+  slug,
   reqLogger,
 }: {
-  params: Promise<{ slug: string }>;
   reqLogger: ReturnType<typeof logger.child>;
+  slug: string;
 }) {
-  const { slug } = await params;
   const route = `/companies/${slug}`;
-
-  // Create route-specific logger
   const routeLogger = reqLogger.child({ route });
 
-  // Section: Company Profile Fetch
+  // Fetch company profile (cached via 'use cache')
   const profile = await getCompanyProfile(slug);
 
   if (!profile?.company) {
@@ -211,276 +243,362 @@ async function CompanyPageContent({
     notFound();
   }
 
-  // profile and profile.company are guaranteed to be non-null after the check above
-  const { company, active_jobs, stats } = profile;
+  const { company } = profile;
+
+  return (
+    <div className="container mx-auto px-4 py-12">
+      <div className="flex items-start gap-6">
+        {company.logo ? (
+          <Image
+            src={company.logo}
+            alt={`${company.name} logo`}
+            width={96}
+            height={96}
+            className="border-background h-24 w-24 rounded-lg border-4 object-cover"
+            priority
+          />
+        ) : (
+          <div className="border-background bg-accent flex h-24 w-24 items-center justify-center rounded-lg border-4 text-2xl font-bold">
+            <Building className="h-12 w-12" />
+          </div>
+        )}
+
+        <div className="flex-1">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
+            <h1 className="text-3xl font-bold">{company.name}</h1>
+            {company.featured ? (
+              <UnifiedBadge variant="base" style="default">
+                Featured
+              </UnifiedBadge>
+            ) : null}
+          </div>
+
+          {company.description ? (
+            <p className="text-muted-foreground mt-2 max-w-3xl">{company.description}</p>
+          ) : null}
+
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
+            <SafeWebsiteLink
+              url={company.website}
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.LINK_ACCENT}`}
+            >
+              <Globe className="h-4 w-4" />
+              Website
+            </SafeWebsiteLink>
+
+            {company.industry ? (
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <TrendingUp className="h-4 w-4" />
+                {company.industry}
+              </div>
+            ) : null}
+
+            {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
+            {company.size ? (
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <Users className="h-4 w-4" />
+                {company.size}
+              </div>
+            ) : null}
+
+            {company.using_cursor_since ? (
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <Calendar className="h-4 w-4" />
+                Using Claude since{' '}
+                {new Date(company.using_cursor_since).toLocaleDateString('en-US', {
+                  month: 'short',
+                  year: 'numeric',
+                })}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Company jobs list component - streams in Suspense
+ * Fetches company profile (cached) and renders job listings
+ */
+async function CompanyJobsList({
+  slug,
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+  slug: string;
+}) {
+  const route = `/companies/${slug}`;
+  const routeLogger = reqLogger.child({ route });
+
+  // Fetch company profile (cached via 'use cache')
+  const profile = await getCompanyProfile(slug);
+
+  if (!profile?.company) {
+    routeLogger.warn('CompanyPage: company not found', {
+      section: 'company-profile-fetch',
+    });
+    notFound();
+  }
+
+  const { active_jobs } = profile;
+
+  const filteredActiveJobs =
+    active_jobs?.filter(
+      (
+        job
+      ): job is typeof job & {
+        click_count: number;
+        company: string;
+        experience: Database['public']['Enums']['experience_level'];
+        expires_at: string;
+        id: string;
+        plan: Database['public']['Enums']['job_plan'];
+        posted_at: string;
+        slug: string;
+        title: string;
+        view_count: number;
+        workplace: Database['public']['Enums']['workplace_type'];
+      } => {
+        return Boolean(
+          job.id &&
+          job.slug &&
+          job.title &&
+          job.company &&
+          job.workplace &&
+          job.experience &&
+          job.plan &&
+          job.posted_at &&
+          job.expires_at &&
+          typeof job.view_count === 'number' &&
+          typeof job.click_count === 'number'
+        );
+      }
+    ) ?? [];
 
   return (
     <>
-      <StructuredData route={`/companies/${slug}`} />
-
-      <div className="bg-background min-h-screen">
-        {/* Company Header */}
-        <section className="border-border relative border-b">
-          <div className="container mx-auto px-4 py-12">
-            <div className="flex items-start gap-6">
-              {company.logo ? (
-                <Image
-                  src={company.logo}
-                  alt={`${company.name} logo`}
-                  width={96}
-                  height={96}
-                  className="border-background h-24 w-24 rounded-lg border-4 object-cover"
-                  priority
-                />
-              ) : (
-                <div className="border-background bg-accent flex h-24 w-24 items-center justify-center rounded-lg border-4 text-2xl font-bold">
-                  <Building className="h-12 w-12" />
-                </div>
-              )}
-
-              <div className="flex-1">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
-                  <h1 className="text-3xl font-bold">{company.name}</h1>
-                  {company.featured ? (
-                    <UnifiedBadge variant="base" style="default">
-                      Featured
-                    </UnifiedBadge>
-                  ) : null}
-                </div>
-
-                {company.description ? (
-                  <p className="text-muted-foreground mt-2 max-w-3xl">{company.description}</p>
-                ) : null}
-
-                <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
-                  <SafeWebsiteLink
-                    url={company.website}
-                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.LINK_ACCENT}`}
-                  >
-                    <Globe className="h-4 w-4" />
-                    Website
-                  </SafeWebsiteLink>
-
-                  {company.industry ? (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                      <TrendingUp className="h-4 w-4" />
-                      {company.industry}
-                    </div>
-                  ) : null}
-
-                  {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
-                  {company.size ? (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                      <Users className="h-4 w-4" />
-                      {company.size}
-                    </div>
-                  ) : null}
-
-                  {company.using_cursor_since ? (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                      <Calendar className="h-4 w-4" />
-                      Using Claude since{' '}
-                      {new Date(company.using_cursor_since).toLocaleDateString('en-US', {
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Content */}
-        <section className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
-            {/* Main content - Active jobs */}
-            <div className="space-y-6">
-              {(() => {
-                const filteredActiveJobs =
-                  active_jobs?.filter(
-                    (
-                      job
-                    ): job is typeof job & {
-                      click_count: number;
-                      company: string;
-                      experience: Database['public']['Enums']['experience_level'];
-                      expires_at: string;
-                      id: string;
-                      plan: Database['public']['Enums']['job_plan'];
-                      posted_at: string;
-                      slug: string;
-                      title: string;
-                      view_count: number;
-                      workplace: Database['public']['Enums']['workplace_type'];
-                    } => {
-                      return Boolean(
-                        job.id &&
-                        job.slug &&
-                        job.title &&
-                        job.company &&
-                        job.workplace &&
-                        job.experience &&
-                        job.plan &&
-                        job.posted_at &&
-                        job.expires_at &&
-                        typeof job.view_count === 'number' &&
-                        typeof job.click_count === 'number'
-                      );
-                    }
-                  ) ?? [];
-
-                return (
-                  <>
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                      <h2 className="text-2xl font-bold">
-                        Active Positions ({filteredActiveJobs.length})
-                      </h2>
-                    </div>
-
-                    {filteredActiveJobs.length === 0 ? (
-                      <Card>
-                        <CardContent className="flex flex-col items-center py-16">
-                          <Briefcase className="text-muted-foreground mb-4 h-12 w-12" />
-                          <h3 className="mb-2 text-xl font-semibold">No Active Positions</h3>
-                          <p className="text-muted-foreground mb-6 max-w-md text-center">
-                            This company doesn't have any job openings at the moment. Check back
-                            later!
-                          </p>
-                          <Link href={ROUTES.JOBS}>
-                            <UnifiedBadge variant="base" style="default">
-                              Browse All Jobs
-                            </UnifiedBadge>
-                          </Link>
-                        </CardContent>
-                      </Card>
-                    ) : (
-                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        {filteredActiveJobs.map((job) => {
-                          return (
-                            <JobCard
-                              key={job.id}
-                              job={{
-                                id: job.id,
-                                slug: job.slug,
-                                title: job.title,
-                                company: job.company,
-                                company_logo: job.company_logo,
-                                location: job.location,
-                                description: job.description,
-                                salary: job.salary,
-                                remote: job.remote ?? false,
-                                type: job.type,
-                                workplace: job.workplace,
-                                experience: job.experience,
-                                category: job.category,
-                                tags: job.tags ?? [],
-                                plan: job.plan,
-                                tier: job.tier,
-                                posted_at: job.posted_at,
-                                expires_at: job.expires_at,
-                                view_count: job.view_count,
-                                click_count: job.click_count,
-                                link: job.link,
-                              }}
-                            />
-                          );
-                        })}
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Sidebar - Company stats */}
-            <aside className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Company Stats</CardTitle>
-                  <CardDescription>Hiring activity and engagement</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                    <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Jobs Posted</span>
-                    <span className="font-semibold">{stats?.total_jobs ?? 0}</span>
-                  </div>
-
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                    <span className={UI_CLASSES.TEXT_SM_MUTED}>Active Openings</span>
-                    <span className="font-semibold text-green-600">{stats?.active_jobs ?? 0}</span>
-                  </div>
-
-                  {stats && (stats.remote_jobs ?? 0) > 0 ? (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                      <span className={UI_CLASSES.TEXT_SM_MUTED}>Remote Positions</span>
-                      <span className="font-semibold">{stats.remote_jobs ?? 0}</span>
-                    </div>
-                  ) : null}
-
-                  {stats?.avg_salary_min ? (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                      <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
-                      <span className="font-semibold">
-                        ${(stats.avg_salary_min / 1000).toFixed(0)}k+
-                      </span>
-                    </div>
-                  ) : null}
-
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                    <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Views</span>
-                    <span className="font-semibold">
-                      {(stats?.total_views ?? 0).toLocaleString()}
-                    </span>
-                  </div>
-
-                  {stats?.latest_job_posted_at ? (
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                      <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
-                      <span className="text-sm font-semibold">
-                        {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </span>
-                    </div>
-                  ) : null}
-                </CardContent>
-              </Card>
-
-              {/* CTA Card */}
-              <Card className="border-accent/30 bg-accent/5">
-                <CardHeader>
-                  <CardTitle className="text-lg">Interested in joining?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {(() => {
-                    const safeWebsiteUrl = getSafeWebsiteUrl(company.website);
-                    const hasWebsite = Boolean(safeWebsiteUrl);
-
-                    return (
-                      <>
-                        <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
-                          {hasWebsite
-                            ? 'Visit their website to learn more about the company and culture.'
-                            : 'Check back regularly for new opportunities!'}
-                        </p>
-                        {hasWebsite ? (
-                          <SafeWebsiteLink url={safeWebsiteUrl} className={UI_CLASSES.LINK_ACCENT}>
-                            Visit Website
-                          </SafeWebsiteLink>
-                        ) : null}
-                      </>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
-            </aside>
-          </div>
-        </section>
+      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+        <h2 className="text-2xl font-bold">Active Positions ({filteredActiveJobs.length})</h2>
       </div>
+
+      {filteredActiveJobs.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center py-16">
+            <Briefcase className="text-muted-foreground mb-4 h-12 w-12" />
+            <h3 className="mb-2 text-xl font-semibold">No Active Positions</h3>
+            <p className="text-muted-foreground mb-6 max-w-md text-center">
+              This company doesn't have any job openings at the moment. Check back later!
+            </p>
+            <Link href={ROUTES.JOBS}>
+              <UnifiedBadge variant="base" style="default">
+                Browse All Jobs
+              </UnifiedBadge>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {filteredActiveJobs.map((job) => {
+            return (
+              <JobCard
+                key={job.id}
+                job={{
+                  id: job.id,
+                  slug: job.slug,
+                  title: job.title,
+                  company: job.company,
+                  company_logo: job.company_logo,
+                  location: job.location,
+                  description: job.description,
+                  salary: job.salary,
+                  remote: job.remote ?? false,
+                  type: job.type,
+                  workplace: job.workplace,
+                  experience: job.experience,
+                  category: job.category,
+                  tags: job.tags ?? [],
+                  plan: job.plan,
+                  tier: job.tier,
+                  posted_at: job.posted_at,
+                  expires_at: job.expires_at,
+                  view_count: job.view_count,
+                  click_count: job.click_count,
+                  link: job.link,
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
     </>
+  );
+}
+
+/**
+ * Company stats component - streams in Suspense
+ * Fetches company profile (cached) and renders stats sidebar
+ */
+async function CompanyStats({
+  slug,
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+  slug: string;
+}) {
+  const route = `/companies/${slug}`;
+  const routeLogger = reqLogger.child({ route });
+
+  // Fetch company profile (cached via 'use cache')
+  const profile = await getCompanyProfile(slug);
+
+  if (!profile?.company) {
+    routeLogger.warn('CompanyPage: company not found', {
+      section: 'company-profile-fetch',
+    });
+    notFound();
+  }
+
+  const { company, stats } = profile;
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Company Stats</CardTitle>
+          <CardDescription>Hiring activity and engagement</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+            <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Jobs Posted</span>
+            <span className="font-semibold">{stats?.total_jobs ?? 0}</span>
+          </div>
+
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+            <span className={UI_CLASSES.TEXT_SM_MUTED}>Active Openings</span>
+            <span className="font-semibold text-green-600">{stats?.active_jobs ?? 0}</span>
+          </div>
+
+          {stats && (stats.remote_jobs ?? 0) > 0 ? (
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+              <span className={UI_CLASSES.TEXT_SM_MUTED}>Remote Positions</span>
+              <span className="font-semibold">{stats.remote_jobs ?? 0}</span>
+            </div>
+          ) : null}
+
+          {stats?.avg_salary_min ? (
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+              <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
+              <span className="font-semibold">${(stats.avg_salary_min / 1000).toFixed(0)}k+</span>
+            </div>
+          ) : null}
+
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+            <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Views</span>
+            <span className="font-semibold">{(stats?.total_views ?? 0).toLocaleString()}</span>
+          </div>
+
+          {stats?.latest_job_posted_at ? (
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+              <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
+              <span className="text-sm font-semibold">
+                {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </span>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      {/* CTA Card */}
+      <Card className="border-accent/30 bg-accent/5">
+        <CardHeader>
+          <CardTitle className="text-lg">Interested in joining?</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const safeWebsiteUrl = getSafeWebsiteUrl(company.website);
+            const hasWebsite = Boolean(safeWebsiteUrl);
+
+            return (
+              <>
+                <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
+                  {hasWebsite
+                    ? 'Visit their website to learn more about the company and culture.'
+                    : 'Check back regularly for new opportunities!'}
+                </p>
+                {hasWebsite ? (
+                  <SafeWebsiteLink url={safeWebsiteUrl} className={UI_CLASSES.LINK_ACCENT}>
+                    Visit Website
+                  </SafeWebsiteLink>
+                ) : null}
+              </>
+            );
+          })()}
+        </CardContent>
+      </Card>
+    </>
+  );
+}
+
+/**
+ * Skeleton components for PPR loading states
+ */
+function CompanyHeaderSkeleton() {
+  return (
+    <div className="container mx-auto px-4 py-12">
+      <div className="flex items-start gap-6">
+        <div className="bg-muted h-24 w-24 animate-pulse rounded-lg" />
+        <div className="flex-1 space-y-3">
+          <div className="bg-muted h-8 w-64 animate-pulse rounded" />
+          <div className="bg-muted h-4 w-full animate-pulse rounded" />
+          <div className="bg-muted h-4 w-3/4 animate-pulse rounded" />
+          <div className="mt-4 flex gap-4">
+            <div className="bg-muted h-4 w-20 animate-pulse rounded" />
+            <div className="bg-muted h-4 w-24 animate-pulse rounded" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function JobsListSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-muted h-8 w-48 animate-pulse rounded" />
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i}>
+            <CardContent className="py-12">
+              <div className="bg-muted h-48 animate-pulse rounded" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StatsSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="bg-muted h-6 w-32 animate-pulse rounded" />
+        <div className="bg-muted mt-2 h-4 w-48 animate-pulse rounded" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="flex items-center justify-between">
+            <div className="bg-muted h-4 w-24 animate-pulse rounded" />
+            <div className="bg-muted h-4 w-12 animate-pulse rounded" />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 }

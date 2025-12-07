@@ -4,7 +4,7 @@ import {
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
@@ -13,10 +13,6 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
-
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
-// MIGRATED: Added Suspense boundary for dynamic getAuthenticatedUser and params access (Cache Components requirement)
 
 /**
  * Dynamic Rendering Required
@@ -126,10 +122,8 @@ async function EditCollectionPageContent({
       hasData: !!collectionData,
     });
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : error instanceof String ? error.toString() : String(error);
-    userLogger.error('EditCollectionPage: getCollectionDetail threw', errorForLogging, {
+    const normalized = normalizeError(error, 'Failed to load collection detail');
+    userLogger.error('EditCollectionPage: getCollectionDetail threw', normalized, {
       section: 'collection-data-fetch',
     });
     throw error;

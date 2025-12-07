@@ -1,7 +1,7 @@
 'use client';
 
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { useLoggedAsync, useButtonSuccess } from '@heyclaude/web-runtime/hooks';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button } from '@heyclaude/web-runtime/ui';
@@ -65,7 +65,18 @@ export function ContentActionButton({
     if (isLoading || isSuccess) return;
 
     if (!isSafeFetchUrl(url)) {
-      logClientWarning('ContentActionButton: Unsafe URL blocked', { url, label });
+      logClientWarn(
+        '[Security] Unsafe URL blocked',
+        new Error('Unsafe URL blocked'),
+        'ContentActionButton.handleClick',
+        {
+          component: 'ContentActionButton',
+          action: 'block-unsafe-url',
+          category: 'security',
+          url,
+          label,
+        }
+      );
       toasts.raw.error('Invalid or unsafe URL');
       return;
     }

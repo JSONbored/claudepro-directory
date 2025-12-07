@@ -15,30 +15,16 @@ import {
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
-import dynamicImport from 'next/dynamic';
 import localFont from 'next/font/local';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
-import { Toaster } from 'sonner';
 
 import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
-import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
-
-const NotificationToastHandler = dynamicImport(
-  () =>
-    import('@/src/components/features/notifications/notification-toast-handler').then(
-      (module_) => ({
-        default: module_.NotificationToastHandler,
-      })
-    ),
-  {
-    loading: () => null,
-  }
-);
+import { Toaster } from '@/src/components/primitives/feedback/sonner';
 
 // Component config is now static
 
@@ -200,9 +186,7 @@ async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
     const errorForLogging: Error | string =
       layoutDataResult.reason instanceof Error
         ? layoutDataResult.reason
-        : layoutDataResult.reason instanceof String
-          ? layoutDataResult.reason.toString()
-          : String(layoutDataResult.reason);
+        : String(layoutDataResult.reason);
     reqLogger.error('RootLayout: layout data fetch failed', errorForLogging, {
       source: 'root-layout',
     });
@@ -231,7 +215,7 @@ async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
  * @see generateRequestId
  */
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -287,16 +271,13 @@ export default async function RootLayout({
             enableColorScheme={false}
           >
             <PostCopyEmailProvider>
-              <NotificationsProvider>
-                <ErrorBoundary>
-                  <Suspense fallback={<LayoutFallback>{children}</LayoutFallback>}>
-                    <LayoutDataWrapper>{children}</LayoutDataWrapper>
-                  </Suspense>
-                </ErrorBoundary>
-                <Toaster />
-                <NotificationToastHandler />
-                {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
-              </NotificationsProvider>
+              <ErrorBoundary>
+                <Suspense fallback={<LayoutFallback>{children}</LayoutFallback>}>
+                  <LayoutDataWrapper>{children}</LayoutDataWrapper>
+                </Suspense>
+              </ErrorBoundary>
+              <Toaster />
+              {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
             </PostCopyEmailProvider>
           </ThemeProvider>
         </ComponentConfigContextProvider>

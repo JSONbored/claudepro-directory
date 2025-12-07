@@ -5,7 +5,8 @@
  * Displays and links to GitHub repository with star count
  */
 
-import { getSocialLinks, logClientWarning, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { getSocialLinks, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Github } from '@heyclaude/web-runtime/icons';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
@@ -52,7 +53,18 @@ export function GitHubStarsButton({
         setStars(count);
       })
       .catch((error) => {
-        logClientWarning('GitHubStarsButton: failed to fetch star count', error, { apiUrl });
+        const normalized = normalizeError(error, 'Failed to fetch GitHub star count');
+        logClientWarn(
+          '[GitHub] Failed to fetch star count',
+          normalized,
+          'GitHubStarsButton.fetchStars',
+          {
+            component: 'GitHubStarsButton',
+            action: 'fetch-star-count',
+            category: 'external-api',
+            apiUrl,
+          }
+        );
         setStars(null);
       });
   }, [repoUrl]);

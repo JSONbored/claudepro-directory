@@ -9,13 +9,14 @@ import {
   UI_CLASSES,
   Button,
   Input,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from '@heyclaude/web-runtime/ui';
-import { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
+import { useEffect, useRef, useState } from 'react';
 
 export interface NewsletterModalProps {
   category?: Database['public']['Enums']['content_category'];
@@ -35,6 +36,8 @@ export function NewsletterModal({
   slug,
 }: NewsletterModalProps) {
   const [showTime, setShowTime] = useState<null | number>(null);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const pulse = usePulse();
 
   const { email, setEmail, isSubmitting, subscribe } = useNewsletter({
@@ -62,6 +65,12 @@ export function NewsletterModal({
       const now = Date.now();
       setShowTime(now);
 
+      // Focus input field after modal animation completes
+      const focusTimer = setTimeout(() => {
+        inputRef.current?.focus();
+        setIsInputFocused(true);
+      }, 300); // Wait for dialog animation
+
       pulse
         .click({
           category: null,
@@ -78,7 +87,13 @@ export function NewsletterModal({
             copyType,
           });
         });
+
+      return () => {
+        clearTimeout(focusTimer);
+      };
     }
+    setIsInputFocused(false);
+    return undefined;
   }, [open, copyType, pulse]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,26 +165,52 @@ export function NewsletterModal({
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleDismiss}>
-      <SheetContent side="bottom" className="sm:mx-auto sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>{NEWSLETTER_CTA_CONFIG.headline}</SheetTitle>
-          <SheetDescription>{NEWSLETTER_CTA_CONFIG.description}</SheetDescription>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={handleDismiss}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{NEWSLETTER_CTA_CONFIG.headline}</DialogTitle>
+          <DialogDescription>{NEWSLETTER_CTA_CONFIG.description}</DialogDescription>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div className="space-y-2">
-            <Input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isSubmitting}
-              className="h-12 text-base"
-              autoComplete="email"
-              aria-label="Email address"
-              required
-            />
+            <motion.div
+              initial={false}
+              animate={
+                isInputFocused
+                  ? {
+                      scale: 1.02,
+                      transition: {
+                        type: 'spring',
+                        stiffness: 400,
+                        damping: 25,
+                      },
+                    }
+                  : { scale: 1 }
+              }
+            >
+              <Input
+                ref={inputRef}
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
+                disabled={isSubmitting}
+                className={cn(
+                  'h-12 text-base',
+                  'border-border bg-background',
+                  'focus:border-accent focus:ring-accent/20 focus:ring-2',
+                  'transition-all duration-200',
+                  isInputFocused && 'shadow-lg shadow-accent/10',
+                  isSubmitting && 'cursor-not-allowed opacity-60'
+                )}
+                autoComplete="email"
+                aria-label="Email address"
+                required
+              />
+            </motion.div>
           </div>
 
           <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
@@ -177,8 +218,10 @@ export function NewsletterModal({
               type="submit"
               disabled={isSubmitting || !email.trim()}
               className={cn(
-                'from-accent to-primary hover:from-accent/90 hover:to-primary/90 flex-1 bg-linear-to-r',
-                isSubmitting && 'opacity-50'
+                'bg-accent text-white font-semibold flex-1',
+                'hover:bg-accent/90 transition-all duration-200',
+                'disabled:opacity-60 disabled:cursor-not-allowed',
+                isSubmitting && 'opacity-60'
               )}
             >
               {isSubmitting ? 'Joining...' : NEWSLETTER_CTA_CONFIG.buttonText}
@@ -198,7 +241,7 @@ export function NewsletterModal({
         <p className="text-muted-foreground mt-4 text-center text-xs">
           By subscribing, you agree to receive updates about Claude tools and resources.
         </p>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

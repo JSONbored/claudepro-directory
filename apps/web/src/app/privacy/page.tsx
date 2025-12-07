@@ -7,9 +7,6 @@ import { type Metadata } from 'next';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-// MIGRATED: Removed export const revalidate = false (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
 /**
  * Provide page metadata used by Next.js for the site's Privacy page.
  *
@@ -68,7 +65,7 @@ export default async function PrivacyPage() {
   );
 }
 
-async function PrivacyPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
+function PrivacyPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
 
   reqLogger.info('PrivacyPage: rendering page', {

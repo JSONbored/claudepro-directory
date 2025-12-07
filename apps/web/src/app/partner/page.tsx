@@ -27,9 +27,6 @@ import {
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-// MIGRATED: Removed export const revalidate = 86_400 (incompatible with Cache Components)
-// TODO: Will add "use cache" + cacheLife() after analyzing build errors
-
 /**
  * Renders the Partner marketing page that presents pricing, benefits, and CTAs for advertising.
  *
@@ -107,7 +104,21 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
     };
   }
 
-  const heroStats = await getPartnerHeroStats();
+  let heroStats;
+  try {
+    heroStats = await getPartnerHeroStats();
+    reqLogger.info('PartnerPage: hero stats loaded', { section: 'hero-stats' });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load hero stats');
+    reqLogger.error('PartnerPage: getPartnerHeroStats failed', normalized, {
+      section: 'hero-stats',
+    });
+    heroStats = {
+      monthlyVisitors: 10_000,
+      monthlyPageViews: 50_000,
+      configurationCount: 500,
+    };
+  }
   const configCount = heroStats.configurationCount;
 
   const partnerContacts = getPartnerContactChannels();

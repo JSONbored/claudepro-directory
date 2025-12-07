@@ -1,5 +1,5 @@
 // Update entry point
-export * from '../actions/safe-action.ts';
+// REMOVED: export * from '../actions/safe-action.ts'; - Actions should ONLY be exported from @heyclaude/web-runtime/actions to prevent Turbopack from creating 'actions/data' module IDs
 // REMOVED: export * from '../actions/feature-flags.ts'; - Server-only, use lazy imports or import from @heyclaude/web-runtime/actions
 export * from '../storage/image-storage.ts';
 export * from '../storage/image-utils.ts';
@@ -41,15 +41,6 @@ export { getLayoutFlags, type LayoutFlags } from '../data/layout/flags.ts';
 // REMOVED: export * from '../data/config/categories.ts'; - Has module-level feature-flags import
 export * from '../data/config/category/index.ts';
 
-// Actions
-export * from '../actions/pulse.ts';
-export * from '../actions/newsletter.ts';
-export { getQuizConfigurationAction } from '../actions/quiz.ts';
-export * from '../actions/run-rpc-instance.ts';
-export * from '../actions/companies.ts';
-export * from '../actions/contact.ts';
-export * from '../actions/submit-contact-form.generated.ts';
-export * from '../actions/content.ts';
-export * from '../actions/jobs.ts';
-export * from '../actions/notifications.ts';
-export * from '../actions/user.ts';
+// Actions are exported from @heyclaude/web-runtime/actions, not from data entry point
+// This prevents Next.js from creating internal 'actions/data' module IDs that cause bundler errors
+// Import actions from '@heyclaude/web-runtime/actions' instead

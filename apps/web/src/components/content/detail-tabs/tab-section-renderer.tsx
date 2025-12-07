@@ -20,6 +20,7 @@ import dynamic from 'next/dynamic';
 
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
+import { markdownToHtml } from '@/src/lib/utils/markdown-to-html';
 
 // Dynamic import for unified section component (code splitting)
 const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'));
@@ -28,6 +29,7 @@ export interface TabSectionRendererProps {
   config: {
     sections: {
       configuration: boolean;
+      description: boolean;
       examples: boolean;
       features: boolean;
       installation: boolean;
@@ -79,8 +81,25 @@ export function TabSectionRenderer({
 
   switch (sectionId) {
     case 'description': {
-      // Description is handled in header/metadata, not as a separate section
-      return null;
+      // Render description as a content section
+      if (!item.description || typeof item.description !== 'string') return null;
+      if (!config.sections.description) return null;
+
+      // Convert markdown to HTML
+      const descriptionHtml = markdownToHtml(item.description);
+      if (!descriptionHtml) return null;
+
+      const validCategory = isValidCategory(item.category) ? item.category : undefined;
+
+      return (
+        <UnifiedSection
+          variant="text"
+          title="Description"
+          description="Detailed overview and capabilities"
+          html={descriptionHtml}
+          {...(validCategory ? { category: validCategory } : {})}
+        />
+      );
     }
 
     case 'content':
@@ -263,12 +282,13 @@ export function TabSectionRenderer({
         // Log warning for debugging - guides should always have sections
         if (item.category === 'guides') {
           logClientWarn(
-            'Guide sections missing or empty',
+            '[Content] Guide sections missing or empty',
             undefined,
             'TabSectionRenderer.guide_sections',
             {
-              module: 'components/content/detail-tabs/tab-section-renderer',
               component: 'TabSectionRenderer',
+              action: 'render-guide-sections',
+              category: 'content',
               slug: item.slug,
               guideSectionsLength: guideSections?.length ?? 0,
               guideSectionsType: typeof guideSections,

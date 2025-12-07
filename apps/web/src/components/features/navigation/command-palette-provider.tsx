@@ -50,12 +50,13 @@ export function useCommandPalette(): CommandPaletteContextValue {
     // Log when provider is not available (should not happen in normal flow)
     const error = new Error('useCommandPalette called outside CommandPaletteProvider');
     logClientWarn(
-      '[CommandPaletteProvider] Hook used outside provider context',
+      '[Navigation] Hook used outside provider context',
       normalizeError(error, 'CommandPaletteProvider not available'),
       'useCommandPalette.missingProvider',
       {
         component: 'CommandPaletteProvider',
         action: 'hook-call-outside-provider',
+        category: 'navigation',
         stack: error.stack,
       }
     );

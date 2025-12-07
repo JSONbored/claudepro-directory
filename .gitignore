@@ -95,7 +95,13 @@ manifest.json
 
 # Supabase schema dump (contains secrets in trigger definitions)
 apps/edge/schema.sql
-supabase/migrations/*
+# Migration files are tracked in git for GitHub integration
+# IMPORTANT: Override global gitignore (*.sql) to allow migration files
+!supabase/migrations/*.sql
+# Only ignore backup/temp migration files
+supabase/migrations/*.backup
+supabase/migrations/*.tmp
+supabase/migrations/*.orig
 
 .launchd/com.claudepro.backup.plist
 

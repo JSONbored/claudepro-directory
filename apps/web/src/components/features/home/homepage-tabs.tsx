@@ -122,7 +122,12 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               batchSize={30}
               emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
               ariaLabel={`${categoryName} results`}
-              keyExtractor={(item) => `${tab}-${item.slug ?? ''}`}
+              keyExtractor={(item) => {
+                // Use slug for unique keys
+                // DisplayableContent doesn't have an id property
+                const uniqueId = item.slug ?? `unknown-${Math.random()}`;
+                return `${tab}-${uniqueId}`;
+              }}
               renderCard={(item) => {
                 const slug = typeof item.slug === 'string' ? item.slug : null;
                 const showNew = Boolean(weekStartDate && isNewSince(item, weekStartDate));

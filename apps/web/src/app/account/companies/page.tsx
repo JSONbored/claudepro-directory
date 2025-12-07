@@ -37,10 +37,6 @@ import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-// MIGRATED: Removed export const dynamic = 'force-dynamic' (incompatible with Cache Components)
-// MIGRATED: Removed export const runtime = 'nodejs' (default, not needed with Cache Components)
-// TODO: Will add Suspense boundaries or "use cache" after analyzing build errors
-
 /**
  * Dynamic Rendering Required
  * Authenticated user companies
@@ -165,7 +161,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
       companies = data.companies ?? [];
       userLogger.info('CompaniesPage: companies data loaded', {
         section: 'companies-data-fetch',
-        companiesCount: companies?.length ?? 0,
+        companiesCount: companies.length,
       });
     } else {
       userLogger.warn('CompaniesPage: getUserCompanies returned null', {
@@ -201,7 +197,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
     );
   }
 
-  if ((companies?.length ?? 0) === 0) {
+  if (companies.length === 0) {
     userLogger.info('CompaniesPage: user has no companies', {
       section: 'companies-data-fetch',
     });
@@ -210,7 +206,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
   // Final summary log
   userLogger.info('CompaniesPage: page render completed', {
     section: 'page-render',
-    companiesCount: companies?.length ?? 0,
+    companiesCount: companies.length,
   });
 
   return (
@@ -219,7 +215,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
         <div>
           <h1 className="mb-2 text-3xl font-bold">My Companies</h1>
           <p className="text-muted-foreground">
-            {companies?.length ?? 0} {(companies?.length ?? 0) === 1 ? 'company' : 'companies'}
+            {companies.length} {companies.length === 1 ? 'company' : 'companies'}
           </p>
         </div>
         <Button asChild>
@@ -230,7 +226,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
         </Button>
       </div>
 
-      {(companies?.length ?? 0) === 0 ? (
+      {companies.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center py-12">
             <Building2 className="text-muted-foreground mb-4 h-12 w-12" />
@@ -248,7 +244,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
         </Card>
       ) : (
         <div className="grid gap-4">
-          {(companies ?? [])
+          {companies
             .filter(
               (
                 company
