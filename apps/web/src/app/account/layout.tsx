@@ -69,6 +69,10 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
     data: { session },
   } = await supabase.auth.getSession();
 
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
   // Generate single requestId for this layout request (after connection() to allow Date.now())
   const requestId = generateRequestId();
   // Create request-scoped child logger to avoid race conditions

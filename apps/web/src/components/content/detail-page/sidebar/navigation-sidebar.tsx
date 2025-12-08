@@ -463,51 +463,14 @@ export const DetailSidebar = memo(function DetailSidebar({
                   ? relatedItem.slug
                   : '';
               // Validate and sanitize URL before using
+              // getSafeContentItemUrl already performs validation and logging, so no need for duplicate check
               const safeRelatedUrl = getSafeContentItemUrl(relatedCategory, relatedSlug);
               if (!safeRelatedUrl) {
-                logClientWarn(
-                  '[Content] Invalid related item URL rejected',
-                  undefined,
-                  'NavigationSidebar.render',
-                  {
-                    component: 'NavigationSidebar',
-                    action: 'render-related-item',
-                    category: 'content',
-                    itemCategory: relatedCategory,
-                    slug: relatedSlug,
-                    relatedItemTitle: getDisplayTitle({
-                      title:
-                        'title' in relatedItem && typeof relatedItem.title === 'string'
-                          ? relatedItem.title
-                          : null,
-                      slug: relatedSlug,
-                      category: relatedCategory,
-                    }),
-                  }
-                );
-                return null;
-              }
-              // Explicit validation at point of use to satisfy static analysis
-              // This ensures the URL is a safe internal path before using in Link
-              // Type guard: after this check, safeRelatedUrl is guaranteed to be a valid internal path
-              if (!isValidInternalPath(safeRelatedUrl)) {
-                logClientWarn(
-                  '[Content] Invalid internal path rejected',
-                  undefined,
-                  'NavigationSidebar.render',
-                  {
-                    component: 'NavigationSidebar',
-                    action: 'render-related-item',
-                    category: 'content',
-                    itemCategory: relatedCategory,
-                    slug: relatedSlug,
-                    url: safeRelatedUrl,
-                  }
-                );
+                // getSafeContentItemUrl already logged the warning, just return null
                 return null;
               }
               // At this point, safeRelatedUrl is validated and safe for use in Next.js Link
-              // Use validated URL directly to satisfy static analysis
+              // getSafeContentItemUrl ensures the URL is a safe internal path
               const validatedUrl: string = safeRelatedUrl;
               return (
                 <Link

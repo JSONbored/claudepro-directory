@@ -143,9 +143,12 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
       section: 'partner-contacts',
     });
     // Use empty defaults instead of throwing to prevent page crash
+    // Match the expected shape: partnerEmail, hiEmail, supportEmail, securityEmail
     partnerContacts = {
-      email: '',
-      social: {},
+      partnerEmail: '',
+      hiEmail: '',
+      supportEmail: '',
+      securityEmail: '',
     };
   }
 
@@ -157,8 +160,13 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
     reqLogger.error('PartnerPage: getPartnerCtas failed', normalized, {
       section: 'partner-ctas',
     });
-    // Use empty defaults instead of throwing to prevent page crash
-    partnerCtas = {} as ReturnType<typeof getPartnerCtas>;
+    // Use safe default shape instead of empty object to prevent runtime TypeErrors
+    // All CTAs must exist with safe values (empty hrefs) to match expected structure
+    partnerCtas = {
+      jobListing: { href: '', subject: '' },
+      sponsoredListing: { href: '', subject: '' },
+      partnershipInquiry: { href: '', subject: '' },
+    };
   }
 
   return (

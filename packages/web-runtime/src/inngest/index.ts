@@ -57,7 +57,8 @@ import {
 import { processPulseQueue } from './functions/analytics/pulse';
 
 // Changelog functions (Phase 3)
-import { processChangelogQueue } from './functions/changelog/process';
+// Note: processChangelogQueue removed - replaced by /api/changelog/sync endpoint
+// (Vercel free tier doesn't support webhooks, so we use GitHub Actions → API endpoint instead)
 import { processChangelogNotifyQueue } from './functions/changelog/notify';
 
 // Discord functions (Phase 3)
@@ -97,8 +98,8 @@ export const functions = [
   processPulseQueue, // Cron: Every 30 minutes
 
   // Changelog functions (Phase 3) - COMPLETE
-  processChangelogQueue, // Cron: Every 30 minutes
-  processChangelogNotifyQueue, // Cron: Every 30 minutes
+  // processChangelogQueue removed - replaced by /api/changelog/sync endpoint
+  processChangelogNotifyQueue, // Cron: Every 30 minutes (processes notifications from API endpoint)
 
   // Discord functions (Phase 3) - COMPLETE
   processDiscordJobsQueue, // Cron: Every 30 minutes
@@ -134,7 +135,7 @@ export { jobPostingDripCampaign };
 export { processPulseQueue };
 
 // Changelog functions
-export { processChangelogQueue };
+// processChangelogQueue removed - replaced by /api/changelog/sync endpoint
 export { processChangelogNotifyQueue };
 
 // Discord functions

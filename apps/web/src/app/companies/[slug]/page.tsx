@@ -80,12 +80,12 @@ const MAX_STATIC_COMPANIES = 10;
  * Generate route params for build-time pre-rendering of a subset of company pages.
  *
  * Generates up to MAX_STATIC_COMPANIES `{ slug }` objects for static pre-rendering; remaining
- * company pages are rendered on demand via dynamic routing.
- * If fetching companies fails or no slugs are available, returns a single `__placeholder__` slug
- * to satisfy Cache Components build-time validation.
+ * company pages are rendered on demand via dynamic routing with Suspense boundaries.
+ * If fetching companies fails or no slugs are available, returns an empty array.
+ * Dynamic rendering is handled via Suspense boundaries when no static params are available.
  *
- * @returns An array of objects each containing a `slug` string for a company page; may contain a
- * single placeholder slug when no real slugs are available or on error.
+ * @returns An array of objects each containing a `slug` string for a company page.
+ * Returns an empty array when no slugs are available or on error (dynamic rendering handles these cases).
  *
  * @see {@link /apps/web/src/app/companies/[slug]/page.tsx | CompanyPage}
  * @see {@link getCompaniesList} from @heyclaude/web-runtime/data
@@ -180,10 +180,13 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
   const { slug } = await params;
 
-  // Handle placeholder slugs (if any remain from old generateStaticParams)
-  if (slug === '__placeholder__') {
-    reqLogger.warn('CompanyPage: placeholder slug detected, returning 404', {
-      section: 'placeholder-handling',
+  // Fetch profile once to ensure consistency across all components
+  // This prevents multiple fetch waterfalls and cache inconsistency risks
+  const profile = await getCompanyProfile(slug);
+
+  if (!profile?.company) {
+    reqLogger.warn('CompanyPage: company not found', {
+      section: 'company-profile-fetch',
       slug,
     });
     notFound();
@@ -197,7 +200,7 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
         {/* Company Header - streams in Suspense */}
         <section className="border-border relative border-b">
           <Suspense fallback={<CompanyHeaderSkeleton />}>
-            <CompanyHeader slug={slug} reqLogger={reqLogger} />
+            <CompanyHeader profile={profile} />
           </Suspense>
         </section>
 
@@ -207,14 +210,14 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
             {/* Main content - Active jobs */}
             <div className="space-y-6">
               <Suspense fallback={<JobsListSkeleton />}>
-                <CompanyJobsList slug={slug} reqLogger={reqLogger} />
+                <CompanyJobsList profile={profile} />
               </Suspense>
             </div>
 
             {/* Sidebar - Company stats */}
             <aside className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
               <Suspense fallback={<StatsSkeleton />}>
-                <CompanyStats slug={slug} reqLogger={reqLogger} />
+                <CompanyStats profile={profile} />
               </Suspense>
             </aside>
           </div>
@@ -227,39 +230,26 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 /**
  * Renders the company profile header for a company page.
  *
- * Fetches the company's cached profile and renders the logo, name, badges,
- * description, and metadata links (website, industry, size, "using since" date).
- * If the company cannot be found, logs a warning and calls `notFound()` to
- * trigger a 404 response.
+ * Renders the logo, name, badges, description, and metadata links (website, industry, size, "using since" date).
+ * Receives the profile as a prop to avoid duplicate fetches and ensure consistency.
  *
- * @param props.slug - The company slug used to fetch the profile.
+ * @param props.profile - The company profile data (fetched once in parent component).
  * @param props.reqLogger - Request-scoped logger used for route-scoped logging.
  * @returns The header JSX for the company's profile page.
  *
- * @see getCompanyProfile
  * @see SafeWebsiteLink
  */
 async function CompanyHeader({
-  slug,
-  reqLogger,
+  profile,
 }: {
-  reqLogger: ReturnType<typeof logger.child>;
-  slug: string;
+  profile: NonNullable<Awaited<ReturnType<typeof getCompanyProfile>>>;
 }) {
-  const route = `/companies/${slug}`;
-  const routeLogger = reqLogger.child({ route });
-
-  // Fetch company profile (cached via 'use cache')
-  const profile = await getCompanyProfile(slug);
-
-  if (!profile?.company) {
-    routeLogger.warn('CompanyPage: company not found', {
-      section: 'company-profile-fetch',
-    });
-    notFound();
-  }
-
+  // Profile is guaranteed to have company (checked in parent)
   const { company } = profile;
+  if (!company) {
+    // This should never happen due to parent check, but TypeScript needs this
+    return null;
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -335,39 +325,22 @@ async function CompanyHeader({
 }
 
 /**
- * Renders the company's active job listings section by fetching the company profile and displaying either a "No Active Positions" card or a grid of validated JobCard entries.
+ * Renders the company's active job listings section by displaying either a "No Active Positions" card or a grid of validated JobCard entries.
  *
- * Fetches the profile for `slug`, filters active jobs to required fields, and renders a count header plus the appropriate content.
+ * Filters active jobs from the provided profile to required fields and renders a count header plus the appropriate content.
+ * Receives the profile as a prop to avoid duplicate fetches and ensure consistency.
  *
- * If the company is not found, logs a warning and calls `notFound()` to render a 404 response.
- *
- * @param props.slug - The company slug to load job listings for.
+ * @param props.profile - The company profile data (fetched once in parent component).
  * @param props.reqLogger - A request-scoped logger; used to create a route-scoped child logger for this component.
  * @returns A JSX element containing the section header and either a "No Active Positions" card or a grid of `JobCard` components.
  *
- * @see getCompanyProfile
  * @see JobCard
- * @see notFound
  */
 async function CompanyJobsList({
-  slug,
-  reqLogger,
+  profile,
 }: {
-  reqLogger: ReturnType<typeof logger.child>;
-  slug: string;
+  profile: NonNullable<Awaited<ReturnType<typeof getCompanyProfile>>>;
 }) {
-  const route = `/companies/${slug}`;
-  const routeLogger = reqLogger.child({ route });
-
-  // Fetch company profile (cached via 'use cache')
-  const profile = await getCompanyProfile(slug);
-
-  if (!profile?.company) {
-    routeLogger.warn('CompanyPage: company not found', {
-      section: 'company-profile-fetch',
-    });
-    notFound();
-  }
 
   const { active_jobs } = profile;
 
@@ -464,41 +437,27 @@ async function CompanyJobsList({
 }
 
 /**
- * Renders a company statistics sidebar by fetching the company's profile and streaming the data into Suspense.
- *
- * Fetches the cached company profile for the given slug and renders summary stats (total jobs, active openings,
+ * Renders a company statistics sidebar with summary stats (total jobs, active openings,
  * remote positions, average salary, total views, latest posting) plus a CTA with a link to the company website when available.
- * If the profile is missing or lacks a company, logs a warning and triggers a notFound response.
+ * Receives the profile as a prop to avoid duplicate fetches and ensure consistency.
  *
- * @param props.slug - The company slug used to fetch the profile
- * @param props.reqLogger - A request-scoped logger instance for structured logging
- * @returns The sidebar JSX containing company stats and a CTA
+ * @param props.profile - The company profile data (fetched once in parent component).
+ * @param props.reqLogger - A request-scoped logger instance for structured logging.
+ * @returns The sidebar JSX containing company stats and a CTA.
  *
- * @see getCompanyProfile
  * @see SafeWebsiteLink
- * @see notFound
  */
 async function CompanyStats({
-  slug,
-  reqLogger,
+  profile,
 }: {
-  reqLogger: ReturnType<typeof logger.child>;
-  slug: string;
+  profile: NonNullable<Awaited<ReturnType<typeof getCompanyProfile>>>;
 }) {
-  const route = `/companies/${slug}`;
-  const routeLogger = reqLogger.child({ route });
-
-  // Fetch company profile (cached via 'use cache')
-  const profile = await getCompanyProfile(slug);
-
-  if (!profile?.company) {
-    routeLogger.warn('CompanyPage: company not found', {
-      section: 'company-profile-fetch',
-    });
-    notFound();
-  }
-
+  // Profile is guaranteed to have company (checked in parent)
   const { company, stats } = profile;
+  if (!company) {
+    // This should never happen due to parent check, but TypeScript needs this
+    return null;
+  }
 
   return (
     <>

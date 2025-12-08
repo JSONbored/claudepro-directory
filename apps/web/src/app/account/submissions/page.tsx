@@ -403,17 +403,18 @@ async function SubmissionsPageContent({
 
   const getTypeLabel = (type: Database['public']['Enums']['submission_type']): string => {
     // Map submission_type to content_category for config lookup
+    // Use explicit enum string values instead of fragile numeric indexing
     const categoryMap: Record<
       Database['public']['Enums']['submission_type'],
       Database['public']['Enums']['content_category']
     > = {
-      [Constants.public.Enums.submission_type[0]]: 'agents',
-      [Constants.public.Enums.submission_type[1]]: 'mcp',
-      [Constants.public.Enums.submission_type[2]]: 'rules',
-      [Constants.public.Enums.submission_type[3]]: 'commands',
-      [Constants.public.Enums.submission_type[4]]: 'hooks',
-      [Constants.public.Enums.submission_type[5]]: 'statuslines',
-      [Constants.public.Enums.submission_type[6]]: 'skills',
+      'agents': 'agents',
+      'mcp': 'mcp',
+      'rules': 'rules',
+      'commands': 'commands',
+      'hooks': 'hooks',
+      'statuslines': 'statuslines',
+      'skills': 'skills',
     };
 
     const category = categoryMap[type];
@@ -423,14 +424,15 @@ async function SubmissionsPageContent({
     }
 
     // Fallback to hardcoded labels if category mapping fails
+    // Use explicit enum string values instead of fragile numeric indexing
     const fallbackLabels: Record<Database['public']['Enums']['submission_type'], string> = {
-      [Constants.public.Enums.submission_type[0]]: 'Claude Agent',
-      [Constants.public.Enums.submission_type[1]]: 'MCP Server',
-      [Constants.public.Enums.submission_type[2]]: 'CLAUDE.md',
-      [Constants.public.Enums.submission_type[3]]: 'Command',
-      [Constants.public.Enums.submission_type[4]]: 'Hook',
-      [Constants.public.Enums.submission_type[5]]: 'Statusline',
-      [Constants.public.Enums.submission_type[6]]: 'Skill',
+      'agents': 'Claude Agent',
+      'mcp': 'MCP Server',
+      'rules': 'CLAUDE.md',
+      'commands': 'Command',
+      'hooks': 'Hook',
+      'statuslines': 'Statusline',
+      'skills': 'Skill',
     };
     return fallbackLabels[type] ?? type;
   };

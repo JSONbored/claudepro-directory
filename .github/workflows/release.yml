@@ -1,0 +1,79 @@
+# GitHub Actions Workflow: Automatic Release Creation
+#
+# Automatically creates GitHub releases when version tags are pushed.
+#
+# **Trigger:**
+# - Pushes to tags matching `v*.*.*` format (e.g., `v1.2.3`)
+#
+# **What it does:**
+# 1. Extracts version from tag name
+# 2. Generates changelog entry for the release (if git-cliff is available)
+# 3. Creates GitHub Release with:
+#    - Release name: "Release vX.Y.Z"
+#    - Release notes: Contents of CHANGELOG.md
+#    - Auto-generated release notes from commits
+#
+# **Complete Workflow:**
+# 1. Developer generates changelog: `pnpm changelog:generate`
+# 2. Developer bumps version: `pnpm bump:minor`
+# 3. Developer commits: `git commit -m "chore: bump version to X.Y.Z"`
+# 4. Developer tags: `git tag vX.Y.Z && git push origin main --tags`
+# 5. This workflow automatically creates the GitHub release
+#
+# **Requirements:**
+# - Tag format must be `v*.*.*` (e.g., `v1.2.3`, not `1.2.3` or `version-1.2.3`)
+# - Repository must have `contents: write` permission (automatically provided)
+#
+# **Related Files:**
+# - packages/generators/src/commands/bump-version.ts - Version bump script
+# - packages/generators/src/commands/changelog.ts - Changelog generation
+# - apps/web/src/components/core/layout/footer.tsx - Version display in footer
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Matches v1.2.3 format
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to create releases
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for changelog
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.24.0
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Extract version from tag
+        id: tag_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+      - name: Generate changelog for release
+        run: pnpm changelog:generate --tag v${{ steps.tag_version.outputs.VERSION }}
+        continue-on-error: true  # Don't fail if changelog generation fails
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release v${{ steps.tag_version.outputs.VERSION }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true

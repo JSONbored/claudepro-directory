@@ -31,6 +31,7 @@ const NavigationHoverCardContent = React.forwardRef<
         align={align}
         className={cn(
           'z-50 w-64 rounded-md border bg-popover p-2 text-popover-foreground shadow-md',
+          'overflow-hidden', // Prevent hover bleed outside container
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
           'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',

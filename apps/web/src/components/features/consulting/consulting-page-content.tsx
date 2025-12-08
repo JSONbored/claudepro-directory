@@ -2,6 +2,10 @@
 
 /**
  * Consulting Page - Minimalist Centered Note Design
+ *
+ * @todo Visual/UX Enhancement: Drastically improve visual design and UX/UI after navigation menu updates complete.
+ *       Goals: Enhanced visual design, better conversion-focused layout, rich content cards (shadcn components),
+ *       testimonials/case studies, improved CTAs, trust signals. See scratchpad.md for detailed enhancement plan.
  */
 
 import Cal, { getCalApi } from '@calcom/embed-react';

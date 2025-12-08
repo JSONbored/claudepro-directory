@@ -22,10 +22,8 @@ import {
   UI_CLASSES,
   NumberTicker,
   HomepageStatsSkeleton,
-  Skeleton,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -34,24 +32,11 @@ import {
   LazySearchSection,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-home-sections';
+import { MagneticSearchWrapper } from '@/src/components/features/home/magnetic-search-wrapper';
+import { useHeroSearchConnection } from '@/src/components/features/home/hero-search-connection';
 import { searchCache } from '@/src/utils/search-cache';
 
-/**
- * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
- * Search bar renders immediately on server, improving perceived performance
- * Interactive search functionality works after client-side hydration
- * Saves ~200-300ms of skeleton display time
- */
-const UnifiedSearch = dynamic(
-  () =>
-    import('@/src/components/features/search/search').then((mod) => ({
-      default: mod.UnifiedSearch,
-    })),
-  {
-    ssr: true, // SSR enabled: Search bar visible immediately
-    loading: () => <Skeleton size="xl" width="3xl" className="h-14" />,
-  }
-);
+// UnifiedSearch is now wrapped in MagneticSearchWrapper for enhanced interactions
 
 function HomePageClientComponent({
   initialData,
@@ -62,6 +47,7 @@ function HomePageClientComponent({
   weekStart,
   serverCategoryIds,
 }: HomePageClientProps) {
+  const { setSearchFocused } = useHeroSearchConnection();
   const [allConfigs, setAllConfigs] = useState<DisplayableContent[]>([]);
   const [isLoadingAllConfigs, setIsLoadingAllConfigs] = useState(false);
   const [hasMoreAllConfigs, setHasMoreAllConfigs] = useState(true);
@@ -663,7 +649,7 @@ function HomePageClientComponent({
       {/* Search Section */}
       <section className="container mx-auto px-4 pt-8 pb-12">
         <div className="mx-auto max-w-4xl">
-          <UnifiedSearch
+          <MagneticSearchWrapper
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
             onSearch={(query) => {
               // Create new AbortController for this search
@@ -677,7 +663,9 @@ function HomePageClientComponent({
             availableAuthors={filterOptions.authors}
             availableCategories={filterOptions.categories}
             resultCount={filteredResults.length}
-            showFilters={false}
+            onFocusChange={setSearchFocused}
+            enableMagnetic={true}
+            enableExpansion={true}
           />
 
           {/* Quick Stats - Below Search Bar - ENHANCED mobile version */}

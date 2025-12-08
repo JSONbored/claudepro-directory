@@ -112,53 +112,11 @@ export default async function AccountDashboard() {
     section: 'authentication',
   });
 
-  return (
-    <div className="space-y-6">
-      {/* Dashboard header and stats - bundle data in Suspense for streaming */}
-      <Suspense fallback={<div className="space-y-6">Loading dashboard...</div>}>
-        <DashboardHeaderAndStats userId={user.id} userLogger={userLogger} />
-      </Suspense>
-
-      {/* Quick actions and content sections - in separate Suspense for streaming */}
-      <Suspense fallback={<div className="space-y-6">Loading content...</div>}>
-        <DashboardContent userId={user.id} userLogger={userLogger} />
-      </Suspense>
-    </div>
-  );
-}
-
-/**
- * Render the dashboard header, account statistics, and quick actions for a user.
- *
- * This server component fetches the account dashboard bundle for the given user and renders
- * a header with a welcome message, stats cards (bookmarks, tier, member-since), and a quick
- * actions card (resume latest bookmark, view all bookmarks, manage profile). When the dashboard
- * data is missing it renders a fallback Card indicating the dashboard is unavailable.
- *
- * Data fetching is performed server-side via getAccountDashboardBundle and errors from that call
- * are normalized and rethrown so calling code or error boundaries can handle them.
- *
- * @param props.userId - The ID of the authenticated user whose dashboard to load.
- * @param props.userLogger - A request-scoped logger child used for structured logging.
- * @returns The dashboard UI as JSX to be streamed to the client.
- *
- * @throws If getAccountDashboardBundle fails, throws the normalized error object.
- *
- * @see getAccountDashboardBundle
- * @see normalizeError
- * @see QuickActionRow
- */
-async function DashboardHeaderAndStats({
-  userId,
-  userLogger,
-}: {
-  userId: string;
-  userLogger: ReturnType<typeof logger.child>;
-}) {
-  // Section: Dashboard Bundle
+  // Fetch bundle once at the top level to avoid duplicate fetches
+  // This ensures consistency and eliminates fetch waterfalls
   let bundleData: Awaited<ReturnType<typeof getAccountDashboardBundle>> | null = null;
   try {
-    bundleData = await getAccountDashboardBundle(userId);
+    bundleData = await getAccountDashboardBundle(user.id);
     userLogger.info('AccountDashboard: dashboard bundle loaded', {
       section: 'dashboard-bundle',
       hasDashboard: !!bundleData.dashboard,
@@ -167,12 +125,48 @@ async function DashboardHeaderAndStats({
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load account dashboard bundle');
-    userLogger.error('AccountDashboard: getAccountDashboardBundle threw', normalized, {
+    userLogger.error('AccountDashboard: getAccountDashboardBundle failed', normalized, {
       section: 'dashboard-bundle',
     });
     throw normalized;
   }
 
+  return (
+    <div className="space-y-6">
+      {/* Dashboard header and stats - streams in Suspense */}
+      <Suspense fallback={<div className="space-y-6">Loading dashboard...</div>}>
+        <DashboardHeaderAndStats bundleData={bundleData} userLogger={userLogger} />
+      </Suspense>
+
+      {/* Quick actions and content sections - streams in Suspense */}
+      <Suspense fallback={<div className="space-y-6">Loading content...</div>}>
+        <DashboardContent bundleData={bundleData} userLogger={userLogger} />
+      </Suspense>
+    </div>
+  );
+}
+
+/**
+ * Render the dashboard header, account statistics, and quick actions for a user.
+ *
+ * This server component receives the account dashboard bundle as a prop (fetched once in parent)
+ * and renders a header with a welcome message, stats cards (bookmarks, tier, member-since),
+ * and a quick actions card (resume latest bookmark, view all bookmarks, manage profile).
+ * When the dashboard data is missing it renders a fallback Card indicating the dashboard is unavailable.
+ *
+ * @param props.bundleData - The account dashboard bundle data (fetched once in parent component).
+ * @param props.userLogger - A request-scoped logger child used for structured logging.
+ * @returns The dashboard UI as JSX to be streamed to the client.
+ *
+ * @see QuickActionRow
+ */
+async function DashboardHeaderAndStats({
+  bundleData,
+  userLogger,
+}: {
+  bundleData: NonNullable<Awaited<ReturnType<typeof getAccountDashboardBundle>>>;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
   const dashboardData = bundleData.dashboard;
   const libraryData = bundleData.library;
 
@@ -304,42 +298,23 @@ async function DashboardHeaderAndStats({
 /**
  * Render the account dashboard content area with recent bookmarks and personalized recommendations.
  *
- * Fetches the account dashboard bundle for the given user and renders two Suspense-wrapped sections:
+ * Receives the account dashboard bundle as a prop (fetched once in parent) and renders two sections:
  * a recently saved/bookmarks section and a recommendations section.
  *
- * @param userId - The authenticated user's ID used to load dashboard data
+ * @param bundleData - The account dashboard bundle data (fetched once in parent component).
  * @param userLogger - Request-scoped logger preconfigured for the current user/session
  * @returns The dashboard content element containing recent bookmarks and recommendations
- * @throws {Error} When loading the account dashboard bundle fails; the error is normalized and rethrown
  *
  * @see RecentlySavedSection
  * @see RecommendationsSection
- * @see getAccountDashboardBundle
- * @see normalizeError
  */
 async function DashboardContent({
-  userId,
+  bundleData,
   userLogger,
 }: {
-  userId: string;
+  bundleData: NonNullable<Awaited<ReturnType<typeof getAccountDashboardBundle>>>;
   userLogger: ReturnType<typeof logger.child>;
 }) {
-  // Fetch dashboard bundle for library and homepage data
-  let bundleData: Awaited<ReturnType<typeof getAccountDashboardBundle>> | null = null;
-  try {
-    bundleData = await getAccountDashboardBundle(userId);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load account dashboard bundle');
-    userLogger.error(
-      'AccountDashboard: getAccountDashboardBundle threw in DashboardContent',
-      normalized,
-      {
-        section: 'dashboard-content',
-      }
-    );
-    throw normalized;
-  }
-
   const libraryData = bundleData.library;
   const homepageData = bundleData.homepage;
 

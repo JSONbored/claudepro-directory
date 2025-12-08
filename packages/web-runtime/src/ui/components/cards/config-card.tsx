@@ -575,34 +575,7 @@ export const ConfigCard = memo(
             <>
               {showCategory && (
                 <UnifiedBadge variant="category" category={category}>
-                  {(() => {
-                    switch (category) {
-                      case 'mcp':
-                        return 'MCP';
-                      case 'agents':
-                        return 'Agent';
-                      case 'commands':
-                        return 'Command';
-                      case 'hooks':
-                        return 'Hook';
-                      case 'rules':
-                        return 'Rule';
-                      case 'statuslines':
-                        return 'Statusline';
-                      case 'collections':
-                        return 'Collection';
-                      case 'guides':
-                        return 'Guide';
-                      case 'skills':
-                        return 'Skill';
-                      case 'jobs':
-                        return 'Job';
-                      case 'changelog':
-                        return 'Changelog';
-                      default:
-                        return 'Agent';
-                    }
-                  })()}
+                  {/* Display name is automatically handled by UnifiedBadge (rules → "CLAUDE.md") */}
                 </UnifiedBadge>
               )}
 

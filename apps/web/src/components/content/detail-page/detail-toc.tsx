@@ -156,6 +156,8 @@ export function DetailToc({ headings, className }: DetailTocProps) {
       }
     );
 
+    if (typeof document === 'undefined') return;
+    
     const elements = normalizedHeadings
       .map((heading) => document.getElementById(heading.id))
       .filter((el): el is HTMLElement => el !== null);
@@ -169,14 +171,14 @@ export function DetailToc({ headings, className }: DetailTocProps) {
 
   const handleHeadingClick = useCallback(
     (heading: NormalizedHeading) => {
-      if (globalThis.window === undefined) return;
+      if (typeof window === 'undefined' || typeof document === 'undefined') return;
       const element = document.getElementById(heading.id);
       if (!element) {
         updateHash(heading.id);
         return;
       }
 
-      const prefersReducedMotion = globalThis.matchMedia(
+      const prefersReducedMotion = window.matchMedia(
         '(prefers-reduced-motion: reduce)'
       ).matches;
       const offset = 96;

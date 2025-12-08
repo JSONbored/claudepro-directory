@@ -5,12 +5,10 @@
  * Extracted from UserProfileCard to eliminate duplication
  */
 
-import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logUnhandledPromise, getSafeExternalUrl } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
-
-import { getSafeExternalUrl } from './user-profile-card';
 
 interface ExternalLinkButtonProps {
   url: string | null | undefined;

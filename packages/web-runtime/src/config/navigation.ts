@@ -35,12 +35,21 @@ import {
   Calendar,
   FileText,
   Handshake,
+  HelpCircle,
   Layers,
   type LucideIcon,
   MessageSquare,
+  PlusCircle,
   Plug,
+  Rocket,
+  Rss,
+  Search,
+  Settings,
+  Shield,
+  Sparkles,
   Terminal,
   TrendingUp,
+  User,
   Users,
   Zap,
 } from '../icons.tsx';
@@ -161,69 +170,233 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
     ],
   },
   {
-    label: 'Trending',
-    href: '/trending',
-    icon: TrendingUp,
-    description: 'Popular configurations',
+    label: 'Discover',
+    href: '#',
+    icon: Search,
+    description: 'Find content and people',
+    sections: [
+      {
+        heading: 'Browse',
+        links: [
+          {
+            label: 'Trending',
+            href: '/trending',
+            icon: TrendingUp,
+            description: 'Popular configurations this week',
+          },
+          {
+            label: 'Search',
+            href: '/search',
+            icon: Search,
+            description: 'Find configurations and content',
+          },
+        ],
+      },
+      {
+        heading: 'Community',
+        links: [
+          {
+            label: 'Community Directory',
+            href: '/community/directory',
+            icon: Users,
+            description: 'Browse all users and profiles',
+          },
+          {
+            label: 'Community',
+            href: '/community',
+            icon: MessageSquare,
+            description: 'Join discussions and connect',
+          },
+        ],
+      },
+      {
+        heading: 'Companies',
+        links: [
+          {
+            label: 'Browse Companies',
+            href: '/companies',
+            icon: Building,
+            description: 'Find organizations and teams',
+          },
+        ],
+      },
+    ],
   },
   {
-    label: 'Guides',
-    href: '/guides',
+    label: 'Resources',
+    href: '#',
     icon: BookOpen,
-    description: 'Tutorials and how-to guides',
+    description: 'Learning and tools',
+    sections: [
+      {
+        heading: 'Learn',
+        links: [
+          {
+            label: 'Guides',
+            href: '/guides',
+            icon: BookOpen,
+            description: 'Tutorials and how-to guides',
+          },
+          {
+            label: 'Help Center',
+            href: '/help',
+            icon: HelpCircle,
+            description: 'FAQs and support documentation',
+          },
+          {
+            label: 'Changelog',
+            href: '/changelog',
+            icon: Calendar,
+            description: 'Latest updates and releases',
+          },
+        ],
+      },
+      {
+        heading: 'Tools',
+        links: [
+          {
+            label: 'Config Recommender',
+            href: '/tools/config-recommender',
+            icon: Sparkles,
+            description: 'Get personalized recommendations',
+            isNew: true,
+          },
+        ],
+      },
+      {
+        heading: 'Formats',
+        links: [
+          {
+            label: 'LLMs.txt',
+            href: '/llms.txt',
+            icon: FileText,
+            description: 'AI-optimized content format',
+          },
+          {
+            label: 'RSS Feed',
+            href: '/api/feeds',
+            icon: Rss,
+            description: 'Subscribe to updates',
+            external: true,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Contribute',
+    href: '#',
+    icon: Rocket,
+    description: 'Ways to contribute and engage',
+    sections: [
+      {
+        heading: 'Submit',
+        links: [
+          {
+            label: 'Submit Content',
+            href: '/submit',
+            icon: PlusCircle,
+            description: 'Share your configurations',
+          },
+        ],
+      },
+      {
+        heading: 'Partner',
+        links: [
+          {
+            label: 'Partner Program',
+            href: '/partner',
+            icon: Handshake,
+            description: 'Become a partner',
+          },
+        ],
+      },
+      {
+        heading: 'Community',
+        links: [
+          {
+            label: 'Community',
+            href: '/community',
+            icon: Users,
+            description: 'Join our community',
+          },
+        ],
+      },
+    ],
   },
   {
     label: 'Jobs',
-    href: '/jobs',
+    href: '#',
     icon: Briefcase,
     description: 'Find career opportunities',
-  },
-  {
-    label: 'Contact',
-    href: '/contact',
-    icon: MessageSquare,
-    description: 'Get in touch with us',
+    sections: [
+      {
+        heading: 'Browse',
+        links: [
+          {
+            label: 'Browse All Jobs',
+            href: '/jobs',
+            icon: Briefcase,
+            description: 'View all job listings',
+          },
+          {
+            label: 'Remote Jobs',
+            href: '/jobs?remote=true',
+            icon: Building,
+            description: 'Remote opportunities',
+          },
+        ],
+      },
+    ],
   },
 ];
 
-/** Secondary navigation groups shown in footer/sidebar */
+/** Secondary navigation groups shown in "More" dropdown */
 export const SECONDARY_NAVIGATION: NavigationGroup[] = [
   {
-    heading: 'Discover',
+    heading: 'Support',
     links: [
       {
-        label: 'Companies',
-        href: '/companies',
-        icon: Building,
-        description: 'Browse company profiles',
-      },
-    ],
-  },
-  {
-    heading: 'Resources',
-    links: [
-      {
-        label: 'Changelog',
-        href: '/changelog',
-        icon: Calendar,
-        description: 'Latest updates and releases',
-      },
-    ],
-  },
-  {
-    heading: 'Community',
-    links: [
-      {
-        label: 'Community',
-        href: '/community',
-        icon: Users,
-        description: 'Join our community',
+        label: 'Help Center',
+        href: '/help',
+        icon: HelpCircle,
+        description: 'FAQs and support documentation',
       },
       {
-        label: 'Partner Program',
-        href: '/partner',
-        icon: Handshake,
-        description: 'Become a partner',
+        label: 'Contact',
+        href: '/contact',
+        icon: MessageSquare,
+        description: 'Get in touch with us',
+      },
+      {
+        label: 'Consulting',
+        href: '/consulting',
+        icon: Briefcase,
+        description: 'Professional consulting services',
+      },
+      {
+        label: 'Accessibility',
+        href: '/accessibility',
+        icon: Shield,
+        description: 'Accessibility information',
+      },
+      {
+        label: 'Privacy',
+        href: '/privacy',
+        icon: Shield,
+        description: 'Privacy policy',
+      },
+      {
+        label: 'Terms',
+        href: '/terms',
+        icon: FileText,
+        description: 'Terms of service',
+      },
+      {
+        label: 'Cookies',
+        href: '/cookies',
+        icon: Settings,
+        description: 'Cookie policy',
       },
     ],
   },
@@ -309,11 +482,20 @@ function getIconName(icon?: LucideIcon): string | null {
     [Calendar, 'Calendar'],
     [FileText, 'FileText'],
     [Handshake, 'Handshake'],
+    [HelpCircle, 'HelpCircle'],
     [Layers, 'Layers'],
     [MessageSquare, 'MessageSquare'],
+    [PlusCircle, 'PlusCircle'],
     [Plug, 'Plug'],
+    [Rocket, 'Rocket'],
+    [Rss, 'Rss'],
+    [Search, 'Search'],
+    [Settings, 'Settings'],
+    [Shield, 'Shield'],
+    [Sparkles, 'Sparkles'],
     [Terminal, 'Terminal'],
     [TrendingUp, 'TrendingUp'],
+    [User, 'User'],
     [Users, 'Users'],
     [Zap, 'Zap'],
   ]);

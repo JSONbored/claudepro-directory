@@ -332,6 +332,6 @@ function toHomepageContentItem(input: {
     category: input.category,
     view_count: input.viewCount ?? 0,
     copy_count: input.copyCount ?? 0,
-    featured: input.featuredScore !== undefined,
+    featured: input.featuredScore != null && typeof input.featuredScore === 'number',
   };
 }

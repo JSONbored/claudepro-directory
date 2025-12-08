@@ -33,6 +33,28 @@ import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 
+/**
+ * Root package.json - Contains the application version for display in footer.
+ *
+ * The version is read from the root package.json (not apps/web/package.json) as this
+ * represents the overall application version. The footer displays this version and links
+ * to the changelog page where users can see all release entries.
+ *
+ * **Path Resolution:**
+ * From `apps/web/src/components/core/layout/footer.tsx`:
+ * - `../../../../../../` = 7 levels up to repository root
+ * - Resolves to root `package.json` (version: 1.1.0)
+ *
+ * **Version Management:**
+ * - Bump version: `pnpm bump:patch/minor/major`
+ * - Creates git tag: `git tag vX.Y.Z`
+ * - GitHub Actions auto-creates release when tag is pushed
+ *
+ * @see {@link ../../../../../../packages/generators/src/commands/bump-version.ts | Version Bump Script}
+ * @see {@link ../../../../../../.github/workflows/release.yml | GitHub Release Workflow}
+ */
+import packageJson from '../../../../../../package.json';
+
 // Type for resource links with optional icon
 interface ResourceLink {
   href: string;
@@ -390,7 +412,7 @@ function FooterComponent() {
             transition={{ delay: 0.3 }}
           >
             <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-              {/* Left - Copyright with heart */}
+              {/* Left - Copyright with heart and version */}
               <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
                 <span>© {currentYear}</span>
                 <span className="text-border">•</span>
@@ -402,6 +424,35 @@ function FooterComponent() {
                   className="text-foreground font-medium underline-offset-4 hover:underline"
                 >
                   JSONbored
+                </Link>
+                <span className="text-border">•</span>
+                {/* 
+                  Version Display - Links to changelog page
+                  
+                  Displays the current application version from root package.json.
+                  The version links to /changelog where users can see all release entries.
+                  
+                  **Version Management Workflow:**
+                  1. Generate changelog: `pnpm changelog:generate`
+                  2. Bump version: `pnpm bump:patch/minor/major`
+                  3. Commit: `git commit -m "chore: bump version to X.Y.Z"`
+                  4. Tag: `git tag vX.Y.Z && git push origin main --tags`
+                  5. GitHub Actions automatically creates release
+                  
+                  **When to Bump:**
+                  - Patch: Bug fixes, small improvements, docs
+                  - Minor: New features, new pages, significant improvements
+                  - Major: Breaking changes, major redesigns, architecture changes
+                  
+                  @see {@link ../../../../../../packages/generators/src/commands/bump-version.ts | Version Bump Script}
+                  @see {@link ../../../../../../.github/workflows/release.yml | GitHub Release Workflow}
+                */}
+                <Link
+                  href="/changelog"
+                  className="font-mono text-xs hover:text-foreground transition-colors"
+                  title={`Version ${packageJson.version} - View changelog and release history`}
+                >
+                  v{packageJson.version}
                 </Link>
               </div>
 
@@ -428,7 +479,7 @@ function FooterComponent() {
         ) : (
           <div className="border-border/30 mt-12 border-t pt-8">
             <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-              {/* Left - Copyright with heart */}
+              {/* Left - Copyright with heart and version */}
               <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
                 <span>© {currentYear}</span>
                 <span className="text-border">•</span>
@@ -440,6 +491,35 @@ function FooterComponent() {
                   className="text-foreground font-medium underline-offset-4 hover:underline"
                 >
                   JSONbored
+                </Link>
+                <span className="text-border">•</span>
+                {/* 
+                  Version Display - Links to changelog page
+                  
+                  Displays the current application version from root package.json.
+                  The version links to /changelog where users can see all release entries.
+                  
+                  **Version Management Workflow:**
+                  1. Generate changelog: `pnpm changelog:generate`
+                  2. Bump version: `pnpm bump:patch/minor/major`
+                  3. Commit: `git commit -m "chore: bump version to X.Y.Z"`
+                  4. Tag: `git tag vX.Y.Z && git push origin main --tags`
+                  5. GitHub Actions automatically creates release
+                  
+                  **When to Bump:**
+                  - Patch: Bug fixes, small improvements, docs
+                  - Minor: New features, new pages, significant improvements
+                  - Major: Breaking changes, major redesigns, architecture changes
+                  
+                  @see {@link ../../../../../../packages/generators/src/commands/bump-version.ts | Version Bump Script}
+                  @see {@link ../../../../../../.github/workflows/release.yml | GitHub Release Workflow}
+                */}
+                <Link
+                  href="/changelog"
+                  className="font-mono text-xs hover:text-foreground transition-colors"
+                  title={`Version ${packageJson.version} - View changelog and release history`}
+                >
+                  v{packageJson.version}
                 </Link>
               </div>
 

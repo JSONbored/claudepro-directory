@@ -12,6 +12,8 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { useInfiniteScroll } from '@heyclaude/web-runtime/hooks';
+import { getChangelogPath } from '@heyclaude/web-runtime/utils/changelog';
+import Link from 'next/link';
 
 import { ChangelogContent } from './changelog-content';
 
@@ -110,9 +112,14 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
 
                 <div className="space-y-6">
                   <div className="relative z-10 flex flex-col gap-2">
-                    <h2 className="text-2xl font-semibold tracking-tight text-balance">
-                      {entry.title}
-                    </h2>
+                    <Link
+                      href={getChangelogPath(entry.slug)}
+                      className="block hover:text-primary transition-colors"
+                    >
+                      <h2 className="text-2xl font-semibold tracking-tight text-balance">
+                        {entry.title}
+                      </h2>
+                    </Link>
 
                     {/* Tags */}
                     {tags.length > 0 && (

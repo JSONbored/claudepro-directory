@@ -10,6 +10,7 @@ import {
   getSubmissionDashboard,
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
+import { type SubmissionFormConfig } from '@heyclaude/web-runtime/types/component.types';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -373,11 +374,20 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
     reqLogger.error('SubmitPage: formConfig is null', new Error('Form config is null'), {
       section: 'form-config',
     });
-    // Render form with empty config - better UX than crashing
-    // SubmissionFormConfig is a Record, so use empty object
+    // Provide minimal valid config with empty sections for all submission types
+    // This ensures SubmitFormClient can render without crashing while showing an error state
+    const emptyFormConfig: SubmissionFormConfig = {
+      agents: { nameField: null, common: [], typeSpecific: [], tags: [] },
+      mcp: { nameField: null, common: [], typeSpecific: [], tags: [] },
+      rules: { nameField: null, common: [], typeSpecific: [], tags: [] },
+      commands: { nameField: null, common: [], typeSpecific: [], tags: [] },
+      hooks: { nameField: null, common: [], typeSpecific: [], tags: [] },
+      statuslines: { nameField: null, common: [], typeSpecific: [], tags: [] },
+      skills: { nameField: null, common: [], typeSpecific: [], tags: [] },
+    };
     return (
       <SubmitFormClient
-        formConfig={{} as Awaited<ReturnType<typeof getSubmissionFormFields>>}
+        formConfig={emptyFormConfig}
         templates={templates}
       />
     );
@@ -425,13 +435,16 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
   const recentMerged = (dashboardData?.recent ?? [])
     .filter((submission) => isValidRecentSubmission(submission))
     .map((submission) => {
-      // Type guard ensures these are non-null, but TypeScript needs explicit checks
       const id = submission.id;
       const mergedAt = submission.merged_at;
       const contentName = submission.content_name;
       if (!id || !mergedAt || !contentName) {
-        // This should never happen due to type guard, but TypeScript needs this check
-        throw new Error('Invalid submission data');
+        // Log warning and return null instead of throwing to prevent crashing the sidebar
+        reqLogger.warn('Invalid submission data after filter', {
+          submission,
+          section: 'submission-dashboard-sidebar',
+        });
+        return null;
       }
       return {
         id,
@@ -444,7 +457,8 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
             ? { name: submission.user.name, slug: submission.user.slug }
             : null,
       };
-    });
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 
   return (
     <>

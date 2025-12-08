@@ -7,19 +7,10 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 /**
- * Provides page metadata for the Cookies page used by Next.js.
+ * Produce page metadata for the Cookies page.
  *
- * Metadata is generated at build time for the '/cookies' route; revalidation is disabled (static generation, no ISR).
- *
- * @returns Metadata object describing the Cookies page.
- *
- * @see generatePageMetadata
- * @see {@link https://nextjs.org/docs/app/api-reference/functions/generate-metadata Next.js generate metadata}
- */
-/**
- * Produce page metadata for the Cookies page for static generation.
- *
- * Awaits a runtime connection to allow non-deterministic operations during metadata generation and returns the metadata for the '/cookies' route. The metadata is generated at build time and the page is not automatically revalidated.
+ * Awaits `connection()` so Cache Components can safely use non-deterministic helpers
+ * during metadata generation for the '/cookies' route.
  *
  * @returns The Next.js Metadata object for the Cookies page.
  * @see generatePageMetadata

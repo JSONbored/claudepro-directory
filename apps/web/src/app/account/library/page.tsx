@@ -39,7 +39,7 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 // Extract collections category value to avoid fragile enum index access
-const COLLECTIONS_TAB_VALUE = 'collections' as Database['public']['Enums']['content_category'];
+const COLLECTIONS_TAB_VALUE = 'collections' as const;
 
 // MIGRATED: Added Suspense boundary for dynamic getAuthenticatedUser access (Cache Components requirement)
 

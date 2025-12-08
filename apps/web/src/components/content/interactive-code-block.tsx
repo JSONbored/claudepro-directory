@@ -48,6 +48,18 @@ const CLIPBOARD_RESET_DEFAULT_MS = 2000;
  */
 function escapeHtml(html: string): string {
   if (typeof html !== 'string') return '';
+  
+  // Guard for SSR: document is not available during server-side rendering
+  if (typeof document === 'undefined') {
+    // Safe string fallback for SSR: manually escape HTML entities
+    return html
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  
   const div = document.createElement('div');
   div.textContent = html;
   return div.innerHTML;

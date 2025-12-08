@@ -6,6 +6,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { isValidInternalPath, getSafeExternalUrl } from '@heyclaude/web-runtime/core';
 import React, { useEffect, useState } from 'react';
 
 import { Checklist } from '@/src/components/content/checklist';
@@ -78,69 +79,6 @@ interface ResourceItem {
   title: string;
   type: string;
   url: string;
-}
-
-/**
- * Validate internal navigation path is safe
- * Only allows relative paths starting with /, no protocol-relative URLs
- */
-function isValidInternalPath(path: string): boolean {
-  if (typeof path !== 'string' || path.length === 0) return false;
-  // Must start with / for relative paths
-  if (!path.startsWith('/')) return false;
-  // Reject protocol-relative URLs (//example.com)
-  if (path.startsWith('//')) return false;
-  // Reject dangerous protocols
-  if (/^(javascript|data|vbscript|file):/i.test(path)) return false;
-  // Basic path validation - allow alphanumeric, slashes, hyphens, underscores, query params, hash
-  return /^\/[a-zA-Z0-9/?#\-_.~!*'();:@&=+$,%[\]]*$/.test(path);
-}
-
-/**
- * Validate and canonicalize an external URL for safe use in href attributes.
- *
- * Only allows `https:` URLs; allows `http:` only for localhost addresses (`localhost`, `127.0.0.1`, `::1`). Rejects URLs containing username or password credentials and normalizes hostname and default ports.
- *
- * @param url - The input URL string to validate and sanitize.
- * @returns The canonicalized absolute href string if the URL is allowed, `null` otherwise.
- *
- * @see isValidInternalPath
- */
-function getSafeExternalUrl(url: string): null | string {
-  if (!url || typeof url !== 'string') return null;
-
-  try {
-    const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol (or HTTP for localhost/development)
-    const isLocalhost =
-      parsed.hostname === 'localhost' ||
-      parsed.hostname === '127.0.0.1' ||
-      parsed.hostname === '::1';
-    if (parsed.protocol === 'https:') {
-      // HTTPS always allowed
-    } else if (parsed.protocol === 'http:' && isLocalhost) {
-      // HTTP allowed only for local development
-    } else {
-      return null;
-    }
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // Sanitize: remove credentials
-    parsed.username = '';
-    parsed.password = '';
-    // Normalize hostname
-    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-    // Remove default ports
-    if (parsed.port === '80' || parsed.port === '443') {
-      parsed.port = '';
-    }
-
-    // Return canonicalized href
-    return parsed.href;
-  } catch {
-    return null;
-  }
 }
 
 interface SectionBase {
@@ -701,12 +639,15 @@ function render_section(section: Section, index: number): React.ReactNode {
           {section.resources && section.resources.length > 0 ? (
             <div className="grid gap-4">
               {section.resources.map((r: ResourceItem) => {
-                // Defensive defaulting: infer external flag from URL pattern if not provided
-                // Prevents silent link disabling when external flag is undefined but URL is clearly external
+                // Infer external flag from URL pattern: if explicitly set to true, use it;
+                // otherwise infer from URL pattern (http:// or https:// indicates external)
+                // This prevents silent link disabling when external flag is undefined but URL is clearly external
+                // Note: An explicit false with an external URL pattern will still be inferred as external
+                // to prevent silent disabling of valid external links
                 const isExternal =
-                  r.external === undefined
-                    ? r.url.trim().startsWith('http://') || r.url.trim().startsWith('https://')
-                    : r.external;
+                  r.external !== undefined && r.external === true
+                    ? true
+                    : r.url.trim().startsWith('http://') || r.url.trim().startsWith('https://');
 
                 // Validate and sanitize URL based on whether it's external or internal
                 const safeUrl = isExternal

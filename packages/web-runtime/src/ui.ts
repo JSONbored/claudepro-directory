@@ -54,6 +54,7 @@ export * from './ui/components/display/terminal.tsx';
 export * from './ui/components/display/highlight-text.tsx';
 export * from './ui/components/animation/number-ticker.tsx';
 export * from './ui/components/animation/particles-background.tsx';
+export * from './ui/components/animation/morphing-blob-background.tsx';
 export * from './ui/components/animation/gradient-text.tsx';
 export * from './ui/components/animation/rolling-text.tsx';
 export * from './ui/components/forms/form-field.tsx';

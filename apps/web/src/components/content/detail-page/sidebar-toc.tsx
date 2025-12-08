@@ -177,6 +177,8 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
       }
     );
 
+    if (typeof document === 'undefined') return;
+    
     const elements = normalizedHeadings
       .map((heading: NormalizedHeading) => document.getElementById(heading.id))
       .filter((el: HTMLElement | null): el is HTMLElement => el !== null);

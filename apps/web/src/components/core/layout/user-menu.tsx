@@ -23,12 +23,16 @@ import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   Activity,
+  Bookmark,
   BookOpen,
+  Briefcase,
+  Building,
   LogOut,
+  Rocket,
   Settings,
+  User,
 } from '@heyclaude/web-runtime/icons';
 import {
-  DIMENSIONS,
   toasts,
   UI_CLASSES,
   Skeleton,
@@ -36,12 +40,9 @@ import {
   AvatarFallback,
   AvatarImage,
   Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  NavigationHoverCard,
+  NavigationHoverCardContent,
+  NavigationHoverCardTrigger,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -140,8 +141,8 @@ export function UserMenu({ className }: UserMenuProps) {
 
   return (
     <div className={className}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <NavigationHoverCard openDelay={150} closeDelay={300}>
+        <NavigationHoverCardTrigger asChild>
           <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -162,58 +163,118 @@ export function UserMenu({ className }: UserMenuProps) {
               </Avatar>
             </Button>
           </motion.div>
-        </DropdownMenuTrigger>
+        </NavigationHoverCardTrigger>
 
-        <DropdownMenuContent
-          className={`${DIMENSIONS.DROPDOWN_SM} sm:${DIMENSIONS.DROPDOWN_MD}`}
-          align="end"
-          forceMount
-        >
-          {/* User Info */}
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col">
-              <p className="text-sm leading-none font-medium">{displayName}</p>
-              <p className="text-muted-foreground mt-1 text-xs leading-none">{user.email}</p>
+        <NavigationHoverCardContent align="end" className="w-72 p-4" sideOffset={8}>
+          {/* User Header with Avatar */}
+          <div className="flex items-center gap-3 mb-4 pb-4 border-b border-border">
+            <Avatar className="h-12 w-12">
+              {avatarUrl ? (
+                <AvatarImage src={avatarUrl} alt={displayName || 'User avatar'} />
+              ) : null}
+              <AvatarFallback className="bg-accent/20 text-accent text-base font-semibold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate">{displayName}</p>
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
             </div>
-          </DropdownMenuLabel>
+          </div>
 
-          <DropdownMenuSeparator />
-
-          {/* Navigation Links */}
-          <DropdownMenuItem asChild>
-            <Link href="/account/settings">
-              <Settings className={UI_CLASSES.ICON_SM_LEADING} />
-              <span>Settings</span>
-            </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem asChild>
-            <Link href="/account/library">
-              <BookOpen className={UI_CLASSES.ICON_SM_LEADING} />
-              <span>Library</span>
-            </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem asChild>
-            <Link href="/account/activity">
-              <Activity className={UI_CLASSES.ICON_SM_LEADING} />
-              <span>Activity</span>
-            </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator />
-
-          {/* Sign Out */}
-          <DropdownMenuItem
-            onClick={handleSignOut}
-            disabled={signingOut}
-            className="text-destructive focus:text-destructive cursor-pointer"
+          {/* Dashboard Link */}
+          <Link
+            href="/account"
+            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item mb-2"
           >
-            <LogOut className={UI_CLASSES.ICON_SM_LEADING} />
-            <span>{signingOut ? 'Signing out...' : 'Sign out'}</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            <User className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+            <span className="flex-1 text-sm font-medium">Dashboard</span>
+          </Link>
+
+          {/* My Content Section */}
+          <div className="mb-2">
+            <div className="px-3 py-1.5 mb-1">
+              <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                My Content
+              </p>
+            </div>
+            <div className="space-y-0.5">
+              <Link
+                href="/account/library"
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+              >
+                <BookOpen className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                <span className="flex-1 text-sm">Library</span>
+              </Link>
+              <Link
+                href="/account/bookmarks"
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+              >
+                <Bookmark className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                <span className="flex-1 text-sm">Bookmarks</span>
+              </Link>
+              <Link
+                href="/account/submissions"
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+              >
+                <Rocket className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                <span className="flex-1 text-sm">Submissions</span>
+              </Link>
+              <Link
+                href="/account/activity"
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+              >
+                <Activity className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                <span className="flex-1 text-sm">Activity</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Manage Section */}
+          <div className="mb-2">
+            <div className="px-3 py-1.5 mb-1">
+              <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                Manage
+              </p>
+            </div>
+            <div className="space-y-0.5">
+              <Link
+                href="/account/companies"
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+              >
+                <Building className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                <span className="flex-1 text-sm">Companies</span>
+              </Link>
+              <Link
+                href="/account/jobs"
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+              >
+                <Briefcase className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                <span className="flex-1 text-sm">Jobs</span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-2 pt-2 border-t border-border">
+            <Link
+              href="/account/settings"
+              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item mb-2"
+            >
+              <Settings className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+              <span className="flex-1 text-sm">Settings</span>
+            </Link>
+
+            <button
+              onClick={handleSignOut}
+              disabled={signingOut}
+              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-destructive/10 transition-colors group/item w-full text-left text-destructive"
+            >
+              <LogOut className="h-4 w-4 group-hover/item:text-destructive transition-colors" />
+              <span className="flex-1 text-sm">{signingOut ? 'Signing out...' : 'Sign out'}</span>
+            </button>
+          </div>
+        </NavigationHoverCardContent>
+      </NavigationHoverCard>
     </div>
   );
 }

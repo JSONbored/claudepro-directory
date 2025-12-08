@@ -15,6 +15,7 @@ export * from './supabase/server-anon.ts';
 export * from './supabase/admin.ts';
 export * from './supabase/middleware.ts';
 export * from './pulse.ts';
+export * from './supabase/pgmq-client.ts';
 export * from './auth/get-authenticated-user.ts';
 export * from './server/api-helpers.ts';
 export * from './server/storage-proxy.ts';

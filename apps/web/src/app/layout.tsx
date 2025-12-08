@@ -78,7 +78,8 @@ const geistMono = localFont({
  */
 async function getCachedHomeMetadata(): Promise<Metadata> {
   'use cache';
-  cacheLife({ stale: 43_200, revalidate: 86_400, expire: 172_800 }); // 12hr stale, 24hr revalidate, 48hr expire
+  // Use named 'metadata' profile: 12hr stale, 24hr revalidate, 48hr expire
+  cacheLife('metadata');
   cacheTag('homepage-metadata');
 
   return generatePageMetadata('/');

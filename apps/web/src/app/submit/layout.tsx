@@ -1,6 +1,5 @@
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { type Metadata } from 'next';
-import { connection } from 'next/server';
 import { type ReactNode } from 'react';
 
 /**
@@ -12,17 +11,14 @@ import { type ReactNode } from 'react';
  */
 
 /**
- * Generate metadata for the "/submit" page at request time.
+ * Generate metadata for the "/submit" page.
  *
- * Awaits a server connection to ensure non-deterministic operations (for example, `Date.now()`) occur at request time before producing metadata.
+ * The metadata function is deterministic, so connection() defer is not needed.
  *
  * @returns The `Metadata` object for the "/submit" page
  * @see {@link @heyclaude/web-runtime/data.generatePageMetadata}
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   return generatePageMetadata('/submit');
 }
 

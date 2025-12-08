@@ -81,6 +81,7 @@ export * from './edge/transform.ts';
 export * from './edge/search-client.ts';
 export * from './utils/markdown-code-extractor.ts';
 export * from './seo/og.ts';
+export * from './seo/changelog-seo.ts';
 export * from './pulse-client.ts';
 // Export all icons except Command (which conflicts with Command component from ui.ts)
 export {

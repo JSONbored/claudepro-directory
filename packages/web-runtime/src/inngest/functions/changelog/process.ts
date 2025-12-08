@@ -1,8 +1,14 @@
 /**
  * Changelog Process Inngest Function
  *
- * Processes changelog_process queue: Vercel webhook → GitHub API → Create changelog entry
- * Triggered by events when webhooks are received, and by cron as a fallback.
+ * @deprecated This function is no longer used. It was replaced by the /api/changelog/sync endpoint
+ * which is called directly by GitHub Actions. The old flow (Vercel webhook → queue → Inngest)
+ * no longer works because Vercel free tier doesn't support webhooks.
+ *
+ * This file is kept for reference but the function is not registered in the Inngest functions list.
+ *
+ * Old flow: Vercel webhook → changelog_process queue → this function → database
+ * New flow: GitHub Actions → /api/changelog/sync → database → changelog_notify queue → processChangelogNotifyQueue
  */
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';

@@ -20,6 +20,7 @@ import { HomepageContentServer } from '@/src/components/features/home/homepage-c
 import { HomepageHeroServer } from '@/src/components/features/home/homepage-hero-server';
 import { HomepageSearchFacetsServer } from '@/src/components/features/home/homepage-search-facets-server';
 import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
+import { HeroSearchConnectionProvider } from '@/src/components/features/home/hero-search-connection';
 
 /**
  * Generate metadata for the root page, deferring execution until request time.
@@ -143,12 +144,13 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
   const searchFiltersPromise = HomepageSearchFacetsServer();
 
   return (
-    <div className="bg-background min-h-screen">
-      <div className="relative overflow-hidden">
-        {/* Hero section - streams immediately with Suspense boundary for member count */}
-        <Suspense fallback={<HomepageHeroServer memberCount={0} />}>
-          <HomepageHeroWithMemberCount />
-        </Suspense>
+    <HeroSearchConnectionProvider>
+      <div className="bg-background min-h-screen">
+        <div className="relative overflow-hidden">
+          {/* Hero section - streams immediately with Suspense boundary for member count */}
+          <Suspense fallback={<HomepageHeroServer memberCount={0} />}>
+            <HomepageHeroWithMemberCount />
+          </Suspense>
 
         <LazySection>
           <RecentlyViewedRail />
@@ -161,14 +163,15 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
           </Suspense>
         </div>
 
-        {/* Top contributors - lazy loaded below fold */}
-        <LazySection rootMargin="0px 0px -500px 0px">
-          <Suspense fallback={null}>
-            <TopContributorsServer />
-          </Suspense>
-        </LazySection>
+          {/* Top contributors - lazy loaded below fold */}
+          <LazySection rootMargin="0px 0px -500px 0px">
+            <Suspense fallback={null}>
+              <TopContributorsServer />
+            </Suspense>
+          </LazySection>
+        </div>
       </div>
-    </div>
+    </HeroSearchConnectionProvider>
   );
 }
 
@@ -195,6 +198,7 @@ async function HomepageHeroWithMemberCount() {
   });
 
   const memberCount = homepageResult?.member_count ?? 0;
+  // Hero will get search ref from context via client wrapper
   return <HomepageHeroServer memberCount={memberCount} />;
 }
 

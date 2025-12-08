@@ -31,49 +31,6 @@ import { memo } from 'react';
 import { ExternalLinkButton } from './external-link-button';
 
 /**
- * Produce a canonical, safe external URL suitable for opening in a new tab.
- *
- * Accepts a string URL (or null/undefined) and returns a sanitized href only if the URL is a valid HTTP or HTTPS URL and does not contain embedded credentials.
- *
- * Observed behavior:
- * - Allows `http:` and `https:` schemes only.
- * - Rejects URLs that include a username or password.
- * - Normalizes the hostname to lowercase and removes a trailing dot.
- * - Removes default ports `80` and `443`.
- *
- * @param url - The input URL to validate and sanitize; may be `null` or `undefined`.
- * @returns `null` if the input is not a valid or allowed external URL, otherwise the canonicalized URL string.
- *
- * @see URL
- */
-export function getSafeExternalUrl(url: null | string | undefined): null | string {
-  if (!url || typeof url !== 'string') return null;
-
-  try {
-    const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol (or HTTP for localhost/development)
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // Sanitize: remove credentials
-    parsed.username = '';
-    parsed.password = '';
-    // Normalize hostname
-    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-    // Remove default ports
-    if (parsed.port === '80' || parsed.port === '443') {
-      parsed.port = '';
-    }
-
-    // Return canonicalized href
-    return parsed.href;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * User profile data with runtime-added stats from materialized views
  * Supports both full user records and simplified user objects from RPCs
  */

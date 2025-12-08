@@ -12,6 +12,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { getContentBySlug } from '@heyclaude/web-runtime/data';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { getCategoryRoute } from '@heyclaude/web-runtime/hooks';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { generateRequestId } from '@heyclaude/web-runtime/logging/server';
@@ -28,6 +29,8 @@ export interface RecentlyViewedItemInput {
 /**
  * Fetch full item data for recently viewed items
  * Returns enriched_content_item directly to preserve all properties for ConfigCard
+ * 
+ * Security: Verifies user authentication before fetching item data to prevent unauthorized access.
  */
 export async function fetchRecentlyViewedItems(
   items: RecentlyViewedItemInput[]
@@ -38,6 +41,20 @@ export async function fetchRecentlyViewedItems(
     operation: 'fetchRecentlyViewedItems',
     module: 'actions/fetch-recently-viewed-items',
   });
+
+  // Verify user authentication before fetching item data
+  const { user } = await getAuthenticatedUser({
+    requireUser: false,
+    context: 'fetchRecentlyViewedItems',
+  });
+
+  if (!user) {
+    reqLogger.warn('fetchRecentlyViewedItems: unauthenticated access attempt', {
+      section: 'authentication',
+    });
+    // Return empty array for unauthenticated users (graceful degradation)
+    return [];
+  }
 
   try {
     // Fetch all items in parallel

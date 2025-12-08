@@ -488,14 +488,14 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
               className={`${UI_CLASSES.FLEX_COL_GAP_2} bg-card/50 rounded-lg border p-3 sm:flex-row sm:items-start sm:gap-4`}
             >
               <div className="sm:w-1/3">
-                <dt itemProp="name" className={`font-medium ${UI_CLASSES.TEXT_SM_MUTED}`}>
+                <p itemProp="name" className={`font-medium ${UI_CLASSES.TEXT_SM_MUTED}`}>
                   {item.label}
-                </dt>
+                </p>
               </div>
               <div className="sm:w-2/3">
-                <dd itemProp="value" className="text-foreground mb-1 font-semibold">
+                <p itemProp="value" className="text-foreground mb-1 font-semibold">
                   {item.value}
-                </dd>
+                </p>
                 {item.description ? (
                   <p className={UI_CLASSES.TEXT_SM_MUTED}>{item.description}</p>
                 ) : null}

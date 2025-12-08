@@ -308,7 +308,7 @@ export const RETRY_CONFIG = {
 /** Queue batch sizes */
 export const QUEUE_CONFIG = {
   'pulse.batch_size': 100,
-  'changelog_process.batch_size': 5,
+  // 'changelog_process.batch_size': 5, // Removed - queue no longer used (replaced by /api/changelog/sync)
   'changelog_notify.batch_size': 5,
 } as const;
 

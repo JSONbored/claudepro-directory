@@ -5,7 +5,7 @@
  *
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
-import { Constants, type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
 import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
@@ -108,17 +108,16 @@ export async function generateStaticParams() {
 }
 
 // Map route categories (plural) to RecentlyViewedCategory (singular)
-// Use Constants.public.Enums.content_category to avoid hardcoded enum values
-const CONTENT_CATEGORY_ENUMS = Constants.public.Enums.content_category;
+// Use explicit string keys instead of fragile array indexing to prevent breakage if enum order changes
 const CATEGORY_TO_RECENTLY_VIEWED: Record<string, RecentlyViewedCategory> = {
-  [CONTENT_CATEGORY_ENUMS[0]]: 'agent', // agents
-  [CONTENT_CATEGORY_ENUMS[3]]: 'command', // commands
-  [CONTENT_CATEGORY_ENUMS[4]]: 'hook', // hooks
-  [CONTENT_CATEGORY_ENUMS[1]]: 'mcp', // mcp
-  [CONTENT_CATEGORY_ENUMS[2]]: 'rule', // rules
-  [CONTENT_CATEGORY_ENUMS[5]]: 'statusline', // statuslines
-  [CONTENT_CATEGORY_ENUMS[6]]: 'skill', // skills
-  [CONTENT_CATEGORY_ENUMS[9]]: 'job', // jobs
+  agents: 'agent',
+  commands: 'command',
+  hooks: 'hook',
+  mcp: 'mcp',
+  rules: 'rule',
+  statuslines: 'statusline',
+  skills: 'skill',
+  jobs: 'job',
   job: 'job', // Alias for consistency
 } as const;
 

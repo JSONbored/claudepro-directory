@@ -36,7 +36,7 @@ import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form'
  * Caching Strategy
  *
  * This page is ~95% static (hero, benefits, features cards) with only the QuizForm being interactive client-side.
- * Uses connection() to defer non-deterministic operations to request time for Cache Components compatibility.
+ * Uses Cache Components pattern for optimal performance with edge/CDN caching.
  * The static content can be cached at the edge/CDN level for optimal performance.
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
@@ -70,8 +70,9 @@ export default async function ConfigRecommenderPage() {
   'use cache';
 
   // Configure cache for static landing page content
+  // Cache preset: 5 minutes stale, 1 day revalidate, 1 week expire
   const { cacheLife } = await import('next/cache');
-  cacheLife('days'); // 1 day stale, 6hr revalidate, 7 days expire
+  cacheLife('days');
 
   // Return JSX - no try/catch needed for static content
   // Rendering errors will be caught by error boundaries

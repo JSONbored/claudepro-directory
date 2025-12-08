@@ -203,9 +203,10 @@ function TrustedHTML({ html, className }: { className?: string; html: string }) 
     return <div className={className} />;
   }
 
-  // During SSR, render unsanitized (will be sanitized on client hydration)
+  // SSR uses pre-sanitized HTML; client re-sanitizes as defense-in-depth
   const htmlToRender = isClient ? safeHtml : html;
 
+  // eslint-disable-next-line react/no-danger -- HTML is pre-sanitized server-side via markdownToHtml and re-sanitized client-side via DOMPurify as defense-in-depth
   return <div className={className} dangerouslySetInnerHTML={{ __html: htmlToRender }} />;
 }
 

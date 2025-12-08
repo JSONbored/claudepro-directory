@@ -29,7 +29,7 @@ export interface AccordionSection {
 }
 
 /**
- * Extracts "Technical Details" and "Deployment" sections from a markdown string as accordion-ready objects.
+ * Extracts "Technical Details", "Deployment", and "Statistics" sections from a markdown string as accordion-ready objects.
  *
  * Each returned section includes its text content, the number of bullet items it contains, and a title
  * that appends the item count in parentheses when the count is greater than zero.
@@ -47,7 +47,8 @@ function parseAccordionSections(content: string): AccordionSection[] {
 
   // Match ### Section headers and their content
   // Pattern: ### Section Title followed by content until next ### or end
-  const sectionRegex = /### (Technical Details|Deployment)([\s\S]*?)(?=### |$)/g;
+  // Includes: Technical Details, Deployment, Statistics
+  const sectionRegex = /### (Technical Details|Deployment|Statistics)([\s\S]*?)(?=### |$)/g;
   const matches = [...content.matchAll(sectionRegex)];
 
   for (const match of matches) {

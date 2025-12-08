@@ -6,7 +6,7 @@
  */
 
 /**
- * Remove "Technical Details" and "Deployment" accordion sections and their content from markdown.
+ * Remove "Technical Details", "Deployment", and "Statistics" accordion sections and their content from markdown.
  *
  * Collapses runs of three or more consecutive newlines into two and trims leading/trailing whitespace.
  * If `content` is falsy or not a string, returns the input unchanged.
@@ -17,8 +17,8 @@
 export function removeAccordionSectionsFromContent(content: string): string {
   if (!content || typeof content !== 'string') return content;
 
-  // Match ### Technical Details and ### Deployment sections
-  const sectionRegex = /### (Technical Details|Deployment)([\s\S]*?)(?=### |## |$)/g;
+  // Match ### Technical Details, ### Deployment, and ### Statistics sections
+  const sectionRegex = /### (Technical Details|Deployment|Statistics)([\s\S]*?)(?=### |## |$)/g;
 
   // Remove all matches
   return content

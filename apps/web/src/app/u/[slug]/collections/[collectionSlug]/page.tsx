@@ -57,7 +57,8 @@ function isValidContentType(type: string): boolean {
  */
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string') return false;
-  return /^[a-z0-9-_]+$/.test(slug);
+  // Allow uppercase to match standard pattern used across codebase
+  return /^[a-zA-Z0-9-_]+$/.test(slug);
 }
 
 /**

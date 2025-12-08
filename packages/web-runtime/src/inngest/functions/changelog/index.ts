@@ -2,5 +2,6 @@
  * Changelog Inngest Functions
  */
 
-export { processChangelogQueue } from './process';
+// processChangelogQueue removed - replaced by /api/changelog/sync endpoint
+// export { processChangelogQueue } from './process';
 export { processChangelogNotifyQueue } from './notify';

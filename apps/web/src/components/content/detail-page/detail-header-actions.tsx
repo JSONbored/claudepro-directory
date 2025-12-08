@@ -520,7 +520,9 @@ export function DetailHeaderActions({
                     `Check out ${displayTitle} on ClaudePro Directory!`
                   );
                   const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(shareUrlWithUtm)}`;
-                  window.open(twitterUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
+                  if (typeof window !== 'undefined') {
+                    window.open(twitterUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
+                  }
                   await pulse
                     .share({ platform: 'twitter', category, slug: contentItem.slug, url: shareUrl })
                     .catch(() => {});
@@ -533,7 +535,9 @@ export function DetailHeaderActions({
                 onClick={async () => {
                   const shareUrlWithUtm = `${shareUrl}?utm_source=share&utm_medium=share&utm_campaign=${category}`;
                   const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrlWithUtm)}`;
-                  window.open(linkedInUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
+                  if (typeof window !== 'undefined') {
+                    window.open(linkedInUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
+                  }
                   await pulse
                     .share({ platform: 'linkedin', category, slug: contentItem.slug, url: shareUrl })
                     .catch(() => {});
@@ -664,11 +668,13 @@ export function DetailHeaderActions({
                         const content = await response.text();
                         const blob = new Blob([content], { type: 'text/markdown' });
                         const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `${contentItem.slug}.md`;
-                        a.click();
-                        URL.revokeObjectURL(url);
+                        if (typeof document !== 'undefined') {
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `${contentItem.slug}.md`;
+                          a.click();
+                          URL.revokeObjectURL(url);
+                        }
                         toasts.raw.success('Downloaded markdown file!');
                         await pulse.download({
                           category,

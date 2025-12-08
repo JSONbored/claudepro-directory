@@ -143,9 +143,6 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
         <div className="container mx-auto">
           <TabsList className="h-auto w-full justify-start rounded-none border-0 bg-transparent p-0">
             {tabs.map((tab) => {
-              const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-              const label = isMobile && tab.mobileLabel ? tab.mobileLabel : tab.label;
-
               return (
                 <TabsTrigger
                   key={tab.id}
@@ -159,7 +156,14 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
                     'min-w-20 md:min-w-[100px]'
                   )}
                 >
-                  {label}
+                  {tab.mobileLabel ? (
+                    <>
+                      <span className="md:hidden">{tab.mobileLabel}</span>
+                      <span className="hidden md:inline">{tab.label}</span>
+                    </>
+                  ) : (
+                    tab.label
+                  )}
                 </TabsTrigger>
               );
             })}

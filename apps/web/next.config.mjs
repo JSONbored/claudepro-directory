@@ -54,8 +54,9 @@ const nextConfig = {
    * - `quarter`: 15min stale, 5min revalidate, 2hr expire - Frequently changing data (newsletter counts, search)
    * - `half`: 30min stale, 10min revalidate, 3hr expire - Moderately changing data (jobs, companies, content lists)
    * - `hours`: 1hr stale, 15min revalidate, 1 day expire - Hourly updates (content detail, search facets, changelog)
+   * - `metadata`: 12hr stale, 24hr revalidate, 48hr expire - SEO metadata (homepage metadata, page metadata)
    * - `stable`: 6hr stale, 1hr revalidate, 7 days expire - Stable data (navigation menus, site config)
-   * - `static`: 1 day stale, 6hr revalidate, 30 days expire - Rarely changing data (SEO metadata, paginated content)
+   * - `static`: 1 day stale, 6hr revalidate, 30 days expire - Rarely changing data (paginated content)
    *
    * Usage in data functions:
    * ```ts
@@ -86,6 +87,8 @@ const nextConfig = {
     half: { stale: 1800, revalidate: 600, expire: 10800 },
     /** Hourly updates (content detail, search facets, changelog) - 1hr stale, 15min revalidate, 1 day expire */
     hours: { stale: 3600, revalidate: 900, expire: 86400 },
+    /** SEO metadata (homepage metadata, page metadata) - 12hr stale, 24hr revalidate, 48hr expire */
+    metadata: { stale: 43200, revalidate: 86400, expire: 172800 },
     /** Stable data (navigation menus, site config) - 6hr stale, 1hr revalidate, 7 days expire */
     stable: { stale: 21600, revalidate: 3600, expire: 604800 },
     /** Rarely changing data (SEO metadata, paginated content) - 1 day stale, 6hr revalidate, 30 days expire */

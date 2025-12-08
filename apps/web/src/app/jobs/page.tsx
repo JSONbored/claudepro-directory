@@ -46,14 +46,12 @@ import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
 /**
- * ISR: 15 minutes (900s) - Jobs update frequently but don't need real-time freshness
- *
  * Hybrid Rendering Strategy:
- * - Base job list (no filters) uses ISR with 15min revalidation
+ * - Base job list (no filters) uses Cache Components pattern for edge/CDN caching
  * - Filtered queries bypass cache (uncached SSR) for real-time results
  *
- * Note: Using ISR instead of force-dynamic to enable caching while still allowing
- * on-demand revalidation for filtered queries.
+ * Note: Caching is handled via the Cache Components pattern. Filtered queries
+ * are rendered uncached to ensure real-time results.
  */
 
 /**
