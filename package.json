@@ -166,7 +166,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-unicorn": "^62.0.0",
     "eslint-plugin-vitest": "^0.5.4",
-    "jsdom": "^27.2.0",
+    "jsdom": "^27.3.0",
     "knip": "^5.71.0",
     "lefthook": "^2.0.8",
     "ora": "^9.0.0",
