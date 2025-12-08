@@ -67,7 +67,7 @@
     "sugar-high": "^0.9.5",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.1.12",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "16.0.7",

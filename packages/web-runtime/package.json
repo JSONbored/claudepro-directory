@@ -240,7 +240,7 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.1.12",
-    "zustand": "^5.0.2"
+    "zustand": "^5.0.9"
   },
   "scripts": {
     "build": "tsc --build",
