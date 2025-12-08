@@ -37,7 +37,7 @@ jobs:
           fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
 
       - name: Check for hardcoded secrets
-        uses: trufflesecurity/trufflehog@v3.91.1
+        uses: trufflesecurity/trufflehog@v3.91.2
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
