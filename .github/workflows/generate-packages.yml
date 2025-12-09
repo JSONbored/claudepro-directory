@@ -1,10 +1,6 @@
-# Package Generation Workflow - Optimized for performance and resource efficiency
-# - Only runs when packages actually need generation (database-driven or manual trigger)
-# - Uses reusable composite action for setup (reduces duplication)
-# - Shallow git clone (fetch-depth: 1) for faster checkout
-# - Parallel execution of skills and mcpb generation when both needed
-# - Turbo remote cache enabled for faster builds
-# - Smart concurrency grouping to prevent duplicate runs
+# Package Generation Workflow
+# Optimizations: conditional execution, parallel generation, shallow clones, smart concurrency
+# Uses actions/checkout@v6 for improved performance and sparse checkout support
 name: Generate Packages
 
 on:
@@ -59,19 +55,19 @@ jobs:
     name: Determine Packages to Generate
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    steps:
-      # Only checkout for push events (need to check changed paths)
-      # Other triggers don't need checkout
-      - name: Checkout (only for push events)
-        if: github.event_name == 'push'
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1 # Shallow clone - only need current commit for path checking
     outputs:
       generate-skills: ${{ steps.determine.outputs.generate-skills }}
       generate-mcpb: ${{ steps.determine.outputs.generate-mcpb }}
       content-id: ${{ steps.determine.outputs.content-id }}
       slug: ${{ steps.determine.outputs.slug }}
+    steps:
+      # Only checkout for push events (need to check changed paths)
+      # Other triggers don't need checkout
+      - name: Checkout (only for push events)
+        if: github.event_name == 'push'
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1 # Shallow clone - only need current commit for path checking
       - name: Determine package types
         id: determine
         run: |
@@ -133,9 +129,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: ./.github/actions/setup
+      # Checkout first to make composite action files available
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1 # Shallow clone - only need current commit
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true # Already checked out above
       - name: Generate skill packages
         run: pnpm build:skills
         env:
@@ -152,9 +152,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: ./.github/actions/setup
+      # Checkout first to make composite action files available
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1 # Shallow clone - only need current commit
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true # Already checked out above
       - name: Generate MCPB packages
         run: pnpm build:mcpb
         env:

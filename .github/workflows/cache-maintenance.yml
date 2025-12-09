@@ -1,7 +1,6 @@
-# Cache Maintenance - Optimized for resource efficiency
-# - Only runs weekly (scheduled) or manually (workflow_dispatch)
-# - Shallow git clone (fetch-depth: 1) - only need current commit
-# - Minimal permissions (only actions: write for cache deletion)
+# Cache Maintenance
+# Optimizations: weekly schedule, shallow clone, minimal permissions
+# Uses actions/checkout@v6 with fetch-depth: 1 (only need current commit)
 name: Cache Maintenance
 
 on:
@@ -31,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1 # Shallow clone - only need current commit for cache operations
 

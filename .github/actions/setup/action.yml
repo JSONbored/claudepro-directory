@@ -1,3 +1,6 @@
+# Composite Action: Setup repository with pnpm and Node.js
+# Optimizations: skip-checkout option (avoids double checkout), install-deps option
+# Uses actions/checkout@v6 for improved performance and sparse checkout support
 name: 'Setup'
 description: 'Setup repository with pnpm and Node.js (optimized with caching)'
 
@@ -18,23 +21,34 @@ inputs:
     description: 'Git fetch depth (0 for full history, 1 for shallow)'
     required: false
     default: '1'
+  skip-checkout:
+    description: 'Skip checkout step (use when already checked out)'
+    required: false
+    default: 'false'
+  install-deps:
+    description: 'Whether to install dependencies'
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'
   steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      if: inputs.skip-checkout != 'true'
+      uses: actions/checkout@v6
       with:
         fetch-depth: ${{ inputs.fetch-depth }}
       shell: bash
       
     - name: Setup pnpm
+      if: inputs.install-deps == 'true'
       uses: pnpm/action-setup@v4
       with:
         version: ${{ inputs.pnpm-version }}
       shell: bash
           
     - name: Setup Node.js
+      if: inputs.install-deps == 'true'
       uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
@@ -42,5 +56,6 @@ runs:
       shell: bash
 
     - name: Install dependencies
+      if: inputs.install-deps == 'true'
       run: pnpm install ${{ inputs.install-args }}
       shell: bash

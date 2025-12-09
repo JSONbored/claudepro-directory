@@ -1,9 +1,6 @@
-# CI Pipeline - Optimized for performance and resource efficiency
-# - Only runs when relevant code changes detected
-# - Parallel execution of type-check, lint, and build
-# - Reusable workflow for setup (reduces duplication)
-# - Shallow git clone (fetch-depth: 1) for faster checkout
-# - Turbo remote cache enabled for faster builds
+# CI Pipeline
+# Optimizations: path-based filtering, parallel jobs, shallow clones (fetch-depth: 1), Turbo cache
+# Uses actions/checkout@v6 for improved performance and sparse checkout support
 name: CI
 
 on:
@@ -34,7 +31,7 @@ jobs:
       generators: ${{ steps.filter.outputs.generators }}
       content: ${{ steps.filter.outputs.content }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1 # Shallow clone - only need current commit for path filtering
       - uses: dorny/paths-filter@v3
@@ -61,9 +58,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: ./.github/actions/setup
+      # Checkout first to make composite action files available
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1 # Shallow clone - only need current commit
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true # Already checked out above
       - name: Type check
         run: pnpm type-check
         env:
@@ -77,9 +78,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: ./.github/actions/setup
+      # Checkout first to make composite action files available
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1 # Shallow clone - only need current commit
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true # Already checked out above
       - name: Lint
         run: pnpm lint
         env:
@@ -93,9 +98,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: ./.github/actions/setup
+      # Checkout first to make composite action files available
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1 # Shallow clone - only need current commit
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true # Already checked out above
       - name: Build
         run: pnpm build
         env:

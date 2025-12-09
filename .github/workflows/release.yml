@@ -1,8 +1,6 @@
-# Create Release - Optimized for performance
-# - Only runs on tag pushes (v*.*.* format) - very specific trigger
-# - Uses reusable composite action for setup (reduces duplication)
-# - fetch-depth: 0 needed for changelog generation (requires git history)
-# - Continues on non-critical errors (changelog generation failures)
+# Create Release
+# Optimizations: specific trigger (tag pushes only), continues on non-critical errors
+# Uses actions/checkout@v6 with fetch-depth: 0 (required for changelog generation)
 #
 # **What it does:**
 # 1. Extracts version from tag name
@@ -34,10 +32,13 @@ jobs:
       contents: write  # Required to create releases
     
     steps:
+      # Checkout first to make composite action files available
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # fetch-depth: 0 needed for changelog generation (requires git history)
       - uses: ./.github/actions/setup
         with:
-          # fetch-depth: 0 needed for changelog generation (requires git history)
-          fetch-depth: 0
+          skip-checkout: true # Already checked out above
       
       - name: Extract version from tag
         id: tag_version

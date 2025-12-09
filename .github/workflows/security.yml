@@ -1,9 +1,6 @@
-# Security Scanning - Optimized for performance and resource efficiency
-# - Only runs on PRs (not every push) or scheduled weekly
-# - Path-based filtering to skip when security files unchanged
-# - Conditional job execution (secrets on PRs, CodeQL on schedule)
-# - Shallow git clones where possible (fetch-depth: 1 or 2)
-# - Cancels in-progress PR runs when new commits pushed (saves resources)
+# Security Scanning
+# Optimizations: path-based filtering, conditional jobs, shallow clones, cancels in-progress
+# Uses actions/checkout@v6 (fetch-depth: 2 for PRs, 1 for others)
 name: Security
 
 on:
@@ -38,7 +35,7 @@ jobs:
     if: github.event_name != 'schedule'
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # PRs need depth 2 for base comparison, others only need 1
           fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
@@ -64,7 +61,7 @@ jobs:
       security-events: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1 # Shallow clone - CodeQL doesn't need full history
 
@@ -92,7 +89,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1 # Shallow clone - dependency review only needs current state
 

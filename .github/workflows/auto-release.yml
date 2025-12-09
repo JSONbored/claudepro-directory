@@ -1,10 +1,6 @@
-# Auto Release - Optimized for performance and resource efficiency
-# - Only runs when PR is actually merged (not just closed) - conditional execution
-# - Uses caching for dependencies (pnpm cache via setup-node)
-# - fetch-depth: 0 needed for git log since last tag (can't optimize further)
-# - Continues on non-critical errors (changelog generation, etc.)
-# - Timeout protection (10 minutes max)
-# - Batch git operations (commit + tag push together)
+# Auto Release
+# Optimizations: conditional execution (PR merged only), batch git ops, optimized tag fetching
+# Uses actions/checkout@v6 with fetch-depth: 0 (required for git log since last tag)
 #
 # **What it does:**
 # 1. Analyzes commits since last tag to determine version bump type
@@ -44,7 +40,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # fetch-depth: 0 needed for git log since last tag
           fetch-depth: 0

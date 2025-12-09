@@ -1,8 +1,6 @@
-# PR Content Extraction - Optimized for performance
-# - Only runs on PR open/edit (not on every push)
-# - Shallow git clone (fetch-depth: 1) - only need current commit
-# - Cancels in-progress runs when PR updated (saves resources)
-# - Uses github-script (no dependencies needed)
+# PR Content Extraction
+# Optimizations: only on PR open/edit, shallow clone, cancels in-progress
+# Uses actions/checkout@v6 with fetch-depth: 1 (only need current commit)
 name: PR Content Extraction
 
 on:
@@ -25,9 +23,13 @@ jobs:
       contents: read
 
     steps:
-      - uses: ./.github/actions/setup
+      # Checkout first to make composite action files available
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1 # Shallow clone - only need current commit
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true # Already checked out above
           install-deps: false # Don't install deps - we only use github-script
 
       - name: Extract plaintext submission
