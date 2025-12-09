@@ -30,7 +30,6 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           skip-checkout: true # Already checked out above
-          install-deps: false # Don't install deps - we only use github-script
 
       - name: Extract plaintext submission
         id: extract

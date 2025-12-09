@@ -107,7 +107,8 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
  * Jobs lists change periodically, so we use the 'half' cacheLife profile.
  * @param limit
  * @param offset
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getJobsListCached(limit: number, offset: number): Promise<JobsFilterResult | null> {
   'use cache';
 
@@ -175,7 +176,8 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
  * @param limit
  * @param offset
  * @param sort
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getFilteredJobsCached(
   rpcArguments: Database['public']['Functions']['filter_jobs']['Args'],
   searchQuery: string,

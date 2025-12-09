@@ -11,6 +11,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
 import { normalizeError, verifySvixSignature } from '@heyclaude/shared-runtime';
 
+type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
+
 import { createSupabaseAdminClient } from '../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
@@ -697,33 +699,10 @@ async function processSupabaseWebhook(
     return { forwarded: false, error: 'Missing content metadata' };
   }
 
-  // Only process skills and MCP categories
-  if (category !== 'skills' && category !== 'mcp') {
-    logger.info('Supabase webhook for non-package category, skipping', {
-      ...logContext,
-      eventType,
-      category,
-    });
-    return { forwarded: false };
-  }
-
-  // Check if package generation is needed
-  // For skills: check if storage_url is null/empty
-  // For MCP: check if mcpb_storage_url is null/empty
-  const needsGeneration = 
-    (category === 'skills' && (!record['storage_url'] || String(record['storage_url']).trim() === '')) ||
-    (category === 'mcp' && (!record['mcpb_storage_url'] || String(record['mcpb_storage_url']).trim() === ''));
-
-  if (!needsGeneration) {
-    logger.info('Supabase webhook: package already exists, skipping', {
-      ...logContext,
-      eventType,
-      category,
-      contentId,
-      slug,
-    });
-    return { forwarded: false };
-  }
+  // Forward ALL content changes to Inngest (not just skills/mcp)
+  // Inngest function will decide what actions to take:
+  // - Package generation for skills/mcp
+  // - README update for all categories
 
   // Forward to Inngest for durable processing
   try {
@@ -741,13 +720,15 @@ async function processSupabaseWebhook(
       return { forwarded: false, error: `Invalid event type: ${eventType}` };
     }
 
+    // Forward all content categories to Inngest
+    // Inngest function will handle package generation (skills/mcp) and README updates (all categories)
     await inngest.send({
       name: 'supabase/content-changed',
       data: {
         webhookId,
         svixId,
         eventType: dbEventType,
-        category: category as 'skills' | 'mcp',
+        category: category as ContentCategory,
         contentId,
         slug: slug ?? undefined,
         record,

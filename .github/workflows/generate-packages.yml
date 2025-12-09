@@ -42,11 +42,12 @@ on:
       - '.build-cache/cache.json'
 
 # Smart concurrency: group by trigger type to prevent duplicate runs
-# - Scheduled runs grouped together (only one scheduled run at a time)
-# - repository_dispatch with content_id grouped by content_id (one per content item)
-# - Other triggers use default group
+# Concurrency grouping:
+# - schedule → 'scheduled' (only one scheduled run at a time)
+# - repository_dispatch → content_id (or 'default' if content_id missing)
+# - Other triggers → 'default'
 concurrency:
-  group: generate-packages-${{ github.event_name == 'schedule' && 'scheduled' || github.event_name == 'repository_dispatch' && github.event.client_payload.content_id || 'default' }}
+  group: generate-packages-${{ github.event_name == 'schedule' && 'scheduled' || (github.event_name == 'repository_dispatch' && github.event.client_payload.content_id) || 'default' }}
   cancel-in-progress: false # Don't cancel - let each run complete (packages may differ)
 
 jobs:
@@ -186,7 +187,7 @@ jobs:
             echo "- ✅ Skills packages" >> $GITHUB_STEP_SUMMARY
           fi
           if [ "${{ needs.determine-packages.outputs.generate-mcpb }}" = "true" ]; then
-            echo "- ✅ MCPB packages" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ MCPB packages (with verification)" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ -n "${{ needs.determine-packages.outputs.content-id }}" ]; then
@@ -195,3 +196,4 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Note:** Packages are stored in Supabase Storage, not committed to git." >> $GITHUB_STEP_SUMMARY
+          echo "**Verification:** MCPB packages are automatically verified after generation." >> $GITHUB_STEP_SUMMARY

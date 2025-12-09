@@ -41,7 +41,8 @@ interface VercelAnalyticsResponse {
  * Uses 'use cache' to cache visitor statistics.
  * This data is public and same for all users, so it can be cached at build time.
  * Visitor stats change hourly, so we use the 'hours' cacheLife profile.
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getVisitorStats(): Promise<VisitorStats> {
   'use cache';
   cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire

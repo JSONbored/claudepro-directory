@@ -159,6 +159,125 @@ export async function runGenerateMcpbPackages(): Promise<void> {
   }
 
   logger.info('\n✨ Build complete! Next run will skip unchanged MCP servers.\n');
+
+  // Post-generation verification: Verify all MCP content has valid packages
+  logger.info('\n🔍 Verifying MCPB packages...\n');
+  const verificationResult = await verifyMcpbPackages(supabase);
+
+  if (verificationResult.missing_packages > 0 || verificationResult.storage_mismatches > 0) {
+    logger.warn(
+      `⚠️  Verification found ${verificationResult.missing_packages + verificationResult.storage_mismatches} issues`,
+      {
+        script: 'generate-mcpb-packages',
+        missing_packages: verificationResult.missing_packages,
+        storage_mismatches: verificationResult.storage_mismatches,
+      }
+    );
+    // Don't fail the build - just warn (packages may be in progress)
+  } else {
+    logger.info('✅ All MCP content has valid packages!\n', {
+      script: 'generate-mcpb-packages',
+    });
+  }
+}
+
+interface VerificationResult {
+  missing_packages: number;
+  missing_packages_list: Array<{
+    id: string;
+    slug: string;
+    title: null | string;
+  }>;
+  storage_mismatches: number;
+  storage_mismatches_list: Array<{
+    has_db_url: boolean;
+    has_storage_file: boolean;
+    id: string;
+    slug: string;
+  }>;
+  total_mcp_content: number;
+  with_packages: number;
+}
+
+/**
+ * Verifies that all MCP content entries have MCPB package URLs in the database and corresponding files in Supabase storage.
+ */
+async function verifyMcpbPackages(
+  supabase: ReturnType<typeof createServiceRoleClient>
+): Promise<VerificationResult> {
+  const { data: mcpContent, error: fetchError } = await supabase
+    .from('content')
+    .select('id, slug, title, mcpb_storage_url')
+    .eq('category', 'mcp')
+    .order('slug');
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch MCP content: ${fetchError.message}`);
+  }
+
+  if (mcpContent.length === 0) {
+    return {
+      total_mcp_content: 0,
+      with_packages: 0,
+      missing_packages: 0,
+      missing_packages_list: [],
+      storage_mismatches: 0,
+      storage_mismatches_list: [],
+    };
+  }
+
+  const missingPackages = mcpContent.filter(
+    (mcp) => !mcp.mcpb_storage_url || mcp.mcpb_storage_url.trim().length === 0
+  );
+
+  const withPackages = mcpContent.filter(
+    (mcp): mcp is typeof mcp & { mcpb_storage_url: string } => {
+      const url = mcp.mcpb_storage_url;
+      return url !== null && url !== undefined && url.trim().length > 0;
+    }
+  );
+
+  const storageMismatches: VerificationResult['storage_mismatches_list'] = [];
+
+  for (const mcp of withPackages) {
+    const { data: fileData, error: fileError } = await supabase.storage
+      .from('mcpb-packages')
+      .list('packages', {
+        search: mcp.slug,
+      });
+
+    if (fileError) {
+      logger.warn(`Storage list error for ${mcp.slug}: ${fileError.message}`, {
+        script: 'generate-mcpb-packages',
+        slug: mcp.slug,
+      });
+    }
+
+    const hasStorageFile =
+      !fileError && Boolean(fileData) && fileData.some((file) => file.name === `${mcp.slug}.mcpb`);
+
+    if (!hasStorageFile) {
+      storageMismatches.push({
+        id: mcp.id,
+        slug: mcp.slug,
+        has_db_url: true,
+        has_storage_file: false,
+      });
+    }
+  }
+
+  return {
+    total_mcp_content: mcpContent.length,
+    with_packages: withPackages.length,
+    missing_packages: missingPackages.length,
+    missing_packages_list: missingPackages.map((mcp) => ({
+      id: mcp.id,
+      slug: mcp.slug,
+      title: mcp.title,
+    })),
+    storage_mismatches: storageMismatches.length,
+    storage_mismatches_list: storageMismatches,
+  };
 }
 
 async function loadAllMcpServersFromDatabase(

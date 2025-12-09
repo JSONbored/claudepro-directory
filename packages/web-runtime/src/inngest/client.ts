@@ -259,8 +259,8 @@ export interface SupabaseContentChangedEventData {
   svixId: string | null;
   /** Database event type: INSERT, UPDATE, DELETE */
   eventType: 'INSERT' | 'UPDATE' | 'DELETE';
-  /** Content category: 'skills' or 'mcp' */
-  category: 'skills' | 'mcp';
+  /** Content category (all categories supported for README updates, package generation only for skills/mcp) */
+  category: Database['public']['Enums']['content_category'];
   /** Content ID (UUID) */
   contentId: string;
   /** Content slug */

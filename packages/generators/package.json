@@ -8,7 +8,6 @@
     "heyclaude-generate-skills": "./src/bin/generate-skills.ts",
     "heyclaude-generate-mcpb": "./src/bin/generate-mcpb.ts",
     "heyclaude-generate-readme": "./src/bin/generate-readme.ts",
-    "heyclaude-verify-mcpb": "./src/bin/verify-mcpb.ts",
     "heyclaude-cache": "./src/bin/cache.ts",
     "heyclaude-sync-db": "./src/bin/sync-db.ts",
     "heyclaude-lint-unused": "./src/bin/lint-unused.ts",

@@ -25,16 +25,23 @@ import { RETRY_CONFIGS } from '../../config/index';
 
 // Type for content row from database
 type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
-type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
+
+/**
+ * Result type for workflow triggers
+ */
+type WorkflowTriggerResult =
+  | { success: true; skipped?: false }
+  | { success: false; error: string }
+  | { success: true; skipped: true; reason?: string };
 
 /**
  * Trigger GitHub Actions workflow via repository_dispatch
  */
 async function triggerGitHubWorkflow(
-  eventType: 'skill-package-needed' | 'mcpb-package-needed',
-  contentId: string,
+  eventType: 'skill-package-needed' | 'mcpb-package-needed' | 'readme-update-needed',
+  contentId?: string,
   slug?: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<WorkflowTriggerResult> {
   const githubToken = process.env['GITHUB_TOKEN'];
   const githubRepo = process.env['GITHUB_REPOSITORY'] || 'JSONbored/claudepro-directory';
 
@@ -61,8 +68,8 @@ async function triggerGitHubWorkflow(
       body: JSON.stringify({
         event_type: eventType,
         client_payload: {
-          content_id: contentId,
-          slug: slug ?? null,
+          ...(contentId && { content_id: contentId }),
+          ...(slug && { slug }),
           triggered_at: new Date().toISOString(),
         },
       }),
@@ -136,16 +143,8 @@ export const handleSupabaseContentChanged = inngest.createFunction(
         };
       }
 
-      // Only process skills and MCP categories
-      // Type guard to ensure category is valid
-      const validCategories: ContentCategory[] = ['skills', 'mcp'];
-      if (!validCategories.includes(category as ContentCategory)) {
-        return {
-          valid: false,
-          reason: `Unsupported category: ${category}`,
-        };
-      }
-
+      // Accept all content categories
+      // Package generation only applies to skills/mcp, but README updates apply to all
       return { valid: true };
     });
 
@@ -168,49 +167,40 @@ export const handleSupabaseContentChanged = inngest.createFunction(
       };
     }
 
-    // Step 2: Check if package generation is needed
-    const needsGeneration = await step.run('check-package-status', async () => {
-      // Type-safe access to record fields
+    // Step 2: Check if package generation is needed (only for skills/mcp)
+    const packageWorkflowResult = await step.run('trigger-package-workflow', async (): Promise<WorkflowTriggerResult> => {
+      // Only trigger package generation for skills and mcp categories
+      if (category !== 'skills' && category !== 'mcp') {
+        return { success: true, skipped: true, reason: 'not_package_category' };
+      }
+
+      // Check if package generation is needed
       const contentRecord = record as Partial<ContentRow>;
       
+      let needsGeneration = false;
       if (category === 'skills') {
         const storageUrl = contentRecord.storage_url;
-        return !storageUrl || storageUrl.trim() === '';
-      }
-
-      if (category === 'mcp') {
+        needsGeneration = !storageUrl || storageUrl.trim() === '';
+      } else if (category === 'mcp') {
         const mcpbStorageUrl = contentRecord.mcpb_storage_url;
-        return !mcpbStorageUrl || mcpbStorageUrl.trim() === '';
+        needsGeneration = !mcpbStorageUrl || mcpbStorageUrl.trim() === '';
       }
 
-      return false;
-    });
+      if (!needsGeneration) {
+        logger.info('Package already exists, skipping workflow trigger', {
+          ...logContext,
+          category,
+          contentId,
+          slug: slug ?? null,
+        });
+        return { success: true, skipped: true, reason: 'package_already_exists' };
+      }
 
-    if (!needsGeneration) {
-      logger.info('Package already exists, skipping workflow trigger', {
-        ...logContext,
-        category,
-        contentId,
-        slug: slug ?? null,
-      });
-
-      return {
-        success: true,
-        eventType,
-        category,
-        contentId,
-        action: 'skipped',
-        reason: 'package_already_exists',
-      };
-    }
-
-    // Step 3: Trigger GitHub Actions workflow
-    const workflowResult = await step.run('trigger-github-workflow', async () => {
       const workflowEventType = category === 'skills' 
         ? 'skill-package-needed' 
         : 'mcpb-package-needed';
 
-      logger.info('Triggering GitHub Actions workflow', {
+      logger.info('Triggering package generation workflow', {
         ...logContext,
         workflowEventType,
         category,
@@ -221,22 +211,59 @@ export const handleSupabaseContentChanged = inngest.createFunction(
       return await triggerGitHubWorkflow(workflowEventType, contentId, slug);
     });
 
-    if (!workflowResult.success) {
-      logger.error('Failed to trigger GitHub Actions workflow', undefined, {
+    if (!packageWorkflowResult.success && !('skipped' in packageWorkflowResult && packageWorkflowResult.skipped)) {
+      const errorMessage = 'error' in packageWorkflowResult ? packageWorkflowResult.error : 'Unknown error';
+      logger.error('Failed to trigger package generation workflow', undefined, {
         ...logContext,
         category,
         contentId,
-        error: workflowResult.error,
+        error: errorMessage,
       });
+      // Don't fail - continue to README update
+    }
 
-      return {
-        success: false,
-        eventType,
+    // Step 4: Also trigger README update for any content changes (title, description, slug, category)
+    // This ensures README stays in sync with database content
+    const readmeTriggerResult = await step.run('trigger-readme-update', async (): Promise<WorkflowTriggerResult> => {
+      // Check if content metadata changed (title, description, slug, category)
+      const contentRecord = record as Partial<ContentRow>;
+      const oldContentRecord = event.data.oldRecord as Partial<ContentRow> | undefined;
+
+      const metadataChanged =
+        !oldContentRecord ||
+        contentRecord.title !== oldContentRecord.title ||
+        contentRecord.description !== oldContentRecord.description ||
+        contentRecord.slug !== oldContentRecord.slug ||
+        contentRecord.category !== oldContentRecord.category;
+
+      if (!metadataChanged && eventType === 'UPDATE') {
+        logger.info('Content metadata unchanged, skipping README update', {
+          ...logContext,
+          category,
+          contentId,
+        });
+        return { success: true, skipped: true };
+      }
+
+      logger.info('Triggering README update workflow', {
+        ...logContext,
         category,
         contentId,
-        action: 'workflow_trigger_failed',
-        error: workflowResult.error,
-      };
+        slug: slug ?? null,
+      });
+
+      return await triggerGitHubWorkflow('readme-update-needed', contentId, slug);
+    });
+
+    if (!readmeTriggerResult.success && !('skipped' in readmeTriggerResult && readmeTriggerResult.skipped)) {
+      const errorMessage = 'error' in readmeTriggerResult ? readmeTriggerResult.error : 'Unknown error';
+      logger.warn('Failed to trigger README update workflow (non-critical)', undefined, {
+        ...logContext,
+        category,
+        contentId,
+        error: errorMessage,
+      });
+      // Don't fail - README update is non-critical
     }
 
     const durationMs = Date.now() - startTime;

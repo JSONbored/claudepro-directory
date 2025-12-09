@@ -38,14 +38,12 @@ runs:
       uses: actions/checkout@v6
       with:
         fetch-depth: ${{ inputs.fetch-depth }}
-      shell: bash
       
     - name: Setup pnpm
       if: inputs.install-deps == 'true'
       uses: pnpm/action-setup@v4
       with:
         version: ${{ inputs.pnpm-version }}
-      shell: bash
           
     - name: Setup Node.js
       if: inputs.install-deps == 'true'
@@ -53,7 +51,6 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
         cache: 'pnpm'
-      shell: bash
 
     - name: Install dependencies
       if: inputs.install-deps == 'true'

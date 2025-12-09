@@ -1,0 +1,95 @@
+# Sync Email Templates
+# Optimizations: file-triggered only, auto-commit template-map.json, shallow clones
+# Uses actions/checkout@v6 for improved performance and sparse checkout support
+name: Sync Email Templates
+
+on:
+  # File-triggered: when email templates change
+  push:
+    branches: [main]
+    paths:
+      - 'packages/web-runtime/src/inngest/functions/email/**/*'
+      - 'packages/web-runtime/src/email/templates/**/*'
+      - 'packages/edge-runtime/src/utils/email/templates/template-map.json'
+  # Manual trigger (for testing/debugging)
+  workflow_dispatch:
+    inputs:
+      force:
+        type: boolean
+        default: false
+        description: 'Force creation of new templates'
+      only:
+        type: string
+        description: 'Comma-separated template slugs (optional)'
+
+# Concurrency: only one sync at a time
+concurrency:
+  group: sync-email-templates
+  cancel-in-progress: false
+
+jobs:
+  sync-templates:
+    name: Sync Email Templates
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # Required to commit template-map.json changes
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1 # Shallow clone - only need current commit
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true # Already checked out above
+      - name: Sync email templates
+        run: |
+          SYNC_ARGS=""
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            SYNC_ARGS="$SYNC_ARGS --force"
+          fi
+          if [ -n "${{ github.event.inputs.only }}" ]; then
+            SYNC_ARGS="$SYNC_ARGS --only=${{ github.event.inputs.only }}"
+          fi
+          pnpm exec heyclaude-sync-email $SYNC_ARGS
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if [ -n "$(git status --porcelain packages/edge-runtime/src/utils/email/templates/template-map.json)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Commit template-map.json changes
+        if: steps.check-changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add packages/edge-runtime/src/utils/email/templates/template-map.json
+          git commit -m "chore: auto-update email template map from Resend sync"
+          git push
+      - name: Summary
+        if: always()
+        run: |
+          echo "## ✅ Email Template Sync Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check-changes.outputs.has_changes }}" = "true" ]; then
+            echo "**Status:** ✅ Templates synced and template-map.json committed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Status:** ℹ️  No changes detected (templates already in sync)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.force }}" = "true" ]; then
+              echo "**Options:** Force mode enabled" >> $GITHUB_STEP_SUMMARY
+            fi
+            if [ -n "${{ github.event.inputs.only }}" ]; then
+              echo "**Options:** Limited to: ${{ github.event.inputs.only }}" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
